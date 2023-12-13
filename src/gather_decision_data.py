@@ -2,6 +2,8 @@ print("Running: gather_decision_data.py")
 
 import pandas as pd
 
+def gather_decision_data(paths, options):
+
 # Set file paths
 SOEP_C38 = r"C:\Users\bruno\papers\soep\soep38"
 SOEP_RV = r"C:\Users\bruno\papers\soep\soep_rv"
@@ -16,7 +18,7 @@ merged_data = pd.merge(core_data, pathl_data, on=['pid', 'hid', 'syear'], how='i
 non_numeric_columns = merged_data.columns.difference(['STATUS_2'])
 merged_data[non_numeric_columns] = merged_data[non_numeric_columns].apply(pd.to_numeric, errors='coerce')
 
-# Calculate age and filter out missing rv_id values for people older than resolution age
+# Calculate age and filter out missing rv_id values for people older than minimum retirement age
 merged_data['age'] = merged_data['syear'] - merged_data['gebjahr']
 merged_data = merged_data[(merged_data['rv_id'] >= 0) | ((merged_data['rv_id'] < 0) & (merged_data['age'] < 60))]
 merged_data['rv_id'].replace(-1, pd.NA, inplace=True)

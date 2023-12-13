@@ -13,26 +13,35 @@
 #----------------------------------------------------------------------------------------------
 # Step 0: Set paths and parameters
 #----------------------------------------------------------------------------------------------
-
+# %%
 # Set file paths
 paths_dict = {
-    "SOEP_C38": "C:\Users\bruno\papers\soep\soep38",
-    "SOEP_RV": "C:\Users\bruno\papers\soep\soep_rv"
+    # "soep_c38": "C:\Users\bruno\papers\soep\soep38",
+    # "soep_rv": "C:\Users\bruno\papers\soep\soep_rv",
+    "soep_c38": "/home/maxbl/Uni/pol_uncetainty/data/soep38",
+    "soep_rv": "/home/maxbl/Uni/pol_uncetainty/data/soep_rv"
 }
 
 # Set options for data preparation
-minimum_SRA = 65
-minimum_ret_age = minimum_SRA - 4
+min_SRA = 65
+min_ret_age = min_SRA - 4
+exp_cap = 40
 
 data_options = {
-    "minimum_ret_age": minimum_ret_age,
-
-
+    "min_ret_age": min_ret_age,
+    "start_year": 2010,
+    "end_year": 2021,
+    "start_age": 25,
+    "exp_cap": 40
 }
-
+from src.gather_decision_data import gather_decision_data
+dec_data = gather_decision_data(paths_dict, data_options, load_data=False)
+# %%
 
 
 #----------------------------------------------------------------------------------------------
 # Step 1: Get choice and state variables from SOEP core and SOEP RV VSKT
 #----------------------------------------------------------------------------------------------
 
+
+# %%

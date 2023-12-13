@@ -36,6 +36,11 @@ data_options = {
 }
 from src.gather_decision_data import gather_decision_data
 dec_data = gather_decision_data(paths_dict, data_options, load_data=False)
+# Add checks on our model choice sets. I.e. no retirement before min_ret_age,
+# no working/unemployment after max_ret_age.
+# Also our syear is from the soep. We could check, that single observations,
+# have only two consecutive observations in soep.
+
 # %%
 
 

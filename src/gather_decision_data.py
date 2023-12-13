@@ -65,14 +65,25 @@ def gather_decision_data(paths, options, load_data=False):
     merged_data["period"] = merged_data["age"] - start_age
     merged_data = merged_data[merged_data["period"] >= 0]
 
-    # Create lagged choice variable
+    # Set pid and syear as index
     merged_data.set_index(["pid", "syear"], inplace=True)
-    merged_data["lagged_choice"] = merged_data.groupby("pid")["choice"].shift()
-    merged_data = merged_data[merged_data["lagged_choice"].notna()]
+
 
     # Filter out women and years outside of estimation range
     merged_data = merged_data[(merged_data["sex"] == 1)]
-    merged_data = merged_data.loc[((slice(None), range(start_year, end_year + 1))), :]
+    merged_data = merged_data.loc[((slice(None), range(start_year - 1, end_year + 1))), :]
+
+    # Create lagged choice variable
+    full_index = pd.MultiIndex.from_product(
+        [merged_data.index.levels[0], range(start_year - 1, end_year + 1)],
+        names=["pid", "syear"],
+    )
+    full_container = pd.DataFrame(index=full_index, data=np.nan, dtype=float, columns=merged_data.columns)
+    full_container.update(merged_data)
+    full_container["lagged_choice"] = full_container.groupby(["pid"])["choice"].shift()
+    merged_data = full_container[full_container["lagged_choice"].notna()]
+    # Delete entries of persons missing 2021, but observed in 2020.
+    merged_data = merged_data[merged_data["choice"].notna()]
 
     # Calculate policy_state according to 2007 reform
     merged_data["policy_state"] = create_policy_state(merged_data["gebjahr"])
@@ -86,7 +97,7 @@ def gather_decision_data(paths, options, load_data=False):
     ]
 
     # Round experience values
-    merged_data["experience"] = merged_data["pgexpft"].round()
+    merged_data["experience"] = merged_data["pgexpft"].astype(float).round()
 
     # Keep relevant columns (i.e. state variables)
     merged_data = merged_data[
@@ -107,7 +118,7 @@ def gather_decision_data(paths, options, load_data=False):
 
 def create_choice_variable(rv_ret_choice, soep_empl_choice):
     """This function creates the choice variable for the structural model.
-    TODO: This function assumes retirees with part-time employment as full-time retirees.
+    TODO: This function assumes reti    rees with part-time employment as full-time retirees.
 
     """
     choice = pd.Series(index=rv_ret_choice.index, data=np.nan, dtype=float)

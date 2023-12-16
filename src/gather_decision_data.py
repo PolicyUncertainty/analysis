@@ -35,6 +35,8 @@ def gather_decision_data(paths, options, load_data=False):
         core_data, pathl_data, on=["pid", "hid", "syear"], how="inner"
     )
 
+    print(str(len(merged_data))+" observations in SOEP C38 core.")
+
     # Calculate age and filter out missing rv_id values for people older than minimum retirement age
     merged_data["age"] = merged_data["syear"] - merged_data["gebjahr"]
     merged_data = merged_data[
@@ -42,6 +44,8 @@ def gather_decision_data(paths, options, load_data=False):
         | ((merged_data["rv_id"] < 0) & (merged_data["age"] < min_ret_age))
     ]
     merged_data["rv_id"].replace(-2, pd.NA, inplace=True)
+
+    print(str(len(merged_data))+" left after dropping over "+str(min_ret_age)+" year olds w/o SOEP-RV ID.")
 
     # Load SOEP RV VSKT data
     rv_data = pd.read_stata(
@@ -73,6 +77,9 @@ def gather_decision_data(paths, options, load_data=False):
     merged_data = merged_data[(merged_data["sex"] == 1)]
     merged_data = merged_data.loc[((slice(None), range(start_year - 1, end_year + 1))), :]
 
+    print(str(len(merged_data))+" left after dropping women, men under "+str(start_age)+" years old, and people outside of estimation years.")
+
+
     # Create lagged choice variable
     full_index = pd.MultiIndex.from_product(
         [merged_data.index.levels[0], range(start_year - 1, end_year + 1)],
@@ -84,6 +91,8 @@ def gather_decision_data(paths, options, load_data=False):
     merged_data = full_container[full_container["lagged_choice"].notna()]
     # Delete entries of persons missing 2021, but observed in 2020.
     merged_data = merged_data[merged_data["choice"].notna()]
+
+    print(str(len(merged_data))+" left after filtering missing lagged choices.")
 
     # Calculate policy_state according to 2007 reform
     merged_data["policy_state"] = create_policy_state(merged_data["gebjahr"])
@@ -110,6 +119,9 @@ def gather_decision_data(paths, options, load_data=False):
             "experience",
         ]
     ]
+
+    print(str(len(merged_data))+" in final sample, after dropping invalid experience values.")
+
 
     # Save data
     merged_data.to_pickle("output/decision_data.pkl")

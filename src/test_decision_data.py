@@ -61,3 +61,8 @@ def test_decision_data_exp_cap(paths_dict,data_options, load_data=True):
     dec_dat = gather_decision_data(paths_dict, data_options, load_data=load_data)
     assert dec_dat["experience"].max() <= data_options["exp_cap"]
     assert dec_dat["experience"].max() <= dec_dat["period"].max()
+
+def test_decision_data_retirement_is_absorbing(paths_dict,data_options, load_data=True):
+    """This functions asserts that retirement is absorbing"""
+    dec_dat = gather_decision_data(paths_dict, data_options, load_data=load_data)
+    assert dec_dat.loc[dec_dat["lagged_choice"] == 2, "choice"].unique() == 2

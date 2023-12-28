@@ -152,3 +152,7 @@ def create_policy_state(gebjahr):
     policy_state.loc[mask2] = 66 - 1 / 12 * (1958 - gebjahr[mask2])
     policy_state.loc[mask3] = 65
     return policy_state
+
+
+
+

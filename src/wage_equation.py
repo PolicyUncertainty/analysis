@@ -31,14 +31,14 @@ def estimate_wage_parameters(paths, options):
     merged_df = merged_df.rename(columns={'pgexpft': 'full_time_exp', 'pglabgro': 'wage'})
     merged_df['full_time_exp_2'] = merged_df['full_time_exp'] ** 2
 
-    # Estimate parametric regression
+    # estimate parametric regression, save parameters
     model = PanelOLS(
                 dependent=merged_df['wage'],
                 exog=merged_df[['full_time_exp', 'full_time_exp_2']],
                 entity_effects=True, time_effects=True
             )
     coefficients = model.fit().params
-    print(coefficients)
+    print("Estimated wage equation coefficients:\n{}".format(coefficients.to_string()))
 
     # Export regression coefficients
     coefficients.to_csv("output/wage_eq_params.csv")

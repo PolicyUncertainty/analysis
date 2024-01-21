@@ -1,9 +1,9 @@
 # Gathers everything necessary for structural model estimation.
 # This script executes the following steps:
 # 0. Set paths and parameters.
-# 1. Get choice and state variables from SOEP core and SOEP RV VSKT.
-# 2. Estimates wage equation parameters.
-# 3. Estimates policy expectation process parameters.
+# 1. Estimates policy expectation process parameters.
+# 2. Get choice and state variables from SOEP core and SOEP RV VSKT.
+# 3. Estimates wage equation parameters.
 
 # locations:
 # dependencies: original data saved on local machines, functions for steps 0-3 in src folder
@@ -12,16 +12,14 @@
 # %%
 # Step 0: Set paths and parameters
 # ----------------------------------------------------------------------------------------------
-USER = "max"
+USER = "bruno"
 
 # Set file paths
 if USER == "bruno":
     paths_dict = {
-        # SOEP Core and SOEP RV are saved locally
         "soep_c38": "C:/Users/bruno/papers/soep/soep38",
         "soep_rv": "C:/Users/bruno/papers/soep/soep_rv",
-        # SOEP IS (our own questions) is saved on the server
-        "soep_is": "../data/dataset_main_SOEP_IS.dta",
+        "soep_is": "C:/Users/bruno/papers/soep/soep_is_2022/dataset_main_SOEP_IS.dta",
     }
 elif USER == "max":
     paths_dict = {
@@ -36,6 +34,19 @@ max_ret_age = 72
 exp_cap = 40  # maximum number of periods of exp accumulation
 start_year = 2010  # start year of estimation sample
 end_year = 2021  # end year of estimation sample
+
+# Set options for estimation of policy expectation process parameters
+policy_expectation_options = {
+    # limits for truncation of the normal distribution
+    "lower_limit": 66.5,
+    "upper_limit": 80,
+    # points at which the CDF is evaluated from survey data
+    "first_cdf_point": 67.5,
+    "second_cdf_point": 68.5,
+    # cohorts for which process parameters are estimated
+    "min_birth_year": 1947,
+    "max_birth_year": 2000,
+}
 
 # Set options for data preparation
 data_options = {
@@ -55,49 +66,32 @@ wage_eq_options = {
     "wage_dist_truncation_percentiles": [0.01, 0.99],
 }
 
-# Set options for estimation of policy expectation process parameters
-policy_expectation_options = {
-    # limits for truncation of the normal distribution
-    "lower_limit": 66.5,
-    "upper_limit": 80,
-    # points at which the CDF is evaluated from survey data
-    "first_cdf_point": 67.5,
-    "second_cdf_point": 68.5,
-    # cohorts for which process parameters are estimated
-    "min_birth_year": 1947,
-    "max_birth_year": 2000,
-}
-
 # %%
 
 # %%
-# Step 1: Get choice and state variables from SOEP core and SOEP RV VSKT
-# ----------------------------------------------------------------------------------------------
-
-from src.gather_decision_data import gather_decision_data
-
-dec_data = gather_decision_data(paths_dict, data_options, load_data=False)
-# Add checks on our model choice sets. I.e. no retirement before min_ret_age,
-# no working/unemployment after max_ret_age.
-# Also our syear is from the soep. We could check, that single observations,
-# have only two consecutive observations in soep.
-
-
-# %%
-# Step 2: Estimates wage equation parameters
-# ----------------------------------------------------------------------------------------------
-from src.wage_equation import estimate_wage_parameters
-
-wage_params = estimate_wage_parameters(paths_dict, wage_eq_options)
-
-# %%
-# Step 3: Estimates policy expectation process parameters
+# Step 1: Estimates policy expectation process parameters
 # ----------------------------------------------------------------------------------------------
 from src.ret_age_expectations import estimate_policy_expectation_parameters
 
 policy_expectation_params = estimate_policy_expectation_parameters(
     paths_dict, policy_expectation_options
 )
-# %%
 
 # %%
+# Step 2: Get choice and state variables from SOEP core and SOEP RV VSKT
+# ----------------------------------------------------------------------------------------------
+policy_step_size = policy_expectation_params.iloc[1,0]
+
+from src.gather_decision_data import gather_decision_data
+
+dec_data = gather_decision_data(
+    paths_dict, data_options, policy_step_size, load_data=False
+)
+
+# %%
+# Step 3: Estimates wage equation parameters
+# ----------------------------------------------------------------------------------------------
+from src.wage_equation import estimate_wage_parameters
+
+wage_params = estimate_wage_parameters(paths_dict, wage_eq_options)
+

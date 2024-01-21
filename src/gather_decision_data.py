@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 
-def gather_decision_data(paths, options, load_data=False):
+def gather_decision_data(paths, options, policy_step_size, load_data=False):
     if load_data:
         data = pd.read_pickle("output/decision_data.pkl")
         return data
@@ -59,7 +59,7 @@ def gather_decision_data(paths, options, load_data=False):
     # Merge with SOEP core data
     merged_data = merged_data.merge(rv_data, on=["rv_id", "syear", "MONAT"], how="left")
 
-    # Create choice variable
+    # Create (labor) choice variable
     merged_data["choice"] = create_choice_variable(
         rv_ret_choice=merged_data["STATUS_2"], soep_empl_choice=merged_data["pgemplst"]
     )
@@ -89,6 +89,7 @@ def gather_decision_data(paths, options, load_data=False):
     full_container.update(merged_data)
     full_container["lagged_choice"] = full_container.groupby(["pid"])["choice"].shift()
     merged_data = full_container[full_container["lagged_choice"].notna()]
+    
     # Delete entries of persons missing 2021, but observed in 2020.
     merged_data = merged_data[merged_data["choice"].notna()]
 
@@ -96,6 +97,11 @@ def gather_decision_data(paths, options, load_data=False):
 
     # Calculate policy_state according to 2007 reform
     merged_data["policy_state"] = create_policy_state(merged_data["gebjahr"])
+
+    # Modify policy_state to reduce state space by rounding them to
+    #  closest multiple of the policy expectations process step size
+    merged_data["policy_state"] = modify_policy_state(merged_data["policy_state"], policy_step_size)
+
 
     # Create retirement_age_id (empty for now)
     merged_data["retirement_age_id"] = np.nan
@@ -153,6 +159,12 @@ def create_policy_state(gebjahr):
     policy_state.loc[mask3] = 65
     return policy_state
 
-
+def modify_policy_state(policy_states, policy_step_size):
+    """This function rounds policy state to closest multiple of the policy expectations process step size.
+    65 is hard coded b/c of reference to law."""
+    policy_states = policy_states - 65
+    policy_states = np.around(policy_states / policy_step_size) * policy_step_size
+    policy_states = policy_states + 65
+    return policy_states
 
 

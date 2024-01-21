@@ -39,15 +39,20 @@ def data_options():
         "exp_cap": exp_cap,
     }
 
+# define policy_step_size as a fixture
+@pytest.fixture
+def policy_step_size():
+    policy_step_size = 0.04478741131783991
+    return policy_step_size
 
 # These function tests the decision data for consistency (cf. model state space sparsity condition).
 
 
 def test_decision_data_no_missing_values(
-    paths_dict, data_options, load_data=LOAD_SAVED_DATA
+    paths_dict, data_options, policy_step_size, load_data=LOAD_SAVED_DATA
 ):
     """This functions asserts that there are no missing values for any states"""
-    dec_dat = gather_decision_data(paths_dict, data_options, load_data=load_data)
+    dec_dat = gather_decision_data(paths_dict, data_options, policy_step_size, load_data=load_data)
     assert dec_dat["choice"].isna().sum() == 0
     assert dec_dat["period"].isna().sum() == 0
     assert dec_dat["lagged_choice"].isna().sum() == 0
@@ -57,10 +62,10 @@ def test_decision_data_no_missing_values(
 
 
 def test_decision_data_no_ret_before_min_ret_age(
-    paths_dict, data_options, load_data=LOAD_SAVED_DATA
+    paths_dict, data_options, policy_step_size, load_data=LOAD_SAVED_DATA
 ):
     """This functions asserts that nobody is retired before min_ret_age"""
-    dec_dat = gather_decision_data(paths_dict, data_options, load_data=load_data)
+    dec_dat = gather_decision_data(paths_dict, data_options, policy_step_size, load_data=load_data)
     assert (
         dec_dat.loc[dec_dat["choice"] == 2, "period"].min() + data_options["start_age"]
         >= data_options["min_ret_age"]
@@ -68,26 +73,26 @@ def test_decision_data_no_ret_before_min_ret_age(
 
 
 def test_decision_data_no_work_after_max_ret_age(
-    paths_dict, data_options, load_data=LOAD_SAVED_DATA
+    paths_dict, data_options, policy_step_size, load_data=LOAD_SAVED_DATA
 ):
     """This functions asserts that there are no working after max_ret_age"""
-    dec_dat = gather_decision_data(paths_dict, data_options, load_data=load_data)
+    dec_dat = gather_decision_data(paths_dict, data_options, policy_step_size, load_data=load_data)
     assert (
         dec_dat.loc[dec_dat["choice"] == 1, "period"].max() + data_options["start_age"]
         <= data_options["max_ret_age"]
     )
 
 
-def test_decision_data_exp_cap(paths_dict, data_options, load_data=LOAD_SAVED_DATA):
+def test_decision_data_exp_cap(paths_dict, data_options, policy_step_size, load_data=LOAD_SAVED_DATA):
     """This functions asserts that experience is smaller or equal to age and exp_cap"""
-    dec_dat = gather_decision_data(paths_dict, data_options, load_data=load_data)
+    dec_dat = gather_decision_data(paths_dict, data_options, policy_step_size, load_data=load_data)
     assert dec_dat["experience"].max() <= data_options["exp_cap"]
     assert dec_dat["experience"].max() <= dec_dat["period"].max()
 
 
 def test_decision_data_retirement_is_absorbing(
-    paths_dict, data_options, load_data=LOAD_SAVED_DATA
+    paths_dict, data_options, policy_step_size, load_data=LOAD_SAVED_DATA
 ):
     """This functions asserts that retirement is absorbing"""
-    dec_dat = gather_decision_data(paths_dict, data_options, load_data=load_data)
+    dec_dat = gather_decision_data(paths_dict, data_options, policy_step_size, load_data=load_data)
     assert dec_dat.loc[dec_dat["lagged_choice"] == 2, "choice"].unique() == 2

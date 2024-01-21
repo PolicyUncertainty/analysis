@@ -18,6 +18,57 @@ def gather_decision_data(paths, options, policy_step_size, load_data=False):
     start_age = options["start_age"]
     exp_cap = options["exp_cap"]
 
+    # Load and merge data
+    merged_data = load_and_merge_data(soep_c38, soep_rv, min_ret_age)
+
+    # Filter data
+    merged_data = filter_data(merged_data, start_year, end_year, start_age, exp_cap)
+
+    # (labor) choice
+    merged_data["choice"] = create_choice_variable(
+        rv_ret_choice=merged_data["STATUS_2"], soep_empl_choice=merged_data["pgemplst"]
+    )
+    merged_data = merged_data[merged_data["choice"].notna()]
+    
+    # period
+    merged_data["period"] = merged_data["age"] - start_age
+    
+    # lagged choice
+    merged_data = create_lagged_choice_variable(merged_data, start_year, end_year)
+
+    # policy_state
+    merged_data["policy_state"] = create_policy_state(merged_data["gebjahr"])
+    merged_data["policy_state"] = modify_policy_state(merged_data["policy_state"], policy_step_size)
+
+    # retirement_age_id (empty for now)
+    merged_data["retirement_age_id"] = np.nan
+
+    # experience
+    merged_data["experience"] = merged_data["pgexpft"].astype(float).round()
+
+    # additional filters based on model setup
+    merged_data = enforce_model_work_and_ret_conditions(merged_data, min_ret_age, options["max_ret_age"], start_age)
+
+    # Keep relevant columns (i.e. state variables)
+    merged_data = merged_data[
+        [
+            "choice",
+            "period",
+            "lagged_choice",
+            "policy_state",
+            "retirement_age_id",
+            "experience",
+        ]
+    ]
+
+    print(str(len(merged_data))+" in final sample.")
+
+    # Save data
+    merged_data.to_pickle("output/decision_data.pkl")
+    return merged_data
+
+
+def load_and_merge_data(soep_c38, soep_rv, min_ret_age):
     # Load SOEP core data
     core_data = pd.read_stata(
         f"{soep_c38}/pgen.dta",
@@ -56,31 +107,32 @@ def gather_decision_data(paths, options, policy_step_size, load_data=False):
     # Prepare merge data
     merged_data["MONAT"] = 12
     rv_data["syear"] = rv_data["JAHR"]
+
     # Merge with SOEP core data
     merged_data = merged_data.merge(rv_data, on=["rv_id", "syear", "MONAT"], how="left")
+    return merged_data
 
-    # Create (labor) choice variable
-    merged_data["choice"] = create_choice_variable(
-        rv_ret_choice=merged_data["STATUS_2"], soep_empl_choice=merged_data["pgemplst"]
-    )
-    merged_data = merged_data[merged_data["choice"].notna()]
-
-    # Calculate period and filter out young people
-    merged_data["period"] = merged_data["age"] - start_age
-    merged_data = merged_data[merged_data["period"] >= 0]
-
+def filter_data(merged_data, start_year, end_year, start_age, exp_cap):
     # Set pid and syear as index
     merged_data.set_index(["pid", "syear"], inplace=True)
 
-
-    # Filter out women and years outside of estimation range
+    # filter out young people, women, and years outside of estimation range
+    merged_data = merged_data[merged_data["age"] >= start_age]
+    print(str(len(merged_data))+" left after dropping people under "+str(start_age)+" years old.")
     merged_data = merged_data[(merged_data["sex"] == 1)]
+    print(str(len(merged_data))+" left after dropping women.")
     merged_data = merged_data.loc[((slice(None), range(start_year - 1, end_year + 1))), :]
-
-    print(str(len(merged_data))+" left after dropping women, men under "+str(start_age)+" years old, and people outside of estimation years.")
-
-
-    # Create lagged choice variable
+    print(str(len(merged_data))+" left after dropping people outside of estimation years.")
+    
+    # Filter out invalid experience values
+    merged_data = merged_data[
+        (merged_data["pgexpft"] >= 0) & (merged_data["pgexpft"] <= exp_cap)
+        ]
+    print(str(len(merged_data))+" left after dropping people with invalid experience values.")
+    return merged_data
+    
+def create_lagged_choice_variable(merged_data, start_year, end_year):
+    # Create full index with all possible combinations of pid and syear 
     full_index = pd.MultiIndex.from_product(
         [merged_data.index.levels[0], range(start_year - 1, end_year + 1)],
         names=["pid", "syear"],
@@ -94,49 +146,11 @@ def gather_decision_data(paths, options, policy_step_size, load_data=False):
     merged_data = merged_data[merged_data["choice"].notna()]
 
     print(str(len(merged_data))+" left after filtering missing lagged choices.")
-
-    # Calculate policy_state according to 2007 reform
-    merged_data["policy_state"] = create_policy_state(merged_data["gebjahr"])
-
-    # Modify policy_state to reduce state space by rounding them to
-    #  closest multiple of the policy expectations process step size
-    merged_data["policy_state"] = modify_policy_state(merged_data["policy_state"], policy_step_size)
-
-
-    # Create retirement_age_id (empty for now)
-    merged_data["retirement_age_id"] = np.nan
-
-    # Filter out invalid experience values
-    merged_data = merged_data[
-        (merged_data["pgexpft"] >= 0) & (merged_data["pgexpft"] <= exp_cap)
-    ]
-
-    # Round experience values
-    merged_data["experience"] = merged_data["pgexpft"].astype(float).round()
-
-    # Keep relevant columns (i.e. state variables)
-    merged_data = merged_data[
-        [
-            "choice",
-            "period",
-            "lagged_choice",
-            "policy_state",
-            "retirement_age_id",
-            "experience",
-        ]
-    ]
-
-    print(str(len(merged_data))+" in final sample, after dropping invalid experience values.")
-
-
-    # Save data
-    merged_data.to_pickle("output/decision_data.pkl")
     return merged_data
-
 
 def create_choice_variable(rv_ret_choice, soep_empl_choice):
     """This function creates the choice variable for the structural model.
-    TODO: This function assumes reti    rees with part-time employment as full-time retirees.
+    TODO: This function assumes retirees with part-time employment as full-time retirees.
 
     """
     choice = pd.Series(index=rv_ret_choice.index, data=np.nan, dtype=float)
@@ -167,4 +181,26 @@ def modify_policy_state(policy_states, policy_step_size):
     policy_states = policy_states + 65
     return policy_states
 
+def enforce_model_work_and_ret_conditions(merged_data, min_ret_age, max_ret_age, start_age):
+    """This function filters the choice data according to the model setup."""
+    # Filter out people who are retired before min_ret_age
+    merged_data = merged_data[
+        (merged_data["choice"] != 2)
+        | (merged_data["age"] >= min_ret_age)
+    ]
+
+    # Filter out people who are working after max_ret_age
+    merged_data = merged_data[
+        (merged_data["choice"] != 1)
+        | (merged_data["age"] <= max_ret_age)
+    ]
+    print(str(len(merged_data))+" left after dropping people who are retired before "+str(min_ret_age)+" or working after "+str(max_ret_age)+".")
+
+    # Filter out people who come back from retirement
+    merged_data = merged_data[
+        (merged_data["lagged_choice"] != 2)
+        | (merged_data["choice"] == 2)  
+    ]
+    print(str(len(merged_data))+" left after dropping people who come back from retirement.")
+    return merged_data
 

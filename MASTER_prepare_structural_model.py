@@ -66,7 +66,6 @@ wage_eq_options = {
     "wage_dist_truncation_percentiles": [0.01, 0.99],
 }
 
-# %%
 
 # %%
 # Step 1: Estimates policy expectation process parameters
@@ -74,7 +73,7 @@ wage_eq_options = {
 from src.ret_age_expectations import estimate_policy_expectation_parameters
 
 policy_expectation_params = estimate_policy_expectation_parameters(
-    paths_dict, policy_expectation_options, load_data=False
+    paths_dict, policy_expectation_options, load_data=True 
 )
 
 # %%
@@ -94,6 +93,5 @@ dec_data = gather_decision_data(
 from src.wage_equation import estimate_wage_parameters
 
 wage_params = estimate_wage_parameters(paths_dict, wage_eq_options, load_data=False)
-
 
 # %%

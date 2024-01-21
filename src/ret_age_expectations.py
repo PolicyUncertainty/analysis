@@ -11,7 +11,10 @@ from functools import partial
 from statsmodels.regression.linear_model import OLS
 import matplotlib.pyplot as plt
 
-def estimate_policy_expectation_parameters(paths, options):
+def estimate_policy_expectation_parameters(paths, options, load_data=False):
+    if load_data:
+        coefficients = pd.read_csv("output/policy_expectation_params.csv")
+        return coefficients
 
     # unpack path to SOEP-IS
     soep_is = paths["soep_is"]

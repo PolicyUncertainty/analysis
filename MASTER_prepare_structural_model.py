@@ -28,9 +28,9 @@ elif USER == "max":
         "soep_is": "/home/maxbl/Uni/pol_uncetainty/data/dataset_main_SOEP_IS.dta",
     }
 # Set recurring parameters
-min_SRA = 65
-min_ret_age = min_SRA - 4
-max_ret_age = 72
+min_SRA = 65 
+min_ret_age = min_SRA - 4 
+max_ret_age = 72 
 exp_cap = 40  # maximum number of periods of exp accumulation
 start_year = 2010  # start year of estimation sample
 end_year = 2021  # end year of estimation sample
@@ -74,7 +74,7 @@ wage_eq_options = {
 from src.ret_age_expectations import estimate_policy_expectation_parameters
 
 policy_expectation_params = estimate_policy_expectation_parameters(
-    paths_dict, policy_expectation_options
+    paths_dict, policy_expectation_options, load_data=False
 )
 
 # %%
@@ -93,5 +93,7 @@ dec_data = gather_decision_data(
 # ----------------------------------------------------------------------------------------------
 from src.wage_equation import estimate_wage_parameters
 
-wage_params = estimate_wage_parameters(paths_dict, wage_eq_options)
+wage_params = estimate_wage_parameters(paths_dict, wage_eq_options, load_data=False)
 
+
+# %%

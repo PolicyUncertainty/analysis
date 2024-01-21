@@ -2,7 +2,11 @@ import pandas as pd
 from linearmodels.panel.model import PanelOLS
 
 
-def estimate_wage_parameters(paths, options):
+def estimate_wage_parameters(paths, options, load_data=False):
+
+    if load_data:
+        coefficients = pd.read_csv("output/wage_eq_params.csv")
+        return coefficients
 
     # unpack path to SOEP core
     soep_c38 = paths["soep_c38"]

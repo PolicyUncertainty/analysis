@@ -185,14 +185,12 @@ def enforce_model_work_and_ret_conditions(merged_data, min_ret_age, max_ret_age,
     """This function filters the choice data according to the model setup."""
     # Filter out people who are retired before min_ret_age
     merged_data = merged_data[
-        (merged_data["choice"] != 2)
-        | (merged_data["age"] >= min_ret_age)
+        ~((merged_data["choice"] == 2) & (merged_data["age"] < min_ret_age))
     ]
 
     # Filter out people who are working after max_ret_age
     merged_data = merged_data[
-        (merged_data["choice"] != 1)
-        | (merged_data["age"] <= max_ret_age)
+        ~((merged_data["choice"] != 2) & (merged_data["age"] > max_ret_age))
     ]
     print(str(len(merged_data))+" left after dropping people who are retired before "+str(min_ret_age)+" or working after "+str(max_ret_age)+".")
 

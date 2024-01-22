@@ -12,7 +12,8 @@
 # %%
 # Step 0: Set paths and parameters
 # ----------------------------------------------------------------------------------------------
-USER = "bruno"
+USER = "max"
+LOAD_DATA = False  # if True, load data from pickle files instead of generating it
 
 # Set file paths
 if USER == "bruno":
@@ -73,7 +74,7 @@ wage_eq_options = {
 from src.ret_age_expectations import estimate_policy_expectation_parameters
 
 policy_expectation_params = estimate_policy_expectation_parameters(
-    paths_dict, policy_expectation_options, load_data=True 
+    paths_dict, policy_expectation_options, load_data=LOAD_DATA 
 )
 
 # %%
@@ -84,7 +85,7 @@ policy_step_size = policy_expectation_params.iloc[1,0]
 from src.gather_decision_data import gather_decision_data
 
 dec_data = gather_decision_data(
-    paths_dict, data_options, policy_step_size, load_data=False
+    paths_dict, data_options, policy_step_size, load_data=LOAD_DATA
 )
 
 # %%
@@ -92,4 +93,4 @@ dec_data = gather_decision_data(
 # ----------------------------------------------------------------------------------------------
 from src.wage_equation import estimate_wage_parameters
 
-wage_params = estimate_wage_parameters(paths_dict, wage_eq_options, load_data=False)
+wage_params = estimate_wage_parameters(paths_dict, wage_eq_options, load_data=LOAD_DATA)

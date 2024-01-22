@@ -81,6 +81,10 @@ def test_decision_data_no_work_after_max_ret_age(
         dec_dat.loc[dec_dat["choice"] == 1, "period"].max() + data_options["start_age"]
         <= data_options["max_ret_age"]
     )
+    assert (
+        dec_dat.loc[dec_dat["choice"] == 0, "period"].max() + data_options["start_age"]
+        <= data_options["max_ret_age"]
+    )
 
 
 def test_decision_data_exp_cap(paths_dict, data_options, policy_step_size, load_data=LOAD_SAVED_DATA):

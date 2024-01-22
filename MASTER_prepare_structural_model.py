@@ -93,5 +93,3 @@ dec_data = gather_decision_data(
 from src.wage_equation import estimate_wage_parameters
 
 wage_params = estimate_wage_parameters(paths_dict, wage_eq_options, load_data=False)
-
-# %%

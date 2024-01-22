@@ -29,9 +29,9 @@ elif USER == "max":
         "soep_is": "/home/maxbl/Uni/pol_uncetainty/data/dataset_main_SOEP_IS.dta",
     }
 # Set recurring parameters
-min_SRA = 65 
-min_ret_age = min_SRA - 4 
-max_ret_age = 72 
+min_SRA = 65
+min_ret_age = min_SRA - 4
+max_ret_age = 72
 exp_cap = 40  # maximum number of periods of exp accumulation
 start_year = 2010  # start year of estimation sample
 end_year = 2021  # end year of estimation sample
@@ -74,13 +74,13 @@ wage_eq_options = {
 from src.ret_age_expectations import estimate_policy_expectation_parameters
 
 policy_expectation_params = estimate_policy_expectation_parameters(
-    paths_dict, policy_expectation_options, load_data=LOAD_DATA 
+    paths_dict, policy_expectation_options, load_data=LOAD_DATA
 )
 
 # %%
 # Step 2: Get choice and state variables from SOEP core and SOEP RV VSKT
 # ----------------------------------------------------------------------------------------------
-policy_step_size = policy_expectation_params.iloc[1,0]
+policy_step_size = policy_expectation_params.iloc[1, 0]
 
 from src.gather_decision_data import gather_decision_data
 

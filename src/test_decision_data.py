@@ -55,7 +55,11 @@ def test_decision_data_no_missing_values(
 ):
     """This functions asserts that there are no missing values for any states"""
     dec_dat = gather_decision_data(
-        paths_dict, data_options, policy_step_size, load_data=load_data
+        paths_dict,
+        data_options,
+        policy_step_size,
+        {"min_policy_state": 65},
+        load_data=load_data,
     )
     assert dec_dat["choice"].isna().sum() == 0
     assert dec_dat["period"].isna().sum() == 0
@@ -70,7 +74,11 @@ def test_decision_data_no_ret_before_min_ret_age(
 ):
     """This functions asserts that nobody is retired before min_ret_age"""
     dec_dat = gather_decision_data(
-        paths_dict, data_options, policy_step_size, load_data=load_data
+        paths_dict,
+        data_options,
+        policy_step_size,
+        {"min_policy_state": 65},
+        load_data=load_data,
     )
     assert (
         dec_dat.loc[dec_dat["choice"] == 2, "period"].min() + data_options["start_age"]
@@ -83,7 +91,11 @@ def test_decision_data_no_work_after_max_ret_age(
 ):
     """This functions asserts that there are no working after max_ret_age"""
     dec_dat = gather_decision_data(
-        paths_dict, data_options, policy_step_size, load_data=load_data
+        paths_dict,
+        data_options,
+        policy_step_size,
+        {"min_policy_state": 65},
+        load_data=load_data,
     )
     assert (
         dec_dat.loc[dec_dat["choice"] == 1, "period"].max() + data_options["start_age"]
@@ -100,7 +112,11 @@ def test_decision_data_exp_cap(
 ):
     """This functions asserts that experience is smaller or equal to age and exp_cap"""
     dec_dat = gather_decision_data(
-        paths_dict, data_options, policy_step_size, load_data=load_data
+        paths_dict,
+        data_options,
+        policy_step_size,
+        {"min_policy_state": 65},
+        load_data=load_data,
     )
     assert dec_dat["experience"].max() <= data_options["exp_cap"]
     assert dec_dat["experience"].max() <= dec_dat["period"].max()
@@ -111,6 +127,10 @@ def test_decision_data_retirement_is_absorbing(
 ):
     """This functions asserts that retirement is absorbing"""
     dec_dat = gather_decision_data(
-        paths_dict, data_options, policy_step_size, load_data=load_data
+        paths_dict,
+        data_options,
+        policy_step_size,
+        {"min_policy_state": 65},
+        load_data=load_data,
     )
     assert dec_dat.loc[dec_dat["lagged_choice"] == 2, "choice"].unique() == 2

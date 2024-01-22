@@ -2,7 +2,9 @@ import numpy as np
 import pandas as pd
 
 
-def gather_decision_data(paths, options, policy_step_size, load_data=False):
+def gather_decision_data(
+    paths, options, policy_step_size, policy_expectation_options, load_data=False
+):
     if load_data:
         data = pd.read_pickle("output/decision_data.pkl")
         return data
@@ -38,8 +40,8 @@ def gather_decision_data(paths, options, policy_step_size, load_data=False):
 
     # policy_state
     merged_data["policy_state"] = create_policy_state(merged_data["gebjahr"])
-    merged_data["policy_state"] = modify_policy_state(
-        merged_data["policy_state"], policy_step_size
+    merged_data["policy_state"], merged_data["policy_state_id"] = modify_policy_state(
+        merged_data["policy_state"], policy_step_size, policy_expectation_options
     )
 
     # retirement_age_id (empty for now)
@@ -201,13 +203,14 @@ def create_policy_state(gebjahr):
     return policy_state
 
 
-def modify_policy_state(policy_states, policy_step_size):
+def modify_policy_state(policy_states, policy_step_size, policy_expectation_options):
     """This function rounds policy state to closest multiple of the policy expectations process step size.
     65 is hard coded b/c of reference to law."""
-    policy_states = policy_states - 65
-    policy_states = np.around(policy_states / policy_step_size) * policy_step_size
-    policy_states = policy_states + 65
-    return policy_states
+    min_policy_state = policy_expectation_options["min_policy_state"]
+    policy_states = policy_states - min_policy_state
+    policy_id = np.around(policy_states / policy_step_size).astype(int)
+    policy_states = min_policy_state + policy_id * policy_step_size
+    return policy_states, policy_id
 
 
 def enforce_model_work_and_ret_conditions(

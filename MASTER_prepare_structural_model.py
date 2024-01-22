@@ -47,6 +47,8 @@ policy_expectation_options = {
     # cohorts for which process parameters are estimated
     "min_birth_year": 1947,
     "max_birth_year": 2000,
+    # lowest policy state
+    "min_policy_state": 65,
 }
 
 # Set options for data preparation
@@ -78,14 +80,18 @@ policy_expectation_params = estimate_policy_expectation_parameters(
 )
 
 # %%
-# Step 2: Get choice and state variables from SOEP core and SOEP RV VSKT
+# Step 2: Get choice and state variables from policy_step_sizeSOEP core and SOEP RV VSKT
 # ----------------------------------------------------------------------------------------------
 policy_step_size = policy_expectation_params.iloc[1, 0]
 
 from src.gather_decision_data import gather_decision_data
 
 dec_data = gather_decision_data(
-    paths_dict, data_options, policy_step_size, load_data=LOAD_DATA
+    paths_dict,
+    data_options,
+    policy_step_size,
+    policy_expectation_options,
+    load_data=LOAD_DATA,
 )
 
 # %%

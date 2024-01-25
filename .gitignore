@@ -3,3 +3,4 @@ __pycache__/
 *decision_data.pkl
 .envrc
 .idea/
+.vscode

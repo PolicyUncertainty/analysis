@@ -25,10 +25,10 @@ else:
                      "MASTER_prepare_structural_model.py.")
 
 import os
-analysis_path = os.getcwd() + "/"
+analysis_path = os.path.abspath(os.getcwd() + "/../../") + "/"
 
 import sys
-sys.path.insert(0, analysis_path + "src")
+sys.path.insert(0, analysis_path + "src/process_data/")
 
 # Set paths
 paths_dict = {
@@ -74,7 +74,7 @@ options = {
 # %%
 # Step 1: Estimates policy expectation process parameters
 # ----------------------------------------------------------------------------------------------
-from process_data.ret_age_expectations import estimate_policy_expectation_parameters
+from steps.est_ret_age_expectations import estimate_policy_expectation_parameters
 
 policy_expectation_params = estimate_policy_expectation_parameters(
     paths_dict, options, load_data=LOAD_DATA
@@ -83,7 +83,7 @@ policy_expectation_params = estimate_policy_expectation_parameters(
 # %%
 # Step 2: Estimates wage equation parameters
 # ----------------------------------------------------------------------------------------------
-from process_data.wage_equation import estimate_wage_parameters
+from steps.est_wage_equation import estimate_wage_parameters
 
 wage_params = estimate_wage_parameters(paths_dict, options, load_data=LOAD_DATA)
 
@@ -92,7 +92,7 @@ wage_params = estimate_wage_parameters(paths_dict, options, load_data=LOAD_DATA)
 # ----------------------------------------------------------------------------------------------
 policy_step_size = policy_expectation_params.iloc[1, 0]
 
-from process_data.gather_decision_data import gather_decision_data
+from steps.gather_decision_data import gather_decision_data
 
 dec_data = gather_decision_data(
     paths_dict,

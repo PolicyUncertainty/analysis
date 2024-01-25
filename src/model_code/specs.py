@@ -1,5 +1,5 @@
 import numpy as np
-from setup_model.state_space import sparsity_condition
+from model_code.state_space import sparsity_condition
 
 def set_params_and_options():
     start_age = 25

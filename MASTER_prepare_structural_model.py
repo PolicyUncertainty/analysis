@@ -12,7 +12,7 @@
 # %%
 # Step 0: Set paths and parameters
 # ----------------------------------------------------------------------------------------------
-USER = "max"
+USER = "bruno"
 LOAD_DATA = False  # if True, load data from pickle files instead of generating it
 
 # Set file paths
@@ -70,7 +70,7 @@ options = {
 from src.ret_age_expectations import estimate_policy_expectation_parameters
 
 policy_expectation_params = estimate_policy_expectation_parameters(
-    paths_dict, options, load_data=LOAD_DATA
+    paths_dict, options, load_data=True
 )
 
 # %%
@@ -93,3 +93,5 @@ dec_data = gather_decision_data(
     policy_step_size,
     load_data=LOAD_DATA,
 )
+
+# %%

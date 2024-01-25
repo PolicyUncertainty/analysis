@@ -51,10 +51,9 @@ def gather_decision_data(
     merged_data["experience"] = merged_data["pgexpft"].astype(float).round()
 
     # wealth
-    breakpoint()
-    # wealth_data = gather_wealth_data(soep_c38, start_year, end_year)
-    # merged_data = merged_data.merge(wealth_data, on=["hid", "syear"], how="left")
-    
+    wealth_data = gather_wealth_data(soep_c38, start_year, end_year)
+    merged_data = merged_data.merge(wealth_data, on=["hid", "syear"], how="left")
+    merged_data["wealth"] = merged_data["w011ha"].astype(float)
 
     # additional filters based on model setup
     merged_data = enforce_model_work_and_ret_conditions(
@@ -70,6 +69,7 @@ def gather_decision_data(
             "policy_state",
             "retirement_age_id",
             "experience",
+            "w011ha",
         ]
     ]
 
@@ -149,15 +149,6 @@ def gather_wealth_data(soep_c38, start_year, end_year):
 
     # Interpolate the missing values for each household
     wealth_data_full['w011ha'] = wealth_data_full.groupby('hid')['w011ha'].transform(lambda group: group.interpolate(method='linear'))
-
-    # Keep only the years of interest
-    wealth_data_full = wealth_data_full.loc[((slice(None), range(start_year - 1, end_year + 1))), :]
-
-    # Keep only the relevant columns
-    wealth_data_full = wealth_data_full[['w011ha']]
-
-    # Rename columns
-    wealth_data_full.rename(columns={'w011ha': 'wealth'}, inplace=True)
 
     return wealth_data_full
 

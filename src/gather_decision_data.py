@@ -23,7 +23,7 @@ def gather_decision_data(paths, options, policy_step_size, load_data=False):
 
     # Filter data
     merged_data = filter_data(merged_data, start_year, end_year, start_age, exp_cap)
-
+    
     # (labor) choice
     merged_data["choice"] = create_choice_variable(
         rv_ret_choice=merged_data["STATUS_2"], soep_empl_choice=merged_data["pgemplst"]
@@ -45,6 +45,12 @@ def gather_decision_data(paths, options, policy_step_size, load_data=False):
 
     # experience
     merged_data["experience"] = merged_data["pgexpft"].astype(float).round()
+
+    # wealth
+    breakpoint()
+    wealth_data = gather_wealth_data(soep_c38, start_year, end_year)
+    merged_data = merged_data.merge(wealth_data, on=["hid", "syear"], how="left")
+    
 
     # additional filters based on model setup
     merged_data = enforce_model_work_and_ret_conditions(merged_data, min_ret_age, options["max_ret_age"], start_age)
@@ -111,6 +117,38 @@ def load_and_merge_data(soep_c38, soep_rv, min_ret_age):
     # Merge with SOEP core data
     merged_data = merged_data.merge(rv_data, on=["rv_id", "syear", "MONAT"], how="left")
     return merged_data
+
+def gather_wealth_data(soep_c38, start_year, end_year):
+    # Load SOEP core data
+    wealth_data = pd.read_stata(
+        f"{soep_c38}/hwealth.dta",
+        columns=["hid", "syear", "w011ha"],
+        convert_categoricals=False,
+    )
+    wealth_data['hid'] = wealth_data['hid'].astype(int)
+
+    # for each household, create a row for each year between min and max syear
+    min_max_syear = wealth_data.groupby('hid')['syear'].agg(['min', 'max'])
+    all_combinations = pd.concat([pd.DataFrame({'hid': hid, 'syear': range(row['min'], row['max'] + 1)}) for hid, row in min_max_syear.iterrows()])
+    wealth_data_full = pd.merge(all_combinations, wealth_data, on=['hid', 'syear'], how='left')
+
+    # Set 'hid' and 'syear' as the index
+    wealth_data_full.set_index(['hid', 'syear'], inplace=True)
+    wealth_data_full.sort_index(inplace=True)
+
+    # Interpolate the missing values for each household
+    wealth_data_full['w011ha'] = wealth_data_full.groupby('hid')['w011ha'].transform(lambda group: group.interpolate(method='linear'))
+
+    # Keep only the years of interest
+    wealth_data_full = wealth_data_full.loc[((slice(None), range(start_year - 1, end_year + 1))), :]
+
+    # Keep only the relevant columns
+    wealth_data_full = wealth_data_full[['w011ha']]
+
+    # Rename columns
+    wealth_data_full.rename(columns={'w011ha': 'wealth'}, inplace=True)
+
+    return wealth_data_full
 
 def filter_data(merged_data, start_year, end_year, start_age, exp_cap):
     # Set pid and syear as index

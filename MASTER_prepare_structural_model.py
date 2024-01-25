@@ -2,8 +2,8 @@
 # This script executes the following steps:
 # 0. Set paths and parameters.
 # 1. Estimates policy expectation process parameters.
-# 2. Get choice and state variables from SOEP core and SOEP RV VSKT.
-# 3. Estimates wage equation parameters.
+# 2. Estimates wage equation parameters.
+# 3. Get choice and other state variables (lagged choice, policy state, retirement age id, experience, wealth) from SOEP core and SOEP RV VSKT.
 
 # locations:
 # dependencies: original data saved on local machines, functions for steps 0-3 in src folder
@@ -77,7 +77,14 @@ policy_expectation_params = estimate_policy_expectation_parameters(
 )
 
 # %%
-# Step 2: Get choice and state variables from SOEP core and SOEP RV VSKT
+# Step 2: Estimates wage equation parameters
+# ----------------------------------------------------------------------------------------------
+from src.wage_equation import estimate_wage_parameters
+
+wage_params = estimate_wage_parameters(paths_dict, wage_eq_options, load_data=False)
+
+# %%
+# Step 3: Get choice and state variables from SOEP core and SOEP RV VSKT
 # ----------------------------------------------------------------------------------------------
 policy_step_size = policy_expectation_params.iloc[1,0]
 
@@ -88,8 +95,3 @@ dec_data = gather_decision_data(
 )
 
 # %%
-# Step 3: Estimates wage equation parameters
-# ----------------------------------------------------------------------------------------------
-from src.wage_equation import estimate_wage_parameters
-
-wage_params = estimate_wage_parameters(paths_dict, wage_eq_options, load_data=False)

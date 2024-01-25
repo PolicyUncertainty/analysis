@@ -1,3 +1,5 @@
 .ipynb_checkpoints/
 __pycache__/
 *decision_data.pkl
+.envrc
+.idea/

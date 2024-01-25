@@ -5,8 +5,9 @@ import pandas as pd
 def gather_decision_data(
     paths, options, policy_step_size, load_data=False
 ):
+    out_file_path = paths["project_path"] + "output/decision_data.pkl"
     if load_data:
-        data = pd.read_pickle("output/decision_data.pkl")
+        data = pd.read_pickle(out_file_path)
         return data
 
     # Set file paths
@@ -76,7 +77,7 @@ def gather_decision_data(
     print(str(len(merged_data)) + " in final sample.")
 
     # Save data
-    merged_data.to_pickle("output/decision_data.pkl")
+    merged_data.to_pickle(out_file_path)
     return merged_data
 
 

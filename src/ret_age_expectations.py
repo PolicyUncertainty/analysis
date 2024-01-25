@@ -12,8 +12,10 @@ from statsmodels.regression.linear_model import OLS
 import matplotlib.pyplot as plt
 
 def estimate_policy_expectation_parameters(paths, options, load_data=False):
+    out_file_path = paths["project_path"] + "output/policy_expectation_params.csv"
+
     if load_data:
-        coefficients = pd.read_csv("output/policy_expectation_params.csv")
+        coefficients = pd.read_csv(out_file_path)
         coefficients = coefficients.iloc[:,[1]]
         return coefficients
 
@@ -51,7 +53,7 @@ def estimate_policy_expectation_parameters(paths, options, load_data=False):
     #model.fit().summary()
     coefficients = pd.DataFrame(model.fit().params)
     print("Estimated regression equation: E[ret age] = {} + {} * (birth year - {})".format(coefficients.iloc[0,0], coefficients.iloc[1,0], options["min_birth_year"]))
-    coefficients.to_csv("output/policy_expectation_params.csv")
+    coefficients.to_csv(out_file_path)
     return coefficients
 
 

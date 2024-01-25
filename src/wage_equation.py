@@ -3,9 +3,10 @@ from linearmodels.panel.model import PanelOLS
 
 
 def estimate_wage_parameters(paths, options, load_data=False):
+    out_file_path = paths["project_path"] + "output/wage_eq_params.csv"
 
     if load_data:
-        coefficients = pd.read_csv("output/wage_eq_params.csv")
+        coefficients = pd.read_csv(out_file_path)
         return coefficients
 
     # unpack path to SOEP core
@@ -45,5 +46,5 @@ def estimate_wage_parameters(paths, options, load_data=False):
     print("Estimated wage equation coefficients:\n{}".format(coefficients.to_string()))
 
     # Export regression coefficients
-    coefficients.to_csv("output/wage_eq_params.csv")
+    coefficients.to_csv(out_file_path)
     return coefficients

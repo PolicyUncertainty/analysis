@@ -12,22 +12,29 @@
 # %%
 # Step 0: Set paths and parameters
 # ----------------------------------------------------------------------------------------------
-USER = "bruno"
+USER = "max"
 LOAD_DATA = False  # if True, load data from pickle files instead of generating it
 
-# Set file paths
+# Set data paths according to user.
 if USER == "bruno":
-    paths_dict = {
-        "soep_c38": "C:/Users/bruno/papers/soep/soep38",
-        "soep_rv": "C:/Users/bruno/papers/soep/soep_rv",
-        "soep_is": "C:/Users/bruno/papers/soep/soep_is_2022/dataset_main_SOEP_IS.dta",
-    }
+    data_path = "C:/Users/bruno/papers/soep/"
 elif USER == "max":
-    paths_dict = {
-        "soep_c38": "/home/maxbl/Uni/pol_uncetainty/data/soep38",
-        "soep_rv": "/home/maxbl/Uni/pol_uncetainty/data/soep_rv",
-        "soep_is": "/home/maxbl/Uni/pol_uncetainty/data/dataset_main_SOEP_IS.dta",
-    }
+    data_path = "/home/maxbl/Uni/pol_uncetainty/data/"
+else:
+    raise ValueError("Please specify valid USER in "
+                     "MASTER_prepare_structural_model.py.")
+
+import os
+analysis_path = os.getcwd() + "/"
+
+# Set paths
+paths_dict = {
+    "soep_c38": data_path + "soep38",
+    "soep_rv": data_path + "soep_rv",
+    "soep_is": data_path + "soep_is_2022/dataset_main_SOEP_IS.dta",
+    "project_path": analysis_path
+}
+
 # Set recurring parameters
 min_SRA = 65
 min_ret_age = min_SRA - 4
@@ -35,6 +42,7 @@ max_ret_age = 72
 exp_cap = 40  # maximum number of periods of exp accumulation
 start_year = 2010  # start year of estimation sample
 end_year = 2021  # end year of estimation sample
+
 
 options = {
     # Set options for estimation of policy expectation process parameters
@@ -49,13 +57,9 @@ options = {
     "max_birth_year": 2000,
     # lowest policy state
     "min_policy_state": 65,
-    # Set options for data preparation
-    "start_year": start_year,
-    "end_year": end_year,
     "start_age": 25,
     "min_ret_age": min_ret_age,
     "max_ret_age": max_ret_age,
-    "exp_cap": exp_cap,
     # Set options for estimation of wage equation parameters
     "start_year": start_year,
     "end_year": end_year,

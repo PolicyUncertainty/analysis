@@ -5,11 +5,13 @@ def create_utility_functions():
         "marginal_utility": marg_utility,
     }
 
+
 def create_final_period_utility_functions():
     return {
         "utility": utility_final_consume_all,
         "marginal_utility": marginal_utility_final_consume_all,
     }
+
 
 def utility_func(consumption, choice, params):
     mu = params["mu"]
@@ -21,14 +23,13 @@ def utility_func(consumption, choice, params):
 
 def marg_utility(consumption, params):
     mu = params["mu"]
-    marg_util = consumption ** -mu
+    marg_util = consumption**-mu
     return marg_util
 
 
 def inverse_marginal(marginal_utility, params):
     mu = params["mu"]
     return marginal_utility ** (-1 / mu)
-
 
 
 def utility_final_consume_all(
@@ -40,7 +41,5 @@ def utility_final_consume_all(
     return utility_func(consumption=resources, choice=choice, params=params)
 
 
-def marginal_utility_final_consume_all(
-    choice, resources, params, options
-):
+def marginal_utility_final_consume_all(choice, resources, params, options):
     return marg_utility(consumption=resources, params=params)

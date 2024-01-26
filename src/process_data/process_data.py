@@ -4,11 +4,9 @@
 # 1. Estimates policy expectation process parameters.
 # 2. Estimates wage equation parameters.
 # 3. Get choice and other state variables (lagged choice, policy state, retirement age id, experience, wealth) from SOEP core and SOEP RV VSKT.
-
 # locations:
 # dependencies: original data saved on local machines, functions for steps 0-3 in src folder
 # output: data (decisions and outside_parameters) saved in output folder
-
 # %%
 # Step 0: Set paths and parameters
 # ----------------------------------------------------------------------------------------------
@@ -21,13 +19,16 @@ if USER == "bruno":
 elif USER == "max":
     data_path = "/home/maxbl/Uni/pol_uncetainty/data/"
 else:
-    raise ValueError("Please specify valid USER in "
-                     "MASTER_prepare_structural_model.py.")
+    raise ValueError(
+        "Please specify valid USER in " "MASTER_prepare_structural_model.py."
+    )
 
 import os
+
 analysis_path = os.path.abspath(os.getcwd() + "/../../") + "/"
 
 import sys
+
 sys.path.insert(0, analysis_path + "src/process_data/")
 
 # Set paths
@@ -35,7 +36,7 @@ paths_dict = {
     "soep_c38": data_path + "soep38",
     "soep_rv": data_path + "soep_rv",
     "soep_is": data_path + "soep_is_2022/dataset_main_SOEP_IS.dta",
-    "project_path": analysis_path
+    "project_path": analysis_path,
 }
 
 # Set recurring parameters
@@ -100,6 +101,5 @@ dec_data = gather_decision_data(
     policy_step_size,
     load_data=LOAD_DATA,
 )
-breakpoint()
 
 # %%

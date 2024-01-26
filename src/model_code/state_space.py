@@ -3,9 +3,10 @@ import numpy as np
 
 def create_state_space_functions():
     return {
-    "update_endog_state_by_state_and_choice": update_state_space,
-    "get_state_specific_choice_set": state_specific_choice_set,
-}
+        "update_endog_state_by_state_and_choice": update_state_space,
+        "get_state_specific_choice_set": state_specific_choice_set,
+    }
+
 
 def sparsity_condition(
     period, lagged_choice, policy_state, retirement_age_id, experience, options

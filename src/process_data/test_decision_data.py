@@ -5,9 +5,11 @@ LOAD_SAVED_DATA = True
 USER = "max"
 
 import os
+
 analysis_path = os.path.abspath(os.getcwd() + "/../../") + "/"
 
 import sys
+
 sys.path.insert(0, analysis_path + "src/process_data/")
 
 
@@ -39,27 +41,27 @@ def options():
     start_year = 2010  # start year of estimation sample
     end_year = 2021  # end year of estimation sample
     return {
-    # Set options for estimation of policy expectation process parameters
-    # limits for truncation of the normal distribution
-    "lower_limit": 66.5,
-    "upper_limit": 80,
-    # points at which the CDF is evaluated from survey data
-    "first_cdf_point": 67.5,
-    "second_cdf_point": 68.5,
-    # cohorts for which process parameters are estimated
-    "min_birth_year": 1947,
-    "max_birth_year": 2000,
-    # lowest policy state
-    "min_policy_state": 65,
-    "start_age": 25,
-    "min_ret_age": min_ret_age,
-    "max_ret_age": max_ret_age,
-    # Set options for estimation of wage equation parameters
-    "start_year": start_year,
-    "end_year": end_year,
-    "exp_cap": exp_cap,
-    "wage_dist_truncation_percentiles": [0.01, 0.99],
-}
+        # Set options for estimation of policy expectation process parameters
+        # limits for truncation of the normal distribution
+        "lower_limit": 66.5,
+        "upper_limit": 80,
+        # points at which the CDF is evaluated from survey data
+        "first_cdf_point": 67.5,
+        "second_cdf_point": 68.5,
+        # cohorts for which process parameters are estimated
+        "min_birth_year": 1947,
+        "max_birth_year": 2000,
+        # lowest policy state
+        "min_policy_state": 65,
+        "start_age": 25,
+        "min_ret_age": min_ret_age,
+        "max_ret_age": max_ret_age,
+        # Set options for estimation of wage equation parameters
+        "start_year": start_year,
+        "end_year": end_year,
+        "exp_cap": exp_cap,
+        "wage_dist_truncation_percentiles": [0.01, 0.99],
+    }
 
 
 # define policy_step_size as a fixture
@@ -75,7 +77,7 @@ def policy_step_size():
 def test_decision_data_no_missing_values(
     paths_dict, options, policy_step_size, load_data=LOAD_SAVED_DATA
 ):
-    """This functions asserts that there are no missing values for any states"""
+    """This functions asserts that there are no missing values for any states."""
     dec_dat = gather_decision_data(
         paths_dict,
         options,
@@ -94,7 +96,7 @@ def test_decision_data_no_missing_values(
 def test_decision_data_no_ret_before_min_ret_age(
     paths_dict, options, policy_step_size, load_data=LOAD_SAVED_DATA
 ):
-    """This functions asserts that nobody is retired before min_ret_age"""
+    """This functions asserts that nobody is retired before min_ret_age."""
     dec_dat = gather_decision_data(
         paths_dict,
         options,
@@ -110,7 +112,7 @@ def test_decision_data_no_ret_before_min_ret_age(
 def test_decision_data_no_work_after_max_ret_age(
     paths_dict, options, policy_step_size, load_data=LOAD_SAVED_DATA
 ):
-    """This functions asserts that there are no working after max_ret_age"""
+    """This functions asserts that there are no working after max_ret_age."""
     dec_dat = gather_decision_data(
         paths_dict,
         options,
@@ -130,7 +132,7 @@ def test_decision_data_no_work_after_max_ret_age(
 def test_decision_data_exp_cap(
     paths_dict, options, policy_step_size, load_data=LOAD_SAVED_DATA
 ):
-    """This functions asserts that experience is smaller or equal to age and exp_cap"""
+    """This functions asserts that experience is smaller or equal to age and exp_cap."""
     dec_dat = gather_decision_data(
         paths_dict,
         options,
@@ -144,7 +146,7 @@ def test_decision_data_exp_cap(
 def test_decision_data_retirement_is_absorbing(
     paths_dict, options, policy_step_size, load_data=LOAD_SAVED_DATA
 ):
-    """This functions asserts that retirement is absorbing"""
+    """This functions asserts that retirement is absorbing."""
     dec_dat = gather_decision_data(
         paths_dict,
         options,

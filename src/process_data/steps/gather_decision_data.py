@@ -2,9 +2,7 @@ import numpy as np
 import pandas as pd
 
 
-def gather_decision_data(
-    paths, options, policy_step_size, load_data=False
-):
+def gather_decision_data(paths, options, policy_step_size, load_data=False):
     out_file_path = paths["project_path"] + "output/decision_data.pkl"
     if load_data:
         data = pd.read_pickle(out_file_path)
@@ -26,7 +24,7 @@ def gather_decision_data(
 
     # Filter data
     merged_data = filter_data(merged_data, start_year, end_year, start_age, exp_cap)
-    
+
     # (labor) choice
     merged_data["choice"] = create_choice_variable(
         rv_ret_choice=merged_data["STATUS_2"], soep_empl_choice=merged_data["pgemplst"]
@@ -41,10 +39,10 @@ def gather_decision_data(
 
     # policy_state
     merged_data["policy_state"] = create_policy_state(merged_data["gebjahr"])
-    merged_data["policy_state_value"], merged_data["policy_state"] = (
-        modify_policy_state(
-        merged_data["policy_state"], policy_step_size, options
-    ))
+    (
+        merged_data["policy_state_value"],
+        merged_data["policy_state"],
+    ) = modify_policy_state(merged_data["policy_state"], policy_step_size, options)
 
     # retirement_age_id (dummy 0 for now)
     merged_data["retirement_age_id"] = 0
@@ -69,7 +67,7 @@ def gather_decision_data(
             "period",
             "lagged_choice",
             "policy_state",
-            "policy_state_id",
+            "policy_state_value",
             "retirement_age_id",
             "experience",
             "w011ha",
@@ -132,6 +130,7 @@ def load_and_merge_data(soep_c38, soep_rv, min_ret_age):
     merged_data = merged_data.merge(rv_data, on=["rv_id", "syear", "MONAT"], how="left")
     return merged_data
 
+
 def gather_wealth_data(soep_c38, start_year, end_year):
     # Load SOEP core data
     wealth_data = pd.read_stata(
@@ -139,21 +138,31 @@ def gather_wealth_data(soep_c38, start_year, end_year):
         columns=["hid", "syear", "w011ha"],
         convert_categoricals=False,
     )
-    wealth_data['hid'] = wealth_data['hid'].astype(int)
+    wealth_data["hid"] = wealth_data["hid"].astype(int)
 
     # for each household, create a row for each year between min and max syear
-    min_max_syear = wealth_data.groupby('hid')['syear'].agg(['min', 'max'])
-    all_combinations = pd.concat([pd.DataFrame({'hid': hid, 'syear': range(row['min'], row['max'] + 1)}) for hid, row in min_max_syear.iterrows()])
-    wealth_data_full = pd.merge(all_combinations, wealth_data, on=['hid', 'syear'], how='left')
+    min_max_syear = wealth_data.groupby("hid")["syear"].agg(["min", "max"])
+    all_combinations = pd.concat(
+        [
+            pd.DataFrame({"hid": hid, "syear": range(row["min"], row["max"] + 1)})
+            for hid, row in min_max_syear.iterrows()
+        ]
+    )
+    wealth_data_full = pd.merge(
+        all_combinations, wealth_data, on=["hid", "syear"], how="left"
+    )
 
     # Set 'hid' and 'syear' as the index
-    wealth_data_full.set_index(['hid', 'syear'], inplace=True)
+    wealth_data_full.set_index(["hid", "syear"], inplace=True)
     wealth_data_full.sort_index(inplace=True)
 
     # Interpolate the missing values for each household
-    wealth_data_full['w011ha'] = wealth_data_full.groupby('hid')['w011ha'].transform(lambda group: group.interpolate(method='linear'))
+    wealth_data_full["w011ha"] = wealth_data_full.groupby("hid")["w011ha"].transform(
+        lambda group: group.interpolate(method="linear")
+    )
 
     return wealth_data_full
+
 
 def filter_data(merged_data, start_year, end_year, start_age, exp_cap):
     # Set pid and syear as index
@@ -210,6 +219,7 @@ def create_lagged_choice_variable(merged_data, start_year, end_year):
 
 def create_choice_variable(rv_ret_choice, soep_empl_choice):
     """This function creates the choice variable for the structural model.
+
     TODO: This function assumes retirees with part-time employment as full-time retirees.
 
     """
@@ -235,8 +245,12 @@ def create_policy_state(gebjahr):
 
 
 def modify_policy_state(policy_states, policy_step_size, options):
-    """This function rounds policy state to closest multiple of the policy expectations process step size.
-    65 is hard coded b/c of reference to law."""
+    """This function rounds policy state to closest multiple of the policy expectations
+    process step size.
+
+    65 is hard coded b/c of reference to law.
+
+    """
     min_policy_state = options["min_policy_state"]
     policy_states = policy_states - min_policy_state
     policy_id = np.around(policy_states / policy_step_size).astype(int)

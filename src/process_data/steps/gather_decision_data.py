@@ -45,8 +45,8 @@ def gather_decision_data(
         merged_data["policy_state"], policy_step_size, options
     )
 
-    # retirement_age_id (empty for now)
-    merged_data["retirement_age_id"] = np.nan
+    # retirement_age_id (dummy 0 for now)
+    merged_data["retirement_age_id"] = 0
 
     # experience
     merged_data["experience"] = merged_data["pgexpft"].astype(float).round()
@@ -68,6 +68,7 @@ def gather_decision_data(
             "period",
             "lagged_choice",
             "policy_state",
+            "policy_state_id",
             "retirement_age_id",
             "experience",
             "w011ha",

@@ -1,7 +1,11 @@
 import numpy as np
 from model_code.state_space import sparsity_condition
+from model_code.state_space import create_state_space_functions
+from model_code.utility_functions import create_utility_functions, create_final_period_utility_functions
+from model_code.budget_equation import budget_constraint
 
-def set_params_and_options():
+
+def setup_model():
     start_age = 25
     end_age = 75
     n_periods = end_age - start_age + 1
@@ -17,7 +21,7 @@ def set_params_and_options():
     # choices: 0 = unemployment, , 1 = work, 2 = retire
     choices = np.array([0, 1, 2])
 
-    options_test = {
+    options = {
         "state_space": {
             "n_periods": n_periods,
             "choices": np.array([0, 1, 2]),
@@ -52,7 +56,7 @@ def set_params_and_options():
         },
     }
 
-    params_dict_test = {
+    params = {
         "mu": 0.5,  # Risk aversion
         "delta": 4,  # Disutility of work
         "interest_rate": 0.03,
@@ -60,4 +64,4 @@ def set_params_and_options():
         "beta": 0.95,  # Discount factor
         "sigma": 1,  # Income shock scale/variance.
     }
-    return params_dict_test, options_test
+    return

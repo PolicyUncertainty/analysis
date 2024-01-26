@@ -5,6 +5,12 @@ def create_utility_functions():
         "marginal_utility": marg_utility,
     }
 
+def create_final_period_utility_functions():
+    return {
+        "utility": utility_final_consume_all,
+        "marginal_utility": marginal_utility_final_consume_all,
+    }
+
 def utility_func(consumption, choice, params):
     mu = params["mu"]
     delta = params["delta"]
@@ -24,47 +30,17 @@ def inverse_marginal(marginal_utility, params):
     return marginal_utility ** (-1 / mu)
 
 
-def solve_final_period_scalar(
+
+def utility_final_consume_all(
     choice,
-    begin_of_period_resources,
+    resources,
     params,
     options,
-    compute_utility,
-    compute_marginal_utility,
 ):
-    """Compute optimal consumption policy and value function in the final period.
+    return utility_func(consumption=resources, choice=choice, params=params)
 
-    In the last period, everything is consumed, i.e. consumption = savings.
 
-    Args:
-        state (np.ndarray): 1d array of shape (n_state_variables,) containing the
-            period-specific state vector.
-        choice (int): The agent's choice in the current period.
-        begin_of_period_resources (float): The agent's begin of period resources.
-        compute_utility (callable): Function for computation of agent's utility.
-        compute_marginal_utility (callable): Function for computation of agent's
-        params (dict): Dictionary of model parameters.
-        options (dict): Options dictionary.
-
-    Returns:
-        tuple:
-
-        - consumption (float): The agent's consumption in the final period.
-        - value (float): The agent's value in the final period.
-        - marginal_utility (float): The agent's marginal utility .
-
-    """
-
-    # eat everything
-    consumption = begin_of_period_resources
-
-    # utility & marginal utility of eating everything
-    value = compute_utility(
-        consumption=begin_of_period_resources, choice=choice, params=params
-    )
-
-    marginal_utility = compute_marginal_utility(
-        consumption=begin_of_period_resources, params=params
-    )
-
-    return marginal_utility, value, consumption
+def marginal_utility_final_consume_all(
+    choice, resources, params, options
+):
+    return marg_utility(consumption=resources, params=params)

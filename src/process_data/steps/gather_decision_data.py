@@ -41,9 +41,10 @@ def gather_decision_data(
 
     # policy_state
     merged_data["policy_state"] = create_policy_state(merged_data["gebjahr"])
-    merged_data["policy_state"], merged_data["policy_state_id"] = modify_policy_state(
+    merged_data["policy_state_value"], merged_data["policy_state"] = (
+        modify_policy_state(
         merged_data["policy_state"], policy_step_size, options
-    )
+    ))
 
     # retirement_age_id (dummy 0 for now)
     merged_data["retirement_age_id"] = 0

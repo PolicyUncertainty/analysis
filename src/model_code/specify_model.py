@@ -66,10 +66,10 @@ def specify_model():
         "beta": 0.95,  # Discount factor
         "sigma": 1,  # Income shock scale/variance.
     }
-    model = specify_model(
+    model = setup_model(
         options=options,
     state_space_functions=create_state_space_functions(),
     utility_functions=create_utility_functions(),
     utility_functions_final_period=create_final_period_utility_functions(),
     budget_constraint=budget_constraint,)
-    return model, params
+    return model, params, options

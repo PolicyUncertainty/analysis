@@ -16,7 +16,10 @@ def estimate_wage_parameters(paths, options, load_data=False):
     start_year = options["start_year"]
     end_year = options["end_year"]
     exp_cap = (options["exp_cap"],)
-    truncation_percentiles = options["wage_dist_truncation_percentiles"]
+    truncation_percentiles = [
+        options["wage_trunc_low_perc"],
+        options["wage_trunc_high_perc"],
+    ]
 
     # get relevant data (sex, employment status, gross income, full time experience) from SOEP core
     pgen_df = pd.read_stata(

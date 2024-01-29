@@ -20,8 +20,6 @@ from model_code.specify_model import specify_model
 
 model, start_params, options = specify_model()
 
-from dcegm.likelihood import create_individual_likelihood_function_for_model
-
 # Create dummy exog column to handle in the model
 data_decision["dummy_exog"] = np.zeros(len(data_decision), dtype=np.int8)
 oberved_states_dict = {
@@ -32,6 +30,8 @@ observed_wealth = data_decision["wealth"].values
 observed_choices = data_decision["choice"].values
 
 savings_grid = np.arange(start=0, stop=100, step=0.5)
+
+from dcegm.likelihood import create_individual_likelihood_function_for_model
 
 individual_likelihood = create_individual_likelihood_function_for_model(
     model=model,

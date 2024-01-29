@@ -10,7 +10,7 @@
 # %%
 # Step 0: Set paths and parameters
 # ----------------------------------------------------------------------------------------------
-USER = "bruno"
+USER = "max"
 LOAD_DATA = False  # if True, load data from pickle files instead of generating it
 
 # Set data paths according to user.
@@ -24,12 +24,13 @@ else:
     )
 
 import os
+import yaml
 
 analysis_path = os.path.abspath(os.getcwd() + "/../../") + "/"
 
 import sys
 
-sys.path.insert(0, analysis_path + "src/process_data/")
+sys.path.insert(0, analysis_path + "src/")
 
 # Set paths
 paths_dict = {
@@ -39,43 +40,18 @@ paths_dict = {
     "project_path": analysis_path,
 }
 
-# Set recurring parameters
-min_SRA = 65
-min_ret_age = min_SRA - 4
-max_ret_age = 72
-exp_cap = 40  # maximum number of periods of exp accumulation
-start_year = 2010  # start year of estimation sample
-end_year = 2017  # end year of estimation sample
+# Load options and generate auxiliary options
+from gen_aux_options import generate_aux_options
 
-
-options = {
-    # Set options for estimation of policy expectation process parameters
-    # limits for truncation of the normal distribution
-    "lower_limit": 66.5,
-    "upper_limit": 80,
-    # points at which the CDF is evaluated from survey data
-    "first_cdf_point": 67.5,
-    "second_cdf_point": 68.5,
-    # cohorts for which process parameters are estimated
-    "min_birth_year": 1947,
-    "max_birth_year": 2000,
-    # lowest policy state
-    "min_policy_state": 65,
-    "start_age": 25,
-    "min_ret_age": min_ret_age,
-    "max_ret_age": max_ret_age,
-    # Set options for estimation of wage equation parameters
-    "start_year": start_year,
-    "end_year": end_year,
-    "exp_cap": exp_cap,
-    "wage_dist_truncation_percentiles": [0.01, 0.99],
-}
-
+options = yaml.safe_load(open(analysis_path + "src/spec.yaml"))
+options = generate_aux_options(options)
 
 # %%
 # Step 1: Estimates policy expectation process parameters
 # ----------------------------------------------------------------------------------------------
-from steps.est_ret_age_expectations import estimate_policy_expectation_parameters
+from process_data.steps.est_ret_age_expectations import (
+    estimate_policy_expectation_parameters,
+)
 
 policy_expectation_params = estimate_policy_expectation_parameters(
     paths_dict, options, load_data=True
@@ -84,7 +60,7 @@ policy_expectation_params = estimate_policy_expectation_parameters(
 # %%
 # Step 2: Estimates wage equation parameters
 # ----------------------------------------------------------------------------------------------
-from steps.est_wage_equation import estimate_wage_parameters
+from process_data.steps.est_wage_equation import estimate_wage_parameters
 
 wage_params = estimate_wage_parameters(paths_dict, options, load_data=LOAD_DATA)
 
@@ -93,7 +69,7 @@ wage_params = estimate_wage_parameters(paths_dict, options, load_data=LOAD_DATA)
 # ----------------------------------------------------------------------------------------------
 policy_step_size = policy_expectation_params.iloc[1, 0]
 
-from steps.gather_decision_data import gather_decision_data
+from process_data.steps.gather_decision_data import gather_decision_data
 
 dec_data = gather_decision_data(
     paths_dict,

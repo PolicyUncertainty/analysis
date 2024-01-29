@@ -22,7 +22,7 @@ def gather_decision_data(paths, options, policy_step_size, load_data=False):
     # Load and merge data state data from SOEP core and SOEP RV VSKT (all but wealth)
     merged_data = load_and_merge_data(soep_c38, soep_rv, min_ret_age)
 
-     # wealth data from SOEP C38 (hwealth.dta)
+    # wealth data from SOEP C38 (hwealth.dta)
     wealth_data = gather_wealth_data(soep_c38, start_year, end_year)
     merged_data = merged_data.merge(wealth_data, on=["hid", "syear"], how="left")
 
@@ -77,16 +77,16 @@ def gather_decision_data(paths, options, policy_step_size, load_data=False):
     ]
 
     merged_data = merged_data.astype(
-    {
-        "choice": "int8",
-        "lagged_choice": "int8",
-        "policy_state": "int8",
-        "retirement_age_id": "int8",
-        "experience": "int8",
-        "wealth": "float32",
-        "period": "int8",
-    }
-)
+        {
+            "choice": "int8",
+            "lagged_choice": "int8",
+            "policy_state": "int8",
+            "retirement_age_id": "int8",
+            "experience": "int8",
+            "wealth": "float32",
+            "period": "int8",
+        }
+    )
 
     print(str(len(merged_data)) + " in final sample.")
 
@@ -295,6 +295,10 @@ def enforce_model_work_and_ret_conditions(
     merged_data = merged_data[
         ~((merged_data["choice"] != 2) & (merged_data["age"] > max_ret_age))
     ]
+    # Filter out people who have not retirement as lagged choice after max_ret_age + 1
+    merged_data = merged_data[
+        ~((merged_data["lagged_choice"] != 2) & (merged_data["age"] > max_ret_age + 1))
+    ]
     print(
         str(len(merged_data))
         + " left after dropping people who are retired before "
@@ -308,6 +312,10 @@ def enforce_model_work_and_ret_conditions(
     merged_data = merged_data[
         (merged_data["lagged_choice"] != 2) | (merged_data["choice"] == 2)
     ]
+    merged_data = merged_data[
+        (merged_data["lagged_choice"] != 2) | (merged_data["choice"] == 2)
+    ]
+
     print(
         str(len(merged_data))
         + " left after dropping people who come back from retirement."

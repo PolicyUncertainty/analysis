@@ -4,6 +4,7 @@ from steps.gather_decision_data import gather_decision_data
 LOAD_SAVED_DATA = True
 USER = "max"
 
+import yaml
 import os
 
 analysis_path = os.path.abspath(os.getcwd() + "/../../") + "/"
@@ -34,34 +35,7 @@ def paths_dict():
 # Define options as a fixture
 @pytest.fixture
 def options():
-    min_SRA = 65
-    min_ret_age = min_SRA - 4
-    max_ret_age = 72
-    exp_cap = 40  # maximum number of periods of exp accumulation
-    start_year = 2010  # start year of estimation sample
-    end_year = 2021  # end year of estimation sample
-    return {
-        # Set options for estimation of policy expectation process parameters
-        # limits for truncation of the normal distribution
-        "lower_limit": 66.5,
-        "upper_limit": 80,
-        # points at which the CDF is evaluated from survey data
-        "first_cdf_point": 67.5,
-        "second_cdf_point": 68.5,
-        # cohorts for which process parameters are estimated
-        "min_birth_year": 1947,
-        "max_birth_year": 2000,
-        # lowest policy state
-        "min_policy_state": 65,
-        "start_age": 25,
-        "min_ret_age": min_ret_age,
-        "max_ret_age": max_ret_age,
-        # Set options for estimation of wage equation parameters
-        "start_year": start_year,
-        "end_year": end_year,
-        "exp_cap": exp_cap,
-        "wage_dist_truncation_percentiles": [0.01, 0.99],
-    }
+    return yaml.safe_load(open(analysis_path + "src/spec.yaml"))
 
 
 # define policy_step_size as a fixture

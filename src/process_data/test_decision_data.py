@@ -1,17 +1,18 @@
 import pytest
-from steps.gather_decision_data import gather_decision_data
+import sys
+import os
+
 
 LOAD_SAVED_DATA = True
 USER = "max"
 
 import yaml
-import os
+
 
 analysis_path = os.path.abspath(os.getcwd() + "/../../") + "/"
+sys.path.insert(0, analysis_path + "src")
 
-import sys
-
-sys.path.insert(0, analysis_path + "src/process_data/")
+from process_data.steps.gather_decision_data import gather_decision_data
 
 
 # Define paths_dict as a fixture

@@ -1,4 +1,5 @@
 import os
+import time
 
 import numpy as np
 import pandas as pd
@@ -20,6 +21,7 @@ data_decision = data_decision[data_decision["lagged_choice"] != 2]
 # Load data specs
 from derive_specs import generate_derived_and_data_derived_options
 
+start = time.time()
 project_paths = {
     "project_path": analysis_path,
 }
@@ -56,6 +58,11 @@ individual_likelihood = create_individual_likelihood_function_for_model(
 )
 params_to_estimate_names = ["mu", "delta", "lambda", "sigma"]
 start_params = {name: start_params_all[name] for name in params_to_estimate_names}
+past_prep = time.time()
+print(f"Preparation took {past_prep - start} seconds.")
 ll = individual_likelihood(start_params)
-
-breakpoint()
+first = time.time()
+print(f"First call took {first - past_prep} seconds.")
+ll = individual_likelihood(start_params)
+second = time.time()
+print(f"Second call took {second - first} seconds.")

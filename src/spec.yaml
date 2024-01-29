@@ -2,13 +2,15 @@
 # We start with the parameters for the data preparation and model specification
 ###############################################################################
 start_age: 25
+end_age: 75
 
+n_choices: 3  # choices: 0 = unemployment, , 1 = work, 2 = retire
 min_SRA: 65
 ret_years_before_SRA: 4
 max_ret_age: 72
 exp_cap: 40 # maximum of exp accumulated
-# parameters of the policy states
-min_policy_state: 65
+# parameters of the policy expectation process
+resolution_age: 60
 
 ###############################################################################
 # Now the parameters for the data preparation

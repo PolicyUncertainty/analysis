@@ -7,20 +7,12 @@ from model_code.utility_functions import create_final_period_utility_functions
 from model_code.utility_functions import create_utility_functions
 
 
-def specify_model():
-    start_age = 25
-    end_age = 75
-    n_periods = end_age - start_age + 1
-    resolution_age = 60
-    max_retirement_age = 72
-    minimum_SRA = 67
-    # you can retire four years before minimum_SRA
-    min_retirement_age = minimum_SRA - 4
-    # you can retire from min retirement age until max retirement age
-    n_possible_retirement_ages = max_retirement_age - min_retirement_age + 1
+def specify_model(project_specs):
+    # Load specifications
+    n_possible_ret_ages = project_specs["n_possible_ret_ages"]
+
     # when you are (start_age) years old, there can be as many policy states as there are years until (resolution_age)
     n_possible_policy_states = resolution_age - start_age + 1
-    # choices: 0 = unemployment, , 1 = work, 2 = retire
     choices = np.array([0, 1, 2])
 
     options = {
@@ -30,7 +22,7 @@ def specify_model():
             "endogenous_states": {
                 "experience": np.arange(n_periods, dtype=int),
                 "policy_state": np.arange(n_possible_policy_states, dtype=int),
-                "retirement_age_id": np.arange(n_possible_retirement_ages, dtype=int),
+                "retirement_age_id": np.arange(n_possible_ret_ages, dtype=int),
                 "sparsity_condition": sparsity_condition,
             },
         },

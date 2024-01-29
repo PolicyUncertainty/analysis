@@ -7,6 +7,9 @@ def estimate_wage_parameters(paths, options, load_data=False):
 
     if load_data:
         coefficients = pd.read_csv(out_file_path)
+        print(
+            "Estimated wage equation coefficients:\n{}".format(coefficients.to_string())
+        )
         return coefficients
 
     # unpack path to SOEP core

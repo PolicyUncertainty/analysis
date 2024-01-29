@@ -18,6 +18,13 @@ def estimate_policy_expectation_parameters(paths, options, load_data=False):
     if load_data:
         coefficients = pd.read_csv(out_file_path)
         coefficients = coefficients.iloc[:, [1]]
+        print(
+            "Estimated regression equation: E[ret age] = {} + {} * (birth year - {})".format(
+                coefficients.iloc[0, 0],
+                coefficients.iloc[1, 0],
+                options["min_birth_year"],
+            )
+        )
         return coefficients
 
     # unpack path to SOEP-IS

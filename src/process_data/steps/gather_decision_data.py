@@ -269,16 +269,16 @@ def create_policy_state(gebjahr):
 
 
 def modify_policy_state(policy_states, policy_step_size, options):
-    """This function rounds policy state to closest multiple of the policy expectations
-    process step size.
+    """This function rounds policy state to the closest multiple of the policy
+    expectations process step size.
 
-    65 is hard coded b/c of reference to law.
+    min_SRA is set by the assumption of the belief process in the model.
 
     """
-    min_policy_state = options["min_policy_state"]
-    policy_states = policy_states - min_policy_state
+    min_SRA = options["min_SRA"]
+    policy_states = policy_states - min_SRA
     policy_id = np.around(policy_states / policy_step_size).astype(int)
-    policy_states = min_policy_state + policy_id * policy_step_size
+    policy_states = min_SRA + policy_id * policy_step_size
     return policy_states, policy_id
 
 

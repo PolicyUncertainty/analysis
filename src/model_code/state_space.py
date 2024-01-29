@@ -11,7 +11,7 @@ def create_state_space_functions():
 def sparsity_condition(
     period, lagged_choice, policy_state, retirement_age_id, experience, options
 ):
-    min_ret_age = options["min_retirement_age"]
+    min_ret_age = options["min_ret_age"]
     start_age = options["start_age"]
     max_ret_age = options["max_retirement_age"]
     n_policy_states = options["n_possible_policy_states"]
@@ -65,7 +65,7 @@ def update_state_space(
     if lagged_choice == 2:  # Retirement
         next_state["retirement_age_id"] = retirement_age_id
     elif choice == 2:  # Retirement
-        next_state["retirement_age_id"] = age - options["min_retirement_age"]
+        next_state["retirement_age_id"] = age - options["min_ret_age"]
 
     if choice == 1:  # Work
         next_state["experience"] = experience + 1
@@ -76,8 +76,7 @@ def update_state_space(
 def state_specific_choice_set(period, lagged_choice, policy_state, options):
     age = period + options["start_age"]
     min_individual_retirement_age = (
-        options["min_retirement_age"]
-        + policy_state * options["belief_update_increment"]
+        options["min_ret_age"] + policy_state * options["belief_update_increment"]
     )
 
     if age < min_individual_retirement_age:

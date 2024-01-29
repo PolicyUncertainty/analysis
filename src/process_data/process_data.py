@@ -11,7 +11,7 @@
 # Step 0: Set paths and parameters
 # ----------------------------------------------------------------------------------------------
 USER = "max"
-LOAD_DATA = False  # if True, load data from pickle files instead of generating it
+LOAD_DATA = True  # if True, load data from pickle files instead of generating it
 
 # Set data paths according to user.
 if USER == "bruno":
@@ -41,10 +41,10 @@ paths_dict = {
 }
 
 # Load options and generate auxiliary options
-from gen_aux_options import generate_aux_options
+from derive_specs import generate_derived_specs
 
-options = yaml.safe_load(open(analysis_path + "src/spec.yaml"))
-options = generate_aux_options(options)
+project_specs = yaml.safe_load(open(analysis_path + "src/spec.yaml"))
+project_specs = generate_derived_specs(project_specs)
 
 # %%
 # Step 1: Estimates policy expectation process parameters
@@ -54,7 +54,7 @@ from process_data.steps.est_ret_age_expectations import (
 )
 
 policy_expectation_params = estimate_policy_expectation_parameters(
-    paths_dict, options, load_data=True
+    paths_dict, project_specs, load_data=True
 )
 
 # %%
@@ -62,7 +62,7 @@ policy_expectation_params = estimate_policy_expectation_parameters(
 # ----------------------------------------------------------------------------------------------
 from process_data.steps.est_wage_equation import estimate_wage_parameters
 
-wage_params = estimate_wage_parameters(paths_dict, options, load_data=LOAD_DATA)
+wage_params = estimate_wage_parameters(paths_dict, project_specs, load_data=LOAD_DATA)
 
 # %%
 # Step 3: Get choice and state variables from policy_step_sizeSOEP core and SOEP RV VSKT
@@ -73,9 +73,10 @@ from process_data.steps.gather_decision_data import gather_decision_data
 
 dec_data = gather_decision_data(
     paths_dict,
-    options,
+    project_specs,
     policy_step_size,
     load_data=LOAD_DATA,
 )
+breakpoint()
 
 # %%

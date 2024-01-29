@@ -10,7 +10,7 @@
 # %%
 # Step 0: Set paths and parameters
 # ----------------------------------------------------------------------------------------------
-USER = "max"
+USER = "bruno"
 LOAD_DATA = False  # if True, load data from pickle files instead of generating it
 
 # Set data paths according to user.
@@ -45,7 +45,7 @@ min_ret_age = min_SRA - 4
 max_ret_age = 72
 exp_cap = 40  # maximum number of periods of exp accumulation
 start_year = 2010  # start year of estimation sample
-end_year = 2021  # end year of estimation sample
+end_year = 2017  # end year of estimation sample
 
 
 options = {
@@ -78,7 +78,7 @@ options = {
 from steps.est_ret_age_expectations import estimate_policy_expectation_parameters
 
 policy_expectation_params = estimate_policy_expectation_parameters(
-    paths_dict, options, load_data=LOAD_DATA
+    paths_dict, options, load_data=True
 )
 
 # %%

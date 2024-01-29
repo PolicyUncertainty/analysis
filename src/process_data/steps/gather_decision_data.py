@@ -19,8 +19,15 @@ def gather_decision_data(paths, options, policy_step_size, load_data=False):
     start_age = options["start_age"]
     exp_cap = options["exp_cap"]
 
-    # Load and merge data
+    # Load and merge data state data from SOEP core and SOEP RV VSKT (all but wealth)
     merged_data = load_and_merge_data(soep_c38, soep_rv, min_ret_age)
+
+     # wealth data from SOEP C38 (hwealth.dta)
+    wealth_data = gather_wealth_data(soep_c38, start_year, end_year)
+    merged_data = merged_data.merge(wealth_data, on=["hid", "syear"], how="left")
+
+    merged_data = merged_data[merged_data["wealth"].notna()]
+    merged_data[merged_data["wealth"] < 0] = 0
 
     # Filter data
     merged_data = filter_data(merged_data, start_year, end_year, start_age, exp_cap)
@@ -50,29 +57,24 @@ def gather_decision_data(paths, options, policy_step_size, load_data=False):
     # experience
     merged_data["experience"] = merged_data["pgexpft"].astype(float).round()
 
-    # wealth
-    wealth_data = gather_wealth_data(soep_c38, start_year, end_year)
-    merged_data = merged_data.merge(wealth_data, on=["hid", "syear"], how="left")
-    merged_data["wealth"] = merged_data["w011ha"].astype(float)
-
     # additional filters based on model setup
     merged_data = enforce_model_work_and_ret_conditions(
         merged_data, min_ret_age, options["max_ret_age"], start_age
     )
 
     # Keep relevant columns (i.e. state variables)
-    merged_data = merged_data[
-        [
-            "choice",
-            "period",
-            "lagged_choice",
-            "policy_state",
-            "policy_state_value",
-            "retirement_age_id",
-            "experience",
-            "w011ha",
-        ]
-    ]
+
+    merged_data = merged_data.astype(
+    {
+        "choice": "int8",
+        "lagged_choice": "int8",
+        "policy_state": "int8",
+        "retirement_age_id": "int8",
+        "experience": "int8",
+        "wealth": "float32",
+        "period": "int8",
+    }
+)
 
     print(str(len(merged_data)) + " in final sample.")
 
@@ -161,6 +163,10 @@ def gather_wealth_data(soep_c38, start_year, end_year):
         lambda group: group.interpolate(method="linear")
     )
 
+    # rename to "wealth" and change unit to 1000s of euros
+    wealth_data_full.rename(columns={"w011ha": "wealth"}, inplace=True)
+    wealth_data_full["wealth"] = wealth_data_full["wealth"] / 1000
+
     return wealth_data_full
 
 
@@ -194,6 +200,12 @@ def filter_data(merged_data, start_year, end_year, start_age, exp_cap):
         str(len(merged_data))
         + " left after dropping people with invalid experience values."
     )
+
+    # drop missing wealth values and set negative wealth to 0
+    merged_data = merged_data[merged_data["wealth"].notna()]
+    merged_data[merged_data["wealth"] < 0] = 0
+    print(str(len(merged_data)) + " left after dropping people with missing wealth.")
+
     return merged_data
 
 

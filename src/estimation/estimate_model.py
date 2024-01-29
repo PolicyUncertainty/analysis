@@ -13,29 +13,8 @@ sys.path.insert(0, analysis_path + "src/")
 
 data_decision = pd.read_pickle(analysis_path + "output/decision_data.pkl")
 
-
-# Filters and datatypes changes which should be done in pre cleaning
-data_decision.rename(columns={"w011ha": "wealth"}, inplace=True)
-data_decision = data_decision[data_decision["wealth"].notna()]
-data_decision[data_decision["wealth"] < 0] = 0
-
-# We count in the model in 1000s of euros
-data_decision["wealth"] = data_decision["wealth"] / 1000
-
 # Retirees don't have any choice
 data_decision = data_decision[data_decision["lagged_choice"] != 2]
-
-data_decision = data_decision.astype(
-    {
-        "choice": "int8",
-        "lagged_choice": "int8",
-        "policy_state": "int8",
-        "retirement_age_id": "int8",
-        "experience": "int8",
-        "wealth": "float32",
-        "period": "int8",
-    }
-)
 
 from model_code.specify_model import specify_model
 

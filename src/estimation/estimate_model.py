@@ -30,7 +30,7 @@ project_specs = generate_derived_and_data_derived_options(
 
 from model_code.specify_model import specify_model
 
-model, start_params, options = specify_model(project_specs)
+model, start_params_all, options = specify_model(project_specs, load_model=True)
 
 # Create dummy exog column to handle in the model
 data_decision["dummy_exog"] = np.zeros(len(data_decision), dtype=np.int8)
@@ -52,5 +52,10 @@ individual_likelihood = create_individual_likelihood_function_for_model(
     observed_wealth=observed_wealth,
     observed_choices=observed_choices,
     exog_savings_grid=savings_grid,
-    params_all=start_params,
+    params_all=start_params_all,
 )
+params_to_estimate_names = ["mu", "delta", "lambda", "sigma"]
+start_params = {name: start_params_all[name] for name in params_to_estimate_names}
+ll = individual_likelihood(start_params)
+
+breakpoint()

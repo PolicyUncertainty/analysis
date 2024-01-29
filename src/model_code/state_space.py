@@ -3,7 +3,7 @@ import numpy as np
 
 def create_state_space_functions():
     return {
-        "update_endog_state_by_state_and_choice": update_state_space,
+        "get_next_period_state": update_state_space,
         "get_state_specific_choice_set": state_specific_choice_set,
     }
 
@@ -13,7 +13,7 @@ def sparsity_condition(
 ):
     min_ret_age = options["min_ret_age"]
     start_age = options["start_age"]
-    max_ret_age = options["max_retirement_age"]
+    max_ret_age = options["max_ret_age"]
     n_policy_states = options["n_possible_policy_states"]
 
     age = start_age + period
@@ -66,7 +66,6 @@ def update_state_space(
         next_state["retirement_age_id"] = retirement_age_id
     elif choice == 2:  # Retirement
         next_state["retirement_age_id"] = age - options["min_ret_age"]
-
     if choice == 1:  # Work
         next_state["experience"] = experience + 1
 
@@ -81,7 +80,7 @@ def state_specific_choice_set(period, lagged_choice, policy_state, options):
 
     if age < min_individual_retirement_age:
         return np.array([0, 1])
-    elif age >= options["max_retirement_age"]:
+    elif age >= options["max_ret_age"]:
         return np.array([2])
     elif lagged_choice == 2:  # retirement is absorbing
         return np.array([2])

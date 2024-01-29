@@ -11,7 +11,7 @@
 # Step 0: Set paths and parameters
 # ----------------------------------------------------------------------------------------------
 USER = "max"
-LOAD_DATA = True  # if True, load data from pickle files instead of generating it
+LOAD_DATA = False  # if True, load data from pickle files instead of generating it
 
 # Set data paths according to user.
 if USER == "bruno":
@@ -77,6 +77,5 @@ dec_data = gather_decision_data(
     policy_step_size,
     load_data=LOAD_DATA,
 )
-breakpoint()
 
 # %%

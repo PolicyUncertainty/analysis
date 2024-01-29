@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 from linearmodels.panel.model import PanelOLS
 
@@ -6,7 +7,7 @@ def estimate_wage_parameters(paths, options, load_data=False):
     out_file_path = paths["project_path"] + "output/wage_eq_params.csv"
 
     if load_data:
-        coefficients = pd.read_csv(out_file_path)
+        coefficients = pd.read_csv(out_file_path, index_col=0)
         print(
             "Estimated wage equation coefficients:\n{}".format(coefficients.to_string())
         )
@@ -60,12 +61,13 @@ def estimate_wage_parameters(paths, options, load_data=False):
     merged_df = merged_df.rename(
         columns={"pgexpft": "full_time_exp", "pglabgro": "wage"}
     )
-    merged_df["full_time_exp_2"] = merged_df["full_time_exp"] ** 2
+    merged_df["full_time_exp_sq"] = merged_df["full_time_exp"] ** 2
+    merged_df["constant"] = np.ones(len(merged_df))
 
     # estimate parametric regression, save parameters
     model = PanelOLS(
-        dependent=merged_df["wage"],
-        exog=merged_df[["full_time_exp", "full_time_exp_2"]],
+        dependent=merged_df["wage"] / options["wealth_unit"],
+        exog=merged_df[["constant", "full_time_exp", "full_time_exp_sq"]],
         entity_effects=True,
         time_effects=True,
     )

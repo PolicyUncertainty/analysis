@@ -9,16 +9,15 @@ from model_code.utility_functions import create_utility_functions
 
 def specify_model(project_specs):
     # Load specifications
+    n_periods = project_specs["n_periods"]
     n_possible_ret_ages = project_specs["n_possible_ret_ages"]
-
-    # when you are (start_age) years old, there can be as many policy states as there are years until (resolution_age)
-    n_possible_policy_states = resolution_age - start_age + 1
-    choices = np.array([0, 1, 2])
+    n_possible_policy_states = project_specs["n_possible_ret_ages"]
+    choices = np.arange(project_specs["n_choices"], dtype=int)
 
     options = {
         "state_space": {
             "n_periods": n_periods,
-            "choices": np.array([0, 1, 2]),
+            "choices": choices,
             "endogenous_states": {
                 "experience": np.arange(n_periods, dtype=int),
                 "policy_state": np.arange(n_possible_policy_states, dtype=int),
@@ -26,35 +25,15 @@ def specify_model(project_specs):
                 "sparsity_condition": sparsity_condition,
             },
         },
-        "model_params": {
-            # info from state spoace used in functions
-            "n_periods": n_periods,
-            "n_possible_policy_states": n_possible_policy_states,
-            # mandatory keywords
-            "quadrature_points_stochastic": 5,
-            # custom: model structure
-            "start_age": start_age,
-            "resolution_age": resolution_age,
-            # custom: policy environment
-            "minimum_SRA": minimum_SRA,
-            "max_retirement_age": max_retirement_age,
-            "min_retirement_age": min_retirement_age,
-            "unemployment_benefits": 5,
-            "pension_point_value": 0.3,
-            "early_retirement_penalty": 0.036,
-            # custom: params estimated outside model
-            "belief_update_increment": 0.05,
-            "gamma_0": 10,
-            "gamma_1": 1,
-            "gamma_2": -0.1,
-        },
+        "model_params": project_specs,
     }
+    breakpoint()
 
     params = {
         "mu": 0.5,  # Risk aversion
         "delta": 4,  # Disutility of work
         "interest_rate": 0.03,
-        "lambda": 1e-16,  # Taste shock scale/variance. Almost equal zero = no taste shocks
+        "lambda": 1,  # Taste shock scale/variance. Almost equal zero = no taste shocks
         "beta": 0.95,  # Discount factor
         "sigma": 1,  # Income shock scale/variance.
     }

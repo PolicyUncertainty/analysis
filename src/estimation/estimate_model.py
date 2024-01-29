@@ -6,6 +6,7 @@ import pandas as pd
 analysis_path = os.path.abspath(os.getcwd() + "/../../") + "/"
 
 import sys
+import yaml
 
 sys.path.insert(0, analysis_path + "submodules/dcegm/src/")
 sys.path.insert(0, analysis_path + "src/")
@@ -13,12 +14,23 @@ sys.path.insert(0, analysis_path + "src/")
 
 data_decision = pd.read_pickle(analysis_path + "output/decision_data.pkl")
 
-# Retirees don't have any choice
+# Retirees don't have any choice and therefore no information
 data_decision = data_decision[data_decision["lagged_choice"] != 2]
+
+# Load data specs
+from derive_specs import generate_derived_and_data_derived_options
+
+project_paths = {
+    "project_path": analysis_path,
+}
+project_specs = yaml.safe_load(open(analysis_path + "src/spec.yaml"))
+project_specs = generate_derived_and_data_derived_options(
+    project_specs, project_paths, load_data=True
+)
 
 from model_code.specify_model import specify_model
 
-model, start_params, options = specify_model()
+model, start_params, options = specify_model(project_specs)
 
 # Create dummy exog column to handle in the model
 data_decision["dummy_exog"] = np.zeros(len(data_decision), dtype=np.int8)

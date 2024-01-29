@@ -63,6 +63,18 @@ def gather_decision_data(paths, options, policy_step_size, load_data=False):
     )
 
     # Keep relevant columns (i.e. state variables)
+    merged_data = merged_data[
+        [
+            "choice",
+            "period",
+            "lagged_choice",
+            "policy_state",
+            "policy_state_value",
+            "retirement_age_id",
+            "experience",
+            "wealth",
+        ]
+    ]
 
     merged_data = merged_data.astype(
     {

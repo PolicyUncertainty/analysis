@@ -87,6 +87,8 @@ def gather_decision_data(paths, options, policy_step_size, load_data=False):
             "period": "int8",
         }
     )
+    # Anonymize data
+    merged_data.reset_index(drop=True, inplace=True)
 
     print(str(len(merged_data)) + " in final sample.")
 

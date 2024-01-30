@@ -32,11 +32,11 @@ def specify_model(project_specs, load_model=False):
 
     params = {
         "mu": 0.5,  # Risk aversion
-        "delta": 4,  # Disutility of work
+        "delta": 4.0,  # Disutility of work
         "interest_rate": 0.03,
-        "lambda": 1,  # Taste shock scale/variance. Almost equal zero = no taste shocks
+        "lambda": 1.0,  # Taste shock scale/variance. Almost equal zero = no taste shocks
         "beta": 0.95,  # Discount factor
-        "sigma": 1,  # Income shock scale/variance.
+        "sigma": 1.0,  # Income shock scale/variance.
     }
 
     if load_model:

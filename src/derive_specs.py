@@ -3,6 +3,7 @@ from process_data.steps.est_ret_age_expectations import (
     estimate_policy_expectation_parameters,
 )
 from process_data.steps.est_wage_equation import estimate_wage_parameters
+from process_data.steps.gather_decision_data import gather_decision_data
 
 
 def generate_derived_specs(options):
@@ -36,4 +37,12 @@ def generate_derived_and_data_derived_options(options, project_paths, load_data=
     options["gamma_0"] = wage_params.loc["constant", "parameter"]
     options["gamma_1"] = wage_params.loc["full_time_exp", "parameter"]
     options["gamma_2"] = wage_params.loc["full_time_exp_sq", "parameter"]
+
+    # Max experience
+    data_decision = gather_decision_data(
+        project_paths, options, policy_step_size, load_data=load_data
+    )
+    options["max_init_experience"] = (
+        data_decision["experience"] - data_decision["period"]
+    ).max()
     return options

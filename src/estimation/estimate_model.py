@@ -40,6 +40,7 @@ oberved_states_dict = {
     name: data_decision[name].values for name in model["state_space_names"]
 }
 
+
 observed_wealth = data_decision["wealth"].values
 observed_choices = data_decision["choice"].values
 
@@ -61,7 +62,6 @@ start_params = {name: start_params_all[name] for name in params_to_estimate_name
 past_prep = time.time()
 print(f"Preparation took {past_prep - start} seconds.")
 ll = individual_likelihood(start_params)
-breakpoint()
 first = time.time()
 print(f"First call took {first - past_prep} seconds.")
 ll = individual_likelihood(start_params)

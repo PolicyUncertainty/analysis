@@ -15,6 +15,7 @@ def sparsity_condition(
     start_age = options["start_age"]
     max_ret_age = options["max_ret_age"]
     n_policy_states = options["n_possible_policy_states"]
+    max_init_experience = options["max_init_experience"]
 
     age = start_age + period
     actual_retirement_age = min_ret_age + retirement_age_id
@@ -34,15 +35,21 @@ def sparsity_condition(
     elif policy_state > n_policy_states - 1:
         return False
     # If you have not worked last period, you can't have worked all your live
-    elif (lagged_choice != 1) & (period == experience) & (period > 0):
+    elif (
+        (lagged_choice != 1)
+        & (period + max_init_experience == experience)
+        & (period > 0)
+    ):
         return False
     # You cannot have more experience than your age
-    elif experience > period:
+    elif experience > period + max_init_experience:
         return False
-    # The policy state we need to consider increases by one increment
-    # per period.
-    elif policy_state > period:
+    elif experience > options["exp_cap"]:
         return False
+    # # The policy state we need to consider increases by one increment
+    # # per period.
+    # elif policy_state > period:
+    #     return False
     else:
         return True
 
@@ -57,16 +64,13 @@ def update_state_space(
 
     age = period + options["start_age"]
 
-    if age < options["resolution_age"]:
-        next_state["policy_state"] = policy_state + 1
-    else:
-        next_state["policy_state"] = policy_state
+    next_state["policy_state"] = policy_state
 
     if lagged_choice == 2:  # Retirement
         next_state["retirement_age_id"] = retirement_age_id
     elif choice == 2:  # Retirement
         next_state["retirement_age_id"] = age - options["min_ret_age"]
-    if choice == 1:  # Work
+    elif (choice == 1) & (experience < options["exp_cap"]):  # Work
         next_state["experience"] = experience + 1
 
     return next_state

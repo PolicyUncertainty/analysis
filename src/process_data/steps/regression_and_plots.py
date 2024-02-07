@@ -37,8 +37,13 @@ def gen_exp_val_params_and_plot(paths, df, load_data=False):
         f"Estimated regression equation: E[ret age] = {coefficients[0]} + "
         f"{coefficients[1]} * (Time to retirement)"
     )
-    np.savetxt(output_file, coefficients, delimiter=",")
-    return coefficients
+
+    # save relevant parameter
+    alpha_hat = coefficients[1:]
+
+
+    np.savetxt(output_file, alpha_hat, delimiter=",")
+    return alpha_hat
 
 
 def gen_var_params_and_plot(paths, df, load_data=False):
@@ -47,8 +52,19 @@ def gen_var_params_and_plot(paths, df, load_data=False):
     y_var = "var"
     weights = "fweights"
 
+
     if load_data:
         return np.loadtxt(output_file)
+
+    # divide estimated variances by time to retirement
+    sigma_sq_hat = df["var"] / df["time_to_ret"]
+
+    # weight and take average
+    sigma_sq_hat = (sigma_sq_hat * df["fweights"]).sum() / df["fweights"].sum()
+    sigma_sq_hat = np.array([sigma_sq_hat])
+
+    # this is a mostly useless regression that is only used to generate a plot to 
+    # illustrate why we need to improve the model
 
     exog_1 = np.array([np.ones(df.shape[0]), df[x_var].values]).T
     model = sm.WLS(
@@ -72,5 +88,5 @@ def gen_var_params_and_plot(paths, df, load_data=False):
     plt.savefig(paths["project_path"] + "output/var_plot.png")
     plt.show()
 
-    np.savetxt(output_file, coefficients, delimiter=",")
-    return coefficients
+    np.savetxt(output_file, sigma_sq_hat, delimiter=",")
+    return sigma_sq_hat

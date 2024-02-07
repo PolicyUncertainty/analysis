@@ -10,7 +10,7 @@
 # %%
 # Step 0: Set paths and parameters
 # ----------------------------------------------------------------------------------------------
-USER = "max"
+USER = "bruno" 
 LOAD_DATA = False  # if True, load data from pickle files instead of generating it
 
 # Set data paths according to user.
@@ -36,7 +36,7 @@ sys.path.insert(0, analysis_path + "src/")
 paths_dict = {
     "soep_c38": data_path + "soep38",
     "soep_rv": data_path + "soep_rv",
-    "soep_is": data_path + "soep_is_2022/dataset_main_SOEP_IS_2.dta",
+    "soep_is": data_path + "soep_is_2022/dataset_main_SOEP_IS.dta",
     "project_path": analysis_path,
     "output_path": analysis_path + "output/",
 }
@@ -53,7 +53,7 @@ project_specs = generate_derived_specs(project_specs)
 # --------------------------------------------------------------------------------------
 from process_data.steps.est_ret_age_expectations import estimate_truncated_normal
 
-df_analysis = estimate_truncated_normal(paths_dict, project_specs, load_data=True)
+df_estimated_ret_age_expectations = estimate_truncated_normal(paths_dict, project_specs, load_data=False)
 
 # %%
 #
@@ -65,11 +65,11 @@ from process_data.steps.regression_and_plots import (
 )
 
 policy_expectation_value_params = gen_exp_val_params_and_plot(
-    paths=paths_dict, df=df_analysis
+    paths=paths_dict, df=df_estimated_ret_age_expectations
 )
 
 policy_expectation_variance_params = gen_var_params_and_plot(
-    paths=paths_dict, df=df_analysis
+    paths=paths_dict, df=df_estimated_ret_age_expectations
 )
 
 # %%

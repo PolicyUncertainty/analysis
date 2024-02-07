@@ -36,8 +36,9 @@ sys.path.insert(0, analysis_path + "src/")
 paths_dict = {
     "soep_c38": data_path + "soep38",
     "soep_rv": data_path + "soep_rv",
-    "soep_is": data_path + "soep_is_2022/dataset_main_SOEP_IS.dta",
+    "soep_is": data_path + "soep_is_2022/dataset_main_SOEP_IS_2.dta",
     "project_path": analysis_path,
+    "output_path": analysis_path + "output/",
 }
 
 # Load options and generate auxiliary options
@@ -48,16 +49,31 @@ project_specs = generate_derived_specs(project_specs)
 
 # %%
 # Step 1: Estimates policy expectation process parameters
-# ----------------------------------------------------------------------------------------------
-from process_data.steps.est_ret_age_expectations import (
-    estimate_policy_expectation_parameters,
+# Step 1a: Estimate for each individual truncated normals
+# --------------------------------------------------------------------------------------
+from process_data.steps.est_ret_age_expectations import estimate_truncated_normal
+
+df_analysis = estimate_truncated_normal(paths_dict, project_specs, load_data=True)
+
+# %%
+#
+# Step 1b: Estimate regressions and create plots
+# ---------------------------------------------------------------------------------------
+from process_data.steps.regression_and_plots import (
+    gen_exp_val_params_and_plot,
+    gen_var_params_and_plot,
 )
 
-policy_expectation_params = estimate_policy_expectation_parameters(
-    paths_dict, project_specs, load_data=True
+policy_expectation_value_params = gen_exp_val_params_and_plot(
+    paths=paths_dict, df=df_analysis
+)
+
+policy_expectation_variance_params = gen_var_params_and_plot(
+    paths=paths_dict, df=df_analysis
 )
 
 # %%
+
 # Step 2: Estimates wage equation parameters
 # ----------------------------------------------------------------------------------------------
 from process_data.steps.est_wage_equation import estimate_wage_parameters
@@ -67,7 +83,7 @@ wage_params = estimate_wage_parameters(paths_dict, project_specs, load_data=LOAD
 # %%
 # Step 3: Get choice and state variables from policy_step_sizeSOEP core and SOEP RV VSKT
 # ----------------------------------------------------------------------------------------------
-policy_step_size = policy_expectation_params.iloc[1, 0]
+policy_step_size = policy_expectation_value_params[1]
 
 from process_data.steps.gather_decision_data import gather_decision_data
 

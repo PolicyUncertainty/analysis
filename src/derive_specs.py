@@ -1,9 +1,9 @@
 import numpy as np
-from process_data.steps.est_ret_age_expectations import (
-    estimate_policy_expectation_parameters,
+from process_data.steps.est_wage_equation import (
+    estimate_wage_parameters,
 )
-from process_data.steps.est_wage_equation import estimate_wage_parameters
 from process_data.steps.gather_decision_data import gather_decision_data
+from process_data.steps.regression_and_plots import gen_exp_val_params_and_plot
 
 
 def generate_derived_specs(options):
@@ -19,10 +19,10 @@ def generate_derived_specs(options):
 def generate_derived_and_data_derived_options(options, project_paths, load_data=True):
     options = generate_derived_specs(options)
     # Generate number of policy states between 67 and min_SRA
-    policy_expectation_params = estimate_policy_expectation_parameters(
-        project_paths, options, load_data=load_data
+    policy_expectation_params = gen_exp_val_params_and_plot(
+        project_paths, options, load_data=True
     )
-    policy_step_size = policy_expectation_params.iloc[1, 0]
+    policy_step_size = policy_expectation_params[1]
     add_policy_states = np.ceil((67 - options["min_SRA"]) / policy_step_size)
     # when you are (start_age) years old, there can be as many policy states as there
     # are years until (resolution_age). These are added to the number of policy states

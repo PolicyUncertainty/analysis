@@ -3,29 +3,18 @@
 # Then, the expected values of the individual CDF are regressed on birth year to obtain the slope of the policy expectation process.
 from functools import partial
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from scipy.optimize import minimize
 from scipy.optimize import root
 from scipy.stats import truncnorm
-from statsmodels.regression.linear_model import OLS
 
 
-def estimate_policy_expectation_parameters(paths, options, load_data=False):
-    out_file_path = paths["project_path"] + "output/policy_expectation_params.csv"
+def estimate_truncated_normal(paths, options, load_data=False):
+    out_file_path = paths["project_path"] + "output/policy_expect_data.pkl"
 
     if load_data:
-        coefficients = pd.read_csv(out_file_path)
-        coefficients = coefficients.iloc[:, [1]]
-        print(
-            "Estimated regression equation: E[ret age] = {} + {} * (birth year - {})".format(
-                coefficients.iloc[0, 0],
-                coefficients.iloc[1, 0],
-                options["min_birth_year"],
-            )
-        )
-        return coefficients
+        df_analysis = pd.read_pickle(out_file_path)
+        return df_analysis
 
     # unpack path to SOEP-IS
     soep_is = paths["soep_is"]
@@ -43,37 +32,27 @@ def estimate_policy_expectation_parameters(paths, options, load_data=False):
         "pol_unc_stat_ret_age_67",
         "pol_unc_stat_ret_age_68",
         "pol_unc_stat_ret_age_69",
+        "exp_pens_uptake",
+        "age",
         "gebjahr",
+        "fweights",
     ]
     df = pd.read_stata(soep_is)[relevant_cols].astype(float)
     df.rename({"gebjahr": "birth_year"}, axis=1, inplace=True)
+    df["time_to_ret"] = df["exp_pens_uptake"] - df["age"]
 
     # estimate params of truncated normal, as well as mean and var
     df = estimate_truncated_normal_parameters(df, function_spec)
 
     # exclude people born before 1947 and people born after 2000
     df_analysis = df[df["pol_unc_stat_ret_age_67"].notnull()]
-    df_analysis = df_analysis[df_analysis["birth_year"] >= options["min_birth_year"]]
-    df_analysis = df_analysis[df_analysis["birth_year"] <= options["max_birth_year"]]
+    df_analysis = df_analysis[df_analysis["ex_val"].notnull()]
+    df_analysis = df_analysis[df_analysis["time_to_ret"] > 0]
+    df_analysis = df_analysis[df_analysis["time_to_ret"] < 48]
 
-    # plot means by birth year
-    df_analysis.groupby("birth_year")["ex_val"].mean().plot()
-
-    # regress expected value on birth year minus minimum birth year, save OLS results
-    df_analysis["birth_year"] = df_analysis["birth_year"] - options["min_birth_year"]
-    exog_1 = np.array(
-        [np.ones(df_analysis.shape[0]), df_analysis["birth_year"].values]
-    ).T
-    model = OLS(exog=exog_1, endog=df_analysis["ex_val"].values)
-    # model.fit().summary()
-    coefficients = pd.DataFrame(model.fit().params)
-    print(
-        "Estimated regression equation: E[ret age] = {} + {} * (birth year - {})".format(
-            coefficients.iloc[0, 0], coefficients.iloc[1, 0], options["min_birth_year"]
-        )
-    )
-    coefficients.to_csv(out_file_path)
-    return coefficients
+    df_analysis["sigma_sq"] = df_analysis["var"] / df_analysis["time_to_ret"]
+    df_analysis.to_pickle(out_file_path)
+    return df_analysis
 
 
 def estimate_truncated_normal_parameters(df, function_spec):
@@ -93,6 +72,21 @@ def estimate_truncated_normal_parameters(df, function_spec):
 
     for index, row in df.iterrows():
         if not np.isnan(row["pol_unc_stat_ret_age_67"]):
+            if row["pol_unc_stat_ret_age_67"] == 100:
+                row["pol_unc_stat_ret_age_67"] = 99.5
+                row["pol_unc_stat_ret_age_68"] = 0.4
+                row["pol_unc_stat_ret_age_69"] = 0.1
+            elif row["pol_unc_stat_ret_age_68"] == 100:
+                row["pol_unc_stat_ret_age_67"] = 0.25
+                row["pol_unc_stat_ret_age_68"] = 99.5
+                row["pol_unc_stat_ret_age_69"] = 0.25
+            elif row["pol_unc_stat_ret_age_69"] == 100:
+                # Assume that there was just enough mass in the last interval that the
+                # respondet rounded up to 100. Assign the rest to 68.
+                row["pol_unc_stat_ret_age_67"] = 0.1
+                row["pol_unc_stat_ret_age_68"] = 0.4
+                row["pol_unc_stat_ret_age_69"] = 99.5
+
             # observed CDF values
             function_spec["observed_cdf_67_5"] = (
                 row["pol_unc_stat_ret_age_67"] / 100
@@ -101,38 +95,26 @@ def estimate_truncated_normal_parameters(df, function_spec):
                 row["pol_unc_stat_ret_age_68"] + row["pol_unc_stat_ret_age_67"]
             ) / 100  # CDF(68.5)
 
-            if row["pol_unc_stat_ret_age_67"] == 100:
-                df.at[index, "ex_val"] = 67
-                df.at[index, "var"] = 0
-            elif row["pol_unc_stat_ret_age_68"] == 100:
-                df.at[index, "ex_val"] = 68
-                df.at[index, "var"] = 0
-            elif row["pol_unc_stat_ret_age_69"] == 100:
-                # Mean of last interval (which goes from 68.5 to specified upper limit, e.g. 80)
-                df.at[index, "ex_val"] = 68.5 + (function_spec["ul"] - 68.5) / 2
-                # Variance of uniform distribution between start of last interval and upper limit
-                df.at[index, "var"] = ((80 - 68.5) ** 2) / 12
-            else:
-                # initial guess for mean and variance
-                initial_guess = [68, 1]
-                partial_obj = partial(objective, function_spec=function_spec)
+            # initial guess for mean and variance
+            initial_guess = np.array([68, 2])
+            partial_obj = partial(objective, function_spec=function_spec)
 
-                # perform optimization
-                result = root(fun=partial_obj, x0=initial_guess)
+            # perform optimization
+            result = root(fun=partial_obj, x0=initial_guess, tol=1e-16)
 
-                # collect results
-                mean, stdev = result.x
-                df.at[index, "mu"] = mean
-                df.at[index, "sigma"] = stdev
-                df.at[index, "error_1"], df.at[index, "error_2"] = result.fun
+            # collect results
+            loc, scale = result.x
+            df.at[index, "mu"] = loc
+            df.at[index, "sigma"] = scale
+            df.at[index, "error_1"], df.at[index, "error_2"] = result.fun
 
-                # calculate expected value
-                a, b = (function_spec["ll"] - mean) / stdev, (
-                    function_spec["ul"] - mean
-                ) / stdev
-                exval, var = truncnorm.stats(a, b, loc=mean, scale=stdev, moments="mv")
-                df.at[index, "ex_val"] = exval
-                df.at[index, "var"] = var
+            # calculate expected value
+            a, b = (function_spec["ll"] - loc) / scale, (
+                function_spec["ul"] - loc
+            ) / scale
+            exval, var = truncnorm.stats(a, b, loc=loc, scale=scale, moments="mv")
+            df.at[index, "ex_val"] = exval
+            df.at[index, "var"] = var
     return df
 
 

@@ -35,7 +35,7 @@ wealth_unit: 1000  # unit of wealth in data
 # Belief process estimation
 # Limits for truncation of the normal distribution
 lower_limit: 66.5
-upper_limit: 80
+upper_limit: 72
 # points at which the CDF is evaluated from survey data
 first_cdf_point: 67.5
 second_cdf_point: 68.5

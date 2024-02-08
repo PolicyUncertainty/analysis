@@ -1,7 +1,6 @@
 import numpy as np
 from dcegm.pre_processing.setup_model import load_and_setup_model
 from dcegm.pre_processing.setup_model import setup_and_save_model
-from dcegm.pre_processing.setup_model import setup_model
 from model_code.budget_equation import budget_constraint
 from model_code.state_space import create_state_space_functions
 from model_code.state_space import sparsity_condition
@@ -30,15 +29,6 @@ def specify_model(project_specs, load_model=False):
         "model_params": project_specs,
     }
 
-    params = {
-        "mu": 0.5,  # Risk aversion
-        "delta": 4.0,  # Disutility of work
-        "interest_rate": 0.03,
-        "lambda": 1.0,  # Taste shock scale/variance. Almost equal zero = no taste shocks
-        "beta": 0.95,  # Discount factor
-        "sigma": 1.0,  # Income shock scale/variance.
-    }
-
     if load_model:
         model = load_and_setup_model(
             options=options,
@@ -59,4 +49,4 @@ def specify_model(project_specs, load_model=False):
             path="model.pkl",
         )
 
-    return model, params, options
+    return model, options

@@ -16,9 +16,7 @@ def budget_constraint(
     ERP = options["early_retirement_penalty"]
 
     # generate actual retirement age and SRA at resolution
-    SRA_at_resolution = (
-        options["min_SRA"] + policy_state * options["belief_update_increment"]
-    )
+    SRA_at_resolution = options["min_SRA"] + policy_state * options["SRA_grid_size"]
     actual_retirement_age = options["min_ret_age"] + retirement_age_id
 
     # calculate applicable SRA and pension deduction/increase factor

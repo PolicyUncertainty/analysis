@@ -8,7 +8,10 @@ start_age: 25
 end_age: 75
 
 n_choices: 3  # choices: 0 = unemployment, , 1 = work, 2 = retire
+# Belief process parameters
+SRA_grid_size: 0.25
 min_SRA: 65
+max_SRA: 72
 ret_years_before_SRA: 4
 max_ret_age: 72
 exp_cap: 40 # maximum of exp accumulated

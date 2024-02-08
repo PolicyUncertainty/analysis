@@ -13,34 +13,36 @@ def generate_derived_specs(options):
     options["n_periods"] = options["end_age"] - options["start_age"] + 1
     # you can retire from min retirement age until max retirement age
     options["n_possible_ret_ages"] = options["max_ret_age"] - options["min_ret_age"] + 1
+    options["n_policy_states"] = int(
+        ((options["max_SRA"] - options["min_SRA"]) / options["SRA_grid_size"]) + 1
+    )
+    options["SRA_values_policy_states"] = np.arange(
+        options["min_SRA"],
+        options["max_SRA"] + options["SRA_grid_size"],
+        options["SRA_grid_size"],
+    )
+
     return options
 
 
 def generate_derived_and_data_derived_options(options, project_paths, load_data=True):
     options = generate_derived_specs(options)
-    # Generate number of policy states between 67 and min_SRA
-    policy_expectation_params = gen_exp_val_params_and_plot(
-        project_paths, options, load_data=True
-    )
-    policy_step_size = policy_expectation_params[1]
-    add_policy_states = np.ceil((67 - options["min_SRA"]) / policy_step_size)
-    # when you are (start_age) years old, there can be as many policy states as there
-    # are years until (resolution_age). These are added to the number of policy states
-    #
 
-    options["n_possible_policy_states"] = (
-        add_policy_states + options["resolution_age"] - options["start_age"] + 1
+    # Generate dummy transition matrix
+    n_policy_states = options["n_policy_states"]
+    options["beliefs_trans_mat"] = (
+        np.ones((n_policy_states, n_policy_states)) / n_policy_states
     )
-    options["belief_update_increment"] = policy_step_size
-    # Wage parameters
+
+    # Generate number of policy states between 67 and min_SRA
     wage_params = estimate_wage_parameters(project_paths, options, load_data=load_data)
     options["gamma_0"] = wage_params.loc["constant", "parameter"]
     options["gamma_1"] = wage_params.loc["full_time_exp", "parameter"]
     options["gamma_2"] = wage_params.loc["full_time_exp_sq", "parameter"]
 
-    # Max experience
+    # # Max experience
     data_decision = gather_decision_data(
-        project_paths, options, policy_step_size, load_data=load_data
+        project_paths, options, None, load_data=load_data
     )
     options["max_init_experience"] = (
         data_decision["experience"] - data_decision["period"]

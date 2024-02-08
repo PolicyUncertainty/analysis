@@ -5,8 +5,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-file_dir_path = str(Path(__file__).parent.absolute())
-analysis_path = os.path.abspath(file_dir_path + "/../../") + "/"
+file_dir_path = str(Path(__file__).parent.absolute()) + "/"
+analysis_path = os.path.abspath(file_dir_path + "../../") + "/"
 
 import sys
 import yaml
@@ -37,7 +37,6 @@ from model_code.specify_model import specify_model
 model, options = specify_model(project_specs, load_model=True)
 
 # Prepare data for estimation
-data_decision["dummy_exog"] = np.zeros(len(data_decision), dtype=np.int8)
 oberved_states_dict = {
     name: data_decision[name].values for name in model["state_space_names"]
 }
@@ -46,7 +45,6 @@ observed_choices = data_decision["choice"].values
 
 # Load start parameters
 start_params_all = yaml.safe_load(open(file_dir_path + "start_params.yaml"))
-
 # Specifiy savings wealth grid
 savings_grid = np.arange(start=0, stop=100, step=0.5)
 

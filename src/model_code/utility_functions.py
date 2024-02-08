@@ -45,8 +45,12 @@ def utility_final_consume_all(
     params,
     options,
 ):
-    return utility_func(consumption=resources, choice=choice, params=params)
+    mu = params["mu"]
+    bequest_scale = params["bequest_scale"]
+    return bequest_scale * (resources ** (1 - mu) / (1 - mu))
 
 
 def marginal_utility_final_consume_all(choice, resources, params, options):
-    return marg_utility(consumption=resources, params=params)
+    mu = params["mu"]
+    bequest_scale = params["bequest_scale"]
+    return bequest_scale * (resources**-mu)

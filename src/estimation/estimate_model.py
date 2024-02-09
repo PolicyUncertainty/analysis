@@ -31,7 +31,7 @@ project_specs = generate_derived_and_data_derived_options(
 )
 from model_code.specify_model import specify_model
 
-model, options = specify_model(project_specs, load_model=False)
+model, options = specify_model(project_specs, load_model=True)
 print("Model specified.")
 # Prepare data for estimation
 oberved_states_dict = {
@@ -57,7 +57,14 @@ individual_likelihood = create_individual_likelihood_function_for_model(
     params_all=start_params_all,
 )
 
-params_to_estimate_names = ["mu", "delta", "lambda", "sigma"]
+params_to_estimate_names = [
+    "mu",
+    "dis_util_work",
+    "dis_util_unemployed",
+    "bequest_scale",
+    "lambda",
+    "sigma",
+]
 start_params = {name: start_params_all[name] for name in params_to_estimate_names}
 past_prep = time.time()
 print(f"Preparation took {past_prep - start} seconds.")

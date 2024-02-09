@@ -13,6 +13,7 @@ SRA_grid_size: 0.25
 min_SRA: 65
 max_SRA: 72
 ret_years_before_SRA: 4
+min_ret_age: 63
 max_ret_age: 72
 exp_cap: 40 # maximum of exp accumulated
 # parameters of the policy expectation process

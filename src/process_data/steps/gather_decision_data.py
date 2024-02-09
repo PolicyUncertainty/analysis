@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 
-def gather_decision_data(paths, options, policy_step_size, load_data=False):
+def gather_decision_data(paths, options, load_data=False):
     out_file_path = paths["project_path"] + "output/decision_data.pkl"
     if load_data:
         data = pd.read_pickle(out_file_path)
@@ -49,7 +49,7 @@ def gather_decision_data(paths, options, policy_step_size, load_data=False):
     (
         merged_data["policy_state_value"],
         merged_data["policy_state"],
-    ) = modify_policy_state(merged_data["policy_state"], policy_step_size, options)
+    ) = modify_policy_state(merged_data["policy_state"], options)
 
     # retirement_age_id (dummy 0 for now)
     merged_data["retirement_age_id"] = 0
@@ -270,7 +270,7 @@ def create_policy_state(gebjahr):
     return policy_state
 
 
-def modify_policy_state(policy_states, policy_step_size, options):
+def modify_policy_state(policy_states, options):
     """This function rounds policy state to the closest multiple of the policy
     expectations process step size.
 
@@ -278,10 +278,11 @@ def modify_policy_state(policy_states, policy_step_size, options):
 
     """
     min_SRA = options["min_SRA"]
+    SRA_grid_size = options["SRA_grid_size"]
     policy_states = policy_states - min_SRA
-    policy_id = np.around(policy_states / policy_step_size).astype(int)
-    policy_states = min_SRA + policy_id * policy_step_size
-    return policy_states, policy_id
+    policy_id = np.around(policy_states / SRA_grid_size).astype(int)
+    policy_states_values = min_SRA + policy_id * SRA_grid_size
+    return policy_states_values, policy_id
 
 
 def enforce_model_work_and_ret_conditions(

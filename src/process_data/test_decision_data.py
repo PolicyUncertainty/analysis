@@ -1,6 +1,7 @@
-import pytest
-import sys
 import os
+import sys
+
+import pytest
 
 
 LOAD_SAVED_DATA = True
@@ -56,7 +57,6 @@ def test_decision_data_no_missing_values(
     dec_dat = gather_decision_data(
         paths_dict,
         options,
-        policy_step_size,
         load_data=load_data,
     )
     assert dec_dat["choice"].isna().sum() == 0
@@ -75,7 +75,6 @@ def test_decision_data_no_ret_before_min_ret_age(
     dec_dat = gather_decision_data(
         paths_dict,
         options,
-        policy_step_size,
         load_data=load_data,
     )
     assert (
@@ -91,7 +90,6 @@ def test_decision_data_no_work_after_max_ret_age(
     dec_dat = gather_decision_data(
         paths_dict,
         options,
-        policy_step_size,
         load_data=load_data,
     )
     assert (
@@ -111,7 +109,6 @@ def test_decision_data_exp_cap(
     dec_dat = gather_decision_data(
         paths_dict,
         options,
-        policy_step_size,
         load_data=load_data,
     )
     assert dec_dat["experience"].max() <= options["exp_cap"]
@@ -125,7 +122,6 @@ def test_decision_data_retirement_is_absorbing(
     dec_dat = gather_decision_data(
         paths_dict,
         options,
-        policy_step_size,
         load_data=load_data,
     )
     assert dec_dat.loc[dec_dat["lagged_choice"] == 2, "choice"].unique() == 2

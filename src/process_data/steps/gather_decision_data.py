@@ -288,7 +288,7 @@ def modify_policy_state(policy_states, options):
 def enforce_model_work_and_ret_conditions(
     merged_data, min_ret_age, max_ret_age, start_age
 ):
-    """This function filters the choice data according to the model setup."""
+    """This function filters the choice data abirth_yearccording to the model setup."""
     # Filter out people who are retired before min_ret_age
     merged_data = merged_data[
         ~((merged_data["choice"] == 2) & (merged_data["age"] < min_ret_age))

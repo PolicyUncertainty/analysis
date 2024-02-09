@@ -3,7 +3,7 @@ from process_data.steps.est_wage_equation import (
     estimate_wage_parameters,
 )
 from process_data.steps.gather_decision_data import gather_decision_data
-from process_data.steps.regression_and_plots import gen_exp_val_params_and_plot
+from process_data.steps.est_SRA_random_walk import gen_exp_val_params_and_plot
 
 
 def generate_derived_specs(options):

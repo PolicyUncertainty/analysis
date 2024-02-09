@@ -34,15 +34,15 @@ def budget_constraint(
         + income_shock_previous_period
     )
 
-    # decision bools
-    is_unemployed = lagged_choice == 0
-    is_worker = lagged_choice == 1
-    is_retired = lagged_choice == 2
+    # bools of last period decision: income is payed in following period!
+    was_unemployed = lagged_choice == 0
+    was_worker = lagged_choice == 1
+    was_retired = lagged_choice == 2
 
     income = (
-        is_unemployed * unemployment_benefits
-        + is_worker * labor_income
-        + is_retired * retirement_income
+        was_unemployed * unemployment_benefits
+        + was_worker * labor_income
+        + was_retired * retirement_income
     )
 
     # calculate beginning of period wealth M_t

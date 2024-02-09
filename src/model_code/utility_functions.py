@@ -20,7 +20,7 @@ def utility_func(consumption, choice, params):
     dis_util_unemployed = params["dis_util_unemployed"]
     # Check which choice we have
     is_working = choice == 1
-    is_unemployed = choice == 2
+    is_unemployed = choice == 0
     # Select which dis-utility to use. Retirement is 0 as baseline
     dis_utility = dis_util_work * is_working + dis_util_unemployed * is_unemployed
     # Compute utility

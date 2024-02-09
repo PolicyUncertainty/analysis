@@ -1,7 +1,8 @@
 import numpy as np
 from matplotlib import pyplot as plt
-from statsmodels import api as sm
 from process_data.steps.gather_decision_data import create_policy_state
+from statsmodels import api as sm
+
 
 def gen_exp_val_params_and_plot(paths, df, load_data=False):
     output_file = paths["project_path"] + "output/exp_val_params.txt"
@@ -11,15 +12,12 @@ def gen_exp_val_params_and_plot(paths, df, load_data=False):
     df["current_SRA"] = create_policy_state(df["birth_year"])
     df["exp_SRA_increase"] = df["ex_val"] - df["current_SRA"]
     y_var = "exp_SRA_increase"
-    #y_var = "ex_val"
+    # y_var = "ex_val"
 
     if load_data:
         return np.loadtxt(output_file)
 
-    #exog_1 = np.array([np.ones(df.shape[0]), df[x_var].values]).T
-
     model = sm.WLS(
-        #exog=exog_1,
         exog=df[x_var].values,
         endog=df[y_var].values,
         weights=df[weights].values,
@@ -44,7 +42,6 @@ def gen_exp_val_params_and_plot(paths, df, load_data=False):
         f"{alpha_hat[0]} * (Time to retirement)"
     )
 
-
     np.savetxt(output_file, alpha_hat, delimiter=",")
     return alpha_hat
 
@@ -54,7 +51,6 @@ def gen_var_params_and_plot(paths, df, load_data=False):
     x_var = "time_to_ret"
     y_var = "var"
     weights = "fweights"
-
 
     if load_data:
         return np.loadtxt(output_file)
@@ -68,20 +64,21 @@ def gen_var_params_and_plot(paths, df, load_data=False):
 
     # regress variance on time to retirement without constant
 
-    #exog_1 = np.array([np.ones(df.shape[0]), df[x_var].values]).T
-        
-    model = sm.WLS(
-        exog=df[x_var].values,
-        endog=df[y_var].values,
-        weights=df[weights].values,
-    )
-    print(model.fit().summary())
-    coefficients = model.fit().params
+    # exog_1 = np.array([np.ones(df.shape[0]), df[x_var].values]).T
+    #
+    # model = sm.WLS(
+    #     exog=df[x_var].values,
+    #     endog=df[y_var].values,
+    #     weights=df[weights].values,
+    # )
+    # print(model.fit().summary())
+    # coefficients = model.fit().params
+
     fig, ax = plt.subplots()
     ax.scatter(df[x_var], df[y_var], s=(df[weights] / df[weights].sum()) * 5000)
     ax.plot(
         df[x_var],
-        coefficients[0] * df[x_var],
+        sigma_sq_hat[0] * df[x_var],
         "r",
     )
     ax.set_xlabel("Time to retirement")

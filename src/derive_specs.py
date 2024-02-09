@@ -1,9 +1,9 @@
 import numpy as np
+from model_code.belief_process import exp_ret_age_transition_matrix
 from process_data.steps.est_wage_equation import (
     estimate_wage_parameters,
 )
 from process_data.steps.gather_decision_data import gather_decision_data
-from process_data.steps.est_SRA_random_walk import gen_exp_val_params_and_plot
 
 
 def generate_derived_specs(options):

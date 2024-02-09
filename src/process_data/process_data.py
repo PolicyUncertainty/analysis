@@ -10,22 +10,23 @@
 # %%
 # Step 0: Set paths and parameters
 # ----------------------------------------------------------------------------------------------
-USER = "bruno" # "bruno" or "max"
+USER = "max"  # "bruno" or "max"
 LOAD_DATA = False  # if True, load data from pickle files instead of generating it
 
-# Set data paths according to user. 
-import os
+# Set data paths according to user.
 import sys
-analysis_path = os.path.abspath(os.getcwd() + "/../../") + "/"
+from pathlib import Path
+
+analysis_path = str(Path(__file__).resolve().parents[2]) + "/"
 sys.path.insert(0, analysis_path + "src/")
 
-from process_data.steps.set_paths import create_path_dict
+from set_paths import create_path_dict
+
 paths_dict = create_path_dict(USER, analysis_path)
 
 # Load options and generate auxiliary options
 import yaml
 from derive_specs import generate_derived_specs
-from process_data.steps import set_paths  # Add the missing import statement
 
 project_specs = yaml.safe_load(open(analysis_path + "src/spec.yaml"))
 project_specs = generate_derived_specs(project_specs)

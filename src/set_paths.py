@@ -1,4 +1,3 @@
-
 def create_path_dict(user, analysis_path):
     if user == "bruno":
         data_path = "C:/Users/bruno/papers/soep/"

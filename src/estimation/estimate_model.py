@@ -1,13 +1,10 @@
-import os
 import time
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
-file_dir_path = str(Path(__file__).parent.absolute()) + "/"
-analysis_path = os.path.abspath(file_dir_path + "../../") + "/"
-
+analysis_path = str(Path(__file__).resolve().parents[2]) + "/"
 import sys
 import yaml
 

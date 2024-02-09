@@ -16,30 +16,28 @@ def budget_constraint(
     ERP = options["early_retirement_penalty"]
 
     # generate actual retirement age and SRA at resolution
-    SRA_at_resolution = (
-        options["min_SRA"] + policy_state * options["belief_update_increment"]
-    )
+    SRA_at_resolution = options["min_SRA"] + policy_state * options["SRA_grid_size"]
     actual_retirement_age = options["min_ret_age"] + retirement_age_id
 
     # calculate applicable SRA and pension deduction/increase factor
     # (malus for early retirement, bonus for late retirement)
-
     pension_factor = 1 - (actual_retirement_age - SRA_at_resolution) * ERP
+    retirement_income = pension_point_value * experience * pension_factor
 
-    # decision bools
-    is_unemployed = lagged_choice == 0
-    is_worker = lagged_choice == 1
-    is_retired = lagged_choice == 2
-
-    # decision-specific income
+    # Unemployment benefits
     unemployment_benefits = options["unemployment_benefits"]
+    # Labor income
     labor_income = (
         gamma_0
         + gamma_1 * experience
         + gamma_2 * experience**2
         + income_shock_previous_period
     )
-    retirement_income = pension_point_value * experience * pension_factor
+
+    # decision bools
+    is_unemployed = lagged_choice == 0
+    is_worker = lagged_choice == 1
+    is_retired = lagged_choice == 2
 
     income = (
         is_unemployed * unemployment_benefits

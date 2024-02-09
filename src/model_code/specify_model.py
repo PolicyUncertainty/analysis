@@ -1,6 +1,7 @@
 import numpy as np
 from dcegm.pre_processing.setup_model import load_and_setup_model
 from dcegm.pre_processing.setup_model import setup_and_save_model
+from model_code.belief_process import expected_SRA_probs
 from model_code.budget_equation import budget_constraint
 from model_code.state_space import create_state_space_functions
 from model_code.state_space import sparsity_condition
@@ -12,7 +13,7 @@ def specify_model(project_specs, load_model=False):
     # Load specifications
     n_periods = project_specs["n_periods"]
     n_possible_ret_ages = project_specs["n_possible_ret_ages"]
-    n_possible_policy_states = project_specs["n_possible_policy_states"]
+    n_policy_states = project_specs["n_policy_states"]
     choices = np.arange(project_specs["n_choices"], dtype=int)
 
     options = {
@@ -21,9 +22,14 @@ def specify_model(project_specs, load_model=False):
             "choices": choices,
             "endogenous_states": {
                 "experience": np.arange(n_periods, dtype=int),
-                "policy_state": np.arange(n_possible_policy_states, dtype=int),
                 "retirement_age_id": np.arange(n_possible_ret_ages, dtype=int),
                 "sparsity_condition": sparsity_condition,
+            },
+            "exogenous_processes": {
+                "policy_state": {
+                    "transition": expected_SRA_probs,
+                    "states": np.arange(n_policy_states, dtype=int),
+                },
             },
         },
         "model_params": project_specs,

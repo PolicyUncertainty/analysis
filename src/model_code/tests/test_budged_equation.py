@@ -13,6 +13,8 @@ from model_code.budget_equation import budget_constraint
 BENEFITS_GRID = np.linspace(10, 100, 5)
 SAVINGS_GRID = np.linspace(10, 100, 5)
 INTEREST_RATE_GRID = np.linspace(0.01, 0.1, 2)
+GAMMA_GRID = np.linspace(0.1, 0.9, 3)
+EXP_GRID = np.linspace(10, 30, 3)
 
 
 @pytest.mark.parametrize(
@@ -45,3 +47,36 @@ def test_budget_unemployed(unemployment_benefits, savings, interest_rate):
     np.testing.assert_almost_equal(
         wealth, savings * (1 + interest_rate) + unemployment_benefits
     )
+
+
+@pytest.mark.parametrize(
+    "gamma, income_shock, experience, interest_rate, savings",
+    list(
+        product(GAMMA_GRID, BENEFITS_GRID, EXP_GRID, INTEREST_RATE_GRID, SAVINGS_GRID)
+    ),
+)
+def test_budget_worker(gamma, income_shock, experience, interest_rate, savings):
+    options = {
+        "gamma_0": gamma,
+        "gamma_1": gamma,
+        "gamma_2": gamma,
+        "pension_point_value": 1,
+        "early_retirement_penalty": 0.01,
+        "min_SRA": 63,
+        "SRA_grid_size": 0.5,
+        "min_ret_age": 65,
+        "unemployment_benefits": 0,
+    }
+    params = {"interest_rate": interest_rate}
+    wealth = budget_constraint(
+        lagged_choice=1,
+        experience=experience,
+        policy_state=0,
+        retirement_age_id=0,
+        savings_end_of_previous_period=savings,
+        income_shock_previous_period=income_shock,
+        params=params,
+        options=options,
+    )
+    labor_income = gamma + gamma * experience + gamma * experience**2 + income_shock
+    np.testing.assert_almost_equal(wealth, savings * (1 + interest_rate) + labor_income)

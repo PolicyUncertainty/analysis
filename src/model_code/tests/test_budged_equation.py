@@ -10,11 +10,11 @@ sys.path.append(str(src_folder))
 
 from model_code.budget_equation import budget_constraint
 
-BENEFITS_GRID = np.linspace(10, 100, 5)
+
 SAVINGS_GRID = np.linspace(10, 100, 5)
 INTEREST_RATE_GRID = np.linspace(0.01, 0.1, 2)
-GAMMA_GRID = np.linspace(0.1, 0.9, 3)
-EXP_GRID = np.linspace(10, 30, 3)
+
+BENEFITS_GRID = np.linspace(10, 100, 5)
 
 
 @pytest.mark.parametrize(
@@ -49,6 +49,10 @@ def test_budget_unemployed(unemployment_benefits, savings, interest_rate):
     )
 
 
+GAMMA_GRID = np.linspace(0.1, 0.9, 3)
+EXP_GRID = np.linspace(10, 30, 3)
+
+
 @pytest.mark.parametrize(
     "gamma, income_shock, experience, interest_rate, savings",
     list(
@@ -80,3 +84,64 @@ def test_budget_worker(gamma, income_shock, experience, interest_rate, savings):
     )
     labor_income = gamma + gamma * experience + gamma * experience**2 + income_shock
     np.testing.assert_almost_equal(wealth, savings * (1 + interest_rate) + labor_income)
+
+
+EXP_GRID = np.linspace(10, 30, 3)
+POLICY_STATE_GRID = np.linspace(0, 2, 3)
+RET_AGE_GRID = np.linspace(0, 2, 3)
+
+
+@pytest.mark.parametrize(
+    "interest_rate, savings, exp, policy_state, ret_age_id",
+    list(
+        product(
+            INTEREST_RATE_GRID, SAVINGS_GRID, EXP_GRID, POLICY_STATE_GRID, RET_AGE_GRID
+        )
+    ),
+)
+def test_retiree(
+    interest_rate,
+    savings,
+    exp,
+    policy_state,
+    ret_age_id,
+):
+    min_ret_age = 63
+    min_SRA = 65
+    SRA_grid_size = 0.25
+    erp = 0.36
+    point_value = 0.9
+    actual_retirement_age = min_ret_age + ret_age_id
+    options = {
+        "gamma_0": 1,
+        "gamma_1": 1,
+        "gamma_2": 1,
+        "pension_point_value": point_value,
+        "early_retirement_penalty": erp,
+        "min_SRA": min_SRA,
+        "SRA_grid_size": SRA_grid_size,
+        "min_ret_age": min_ret_age,
+        "unemployment_benefits": 0,
+    }
+    params = {"interest_rate": interest_rate}
+    wealth = budget_constraint(
+        lagged_choice=2,
+        experience=exp,
+        policy_state=policy_state,
+        retirement_age_id=ret_age_id,
+        savings_end_of_previous_period=savings,
+        income_shock_previous_period=0,
+        params=params,
+        options=options,
+    )
+    pension_point_value = options["pension_point_value"]
+    SRA_at_resolution = options["min_SRA"] + policy_state * options["SRA_grid_size"]
+    pension_factor = (
+        1
+        - (actual_retirement_age - SRA_at_resolution)
+        * options["early_retirement_penalty"]
+    )
+    retirement_income = pension_point_value * pension_factor * exp
+    np.testing.assert_almost_equal(
+        wealth, savings * (1 + interest_rate) + retirement_income
+    )

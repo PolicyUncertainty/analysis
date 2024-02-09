@@ -51,8 +51,12 @@ def test_marginal_utility(consumption, dis_util_work, dis_util_unemployed, mu):
         "dis_util_work": dis_util_work,
         "dis_util_unemployed": dis_util_unemployed,
     }
-    marg_util = jax.jacfwd(utility_func, argnums=0)(consumption, 1, params)
-    np.testing.assert_almost_equal(marg_utility(consumption, params), marg_util)
+    random_choice = np.random.choice(np.array([0, 1, 2]))
+    marg_util_jax = jax.jacfwd(utility_func, argnums=0)(
+        consumption, random_choice, params
+    )
+    marg_util_model = marg_utility(consumption, params)
+    np.testing.assert_almost_equal(marg_util_jax, marg_util_model)
 
 
 @pytest.mark.parametrize(

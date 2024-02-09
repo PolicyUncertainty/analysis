@@ -53,7 +53,7 @@ project_specs = generate_derived_specs(project_specs)
 # --------------------------------------------------------------------------------------
 from process_data.steps.est_ret_age_expectations import estimate_truncated_normal
 
-df_estimated_ret_age_expectations = estimate_truncated_normal(paths_dict, project_specs, load_data=False)
+df_estimated_ret_age_expectations = estimate_truncated_normal(paths_dict, project_specs, load_data=True)
 
 # %%
 #
@@ -64,11 +64,11 @@ from process_data.steps.regression_and_plots import (
     gen_var_params_and_plot,
 )
 
-policy_expectation_value_params = gen_exp_val_params_and_plot(
+policy_expectation_alpha = gen_exp_val_params_and_plot(
     paths=paths_dict, df=df_estimated_ret_age_expectations
 )
 
-policy_expectation_variance_params = gen_var_params_and_plot(
+policy_expectation_sigma_sq = gen_var_params_and_plot(
     paths=paths_dict, df=df_estimated_ret_age_expectations
 )
 
@@ -83,7 +83,7 @@ wage_params = estimate_wage_parameters(paths_dict, project_specs, load_data=LOAD
 # %%
 # Step 3: Get choice and state variables from policy_step_sizeSOEP core and SOEP RV VSKT
 # ----------------------------------------------------------------------------------------------
-policy_step_size = policy_expectation_value_params[1]
+policy_step_size = policy_expectation_alpha[0]
 
 from process_data.steps.gather_decision_data import gather_decision_data
 

@@ -1,5 +1,8 @@
 import numpy as np
 from model_code.belief_process import exp_ret_age_transition_matrix
+from process_data.steps.est_SRA_expectations import estimate_truncated_normal
+from process_data.steps.est_SRA_random_walk import gen_exp_val_params_and_plot
+from process_data.steps.est_SRA_random_walk import gen_var_params_and_plot
 from process_data.steps.est_wage_equation import (
     estimate_wage_parameters,
 )
@@ -28,9 +31,23 @@ def generate_derived_and_data_derived_options(options, project_paths, load_data=
 
     # Generate dummy transition matrix
     n_policy_states = options["n_policy_states"]
-    options["beliefs_trans_mat"] = (
-        np.ones((n_policy_states, n_policy_states)) / n_policy_states
+    df_expectations = estimate_truncated_normal(
+        project_paths, options, load_data=load_data
     )
+
+    alpha_hat = gen_exp_val_params_and_plot(
+        project_paths, df_expectations, load_data=load_data
+    )
+    sigma_sq_hat = gen_var_params_and_plot(
+        project_paths, df_expectations, load_data=load_data
+    )
+
+    options["beliefs_trans_mat"] = exp_ret_age_transition_matrix(
+        options=options,
+        alpha_hat=alpha_hat,
+        sigma_sq_hat=sigma_sq_hat,
+    )
+    breakpoint()
 
     # Generate number of policy states between 67 and min_SRA
     wage_params = estimate_wage_parameters(project_paths, options, load_data=load_data)

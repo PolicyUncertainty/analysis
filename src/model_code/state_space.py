@@ -82,4 +82,4 @@ def state_specific_choice_set(period, lagged_choice, policy_state, options):
 
 
 def apply_retirement_constraint_for_SRA(SRA, options):
-    return np.max(SRA - options["ret_years_before_SRA"], 63)
+    return np.maximum(SRA - options["ret_years_before_SRA"], 63)

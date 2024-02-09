@@ -47,7 +47,6 @@ def generate_derived_and_data_derived_options(options, project_paths, load_data=
         alpha_hat=alpha_hat,
         sigma_sq_hat=sigma_sq_hat,
     )
-    breakpoint()
 
     # Generate number of policy states between 67 and min_SRA
     wage_params = estimate_wage_parameters(project_paths, options, load_data=load_data)

@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 
 analysis_path = str(Path(__file__).resolve().parents[2]) + "/"
+file_dir_path = str(Path(__file__).resolve().parents[0]) + "/"
 import sys
 import yaml
 
@@ -28,11 +29,10 @@ project_specs = yaml.safe_load(open(analysis_path + "src/spec.yaml"))
 project_specs = generate_derived_and_data_derived_options(
     project_specs, project_paths, load_data=True
 )
-
 from model_code.specify_model import specify_model
 
-model, options = specify_model(project_specs, load_model=True)
-
+model, options = specify_model(project_specs, load_model=False)
+print("Model specified.")
 # Prepare data for estimation
 oberved_states_dict = {
     name: data_decision[name].values for name in model["state_space_names"]

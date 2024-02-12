@@ -7,5 +7,16 @@
 #
 # src_folder = Path(__file__).resolve().parents[2]
 # sys.path.append(str(src_folder))
-#
-# from model_code.state_space import get_next_state, get_next_state_jax
+
+
+import sys
+from pathlib import Path
+
+src_folder = Path(__file__).resolve().parents[2]
+sys.path.append(str(src_folder))
+import pytest
+import numpy as np
+from itertools import product
+import jax
+
+from model_code.state_space import sparsity_condition, update_state_space, create_state_space_functions

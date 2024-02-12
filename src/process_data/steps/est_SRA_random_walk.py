@@ -6,6 +6,9 @@ from statsmodels import api as sm
 
 def gen_exp_val_params_and_plot(paths, df, load_data=False):
     output_file = paths["project_path"] + "output/exp_val_params.txt"
+    if load_data:
+        return np.loadtxt(output_file)
+
     x_var = "time_to_ret"
     weights = "fweights"
     # calculate current policy state for each observation
@@ -13,9 +16,6 @@ def gen_exp_val_params_and_plot(paths, df, load_data=False):
     df["exp_SRA_increase"] = df["ex_val"] - df["current_SRA"]
     y_var = "exp_SRA_increase"
     # y_var = "ex_val"
-
-    if load_data:
-        return np.loadtxt(output_file)
 
     model = sm.WLS(
         exog=df[x_var].values,

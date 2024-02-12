@@ -30,17 +30,9 @@ def generate_derived_and_data_derived_options(options, project_paths, load_data=
     options = generate_derived_specs(options)
 
     # Generate dummy transition matrix
-    n_policy_states = options["n_policy_states"]
-    df_expectations = estimate_truncated_normal(
-        project_paths, options, load_data=load_data
-    )
 
-    alpha_hat = gen_exp_val_params_and_plot(
-        project_paths, df_expectations, load_data=load_data
-    )
-    sigma_sq_hat = gen_var_params_and_plot(
-        project_paths, df_expectations, load_data=load_data
-    )
+    alpha_hat = gen_exp_val_params_and_plot(project_paths, None, load_data=load_data)
+    sigma_sq_hat = gen_var_params_and_plot(project_paths, None, load_data=load_data)
 
     options["beliefs_trans_mat"] = exp_ret_age_transition_matrix(
         options=options,

@@ -8,6 +8,8 @@ analysis_path = str(Path(__file__).resolve().parents[2]) + "/"
 file_dir_path = str(Path(__file__).resolve().parents[0]) + "/"
 import sys
 import yaml
+from dcegm.likelihood import create_observed_choice_indexes
+from model_code.state_space import update_state_space, sparsity_condition
 
 sys.path.insert(0, analysis_path + "submodules/dcegm/src/")
 sys.path.insert(0, analysis_path + "src/")
@@ -56,6 +58,19 @@ individual_likelihood = create_individual_likelihood_function_for_model(
     exog_savings_grid=savings_grid,
     params_all=start_params_all,
 )
+(
+    choice_probs,
+    choice_prob_across_choices,
+    value_solved,
+    endog_grid_solved,
+) = individual_likelihood(start_params_all)
+observed_state_choice_indexes = create_observed_choice_indexes(
+    observed_states_dict=oberved_states_dict, model=model
+)
+nan_state = dict(data_decision.iloc[678])
+update_state_space(41, 2, 0, 0, 38, options["model_params"])
+breakpoint()
+
 
 params_to_estimate_names = [
     "mu",

@@ -67,8 +67,6 @@ individual_likelihood = create_individual_likelihood_function_for_model(
 observed_state_choice_indexes = create_observed_choice_indexes(
     observed_states_dict=oberved_states_dict, model=model
 )
-nan_state = dict(data_decision.iloc[678])
-update_state_space(41, 2, 0, 0, 38, options["model_params"])
 breakpoint()
 
 

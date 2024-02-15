@@ -11,7 +11,7 @@
 # Step 0: Set paths and parameters
 # ----------------------------------------------------------------------------------------------
 USER = "max"  # "bruno" or "max"
-LOAD_DATA = False  # if True, load data from pickle files instead of generating it
+LOAD_DATA = True  # if True, load data from pickle files instead of generating it
 
 # Set data paths according to user.
 import sys
@@ -39,7 +39,7 @@ from process_data.steps.gather_decision_data import gather_decision_data
 dec_data = gather_decision_data(
     paths_dict,
     project_specs,
-    load_data=True,
+    load_data=False,
 )
 
 # %%

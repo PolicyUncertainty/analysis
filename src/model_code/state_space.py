@@ -56,12 +56,21 @@ def update_state_space(
 
     age = period + options["start_age"]
 
-    if lagged_choice == 2:  # Retirement
-        next_state["retirement_age_id"] = retirement_age_id
-    elif choice == 2:  # Retirement
-        next_state["retirement_age_id"] = age - options["min_ret_age"]
-    elif (choice == 1) & (experience < options["exp_cap"]):  # Work
-        next_state["experience"] = experience + 1
+    if choice == 0:
+        return next_state
+    elif choice == 1:
+        if experience < options["exp_cap"]:
+            next_state["experience"] = experience + 1
+            return next_state
+        else:
+            return next_state
+    elif choice == 2:
+        if lagged_choice == 2:
+            return next_state
+        else:
+            next_state["retirement_age_id"] = age - options["min_ret_age"]
+    else:
+        raise ValueError("Choice not recognized in update_state_space")
 
     return next_state
 
@@ -75,7 +84,9 @@ def state_specific_choice_set(period, lagged_choice, policy_state, options):
         return np.array([0, 1])
     elif age >= options["max_ret_age"]:
         return np.array([2])
-    elif lagged_choice == 2:  # retirement is absorbing
+
+    # If all choices possible, then check if already retired
+    if lagged_choice == 2:  # retirement is absorbing
         return np.array([2])
     else:
         return np.array([0, 1, 2])

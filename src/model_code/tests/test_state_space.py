@@ -8,20 +8,22 @@ import numpy as np
 from itertools import product
 import jax
 
-from model_code.state_space import sparsity_condition, update_state_space, state_specific_choice_set, apply_retirement_constraint_for_SRA
+from model_code.state_space import (
+    sparsity_condition,
+    update_state_space,
+    state_specific_choice_set,
+    apply_retirement_constraint_for_SRA,
+)
 
 
 # tests of update state space
 PERIOD_GRID = np.linspace(10, 30, 3)
 LAGGED_CHOICE_SET = np.array([0, 1, 2])
 
+
 @pytest.mark.parametrize(
     "period, lagged_choice",
-    list(
-        product(
-            PERIOD_GRID, LAGGED_CHOICE_SET
-        )
-    ),
+    list(product(PERIOD_GRID, LAGGED_CHOICE_SET)),
 )
 def test_period_and_lagged_choice_update(period, lagged_choice):
     options = {
@@ -38,6 +40,7 @@ def test_period_and_lagged_choice_update(period, lagged_choice):
     assert next_state["period"] == period + 1
     assert next_state["lagged_choice"] == choice
 
+
 # tests of update state space
 PERIOD_GRID = np.linspace(35, 45, 1)
 LAGGED_CHOICE_SET = np.array([0, 1, 2])
@@ -45,14 +48,11 @@ LAGGED_CHOICE_SET = np.array([0, 1, 2])
 
 @pytest.mark.parametrize(
     "period, lagged_choice",
-    list(
-        product(
-            PERIOD_GRID, LAGGED_CHOICE_SET
-        )
-    ),
+    list(product(PERIOD_GRID, LAGGED_CHOICE_SET)),
 )
 def test_retirement_age_update(period, lagged_choice):
-    """ Test that the retirement age is updated correctly for people who choose to retire."""
+    """Test that the retirement age is updated correctly for people who choose to
+    retire."""
     options = {
         "start_age": 25,
         "min_ret_age": 65,
@@ -65,23 +65,20 @@ def test_retirement_age_update(period, lagged_choice):
         period, choice, lagged_choice, retirement_age_id, experience, options
     )
     age = period + options["start_age"]
-    if lagged_choice == 2:
-        assert next_state["retirement_age_id"] == retirement_age_id
-    else:
+    if lagged_choice != 2:
         assert next_state["retirement_age_id"] == age - options["min_ret_age"]
+    else:
+        assert "retirement_age_id" not in next_state
 
 
 PERIOD_GRID = np.linspace(35, 45, 1)
 CHOICE_SET = np.array([0, 1, 2])
 EXPERIENCE_GRID = np.linspace(35, 45, 2)
 
+
 @pytest.mark.parametrize(
     "period, choice, experience",
-    list(
-        product(
-            PERIOD_GRID, CHOICE_SET, EXPERIENCE_GRID
-        )
-    ),
+    list(product(PERIOD_GRID, CHOICE_SET, EXPERIENCE_GRID)),
 )
 def test_experience_update(period, choice, experience):
     options = {
@@ -102,6 +99,7 @@ def test_experience_update(period, choice, experience):
     else:
         assert next_state["experience"] == experience
 
+
 # tests of choice set
 
 PERIOD_GRID = np.linspace(10, 30, 3)
@@ -110,11 +108,7 @@ LAGGED_CHOICE_SET = np.array([0, 1])
 
 @pytest.mark.parametrize(
     "period, lagged_choice",
-    list(
-        product(
-            PERIOD_GRID, LAGGED_CHOICE_SET
-        )
-    ),
+    list(product(PERIOD_GRID, LAGGED_CHOICE_SET)),
 )
 def test_choice_set_under_63(period, lagged_choice):
     options = {
@@ -124,22 +118,18 @@ def test_choice_set_under_63(period, lagged_choice):
         "ret_years_before_SRA": 2,
     }
     policy_state = 0
-    choice_set = state_specific_choice_set(
-        period, lagged_choice, policy_state, options
-    )
+    choice_set = state_specific_choice_set(period, lagged_choice, policy_state, options)
     assert (choice_set == [0, 1]).all()
+
 
 PERIOD_GRID = np.linspace(10, 30, 3)
 LAGGED_CHOICE_SET = np.array([0, 1])
 POLICY_GRID = np.linspace(0, 9, 1)
 
+
 @pytest.mark.parametrize(
     "period, lagged_choice, policy_state",
-    list(
-        product(
-            PERIOD_GRID, LAGGED_CHOICE_SET, POLICY_GRID
-        )
-    ),
+    list(product(PERIOD_GRID, LAGGED_CHOICE_SET, POLICY_GRID)),
 )
 def test_choice_set_over_63_under_72(period, lagged_choice, policy_state):
     options = {
@@ -150,9 +140,7 @@ def test_choice_set_over_63_under_72(period, lagged_choice, policy_state):
         "ret_years_before_SRA": 4,
     }
 
-    choice_set = state_specific_choice_set(
-        period, lagged_choice, policy_state, options
-    )
+    choice_set = state_specific_choice_set(period, lagged_choice, policy_state, options)
     age = period + options["start_age"]
     SRA = options["min_SRA"] + policy_state * options["SRA_grid_size"]
     min_ret_age_pol_state = apply_retirement_constraint_for_SRA(SRA, options)
@@ -161,20 +149,17 @@ def test_choice_set_over_63_under_72(period, lagged_choice, policy_state):
         assert (choice_set == [0, 1]).all()
     else:
         # old enough to retire
-        assert (choice_set == [0,1,2]).all()
+        assert (choice_set == [0, 1, 2]).all()
 
 
 PERIOD_GRID = np.linspace(47, 55, 1)
 LAGGED_CHOICE_SET = np.array([0, 1, 2])
 POLICY_GRID = np.linspace(0, 9, 1)
 
+
 @pytest.mark.parametrize(
     "period, lagged_choice, policy_state",
-    list(
-        product(
-            PERIOD_GRID, LAGGED_CHOICE_SET, POLICY_GRID
-        )
-    ),
+    list(product(PERIOD_GRID, LAGGED_CHOICE_SET, POLICY_GRID)),
 )
 def test_choice_set_over_72(period, lagged_choice, policy_state):
     options = {
@@ -185,8 +170,6 @@ def test_choice_set_over_72(period, lagged_choice, policy_state):
         "ret_years_before_SRA": 4,
     }
 
-    choice_set = state_specific_choice_set(
-        period, lagged_choice, policy_state, options
-    )
+    choice_set = state_specific_choice_set(period, lagged_choice, policy_state, options)
     age = period + options["start_age"]
     assert (choice_set == [2]).all()

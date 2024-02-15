@@ -91,4 +91,4 @@ if custom_load_data:
 
 from process_data.steps.est_wage_equation import estimate_wage_parameters
 
-wage_params = estimate_wage_parameters(paths_dict, project_specs, load_data=LOAD_DATA)
+wage_params = estimate_wage_parameters(paths_dict, project_specs, load_data=False)

@@ -36,7 +36,7 @@ def test_utility_func(consumption, dis_util_work, dis_util_unemployed, mu):
         "dis_util_work": dis_util_work,
         "dis_util_unemployed": dis_util_unemployed,
     }
-    cons_utility = consumption ** (1 - mu) / (1 - mu)
+    cons_utility = consumption ** (1 - mu) / (1 - mu) - 1 / (1 - mu)
 
     np.testing.assert_almost_equal(
         utility_func(consumption=consumption, choice=1, params=params),

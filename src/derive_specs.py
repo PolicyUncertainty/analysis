@@ -26,7 +26,7 @@ def generate_derived_specs(options):
     return options
 
 
-def generate_derived_and_data_derived_options(options, project_paths, load_data=True):
+def generate_derived_and_data_derived_specs(options, project_paths, load_data=True):
     options = generate_derived_specs(options)
 
     # Generate dummy transition matrix
@@ -45,6 +45,7 @@ def generate_derived_and_data_derived_options(options, project_paths, load_data=
     options["gamma_0"] = wage_params.loc["constant", "parameter"]
     options["gamma_1"] = wage_params.loc["full_time_exp", "parameter"]
     options["gamma_2"] = wage_params.loc["full_time_exp_sq", "parameter"]
+    options["income_shock_scale"] = wage_params.loc["income_shock_std", "parameter"]
 
     # # Max experience
     data_decision = gather_decision_data(project_paths, options, load_data=load_data)

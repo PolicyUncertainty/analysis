@@ -11,6 +11,9 @@ import yaml
 from jax.flatten_util import ravel_pytree
 import pickle
 from scipy.optimize import minimize
+import jax
+
+jax.config.update("jax_enable_x64", True)
 
 sys.path.insert(0, analysis_path + "submodules/dcegm/src/")
 sys.path.insert(0, analysis_path + "src/")
@@ -47,7 +50,7 @@ observed_choices = data_decision["choice"].values
 start_params_all = yaml.safe_load(open(file_dir_path + "start_params.yaml"))
 # Specifiy savings wealth grid
 savings_grid = np.arange(start=0, stop=100, step=0.5)
-
+# Create likelihood function
 from dcegm.likelihood import create_individual_likelihood_function_for_model
 
 individual_likelihood = create_individual_likelihood_function_for_model(
@@ -61,7 +64,7 @@ individual_likelihood = create_individual_likelihood_function_for_model(
 )
 
 params_to_estimate_names = [
-    "mu",
+    # "mu",
     "dis_util_work",
     "dis_util_unemployed",
     "bequest_scale",
@@ -70,14 +73,15 @@ params_to_estimate_names = [
 ]
 start_params = {name: start_params_all[name] for name in params_to_estimate_names}
 
-(ll_value,) = individual_likelihood(start_params)
-breakpoint()
+# Create likelihood function for estimation
 params_start_vec, unravel_func = ravel_pytree(start_params)
 
 
 def individual_likelihood_vec(params_vec):
     params = unravel_func(params_vec)
-    return individual_likelihood(params)
+    ll_value = individual_likelihood(params)
+    print("Params, ", params, " with ll value, ", ll_value)
+    return ll_value
 
 
 result = minimize(

@@ -10,8 +10,8 @@
 # %%
 # Step 0: Set paths and parameters
 # ----------------------------------------------------------------------------------------------
-USER = "bruno"  # "bruno" or "max"
-LOAD_DATA = False  # if True, load data from pickle files instead of generating it
+USER = "max"  # "bruno" or "max"
+LOAD_DATA = True  # if True, load data from pickle files instead of generating it
 
 # Set data paths according to user.
 import sys
@@ -75,4 +75,4 @@ policy_expectation_sigma_sq = gen_var_params_and_plot(
 # ---------------------------------------------------------------------------------------
 from process_data.steps.est_wage_equation import estimate_wage_parameters
 
-wage_params = estimate_wage_parameters(paths_dict, project_specs, load_data=LOAD_DATA)
+wage_params = estimate_wage_parameters(paths_dict, project_specs, load_data=False)

@@ -1,7 +1,7 @@
 def create_path_dict(user, analysis_path):
-    if user == "bruno":
+    if user == "b":
         data_path = "C:/Users/bruno/papers/soep/"
-    elif user == "max":
+    elif user == "m":
         data_path = "/home/maxbl/Uni/pol_uncetainty/data/"
     else:
         raise ValueError(

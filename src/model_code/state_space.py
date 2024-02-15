@@ -67,7 +67,7 @@ def update_state_space(
         else:
             return next_state
     # If choosing retirement and already retired nothing further happens.
-    # If not
+    # If not then retirement_age_id gets updated
     elif choice == 2:
         if lagged_choice == 2:
             return next_state

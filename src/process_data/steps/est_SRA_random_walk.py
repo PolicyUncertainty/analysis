@@ -36,7 +36,7 @@ def gen_exp_val_params_and_plot(paths, df, load_data=False):
         "Expected retirement age",
     )
     plt.savefig(paths["project_path"] + "output/exp_val_plot.png")
-    plt.show()
+    # plt.show()
     print(
         f"Estimated regression equation: E[ret age change] = "
         f"{alpha_hat[0]} * (Time to retirement)"
@@ -86,7 +86,7 @@ def gen_var_params_and_plot(paths, df, load_data=False):
         "Expected retirement age",
     )
     plt.savefig(paths["project_path"] + "output/var_plot.png")
-    plt.show()
+    # plt.show()
 
     np.savetxt(output_file, sigma_sq_hat, delimiter=",")
     return sigma_sq_hat

@@ -23,11 +23,7 @@ def gather_decision_data(paths, options, load_data=False):
     merged_data = load_and_merge_data(soep_c38, soep_rv, min_ret_age)
 
     # wealth data from SOEP C38 (hwealth.dta)
-    wealth_data = gather_wealth_data(soep_c38, options)
-    merged_data = merged_data.merge(wealth_data, on=["hid", "syear"], how="left")
-
-    merged_data = merged_data[merged_data["wealth"].notna()]
-    merged_data[merged_data["wealth"] < 0] = 0
+    merged_data = gather_wealth_data(soep_c38, merged_data, options)
 
     # Filter data
     merged_data = filter_data(merged_data, start_year, end_year, start_age, exp_cap)
@@ -147,7 +143,7 @@ def load_and_merge_data(soep_c38, soep_rv, min_ret_age):
     return merged_data
 
 
-def gather_wealth_data(soep_c38, options):
+def gather_wealth_data(soep_c38, merged_data, options):
     # Load SOEP core data
     wealth_data = pd.read_stata(
         f"{soep_c38}/hwealth.dta",
@@ -181,7 +177,14 @@ def gather_wealth_data(soep_c38, options):
     wealth_data_full.rename(columns={"w011ha": "wealth"}, inplace=True)
     wealth_data_full["wealth"] = wealth_data_full["wealth"] / options["wealth_unit"]
 
-    return wealth_data_full
+    merged_data = merged_data.merge(wealth_data_full, on=["hid", "syear"], how="left")
+
+    merged_data = merged_data[merged_data["wealth"].notna()]
+    merged_data[merged_data["wealth"] < 0] = 0
+
+    print(str(len(merged_data)) + " left after dropping people with missing wealth.")
+
+    return merged_data
 
 
 def filter_data(merged_data, start_year, end_year, start_age, exp_cap):
@@ -312,9 +315,6 @@ def enforce_model_work_and_ret_conditions(
     )
 
     # Filter out people who come back from retirement
-    merged_data = merged_data[
-        (merged_data["lagged_choice"] != 2) | (merged_data["choice"] == 2)
-    ]
     merged_data = merged_data[
         (merged_data["lagged_choice"] != 2) | (merged_data["choice"] == 2)
     ]

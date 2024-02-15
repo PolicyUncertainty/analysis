@@ -11,7 +11,7 @@ def expected_SRA_probs(policy_state, choice, options):
     # current state
     n_exog_states = trans_mat.shape[0]
     no_policy_change = jnp.zeros(n_exog_states)
-    no_policy_change[policy_state] = 1
+    no_policy_change = no_policy_change.at[policy_state].set(1)
     # Check if retired
     retirement_bool = choice == 2
     # Aggregate the two transition vectors

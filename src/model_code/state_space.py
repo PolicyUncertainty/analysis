@@ -56,14 +56,18 @@ def update_state_space(
 
     age = period + options["start_age"]
 
+    # If unemployed nothing further gets updated
     if choice == 0:
         return next_state
+    # If working then experience gets updated if not at cap
     elif choice == 1:
         if experience < options["exp_cap"]:
             next_state["experience"] = experience + 1
             return next_state
         else:
             return next_state
+    # If choosing retirement and already retired nothing further happens.
+    # If not
     elif choice == 2:
         if lagged_choice == 2:
             return next_state
@@ -80,6 +84,7 @@ def state_specific_choice_set(period, lagged_choice, policy_state, options):
     SRA_pol_state = options["min_SRA"] + policy_state * options["SRA_grid_size"]
     min_ret_age_pol_state = apply_retirement_constraint_for_SRA(SRA_pol_state, options)
 
+    # First check if the person is not in the voluntary retirement range.
     if age < min_ret_age_pol_state:
         return np.array([0, 1])
     elif age >= options["max_ret_age"]:

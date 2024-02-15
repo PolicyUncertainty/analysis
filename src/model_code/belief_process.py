@@ -3,9 +3,21 @@ import numpy as np
 from scipy.stats import norm
 
 
-def expected_SRA_probs(policy_state, options):
+def expected_SRA_probs(policy_state, choice, options):
     trans_mat = options["beliefs_trans_mat"]
-    trans_vector = jnp.take(trans_mat, policy_state, axis=0)
+    # Take the row of the transition matrix for expected policy change
+    trans_vector_not_retired = jnp.take(trans_mat, policy_state, axis=0)
+    # If already retired the transition vector is a zero vector with a one at the
+    # current state
+    n_exog_states = trans_mat.shape[0]
+    no_policy_change = jnp.zeros(n_exog_states)
+    no_policy_change[policy_state] = 1
+    # Check if retired
+    retirement_bool = choice == 2
+    # Aggregate the two transition vectors
+    trans_vector = (
+        1 - retirement_bool
+    ) * trans_vector_not_retired + retirement_bool * no_policy_change
     return trans_vector
 
 

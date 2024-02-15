@@ -48,6 +48,7 @@ observed_choices = data_decision["choice"].values
 
 # Load start parameters
 start_params_all = yaml.safe_load(open(file_dir_path + "start_params.yaml"))
+start_params_all["sigma"] = options["income_shock_scale"]
 # Specifiy savings wealth grid
 savings_grid = np.arange(start=0, stop=100, step=0.5)
 # Create likelihood function
@@ -68,8 +69,8 @@ params_to_estimate_names = [
     "dis_util_work",
     "dis_util_unemployed",
     "bequest_scale",
-    "lambda",
-    "sigma",
+    # "lambda",
+    # "sigma",
 ]
 start_params = {name: start_params_all[name] for name in params_to_estimate_names}
 
@@ -87,7 +88,7 @@ def individual_likelihood_vec(params_vec):
 result = minimize(
     individual_likelihood_vec,
     params_start_vec,
-    method="Nelder-Mead",
+    method="BFGS",
 )
 pickle.dump(result, open(file_dir_path + "res.pkl", "wb"))
 

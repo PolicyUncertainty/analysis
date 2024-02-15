@@ -1,17 +1,22 @@
-# Gathers everything necessary for structural model estimation.
-# This script executes the following steps:
-# Set paths and optionns.
-# Get choice and other state variables (lagged choice, policy state, retirement age id, experience, wealth) from SOEP core and SOEP RV VSKT.
-# Estimates policy expectation process parameters.
-# Estimates wage equation parameters.
-# locations:
-# dependencies: original data saved on local machines, functions for steps 0-3 in src folder
+# dependencies: 
+#   - original data saved on local machines, 
+#   - functions for steps 0-3 in src\steps folder
+#   - src\spec.yaml
 # output: data (decisions and outside_parameters) saved in output folder
 # %%
 # Step 0: Set paths and parameters
 # ----------------------------------------------------------------------------------------------
-USER = "max"  # "bruno" or "max"
-LOAD_DATA = True  # if True, load data from pickle files instead of generating it
+
+# Set user and specify load data from pickle files
+USER = input("Enter user name ([b]runo/ [m]ax): ")
+custom_load_data = False
+load_data_prompt = input("Load data from pickle files? (y/n/[c]ustom for every step): ")
+if load_data_prompt == "y":
+    LOAD_DATA = True
+elif load_data_prompt == "n":
+    LOAD_DATA = False
+else:
+    custom_load_data = True
 
 # Set data paths according to user.
 import sys
@@ -36,6 +41,9 @@ project_specs = generate_derived_specs(project_specs)
 # ----------------------------------------------------------------------------------------------
 from process_data.steps.gather_decision_data import gather_decision_data
 
+if custom_load_data:
+    LOAD_DATA = input("Load choice & decision data from pickle files? (y/n): ") == "y"
+
 dec_data = gather_decision_data(
     paths_dict,
     project_specs,
@@ -47,6 +55,10 @@ dec_data = gather_decision_data(
 # Step 2a: Estimate for each individual truncated normals
 # --------------------------------------------------------------------------------------
 from process_data.steps.est_SRA_expectations import estimate_truncated_normal
+
+if custom_load_data:
+    LOAD_DATA = input("Load policy expectation parameters from pickle files? (y/n): ") == "y"
+
 
 df_estimated_ret_age_expectations = estimate_truncated_normal(
     paths_dict, project_specs, load_data=LOAD_DATA
@@ -73,6 +85,10 @@ policy_expectation_sigma_sq = gen_var_params_and_plot(
 
 # Step 3: Estimates wage equation parameters
 # ---------------------------------------------------------------------------------------
+
+if custom_load_data:
+    LOAD_DATA = input("Load wage equation parameters from pickle files? (y/n): ") == "y"
+
 from process_data.steps.est_wage_equation import estimate_wage_parameters
 
 wage_params = estimate_wage_parameters(paths_dict, project_specs, load_data=False)

@@ -25,14 +25,14 @@ data_decision = pd.read_pickle(analysis_path + "output/decision_data.pkl")
 data_decision = data_decision[data_decision["lagged_choice"] != 2]
 
 # Load data specs
-from derive_specs import generate_derived_and_data_derived_options
+from derive_specs import generate_derived_and_data_derived_specs
 
 start = time.time()
 project_paths = {
     "project_path": analysis_path,
 }
 project_specs = yaml.safe_load(open(analysis_path + "src/spec.yaml"))
-project_specs = generate_derived_and_data_derived_options(
+project_specs = generate_derived_and_data_derived_specs(
     project_specs, project_paths, load_data=True
 )
 from model_code.specify_model import specify_model
@@ -48,7 +48,7 @@ observed_choices = data_decision["choice"].values
 
 # Load start parameters
 start_params_all = yaml.safe_load(open(file_dir_path + "start_params.yaml"))
-start_params_all["sigma"] = options["income_shock_scale"]
+start_params_all["sigma"] = project_specs["income_shock_scale"]
 # Specifiy savings wealth grid
 savings_grid = np.arange(start=0, stop=100, step=0.5)
 # Create likelihood function
@@ -88,9 +88,21 @@ def individual_likelihood_vec(params_vec):
 result = minimize(
     individual_likelihood_vec,
     params_start_vec,
-    method="BFGS",
+    bounds=[(1e-12, 100), (-100, 10000), (-100, 10000)],
+    method="L-BFGS-B",
 )
 pickle.dump(result, open(file_dir_path + "res.pkl", "wb"))
+
+# from dcegm.solve import get_solve_func_for_model
+# solve_func = get_solve_func_for_model(
+#     model=model,exog_savings_grid=savings_grid, options=options
+# )
+# # start_params_all["bequest_scale"] = -48.0408919
+# # start_params_all["dis_util_unemployed"] = -63.12383726
+# # start_params_all["dis_util_work"] = -65.21426645
+# #
+# # value, policy_left, policy_right, endog_grid = solve_func(start_params_all)
+# # breakpoint()
 
 
 # past_prep = time.time()

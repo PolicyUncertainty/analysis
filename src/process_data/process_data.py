@@ -10,7 +10,7 @@
 # %%
 # Step 0: Set paths and parameters
 # ----------------------------------------------------------------------------------------------
-USER = "max"  # "bruno" or "max"
+USER = "bruno"  # "bruno" or "max"
 LOAD_DATA = False  # if True, load data from pickle files instead of generating it
 
 # Set data paths according to user.

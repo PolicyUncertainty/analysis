@@ -8,8 +8,9 @@ analysis_path = str(Path(__file__).resolve().parents[2]) + "/"
 file_dir_path = str(Path(__file__).resolve().parents[0]) + "/"
 import sys
 import yaml
-from dcegm.likelihood import create_observed_choice_indexes
-from model_code.state_space import update_state_space, sparsity_condition
+from jax.flatten_util import ravel_pytree
+import pickle
+from scipy.optimize import minimize
 
 sys.path.insert(0, analysis_path + "submodules/dcegm/src/")
 sys.path.insert(0, analysis_path + "src/")
@@ -58,17 +59,6 @@ individual_likelihood = create_individual_likelihood_function_for_model(
     exog_savings_grid=savings_grid,
     params_all=start_params_all,
 )
-(
-    choice_probs,
-    choice_prob_across_choices,
-    value_solved,
-    endog_grid_solved,
-) = individual_likelihood(start_params_all)
-observed_state_choice_indexes = create_observed_choice_indexes(
-    observed_states_dict=oberved_states_dict, model=model
-)
-breakpoint()
-
 
 params_to_estimate_names = [
     "mu",
@@ -79,11 +69,30 @@ params_to_estimate_names = [
     "sigma",
 ]
 start_params = {name: start_params_all[name] for name in params_to_estimate_names}
-past_prep = time.time()
-print(f"Preparation took {past_prep - start} seconds.")
-ll = individual_likelihood(start_params)
-first = time.time()
-print(f"First call took {first - past_prep} seconds.")
-ll = individual_likelihood(start_params)
-second = time.time()
-print(f"Second call took {second - first} seconds.")
+
+(ll_value,) = individual_likelihood(start_params)
+breakpoint()
+params_start_vec, unravel_func = ravel_pytree(start_params)
+
+
+def individual_likelihood_vec(params_vec):
+    params = unravel_func(params_vec)
+    return individual_likelihood(params)
+
+
+result = minimize(
+    individual_likelihood_vec,
+    params_start_vec,
+    method="Nelder-Mead",
+)
+pickle.dump(result, open(file_dir_path + "res.pkl", "wb"))
+
+
+# past_prep = time.time()
+# print(f"Preparation took {past_prep - start} seconds.")
+# ll = individual_likelihood(start_params)
+# first = time.time()
+# print(f"First call took {first - past_prep} seconds.")
+# ll = individual_likelihood(start_params)
+# second = time.time()
+# print(f"Second call took {second - first} seconds.")

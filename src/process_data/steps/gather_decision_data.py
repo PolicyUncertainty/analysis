@@ -26,7 +26,7 @@ def gather_decision_data(paths, options, load_data=False):
     merged_data = gather_wealth_data(soep_c38, merged_data, options)
 
     # Filter data
-    merged_data = filter_data(merged_data, start_year, end_year, start_age, exp_cap)
+    merged_data = filter_data(merged_data, start_year, end_year, start_age)
 
     # (labor) choice
     merged_data["choice"] = create_choice_variable(
@@ -54,8 +54,8 @@ def gather_decision_data(paths, options, load_data=False):
     merged_data["experience"] = merged_data["pgexpft"].astype(float).round()
 
     # additional filters based on model setup
-    merged_data = enforce_model_work_and_ret_conditions(
-        merged_data, min_ret_age, options["max_ret_age"], start_age
+    merged_data = enforce_model_conditions(
+        merged_data, min_ret_age, options["max_ret_age"], exp_cap
     )
 
     # Keep relevant columns (i.e. state variables)
@@ -187,7 +187,7 @@ def gather_wealth_data(soep_c38, merged_data, options):
     return merged_data
 
 
-def filter_data(merged_data, start_year, end_year, start_age, exp_cap):
+def filter_data(merged_data, start_year, end_year, start_age):
     # Set pid and syear as index
     merged_data.set_index(["pid", "syear"], inplace=True)
 
@@ -210,19 +210,11 @@ def filter_data(merged_data, start_year, end_year, start_age, exp_cap):
     )
 
     # Filter out invalid experience values
-    merged_data = merged_data[
-        (merged_data["pgexpft"] >= 0) & (merged_data["pgexpft"] <= exp_cap)
-    ]
+    merged_data = merged_data[(merged_data["pgexpft"] >= 0)]
     print(
         str(len(merged_data))
         + " left after dropping people with invalid experience values."
     )
-
-    # drop missing wealth values and set negative wealth to 0
-    merged_data = merged_data[merged_data["wealth"].notna()]
-    merged_data[merged_data["wealth"] < 0] = 0
-    print(str(len(merged_data)) + " left after dropping people with missing wealth.")
-
     return merged_data
 
 
@@ -288,9 +280,7 @@ def modify_policy_state(policy_states, options):
     return policy_states_values, policy_id
 
 
-def enforce_model_work_and_ret_conditions(
-    merged_data, min_ret_age, max_ret_age, start_age
-):
+def enforce_model_conditions(merged_data, min_ret_age, max_ret_age, exp_cap):
     """This function filters the choice data abirth_yearccording to the model setup."""
     # Filter out people who are retired before min_ret_age
     merged_data = merged_data[
@@ -319,8 +309,24 @@ def enforce_model_work_and_ret_conditions(
         (merged_data["lagged_choice"] != 2) | (merged_data["choice"] == 2)
     ]
 
+    # Enforce experience cap
+    merged_data.loc[merged_data["pgexpft"] <= exp_cap, "pgexpft"] = exp_cap
+
     print(
         str(len(merged_data))
         + " left after dropping people who come back from retirement."
     )
     return merged_data
+
+
+def print_n_retirees(merged_data):
+    n_retirees = merged_data.groupby("choice").size().loc[2]
+    print(str(n_retirees) + " retirees in sample.")
+
+
+def print_n_fresh_retirees(merged_data):
+    n_fresh_retirees = (
+        merged_data.groupby(["choice", "lagged_choice"]).size().loc[2, 1]
+        + merged_data.groupby(["choice", "lagged_choice"]).size().loc[2, 0]
+    )
+    print(str(n_fresh_retirees) + " fresh retirees in sample.")

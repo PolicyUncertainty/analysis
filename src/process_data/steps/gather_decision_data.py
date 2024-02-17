@@ -310,7 +310,7 @@ def enforce_model_conditions(merged_data, min_ret_age, max_ret_age, exp_cap):
     ]
 
     # Enforce experience cap
-    merged_data.loc[merged_data["pgexpft"] <= exp_cap, "pgexpft"] = exp_cap
+    merged_data.loc[merged_data["experience"] > exp_cap, "experience"] = exp_cap
 
     print(
         str(len(merged_data))

@@ -10,7 +10,7 @@ import sys
 import yaml
 from jax.flatten_util import ravel_pytree
 import pickle
-from scipy.optimize import minimize
+import scipy.optimize as opt
 import jax
 
 jax.config.update("jax_enable_x64", True)
@@ -69,7 +69,7 @@ params_to_estimate_names = [
     "dis_util_work",
     "dis_util_unemployed",
     "bequest_scale",
-    # "lambda",
+    "lambda",
     # "sigma",
 ]
 start_params = {name: start_params_all[name] for name in params_to_estimate_names}
@@ -85,10 +85,10 @@ def individual_likelihood_vec(params_vec):
     return ll_value
 
 
-result = minimize(
+result = opt.minimize(
     individual_likelihood_vec,
     params_start_vec,
-    bounds=[(1e-12, 100), (-100, 10000), (-100, 10000)],
+    bounds=[(1e-12, 100), (1e-12, 100), (1e-12, 100), (1e-12, 10)],
     method="L-BFGS-B",
 )
 pickle.dump(result, open(file_dir_path + "res.pkl", "wb"))

@@ -69,7 +69,7 @@ params_to_estimate_names = [
     "dis_util_work",
     "dis_util_unemployed",
     "bequest_scale",
-    "lambda",
+    # "lambda",
     # "sigma",
 ]
 start_params = {name: start_params_all[name] for name in params_to_estimate_names}
@@ -88,7 +88,7 @@ def individual_likelihood_vec(params_vec):
 result = opt.minimize(
     individual_likelihood_vec,
     params_start_vec,
-    bounds=[(1e-12, 100), (1e-12, 100), (1e-12, 100), (1e-12, 10)],
+    bounds=[(1e-12, 100), (1e-12, 100), (1e-12, 100)],
     method="L-BFGS-B",
 )
 pickle.dump(result, open(file_dir_path + "res.pkl", "wb"))

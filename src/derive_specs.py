@@ -38,7 +38,7 @@ def generate_derived_and_data_derived_specs(options, project_paths, load_data=Tr
         options=options,
         alpha_hat=alpha_hat,
         sigma_sq_hat=sigma_sq_hat,
-    )
+    )    
 
     # Generate number of policy states between 67 and min_SRA
     wage_params = estimate_wage_parameters(project_paths, options, load_data=load_data)
@@ -47,7 +47,12 @@ def generate_derived_and_data_derived_specs(options, project_paths, load_data=Tr
     options["gamma_2"] = wage_params.loc["full_time_exp_sq", "parameter"]
     options["income_shock_scale"] = wage_params.loc["income_shock_std", "parameter"]
 
-    # # Max experience
+    # calculate value of pension point based on unweighted average wage over 40 years of work 
+    exp_grid = np.arange(1, 41)
+    wage_grid = options["gamma_0"] + options["gamma_1"] * exp_grid + options["gamma_2"] * exp_grid**2
+    options["pension_point_value"] = wage_grid.mean() / 40 * 0.48
+
+    # max initial experience
     data_decision = gather_decision_data(project_paths, options, load_data=load_data)
     options["max_init_experience"] = (
         data_decision["experience"] - data_decision["period"]

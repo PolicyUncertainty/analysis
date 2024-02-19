@@ -45,7 +45,7 @@ def test_budget_unemployed(unemployment_benefits, savings, interest_rate):
         options=options,
     )
     np.testing.assert_almost_equal(
-        wealth, savings * (1 + interest_rate) + unemployment_benefits
+        wealth, savings * (1 + interest_rate) + unemployment_benefits * 12
     )
 
 
@@ -83,7 +83,7 @@ def test_budget_worker(gamma, income_shock, experience, interest_rate, savings):
         options=options,
     )
     labor_income = gamma + gamma * experience + gamma * experience**2 + income_shock
-    np.testing.assert_almost_equal(wealth, savings * (1 + interest_rate) + labor_income)
+    np.testing.assert_almost_equal(wealth, savings * (1 + interest_rate) + labor_income * 12)
 
 
 EXP_GRID = np.linspace(10, 30, 3)
@@ -143,5 +143,5 @@ def test_retiree(
     )
     retirement_income = pension_point_value * pension_factor * exp
     np.testing.assert_almost_equal(
-        wealth, savings * (1 + interest_rate) + retirement_income
+        wealth, savings * (1 + interest_rate) + retirement_income * 12
     )

@@ -72,7 +72,13 @@ params_to_estimate_names = [
     "lambda",
     # "sigma",
 ]
-start_params = {name: start_params_all[name] for name in params_to_estimate_names}
+# start_params = {name: start_params_all[name] for name in params_to_estimate_names}
+start_params = {
+    "bequest_scale": 6.01139358,
+    "dis_util_unemployed": 18.98725915,
+    "dis_util_work": 1e-12,
+    "lambda": 9.99999999,
+}
 
 # Create likelihood function for estimation
 params_start_vec, unravel_func = ravel_pytree(start_params)
@@ -92,6 +98,10 @@ result = opt.minimize(
     method="L-BFGS-B",
 )
 pickle.dump(result, open(file_dir_path + "res.pkl", "wb"))
+
+# Params,  {'bequest_scale': Array(6.01139358, dtype=float64), 'dis_util_unemployed':
+# Array(18.98725915, dtype=float64), 'dis_util_work': Array(1.e-12, dtype=float64),
+# 'lambda': Array(9.99999999, dtype=float64)}  with ll value,  10628.856864631267
 
 # from dcegm.solve import get_solve_func_for_model
 # solve_func = get_solve_func_for_model(

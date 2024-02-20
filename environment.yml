@@ -12,6 +12,7 @@ dependencies:
 
   # Package dependencies
   - numpy
+  - pandas
   - scipy
   - pandas
 
@@ -26,3 +27,4 @@ dependencies:
 
   - pip:
       - jax
+      - jaxlib

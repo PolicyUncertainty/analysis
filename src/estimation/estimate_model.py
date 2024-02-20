@@ -27,7 +27,7 @@ start_params_all = {
     "dis_util_work": 4.0,
     "dis_util_unemployed": 1.0,
     "bequest_scale": 2.0,
-    # Taste and income shock scael
+    # Taste and income shock scale
     "lambda": 1.0,
     "sigma": 1.0,
     # Interest rate and discount factor

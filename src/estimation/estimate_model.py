@@ -1,66 +1,43 @@
 import pickle
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 
 analysis_path = str(Path(__file__).resolve().parents[2]) + "/"
 file_dir_path = str(Path(__file__).resolve().parents[0]) + "/"
 import sys
-import yaml
 import jax
+import estimagic as em
+from estimation.tools_estimation import prepare_estimation
 
 jax.config.update("jax_enable_x64", True)
 
 sys.path.insert(0, analysis_path + "submodules/dcegm/src/")
 sys.path.insert(0, analysis_path + "src/")
-
+project_paths = {
+    "analysis_path": analysis_path,
+    "model_path": file_dir_path,
+}
 
 data_decision = pd.read_pickle(analysis_path + "output/decision_data.pkl")
 
 # Retirees don't have any choice and therefore no information
 data_decision = data_decision[data_decision["lagged_choice"] != 2]
 
-# Load data specs
-from derive_specs import generate_derived_and_data_derived_specs
-
-project_paths = {
-    "project_path": analysis_path,
+start_params_all = {
+    # Utility parameters
+    "mu": 0.5,
+    "dis_util_work": 4.0,
+    "dis_util_unemployed": 1.0,
+    "bequest_scale": 2.0,
+    # Taste and income shock scael
+    "lambda": 1.0,
+    "sigma": 1.0,
+    # Interest rate and discount factor
+    "interest_rate": 0.03,
+    "beta": 0.95,
 }
-project_specs = yaml.safe_load(open(analysis_path + "src/spec.yaml"))
-project_specs = generate_derived_and_data_derived_specs(
-    project_specs, project_paths, load_data=True
-)
-from model_code.specify_model import specify_model
 
-model, options = specify_model(
-    project_specs=project_specs, model_data_path=file_dir_path, load_model=True
-)
-print("Model specified.")
-# Prepare data for estimation
-oberved_states_dict = {
-    name: data_decision[name].values for name in model["state_space_names"]
-}
-observed_wealth = data_decision["wealth"].values
-observed_choices = data_decision["choice"].values
-
-# Load start parameters
-start_params_all = yaml.safe_load(open(file_dir_path + "start_params.yaml"))
-start_params_all["sigma"] = project_specs["income_shock_scale"]
-# Specifiy savings wealth grid
-savings_grid = np.arange(start=0, stop=100, step=0.5)
-# Create likelihood function
-from dcegm.likelihood import create_individual_likelihood_function_for_model
-
-individual_likelihood = create_individual_likelihood_function_for_model(
-    model=model,
-    options=options,
-    observed_states=oberved_states_dict,
-    observed_wealth=observed_wealth,
-    observed_choices=observed_choices,
-    exog_savings_grid=savings_grid,
-    params_all=start_params_all,
-)
 
 params_to_estimate_names = [
     # "mu",
@@ -72,7 +49,6 @@ params_to_estimate_names = [
 ]
 start_params = {name: start_params_all[name] for name in params_to_estimate_names}
 
-import estimagic as em
 
 lower_bounds = {
     "dis_util_work": 1e-12,
@@ -87,8 +63,22 @@ upper_bounds = {
     "lambda": 100,
 }
 
+individual_likelihood = prepare_estimation(
+    data_decision=data_decision,
+    project_paths=project_paths,
+    start_params_all=start_params_all,
+    load_model=True,
+)
+
+
+def individual_likelihood_print(params):
+    ll_value = individual_likelihood(params)
+    print("Params, ", params, " with ll value, ", ll_value)
+    return ll_value
+
+
 result = em.minimize(
-    criterion=individual_likelihood,
+    criterion=individual_likelihood_print,
     params=start_params,
     lower_bounds=lower_bounds,
     upper_bounds=upper_bounds,

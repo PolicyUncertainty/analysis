@@ -23,7 +23,10 @@ def prepare_estimation(data_decision, project_paths, start_params_all, load_mode
         project_specs=project_specs, model_data_path=model_path, load_model=load_model
     )
     print("Model specified.")
-    # Prepare data for estimation with information from dcegm model
+    # Prepare data for estimation with information from dcegm model. Retirees don't
+    # have any choice and therefore no information
+    data_decision = data_decision[data_decision["lagged_choice"] != 2]
+    # Now transform for dcegm
     oberved_states_dict = {
         name: data_decision[name].values for name in model["state_space_names"]
     }

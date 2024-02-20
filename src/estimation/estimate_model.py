@@ -21,9 +21,6 @@ project_paths = {
 
 data_decision = pd.read_pickle(analysis_path + "output/decision_data.pkl")
 
-# Retirees don't have any choice and therefore no information
-data_decision = data_decision[data_decision["lagged_choice"] != 2]
-
 start_params_all = {
     # Utility parameters
     "mu": 0.5,

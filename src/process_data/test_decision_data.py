@@ -15,6 +15,9 @@ sys.path.insert(0, analysis_path + "src")
 
 from process_data.steps.gather_decision_data import gather_decision_data
 
+# As we do not keep our data in github these tests can only be run locally
+IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
+
 
 # Define paths_dict as a fixture
 @pytest.fixture
@@ -50,6 +53,7 @@ def policy_step_size():
 # These function tests the decision data for consistency (cf. model state space sparsity condition).
 
 
+@pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Test doesn't work in Github Actions.")
 def test_decision_data_no_missing_values(
     paths_dict, options, policy_step_size, load_data=LOAD_SAVED_DATA
 ):
@@ -68,6 +72,7 @@ def test_decision_data_no_missing_values(
     assert dec_dat["experience"].isna().sum() == 0
 
 
+@pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Test doesn't work in Github Actions.")
 def test_decision_data_no_ret_before_min_ret_age(
     paths_dict, options, policy_step_size, load_data=LOAD_SAVED_DATA
 ):
@@ -83,6 +88,7 @@ def test_decision_data_no_ret_before_min_ret_age(
     )
 
 
+@pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Test doesn't work in Github Actions.")
 def test_decision_data_no_work_after_max_ret_age(
     paths_dict, options, policy_step_size, load_data=LOAD_SAVED_DATA
 ):
@@ -102,6 +108,7 @@ def test_decision_data_no_work_after_max_ret_age(
     )
 
 
+@pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Test doesn't work in Github Actions.")
 def test_decision_data_exp_cap(
     paths_dict, options, policy_step_size, load_data=LOAD_SAVED_DATA
 ):
@@ -115,6 +122,7 @@ def test_decision_data_exp_cap(
     assert dec_dat["experience"].max() <= dec_dat["period"].max()
 
 
+@pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Test doesn't work in Github Actions.")
 def test_decision_data_retirement_is_absorbing(
     paths_dict, options, policy_step_size, load_data=LOAD_SAVED_DATA
 ):

@@ -9,7 +9,7 @@ from model_code.utility_functions import create_final_period_utility_functions
 from model_code.utility_functions import create_utility_functions
 
 
-def specify_model(project_specs, load_model=False):
+def specify_model(project_specs, model_data_path, load_model=False):
     # Load specifications
     n_periods = project_specs["n_periods"]
     n_possible_ret_ages = project_specs["n_possible_ret_ages"]
@@ -42,7 +42,7 @@ def specify_model(project_specs, load_model=False):
             utility_functions=create_utility_functions(),
             utility_functions_final_period=create_final_period_utility_functions(),
             budget_constraint=budget_constraint,
-            path="model.pkl",
+            path=model_data_path + "model.pkl",
         )
 
     else:
@@ -52,7 +52,7 @@ def specify_model(project_specs, load_model=False):
             utility_functions=create_utility_functions(),
             utility_functions_final_period=create_final_period_utility_functions(),
             budget_constraint=budget_constraint,
-            path="model.pkl",
+            path=model_data_path + "model.pkl",
         )
 
     return model, options

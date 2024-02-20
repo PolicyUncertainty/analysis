@@ -9,52 +9,56 @@ from process_data.steps.est_wage_equation import (
 from process_data.steps.gather_decision_data import gather_decision_data
 
 
-def generate_derived_specs(options):
+def generate_derived_specs(specs):
     # Number of periods in model
-    options["n_periods"] = options["end_age"] - options["start_age"] + 1
+    specs["n_periods"] = specs["end_age"] - specs["start_age"] + 1
     # you can retire from min retirement age until max retirement age
-    options["n_possible_ret_ages"] = options["max_ret_age"] - options["min_ret_age"] + 1
-    options["n_policy_states"] = int(
-        ((options["max_SRA"] - options["min_SRA"]) / options["SRA_grid_size"]) + 1
+    specs["n_possible_ret_ages"] = specs["max_ret_age"] - specs["min_ret_age"] + 1
+    specs["n_policy_states"] = int(
+        ((specs["max_SRA"] - specs["min_SRA"]) / specs["SRA_grid_size"]) + 1
     )
-    options["SRA_values_policy_states"] = np.arange(
-        options["min_SRA"],
-        options["max_SRA"] + options["SRA_grid_size"],
-        options["SRA_grid_size"],
+    specs["SRA_values_policy_states"] = np.arange(
+        specs["min_SRA"],
+        specs["max_SRA"] + specs["SRA_grid_size"],
+        specs["SRA_grid_size"],
     )
 
-    return options
+    return specs
 
 
-def generate_derived_and_data_derived_specs(options, project_paths, load_data=True):
-    options = generate_derived_specs(options)
+def generate_derived_and_data_derived_specs(specs, project_paths, load_data=True):
+    specs = generate_derived_specs(specs)
 
     # Generate dummy transition matrix
 
     alpha_hat = gen_exp_val_params_and_plot(project_paths, None, load_data=load_data)
     sigma_sq_hat = gen_var_params_and_plot(project_paths, None, load_data=load_data)
 
-    options["beliefs_trans_mat"] = exp_ret_age_transition_matrix(
-        options=options,
+    specs["beliefs_trans_mat"] = exp_ret_age_transition_matrix(
+        options=specs,
         alpha_hat=alpha_hat,
         sigma_sq_hat=sigma_sq_hat,
-    )    
+    )
 
     # Generate number of policy states between 67 and min_SRA
-    wage_params = estimate_wage_parameters(project_paths, options, load_data=load_data)
-    options["gamma_0"] = wage_params.loc["constant", "parameter"]
-    options["gamma_1"] = wage_params.loc["full_time_exp", "parameter"]
-    options["gamma_2"] = wage_params.loc["full_time_exp_sq", "parameter"]
-    options["income_shock_scale"] = wage_params.loc["income_shock_std", "parameter"]
+    wage_params = estimate_wage_parameters(project_paths, specs, load_data=load_data)
+    specs["gamma_0"] = wage_params.loc["constant", "parameter"]
+    specs["gamma_1"] = wage_params.loc["full_time_exp", "parameter"]
+    specs["gamma_2"] = wage_params.loc["full_time_exp_sq", "parameter"]
+    specs["income_shock_scale"] = wage_params.loc["income_shock_std", "parameter"]
 
-    # calculate value of pension point based on unweighted average wage over 40 years of work 
+    # calculate value of pension point based on unweighted average wage over 40 years of work
     exp_grid = np.arange(1, 41)
-    wage_grid = options["gamma_0"] + options["gamma_1"] * exp_grid + options["gamma_2"] * exp_grid**2
-    options["pension_point_value"] = wage_grid.mean() / 40 * 0.48
+    wage_grid = (
+        specs["gamma_0"]
+        + specs["gamma_1"] * exp_grid
+        + specs["gamma_2"] * exp_grid**2
+    )
+    specs["pension_point_value"] = wage_grid.mean() / 40 * 0.48
 
     # max initial experience
-    data_decision = gather_decision_data(project_paths, options, load_data=load_data)
-    options["max_init_experience"] = (
+    data_decision = gather_decision_data(project_paths, specs, load_data=load_data)
+    specs["max_init_experience"] = (
         data_decision["experience"] - data_decision["period"]
     ).max()
-    return options
+    return specs

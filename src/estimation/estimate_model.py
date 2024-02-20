@@ -37,7 +37,9 @@ project_specs = generate_derived_and_data_derived_specs(
 )
 from model_code.specify_model import specify_model
 
-model, options = specify_model(project_specs, load_model=True)
+model, options = specify_model(
+    project_specs=project_specs, model_data_path=file_dir_path, load_model=True
+)
 print("Model specified.")
 # Prepare data for estimation
 oberved_states_dict = {

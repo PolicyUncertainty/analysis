@@ -30,8 +30,11 @@ def gather_decision_data(paths, options, load_data=False):
 
     # (labor) choice
     merged_data["choice"] = create_choice_variable(
-        rv_ret_choice=merged_data["STATUS_2"], soep_empl_choice=merged_data["pgemplst"]
+        rv_ret_choice=merged_data["STATUS_2"],
+        soep_empl_choice=merged_data["pgemplst"],
+        soep_empl_status=merged_data["pgstib"],
     )
+
     merged_data = merged_data[merged_data["choice"].notna()]
 
     # period
@@ -51,7 +54,9 @@ def gather_decision_data(paths, options, load_data=False):
     merged_data["retirement_age_id"] = 0
 
     # experience
-    merged_data["experience"] = create_experience_variable(merged_data["pgexpft"], exp_cap)
+    merged_data["experience"] = create_experience_variable(
+        merged_data["pgexpft"], exp_cap
+    )
     merged_data = merged_data[merged_data["experience"].notna()]
 
     # additional filters based on model setup
@@ -97,7 +102,7 @@ def load_and_merge_data(soep_c38, soep_rv, min_ret_age):
     # Load SOEP core data
     core_data = pd.read_stata(
         f"{soep_c38}/pgen.dta",
-        columns=["syear", "pid", "hid", "pgemplst", "pgexpft"],
+        columns=["syear", "pid", "hid", "pgemplst", "pgexpft", "pgstib"],
         convert_categoricals=False,
     )
     pathl_data = pd.read_stata(
@@ -131,7 +136,17 @@ def load_and_merge_data(soep_c38, soep_rv, min_ret_age):
     # Load SOEP RV VSKT data
     rv_data = pd.read_stata(
         f"{soep_rv}/vskt/SUF.SOEP-RV.VSKT.2020.var.1-0.dta",
-        columns=["rv_id", "JAHR", "STATUS_2", "MONAT"],
+        columns=["rv_id", "JAHR", "STATUS_2", "MONAT", "STATUS_1"],
+    )
+    # Check if rv_id is in rv data
+    merged_data = merged_data[
+        (merged_data["age"] < min_ret_age)
+        | merged_data["rv_id"].isin(rv_data["rv_id"].unique())
+    ]
+
+    print(
+        str(len(merged_data))
+        + " left after dropping people with missing SOEP-RV ID in SOEP-RV VSKT."
     )
 
     # Prepare merge data
@@ -189,7 +204,11 @@ def gather_wealth_data(soep_c38, merged_data, options):
 
 def filter_data(merged_data, start_year, end_year, start_age):
     """This function filters the data according to the model setup.
-    Specifically, it filters out young people, women, and years outside of estimation range."""
+
+    Specifically, it filters out young people, women, and years outside of estimation
+    range.
+
+    """
 
     # Set pid and syear as index
     merged_data.set_index(["pid", "syear"], inplace=True)
@@ -215,7 +234,8 @@ def filter_data(merged_data, start_year, end_year, start_age):
 
 
 def create_lagged_choice_variable(merged_data, start_year, end_year):
-    """This function creates the lagged choice variable and drops missing lagged choices."""
+    """This function creates the lagged choice variable and drops missing lagged
+    choices."""
     # Create full index with all possible combinations of pid and syear
     full_index = pd.MultiIndex.from_product(
         [merged_data.index.levels[0], range(start_year - 1, end_year + 1)],
@@ -235,7 +255,7 @@ def create_lagged_choice_variable(merged_data, start_year, end_year):
     return merged_data
 
 
-def create_choice_variable(rv_ret_choice, soep_empl_choice):
+def create_choice_variable(rv_ret_choice, soep_empl_choice, soep_empl_status):
     """This function creates the choice variable for the structural model.
 
     TODO: This function assumes retirees with part-time employment as full-time retirees.
@@ -244,6 +264,9 @@ def create_choice_variable(rv_ret_choice, soep_empl_choice):
     choice = pd.Series(index=rv_ret_choice.index, data=np.nan, dtype=float)
     choice.loc[soep_empl_choice == 5] = 0
     choice.loc[soep_empl_choice == 1] = 1
+    # First assign soep employment status for retirement and then
+    # overwrite with rv retirement choices
+    choice.loc[soep_empl_status == 13] = 2
     choice.loc[rv_ret_choice == "RTB"] = 2
     return choice
 
@@ -276,8 +299,10 @@ def modify_policy_state(policy_states, options):
     policy_states_values = min_SRA + policy_id * SRA_grid_size
     return policy_states_values, policy_id
 
+
 def create_experience_variable(pgexpft, exp_cap):
-    """This function creates the experience variable for the structural model and enforces the experience cap."""
+    """This function creates the experience variable for the structural model and
+    enforces the experience cap."""
     experience = pgexpft.astype(float).round()
     # Filter out invalid experience values
     experience = experience[(experience >= 0)]
@@ -285,14 +310,18 @@ def create_experience_variable(pgexpft, exp_cap):
     # Enforce experience cap
     experience[experience > exp_cap] = exp_cap
     print(
-    str(len(experience)) + " left after dropping people with invalid experience values."
+        str(len(experience))
+        + " left after dropping people with invalid experience values."
     )
     return experience
-    
+
 
 def enforce_model_choice_restriction(merged_data, min_ret_age, max_ret_age):
     """This function filters the choice data according to the model setup.
-    Specifically, it filters out people retire too early, work too long, or come back from retirement,
+
+    Specifically, it filters out people retire too early, work too long, or come back
+    from retirement,
+
     """
     # Filter out people who are retired before min_ret_age
     merged_data = merged_data[

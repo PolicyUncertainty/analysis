@@ -6,3 +6,7 @@ __pycache__/
 .vscode
 model.pkl
 policy_expect_data.pkl
+*.db*
+*.png
+*model*pkl
+*probs.pkl

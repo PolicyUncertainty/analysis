@@ -1,3 +1,7 @@
+# Description: This file estimates the parameters of the MONTHLY wage equation using the SOEP data.
+# We estimate the following equation: 
+# wage = beta_0 + beta_1 * full_time_exp + beta_2 * full_time_exp^2 + individual_FE + time_FE + epsilon
+
 import numpy as np
 import pandas as pd
 from linearmodels.panel.model import PanelOLS

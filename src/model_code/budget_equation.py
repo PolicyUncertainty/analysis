@@ -42,7 +42,7 @@ def budget_constraint(
     was_retired = lagged_choice == 2
 
     income = +was_worker * labor_income + was_retired * retirement_income
-    income_with_floor = jnp.maximum(income, unemployment_benefits)
+    income_with_floor = jnp.maximum(income, unemployment_benefits) * 12
 
     # calculate beginning of period wealth M_t
     wealth = (

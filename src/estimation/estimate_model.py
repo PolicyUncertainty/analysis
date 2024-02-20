@@ -85,12 +85,13 @@ def individual_likelihood_vec(params_vec):
     print("Params, ", params, " with ll value, ", ll_value)
     return ll_value
 
-bounds=[
+
+bounds = [
     (1e-12, 100),
     (1e-12, 100),
     (1e-12, 100),
-    #(1e-12, 10)
-    ]
+    # (1e-12, 10)
+]
 
 result = opt.minimize(
     individual_likelihood_vec,
@@ -99,7 +100,6 @@ result = opt.minimize(
     method="L-BFGS-B",
 )
 pickle.dump(result, open(file_dir_path + "res.pkl", "wb"))
-
 
 
 # from dcegm.solve import get_solve_func_for_model

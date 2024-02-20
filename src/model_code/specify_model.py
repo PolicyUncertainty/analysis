@@ -2,6 +2,7 @@ import numpy as np
 from dcegm.pre_processing.setup_model import load_and_setup_model
 from dcegm.pre_processing.setup_model import setup_and_save_model
 from model_code.belief_process import expected_SRA_probs_estimation
+from model_code.belief_process import expected_SRA_probs_simulation
 from model_code.budget_equation import budget_constraint
 from model_code.state_space import create_state_space_functions
 from model_code.state_space import sparsity_condition
@@ -18,6 +19,10 @@ def specify_model(project_specs, model_data_path, load_model=False, step="estima
 
     if step == "estimation":
         exog_trans_func = expected_SRA_probs_estimation
+    elif step == "simulation":
+        exog_trans_func = expected_SRA_probs_simulation
+    else:
+        raise ValueError("Step must be either 'estimation' or 'simulation'")
 
     options = {
         "state_space": {
@@ -30,7 +35,7 @@ def specify_model(project_specs, model_data_path, load_model=False, step="estima
             },
             "exogenous_processes": {
                 "policy_state": {
-                    "transition": expected_SRA_probs_estimation,
+                    "transition": exog_trans_func,
                     "states": np.arange(n_policy_states, dtype=int),
                 },
             },

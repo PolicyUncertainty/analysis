@@ -16,7 +16,7 @@ jax.config.update("jax_enable_x64", True)
 import pickle
 import pandas as pd
 import estimagic as em
-from estimation.tools_estimation import prep_data_and_model
+from estimation.tools import process_data_and_model
 
 project_paths = {
     "project_path": analysis_path,
@@ -64,7 +64,7 @@ upper_bounds = {
     "lambda": 100,
 }
 
-individual_likelihood = prep_data_and_model(
+individual_likelihood = process_data_and_model(
     data_decision=data_decision,
     project_paths=project_paths,
     start_params_all=start_params_all,

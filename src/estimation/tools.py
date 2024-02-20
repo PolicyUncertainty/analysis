@@ -9,13 +9,14 @@ from derive_specs import generate_derived_and_data_derived_specs
 from model_code.specify_model import specify_model
 
 
-def prep_data_and_model(
+def process_data_and_model(
     data_decision, project_paths, start_params_all, load_model, output="likelihood"
 ):
-    model, options = specify_model(
+    model, options = specify_model_and_options(
         project_paths=project_paths,
         start_params_all=start_params_all,
         load_model=load_model,
+        step="estimation",
     )
 
     # Prepare data for estimation with information from dcegm model. Retirees don't
@@ -64,7 +65,7 @@ def prep_data_and_model(
         raise ValueError("Output must be either 'likelihood' or 'probabilities'")
 
 
-def specify_model(project_paths, start_params_all, load_model):
+def specify_model_and_options(project_paths, start_params_all, load_model, step):
     analysis_path = project_paths["project_path"]
     model_path = project_paths["model_path"]
 
@@ -78,7 +79,10 @@ def specify_model(project_paths, start_params_all, load_model):
 
     # Generate dcegm model for project specs
     model, options = specify_model(
-        project_specs=project_specs, model_data_path=model_path, load_model=load_model
+        project_specs=project_specs,
+        model_data_path=model_path,
+        load_model=load_model,
+        step=step,
     )
     print("Model specified.")
     return model, options

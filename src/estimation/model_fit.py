@@ -19,7 +19,7 @@ sys.path.insert(0, analysis_path + "src/")
 
 jax.config.update("jax_enable_x64", True)
 
-from estimation.tools_estimation import prep_data_and_model
+from estimation.tools import process_data_and_model
 
 data_decision = pd.read_pickle(analysis_path + "output/decision_data.pkl")
 data_decision = data_decision[data_decision["lagged_choice"] != 2]

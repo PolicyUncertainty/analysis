@@ -39,7 +39,10 @@ def generate_derived_and_data_derived_specs(specs, project_paths, load_data=True
     # Then round to the nearest value, which you can do by multiplying with the
     # inverse of the grid size. In the baseline case 1 / 0.25 = 4
     multiplier = 1 / specs["SRA_grid_size"]
-    specs["policy_state_increases"] = np.round(per_period_expec_increase * multiplier)
+    policy_state_ids = np.round(per_period_expec_increase * multiplier)
+    specs["policy_step_periods"] = (
+        np.where(policy_state_ids > np.roll(policy_state_ids, shift=1))[0] - 1
+    )
 
     specs["beliefs_trans_mat"] = exp_ret_age_transition_matrix(
         options=specs,

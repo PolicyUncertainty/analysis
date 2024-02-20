@@ -7,3 +7,6 @@ __pycache__/
 model.pkl
 policy_expect_data.pkl
 *.db*
+*.png
+*model*pkl
+*probs.pkl

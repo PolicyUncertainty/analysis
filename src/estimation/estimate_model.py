@@ -8,15 +8,16 @@ file_dir_path = str(Path(__file__).resolve().parents[0]) + "/"
 import sys
 import jax
 import estimagic as em
-from estimation.tools_estimation import prepare_estimation
 
 jax.config.update("jax_enable_x64", True)
 
 sys.path.insert(0, analysis_path + "submodules/dcegm/src/")
 sys.path.insert(0, analysis_path + "src/")
+from estimation.tools_estimation import prep_data_and_model
+
 project_paths = {
     "project_path": analysis_path,
-    "model_path": file_dir_path,
+    "model_path": file_dir_path + "results_and_data/",
 }
 
 data_decision = pd.read_pickle(analysis_path + "output/decision_data.pkl")
@@ -60,7 +61,7 @@ upper_bounds = {
     "lambda": 100,
 }
 
-individual_likelihood = prepare_estimation(
+individual_likelihood = prep_data_and_model(
     data_decision=data_decision,
     project_paths=project_paths,
     start_params_all=start_params_all,

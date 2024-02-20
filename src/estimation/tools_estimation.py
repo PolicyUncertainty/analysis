@@ -7,7 +7,7 @@ from model_code.specify_model import specify_model
 
 
 def prepare_estimation(data_decision, project_paths, start_params_all, load_model):
-    analysis_path = project_paths["analysis_path"]
+    analysis_path = project_paths["project_path"]
     model_path = project_paths["model_path"]
 
     # Generate model_specs

@@ -15,7 +15,7 @@ jax.config.update("jax_enable_x64", True)
 sys.path.insert(0, analysis_path + "submodules/dcegm/src/")
 sys.path.insert(0, analysis_path + "src/")
 project_paths = {
-    "analysis_path": analysis_path,
+    "project_path": analysis_path,
     "model_path": file_dir_path,
 }
 

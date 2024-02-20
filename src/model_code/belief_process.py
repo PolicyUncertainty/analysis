@@ -3,7 +3,10 @@ import numpy as np
 from scipy.stats import norm
 
 
-def expected_SRA_probs(policy_state, choice, options):
+# def expected_SRA_probs_simulation(policy_state, choice, options):
+
+
+def expected_SRA_probs_estimation(policy_state, choice, options):
     trans_mat = options["beliefs_trans_mat"]
     # Take the row of the transition matrix for expected policy change
     trans_vector_not_retired = jnp.take(trans_mat, policy_state, axis=0)

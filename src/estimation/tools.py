@@ -12,22 +12,12 @@ from model_code.specify_model import specify_model
 def prep_data_and_model(
     data_decision, project_paths, start_params_all, load_model, output="likelihood"
 ):
-    analysis_path = project_paths["project_path"]
-    model_path = project_paths["model_path"]
-
-    # Generate model_specs
-    project_specs = yaml.safe_load(open(analysis_path + "src/spec.yaml"))
-    project_specs = generate_derived_and_data_derived_specs(
-        project_specs, project_paths, load_data=True
-    )
-    # Assign income shock scale to start_params_all
-    start_params_all["sigma"] = project_specs["income_shock_scale"]
-
-    # Generate dcegm model for project specs
     model, options = specify_model(
-        project_specs=project_specs, model_data_path=model_path, load_model=load_model
+        project_paths=project_paths,
+        start_params_all=start_params_all,
+        load_model=load_model,
     )
-    print("Model specified.")
+
     # Prepare data for estimation with information from dcegm model. Retirees don't
     # have any choice and therefore no information
     data_decision = data_decision[data_decision["lagged_choice"] != 2]
@@ -72,6 +62,26 @@ def prep_data_and_model(
         return choice_probs_observations, value, policy_left, policy_right, endog_grid
     else:
         raise ValueError("Output must be either 'likelihood' or 'probabilities'")
+
+
+def specify_model(project_paths, start_params_all, load_model):
+    analysis_path = project_paths["project_path"]
+    model_path = project_paths["model_path"]
+
+    # Generate model_specs
+    project_specs = yaml.safe_load(open(analysis_path + "src/spec.yaml"))
+    project_specs = generate_derived_and_data_derived_specs(
+        project_specs, project_paths, load_data=True
+    )
+    # Assign income shock scale to start_params_all
+    start_params_all["sigma"] = project_specs["income_shock_scale"]
+
+    # Generate dcegm model for project specs
+    model, options = specify_model(
+        project_specs=project_specs, model_data_path=model_path, load_model=load_model
+    )
+    print("Model specified.")
+    return model, options
 
 
 def visualize_em_database(db_path):

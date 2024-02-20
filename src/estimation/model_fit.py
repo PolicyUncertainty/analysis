@@ -23,7 +23,7 @@ from estimation.tools_estimation import prep_data_and_model
 
 data_decision = pd.read_pickle(analysis_path + "output/decision_data.pkl")
 data_decision = data_decision[data_decision["lagged_choice"] != 2]
-data_decision["policy_state"] = 8
+# data_decision["policy_state"] = 8
 
 res = pickle.load(open(file_dir_path + "results_and_data/res.pkl", "rb"))
 start_params_all = {

@@ -29,10 +29,17 @@ def generate_derived_specs(specs):
 def generate_derived_and_data_derived_specs(specs, project_paths, load_data=True):
     specs = generate_derived_specs(specs)
 
-    # Generate dummy transition matrix
-
+    # Generate belief transition matrix
     alpha_hat = gen_exp_val_params_and_plot(project_paths, None, load_data=load_data)
     sigma_sq_hat = gen_var_params_and_plot(project_paths, None, load_data=load_data)
+    # Generate policy state steps for individuals who start in 0. First calculate the
+    # per year expected increase in policy state
+    life_span = specs["end_age"] - specs["start_age"] + 1
+    per_period_expec_increase = np.arange(life_span) * alpha_hat
+    # Then round to the nearest value, which you can do by multiplying with the
+    # inverse of the grid size. In the baseline case 1 / 0.25 = 4
+    multiplier = 1 / specs["SRA_grid_size"]
+    specs["policy_state_increases"] = np.round(per_period_expec_increase * multiplier)
 
     specs["beliefs_trans_mat"] = exp_ret_age_transition_matrix(
         options=specs,

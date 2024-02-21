@@ -50,6 +50,7 @@ def policy_step_size():
     return policy_step_size
 
 
+
 # These function tests the decision data for consistency (cf. model state space sparsity condition).
 
 
@@ -70,6 +71,7 @@ def test_decision_data_no_missing_values(
     # assert dec_dat["retirement_age_id"].isna().sum() == 0  //
     # this is the only exception because it is irrelevant for matched decisions
     assert dec_dat["experience"].isna().sum() == 0
+    assert dec_dat["wealth"].isna().sum() == 0
 
 
 @pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Test doesn't work in Github Actions.")

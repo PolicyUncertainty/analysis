@@ -1,19 +1,22 @@
-import pickle
+# Set paths of project
+import sys
 from pathlib import Path
-
-import pandas as pd
 
 analysis_path = str(Path(__file__).resolve().parents[2]) + "/"
 file_dir_path = str(Path(__file__).resolve().parents[0]) + "/"
-import sys
-import jax
-import estimagic as em
-
-jax.config.update("jax_enable_x64", True)
 
 sys.path.insert(0, analysis_path + "submodules/dcegm/src/")
 sys.path.insert(0, analysis_path + "src/")
-from estimation.tools_estimation import prep_data_and_model
+# Import jax and set jax to work with 64bit
+import jax
+
+jax.config.update("jax_enable_x64", True)
+
+# Import the rest
+import pickle
+import pandas as pd
+import estimagic as em
+from estimation.tools import process_data_and_model
 
 project_paths = {
     "project_path": analysis_path,
@@ -30,7 +33,6 @@ start_params_all = {
     "bequest_scale": 2.0,
     # Taste and income shock scale
     "lambda": 1.0,
-    "sigma": 1.0,
     # Interest rate and discount factor
     "interest_rate": 0.03,
     "beta": 0.95,
@@ -42,7 +44,7 @@ params_to_estimate_names = [
     "dis_util_work",
     "dis_util_unemployed",
     "bequest_scale",
-    "lambda",
+    # "lambda",
     # "sigma",
 ]
 start_params = {name: start_params_all[name] for name in params_to_estimate_names}
@@ -52,16 +54,16 @@ lower_bounds = {
     "dis_util_work": 1e-12,
     "dis_util_unemployed": 1e-12,
     "bequest_scale": 1e-12,
-    "lambda": 1e-12,
+    # "lambda": 1e-12,
 }
 upper_bounds = {
     "dis_util_work": 100,
     "dis_util_unemployed": 100,
     "bequest_scale": 10,
-    "lambda": 100,
+    # "lambda": 100,
 }
 
-individual_likelihood = prep_data_and_model(
+individual_likelihood = process_data_and_model(
     data_decision=data_decision,
     project_paths=project_paths,
     start_params_all=start_params_all,

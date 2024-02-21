@@ -32,6 +32,8 @@ def test_budget_unemployed(unemployment_benefits, savings, interest_rate):
         "SRA_grid_size": 0.5,
         "min_ret_age": 65,
         "unemployment_benefits": unemployment_benefits,
+        "min_wage": 1.1,
+        "unemployment_wealth_thresh": 25,
     }
     params = {"interest_rate": interest_rate}
     wealth = budget_constraint(
@@ -44,9 +46,12 @@ def test_budget_unemployed(unemployment_benefits, savings, interest_rate):
         params=params,
         options=options,
     )
-    np.testing.assert_almost_equal(
-        wealth, savings * (1 + interest_rate) + unemployment_benefits * 12
-    )
+    if savings < options["unemployment_wealth_thresh"]:
+        np.testing.assert_almost_equal(
+            wealth, savings * (1 + interest_rate) + unemployment_benefits * 12
+        )
+    else:
+        np.testing.assert_almost_equal(wealth, savings * (1 + interest_rate))
 
 
 GAMMA_GRID = np.linspace(0.1, 0.9, 3)
@@ -70,6 +75,8 @@ def test_budget_worker(gamma, income_shock, experience, interest_rate, savings):
         "SRA_grid_size": 0.5,
         "min_ret_age": 65,
         "unemployment_benefits": 0,
+        "min_wage": 100,
+        "unemployment_wealth_thresh": 10,
     }
     params = {"interest_rate": interest_rate}
     wealth = budget_constraint(
@@ -83,7 +90,11 @@ def test_budget_worker(gamma, income_shock, experience, interest_rate, savings):
         options=options,
     )
     labor_income = gamma + gamma * experience + gamma * experience**2 + income_shock
-    np.testing.assert_almost_equal(wealth, savings * (1 + interest_rate) + labor_income * 12)
+    if labor_income < options["min_wage"]:
+        labor_income = options["min_wage"]
+    np.testing.assert_almost_equal(
+        wealth, savings * (1 + interest_rate) + labor_income * 12
+    )
 
 
 EXP_GRID = np.linspace(10, 30, 3)
@@ -121,7 +132,9 @@ def test_retiree(
         "min_SRA": min_SRA,
         "SRA_grid_size": SRA_grid_size,
         "min_ret_age": min_ret_age,
-        "unemployment_benefits": 0,
+        "unemployment_benefits": 50,
+        "min_wage": 100,
+        "unemployment_wealth_thresh": 100,
     }
     params = {"interest_rate": interest_rate}
     wealth = budget_constraint(
@@ -142,6 +155,10 @@ def test_retiree(
         * options["early_retirement_penalty"]
     )
     retirement_income = pension_point_value * pension_factor * exp
+    if savings < options["unemployment_wealth_thresh"]:
+        retirement_income = np.maximum(
+            retirement_income, options["unemployment_benefits"]
+        )
     np.testing.assert_almost_equal(
         wealth, savings * (1 + interest_rate) + retirement_income * 12
     )

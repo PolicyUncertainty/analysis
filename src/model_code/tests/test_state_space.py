@@ -68,7 +68,7 @@ def test_retirement_age_update(period, lagged_choice):
     if lagged_choice != 2:
         assert next_state["retirement_age_id"] == age - options["min_ret_age"]
     else:
-        assert "retirement_age_id" not in next_state
+        assert next_state["retirement_age_id"] == retirement_age_id
 
 
 PERIOD_GRID = np.linspace(35, 45, 1)

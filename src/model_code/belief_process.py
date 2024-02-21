@@ -3,7 +3,28 @@ import numpy as np
 from scipy.stats import norm
 
 
-def expected_SRA_probs(policy_state, choice, options):
+def expected_SRA_probs_simulation(policy_state, period, choice, options):
+    # Check if the current period is a policy step period
+    step_period = jnp.isin(period, options["policy_step_periods"])
+    # Check if retirement is choosen
+    retirement_bool = choice == 2
+    # If retirement is choosen the transition vector is a zero vector with a one at the
+    # current state and if we are in a step period and not retired then the transition
+    # vector has probability 1 of increase in policy state. Retirement superseeds the
+    # step period
+    id_next_period = step_period * (policy_state + 1) + (1 - step_period) * policy_state
+    id_next_period = (
+        retirement_bool * policy_state + (1 - retirement_bool) * id_next_period
+    )
+
+    # Now generate vector
+    n_exog_states = options["beliefs_trans_mat"].shape[0]
+    trans_vector = jnp.zeros(n_exog_states)
+    trans_vector = trans_vector.at[id_next_period].set(1)
+    return trans_vector
+
+
+def expected_SRA_probs_estimation(policy_state, choice, options):
     trans_mat = options["beliefs_trans_mat"]
     # Take the row of the transition matrix for expected policy change
     trans_vector_not_retired = jnp.take(trans_mat, policy_state, axis=0)

@@ -6,28 +6,20 @@ from dcegm.likelihood import create_individual_likelihood_function_for_model
 from dcegm.likelihood import create_observed_choice_indexes
 from dcegm.solve import get_solve_func_for_model
 from derive_specs import generate_derived_and_data_derived_specs
+from model_code.budget_equation import create_savings_grid
 from model_code.specify_model import specify_model
 
 
-def prep_data_and_model(
+def process_data_and_model(
     data_decision, project_paths, start_params_all, load_model, output="likelihood"
 ):
-    analysis_path = project_paths["project_path"]
-    model_path = project_paths["model_path"]
-
-    # Generate model_specs
-    project_specs = yaml.safe_load(open(analysis_path + "src/spec.yaml"))
-    project_specs = generate_derived_and_data_derived_specs(
-        project_specs, project_paths, load_data=True
+    model, options, start_params_all = specify_model_and_options(
+        project_paths=project_paths,
+        start_params_all=start_params_all,
+        load_model=load_model,
+        step="estimation",
     )
-    # Assign income shock scale to start_params_all
-    start_params_all["sigma"] = project_specs["income_shock_scale"]
 
-    # Generate dcegm model for project specs
-    model, options = specify_model(
-        project_specs=project_specs, model_data_path=model_path, load_model=load_model
-    )
-    print("Model specified.")
     # Prepare data for estimation with information from dcegm model. Retirees don't
     # have any choice and therefore no information
     data_decision = data_decision[data_decision["lagged_choice"] != 2]
@@ -39,7 +31,7 @@ def prep_data_and_model(
     observed_choices = data_decision["choice"].values
 
     # Specifiy savings wealth grid
-    savings_grid = np.arange(start=0, stop=100, step=0.5)
+    savings_grid = create_savings_grid()
 
     if output == "likelihood":
         # Create likelihood function
@@ -72,6 +64,29 @@ def prep_data_and_model(
         return choice_probs_observations, value, policy_left, policy_right, endog_grid
     else:
         raise ValueError("Output must be either 'likelihood' or 'probabilities'")
+
+
+def specify_model_and_options(project_paths, start_params_all, load_model, step):
+    analysis_path = project_paths["project_path"]
+    model_path = project_paths["model_path"]
+
+    # Generate model_specs
+    project_specs = yaml.safe_load(open(analysis_path + "src/spec.yaml"))
+    project_specs = generate_derived_and_data_derived_specs(
+        project_specs, project_paths, load_data=True
+    )
+    # Assign income shock scale to start_params_all
+    start_params_all["sigma"] = project_specs["income_shock_scale"]
+
+    # Generate dcegm model for project specs
+    model, options = specify_model(
+        project_specs=project_specs,
+        model_data_path=model_path,
+        load_model=load_model,
+        step=step,
+    )
+    print("Model specified.")
+    return model, options, start_params_all
 
 
 def visualize_em_database(db_path):

@@ -54,27 +54,25 @@ def update_state_space(
     next_state["period"] = period + 1
     next_state["lagged_choice"] = choice
 
-    age = period + options["start_age"]
+    # Create work bools
+    unemployment_bool = choice == 0
+    work_bool = choice == 1
+    retirement_bool = choice == 2
 
-    # If unemployed nothing further gets updated
-    if choice == 0:
-        return next_state
-    # If working then experience gets updated if not at cap
-    elif choice == 1:
-        if experience < options["exp_cap"]:
-            next_state["experience"] = experience + 1
-            return next_state
-        else:
-            return next_state
-    # If choosing retirement and already retired nothing further happens.
-    # If not then retirement_age_id gets updated
-    elif choice == 2:
-        if lagged_choice == 2:
-            return next_state
-        else:
-            next_state["retirement_age_id"] = age - options["min_ret_age"]
-    else:
-        raise ValueError("Choice not recognized in update_state_space")
+    # Update experience
+    below_exp_cap_bool = experience < options["exp_cap"]
+    exp_update_bool = below_exp_cap_bool * work_bool
+    next_state["experience"] = experience + exp_update_bool
+
+    # Update retirement age. First create possible retirement id and then check if
+    # retirement is chosen and not already retired
+    poss_ret_id = period + options["start_age"] - options["min_ret_age"]
+    not_retired_bool = lagged_choice != 2
+    ret_age_update_bool = not_retired_bool * retirement_bool
+    next_state["retirement_age_id"] = (
+        ret_age_update_bool * poss_ret_id
+        + (1 - ret_age_update_bool) * retirement_age_id
+    )
 
     return next_state
 

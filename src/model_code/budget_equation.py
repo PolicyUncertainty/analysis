@@ -1,4 +1,5 @@
 import jax.numpy as jnp
+import numpy as np
 
 
 def budget_constraint(
@@ -27,8 +28,9 @@ def budget_constraint(
     pension_factor = 1 - (actual_retirement_age - SRA_at_resolution) * ERP
     retirement_income = pension_point_value * experience * pension_factor
 
+    means_test = savings_end_of_previous_period < options["unemployment_wealth_thresh"]
     # Unemployment benefits
-    unemployment_benefits = options["unemployment_benefits"]
+    unemployment_benefits = means_test * options["unemployment_benefits"]
     # Labor income
     labor_income = (
         gamma_0
@@ -36,17 +38,34 @@ def budget_constraint(
         + gamma_2 * experience**2
         + income_shock_previous_period
     )
+    labor_income_with_min = jnp.maximum(labor_income, options["min_wage"])
 
     # bools of last period decision: income is payed in following period!
     was_worker = lagged_choice == 1
     was_retired = lagged_choice == 2
 
-    income = +was_worker * labor_income + was_retired * retirement_income
-    income_with_floor = jnp.maximum(income, unemployment_benefits) * 12
+    income = (
+        jnp.maximum(
+            was_worker * labor_income_with_min + was_retired * retirement_income,
+            unemployment_benefits,
+        )
+        * 12
+    )
 
     # calculate beginning of period wealth M_t
-    wealth = (
-        1 + params["interest_rate"]
-    ) * savings_end_of_previous_period + income_with_floor
+    wealth = (1 + params["interest_rate"]) * savings_end_of_previous_period + income
 
     return wealth
+
+
+def create_savings_grid():
+    """Create a saving grid with sections."""
+    section_1 = np.arange(start=0, stop=10, step=0.5)  # 20
+    section_2 = np.arange(start=10, stop=50, step=1)  # 40
+    section_3 = np.arange(start=50, stop=100, step=5)  # 10
+    section_4 = np.arange(start=100, stop=500, step=20)  # 20
+    section_5 = np.arange(start=500, stop=1000, step=100)  # 5
+    savings_grid = np.concatenate(
+        [section_1, section_2, section_3, section_4, section_5]
+    )
+    return savings_grid

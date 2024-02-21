@@ -2,7 +2,7 @@ import jax.numpy as jnp
 import numpy as np
 
 
-def generate_start_states(observed_data, n_agents, seed):
+def generate_start_states(observed_data, n_agents, seed, options):
     np.random.seed(seed)
     # Define start wealth
     start_period_data = observed_data[
@@ -15,7 +15,9 @@ def generate_start_states(observed_data, n_agents, seed):
     wealth_agents = np.random.normal(
         loc=median_start_wealth, scale=std_wealth, size=n_agents
     )
-    wealth_agents[wealth_agents < 0] = 0
+    wealth_agents[wealth_agents < 0] = (
+        options["model_params"]["unemployment_benefits"] * 12
+    )
 
     # Initial experience
     exp_counts = (

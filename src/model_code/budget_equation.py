@@ -27,8 +27,9 @@ def budget_constraint(
     pension_factor = 1 - (actual_retirement_age - SRA_at_resolution) * ERP
     retirement_income = pension_point_value * experience * pension_factor
 
+    means_test = savings_end_of_previous_period < options["unemployment_wealth_thresh"]
     # Unemployment benefits
-    unemployment_benefits = options["unemployment_benefits"]
+    unemployment_benefits = means_test * options["unemployment_benefits"]
     # Labor income
     labor_income = (
         gamma_0
@@ -36,17 +37,21 @@ def budget_constraint(
         + gamma_2 * experience**2
         + income_shock_previous_period
     )
+    labor_income_with_min = jnp.maximum(labor_income, options["min_wage"])
 
     # bools of last period decision: income is payed in following period!
     was_worker = lagged_choice == 1
     was_retired = lagged_choice == 2
 
-    income = +was_worker * labor_income + was_retired * retirement_income
-    income_with_floor = jnp.maximum(income, unemployment_benefits) * 12
+    income = (
+        jnp.maximum(
+            was_worker * labor_income_with_min + was_retired * retirement_income,
+            unemployment_benefits,
+        )
+        * 12
+    )
 
     # calculate beginning of period wealth M_t
-    wealth = (
-        1 + params["interest_rate"]
-    ) * savings_end_of_previous_period + income_with_floor
+    wealth = (1 + params["interest_rate"]) * savings_end_of_previous_period + income
 
     return wealth

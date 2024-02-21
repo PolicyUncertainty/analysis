@@ -33,7 +33,6 @@ start_params_all = {
     "bequest_scale": 2.0,
     # Taste and income shock scale
     "lambda": 1.0,
-    "sigma": 1.0,
     # Interest rate and discount factor
     "interest_rate": 0.03,
     "beta": 0.95,
@@ -45,7 +44,7 @@ params_to_estimate_names = [
     "dis_util_work",
     "dis_util_unemployed",
     "bequest_scale",
-    "lambda",
+    # "lambda",
     # "sigma",
 ]
 start_params = {name: start_params_all[name] for name in params_to_estimate_names}
@@ -55,13 +54,13 @@ lower_bounds = {
     "dis_util_work": 1e-12,
     "dis_util_unemployed": 1e-12,
     "bequest_scale": 1e-12,
-    "lambda": 1e-12,
+    # "lambda": 1e-12,
 }
 upper_bounds = {
     "dis_util_work": 100,
     "dis_util_unemployed": 100,
     "bequest_scale": 10,
-    "lambda": 100,
+    # "lambda": 100,
 }
 
 individual_likelihood = process_data_and_model(

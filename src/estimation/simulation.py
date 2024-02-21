@@ -30,7 +30,6 @@ start_params_all = {
     "bequest_scale": res["x"][0],
     # Taste and income shock scale
     "lambda": 1.0,
-    "sigma": 1.0,
     # Interest rate and discount factor
     "interest_rate": 0.03,
     "beta": 0.95,
@@ -39,7 +38,7 @@ start_params_all = {
 from estimation.tools import specify_model_and_options
 from model_code.initial_conditions_sim import generate_start_states
 
-model, options = specify_model_and_options(
+model, options, start_params_all = specify_model_and_options(
     project_paths=project_paths,
     start_params_all=start_params_all,
     load_model=True,

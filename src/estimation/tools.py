@@ -12,7 +12,7 @@ from model_code.specify_model import specify_model
 def process_data_and_model(
     data_decision, project_paths, start_params_all, load_model, output="likelihood"
 ):
-    model, options = specify_model_and_options(
+    model, options, start_params_all = specify_model_and_options(
         project_paths=project_paths,
         start_params_all=start_params_all,
         load_model=load_model,
@@ -85,7 +85,7 @@ def specify_model_and_options(project_paths, start_params_all, load_model, step)
         step=step,
     )
     print("Model specified.")
-    return model, options
+    return model, options, start_params_all
 
 
 def visualize_em_database(db_path):

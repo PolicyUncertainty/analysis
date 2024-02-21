@@ -49,7 +49,7 @@ solved_model = process_data_and_model(
     output="solved_model",
 )
 pickle.dump(
-    solved_model, open(file_dir_path + "results_and_data/solved_model_67.pkl", "wb")
+    solved_model, open(file_dir_path + "results_and_data/solved_model.pkl", "wb")
 )
 # %%
 # solved_model = pickle.load(

@@ -22,12 +22,13 @@ import numpy as np
 import pickle
 
 res = pickle.load(open(file_dir_path + "results_and_data/res.pkl", "rb"))
+
 start_params_all = {
     # Utility parameters
     "mu": 0.5,
-    "dis_util_work": res["x"][2],
-    "dis_util_unemployed": res["x"][1],
-    "bequest_scale": res["x"][0],
+    "dis_util_work": res.params["dis_util_work"],
+    "dis_util_unemployed": res.params["dis_util_unemployed"],
+    "bequest_scale": res.params["bequest_scale"],
     # Taste and income shock scale
     "lambda": 1.0,
     # Interest rate and discount factor
@@ -44,9 +45,22 @@ model, options, start_params_all = specify_model_and_options(
     load_model=True,
     step="simulation",
 )
+from estimation.tools import process_data_and_model
+
+# data_decision = pd.read_pickle(analysis_path + "output/decision_data.pkl")
+#
+# solved_model = process_data_and_model(
+#     data_decision=data_decision,
+#     project_paths=project_paths,
+#     start_params_all=start_params_all,
+#     load_model=True,
+#     output="solved_model",
+# )
+# pickle.dump(solved_model, open(file_dir_path + "results_and_data/solved_model.pkl", "wb"))
+
 # Load solved model
 solved_model = pickle.load(
-    open(file_dir_path + "results_and_data/solved_model_67.pkl", "rb")
+    open(file_dir_path + "results_and_data/solved_model.pkl", "rb")
 )
 choice_probs_observations, value, policy_left, policy_right, endog_grid = solved_model
 n_agents = 1000

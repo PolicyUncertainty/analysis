@@ -6,6 +6,7 @@ from dcegm.likelihood import create_individual_likelihood_function_for_model
 from dcegm.likelihood import create_observed_choice_indexes
 from dcegm.solve import get_solve_func_for_model
 from derive_specs import generate_derived_and_data_derived_specs
+from model_code.budget_equation import create_savings_grid
 from model_code.specify_model import specify_model
 
 
@@ -30,7 +31,7 @@ def process_data_and_model(
     observed_choices = data_decision["choice"].values
 
     # Specifiy savings wealth grid
-    savings_grid = np.arange(start=0, stop=100, step=0.5)
+    savings_grid = create_savings_grid()
 
     if output == "likelihood":
         # Create likelihood function

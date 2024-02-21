@@ -29,9 +29,9 @@ res = pickle.load(open(file_dir_path + "results_and_data/res.pkl", "rb"))
 start_params_all = {
     # Utility parameters
     "mu": 0.5,
-    "dis_util_work": res["x"][2],
-    "dis_util_unemployed": res["x"][1],
-    "bequest_scale": res["x"][0],
+    "dis_util_work": res.params["dis_util_work"],
+    "dis_util_unemployed": res.params["dis_util_unemployed"],
+    "bequest_scale": res.params["bequest_scale"],
     # Taste and income shock scale
     "lambda": 1.0,
     "sigma": 1.0,
@@ -41,18 +41,20 @@ start_params_all = {
 }
 
 # %%
-# solved_model = prep_data_and_model(
-#     data_decision=data_decision,
-#     project_paths=project_paths,
-#     start_params_all=start_params_all,
-#     load_model=True,
-#     output="solved_model",
-# )
-# pickle.dump(solved_model, open(file_dir_path + "results_and_data/solved_model_67.pkl", "wb"))
-# %%
-solved_model = pickle.load(
-    open(file_dir_path + "results_and_data/solved_model_67.pkl", "rb")
+solved_model = process_data_and_model(
+    data_decision=data_decision,
+    project_paths=project_paths,
+    start_params_all=start_params_all,
+    load_model=True,
+    output="solved_model",
 )
+pickle.dump(
+    solved_model, open(file_dir_path + "results_and_data/solved_model_67.pkl", "wb")
+)
+# %%
+# solved_model = pickle.load(
+#     open(file_dir_path + "results_and_data/solved_model.pkl", "rb")
+# )
 choice_probs_observations, value, policy_left, policy_right, endog_grid = solved_model
 choice_probs_observations = np.nan_to_num(choice_probs_observations, nan=0.0)
 # %%

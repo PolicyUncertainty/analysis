@@ -26,7 +26,6 @@ def gather_decision_data(paths, options, load_data=False):
     merged_data = gather_wealth_data(soep_c38, merged_data, options)
     merged_data = create_hh_cons_equivalence_data(merged_data)
     merged_data["wealth"] = merged_data["wealth"] / merged_data["cons_equiv"]
-
     # filter data
     merged_data = filter_data(merged_data, start_year, end_year, start_age)
 
@@ -223,6 +222,11 @@ def create_hh_cons_equivalence_data(merged_data):
 
     # consumption equivalence scale
     merged_data["cons_equiv"] = 1 + 0.5 * merged_data["has_partner"] + 0.3 * merged_data["n_children"]
+
+    # drop missing values
+    merged_data = merged_data[merged_data["cons_equiv"].notna()]
+
+    print(str(len(merged_data)) + " left after dropping people with missing consumption equivalence scale.")
     return merged_data
 
 

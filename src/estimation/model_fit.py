@@ -30,12 +30,12 @@ est_params = pickle.load(open(paths_dict["est_results"] + "est_params.pkl", "rb"
 
 from model_code.model_solver import solve_model
 from model_code.policy_states_belief import expected_SRA_probs_estimation
-from model_code.policy_states_belief import exp_ret_age_transition_matrix
+from model_code.policy_states_belief import update_specs_exp_ret_age_trans_mat
 
 est_model = solve_model(
     path_dict=paths_dict,
     params=est_params,
-    update_spec_for_policy_state=exp_ret_age_transition_matrix,
+    update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
     policy_state_trans_func=expected_SRA_probs_estimation,
     file_append="est",
     load_model=True,
@@ -47,7 +47,7 @@ from model_code.specify_model import specify_model
 model, options, params = specify_model(
     path_dict=paths_dict,
     params=est_params,
-    update_spec_for_policy_state=exp_ret_age_transition_matrix,
+    update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
     policy_state_trans_func=expected_SRA_probs_estimation,
     load_model=True,
 )

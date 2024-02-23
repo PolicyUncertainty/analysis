@@ -4,8 +4,8 @@ import estimagic as em
 import pandas as pd
 from dcegm.likelihood import create_individual_likelihood_function_for_model
 from model_code.budget_equation import create_savings_grid
-from model_code.policy_states_belief import exp_ret_age_transition_matrix
 from model_code.policy_states_belief import expected_SRA_probs_estimation
+from model_code.policy_states_belief import update_specs_exp_ret_age_trans_mat
 from model_code.specify_model import specify_model
 
 
@@ -26,7 +26,7 @@ def estimate_model(path_dict, load_model):
     model, options, params = specify_model(
         path_dict=path_dict,
         params=start_params_all,
-        update_spec_for_policy_state=exp_ret_age_transition_matrix,
+        update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
         policy_state_trans_func=expected_SRA_probs_estimation,
         load_model=load_model,
     )

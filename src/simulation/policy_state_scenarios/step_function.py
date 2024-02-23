@@ -24,7 +24,7 @@ def realized_policy_step_function(policy_state, period, choice, options):
 
 def update_specs_for_step_function(specs, path_dict):
     # Load the estimates
-    alpha_hat = np.loadtxt(path_dict["est_results"] + "var_params.txt")
+    alpha_hat = np.loadtxt(path_dict["est_results"] + "exp_val_params.txt")
     # Generate policy state steps for individuals who start in 0. First calculate the
     # per year expected increase in policy state
     life_span = specs["end_age"] - specs["start_age"] + 1

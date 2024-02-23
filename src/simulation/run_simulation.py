@@ -23,7 +23,7 @@ from simulation.policy_state_scenarios.step_function import (
 # Create estimated model
 from model_code.model_solver import solve_model
 from model_code.policy_states_belief import expected_SRA_probs_estimation
-from model_code.policy_states_belief import exp_ret_age_transition_matrix
+from model_code.policy_states_belief import update_specs_exp_ret_age_trans_mat
 
 
 est_params = pickle.load(open(path_dict["est_results"] + "est_params.pkl", "rb"))
@@ -31,7 +31,7 @@ est_params = pickle.load(open(path_dict["est_results"] + "est_params.pkl", "rb")
 model_solution_est = solve_model(
     path_dict=path_dict,
     params=est_params,
-    update_spec_for_policy_state=exp_ret_age_transition_matrix,
+    update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
     policy_state_trans_func=expected_SRA_probs_estimation,
     file_append="est",
     load_model=True,

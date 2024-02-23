@@ -5,7 +5,7 @@
 quadrature_points_stochastic: 5
 # economic model parameters
 start_age: 30
-end_age: 75
+end_age: 85
 
 n_choices: 3  # choices: 0 = unemployment, , 1 = work, 2 = retire
 # Belief process parameters

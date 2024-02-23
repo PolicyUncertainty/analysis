@@ -3,10 +3,13 @@ import sys
 from pathlib import Path
 
 analysis_path = str(Path(__file__).resolve().parents[2]) + "/"
-file_dir_path = str(Path(__file__).resolve().parents[0]) + "/"
-
 sys.path.insert(0, analysis_path + "submodules/dcegm/src/")
 sys.path.insert(0, analysis_path + "src/")
+
+from set_paths import create_path_dict
+
+paths_dict = create_path_dict(analysis_path)
+
 # Import jax and set jax to work with 64bit
 import jax
 
@@ -16,14 +19,10 @@ jax.config.update("jax_enable_x64", True)
 import pickle
 import pandas as pd
 import estimagic as em
-from estimation.tools import process_data_and_model
+from estimation.tools import create_likelihood
 
-project_paths = {
-    "project_path": analysis_path,
-    "model_path": file_dir_path + "results_and_data/",
-}
 
-data_decision = pd.read_pickle(analysis_path + "output/decision_data.pkl")
+data_decision = pd.read_pickle(paths_dict["intermediate_data"] + "decision_data.pkl")
 
 start_params_all = {
     # Utility parameters
@@ -63,7 +62,7 @@ upper_bounds = {
     # "lambda": 100,
 }
 
-individual_likelihood = process_data_and_model(
+individual_likelihood = create_likelihood(
     data_decision=data_decision,
     project_paths=project_paths,
     start_params_all=start_params_all,
@@ -86,7 +85,7 @@ result = em.minimize(
     logging="test_log.db",
     error_handling="continue",
 )
-pickle.dump(result, open(file_dir_path + "res.pkl", "wb"))
+pickle.dump(result, open(project_paths["est_results"] + "res.pkl", "wb"))
 
 #
 # # Create likelihood function for estimation

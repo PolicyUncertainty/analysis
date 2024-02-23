@@ -1,6 +1,6 @@
 import numpy as np
-from model_code.belief_process import exp_ret_age_transition_matrix
-from process_data.steps.est_SRA_expectations import estimate_truncated_normal
+import yaml
+from model_code.policy_states import exp_ret_age_transition_matrix
 from process_data.steps.est_SRA_random_walk import gen_exp_val_params_and_plot
 from process_data.steps.est_SRA_random_walk import gen_var_params_and_plot
 from process_data.steps.est_wage_equation import (
@@ -9,25 +9,15 @@ from process_data.steps.est_wage_equation import (
 from process_data.steps.gather_decision_data import gather_decision_data
 
 
-def generate_derived_specs(specs):
-    # Number of periods in model
-    specs["n_periods"] = specs["end_age"] - specs["start_age"] + 1
-    # you can retire from min retirement age until max retirement age
-    specs["n_possible_ret_ages"] = specs["max_ret_age"] - specs["min_ret_age"] + 1
-    specs["n_policy_states"] = int(
-        ((specs["max_SRA"] - specs["min_SRA"]) / specs["SRA_grid_size"]) + 1
-    )
-    specs["SRA_values_policy_states"] = np.arange(
-        specs["min_SRA"],
-        specs["max_SRA"] + specs["SRA_grid_size"],
-        specs["SRA_grid_size"],
-    )
-
-    return specs
+def generate_specs_and_update_params(project_paths, start_params, load_data):
+    specs = generate_derived_and_data_derived_specs(project_paths, load_data=load_data)
+    # Assign income shock scale to start_params_all
+    start_params["sigma"] = specs["income_shock_scale"]
+    return specs, start_params
 
 
-def generate_derived_and_data_derived_specs(specs, project_paths, load_data=True):
-    specs = generate_derived_specs(specs)
+def generate_derived_and_data_derived_specs(project_paths, load_data=True):
+    specs = read_and_derive_specs(project_paths["spec_path"])
 
     # Generate belief transition matrix
     alpha_hat = gen_exp_val_params_and_plot(project_paths, None, load_data=load_data)
@@ -71,4 +61,23 @@ def generate_derived_and_data_derived_specs(specs, project_paths, load_data=True
     specs["max_init_experience"] = (
         data_decision["experience"] - data_decision["period"]
     ).max()
+    return specs
+
+
+def read_and_derive_specs(spec_path):
+    specs = yaml.safe_load(open(spec_path))
+
+    # Number of periods in model
+    specs["n_periods"] = specs["end_age"] - specs["start_age"] + 1
+    # you can retire from min retirement age until max retirement age
+    specs["n_possible_ret_ages"] = specs["max_ret_age"] - specs["min_ret_age"] + 1
+    specs["n_policy_states"] = int(
+        ((specs["max_SRA"] - specs["min_SRA"]) / specs["SRA_grid_size"]) + 1
+    )
+    specs["SRA_values_policy_states"] = np.arange(
+        specs["min_SRA"],
+        specs["max_SRA"] + specs["SRA_grid_size"],
+        specs["SRA_grid_size"],
+    )
+
     return specs

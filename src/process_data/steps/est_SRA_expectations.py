@@ -10,7 +10,7 @@ from scipy.stats import truncnorm
 
 
 def estimate_truncated_normal(paths, options, load_data=False):
-    out_file_path = paths["project_path"] + "output/policy_expect_data.pkl"
+    out_file_path = paths["intermediate_data"] + "policy_expect_data.pkl"
 
     if load_data:
         df_analysis = pd.read_pickle(out_file_path)

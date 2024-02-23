@@ -1,14 +1,22 @@
-# dependencies: 
-#   - original data saved on local machines, 
+# dependencies:
+#   - original data saved on local machines,
 #   - functions for steps 0-3 in src\steps folder
 #   - src\spec.yaml
 # output: data (decisions and outside_parameters) saved in output folder
 # %%
 # Step 0: Set paths and parameters
 # ----------------------------------------------------------------------------------------------
+import sys
+from pathlib import Path
 
-# Set user and specify load data from pickle files
-USER = input("Enter user name ([b]runo/ [m]ax): ")
+analysis_path = str(Path(__file__).resolve().parents[2]) + "/"
+sys.path.insert(0, analysis_path + "src/")
+
+from set_paths import create_path_dict
+
+paths_dict = create_path_dict(analysis_path, define_user=True)
+
+# Specify load data from pickle files
 custom_load_data = False
 load_data_prompt = input("Load data from pickle files? (y/n/[c]ustom for every step): ")
 if load_data_prompt == "y":
@@ -18,23 +26,11 @@ elif load_data_prompt == "n":
 else:
     custom_load_data = True
 
-# Set data paths according to user.
-import sys
-from pathlib import Path
-
-analysis_path = str(Path(__file__).resolve().parents[2]) + "/"
-sys.path.insert(0, analysis_path + "src/")
-
-from set_paths import create_path_dict
-
-paths_dict = create_path_dict(USER, analysis_path)
-
 # Load options and generate auxiliary options
-import yaml
-from derive_specs import generate_derived_specs
+from derive_specs import read_and_derive_specs
 
-project_specs = yaml.safe_load(open(analysis_path + "src/spec.yaml"))
-project_specs = generate_derived_specs(project_specs)
+
+project_specs = read_and_derive_specs(paths_dict["spec_path"])
 
 # %%
 # Step 1: Get choice and state variables from policy_step_sizeSOEP core and SOEP RV VSKT
@@ -57,7 +53,9 @@ dec_data = gather_decision_data(
 from process_data.steps.est_SRA_expectations import estimate_truncated_normal
 
 if custom_load_data:
-    LOAD_DATA = input("Load policy expectation parameters from pickle files? (y/n): ") == "y"
+    LOAD_DATA = (
+        input("Load policy expectation parameters from pickle files? (y/n): ") == "y"
+    )
 
 
 df_estimated_ret_age_expectations = estimate_truncated_normal(

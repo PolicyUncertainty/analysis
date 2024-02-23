@@ -1,19 +1,31 @@
-def create_path_dict(user, analysis_path):
-    if user == "b":
-        data_path = "C:/Users/bruno/papers/soep/"
-    elif user == "m":
-        data_path = "/home/maxbl/Uni/pol_uncetainty/data/"
-    else:
-        raise ValueError(
-            "Please specify valid USER in " "MASTER_prepare_structural_model.py."
-        )
+# Set data paths according to user.
 
-    # Set paths
+
+def create_path_dict(analysis_path, define_user=False):
+    if define_user:
+        user = input("Enter user name ([b]runo/ [m]ax): ")
+
+        if user == "b":
+            data_path = "C:/Users/bruno/papers/soep/"
+        elif user == "m":
+            data_path = "/home/maxbl/Uni/pol_uncetainty/data/"
+        else:
+            raise ValueError(
+                "Please specify valid USER in " "MASTER_prepare_structural_model.py."
+            )
+        # Set user specified paths
+        paths_dict = {
+            "soep_c38": data_path + "soep38",
+            "soep_rv": data_path + "soep_rv",
+            "soep_is": data_path + "soep_is_2022/dataset_main_SOEP_IS.dta",
+        }
+    else:
+        paths_dict = {}
+
     paths_dict = {
-        "soep_c38": data_path + "soep38",
-        "soep_rv": data_path + "soep_rv",
-        "soep_is": data_path + "soep_is_2022/dataset_main_SOEP_IS.dta",
-        "project_path": analysis_path,
-        "output_path": analysis_path + "output/",
+        **paths_dict,
+        "intermediate_data": analysis_path + "output/intermediate_data/",
+        "est_results": analysis_path + "output/est_results/",
+        "spec_path": analysis_path + "src/spec.yaml",
     }
     return paths_dict

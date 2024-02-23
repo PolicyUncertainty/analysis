@@ -3,7 +3,7 @@ import numpy as np
 from scipy.stats import norm
 
 
-def expected_SRA_probs_simulation(policy_state, period, choice, options):
+def realized_policy_step_function(policy_state, period, choice, options):
     # Check if the current period is a policy step period
     step_period = jnp.isin(period, options["policy_step_periods"])
     # Check if retirement is choosen

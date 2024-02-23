@@ -3,7 +3,7 @@ import pandas as pd
 
 
 def gather_decision_data(paths, options, load_data=False):
-    out_file_path = paths["project_path"] + "output/decision_data.pkl"
+    out_file_path = paths["intermediate_data"] + "decision_data.pkl"
     if load_data:
         data = pd.read_pickle(out_file_path)
         return data
@@ -42,7 +42,9 @@ def gather_decision_data(paths, options, load_data=False):
     merged_data["period"] = merged_data["age"] - start_age
 
     # lagged choice
-    merged_data = create_lagged_choice_variable(merged_data, start_year, end_year, start_age)
+    merged_data = create_lagged_choice_variable(
+        merged_data, start_year, end_year, start_age
+    )
 
     # policy_state
     merged_data["policy_state"] = create_policy_state(merged_data["gebjahr"])
@@ -209,6 +211,7 @@ def gather_wealth_data(soep_c38, merged_data, options):
 
     return merged_data
 
+
 def create_hh_cons_equivalence_data(merged_data):
     """This function creates the household consumption equivalence scale following the
     OECD-modified equivalence scale."""
@@ -221,12 +224,17 @@ def create_hh_cons_equivalence_data(merged_data):
     merged_data.loc[merged_data["n_children"] < 0] = 0
 
     # consumption equivalence scale
-    merged_data["cons_equiv"] = 1 + 0.5 * merged_data["has_partner"] + 0.3 * merged_data["n_children"]
+    merged_data["cons_equiv"] = (
+        1 + 0.5 * merged_data["has_partner"] + 0.3 * merged_data["n_children"]
+    )
 
     # drop missing values
     merged_data = merged_data[merged_data["cons_equiv"].notna()]
 
-    print(str(len(merged_data)) + " left after dropping people with missing consumption equivalence scale.")
+    print(
+        str(len(merged_data))
+        + " left after dropping people with missing consumption equivalence scale."
+    )
     return merged_data
 
 
@@ -281,7 +289,6 @@ def create_lagged_choice_variable(merged_data, start_year, end_year, start_age):
 
     # Delete people who are start_age - 1 years old
     merged_data = merged_data[merged_data["age"] >= start_age]
-
 
     print(str(len(merged_data)) + " left after filtering missing lagged choices.")
     return merged_data

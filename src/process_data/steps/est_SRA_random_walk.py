@@ -5,7 +5,7 @@ from statsmodels import api as sm
 
 
 def gen_exp_val_params_and_plot(paths, df, load_data=False):
-    output_file = paths["project_path"] + "output/exp_val_params.txt"
+    output_file = paths["est_results"] + "exp_val_params.txt"
     if load_data:
         return np.loadtxt(output_file)
 
@@ -24,19 +24,7 @@ def gen_exp_val_params_and_plot(paths, df, load_data=False):
     )
     print(model.fit().summary())
     alpha_hat = model.fit().params
-    fig, ax = plt.subplots()
-    ax.scatter(df[x_var], df[y_var], s=(df[weights] / df[weights].sum()) * 5000)
-    ax.plot(
-        df[x_var],
-        alpha_hat[0] * df[x_var],
-        "r",
-    )
-    ax.set_xlabel("Time to retirement")
-    ax.set_ylabel(
-        "Expected retirement age",
-    )
-    plt.savefig(paths["project_path"] + "output/exp_val_plot.png")
-    # plt.show()
+
     print(
         f"Estimated regression equation: E[ret age change] = "
         f"{alpha_hat[0]} * (Time to retirement)"
@@ -47,7 +35,7 @@ def gen_exp_val_params_and_plot(paths, df, load_data=False):
 
 
 def gen_var_params_and_plot(paths, df, load_data=False):
-    output_file = paths["project_path"] + "output/var_params.txt"
+    output_file = paths["est_results"] + "var_params.txt"
     x_var = "time_to_ret"
     y_var = "var"
     weights = "fweights"
@@ -73,20 +61,6 @@ def gen_var_params_and_plot(paths, df, load_data=False):
     # )
     # print(model.fit().summary())
     # coefficients = model.fit().params
-
-    fig, ax = plt.subplots()
-    ax.scatter(df[x_var], df[y_var], s=(df[weights] / df[weights].sum()) * 5000)
-    ax.plot(
-        df[x_var],
-        sigma_sq_hat[0] * df[x_var],
-        "r",
-    )
-    ax.set_xlabel("Time to retirement")
-    ax.set_ylabel(
-        "Expected retirement age",
-    )
-    plt.savefig(paths["project_path"] + "output/var_plot.png")
-    # plt.show()
 
     np.savetxt(output_file, sigma_sq_hat, delimiter=",")
     return sigma_sq_hat

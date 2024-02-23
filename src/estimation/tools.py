@@ -1,92 +1,118 @@
+import pickle
+
 import estimagic as em
 import numpy as np
-import yaml
+import pandas as pd
 from dcegm.likelihood import calc_choice_probs_for_observed_states
 from dcegm.likelihood import create_individual_likelihood_function_for_model
 from dcegm.likelihood import create_observed_choice_indexes
 from dcegm.solve import get_solve_func_for_model
-from derive_specs import generate_derived_and_data_derived_specs
+from derive_specs import generate_specs_and_update_params
 from model_code.budget_equation import create_savings_grid
+from model_code.policy_states import expected_SRA_probs_estimation
 from model_code.specify_model import specify_model
 
 
-def process_data_and_model(
-    data_decision, project_paths, start_params_all, load_model, output="likelihood"
-):
-    model, options, start_params_all = specify_model_and_options(
-        project_paths=project_paths,
-        start_params_all=start_params_all,
-        load_model=load_model,
-        step="estimation",
+def create_likelihood(data_decision, project_paths, start_params_all, load_model):
+    data_dict, model, options, savings_grid = prepare_estimation_model_and_data(
+        data_decision, project_paths, start_params_all, load_model
     )
 
-    # Prepare data for estimation with information from dcegm model. Retirees don't
-    # have any choice and therefore no information
-    data_decision = data_decision[data_decision["lagged_choice"] != 2]
-    # Now transform for dcegm
-    oberved_states_dict = {
-        name: data_decision[name].values for name in model["state_space_names"]
-    }
-    observed_wealth = data_decision["wealth"].values
-    observed_choices = data_decision["choice"].values
+    # Create likelihood function
+    individual_likelihood = create_individual_likelihood_function_for_model(
+        model=model,
+        options=options,
+        observed_states=data_dict["states"],
+        observed_wealth=data_dict["wealth"],
+        observed_choices=data_dict["choices"],
+        exog_savings_grid=savings_grid,
+        params_all=start_params_all,
+    )
+    return individual_likelihood
 
-    # Specifiy savings wealth grid
-    savings_grid = create_savings_grid()
 
-    if output == "likelihood":
-        # Create likelihood function
-        individual_likelihood = create_individual_likelihood_function_for_model(
-            model=model,
-            options=options,
-            observed_states=oberved_states_dict,
-            observed_wealth=observed_wealth,
-            observed_choices=observed_choices,
-            exog_savings_grid=savings_grid,
-            params_all=start_params_all,
+def compute_model_fit(project_paths, start_params_all, load_model, load_solution):
+    intermediate_data = project_paths["intermediate_data"]
+
+    data_decision = pd.read_pickle(intermediate_data + "decision_data.pkl")
+
+    if load_solution:
+        choice_probs_observations = pickle.load(
+            open(intermediate_data + "est_choice_probs.pkl", "rb")
         )
-        return individual_likelihood
-    elif output == "solved_model":
+    else:
+        data_dict, model, options, savings_grid = prepare_estimation_model_and_data(
+            data_decision, project_paths, start_params_all, load_model
+        )
+
         solve_func = get_solve_func_for_model(model, savings_grid, options)
         value, policy_left, policy_right, endog_grid = solve_func(start_params_all)
         observed_state_choice_indexes = create_observed_choice_indexes(
-            oberved_states_dict, model
+            data_dict["states"], model
         )
         choice_probs_observations = calc_choice_probs_for_observed_states(
             value_solved=value,
             endog_grid_solved=endog_grid,
             params=start_params_all,
-            observed_states=oberved_states_dict,
+            observed_states=data_dict["states"],
             state_choice_indexes=observed_state_choice_indexes,
-            oberseved_wealth=observed_wealth,
+            oberseved_wealth=data_dict["choices"],
             choice_range=np.arange(options["model_params"]["n_choices"], dtype=int),
             compute_utility=model["model_funcs"]["compute_utility"],
         )
-        return choice_probs_observations, value, policy_left, policy_right, endog_grid
-    else:
-        raise ValueError("Output must be either 'likelihood' or 'probabilities'")
+        choice_probs_observations = np.nan_to_num(choice_probs_observations, nan=0.0)
+        pickle.dump(
+            choice_probs_observations,
+            open(intermediate_data + "est_choice_probs.pkl", "wb"),
+        )
+
+    data_decision["choice_0"] = 0
+    data_decision["choice_1"] = 0
+    data_decision["choice_2"] = 1
+    data_decision.loc[
+        data_decision["lagged_choice"] != 2, "choice_0"
+    ] = choice_probs_observations[:, 0]
+    data_decision.loc[
+        data_decision["lagged_choice"] != 2, "choice_1"
+    ] = choice_probs_observations[:, 1]
+    data_decision.loc[
+        data_decision["lagged_choice"] != 2, "choice_2"
+    ] = choice_probs_observations[:, 2]
+    return data_decision
 
 
-def specify_model_and_options(project_paths, start_params_all, load_model, step):
-    analysis_path = project_paths["project_path"]
-    model_path = project_paths["model_path"]
-
+def prepare_estimation_model_and_data(
+    data_decision, project_paths, start_params_all, load_model
+):
     # Generate model_specs
-    project_specs = yaml.safe_load(open(analysis_path + "src/spec.yaml"))
-    project_specs = generate_derived_and_data_derived_specs(
-        project_specs, project_paths, load_data=True
+    project_specs, _ = generate_specs_and_update_params(
+        project_paths, start_params_all, load_data=True
     )
-    # Assign income shock scale to start_params_all
-    start_params_all["sigma"] = project_specs["income_shock_scale"]
 
     # Generate dcegm model for project specs
     model, options = specify_model(
         project_specs=project_specs,
-        model_data_path=model_path,
+        model_data_path=project_paths["intermediate_data"],
+        exog_trans_func=expected_SRA_probs_estimation,
         load_model=load_model,
-        step=step,
     )
     print("Model specified.")
-    return model, options, start_params_all
+
+    # Prepare data for estimation with information from dcegm model. Retirees don't
+    # have any choice and therefore no information
+    data_for_estimation = data_decision[data_decision["lagged_choice"] != 2]
+
+    data_dict = {}
+    # Now transform for dcegm
+    data_dict["states"] = {
+        name: data_for_estimation[name].values for name in model["state_space_names"]
+    }
+    data_dict["wealth"] = data_for_estimation["wealth"].values
+    data_dict["choices"] = data_for_estimation["choice"].values
+
+    # Specifiy savings wealth grid
+    savings_grid = create_savings_grid()
+    return data_dict, model, options, savings_grid
 
 
 def visualize_em_database(db_path):

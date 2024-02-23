@@ -1,31 +1,32 @@
 # %%
-import pickle
+# Set paths of project
 import sys
 from pathlib import Path
 
+analysis_path = str(Path(__file__).resolve().parents[2]) + "/"
+sys.path.insert(0, analysis_path + "submodules/dcegm/src/")
+sys.path.insert(0, analysis_path + "src/")
+
+from set_paths import create_path_dict
+
+paths_dict = create_path_dict(analysis_path)
+
+import pickle
 import jax
 import numpy as np
 import pandas as pd
 
-file_dir_path = str(Path(__file__).resolve().parents[0]) + "/"
-analysis_path = str(Path(__file__).resolve().parents[2]) + "/"
-
-project_paths = {
-    "project_path": analysis_path,
-    "model_path": file_dir_path + "results_and_data/",
-}
-sys.path.insert(0, analysis_path + "submodules/dcegm/src/")
-sys.path.insert(0, analysis_path + "src/")
 
 jax.config.update("jax_enable_x64", True)
 
-from estimation.tools import process_data_and_model
+# %%
+import os
 
-data_decision = pd.read_pickle(analysis_path + "output/decision_data.pkl")
-data_decision = data_decision[data_decision["lagged_choice"] != 2]
-# data_decision["policy_state"] = 8
+model_fit_dir = analysis_path + "output/plots/model_fits/"
+os.makedirs(model_fit_dir, exist_ok=True)
 
-res = pickle.load(open(file_dir_path + "results_and_data/res.pkl", "rb"))
+
+res = pickle.load(open(analysis_path + "output/est_results/res.pkl", "rb"))
 start_params_all = {
     # Utility parameters
     "mu": 0.5,
@@ -34,53 +35,23 @@ start_params_all = {
     "bequest_scale": res.params["bequest_scale"],
     # Taste and income shock scale
     "lambda": 1.0,
-    "sigma": 1.0,
     # Interest rate and discount factor
     "interest_rate": 0.03,
     "beta": 0.95,
 }
 
-# %%
-solved_model = process_data_and_model(
-    data_decision=data_decision,
+from estimation.tools import compute_model_fit
+
+data_decision = compute_model_fit(
     project_paths=project_paths,
     start_params_all=start_params_all,
     load_model=True,
-    output="solved_model",
+    load_solution=True,
 )
-pickle.dump(
-    solved_model, open(file_dir_path + "results_and_data/solved_model.pkl", "wb")
-)
-# %%
-# solved_model = pickle.load(
-#     open(file_dir_path + "results_and_data/solved_model.pkl", "rb")
-# )
-choice_probs_observations, value, policy_left, policy_right, endog_grid = solved_model
-choice_probs_observations = np.nan_to_num(choice_probs_observations, nan=0.0)
-# %%
-data_decision = pd.read_pickle(analysis_path + "output/decision_data.pkl")
 
-data_decision["choice_0"] = 0
-data_decision["choice_1"] = 0
-data_decision["choice_2"] = 1
-data_decision.loc[
-    data_decision["lagged_choice"] != 2, "choice_0"
-] = choice_probs_observations[:, 0]
-data_decision.loc[
-    data_decision["lagged_choice"] != 2, "choice_1"
-] = choice_probs_observations[:, 1]
-data_decision.loc[
-    data_decision["lagged_choice"] != 2, "choice_2"
-] = choice_probs_observations[:, 2]
 # generate age
 data_decision["age"] = data_decision["period"] + 30
 data_decision = data_decision[data_decision["age"] < 75]
-# %%
-import os
-
-os.makedirs(file_dir_path + "model_fits", exist_ok=True)
-model_fit_dir = file_dir_path + "model_fits/"
-
 
 age_range = np.arange(31, 70, 1)
 ax = (

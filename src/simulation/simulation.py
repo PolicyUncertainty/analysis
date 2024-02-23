@@ -45,7 +45,7 @@ model, options, start_params_all = specify_model_and_options(
     load_model=True,
     step="simulation",
 )
-from estimation.tools import process_data_and_model
+from estimation.tools import create_likelihood
 
 # data_decision = pd.read_pickle(analysis_path + "output/decision_data.pkl")
 #

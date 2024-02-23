@@ -1,5 +1,3 @@
-import pickle
-
 import jax.numpy as jnp
 import pandas as pd
 from dcegm.simulation.sim_utils import create_simulation_df
@@ -45,4 +43,21 @@ def simulate_scenario(
         model=model,
     )
     df = create_simulation_df(sim_dict)
+    df["age"] = (
+        df.index.get_level_values("period") + options["model_params"]["start_age"]
+    )
+
+    df["wealth_at_beginning"] = df["savings"] + df["consumption"]
+    # Create income var by shifting period of 1 of individuals and then substract
+    # savings from resoures at beginning of period
+    df["labor_income"] = df.groupby("agent")["wealth_at_beginning"].shift(-1) - df[
+        "savings"
+    ] * (1 + params["interest_rate"])
+    df["total_income"] = (
+        df.groupby("agent")["wealth_at_beginning"].shift(-1) - df["savings"]
+    )
+    df["savings_dec"] = (
+        df.groupby("agent")["total_income"].shift(-1) - df["consumption"]
+    )
+
     return df

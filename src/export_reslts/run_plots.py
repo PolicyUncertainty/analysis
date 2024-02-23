@@ -9,7 +9,11 @@ sys.path.insert(0, analysis_path + "src/")
 from set_paths import create_path_dict
 
 path_dict = create_path_dict(analysis_path)
+#
+# from export_reslts.figures.policy_state_trajectories import trajectory_plot
+#
+# trajectory_plot(path_dict)
 
-from export_reslts.figures.policy_state_trajectories import trajectory_plot
+from export_reslts.figures.sim_1_plots import plot_average_savings
 
-trajectory_plot(path_dict)
+plot_average_savings(path_dict)

@@ -1,6 +1,5 @@
 import pickle
 
-import estimagic as em
 from dcegm.solve import get_solve_func_for_model
 from model_code.budget_equation import create_savings_grid
 from model_code.specify_model import specify_model

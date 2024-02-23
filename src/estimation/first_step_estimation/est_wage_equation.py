@@ -1,29 +1,24 @@
 # Description: This file estimates the parameters of the MONTHLY wage equation using the SOEP data.
-# We estimate the following equation: 
+# We estimate the following equation:
 # wage = beta_0 + beta_1 * full_time_exp + beta_2 * full_time_exp^2 + individual_FE + time_FE + epsilon
-
 import numpy as np
 import pandas as pd
 from linearmodels.panel.model import PanelOLS
+from model_code.derive_specs import read_and_derive_specs
 
 
-def estimate_wage_parameters(paths, options, load_data=False):
-    out_file_path = paths["project_path"] + "output/wage_eq_params.csv"
-
-    if load_data:
-        coefficients = pd.read_csv(out_file_path, index_col=0)
-        return coefficients
-
+def estimate_wage_parameters(paths):
+    specs = read_and_derive_specs(paths["specs"])
     # unpack path to SOEP core
     soep_c38 = paths["soep_c38"]
 
     # unpack options
-    start_year = options["start_year"]
-    end_year = options["end_year"]
-    exp_cap = (options["exp_cap"],)
+    start_year = specs["start_year"]
+    end_year = specs["end_year"]
+    exp_cap = (specs["exp_cap"],)
     truncation_percentiles = [
-        options["wage_trunc_low_perc"],
-        options["wage_trunc_high_perc"],
+        specs["wage_trunc_low_perc"],
+        specs["wage_trunc_high_perc"],
     ]
 
     # get relevant data (sex, employment status, gross income, full time experience) from SOEP core
@@ -67,7 +62,7 @@ def estimate_wage_parameters(paths, options, load_data=False):
 
     # estimate parametric regression, save parameters
     model = PanelOLS(
-        dependent=merged_df["wage"] / options["wealth_unit"],
+        dependent=merged_df["wage"] / specs["wealth_unit"],
         exog=merged_df[["constant", "full_time_exp", "full_time_exp_sq"]],
         entity_effects=True,
         time_effects=True,
@@ -79,5 +74,5 @@ def estimate_wage_parameters(paths, options, load_data=False):
     print("Estimated wage equation coefficients:\n{}".format(coefficients.to_string()))
 
     # Export regression coefficients
-    coefficients.to_csv(out_file_path)
+    coefficients.to_csv(paths["est_results"] + "wage_eq_params.csv")
     return coefficients

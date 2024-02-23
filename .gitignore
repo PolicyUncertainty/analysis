@@ -10,3 +10,4 @@ policy_expect_data.pkl
 *.png
 *model*pkl
 *probs.pkl
+sim_data*.pkl

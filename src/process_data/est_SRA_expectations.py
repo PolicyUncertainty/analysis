@@ -5,12 +5,13 @@ from functools import partial
 
 import numpy as np
 import pandas as pd
+from process_data.gather_decision_data import create_policy_state
 from scipy.optimize import root
 from scipy.stats import truncnorm
 
 
 def estimate_truncated_normal(paths, options, load_data=False):
-    out_file_path = paths["project_path"] + "output/policy_expect_data.pkl"
+    out_file_path = paths["intermediate_data"] + "policy_expect_data.pkl"
 
     if load_data:
         df_analysis = pd.read_pickle(out_file_path)
@@ -51,6 +52,7 @@ def estimate_truncated_normal(paths, options, load_data=False):
     df_analysis = df_analysis[df_analysis["time_to_ret"] < 48]
 
     df_analysis["sigma_sq"] = df_analysis["var"] / df_analysis["time_to_ret"]
+    df_analysis["current_SRA"] = create_policy_state(df_analysis["birth_year"])
     df_analysis.to_pickle(out_file_path)
     return df_analysis
 

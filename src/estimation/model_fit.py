@@ -1,85 +1,80 @@
 # %%
-import pickle
+# Set paths of project
 import sys
 from pathlib import Path
 
+analysis_path = str(Path(__file__).resolve().parents[2]) + "/"
+sys.path.insert(0, analysis_path + "submodules/dcegm/src/")
+sys.path.insert(0, analysis_path + "src/")
+
+from set_paths import create_path_dict
+
+paths_dict = create_path_dict(analysis_path)
+
+import pickle
 import jax
 import numpy as np
 import pandas as pd
 
-file_dir_path = str(Path(__file__).resolve().parents[0]) + "/"
-analysis_path = str(Path(__file__).resolve().parents[2]) + "/"
-
-project_paths = {
-    "project_path": analysis_path,
-    "model_path": file_dir_path + "results_and_data/",
-}
-sys.path.insert(0, analysis_path + "submodules/dcegm/src/")
-sys.path.insert(0, analysis_path + "src/")
 
 jax.config.update("jax_enable_x64", True)
 
-from estimation.tools import process_data_and_model
-
-data_decision = pd.read_pickle(analysis_path + "output/decision_data.pkl")
-data_decision = data_decision[data_decision["lagged_choice"] != 2]
-# data_decision["policy_state"] = 8
-
-res = pickle.load(open(file_dir_path + "results_and_data/res.pkl", "rb"))
-start_params_all = {
-    # Utility parameters
-    "mu": 0.5,
-    "dis_util_work": res.params["dis_util_work"],
-    "dis_util_unemployed": res.params["dis_util_unemployed"],
-    "bequest_scale": res.params["bequest_scale"],
-    # Taste and income shock scale
-    "lambda": 1.0,
-    "sigma": 1.0,
-    # Interest rate and discount factor
-    "interest_rate": 0.03,
-    "beta": 0.95,
-}
-
-# %%
-solved_model = process_data_and_model(
-    data_decision=data_decision,
-    project_paths=project_paths,
-    start_params_all=start_params_all,
-    load_model=True,
-    output="solved_model",
-)
-pickle.dump(
-    solved_model, open(file_dir_path + "results_and_data/solved_model_67.pkl", "wb")
-)
-# %%
-# solved_model = pickle.load(
-#     open(file_dir_path + "results_and_data/solved_model.pkl", "rb")
-# )
-choice_probs_observations, value, policy_left, policy_right, endog_grid = solved_model
-choice_probs_observations = np.nan_to_num(choice_probs_observations, nan=0.0)
-# %%
-data_decision = pd.read_pickle(analysis_path + "output/decision_data.pkl")
-
-data_decision["choice_0"] = 0
-data_decision["choice_1"] = 0
-data_decision["choice_2"] = 1
-data_decision.loc[
-    data_decision["lagged_choice"] != 2, "choice_0"
-] = choice_probs_observations[:, 0]
-data_decision.loc[
-    data_decision["lagged_choice"] != 2, "choice_1"
-] = choice_probs_observations[:, 1]
-data_decision.loc[
-    data_decision["lagged_choice"] != 2, "choice_2"
-] = choice_probs_observations[:, 2]
-# generate age
-data_decision["age"] = data_decision["period"] + 30
-data_decision = data_decision[data_decision["age"] < 75]
 # %%
 import os
 
-os.makedirs(file_dir_path + "model_fits", exist_ok=True)
-model_fit_dir = file_dir_path + "model_fits/"
+model_fit_dir = analysis_path + "output/plots/model_fits/"
+os.makedirs(model_fit_dir, exist_ok=True)
+
+
+est_params = pickle.load(open(paths_dict["est_results"] + "est_params.pkl", "rb"))
+
+from model_code.model_solver import solve_model
+from model_code.policy_states_belief import expected_SRA_probs_estimation
+from model_code.policy_states_belief import update_specs_exp_ret_age_trans_mat
+
+est_model = solve_model(
+    path_dict=paths_dict,
+    params=est_params,
+    update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
+    policy_state_trans_func=expected_SRA_probs_estimation,
+    file_append="est",
+    load_model=True,
+    load_solution=True,
+)
+
+from model_code.specify_model import specify_model
+
+model, options, params = specify_model(
+    path_dict=paths_dict,
+    params=est_params,
+    update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
+    policy_state_trans_func=expected_SRA_probs_estimation,
+    load_model=True,
+)
+
+data_decision = pd.read_pickle(paths_dict["intermediate_data"] + "decision_data.pkl")
+data_decision["age"] = data_decision["period"] + 30
+data_decision = data_decision[data_decision["age"] < 75]
+
+from dcegm.likelihood import create_observed_choice_indexes
+from dcegm.likelihood import calc_choice_probs_for_observed_states
+
+states_dict = {name: data_decision[name].values for name in model["state_space_names"]}
+observed_state_choice_indexes = create_observed_choice_indexes(states_dict, model)
+choice_probs_observations = calc_choice_probs_for_observed_states(
+    value_solved=est_model["value"],
+    endog_grid_solved=est_model["endog_grid"],
+    params=est_params,
+    observed_states=states_dict,
+    state_choice_indexes=observed_state_choice_indexes,
+    oberseved_wealth=data_decision["wealth"].values,
+    choice_range=np.arange(options["model_params"]["n_choices"], dtype=int),
+    compute_utility=model["model_funcs"]["compute_utility"],
+)
+choice_probs_observations = np.nan_to_num(choice_probs_observations, nan=0.0)
+data_decision["choice_0"] = choice_probs_observations[:, 0]
+data_decision["choice_1"] = choice_probs_observations[:, 1]
+data_decision["choice_2"] = choice_probs_observations[:, 2]
 
 
 age_range = np.arange(31, 70, 1)

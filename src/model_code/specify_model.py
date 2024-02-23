@@ -1,28 +1,35 @@
 import numpy as np
 from dcegm.pre_processing.setup_model import load_and_setup_model
 from dcegm.pre_processing.setup_model import setup_and_save_model
-from model_code.belief_process import expected_SRA_probs_estimation
-from model_code.belief_process import expected_SRA_probs_simulation
 from model_code.budget_equation import budget_constraint
+from model_code.derive_specs import generate_specs_and_update_params
 from model_code.state_space import create_state_space_functions
 from model_code.state_space import sparsity_condition
 from model_code.utility_functions import create_final_period_utility_functions
 from model_code.utility_functions import create_utility_functions
 
 
-def specify_model(project_specs, model_data_path, load_model=False, step="estimation"):
-    # Load specifications
-    n_periods = project_specs["n_periods"]
-    n_possible_ret_ages = project_specs["n_possible_ret_ages"]
-    n_policy_states = project_specs["n_policy_states"]
-    choices = np.arange(project_specs["n_choices"], dtype=int)
+def specify_model(
+    path_dict,
+    update_spec_for_policy_state,
+    policy_state_trans_func,
+    params,
+    load_model=False,
+):
+    # Generate model_specs
+    specs, params = generate_specs_and_update_params(path_dict, params)
 
-    if step == "estimation":
-        exog_trans_func = expected_SRA_probs_estimation
-    elif step == "simulation":
-        exog_trans_func = expected_SRA_probs_simulation
-    else:
-        raise ValueError("Step must be either 'estimation' or 'simulation'")
+    # Execute load first step estimation data
+    specs = update_spec_for_policy_state(
+        specs=specs,
+        path_dict=path_dict,
+    )
+
+    # Load specifications
+    n_periods = specs["n_periods"]
+    n_possible_ret_ages = specs["n_possible_ret_ages"]
+    n_policy_states = specs["n_policy_states"]
+    choices = np.arange(specs["n_choices"], dtype=int)
 
     options = {
         "state_space": {
@@ -35,12 +42,12 @@ def specify_model(project_specs, model_data_path, load_model=False, step="estima
             },
             "exogenous_processes": {
                 "policy_state": {
-                    "transition": exog_trans_func,
+                    "transition": policy_state_trans_func,
                     "states": np.arange(n_policy_states, dtype=int),
                 },
             },
         },
-        "model_params": project_specs,
+        "model_params": specs,
     }
 
     if load_model:
@@ -50,7 +57,7 @@ def specify_model(project_specs, model_data_path, load_model=False, step="estima
             utility_functions=create_utility_functions(),
             utility_functions_final_period=create_final_period_utility_functions(),
             budget_constraint=budget_constraint,
-            path=model_data_path + "model.pkl",
+            path=path_dict["intermediate_data"] + "model.pkl",
         )
 
     else:
@@ -60,7 +67,8 @@ def specify_model(project_specs, model_data_path, load_model=False, step="estima
             utility_functions=create_utility_functions(),
             utility_functions_final_period=create_final_period_utility_functions(),
             budget_constraint=budget_constraint,
-            path=model_data_path + "model.pkl",
+            path=path_dict["intermediate_data"] + "model.pkl",
         )
 
-    return model, options
+    print("Model specified.")
+    return model, options, params

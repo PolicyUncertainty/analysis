@@ -27,38 +27,47 @@ os.makedirs(model_fit_dir, exist_ok=True)
 
 
 est_params = pickle.load(open(paths_dict["est_results"] + "est_params.pkl", "rb"))
-from estimation.tools import generate_model_to_estimate
 
-model, options, est_params = generate_model_to_estimate(
+from model_code.model_solver import solve_model
+from model_code.policy_states_belief import expected_SRA_probs_estimation
+from model_code.policy_states_belief import exp_ret_age_transition_matrix
+
+est_model = solve_model(
     project_paths=paths_dict,
-    start_params_all=est_params,
+    params=est_params,
+    update_spec_for_policy_state=exp_ret_age_transition_matrix,
+    policy_state_trans_func=expected_SRA_probs_estimation,
+    file_append="est",
     load_model=True,
+    load_solution=True,
 )
 
-from estimation.tools import solve_estimated_model
+from model_code.specify_model import specify_model
 
-est_model = solve_estimated_model(paths_dict, est_params, True, True)
-
-from estimation.tools import process_data_for_dcegm
+model, options, params = specify_model(
+    project_paths=paths_dict,
+    params=est_params,
+    update_spec_for_policy_state=exp_ret_age_transition_matrix,
+    policy_state_trans_func=expected_SRA_probs_estimation,
+    load_model=True,
+)
 
 data_decision = pd.read_pickle(paths_dict["intermediate_data"] + "decision_data.pkl")
 data_decision["age"] = data_decision["period"] + 30
 data_decision = data_decision[data_decision["age"] < 75]
-data_dict = process_data_for_dcegm(data_decision, model["state_space_names"])
 
 from dcegm.likelihood import create_observed_choice_indexes
 from dcegm.likelihood import calc_choice_probs_for_observed_states
 
-observed_state_choice_indexes = create_observed_choice_indexes(
-    data_dict["states"], model
-)
+states_dict = {name: data_decision[name].values for name in model["state_space_names"]}
+observed_state_choice_indexes = create_observed_choice_indexes(states_dict, model)
 choice_probs_observations = calc_choice_probs_for_observed_states(
     value_solved=est_model["value"],
     endog_grid_solved=est_model["endog_grid"],
     params=est_params,
-    observed_states=data_dict["states"],
+    observed_states=states_dict,
     state_choice_indexes=observed_state_choice_indexes,
-    oberseved_wealth=data_dict["choices"],
+    oberseved_wealth=data_decision["wealth"].values,
     choice_range=np.arange(options["model_params"]["n_choices"], dtype=int),
     compute_utility=model["model_funcs"]["compute_utility"],
 )

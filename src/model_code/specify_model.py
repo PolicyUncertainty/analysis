@@ -2,13 +2,29 @@ import numpy as np
 from dcegm.pre_processing.setup_model import load_and_setup_model
 from dcegm.pre_processing.setup_model import setup_and_save_model
 from model_code.budget_equation import budget_constraint
+from model_code.derive_specs import generate_specs_and_update_params
 from model_code.state_space import create_state_space_functions
 from model_code.state_space import sparsity_condition
 from model_code.utility_functions import create_final_period_utility_functions
 from model_code.utility_functions import create_utility_functions
 
 
-def specify_model(specs, model_data_path, exog_trans_func, load_model=False):
+def specify_model(
+    project_paths,
+    update_spec_for_policy_state,
+    policy_state_trans_func,
+    params,
+    load_model=False,
+):
+    # Generate model_specs
+    specs, params = generate_specs_and_update_params(project_paths, params)
+
+    # Execute load first step estimation data
+    specs = update_spec_for_policy_state(
+        specs=specs,
+        project_paths=project_paths,
+    )
+
     # Load specifications
     n_periods = specs["n_periods"]
     n_possible_ret_ages = specs["n_possible_ret_ages"]
@@ -26,7 +42,7 @@ def specify_model(specs, model_data_path, exog_trans_func, load_model=False):
             },
             "exogenous_processes": {
                 "policy_state": {
-                    "transition": exog_trans_func,
+                    "transition": policy_state_trans_func,
                     "states": np.arange(n_policy_states, dtype=int),
                 },
             },
@@ -41,7 +57,7 @@ def specify_model(specs, model_data_path, exog_trans_func, load_model=False):
             utility_functions=create_utility_functions(),
             utility_functions_final_period=create_final_period_utility_functions(),
             budget_constraint=budget_constraint,
-            path=model_data_path + "model.pkl",
+            path=project_paths["intermediate_data"] + "model.pkl",
         )
 
     else:
@@ -51,7 +67,8 @@ def specify_model(specs, model_data_path, exog_trans_func, load_model=False):
             utility_functions=create_utility_functions(),
             utility_functions_final_period=create_final_period_utility_functions(),
             budget_constraint=budget_constraint,
-            path=model_data_path + "model.pkl",
+            path=project_paths["intermediate_data"] + "model.pkl",
         )
 
-    return model, options
+    print("Model specified.")
+    return model, options, params

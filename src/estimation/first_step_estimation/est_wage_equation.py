@@ -3,22 +3,22 @@
 # wage = beta_0 + beta_1 * full_time_exp + beta_2 * full_time_exp^2 + individual_FE + time_FE + epsilon
 import numpy as np
 import pandas as pd
-from derive_specs import read_and_derive_specs
 from linearmodels.panel.model import PanelOLS
+from model_code.derive_specs import read_and_derive_specs
 
 
 def estimate_wage_parameters(paths):
-    specs = read_and_derive_specs(paths["spec_path"])
+    specs = read_and_derive_specs(paths["specs"])
     # unpack path to SOEP core
     soep_c38 = paths["soep_c38"]
 
     # unpack options
-    start_year = options["start_year"]
-    end_year = options["end_year"]
-    exp_cap = (options["exp_cap"],)
+    start_year = specs["start_year"]
+    end_year = specs["end_year"]
+    exp_cap = (specs["exp_cap"],)
     truncation_percentiles = [
-        options["wage_trunc_low_perc"],
-        options["wage_trunc_high_perc"],
+        specs["wage_trunc_low_perc"],
+        specs["wage_trunc_high_perc"],
     ]
 
     # get relevant data (sex, employment status, gross income, full time experience) from SOEP core
@@ -62,7 +62,7 @@ def estimate_wage_parameters(paths):
 
     # estimate parametric regression, save parameters
     model = PanelOLS(
-        dependent=merged_df["wage"] / options["wealth_unit"],
+        dependent=merged_df["wage"] / specs["wealth_unit"],
         exog=merged_df[["constant", "full_time_exp", "full_time_exp_sq"]],
         entity_effects=True,
         time_effects=True,

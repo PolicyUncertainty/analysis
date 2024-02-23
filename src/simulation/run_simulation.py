@@ -26,19 +26,17 @@ from estimation.tools import solve_estimated_model
 
 
 est_params = pickle.load(open(path_dict["est_results"] + "est_params.pkl", "rb"))
-specs, est_params = generate_specs_and_update_params(path_dict, est_params)
 
 model_solution_est = solve_estimated_model(
     path_dict, est_params, load_model=True, load_solution=True
 )
 
-specs = update_specs_for_step_function(specs, path_dict)
 data_sim = simulate_scenario(
     path_dict=path_dict,
     params=est_params,
-    specs=specs,
     n_agents=1000,
     seed=123,
+    update_spec_for_policy_state=update_specs_for_step_function,
     policy_state_func_scenario=realized_policy_step_function,
     expected_model=model_solution_est,
 )

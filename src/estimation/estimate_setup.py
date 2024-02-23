@@ -3,9 +3,10 @@ import pickle
 import estimagic as em
 import pandas as pd
 from dcegm.likelihood import create_individual_likelihood_function_for_model
-from estimation.tools import generate_model_to_estimate
-from estimation.tools import process_data_for_dcegm
 from model_code.budget_equation import create_savings_grid
+from model_code.policy_states_belief import exp_ret_age_transition_matrix
+from model_code.policy_states_belief import expected_SRA_probs_estimation
+from model_code.specify_model import specify_model
 
 
 def estimate_model(project_paths, load_model):
@@ -22,26 +23,34 @@ def estimate_model(project_paths, load_model):
         "beta": 0.95,
     }
 
-    model, options, start_params_all = generate_model_to_estimate(
+    model, options, params = specify_model(
         project_paths=project_paths,
-        start_params_all=start_params_all,
+        params=start_params_all,
+        update_spec_for_policy_state=exp_ret_age_transition_matrix,
+        policy_state_trans_func=expected_SRA_probs_estimation,
         load_model=load_model,
     )
+
+    # Load data
     data_decision = pd.read_pickle(
         project_paths["intermediate_data"] + "decision_data.pkl"
     )
     data_decision = data_decision[data_decision["lagged_choice"] != 2]
-    data_dict = process_data_for_dcegm(data_decision, model["state_space_names"])
+    # Now transform for dcegm
+    states_dict = {
+        name: data_decision[name].values for name in model["state_space_names"]
+    }
 
+    # Create savings grid
     savings_grid = create_savings_grid()
 
     # Create likelihood function
     individual_likelihood = create_individual_likelihood_function_for_model(
         model=model,
         options=options,
-        observed_states=data_dict["states"],
-        observed_wealth=data_dict["wealth"],
-        observed_choices=data_dict["choices"],
+        observed_states=states_dict,
+        observed_wealth=data_decision["wealth"].values,
+        observed_choices=data_decision["choice"].values,
         exog_savings_grid=savings_grid,
         params_all=start_params_all,
     )

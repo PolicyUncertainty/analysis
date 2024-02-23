@@ -9,13 +9,20 @@ from model_code.specify_model import specify_model
 
 
 def simulate_scenario(
-    path_dict, params, specs, n_agents, seed, policy_state_func_scenario, expected_model
+    path_dict,
+    n_agents,
+    seed,
+    params,
+    update_spec_for_policy_state,
+    policy_state_func_scenario,
+    expected_model,
 ):
     # Generate dcegm model for project specs
-    model, options = specify_model(
-        project_specs=specs,
-        model_data_path=path_dict["intermediate_data"],
-        exog_trans_func=policy_state_func_scenario,
+    model, options, params = specify_model(
+        project_paths=path_dict,
+        params=params,
+        update_spec_for_policy_state=update_spec_for_policy_state,
+        policy_state_trans_func=policy_state_func_scenario,
         load_model=True,
     )
 

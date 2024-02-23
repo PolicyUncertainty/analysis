@@ -17,13 +17,14 @@ def realized_policy_step_function(policy_state, period, choice, options):
     )
 
     # Now generate vector
-    n_exog_states = options["beliefs_trans_mat"].shape[0]
-    trans_vector = jnp.zeros(n_exog_states)
+    trans_vector = jnp.zeros(options["n_policy_states"])
     trans_vector = trans_vector.at[id_next_period].set(1)
     return trans_vector
 
 
-def update_specs_for_step_function(specs, alpha_hat):
+def update_specs_for_step_function(specs, path_dict):
+    # Load the estimates
+    alpha_hat = np.loadtxt(path_dict["est_results"] + "var_params.txt")
     # Generate policy state steps for individuals who start in 0. First calculate the
     # per year expected increase in policy state
     life_span = specs["end_age"] - specs["start_age"] + 1

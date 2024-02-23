@@ -30,7 +30,7 @@ else:
 from derive_specs import read_and_derive_specs
 
 
-project_specs = read_and_derive_specs(paths_dict["specs"])
+specs = read_and_derive_specs(paths_dict["specs"])
 
 # %%
 # Step 1: Get choice and state variables from policy_step_sizeSOEP core and SOEP RV VSKT
@@ -42,7 +42,7 @@ if custom_load_data:
 
 gather_decision_data(
     paths_dict,
-    project_specs,
+    specs,
     load_data=LOAD_DATA,
 )
 
@@ -56,4 +56,4 @@ if custom_load_data:
         input("Load policy expectation parameters from pickle files? (y/n): ") == "y"
     )
 
-estimate_truncated_normal(paths_dict, project_specs, load_data=LOAD_DATA)
+estimate_truncated_normal(paths_dict, specs, load_data=LOAD_DATA)

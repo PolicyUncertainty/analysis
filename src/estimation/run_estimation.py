@@ -15,12 +15,8 @@ paths_dict = create_path_dict(analysis_path, define_user=do_first_step)
 import jax
 
 jax.config.update("jax_enable_x64", True)
-
-# Import the rest
-import pickle
 import pandas as pd
-import estimagic as em
-from estimation.tools import create_likelihood
+from estimation.estimate_setup import estimate_model
 
 
 if do_first_step:
@@ -43,71 +39,8 @@ if do_first_step:
 
     estimate_wage_parameters(paths_dict)
 
+estimate_model(paths_dict, load_model=True)
 
-data_decision = pd.read_pickle(paths_dict["intermediate_data"] + "decision_data.pkl")
-
-start_params_all = {
-    # Utility parameters
-    "mu": 0.5,
-    "dis_util_work": 4.0,
-    "dis_util_unemployed": 1.0,
-    "bequest_scale": 2.0,
-    # Taste and income shock scale
-    "lambda": 1.0,
-    # Interest rate and discount factor
-    "interest_rate": 0.03,
-    "beta": 0.95,
-}
-
-
-params_to_estimate_names = [
-    # "mu",
-    "dis_util_work",
-    "dis_util_unemployed",
-    "bequest_scale",
-    # "lambda",
-    # "sigma",
-]
-start_params = {name: start_params_all[name] for name in params_to_estimate_names}
-
-
-lower_bounds = {
-    "dis_util_work": 1e-12,
-    "dis_util_unemployed": 1e-12,
-    "bequest_scale": 1e-12,
-    # "lambda": 1e-12,
-}
-upper_bounds = {
-    "dis_util_work": 100,
-    "dis_util_unemployed": 100,
-    "bequest_scale": 10,
-    # "lambda": 100,
-}
-
-individual_likelihood = create_likelihood(
-    data_decision=data_decision,
-    project_paths=paths_dict,
-    start_params_all=start_params_all,
-    load_model=True,
-)
-
-
-def individual_likelihood_print(params):
-    ll_value = individual_likelihood(params)
-    print("Params, ", params, " with ll value, ", ll_value)
-    return ll_value
-
-
-result = em.minimize(
-    criterion=individual_likelihood_print,
-    params=start_params,
-    lower_bounds=lower_bounds,
-    upper_bounds=upper_bounds,
-    algorithm="scipy_lbfgsb",
-    logging="test_log.db",
-    error_handling="continue",
-)
-pickle.dump(result, open(paths_dict["est_results"] + "res.pkl", "wb"))
 
 #
 # # Create likelihood function for estimation

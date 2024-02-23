@@ -20,21 +20,11 @@ import pandas as pd
 import numpy as np
 import pickle
 
-res = pickle.load(open(path_dict["est_results"] + "res.pkl", "rb"))
+est_params = pickle.load(open(path_dict["est_results"] + "est_params.pkl", "rb"))
+from derive_specs import generate_specs_and_update_params
 
-start_params_all = {
-    # Utility parameters
-    "mu": 0.5,
-    "dis_util_work": res.params["dis_util_work"],
-    "dis_util_unemployed": res.params["dis_util_unemployed"],
-    "bequest_scale": res.params["bequest_scale"],
-    # Taste and income shock scale
-    "lambda": 1.0,
-    # Interest rate and discount factor
-    "interest_rate": 0.03,
-    "beta": 0.95,
-}
-breakpoint()
+specs, start_params_all = generate_specs_and_update_params(path_dict, est_params)
+
 
 # from estimation.tools import specify_model_and_options
 # from model_code.initial_conditions_sim import generate_start_states

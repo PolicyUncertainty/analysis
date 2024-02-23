@@ -3,14 +3,14 @@ import pandas as pd
 import yaml
 
 
-def generate_specs_and_update_params(project_paths, start_params, load_data):
-    specs = generate_derived_and_data_derived_specs(project_paths, load_data=load_data)
+def generate_specs_and_update_params(project_paths, start_params):
+    specs = generate_derived_and_data_derived_specs(project_paths)
     # Assign income shock scale to start_params_all
     start_params["sigma"] = specs["income_shock_scale"]
     return specs, start_params
 
 
-def generate_derived_and_data_derived_specs(project_paths, load_data=True):
+def generate_derived_and_data_derived_specs(project_paths):
     specs = read_and_derive_specs(project_paths["specs"])
 
     # Generate number of policy states between 67 and min_SRA

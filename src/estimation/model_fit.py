@@ -26,32 +26,47 @@ model_fit_dir = analysis_path + "output/plots/model_fits/"
 os.makedirs(model_fit_dir, exist_ok=True)
 
 
-res = pickle.load(open(analysis_path + "output/est_results/res.pkl", "rb"))
-start_params_all = {
-    # Utility parameters
-    "mu": 0.5,
-    "dis_util_work": res.params["dis_util_work"],
-    "dis_util_unemployed": res.params["dis_util_unemployed"],
-    "bequest_scale": res.params["bequest_scale"],
-    # Taste and income shock scale
-    "lambda": 1.0,
-    # Interest rate and discount factor
-    "interest_rate": 0.03,
-    "beta": 0.95,
-}
+est_params = pickle.load(open(paths_dict["est_results"] + "est_params.pkl", "rb"))
+from estimation.tools import generate_model_to_estimate
 
-from estimation.tools import compute_model_fit
-
-data_decision = compute_model_fit(
+model, options, est_params = generate_model_to_estimate(
     project_paths=paths_dict,
-    start_params_all=start_params_all,
+    start_params_all=est_params,
     load_model=True,
-    load_solution=True,
 )
 
-# generate age
+from estimation.tools import solve_estimated_model
+
+est_model = solve_estimated_model(paths_dict, est_params, True, True)
+
+from estimation.tools import process_data_for_dcegm
+
+data_decision = pd.read_pickle(paths_dict["intermediate_data"] + "decision_data.pkl")
 data_decision["age"] = data_decision["period"] + 30
 data_decision = data_decision[data_decision["age"] < 75]
+data_dict = process_data_for_dcegm(data_decision, model["state_space_names"])
+
+from dcegm.likelihood import create_observed_choice_indexes
+from dcegm.likelihood import calc_choice_probs_for_observed_states
+
+observed_state_choice_indexes = create_observed_choice_indexes(
+    data_dict["states"], model
+)
+choice_probs_observations = calc_choice_probs_for_observed_states(
+    value_solved=est_model["value"],
+    endog_grid_solved=est_model["endog_grid"],
+    params=est_params,
+    observed_states=data_dict["states"],
+    state_choice_indexes=observed_state_choice_indexes,
+    oberseved_wealth=data_dict["choices"],
+    choice_range=np.arange(options["model_params"]["n_choices"], dtype=int),
+    compute_utility=model["model_funcs"]["compute_utility"],
+)
+choice_probs_observations = np.nan_to_num(choice_probs_observations, nan=0.0)
+data_decision["choice_0"] = choice_probs_observations[:, 0]
+data_decision["choice_1"] = choice_probs_observations[:, 1]
+data_decision["choice_2"] = choice_probs_observations[:, 2]
+
 
 age_range = np.arange(31, 70, 1)
 ax = (

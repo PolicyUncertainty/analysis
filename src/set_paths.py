@@ -26,6 +26,6 @@ def create_path_dict(analysis_path, define_user=False):
         **paths_dict,
         "intermediate_data": analysis_path + "output/intermediate_data/",
         "est_results": analysis_path + "output/est_results/",
-        "spec_path": analysis_path + "src/spec.yaml",
+        "specs": analysis_path + "src/spec.yaml",
     }
     return paths_dict

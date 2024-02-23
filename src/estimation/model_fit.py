@@ -43,7 +43,7 @@ start_params_all = {
 from estimation.tools import compute_model_fit
 
 data_decision = compute_model_fit(
-    project_paths=project_paths,
+    project_paths=paths_dict,
     start_params_all=start_params_all,
     load_model=True,
     load_solution=True,

@@ -1,12 +1,6 @@
 import numpy as np
+import pandas as pd
 import yaml
-from model_code.policy_states import exp_ret_age_transition_matrix
-from process_data.steps.est_SRA_random_walk import gen_exp_val_params_and_plot
-from process_data.steps.est_SRA_random_walk import gen_var_params_and_plot
-from process_data.steps.est_wage_equation import (
-    estimate_wage_parameters,
-)
-from process_data.steps.gather_decision_data import gather_decision_data
 
 
 def generate_specs_and_update_params(project_paths, start_params, load_data):
@@ -17,31 +11,13 @@ def generate_specs_and_update_params(project_paths, start_params, load_data):
 
 
 def generate_derived_and_data_derived_specs(project_paths, load_data=True):
-    specs = read_and_derive_specs(project_paths["spec_path"])
-
-    # Generate belief transition matrix
-    alpha_hat = gen_exp_val_params_and_plot(project_paths, None, load_data=load_data)
-    sigma_sq_hat = gen_var_params_and_plot(project_paths, None, load_data=load_data)
-    # Generate policy state steps for individuals who start in 0. First calculate the
-    # per year expected increase in policy state
-    life_span = specs["end_age"] - specs["start_age"] + 1
-    per_period_expec_increase = np.arange(life_span) * alpha_hat
-    # Then round to the nearest value, which you can do by multiplying with the
-    # inverse of the grid size. In the baseline case 1 / 0.25 = 4
-    multiplier = 1 / specs["SRA_grid_size"]
-    policy_state_ids = np.round(per_period_expec_increase * multiplier)
-    specs["policy_step_periods"] = (
-        np.where(policy_state_ids > np.roll(policy_state_ids, shift=1))[0] - 1
-    )
-
-    specs["beliefs_trans_mat"] = exp_ret_age_transition_matrix(
-        options=specs,
-        alpha_hat=alpha_hat,
-        sigma_sq_hat=sigma_sq_hat,
-    )
+    specs = read_and_derive_specs(project_paths["specs"])
 
     # Generate number of policy states between 67 and min_SRA
-    wage_params = estimate_wage_parameters(project_paths, specs, load_data=load_data)
+    wage_params = pd.read_csv(
+        project_paths["est_results"] + "wage_eq_params.csv", index_col=0
+    )
+
     specs["gamma_0"] = wage_params.loc["constant", "parameter"]
     specs["gamma_1"] = wage_params.loc["full_time_exp", "parameter"]
     specs["gamma_2"] = wage_params.loc["full_time_exp_sq", "parameter"]
@@ -57,7 +33,9 @@ def generate_derived_and_data_derived_specs(project_paths, load_data=True):
     specs["pension_point_value"] = wage_grid.mean() / 40 * 0.48
 
     # max initial experience
-    data_decision = gather_decision_data(project_paths, specs, load_data=load_data)
+    data_decision = pd.read_pickle(
+        project_paths["intermediate_data"] + "decision_data.pkl"
+    )
     specs["max_init_experience"] = (
         data_decision["experience"] - data_decision["period"]
     ).max()

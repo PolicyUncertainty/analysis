@@ -8,7 +8,8 @@ sys.path.insert(0, analysis_path + "src/")
 
 from set_paths import create_path_dict
 
-paths_dict = create_path_dict(analysis_path)
+do_first_step = input("Do first step estimation? (y/n): ") == "y"
+paths_dict = create_path_dict(analysis_path, define_user=do_first_step)
 
 # Import jax and set jax to work with 64bit
 import jax
@@ -20,6 +21,27 @@ import pickle
 import pandas as pd
 import estimagic as em
 from estimation.tools import create_likelihood
+
+
+if do_first_step:
+    # Estimate policy expectation
+    from estimation.first_step_estimation.est_SRA_random_walk import (
+        estimate_expected_SRA_variance,
+        est_expected_SRA,
+    )
+
+    data_expectation = pd.read_pickle(
+        paths_dict["intermediate_data"] + "policy_expect_data.pkl"
+    )
+    est_expected_SRA(paths_dict, data_expectation)
+    estimate_expected_SRA_variance(paths_dict, data_expectation)
+
+    # Estimate wage parameter
+    from estimation.first_step_estimation.est_wage_equation import (
+        estimate_wage_parameters,
+    )
+
+    estimate_wage_parameters(paths_dict)
 
 
 data_decision = pd.read_pickle(paths_dict["intermediate_data"] + "decision_data.pkl")
@@ -64,7 +86,7 @@ upper_bounds = {
 
 individual_likelihood = create_likelihood(
     data_decision=data_decision,
-    project_paths=project_paths,
+    project_paths=paths_dict,
     start_params_all=start_params_all,
     load_model=True,
 )
@@ -85,7 +107,7 @@ result = em.minimize(
     logging="test_log.db",
     error_handling="continue",
 )
-pickle.dump(result, open(project_paths["est_results"] + "res.pkl", "wb"))
+pickle.dump(result, open(paths_dict["est_results"] + "res.pkl", "wb"))
 
 #
 # # Create likelihood function for estimation

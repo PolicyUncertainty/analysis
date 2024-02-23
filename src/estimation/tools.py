@@ -9,12 +9,19 @@ from dcegm.likelihood import create_observed_choice_indexes
 from dcegm.solve import get_solve_func_for_model
 from derive_specs import generate_specs_and_update_params
 from model_code.budget_equation import create_savings_grid
-from model_code.policy_states import expected_SRA_probs_estimation
+from model_code.policy_states_belief import exp_ret_age_transition_matrix
+from model_code.policy_states_belief import expected_SRA_probs_estimation
 from model_code.specify_model import specify_model
 
 
 def create_likelihood(data_decision, project_paths, start_params_all, load_model):
-    data_dict, model, options, savings_grid = prepare_estimation_model_and_data(
+    (
+        data_dict,
+        model,
+        options,
+        savings_grid,
+        start_params_all,
+    ) = prepare_estimation_model_and_data(
         data_decision, project_paths, start_params_all, load_model
     )
 
@@ -41,7 +48,13 @@ def compute_model_fit(project_paths, start_params_all, load_model, load_solution
             open(intermediate_data + "est_choice_probs.pkl", "rb")
         )
     else:
-        data_dict, model, options, savings_grid = prepare_estimation_model_and_data(
+        (
+            data_dict,
+            model,
+            options,
+            savings_grid,
+            start_params_all,
+        ) = prepare_estimation_model_and_data(
             data_decision, project_paths, start_params_all, load_model
         )
 
@@ -85,8 +98,17 @@ def prepare_estimation_model_and_data(
     data_decision, project_paths, start_params_all, load_model
 ):
     # Generate model_specs
-    project_specs, _ = generate_specs_and_update_params(
+    project_specs, start_params_all = generate_specs_and_update_params(
         project_paths, start_params_all, load_data=True
+    )
+
+    # Execute load first step estimation data
+    alpha_hat = np.loadtxt(project_paths["est_results"] + "exp_val_params.txt")
+    sigma_sq_hat = np.loadtxt(project_paths["est_results"] + "var_params.txt")
+    project_specs["beliefs_trans_mat"] = exp_ret_age_transition_matrix(
+        options=project_specs,
+        alpha_hat=alpha_hat,
+        sigma_sq_hat=sigma_sq_hat,
     )
 
     # Generate dcegm model for project specs
@@ -112,7 +134,7 @@ def prepare_estimation_model_and_data(
 
     # Specifiy savings wealth grid
     savings_grid = create_savings_grid()
-    return data_dict, model, options, savings_grid
+    return data_dict, model, options, savings_grid, start_params_all
 
 
 def visualize_em_database(db_path):

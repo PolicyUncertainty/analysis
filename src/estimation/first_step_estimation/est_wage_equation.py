@@ -3,16 +3,12 @@
 # wage = beta_0 + beta_1 * full_time_exp + beta_2 * full_time_exp^2 + individual_FE + time_FE + epsilon
 import numpy as np
 import pandas as pd
+from derive_specs import read_and_derive_specs
 from linearmodels.panel.model import PanelOLS
 
 
-def estimate_wage_parameters(paths, options, load_data=False):
-    out_file_path = paths["est_results"] + "wage_eq_params.csv"
-
-    if load_data:
-        coefficients = pd.read_csv(out_file_path, index_col=0)
-        return coefficients
-
+def estimate_wage_parameters(paths):
+    specs = read_and_derive_specs(paths["spec_path"])
     # unpack path to SOEP core
     soep_c38 = paths["soep_c38"]
 
@@ -78,5 +74,5 @@ def estimate_wage_parameters(paths, options, load_data=False):
     print("Estimated wage equation coefficients:\n{}".format(coefficients.to_string()))
 
     # Export regression coefficients
-    coefficients.to_csv(out_file_path)
+    coefficients.to_csv(paths["est_results"] + "wage_eq_params.csv")
     return coefficients

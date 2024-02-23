@@ -4,7 +4,6 @@ import jax.numpy as jnp
 import pandas as pd
 from dcegm.simulation.sim_utils import create_simulation_df
 from dcegm.simulation.simulate import simulate_all_periods_for_model
-from derive_specs import generate_specs_and_update_params
 from model_code.initial_conditions_sim import generate_start_states
 from model_code.specify_model import specify_model
 

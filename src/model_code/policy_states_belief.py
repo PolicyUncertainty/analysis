@@ -21,10 +21,15 @@ def expected_SRA_probs_estimation(policy_state, choice, options):
     return trans_vector
 
 
-def exp_ret_age_transition_matrix(options, alpha_hat, sigma_sq_hat):
-    step_size = options["SRA_grid_size"]
-    n_policy_states = options["n_policy_states"]
-    labels = options["SRA_values_policy_states"]
+def exp_ret_age_transition_matrix(specs, project_paths):
+    # Load parameters
+    alpha_hat = np.loadtxt(project_paths["est_results"] + "exp_val_params.txt")
+    sigma_sq_hat = np.loadtxt(project_paths["est_results"] + "var_params.txt")
+
+    # Read out specs
+    step_size = specs["SRA_grid_size"]
+    n_policy_states = specs["n_policy_states"]
+    labels = specs["SRA_values_policy_states"]
 
     # create matrix of zeros and row/column labels
     ret_age_exp_transition_matrix = np.zeros((n_policy_states, n_policy_states))
@@ -51,4 +56,5 @@ def exp_ret_age_transition_matrix(options, alpha_hat, sigma_sq_hat):
                     delta - step_size / 2, loc=alpha_hat, scale=sigma_sq_hat**0.5
                 )
 
-    return ret_age_exp_transition_matrix
+    specs["beliefs_trans_mat"] = ret_age_exp_transition_matrix
+    return specs

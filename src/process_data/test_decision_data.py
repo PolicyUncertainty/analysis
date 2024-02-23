@@ -13,7 +13,7 @@ from pathlib import Path
 analysis_path = str(Path(__file__).resolve().parents[2]) + "/"
 sys.path.insert(0, analysis_path + "src")
 
-from process_data.steps.gather_decision_data import gather_decision_data
+from process_data.gather_decision_data import gather_decision_data
 
 # As we do not keep our data in github these tests can only be run locally
 IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
@@ -48,7 +48,6 @@ def options():
 def policy_step_size():
     policy_step_size = 0.04478741131783991
     return policy_step_size
-
 
 
 # These function tests the decision data for consistency (cf. model state space sparsity condition).

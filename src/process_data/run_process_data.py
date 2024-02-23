@@ -47,7 +47,7 @@ gather_decision_data(
 )
 
 # %%
-# Step 2: Prepare choice data
+# Step 2: Prepare expectation data
 # --------------------------------------------------------------------------------------
 from process_data.est_SRA_expectations import estimate_truncated_normal
 

@@ -8,12 +8,12 @@ from model_code.utility_functions import create_final_period_utility_functions
 from model_code.utility_functions import create_utility_functions
 
 
-def specify_model(project_specs, model_data_path, exog_trans_func, load_model=False):
+def specify_model(specs, model_data_path, exog_trans_func, load_model=False):
     # Load specifications
-    n_periods = project_specs["n_periods"]
-    n_possible_ret_ages = project_specs["n_possible_ret_ages"]
-    n_policy_states = project_specs["n_policy_states"]
-    choices = np.arange(project_specs["n_choices"], dtype=int)
+    n_periods = specs["n_periods"]
+    n_possible_ret_ages = specs["n_possible_ret_ages"]
+    n_policy_states = specs["n_policy_states"]
+    choices = np.arange(specs["n_choices"], dtype=int)
 
     options = {
         "state_space": {
@@ -31,7 +31,7 @@ def specify_model(project_specs, model_data_path, exog_trans_func, load_model=Fa
                 },
             },
         },
-        "model_params": project_specs,
+        "model_params": specs,
     }
 
     if load_model:

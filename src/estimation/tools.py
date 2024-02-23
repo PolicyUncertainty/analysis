@@ -1,7 +1,6 @@
 import pickle
 
 import estimagic as em
-import numpy as np
 from dcegm.solve import get_solve_func_for_model
 from derive_specs import generate_specs_and_update_params
 from model_code.budget_equation import create_savings_grid
@@ -21,12 +20,9 @@ def generate_model_to_estimate(
     )
 
     # Execute load first step estimation data
-    alpha_hat = np.loadtxt(project_paths["est_results"] + "exp_val_params.txt")
-    sigma_sq_hat = np.loadtxt(project_paths["est_results"] + "var_params.txt")
-    project_specs["beliefs_trans_mat"] = exp_ret_age_transition_matrix(
-        options=project_specs,
-        alpha_hat=alpha_hat,
-        sigma_sq_hat=sigma_sq_hat,
+    project_specs = exp_ret_age_transition_matrix(
+        specs=project_specs,
+        project_paths=project_paths,
     )
 
     # Generate dcegm model for project specs

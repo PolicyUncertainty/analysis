@@ -21,10 +21,10 @@ def expected_SRA_probs_estimation(policy_state, choice, options):
     return trans_vector
 
 
-def exp_ret_age_transition_matrix(specs, project_paths):
+def exp_ret_age_transition_matrix(specs, path_dict):
     # Load parameters
-    alpha_hat = np.loadtxt(project_paths["est_results"] + "exp_val_params.txt")
-    sigma_sq_hat = np.loadtxt(project_paths["est_results"] + "var_params.txt")
+    alpha_hat = np.loadtxt(path_dict["est_results"] + "exp_val_params.txt")
+    sigma_sq_hat = np.loadtxt(path_dict["est_results"] + "var_params.txt")
 
     # Read out specs
     step_size = specs["SRA_grid_size"]

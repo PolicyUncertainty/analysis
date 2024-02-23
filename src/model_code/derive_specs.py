@@ -3,19 +3,19 @@ import pandas as pd
 import yaml
 
 
-def generate_specs_and_update_params(project_paths, start_params):
-    specs = generate_derived_and_data_derived_specs(project_paths)
+def generate_specs_and_update_params(path_dict, start_params):
+    specs = generate_derived_and_data_derived_specs(path_dict)
     # Assign income shock scale to start_params_all
     start_params["sigma"] = specs["income_shock_scale"]
     return specs, start_params
 
 
-def generate_derived_and_data_derived_specs(project_paths):
-    specs = read_and_derive_specs(project_paths["specs"])
+def generate_derived_and_data_derived_specs(path_dict):
+    specs = read_and_derive_specs(path_dict["specs"])
 
     # Generate number of policy states between 67 and min_SRA
     wage_params = pd.read_csv(
-        project_paths["est_results"] + "wage_eq_params.csv", index_col=0
+        path_dict["est_results"] + "wage_eq_params.csv", index_col=0
     )
 
     specs["gamma_0"] = wage_params.loc["constant", "parameter"]
@@ -33,9 +33,7 @@ def generate_derived_and_data_derived_specs(project_paths):
     specs["pension_point_value"] = wage_grid.mean() / 40 * 0.48
 
     # max initial experience
-    data_decision = pd.read_pickle(
-        project_paths["intermediate_data"] + "decision_data.pkl"
-    )
+    data_decision = pd.read_pickle(path_dict["intermediate_data"] + "decision_data.pkl")
     specs["max_init_experience"] = (
         data_decision["experience"] - data_decision["period"]
     ).max()

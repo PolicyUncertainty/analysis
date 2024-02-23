@@ -19,7 +19,7 @@ def simulate_scenario(
 ):
     # Generate dcegm model for project specs
     model, options, params = specify_model(
-        project_paths=path_dict,
+        path_dict=path_dict,
         params=params,
         update_spec_for_policy_state=update_spec_for_policy_state,
         policy_state_trans_func=policy_state_func_scenario,

@@ -10,19 +10,19 @@ from model_code.utility_functions import create_utility_functions
 
 
 def specify_model(
-    project_paths,
+    path_dict,
     update_spec_for_policy_state,
     policy_state_trans_func,
     params,
     load_model=False,
 ):
     # Generate model_specs
-    specs, params = generate_specs_and_update_params(project_paths, params)
+    specs, params = generate_specs_and_update_params(path_dict, params)
 
     # Execute load first step estimation data
     specs = update_spec_for_policy_state(
         specs=specs,
-        project_paths=project_paths,
+        path_dict=path_dict,
     )
 
     # Load specifications
@@ -57,7 +57,7 @@ def specify_model(
             utility_functions=create_utility_functions(),
             utility_functions_final_period=create_final_period_utility_functions(),
             budget_constraint=budget_constraint,
-            path=project_paths["intermediate_data"] + "model.pkl",
+            path=path_dict["intermediate_data"] + "model.pkl",
         )
 
     else:
@@ -67,7 +67,7 @@ def specify_model(
             utility_functions=create_utility_functions(),
             utility_functions_final_period=create_final_period_utility_functions(),
             budget_constraint=budget_constraint,
-            path=project_paths["intermediate_data"] + "model.pkl",
+            path=path_dict["intermediate_data"] + "model.pkl",
         )
 
     print("Model specified.")

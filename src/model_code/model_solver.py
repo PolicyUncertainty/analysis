@@ -7,7 +7,7 @@ from model_code.specify_model import specify_model
 
 
 def solve_model(
-    project_paths,
+    path_dict,
     file_append,
     params,
     update_spec_for_policy_state,
@@ -15,9 +15,7 @@ def solve_model(
     load_model,
     load_solution,
 ):
-    solution_file = (
-        project_paths["intermediate_data"] + f"model_solution_{file_append}.pkl"
-    )
+    solution_file = path_dict["intermediate_data"] + f"model_solution_{file_append}.pkl"
 
     if load_solution:
         solution_est = pickle.load(open(solution_file, "rb"))
@@ -25,7 +23,7 @@ def solve_model(
 
     # Generate model_specs
     model, options, params = specify_model(
-        project_paths=project_paths,
+        path_dict=path_dict,
         update_spec_for_policy_state=update_spec_for_policy_state,
         policy_state_trans_func=policy_state_trans_func,
         params=params,

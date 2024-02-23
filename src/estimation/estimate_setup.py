@@ -9,7 +9,7 @@ from model_code.policy_states_belief import expected_SRA_probs_estimation
 from model_code.specify_model import specify_model
 
 
-def estimate_model(project_paths, load_model):
+def estimate_model(path_dict, load_model):
     start_params_all = {
         # Utility parameters
         "mu": 0.5,
@@ -24,7 +24,7 @@ def estimate_model(project_paths, load_model):
     }
 
     model, options, params = specify_model(
-        project_paths=project_paths,
+        path_dict=path_dict,
         params=start_params_all,
         update_spec_for_policy_state=exp_ret_age_transition_matrix,
         policy_state_trans_func=expected_SRA_probs_estimation,
@@ -32,9 +32,7 @@ def estimate_model(project_paths, load_model):
     )
 
     # Load data
-    data_decision = pd.read_pickle(
-        project_paths["intermediate_data"] + "decision_data.pkl"
-    )
+    data_decision = pd.read_pickle(path_dict["intermediate_data"] + "decision_data.pkl")
     data_decision = data_decision[data_decision["lagged_choice"] != 2]
     # Now transform for dcegm
     states_dict = {
@@ -92,4 +90,4 @@ def estimate_model(project_paths, load_model):
         logging="test_log.db",
         error_handling="continue",
     )
-    pickle.dump(result, open(project_paths["est_results"] + "em_result.pkl", "wb"))
+    pickle.dump(result, open(path_dict["est_results"] + "em_result.pkl", "wb"))

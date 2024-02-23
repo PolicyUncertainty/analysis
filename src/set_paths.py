@@ -1,9 +1,12 @@
 # Set data paths according to user.
 
 
-def create_path_dict(analysis_path, define_user=False):
+def create_path_dict(analysis_path, define_user=False, user=None):
     if define_user:
-        user = input("Enter user name ([b]runo/ [m]ax): ")
+        if user is None:
+            user = input("Enter user name ([b]runo/ [m]ax): ")
+        else:
+            pass
 
         if user == "b":
             data_path = "C:/Users/bruno/papers/soep/"

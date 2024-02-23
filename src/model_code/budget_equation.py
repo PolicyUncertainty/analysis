@@ -26,11 +26,11 @@ def budget_constraint(
     # calculate applicable SRA and pension deduction/increase factor
     # (malus for early retirement, bonus for late retirement)
     pension_factor = 1 - (actual_retirement_age - SRA_at_resolution) * ERP
-    retirement_income = pension_point_value * experience * pension_factor
+    retirement_income = pension_point_value * experience * pension_factor * 12
 
     means_test = savings_end_of_previous_period < options["unemployment_wealth_thresh"]
     # Unemployment benefits
-    unemployment_benefits = means_test * options["unemployment_benefits"]
+    unemployment_benefits = means_test * options["unemployment_benefits"] * 12
     # Labor income
     labor_income = (
         gamma_0
@@ -38,18 +38,16 @@ def budget_constraint(
         + gamma_2 * experience**2
         + income_shock_previous_period
     )
-    labor_income_with_min = jnp.maximum(labor_income, options["min_wage"])
+    labor_income_with_min = jnp.maximum(labor_income, options["min_wage"]) * 12
+    net_labor_income = calc_net_income(labor_income_with_min)
 
     # bools of last period decision: income is payed in following period!
     was_worker = lagged_choice == 1
     was_retired = lagged_choice == 2
 
-    income = (
-        jnp.maximum(
-            was_worker * labor_income_with_min + was_retired * retirement_income,
-            unemployment_benefits,
-        )
-        * 12
+    income = jnp.maximum(
+        was_worker * net_labor_income + was_retired * retirement_income,
+        unemployment_benefits,
     )
 
     # calculate beginning of period wealth M_t
@@ -69,3 +67,67 @@ def create_savings_grid():
         [section_1, section_2, section_3, section_4, section_5]
     )
     return savings_grid
+
+
+def calc_net_income(gross_income):
+    """Parameters from 2010 gettsim params."""
+    thresholds = [
+        8004,
+        13469,
+        52881,
+        250730,
+    ]
+
+    rates = [0.14, 0.2397, 0.42, 0.45]
+
+    # In bracket 0 no taxes are paid
+    poss_tax_bracket_0 = 0.0
+
+    # In bracket 1 taxes are paid on income above the threshold
+    poss_tax_bracket_1 = rates[0] * (gross_income - thresholds[0])
+    tax_above_1 = (thresholds[1] - thresholds[0]) * rates[0]
+
+    # In bracket 2 taxes are paid on income above the threshold and the tax paid in
+    # bracket 1
+    poss_tax_bracket_2 = (rates[1] * (gross_income - thresholds[1])) + tax_above_1
+    tax_above_2 = (thresholds[2] - thresholds[1]) * rates[1]
+
+    # In bracket 3 taxes are paid on income above the threshold and the tax paid in
+    # brackets 1+2
+    poss_tax_bracket_3 = (
+        rates[2] * (gross_income - thresholds[2]) + tax_above_2 + tax_above_1
+    )
+    tax_above_3 = (thresholds[3] - thresholds[2]) * rates[2]
+
+    # In bracket 4 taxes are paid on income above the threshold and the tax paid in
+    # brackets 1+2+3
+    poss_tax_bracket_4 = (
+        rates[3] * (gross_income - thresholds[3])
+        + tax_above_1
+        + tax_above_2
+        + tax_above_3
+    )
+
+    # Check in which bracket the income falls and calculate the tax
+    in_bracket_0 = gross_income < thresholds[0]
+    in_bracket_1 = (gross_income >= thresholds[0]) & (gross_income < thresholds[1])
+    in_bracket_2 = (gross_income >= thresholds[1]) & (gross_income < thresholds[2])
+    in_bracket_3 = (gross_income >= thresholds[2]) & (gross_income < thresholds[3])
+    in_bracket_4 = gross_income >= thresholds[3]
+
+    income_tax = (
+        in_bracket_0 * poss_tax_bracket_0
+        + in_bracket_1 * poss_tax_bracket_1
+        + in_bracket_2 * poss_tax_bracket_2
+        + in_bracket_3 * poss_tax_bracket_3
+        + in_bracket_4 * poss_tax_bracket_4
+    )
+
+    # contribution threshold is mean of health and pension insurance
+    # (5500 + 3750) /2 = 4625
+    contribution_threshold = 4625 * 12
+    rate = 0.185
+    # calculate social security contribution
+    social_security = jnp.minimum(gross_income, contribution_threshold) * rate
+    net_income = gross_income - income_tax - social_security
+    return net_income

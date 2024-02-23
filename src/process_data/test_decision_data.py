@@ -5,7 +5,6 @@ import pytest
 
 
 LOAD_SAVED_DATA = True
-USER = "max"
 
 import yaml
 from pathlib import Path
@@ -14,6 +13,7 @@ analysis_path = str(Path(__file__).resolve().parents[2]) + "/"
 sys.path.insert(0, analysis_path + "src")
 
 from process_data.gather_decision_data import gather_decision_data
+from set_paths import create_path_dict
 
 # As we do not keep our data in github these tests can only be run locally
 IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
@@ -22,19 +22,7 @@ IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 # Define paths_dict as a fixture
 @pytest.fixture
 def paths_dict():
-    if USER == "bruno":
-        return {
-            # SOEP Core and SOEP RV are saved locally
-            "soep_c38": "C:/Users/bruno/papers/soep/soep38",
-            "soep_rv": "C:/Users/bruno/papers/soep/soep_rv",
-            "project_path": analysis_path,
-        }
-    elif USER == "max":
-        return {
-            "soep_c38": "/home/maxbl/Uni/pol_uncetainty/data/soep38",
-            "soep_rv": "/home/maxbl/Uni/pol_uncetainty/data/soep_rv",
-            "project_path": analysis_path,
-        }
+    return create_path_dict(analysis_path, define_user=True, user="m")
 
 
 # Define options as a fixture

@@ -77,7 +77,7 @@ def estimate_model(path_dict, load_model):
     upper_bounds = {
         "dis_util_work": 100,
         "dis_util_unemployed": 100,
-        "bequest_scale": 10,
+        "bequest_scale": 20,
         # "lambda": 100,
     }
 

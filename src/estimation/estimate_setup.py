@@ -12,7 +12,7 @@ from model_code.specify_model import specify_model
 def estimate_model(path_dict, load_model):
     start_params_all = {
         # Utility parameters
-        "mu": 3.5,
+        "mu": 0.5,
         "dis_util_work": 4.0,
         "dis_util_unemployed": 1.0,
         "bequest_scale": 2.0,
@@ -55,7 +55,7 @@ def estimate_model(path_dict, load_model):
     )
 
     params_to_estimate_names = [
-        # "mu",
+        "mu",
         "dis_util_work",
         "dis_util_unemployed",
         "bequest_scale",
@@ -70,14 +70,16 @@ def estimate_model(path_dict, load_model):
         return ll_value
 
     lower_bounds = {
+        "mu": 1e-12,
         "dis_util_work": 1e-12,
         "dis_util_unemployed": 1e-12,
         "bequest_scale": 1e-12,
         # "lambda": 1e-12,
     }
     upper_bounds = {
-        "dis_util_work": 100,
-        "dis_util_unemployed": 100,
+        "mu": 5,
+        "dis_util_work": 50,
+        "dis_util_unemployed": 50,
         "bequest_scale": 20,
         # "lambda": 100,
     }

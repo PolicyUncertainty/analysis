@@ -15,7 +15,7 @@ import pickle
 import jax
 import numpy as np
 import pandas as pd
-
+import jax.numpy as jnp
 
 jax.config.update("jax_enable_x64", True)
 
@@ -26,7 +26,20 @@ model_fit_dir = analysis_path + "output/plots/model_fits/"
 os.makedirs(model_fit_dir, exist_ok=True)
 
 
-est_params = pickle.load(open(paths_dict["est_results"] + "est_params_1.pkl", "rb"))
+# est_params = pickle.load(open(paths_dict["est_results"] + "est_params_1.pkl", "rb"))
+params = {
+    # Utility parameters
+    "mu": 3.5,
+    "dis_util_work": 4.0,
+    "dis_util_unemployed": 1.0,
+    "bequest_scale": 2.0,
+    # Taste and income shock scale
+    "lambda": 1.0,
+    # Interest rate and discount factor
+    "interest_rate": 0.03,
+    "beta": 0.95,
+}
+
 
 from model_code.model_solver import solve_model
 from model_code.policy_states_belief import expected_SRA_probs_estimation
@@ -34,19 +47,19 @@ from model_code.policy_states_belief import update_specs_exp_ret_age_trans_mat
 
 est_model = solve_model(
     path_dict=paths_dict,
-    params=est_params,
+    params=params,
     update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
     policy_state_trans_func=expected_SRA_probs_estimation,
-    file_append="est",
+    file_append="start",
     load_model=True,
-    load_solution=False,
+    load_solution=True,
 )
 
 from model_code.specify_model import specify_model
 
 model, options, params = specify_model(
     path_dict=paths_dict,
-    params=est_params,
+    params=params,
     update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
     policy_state_trans_func=expected_SRA_probs_estimation,
     load_model=True,
@@ -64,7 +77,7 @@ observed_state_choice_indexes = create_observed_choice_indexes(states_dict, mode
 choice_probs_observations = calc_choice_probs_for_observed_states(
     value_solved=est_model["value"],
     endog_grid_solved=est_model["endog_grid"],
-    params=est_params,
+    params=params,
     observed_states=states_dict,
     state_choice_indexes=observed_state_choice_indexes,
     oberseved_wealth=data_decision["wealth"].values,
@@ -75,7 +88,9 @@ choice_probs_observations = np.nan_to_num(choice_probs_observations, nan=0.0)
 data_decision["choice_0"] = choice_probs_observations[:, 0]
 data_decision["choice_1"] = choice_probs_observations[:, 1]
 data_decision["choice_2"] = choice_probs_observations[:, 2]
-
+choice_probs_each_obs = jnp.take_along_axis(
+    choice_probs_observations, data_decision["choice"].values[:, None], axis=1
+)[:, 0]
 
 age_range = np.arange(30, 70, 1)
 ax = (

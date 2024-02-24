@@ -34,6 +34,7 @@ def estimate_model(path_dict, load_model):
     # Load data
     data_decision = pd.read_pickle(path_dict["intermediate_data"] + "decision_data.pkl")
     data_decision = data_decision[data_decision["lagged_choice"] != 2]
+    data_decision["wealth"] = data_decision["wealth"].clip(lower=1e-16)
     # Now transform for dcegm
     states_dict = {
         name: data_decision[name].values for name in model["state_space_names"]

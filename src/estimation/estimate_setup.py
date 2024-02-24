@@ -12,7 +12,7 @@ from model_code.specify_model import specify_model
 def estimate_model(path_dict, load_model):
     start_params_all = {
         # Utility parameters
-        "mu": 0.5,
+        "mu": 3.5,
         "dis_util_work": 4.0,
         "dis_util_unemployed": 1.0,
         "bequest_scale": 2.0,

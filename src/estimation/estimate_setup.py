@@ -91,3 +91,7 @@ def estimate_model(path_dict, load_model):
         error_handling="continue",
     )
     pickle.dump(result, open(path_dict["est_results"] + "em_result_1.pkl", "wb"))
+    start_params_all.update(result.params)
+    pickle.dump(
+        start_params_all, open(path_dict["est_results"] + "est_params_1.pkl", "wb")
+    )

@@ -26,7 +26,7 @@ model_fit_dir = analysis_path + "output/plots/model_fits/"
 os.makedirs(model_fit_dir, exist_ok=True)
 
 
-est_params = pickle.load(open(paths_dict["est_results"] + "est_params.pkl", "rb"))
+est_params = pickle.load(open(paths_dict["est_results"] + "est_params_1.pkl", "rb"))
 
 from model_code.model_solver import solve_model
 from model_code.policy_states_belief import expected_SRA_probs_estimation
@@ -39,7 +39,7 @@ est_model = solve_model(
     policy_state_trans_func=expected_SRA_probs_estimation,
     file_append="est",
     load_model=True,
-    load_solution=True,
+    load_solution=False,
 )
 
 from model_code.specify_model import specify_model
@@ -77,7 +77,7 @@ data_decision["choice_1"] = choice_probs_observations[:, 1]
 data_decision["choice_2"] = choice_probs_observations[:, 2]
 
 
-age_range = np.arange(31, 70, 1)
+age_range = np.arange(30, 70, 1)
 ax = (
     data_decision.groupby("age")["choice"]
     .value_counts(normalize=True)

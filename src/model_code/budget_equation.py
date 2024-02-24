@@ -26,7 +26,8 @@ def budget_constraint(
     # calculate applicable SRA and pension deduction/increase factor
     # (malus for early retirement, bonus for late retirement)
     pension_factor = 1 - (actual_retirement_age - SRA_at_resolution) * ERP
-    retirement_income = pension_point_value * experience * pension_factor * 12
+    retirement_income_gross = pension_point_value * experience * pension_factor * 12
+    retirement_income = calc_net_income_pensions(retirement_income_gross)
 
     means_test = savings_end_of_previous_period < options["unemployment_wealth_thresh"]
     # Unemployment benefits
@@ -39,7 +40,7 @@ def budget_constraint(
         + income_shock_previous_period
     )
     labor_income_with_min = jnp.maximum(labor_income, options["min_wage"]) * 12
-    net_labor_income = calc_net_income(labor_income_with_min)
+    net_labor_income = calc_net_income_working(labor_income_with_min)
 
     # bools of last period decision: income is payed in following period!
     was_worker = lagged_choice == 1
@@ -69,7 +70,21 @@ def create_savings_grid():
     return savings_grid
 
 
-def calc_net_income(gross_income):
+def calc_net_income_pensions(gross_income):
+    ssc = calc_health_ltc_contr(gross_income)
+    inc_tax = calc_inc_tax(gross_income - ssc)
+    net_income = gross_income - inc_tax - ssc
+    return net_income
+
+
+def calc_net_income_working(gross_income):
+    ssc = calc_pension_unempl_contr(gross_income) + calc_health_ltc_contr(gross_income)
+    inc_tax = calc_inc_tax(gross_income - ssc)
+    net_income = gross_income - inc_tax - ssc
+    return net_income
+
+
+def calc_inc_tax(gross_income):
     """Parameters from 2010 gettsim params."""
     thresholds = [
         8004,
@@ -122,12 +137,20 @@ def calc_net_income(gross_income):
         + in_bracket_3 * poss_tax_bracket_3
         + in_bracket_4 * poss_tax_bracket_4
     )
+    return income_tax
 
-    # contribution threshold is mean of health and pension insurance
-    # (5500 + 3750) /2 = 4625
-    contribution_threshold = 4625 * 12
-    rate = 0.185
+
+def calc_pension_unempl_contr(gross_income):
+    contribution_threshold = 5500 * 12
+    rate = 0.113
+    # calculate pension contribution
+    pension_contr = jnp.minimum(gross_income, contribution_threshold) * rate
+    return pension_contr
+
+
+def calc_health_ltc_contr(gross_income):
+    contribution_threshold = 3750 * 12
+    rate = 0.08
     # calculate social security contribution
-    social_security = jnp.minimum(gross_income, contribution_threshold) * rate
-    net_income = gross_income - income_tax - social_security
-    return net_income
+    health_contr = jnp.minimum(gross_income, contribution_threshold) * rate
+    return health_contr

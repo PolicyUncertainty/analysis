@@ -27,7 +27,7 @@ else:
     custom_load_data = True
 
 # Load options and generate auxiliary options
-from derive_specs import read_and_derive_specs
+from model_code.derive_specs import read_and_derive_specs
 
 
 specs = read_and_derive_specs(paths_dict["specs"])

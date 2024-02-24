@@ -23,7 +23,8 @@ def generate_derived_and_data_derived_specs(path_dict):
     specs["gamma_2"] = wage_params.loc["full_time_exp_sq", "parameter"]
     specs["income_shock_scale"] = wage_params.loc["income_shock_std", "parameter"]
 
-    # calculate value of pension point based on unweighted average wage over 40 years of work
+    # calculate value of pension point based on unweighted average wage over 40 years
+    # of work
     exp_grid = np.arange(1, 41)
     wage_grid = (
         specs["gamma_0"]

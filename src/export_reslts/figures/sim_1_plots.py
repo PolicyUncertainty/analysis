@@ -34,27 +34,27 @@ def plot_full_time(paths_dict):
         full_time_no_unc["age"], full_time_no_unc["proportion"], label="No Uncertainty"
     )
     ax.legend()
-    fig.show()
+    plt.show()
 
 
 def plot_average_savings(paths_dict):
     data_unc = pd.read_pickle(
         paths_dict["intermediate_data"] + "sim_data_1_unc.pkl"
     ).reset_index()
-    data_no_unc = pd.read_pickle(
-        paths_dict["intermediate_data"] + "sim_data_1_no_unc.pkl"
-    ).reset_index()
+    # data_no_unc = pd.read_pickle(
+    #     paths_dict["intermediate_data"] + "sim_data_1_no_unc.pkl"
+    # ).reset_index()
 
     specs = read_and_derive_specs(paths_dict["specs"])
 
     data_unc["age"] = data_unc["period"] + specs["start_age"]
-    data_no_unc["age"] = data_no_unc["period"] + specs["start_age"]
+    # data_no_unc["age"] = data_no_unc["period"] + specs["start_age"]
 
-    savings_unc = data_unc.groupby("age")["savings_dec"].mean()
-    savings_no_unc = data_no_unc.groupby("age")["savings_dec"].mean()
+    savings_unc = data_unc.groupby("age")["wealth_at_beginning"].mean()
+    # savings_no_unc = data_no_unc.groupby("age")["savings_dec"].mean()
 
     fig, ax = plt.subplots()
     ax.plot(savings_unc, label="Uncertainty")
-    ax.plot(savings_no_unc, label="No Uncertainty")
+    # ax.plot(savings_no_unc, label="No Uncertainty")
     ax.legend()
-    fig.show()
+    plt.show()

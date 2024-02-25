@@ -1,9 +1,15 @@
+import os
+
 import numpy as np
 import pandas as pd
 
 
 def gather_decision_data(paths, options, load_data=False):
+    if not os.path.exists(paths["intermediate_data"]):
+        os.makedirs(paths["intermediate_data"])
+
     out_file_path = paths["intermediate_data"] + "decision_data.pkl"
+
     if load_data:
         data = pd.read_pickle(out_file_path)
         return data

@@ -38,6 +38,9 @@ def gather_decision_data(paths, options, load_data=False):
         merged_data,
     )
 
+    # filter data
+    merged_data = filter_data(merged_data, start_year, end_year, start_age)
+
     # period
     merged_data["period"] = merged_data["age"] - start_age
 
@@ -61,9 +64,6 @@ def gather_decision_data(paths, options, load_data=False):
         merged_data["pgexpft"], exp_cap
     )
     merged_data = merged_data[merged_data["experience"].notna()]
-
-    # filter data
-    merged_data = filter_data(merged_data, start_year, end_year, start_age)
 
     # additional filters based on model setup
     merged_data = enforce_model_choice_restriction(

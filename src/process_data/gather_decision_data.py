@@ -27,8 +27,6 @@ def gather_decision_data(paths, options, load_data=False):
     merged_data = create_hh_cons_equivalence_data(merged_data)
     merged_data["wealth"] = merged_data["wealth"] / merged_data["cons_equiv"]
 
-    # filter data
-    merged_data = filter_data(merged_data, start_year, end_year, start_age)
     # (labor) choice
     merged_data = create_choice_variable(
         merged_data,
@@ -57,6 +55,9 @@ def gather_decision_data(paths, options, load_data=False):
         merged_data["pgexpft"], exp_cap
     )
     merged_data = merged_data[merged_data["experience"].notna()]
+
+    # filter data
+    merged_data = filter_data(merged_data, start_year, end_year, start_age)
 
     # additional filters based on model setup
     merged_data = enforce_model_choice_restriction(
@@ -219,7 +220,7 @@ def create_hh_cons_equivalence_data(merged_data):
 
     # number of children (<0 means 0 or "no info", which is treated as 0)
     merged_data["n_children"] = merged_data["hlc0043"]
-    merged_data.loc[merged_data["n_children"] < 0] = 0
+    merged_data.loc[merged_data["n_children"] < 0, "n_children"] = 0
 
     # consumption equivalence scale
     merged_data["cons_equiv"] = (
@@ -416,7 +417,7 @@ def print_n_fresh_retirees(merged_data):
     print(str(n_fresh_retirees) + " fresh retirees in sample.")
 
 
-def print_sample_by_choice(choice, lagged_choice, string):
+def print_sample_by_choice(merged_data, string):
     n_unemployed = merged_data.groupby(["choice"]).size().loc[0]
     n_workers = merged_data.groupby(["choice"]).size().loc[1]
     n_retirees = merged_data.groupby(["choice"]).size().loc[2]

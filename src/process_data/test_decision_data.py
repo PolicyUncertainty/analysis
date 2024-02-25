@@ -89,10 +89,20 @@ def test_decision_data_no_work_after_max_ret_age(
     )
     assert (
         dec_dat.loc[dec_dat["choice"] == 1, "period"].max() + options["start_age"]
-        <= options["max_ret_age"]
+        < options["max_ret_age"]
     )
     assert (
         dec_dat.loc[dec_dat["choice"] == 0, "period"].max() + options["start_age"]
+        < options["max_ret_age"]
+    )
+    assert (
+        dec_dat.loc[dec_dat["lagged_choice"] == 1, "period"].max()
+        + options["start_age"]
+        <= options["max_ret_age"]
+    )
+    assert (
+        dec_dat.loc[dec_dat["lagged_choice"] == 0, "period"].max()
+        + options["start_age"]
         <= options["max_ret_age"]
     )
 

@@ -66,6 +66,7 @@ model, options, params = specify_model(
 )
 
 data_decision = pd.read_pickle(paths_dict["intermediate_data"] + "decision_data.pkl")
+# data_decision["wealth"] = data_decision["wealth"].clip(lower=1e-16)
 data_decision["age"] = data_decision["period"] + 30
 data_decision = data_decision[data_decision["age"] < 75]
 
@@ -91,7 +92,6 @@ data_decision["choice_2"] = choice_probs_observations[:, 2]
 choice_probs_each_obs = jnp.take_along_axis(
     choice_probs_observations, data_decision["choice"].values[:, None], axis=1
 )[:, 0]
-
 age_range = np.arange(30, 70, 1)
 ax = (
     data_decision.groupby("age")["choice"]

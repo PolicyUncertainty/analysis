@@ -385,9 +385,9 @@ def enforce_model_choice_restriction(merged_data, min_ret_age, max_ret_age):
     merged_data = merged_data[
         ~((merged_data["choice"] != 2) & (merged_data["age"] >= max_ret_age))
     ]
-    # Filter out people who have not retirement as lagged choice after max_ret_age + 1
+    # Filter out people who have not retirement as lagged choice after max_ret_age
     merged_data = merged_data[
-        ~((merged_data["lagged_choice"] != 2) & (merged_data["age"] > max_ret_age + 1))
+        ~((merged_data["lagged_choice"] != 2) & (merged_data["age"] > max_ret_age))
     ]
     print(
         str(len(merged_data))

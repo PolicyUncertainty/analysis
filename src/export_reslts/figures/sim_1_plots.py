@@ -57,4 +57,3 @@ def plot_average_savings(paths_dict):
     ax.plot(savings_unc, label="Uncertainty")
     # ax.plot(savings_no_unc, label="No Uncertainty")
     ax.legend()
-    plt.show()

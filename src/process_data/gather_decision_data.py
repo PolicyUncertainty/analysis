@@ -26,17 +26,13 @@ def gather_decision_data(paths, options, load_data=False):
     merged_data = gather_wealth_data(soep_c38, merged_data, options)
     merged_data = create_hh_cons_equivalence_data(merged_data)
     merged_data["wealth"] = merged_data["wealth"] / merged_data["cons_equiv"]
+
     # filter data
     merged_data = filter_data(merged_data, start_year, end_year, start_age)
-
     # (labor) choice
-    merged_data["choice"] = create_choice_variable(
-        rv_ret_choice=merged_data["STATUS_2"],
-        soep_empl_choice=merged_data["pgemplst"],
-        soep_empl_status=merged_data["pgstib"],
+    merged_data = create_choice_variable(
+        merged_data,
     )
-
-    merged_data = merged_data[merged_data["choice"].notna()]
 
     # period
     merged_data["period"] = merged_data["age"] - start_age
@@ -46,7 +42,7 @@ def gather_decision_data(paths, options, load_data=False):
         merged_data, start_year, end_year, start_age
     )
 
-    # policy_state
+    # policy_stvate
     merged_data["policy_state"] = create_policy_state(merged_data["gebjahr"])
     (
         merged_data["policy_state_value"],
@@ -130,41 +126,41 @@ def load_and_merge_data(soep_c38, soep_rv, min_ret_age):
 
     # Calculate age and filter out missing rv_id values for people older than minimum retirement age
     merged_data["age"] = merged_data["syear"] - merged_data["gebjahr"]
-    merged_data = merged_data[
-        (merged_data["rv_id"] >= 0)
-        | ((merged_data["rv_id"] < 0) & (merged_data["age"] < min_ret_age))
-    ]
-    merged_data["rv_id"].replace(-2, pd.NA, inplace=True)
-
-    print(
-        str(len(merged_data))
-        + " left after dropping over "
-        + str(min_ret_age)
-        + " year olds w/o SOEP-RV ID."
-    )
-
-    # Load SOEP RV VSKT data
-    rv_data = pd.read_stata(
-        f"{soep_rv}/vskt/SUF.SOEP-RV.VSKT.2020.var.1-0.dta",
-        columns=["rv_id", "JAHR", "STATUS_2", "MONAT", "STATUS_1"],
-    )
-    # Check if rv_id is in rv data
-    merged_data = merged_data[
-        (merged_data["age"] < min_ret_age)
-        | merged_data["rv_id"].isin(rv_data["rv_id"].unique())
-    ]
-
-    print(
-        str(len(merged_data))
-        + " left after dropping people with missing SOEP-RV ID in SOEP-RV VSKT."
-    )
-
-    # Prepare merge data
-    merged_data["MONAT"] = 12
-    rv_data["syear"] = rv_data["JAHR"]
-
-    # Merge with SOEP core data
-    merged_data = merged_data.merge(rv_data, on=["rv_id", "syear", "MONAT"], how="left")
+    # merged_data = merged_data[
+    #     (merged_data["rv_id"] >= 0)
+    #     | ((merged_data["rv_id"] < 0) & (merged_data["age"] < min_ret_age))
+    # ]
+    # merged_data["rv_id"].replace(-2, pd.NA, inplace=True)
+    #
+    # print(
+    #     str(len(merged_data))
+    #     + " left after dropping over "
+    #     + str(min_ret_age)
+    #     + " year olds w/o SOEP-RV ID."
+    # )
+    #
+    # # Load SOEP RV VSKT data
+    # rv_data = pd.read_stata(
+    #     f"{soep_rv}/vskt/SUF.SOEP-RV.VSKT.2020.var.1-0.dta",
+    #     columns=["rv_id", "JAHR", "STATUS_2", "MONAT"],
+    # )
+    # # Check if rv_id is in rv data
+    # merged_data = merged_data[
+    #     (merged_data["age"] < min_ret_age)
+    #     | merged_data["rv_id"].isin(rv_data["rv_id"].unique())
+    # ]
+    #
+    # print(
+    #     str(len(merged_data))
+    #     + " left after dropping people with missing SOEP-RV ID in SOEP-RV VSKT."
+    # )
+    #
+    # # Prepare merge data
+    # merged_data["MONAT"] = 12
+    # rv_data["syear"] = rv_data["JAHR"]
+    #
+    # # Merge with SOEP core data
+    # merged_data = merged_data.merge(rv_data, on=["rv_id", "syear", "MONAT"], how="left")
     return merged_data
 
 
@@ -204,7 +200,8 @@ def gather_wealth_data(soep_c38, merged_data, options):
 
     merged_data = merged_data.merge(wealth_data_full, on=["hid", "syear"], how="left")
 
-    merged_data = merged_data[merged_data["wealth"].notna()]
+    merged_data = merged_data[(merged_data["wealth"].notna())]
+
     merged_data[merged_data["wealth"] < 0] = 0
 
     print(str(len(merged_data)) + " left after dropping people with missing wealth.")
@@ -217,7 +214,7 @@ def create_hh_cons_equivalence_data(merged_data):
     OECD-modified equivalence scale."""
     # partner (>0 means has partner)
     merged_data["has_partner"] = 0
-    merged_data.loc[merged_data["pgpartz"] > 1, "has_partner"] = 1
+    merged_data.loc[merged_data["pgpartz"] >= 1, "has_partner"] = 1
 
     # number of children (<0 means 0 or "no info", which is treated as 0)
     merged_data["n_children"] = merged_data["hlc0043"]
@@ -294,20 +291,26 @@ def create_lagged_choice_variable(merged_data, start_year, end_year, start_age):
     return merged_data
 
 
-def create_choice_variable(rv_ret_choice, soep_empl_choice, soep_empl_status):
+def create_choice_variable(merged_data):
     """This function creates the choice variable for the structural model.
 
     TODO: This function assumes retirees with part-time employment as full-time retirees.
 
     """
-    choice = pd.Series(index=rv_ret_choice.index, data=np.nan, dtype=float)
-    choice.loc[soep_empl_choice == 5] = 0
-    choice.loc[soep_empl_choice == 1] = 1
-    # First assign soep employment status for retirement and then
-    # overwrite with rv retirement choices
-    choice.loc[soep_empl_status == 13] = 2
-    choice.loc[rv_ret_choice == "RTB"] = 2
-    return choice
+    merged_data["choice"] = np.nan
+    soep_empl_choice = merged_data["pgemplst"]
+    soep_empl_status = merged_data["pgstib"]
+    # rv_ret_choice = merged_data["STATUS_2"]
+
+    # Now assign emploayment choices
+    merged_data.loc[soep_empl_choice == 5, "choice"] = 0
+    merged_data.loc[soep_empl_choice == 1, "choice"] = 1
+
+    # Finally retirement choice
+    merged_data.loc[soep_empl_status == 13, "choice"] = 2
+    # merged_data.loc[rv_ret_choice == "RTB"] = 2
+    merged_data = merged_data[merged_data["choice"].notna()]
+    return merged_data
 
 
 def create_policy_state(gebjahr):

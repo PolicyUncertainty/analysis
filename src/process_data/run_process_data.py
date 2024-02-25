@@ -40,12 +40,11 @@ from process_data.gather_decision_data import gather_decision_data
 if custom_load_data:
     LOAD_DATA = input("Load choice & decision data from pickle files? (y/n): ") == "y"
 
-gather_decision_data(
+df = gather_decision_data(
     paths_dict,
     specs,
     load_data=LOAD_DATA,
 )
-
 # %%
 # Step 2: Prepare expectation data
 # --------------------------------------------------------------------------------------

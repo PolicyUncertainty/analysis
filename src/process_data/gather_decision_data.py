@@ -121,11 +121,12 @@ def load_and_merge_data(soep_c38, soep_rv, min_ret_age):
     )
     merged_data = pd.merge(merged_data, hl_data, on=["hid", "syear"], how="left")
 
+    merged_data["age"] = merged_data["syear"] - merged_data["gebjahr"]
     del pgen_data, pathl_data, hl_data
     print(str(len(merged_data)) + " observations in SOEP C38 core.")
 
     # Calculate age and filter out missing rv_id values for people older than minimum retirement age
-    merged_data["age"] = merged_data["syear"] - merged_data["gebjahr"]
+
     # merged_data = merged_data[
     #     (merged_data["rv_id"] >= 0)
     #     | ((merged_data["rv_id"] < 0) & (merged_data["age"] < min_ret_age))
@@ -413,3 +414,26 @@ def print_n_fresh_retirees(merged_data):
         + merged_data.groupby(["choice", "lagged_choice"]).size().loc[2, 0]
     )
     print(str(n_fresh_retirees) + " fresh retirees in sample.")
+
+
+def print_sample_by_choice(choice, lagged_choice, string):
+    n_unemployed = merged_data.groupby(["choice"]).size().loc[0]
+    n_workers = merged_data.groupby(["choice"]).size().loc[1]
+    n_retirees = merged_data.groupby(["choice"]).size().loc[2]
+    n_fresh_retirees = (
+        merged_data.groupby(["choice", "lagged_choice"]).size().loc[2, 1]
+        + merged_data.groupby(["choice", "lagged_choice"]).size().loc[2, 0]
+    )
+    print(
+        "Left in sample:"
+        + " unemployed: "
+        + str(n_unemployed)
+        + ", workers: "
+        + str(n_workers)
+        + ", retirees: "
+        + str(n_retirees)
+        + ", fresh retirees: "
+        + str(n_fresh_retirees)
+        + ", after"
+        + string
+    )

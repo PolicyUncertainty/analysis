@@ -20,7 +20,7 @@ import jax.numpy as jnp
 jax.config.update("jax_enable_x64", True)
 
 # %%
-# specify parameters 
+# specify parameters
 import os
 
 model_fit_dir = analysis_path + "output/plots/model_fits/"
@@ -53,17 +53,20 @@ est_model, model, options, params = specify_and_solve_model(
     update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
     policy_state_trans_func=expected_SRA_probs_estimation,
     # note: file_append is used to load the model and solution from the file specified by the string
-    file_append="est_2024_02_25",
+    file_append="est_2024_02_26",
     load_model=True,
     load_solution=True,
 )
+
 
 # %%
 # load and modify data
 def load_and_modify_data(paths_dict, options):
     start_age = options["model_params"]["start_age"]
 
-    data_decision = pd.read_pickle(paths_dict["intermediate_data"] + "decision_data.pkl")
+    data_decision = pd.read_pickle(
+        paths_dict["intermediate_data"] + "decision_data.pkl"
+    )
     data_decision["wealth"] = data_decision["wealth"].clip(lower=1e-16)
     data_decision["age"] = data_decision["period"] + 30
     data_decision = data_decision[data_decision["age"] < 75]
@@ -75,6 +78,7 @@ def load_and_modify_data(paths_dict, options):
     ].transform(lambda x: pd.qcut(x, 3, labels=False, duplicates="drop"))
     return data_decision
 
+
 data_decision = load_and_modify_data(paths_dict, options)
 
 # %%
@@ -82,10 +86,13 @@ data_decision = load_and_modify_data(paths_dict, options)
 from dcegm.likelihood import create_observed_choice_indexes
 from dcegm.likelihood import calc_choice_probs_for_observed_states
 
+
 def create_choice_probs_for_each_observation(
     value_solved, endog_grid_solved, params, data_decision, model, options
 ):
-    states_dict = {name: data_decision[name].values for name in model["state_space_names"]}
+    states_dict = {
+        name: data_decision[name].values for name in model["state_space_names"]
+    }
     observed_state_choice_indexes = create_observed_choice_indexes(states_dict, model)
     choice_probs_observations = calc_choice_probs_for_observed_states(
         value_solved=value_solved,
@@ -103,6 +110,7 @@ def create_choice_probs_for_each_observation(
     data_decision["choice_2"] = choice_probs_observations[:, 2]
     return data_decision, choice_probs_observations
 
+
 data_decision, choice_probs_observations = create_choice_probs_for_each_observation(
     value_solved=est_model["value"],
     endog_grid_solved=est_model["endog_grid"],
@@ -118,7 +126,7 @@ choice_probs_each_obs = jnp.take_along_axis(
     choice_probs_observations, data_decision["choice"].values[:, None], axis=1
 )[:, 0]
 # %%
-# Plot observed choice shares by age 
+# Plot observed choice shares by age
 age_range = np.arange(30, 70, 1)
 ax = (
     data_decision.groupby("age")["choice"]

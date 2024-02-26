@@ -26,19 +26,19 @@ from model_code.model_solver import specify_and_solve_model
 from model_code.policy_states_belief import expected_SRA_probs_estimation
 from model_code.policy_states_belief import update_specs_exp_ret_age_trans_mat
 
-#est_params = pickle.load(open(path_dict["est_results"] + "est_params_1.pkl", "rb"))
-params = {
-    # Utility parameters
-    "mu": 0.8,
-    "dis_util_work": 1.5411056147726503,
-    "dis_util_unemployed": 1.972168129756152,
-    "bequest_scale": 1e-12,
-    # Taste shock scale
-    "lambda": 1.0,
-    # Interest rate and discount factor
-    "interest_rate": 0.03,
-    "beta": 0.95,
-}
+params = pickle.load(open(path_dict["est_results"] + "est_params_1.pkl", "rb"))
+# params = {
+#     # Utility parameters
+#     "mu": 0.8,
+#     "dis_util_work": 1.5411056147726503,
+#     "dis_util_unemployed": 1.972168129756152,
+#     "bequest_scale": 1e-12,
+#     # Taste shock scale
+#     "lambda": 1.0,
+#     # Interest rate and discount factor
+#     "interest_rate": 0.03,
+#     "beta": 0.95,
+# }
 # %%
 
 model_solution_est, model, options, params = specify_and_solve_model(
@@ -46,7 +46,7 @@ model_solution_est, model, options, params = specify_and_solve_model(
     params=params,
     update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
     policy_state_trans_func=expected_SRA_probs_estimation,
-    file_append="est_2024_02_25",
+    file_append="est_2024_02_26",
     load_model=True,
     load_solution=True,
 )
@@ -61,6 +61,7 @@ data_sim_1 = simulate_scenario(
     expected_model=model_solution_est,
 )
 data_sim_1.to_pickle(path_dict["intermediate_data"] + "sim_data_1_unc.pkl")
+import matplotlib.pyplot as plt
 
 #
 # model_solution_step_func, _, _, _ = specify_and_solve_model(
@@ -86,16 +87,20 @@ data_sim_1.to_pickle(path_dict["intermediate_data"] + "sim_data_1_unc.pkl")
 
 # %%
 # Plot choice shares by age
-data_sim_1.groupby(["age"]).choice.value_counts(normalize=True).unstack().plot()
+fig_1 = (
+    data_sim_1.groupby(["age"])
+    .choice.value_counts(normalize=True)
+    .unstack()
+    .plot()
+    .get_figure()
+)
 
 # %%
 # plot average income by age and choice
-income_df = data_sim_1.groupby(["age", "choice"])["labor_income"].mean().unstack()
-income_df.plot()
+data_sim_1.groupby(["age", "choice"])["labor_income"].mean().unstack().plot()
 # %%
 # plot average consumption by age and choice
-consumption_df = data_sim_1.groupby(["age", "choice"])["consumption"].mean().unstack()
-consumption_df.plot()
+data_sim_1.groupby(["age", "choice"])["consumption"].mean().unstack().plot()
 # %%
 # plot average periodic savings by age and choice
 data_sim_1.groupby(["age", "choice"])["savings_dec"].mean().unstack().plot()
@@ -106,4 +111,5 @@ data_sim_1.groupby(["age", "choice"])["utility"].mean().unstack().plot()
 # %%
 # plot average wealth by age and choice
 data_sim_1.groupby(["age", "choice"])["wealth_at_beginning"].mean().unstack().plot()
+plt.show()
 # %%

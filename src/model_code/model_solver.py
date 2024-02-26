@@ -18,9 +18,7 @@ def specify_and_solve_model(
     """Solve the model and save the solution as well as specifications to a file. """
     solution_file = path_dict["intermediate_data"] + f"model_solution_{file_append}.pkl"
 
-    if load_solution:
-        solution_est = pickle.load(open(solution_file, "rb"))
-        return solution_est
+ 
 
     # Generate model_specs
     model, options, params = specify_model(
@@ -30,6 +28,11 @@ def specify_and_solve_model(
         params=params,
         load_model=load_model,
     )
+
+    if load_solution:
+        solution_est = pickle.load(open(solution_file, "rb"))
+        return solution_est , model, options, params
+
     savings_grid = create_savings_grid()
 
     solve_func = get_solve_func_for_model(model, savings_grid, options)

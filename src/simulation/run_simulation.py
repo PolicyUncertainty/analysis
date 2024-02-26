@@ -41,7 +41,7 @@ params = {
 }
 # %%
 
-model_solution_est, _, _, params = specify_and_solve_model(
+model_solution_est, model, options, params = specify_and_solve_model(
     path_dict=path_dict,
     params=params,
     update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,

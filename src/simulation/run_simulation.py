@@ -1,3 +1,4 @@
+# %%
 # Set paths of project
 import sys
 from pathlib import Path
@@ -38,9 +39,9 @@ params = {
     "interest_rate": 0.03,
     "beta": 0.95,
 }
+# %%
 
-
-model_solution_est, _, _, _ = specify_and_solve_model(
+model_solution_est, _, _, params = specify_and_solve_model(
     path_dict=path_dict,
     params=params,
     update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
@@ -82,3 +83,5 @@ data_sim_1.to_pickle(path_dict["intermediate_data"] + "sim_data_1_unc.pkl")
 #     expected_model=model_solution_step_func,
 # )
 # data_sim_2.to_pickle(path_dict["intermediate_data"] + "sim_data_1_no_unc.pkl")
+
+# %%

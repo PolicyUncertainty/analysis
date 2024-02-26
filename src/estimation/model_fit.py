@@ -60,6 +60,21 @@ est_model, model, options, params = specify_and_solve_model(
 
 # %%
 # load and modify data
+def load_and_modify_data(paths_dict, options):
+    start_age = options["model_params"]["start_age"]
+
+    data_decision = pd.read_pickle(paths_dict["intermediate_data"] + "decision_data.pkl")
+    data_decision["wealth"] = data_decision["wealth"].clip(lower=1e-16)
+    data_decision["age"] = data_decision["period"] + 30
+    data_decision = data_decision[data_decision["age"] < 75]
+    data_decision["wealth_tercile"] = data_decision.groupby("age")["wealth"].transform(
+        lambda x: pd.qcut(x, 3, labels=False)
+    )
+    data_decision["experience_tercile"] = data_decision.groupby("age")[
+        "experience"
+    ].transform(lambda x: pd.qcut(x, 3, labels=False, duplicates="drop"))
+    return data_decision
+
 data_decision = load_and_modify_data(paths_dict, options)
 
 # %%
@@ -67,22 +82,35 @@ data_decision = load_and_modify_data(paths_dict, options)
 from dcegm.likelihood import create_observed_choice_indexes
 from dcegm.likelihood import calc_choice_probs_for_observed_states
 
-states_dict = {name: data_decision[name].values for name in model["state_space_names"]}
-observed_state_choice_indexes = create_observed_choice_indexes(states_dict, model)
-choice_probs_observations = calc_choice_probs_for_observed_states(
+def create_choice_probs_for_each_observation(
+    value_solved, endog_grid_solved, params, data_decision, model, options
+):
+    states_dict = {name: data_decision[name].values for name in model["state_space_names"]}
+    observed_state_choice_indexes = create_observed_choice_indexes(states_dict, model)
+    choice_probs_observations = calc_choice_probs_for_observed_states(
+        value_solved=value_solved,
+        endog_grid_solved=endog_grid_solved,
+        params=params,
+        observed_states=states_dict,
+        state_choice_indexes=observed_state_choice_indexes,
+        oberseved_wealth=data_decision["wealth"].values,
+        choice_range=np.arange(options["model_params"]["n_choices"], dtype=int),
+        compute_utility=model["model_funcs"]["compute_utility"],
+    )
+    choice_probs_observations = np.nan_to_num(choice_probs_observations, nan=0.0)
+    data_decision["choice_0"] = choice_probs_observations[:, 0]
+    data_decision["choice_1"] = choice_probs_observations[:, 1]
+    data_decision["choice_2"] = choice_probs_observations[:, 2]
+    return data_decision
+
+data_decision = create_choice_probs_for_each_observation(
     value_solved=est_model["value"],
     endog_grid_solved=est_model["endog_grid"],
     params=params,
-    observed_states=states_dict,
-    state_choice_indexes=observed_state_choice_indexes,
-    oberseved_wealth=data_decision["wealth"].values,
-    choice_range=np.arange(options["model_params"]["n_choices"], dtype=int),
-    compute_utility=model["model_funcs"]["compute_utility"],
+    data_decision=data_decision,
+    model=model,
+    options=options,
 )
-choice_probs_observations = np.nan_to_num(choice_probs_observations, nan=0.0)
-data_decision["choice_0"] = choice_probs_observations[:, 0]
-data_decision["choice_1"] = choice_probs_observations[:, 1]
-data_decision["choice_2"] = choice_probs_observations[:, 2]
 
 # %%
 # test if all predicted probabilities of choices conditional on state are not nan
@@ -203,18 +231,5 @@ ax.get_figure().savefig(model_fit_dir + "experience_terciles_by_age.png")
 
 # %%
 
-def load_and_modify_data(paths_dict, options):
-    start_age = options["model_params"]["start_age"]
 
-    data_decision = pd.read_pickle(paths_dict["intermediate_data"] + "decision_data.pkl")
-    data_decision["wealth"] = data_decision["wealth"].clip(lower=1e-16)
-    data_decision["age"] = data_decision["period"] + 30
-    data_decision = data_decision[data_decision["age"] < 75]
-    data_decision["wealth_tercile"] = data_decision.groupby("age")["wealth"].transform(
-        lambda x: pd.qcut(x, 3, labels=False)
-    )
-    data_decision["experience_tercile"] = data_decision.groupby("age")[
-        "experience"
-    ].transform(lambda x: pd.qcut(x, 3, labels=False, duplicates="drop"))
-    return data_decision
 # %%

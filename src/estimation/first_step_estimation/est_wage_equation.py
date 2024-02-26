@@ -53,7 +53,8 @@ def estimate_wage_parameters(paths):
     ]
 
     # Prepare estimation
-    merged_df = merged_df.set_index(["syear", "pid"])
+    merged_df["year"] = merged_df["syear"].astype("category") 
+    merged_df = merged_df.set_index(["pid", "syear"])
     merged_df = merged_df.rename(
         columns={"pgexpft": "full_time_exp", "pglabgro": "wage"}
     )
@@ -63,11 +64,12 @@ def estimate_wage_parameters(paths):
     # estimate parametric regression, save parameters
     model = PanelOLS(
         dependent=merged_df["wage"] / specs["wealth_unit"],
-        exog=merged_df[["constant", "full_time_exp", "full_time_exp_sq"]],
+        exog=merged_df[["constant", "full_time_exp", "full_time_exp_sq", "year"]],
         entity_effects=True,
-        time_effects=True,
+        #time_effects=True,
     )
-    coefficients = model.fit().params
+    breakpoint()
+    coefficients = model.fit().params[0:3]
     coefficients.loc["income_shock_std"] = np.sqrt(
         model.fit().resid_ss / (merged_df.shape[0] - 2)
     )

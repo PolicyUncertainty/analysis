@@ -24,7 +24,13 @@ def plot_wages(path_dict):
     for i, exp in enumerate(exp_levels):
         net_wages[i] = calc_net_income_working(gross_wages[i])
 
+    unemployment_benefits = (
+        np.ones_like(exp_levels) * specs["unemployment_benefits"] * 12
+    )
+
     fig, ax = plt.subplots()
     ax.plot(exp_levels, net_wages, label="Average net wage")
     ax.plot(exp_levels, gross_wages, label="Average gross wage")
+    ax.plot(exp_levels, unemployment_benefits, label="Unemployment benefits")
+    ax.set_ylim(0, 80)
     ax.legend()

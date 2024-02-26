@@ -26,7 +26,7 @@ from model_code.model_solver import specify_and_solve_model
 from model_code.policy_states_belief import expected_SRA_probs_estimation
 from model_code.policy_states_belief import update_specs_exp_ret_age_trans_mat
 
-params = pickle.load(open(path_dict["est_results"] + "est_params_1.pkl", "rb"))
+params = pickle.load(open(path_dict["est_results"] + "est_params.pkl", "rb"))
 # params = {
 #     # Utility parameters
 #     "mu": 0.8,
@@ -87,29 +87,40 @@ import matplotlib.pyplot as plt
 
 # %%
 # Plot choice shares by age
-fig_1 = (
-    data_sim_1.groupby(["age"])
-    .choice.value_counts(normalize=True)
-    .unstack()
-    .plot()
-    .get_figure()
+data_sim_1.groupby(["age"]).choice.value_counts(normalize=True).unstack().plot(
+    title="Choice shares by age"
+)
+
+# %%fig_1 = (
+
+# plot average income by age and choice
+data_sim_1.groupby(["age", "choice"])["labor_income"].mean().unstack().plot(
+    title="Average income by age and choice"
+)
+# %%
+# plot average consumption by age and choice
+data_sim_1.groupby(["age", "choice"])["consumption"].mean().unstack().plot(
+    title="Average consumption by age and choice"
+)
+# %%
+# plot average periodic savings by age and choice
+data_sim_1.groupby(["age", "choice"])["savings_dec"].mean().unstack().plot(
+    title="Average periodic savings by age and choice"
 )
 
 # %%
-# plot average income by age and choice
-data_sim_1.groupby(["age", "choice"])["labor_income"].mean().unstack().plot()
-# %%
-# plot average consumption by age and choice
-data_sim_1.groupby(["age", "choice"])["consumption"].mean().unstack().plot()
-# %%
-# plot average periodic savings by age and choice
-data_sim_1.groupby(["age", "choice"])["savings_dec"].mean().unstack().plot()
-
-# %%
 # plot average utility by age and choice
-data_sim_1.groupby(["age", "choice"])["utility"].mean().unstack().plot()
+data_sim_1.groupby(["age", "choice"])["utility"].mean().unstack().plot(
+    title="Average utility by age and choice"
+)
 # %%
 # plot average wealth by age and choice
-data_sim_1.groupby(["age", "choice"])["wealth_at_beginning"].mean().unstack().plot()
+data_sim_1.groupby(["age", "choice"])["wealth_at_beginning"].mean().unstack().plot(
+    title="Average wealth by age and choice"
+)
+data_sim_1.groupby(["age"])["wealth_at_beginning"].mean().plot(
+    title="Average wealth by age"
+)
+
 plt.show()
 # %%

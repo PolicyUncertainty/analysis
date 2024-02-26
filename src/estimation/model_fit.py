@@ -27,20 +27,19 @@ model_fit_dir = analysis_path + "output/plots/model_fits/"
 os.makedirs(model_fit_dir, exist_ok=True)
 
 
-# est_params = pickle.load(open(paths_dict["est_results"] + "est_params_1.pkl", "rb"))
-params = {
-    # Utility parameters
-    "mu": 0.8,
-    "dis_util_work": 1.5411056147726503,
-    "dis_util_unemployed": 1.972168129756152,
-    "bequest_scale": 1e-12,
-    # Taste shock scale
-    "lambda": 1.0,
-    # Interest rate and discount factor
-    "interest_rate": 0.03,
-    "beta": 0.95,
-}
-
+params = pickle.load(open(paths_dict["est_results"] + "est_params.pkl", "rb"))
+# params = {
+#     # Utility parameters
+#     "mu": 0.8,
+#     "dis_util_work": 1.5411056147726503,
+#     "dis_util_unemployed": 1.972168129756152,
+#     "bequest_scale": 1e-12,
+#     # Taste shock scale
+#     "lambda": 1.0,
+#     # Interest rate and discount factor
+#     "interest_rate": 0.03,
+#     "beta": 0.95,
+# }
 # specify and solve model
 
 from model_code.model_solver import specify_and_solve_model
@@ -119,12 +118,14 @@ data_decision, choice_probs_observations = create_choice_probs_for_each_observat
     model=model,
     options=options,
 )
-
 # %%
 # test if all predicted probabilities of choices conditional on state are not nan
 choice_probs_each_obs = jnp.take_along_axis(
     choice_probs_observations, data_decision["choice"].values[:, None], axis=1
 )[:, 0]
+explained_0 = data_decision[data_decision["choice"] == 0]["choice_0"].mean()
+explained_1 = data_decision[data_decision["choice"] == 1]["choice_1"].mean()
+explained_2 = data_decision[data_decision["choice"] == 2]["choice_2"].mean()
 # %%
 # Plot observed choice shares by age
 age_range = np.arange(30, 70, 1)

@@ -1,5 +1,6 @@
 import jax.numpy as jnp
 import numpy as np
+import pandas as pd
 
 
 def generate_start_states(observed_data, n_agents, seed, options):
@@ -19,21 +20,12 @@ def generate_start_states(observed_data, n_agents, seed, options):
         options["model_params"]["unemployment_benefits"] * 12
     )
 
+    exp_max = start_period_data["experience"].max()
+    grid_probs = pd.Series(index=np.arange(0, exp_max + 1), data=0, dtype=float)
     # Initial experience
-    exp_counts = (
-        (start_period_data["experience"].value_counts(normalize=True) * n_agents)
-        .round()
-        .sort_index()
-    )
-    # Generate experience state vector
-    exp_agents = np.array([])
-    for i, exp in enumerate(exp_counts.index.values):
-        exp_agents = np.append(exp_agents, np.full(int(exp_counts[i]), exp))
-
-    missing = n_agents - exp_agents.size
-    exp_agents = np.append(exp_agents, np.full(missing, 0)).astype(int)
-    # Shuffle exp_agents
-    np.random.shuffle(exp_agents)
+    exp_dist = start_period_data["experience"].value_counts(normalize=True)
+    grid_probs.update(exp_dist)
+    exp_agents = np.random.choice(exp_max + 1, size=n_agents, p=grid_probs.values)
 
     # Generate lagged choice. Assign everywhere 1 except where experience is 0
     lagged_choice = np.ones_like(exp_agents)

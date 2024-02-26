@@ -55,7 +55,7 @@ est_model, model, options, params = specify_and_solve_model(
     # note: file_append is used to load the model and solution from the file specified by the string
     file_append="est_2024_02_25",
     load_model=True,
-    load_solution=False,
+    load_solution=True,
 )
 
 # %%
@@ -101,9 +101,9 @@ def create_choice_probs_for_each_observation(
     data_decision["choice_0"] = choice_probs_observations[:, 0]
     data_decision["choice_1"] = choice_probs_observations[:, 1]
     data_decision["choice_2"] = choice_probs_observations[:, 2]
-    return data_decision
+    return data_decision, choice_probs_observations
 
-data_decision = create_choice_probs_for_each_observation(
+data_decision, choice_probs_observations = create_choice_probs_for_each_observation(
     value_solved=est_model["value"],
     endog_grid_solved=est_model["endog_grid"],
     params=params,

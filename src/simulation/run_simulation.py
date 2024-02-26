@@ -85,3 +85,25 @@ data_sim_1.to_pickle(path_dict["intermediate_data"] + "sim_data_1_unc.pkl")
 # data_sim_2.to_pickle(path_dict["intermediate_data"] + "sim_data_1_no_unc.pkl")
 
 # %%
+# Plot choice shares by age
+data_sim_1.groupby(["age"]).choice.value_counts(normalize=True).unstack().plot()
+
+# %%
+# plot average income by age and choice
+income_df = data_sim_1.groupby(["age", "choice"])["labor_income"].mean().unstack()
+income_df.plot()
+# %%
+# plot average consumption by age and choice
+consumption_df = data_sim_1.groupby(["age", "choice"])["consumption"].mean().unstack()
+consumption_df.plot()
+# %%
+# plot average periodic savings by age and choice
+data_sim_1.groupby(["age", "choice"])["savings_dec"].mean().unstack().plot()
+
+# %%
+# plot average utility by age and choice
+data_sim_1.groupby(["age", "choice"])["utility"].mean().unstack().plot()
+# %%
+# plot average wealth by age and choice
+data_sim_1.groupby(["age", "choice"])["wealth_at_beginning"].mean().unstack().plot()
+# %%

@@ -25,21 +25,34 @@ from model_code.model_solver import specify_and_solve_model
 from model_code.policy_states_belief import expected_SRA_probs_estimation
 from model_code.policy_states_belief import update_specs_exp_ret_age_trans_mat
 
-est_params = pickle.load(open(path_dict["est_results"] + "est_params_1.pkl", "rb"))
+#est_params = pickle.load(open(path_dict["est_results"] + "est_params_1.pkl", "rb"))
+params = {
+    # Utility parameters
+    "mu": 0.8,
+    "dis_util_work": 1.5411056147726503,
+    "dis_util_unemployed": 1.972168129756152,
+    "bequest_scale": 1e-12,
+    # Taste shock scale
+    "lambda": 1.0,
+    # Interest rate and discount factor
+    "interest_rate": 0.03,
+    "beta": 0.95,
+}
+
 
 model_solution_est, _, _, _ = specify_and_solve_model(
     path_dict=path_dict,
-    params=est_params,
+    params=params,
     update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
     policy_state_trans_func=expected_SRA_probs_estimation,
-    file_append="est",
+    file_append="est_2024_02_25",
     load_model=True,
     load_solution=True,
 )
 
 data_sim_1 = simulate_scenario(
     path_dict=path_dict,
-    params=est_params,
+    params=params,
     n_agents=1000,
     seed=123,
     update_spec_for_policy_state=update_specs_for_step_function,

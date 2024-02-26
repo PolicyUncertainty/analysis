@@ -25,13 +25,7 @@ def generate_derived_and_data_derived_specs(path_dict):
 
     # calculate value of pension point based on unweighted average wage over 40 years
     # of work
-    exp_grid = np.arange(1, 41)
-    wage_grid = (
-        specs["gamma_0"]
-        + specs["gamma_1"] * exp_grid
-        + specs["gamma_2"] * exp_grid**2
-    )
-    specs["pension_point_value"] = wage_grid.mean() / 40 * 0.48
+    specs["pension_point_value"] = 27.2 / specs["wealth_unit"]
 
     # max initial experience
     data_decision = pd.read_pickle(path_dict["intermediate_data"] + "decision_data.pkl")

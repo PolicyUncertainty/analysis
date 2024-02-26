@@ -5,7 +5,7 @@ from model_code.budget_equation import create_savings_grid
 from model_code.specify_model import specify_model
 
 
-def solve_model(
+def specify_and_solve_model(
     path_dict,
     file_append,
     params,
@@ -14,6 +14,8 @@ def solve_model(
     load_model,
     load_solution,
 ):
+    
+    """Solve the model and save the solution as well as specifications to a file. """
     solution_file = path_dict["intermediate_data"] + f"model_solution_{file_append}.pkl"
 
     if load_solution:
@@ -42,4 +44,4 @@ def solve_model(
 
     pickle.dump(solution, open(solution_file, "wb"))
 
-    return solution
+    return solution, model, options, params

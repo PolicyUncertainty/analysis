@@ -17,7 +17,7 @@ def estimate_model(path_dict, load_model):
         "dis_util_unemployed": 1.0,
         "bequest_scale": 1.3,
         # Taste and income shock scale
-        "lambda": 0.5,
+        "lambda": 1,
         # Interest rate and discount factor
         "interest_rate": 0.03,
         "beta": 0.97,
@@ -59,7 +59,7 @@ def estimate_model(path_dict, load_model):
         "dis_util_work",
         "dis_util_unemployed",
         # "bequest_scale",
-        "lambda",
+        # "lambda",
     ]
     start_params = {name: start_params_all[name] for name in params_to_estimate_names}
 
@@ -73,14 +73,14 @@ def estimate_model(path_dict, load_model):
         "dis_util_work": 1e-12,
         "dis_util_unemployed": 1e-12,
         # "bequest_scale": 1e-12,
-        "lambda": 1e-12,
+        # "lambda": 1e-12,
     }
     upper_bounds = {
         # "mu": 5,
         "dis_util_work": 50,
         "dis_util_unemployed": 50,
         # "bequest_scale": 20,
-        "lambda": 1,
+        # "lambda": 1,
     }
 
     result = em.minimize(

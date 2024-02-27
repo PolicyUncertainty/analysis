@@ -56,8 +56,9 @@ def simulate_scenario(
     df["total_income"] = (
         df.groupby("agent")["wealth_at_beginning"].shift(-1) - df["savings"]
     )
-    df["savings_dec"] = (
-        df.groupby("agent")["total_income"].shift(-1) - df["consumption"]
+    df["total_income"] = (
+        df.groupby("agent")["wealth_at_beginning"].shift(-1) - df["savings"]
     )
+    df["savings_dec"] = df["total_income"] - df["consumption"]
 
     return df

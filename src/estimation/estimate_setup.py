@@ -20,7 +20,7 @@ def estimate_model(path_dict, load_model):
         "lambda": 0.5,
         # Interest rate and discount factor
         "interest_rate": 0.03,
-        "beta": 0.95,
+        "beta": 0.97,
     }
 
     model, options, params = specify_model(

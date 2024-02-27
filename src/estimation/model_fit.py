@@ -31,15 +31,15 @@ params = pickle.load(open(paths_dict["est_results"] + "est_params.pkl", "rb"))
 # params = {
 #     # Utility parameters
 #     "mu": 0.5,
-#     "dis_util_work": 5.283220621078782,
-#     "dis_util_unemployed": 0.9721039012532309,
-#     "bequest_scale": 2.3,
+#     "dis_util_work": 4.0,
+#     "dis_util_unemployed": 1.0,
+#     "bequest_scale": 1.3,
 #     # Taste and income shock scale
-#     "lambda": 0.3,
+#     "lambda": 0.5,
 #     # Interest rate and discount factor
 #     "interest_rate": 0.03,
 #     "beta": 0.95,
-#     }
+# }
 
 # specify and solve model
 
@@ -53,9 +53,9 @@ est_model, model, options, params = specify_and_solve_model(
     update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
     policy_state_trans_func=expected_SRA_probs_estimation,
     # note: file_append is used to load the model and solution from the file specified by the string
-    file_append="est_26_02",
-    load_model=False,
-    load_solution=False,
+    file_append="est",
+    load_model=True,
+    load_solution=True,
 )
 
 
@@ -68,7 +68,7 @@ def load_and_modify_data(paths_dict, options):
         paths_dict["intermediate_data"] + "decision_data.pkl"
     )
     data_decision["wealth"] = data_decision["wealth"].clip(lower=1e-16)
-    data_decision["age"] = data_decision["period"] + 30
+    data_decision["age"] = data_decision["period"] + start_age
     data_decision = data_decision[data_decision["age"] < 75]
     data_decision["wealth_tercile"] = data_decision.groupby("age")["wealth"].transform(
         lambda x: pd.qcut(x, 3, labels=False)
@@ -128,7 +128,6 @@ def create_choice_probs_for_each_observation(
 choice_probs_each_obs = jnp.take_along_axis(
     choice_probs_observations, data_decision["choice"].values[:, None], axis=1
 )[:, 0]
-
 explained_0 = data_decision[data_decision["choice"] == 0]["choice_0"].mean()
 explained_1 = data_decision[data_decision["choice"] == 1]["choice_1"].mean()
 explained_2 = data_decision[data_decision["choice"] == 2]["choice_2"].mean()

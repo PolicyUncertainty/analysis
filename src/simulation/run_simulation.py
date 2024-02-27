@@ -46,7 +46,7 @@ model_solution_est, model, options, params = specify_and_solve_model(
     params=params,
     update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
     policy_state_trans_func=expected_SRA_probs_estimation,
-    file_append="est_26_02",
+    file_append="est",
     load_model=True,
     load_solution=True,
 )
@@ -62,7 +62,6 @@ data_sim_1 = simulate_scenario(
 )
 data_sim_1.to_pickle(path_dict["intermediate_data"] + "sim_data_1_unc.pkl")
 import matplotlib.pyplot as plt
-
 
 model_solution_step_func, _, _, _ = specify_and_solve_model(
     path_dict=path_dict,
@@ -96,6 +95,10 @@ data_sim_1.groupby(["age"]).choice.value_counts(normalize=True).unstack().plot(
 # plot average income by age and choice
 data_sim_1.groupby(["age", "choice"])["labor_income"].mean().unstack().plot(
     title="Average income by age and choice"
+)
+# plot average income by age and choice
+data_sim_1.groupby(["age", "choice"])["total_income"].mean().unstack().plot(
+    title="Average total income by age and choice"
 )
 # %%
 # plot average consumption by age and choice

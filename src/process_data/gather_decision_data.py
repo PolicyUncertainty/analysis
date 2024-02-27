@@ -246,16 +246,9 @@ def create_hh_cons_equivalence_data(merged_data):
 
 def deflate_wealth(merged_data, cpi_data, options):
     """This function deflates the wealth variable using the consumer price index."""
-    # Load cpi data, make row index
     cpi_data_df = pd.read_csv(cpi_data, index_col=0)
-    breakpoint()
-    cpi_data = cpi_data.resample("Y").last()
-    cpi_data
-    merged_data = merged_data.merge(cpi_data, left_on="syear", right_index=True)
-    merged
-
-    # Deflate wealth
-    merged_data["wealth"] = merged_data["wealth"] / cpi_data
+    merged_data = merged_data.merge(cpi_data_df, left_on="syear", right_index=True)
+    merged_data["wealth"] = merged_data["wealth"] / merged_data["cpi"]
     return merged_data
 
 def filter_data(merged_data, start_year, end_year, start_age):

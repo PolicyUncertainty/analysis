@@ -17,7 +17,6 @@ def gather_decision_data(paths, options, load_data=False):
     # Set file paths
     soep_c38 = paths["soep_c38"]
     soep_rv = paths["soep_rv"]
-    cpi_data = paths["intermediate_data"] + "cpi_base_2010.csv"
 
     # Export parameters from options
     start_year = options["start_year"]
@@ -33,7 +32,7 @@ def gather_decision_data(paths, options, load_data=False):
     merged_data = gather_wealth_data(soep_c38, merged_data, options)
     merged_data = create_hh_cons_equivalence_data(merged_data)
     merged_data["wealth"] = merged_data["wealth"] / merged_data["cons_equiv"]
-    merged_data = deflate_wealth(merged_data, cpi_data, options)
+    merged_data = deflate_wealth(merged_data, paths)
 
     # (labor) choice
     merged_data = create_choice_variable(
@@ -244,12 +243,16 @@ def create_hh_cons_equivalence_data(merged_data):
     )
     return merged_data
 
-def deflate_wealth(merged_data, cpi_data, options):
+
+def deflate_wealth(merged_data, path_dict):
     """This function deflates the wealth variable using the consumer price index."""
-    cpi_data_df = pd.read_csv(cpi_data, index_col=0)
-    merged_data = merged_data.merge(cpi_data_df, left_on="syear", right_index=True)
+    cpi_data = pd.read_csv(
+        path_dict["intermediate_data"] + "cpi_base_2010.csv", index_col=0
+    )
+    merged_data = merged_data.merge(cpi_data, left_on="syear", right_index=True)
     merged_data["wealth"] = merged_data["wealth"] / merged_data["cpi"]
     return merged_data
+
 
 def filter_data(merged_data, start_year, end_year, start_age):
     """This function filters the data according to the model setup.

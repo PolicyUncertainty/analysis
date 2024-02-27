@@ -33,7 +33,6 @@ def plot_full_time(paths_dict):
     )
     ax.legend()
     ax.set_title("Proportion of full time workers by age")
-    plt.show()
 
 
 def plot_values_by_age(paths_dict):
@@ -49,10 +48,12 @@ def plot_values_by_age(paths_dict):
     data_unc["age"] = data_unc["period"] + specs["start_age"]
     data_no_unc["age"] = data_no_unc["period"] + specs["start_age"]
 
+    data_unc["value_diff"] = data_unc["value"] - data_no_unc["value"]
     # plot average value by age
     fig, ax = plt.subplots()
-    ax.plot(data_unc.groupby("age")["value"].mean(), label="Uncertainty")
-    ax.plot(data_no_unc.groupby("age")["value"].mean(), label="No Uncertainty")
+    # ax.plot(data_unc.groupby("age")["value"].mean(), label="Uncertainty")
+    # ax.plot(data_no_unc.groupby("age")["value"].mean(), label="No Uncertainty")
+    ax.plot(data_unc.groupby("age")["value_diff"].mean(), label="Difference")
     ax.set_title("Average value by age")
     ax.legend()
 

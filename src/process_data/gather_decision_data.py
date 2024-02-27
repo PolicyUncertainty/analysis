@@ -211,7 +211,7 @@ def gather_wealth_data(soep_c38, merged_data, options):
 
     merged_data = merged_data[(merged_data["wealth"].notna())]
 
-    merged_data[merged_data["wealth"] < 0] = 0
+    merged_data.loc[merged_data["wealth"] < 0, "wealth"] = 0
 
     print(str(len(merged_data)) + " left after dropping people with missing wealth.")
 

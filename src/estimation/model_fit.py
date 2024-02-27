@@ -30,16 +30,17 @@ os.makedirs(model_fit_dir, exist_ok=True)
 params = pickle.load(open(paths_dict["est_results"] + "est_params.pkl", "rb"))
 # params = {
 #     # Utility parameters
-#     "mu": 0.8,
-#     "dis_util_work": 1.5411056147726503,
-#     "dis_util_unemployed": 1.972168129756152,
-#     "bequest_scale": 1e-12,
-#     # Taste shock scale
-#     "lambda": 1.0,
+#     "mu": 0.5,
+#     "dis_util_work": 5.283220621078782,
+#     "dis_util_unemployed": 0.9721039012532309,
+#     "bequest_scale": 2.3,
+#     # Taste and income shock scale
+#     "lambda": 0.3,
 #     # Interest rate and discount factor
 #     "interest_rate": 0.03,
 #     "beta": 0.95,
-# }
+#     }
+
 # specify and solve model
 
 from model_code.model_solver import specify_and_solve_model
@@ -52,9 +53,9 @@ est_model, model, options, params = specify_and_solve_model(
     update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
     policy_state_trans_func=expected_SRA_probs_estimation,
     # note: file_append is used to load the model and solution from the file specified by the string
-    file_append="est_2024_02_26",
-    load_model=True,
-    load_solution=True,
+    file_append="est_26_02",
+    load_model=False,
+    load_solution=False,
 )
 
 
@@ -107,10 +108,14 @@ def create_choice_probs_for_each_observation(
     data_decision["choice_0"] = choice_probs_observations[:, 0]
     data_decision["choice_1"] = choice_probs_observations[:, 1]
     data_decision["choice_2"] = choice_probs_observations[:, 2]
-    return data_decision, choice_probs_observations
+    return data_decision, choice_probs_observations, observed_state_choice_indexes
 
 
-data_decision, choice_probs_observations = create_choice_probs_for_each_observation(
+(
+    data_decision,
+    choice_probs_observations,
+    observed_state_choice_indexes,
+) = create_choice_probs_for_each_observation(
     value_solved=est_model["value"],
     endog_grid_solved=est_model["endog_grid"],
     params=params,
@@ -123,6 +128,7 @@ data_decision, choice_probs_observations = create_choice_probs_for_each_observat
 choice_probs_each_obs = jnp.take_along_axis(
     choice_probs_observations, data_decision["choice"].values[:, None], axis=1
 )[:, 0]
+
 explained_0 = data_decision[data_decision["choice"] == 0]["choice_0"].mean()
 explained_1 = data_decision[data_decision["choice"] == 1]["choice_1"].mean()
 explained_2 = data_decision[data_decision["choice"] == 2]["choice_2"].mean()

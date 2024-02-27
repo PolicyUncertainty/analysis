@@ -46,7 +46,7 @@ model_solution_est, model, options, params = specify_and_solve_model(
     params=params,
     update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
     policy_state_trans_func=expected_SRA_probs_estimation,
-    file_append="est_2024_02_26",
+    file_append="est_26_02",
     load_model=True,
     load_solution=True,
 )
@@ -63,27 +63,27 @@ data_sim_1 = simulate_scenario(
 data_sim_1.to_pickle(path_dict["intermediate_data"] + "sim_data_1_unc.pkl")
 import matplotlib.pyplot as plt
 
-#
-# model_solution_step_func, _, _, _ = specify_and_solve_model(
-#     path_dict=path_dict,
-#     params=est_params,
-#     update_spec_for_policy_state=update_specs_for_step_function,
-#     policy_state_trans_func=realized_policy_step_function,
-#     file_append="step",
-#     load_model=True,
-#     load_solution=True,
-# )
-#
-# data_sim_2 = simulate_scenario(
-#     path_dict=path_dict,
-#     params=est_params,
-#     n_agents=1000,
-#     seed=123,
-#     update_spec_for_policy_state=update_specs_for_step_function,
-#     policy_state_func_scenario=realized_policy_step_function,
-#     expected_model=model_solution_step_func,
-# )
-# data_sim_2.to_pickle(path_dict["intermediate_data"] + "sim_data_1_no_unc.pkl")
+
+model_solution_step_func, _, _, _ = specify_and_solve_model(
+    path_dict=path_dict,
+    params=params,
+    update_spec_for_policy_state=update_specs_for_step_function,
+    policy_state_trans_func=realized_policy_step_function,
+    file_append="est_26_02_no_unc",
+    load_model=True,
+    load_solution=True,
+)
+
+data_sim_2 = simulate_scenario(
+    path_dict=path_dict,
+    params=params,
+    n_agents=1000,
+    seed=123,
+    update_spec_for_policy_state=update_specs_for_step_function,
+    policy_state_func_scenario=realized_policy_step_function,
+    expected_model=model_solution_step_func,
+)
+data_sim_2.to_pickle(path_dict["intermediate_data"] + "sim_data_1_no_unc.pkl")
 
 # %%
 # Plot choice shares by age

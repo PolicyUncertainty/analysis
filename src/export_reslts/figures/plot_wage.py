@@ -7,7 +7,7 @@ from model_code.derive_specs import generate_derived_and_data_derived_specs
 def plot_wages(path_dict):
     specs = generate_derived_and_data_derived_specs(path_dict)
 
-    exp_levels = np.arange(40)
+    exp_levels = np.arange(46)
     gross_wages = (
         np.maximum(
             (

@@ -10,14 +10,15 @@ def generate_start_states(observed_data, n_agents, seed, options):
         observed_data["period"] == observed_data["period"].min()
     ]
     # Get wealth quantiles
-    median_start_wealth = start_period_data["wealth"].median()
-    std_wealth = start_period_data["wealth"].std()
+    stats = start_period_data["wealth"].describe()
+
+    min_wealth = stats.loc["25%"]
+    max_wealth = stats.loc["75%"]
+
     # Draw num agents wealth from a normal with mean_start wealth and std
-    wealth_agents = np.random.normal(
-        loc=median_start_wealth, scale=std_wealth, size=n_agents
-    )
-    wealth_agents[wealth_agents < 0] = (
-        options["model_params"]["unemployment_benefits"] * 12
+    wealth_agents = np.random.uniform(min_wealth, max_wealth, n_agents)
+    wealth_agents = np.clip(
+        wealth_agents, options["model_params"]["unemployment_benefits"] * 12, None
     )
 
     exp_max = start_period_data["experience"].max()

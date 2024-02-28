@@ -69,3 +69,49 @@ def plot_choice_shares(paths):
     data_decision.groupby(["age"])["choice"].value_counts(
         normalize=True
     ).unstack().plot(title="Observed choice shares by age", kind="bar", stacked=True)
+
+
+def illustrate_simulated_data(paths):
+    df = pd.read_pickle(paths["intermediate_data"] + "sim_data_1_unc.pkl").reset_index()
+    import matplotlib.pyplot as plt
+
+    # %%
+    # Plot choice shares by age
+    df.groupby(["age"]).choice.value_counts(normalize=True).unstack().plot(
+        title="Choice shares by age"
+    )
+
+    # %%fig_1 = (
+
+    # plot average income by age and choice
+    df.groupby(["age", "choice"])["labor_income"].mean().unstack().plot(
+        title="Average income by age and choice"
+    )
+    # plot average income by age and choice
+    df.groupby(["age", "choice"])["total_income"].mean().unstack().plot(
+        title="Average total income by age and choice"
+    )
+    # %%
+    # plot average consumption by age and choice
+    df.groupby(["age", "choice"])["consumption"].mean().unstack().plot(
+        title="Average consumption by age and choice"
+    )
+    # %%
+    # plot average periodic savings by age and choice
+    df.groupby(["age", "choice"])["savings_dec"].mean().unstack().plot(
+        title="Average periodic savings by age and choice"
+    )
+
+    # %%
+    # plot average utility by age and choice
+    df.groupby(["age", "choice"])["utility"].mean().unstack().plot(
+        title="Average utility by age and choice"
+    )
+    # %%
+    # plot average wealth by age and choice
+    df.groupby(["age", "choice"])["wealth_at_beginning"].mean().unstack().plot(
+        title="Average wealth by age and choice"
+    )
+    df.groupby(["age"])["wealth_at_beginning"].mean().plot(
+        title="Average wealth by age"
+    )

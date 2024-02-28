@@ -53,7 +53,7 @@ est_model, model, options, params = specify_and_solve_model(
     update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
     policy_state_trans_func=expected_SRA_probs_estimation,
     # note: file_append is used to load the model and solution from the file specified by the string
-    file_append="est_1",
+    file_append="est",
     load_model=True,
     load_solution=True,
 )

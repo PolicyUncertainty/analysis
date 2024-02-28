@@ -55,6 +55,46 @@ if show_wage_plots:
     plt.show()
 plt.close("all")
 
+
+# ##########################################
+# # Counterfactual 1 plots
+# ##########################################
+if show_any_plots:
+    show_cf_1_plots = input("Show counterfactual 1 plots? (y/n): ") == "y"
+else:
+    show_cf_1_plots = False
+from export_reslts.figures.counterfactual_no_unc import (
+    plot_average_savings,
+    plot_full_time,
+    plot_values_by_age,
+    trajectory_plot,
+)
+
+trajectory_plot(path_dict)
+# plot_average_savings(path_dict)
+# plot_full_time(path_dict)
+# plot_values_by_age(path_dict)
+if show_cf_1_plots & show_any_plots:
+    plt.show()
+
+plt.close("all")
+
+
+###########################################
+# Counterfactual 2 plots
+###########################################
+if show_any_plots:
+    show_cf_2_plots = input("Show counterfactual 2 plots? (y/n): ") == "y"
+else:
+    show_cf_2_plots = False
+
+from export_reslts.figures.counterfactual_bias import plot_savings_over_age
+
+plot_savings_over_age(path_dict)
+if show_cf_2_plots:
+    plt.show()
+plt.close("all")
+
 # ##########################################
 # # Model fit plots
 # ##########################################
@@ -69,33 +109,8 @@ if show_model_fit_plots:
     plt.show()
 plt.close("all")
 
-
-# ##########################################
-# # Counterfactual 1 plots
-# ##########################################
-if show_any_plots:
-    show_cf_1_plots = input("Show counterfactual 1 plots? (y/n): ") == "y"
-else:
-    show_cf_1_plots = False
-from export_reslts.figures.policy_state_trajectories import trajectory_plot
-from export_reslts.figures.counterfactual_1_plots import (
-    plot_average_savings,
-    plot_full_time,
-    plot_values_by_age,
-)
-
-trajectory_plot(path_dict)
-plot_average_savings(path_dict)
-plot_full_time(path_dict)
-plot_values_by_age(path_dict)
-if show_cf_1_plots & show_any_plots:
-    plt.show()
-
-plt.close("all")
-
-
 ##########################################
-# Model fit plots
+# Model fit plots simulated
 ##########################################
 if show_any_plots:
     show_model_fit_plots = input("Show model fit plots? (y/n): ") == "y"

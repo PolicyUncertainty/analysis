@@ -57,7 +57,7 @@ for scale, df_name, specs_update_func in [
         params=params,
         n_agents=n_agents,
         seed=seeed,
-        update_spec_for_policy_state=update_specs_for_step_function_scale_1,
+        update_spec_for_policy_state=specs_update_func,
         policy_state_func_scenario=realized_policy_step_function,
         expected_model=model_solution_est,
     )

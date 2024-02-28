@@ -1,7 +1,15 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from derive_specs import generate_derived_and_data_derived_specs
+from export_reslts.figures.tools import create_discounted_sum_utilities
+from export_reslts.figures.tools import create_realized_taste_shock
+from matplotlib import pyplot as plt
 from model_code.derive_specs import read_and_derive_specs
+from policy_states_belief import update_specs_exp_ret_age_trans_mat
+from simulation.policy_state_scenarios.step_function import (
+    update_specs_for_step_function_scale_1,
+)
 
 
 def plot_full_time(paths_dict):
@@ -50,44 +58,18 @@ def plot_values_by_age(paths_dict):
     data_unc["age"] = data_unc["period"] + specs["start_age"]
     data_no_unc["age"] = data_no_unc["period"] + specs["start_age"]
 
-    data_unc["real_taste_shock"] = np.nan
-    data_unc.loc[data_unc["choice"] == 0, "real_taste_shock"] = data_unc.loc[
-        data_unc["choice"] == 0, "taste_shock_0"
-    ]
-    data_unc.loc[data_unc["choice"] == 1, "real_taste_shock"] = data_unc.loc[
-        data_unc["choice"] == 1, "taste_shock_1"
-    ]
-    data_unc.loc[data_unc["choice"] == 2, "real_taste_shock"] = data_unc.loc[
-        data_unc["choice"] == 2, "taste_shock_2"
-    ]
-    data_no_unc["real_taste_shock"] = np.nan
-    data_no_unc.loc[data_no_unc["choice"] == 0, "real_taste_shock"] = data_no_unc.loc[
-        data_no_unc["choice"] == 0, "taste_shock_0"
-    ]
-    data_no_unc.loc[data_no_unc["choice"] == 1, "real_taste_shock"] = data_no_unc.loc[
-        data_no_unc["choice"] == 1, "taste_shock_1"
-    ]
-    data_no_unc.loc[data_no_unc["choice"] == 2, "real_taste_shock"] = data_no_unc.loc[
-        data_no_unc["choice"] == 2, "taste_shock_2"
-    ]
+    data_unc = create_realized_taste_shock(data_unc)
+    data_no_unc = create_realized_taste_shock(data_no_unc)
+
     data_unc["real_util"] = data_unc["real_taste_shock"] + data_unc["utility"]
     data_no_unc["real_util"] = data_no_unc["real_taste_shock"] + data_no_unc["utility"]
 
-    # Get periodic mean utility
-    mean_real_util_unc = (
-        data_unc.groupby("period")["real_util"].mean().sort_index().values
+    mean_disc_util_unc = create_discounted_sum_utilities(
+        data_unc, est_params["beta"], utility_col="real_util"
     )
-    mean_real_util_no_unc = (
-        data_no_unc.groupby("period")["real_util"].mean().sort_index().values
+    mean_disc_util_no_unc = create_discounted_sum_utilities(
+        data_no_unc, est_params["beta"], utility_col="real_util"
     )
-    mean_disc_util_unc = mean_real_util_unc.copy()
-    mean_disc_util_no_unc = mean_real_util_no_unc.copy()
-
-    max_period = data_unc["period"].max()
-    # reverse loop over range
-    for i in range(max_period - 1, -1, -1):
-        mean_disc_util_unc[i] += mean_disc_util_unc[i + 1] * est_params["beta"]
-        mean_disc_util_no_unc[i] += mean_disc_util_no_unc[i + 1] * est_params["beta"]
 
     value_diff = mean_disc_util_unc - mean_disc_util_no_unc
 
@@ -122,3 +104,51 @@ def plot_average_savings(paths_dict):
     ax.plot(savings_no_unc, label="No Uncertainty")
     ax.set_title("Average savings by age")
     ax.legend()
+
+
+def trajectory_plot(path_dict):
+    # Load the estimates
+    alpha_hat = np.loadtxt(path_dict["est_results"] + "var_params.txt")
+
+    specs = generate_derived_and_data_derived_specs(path_dict)
+
+    specs = update_specs_for_step_function_scale_1(specs=specs, path_dict=path_dict)
+    specs = update_specs_exp_ret_age_trans_mat(specs, path_dict)
+
+    life_span = specs["end_age"] - specs["start_age"] + 1
+    policy_state_67 = int((67 - specs["min_SRA"]) / specs["SRA_grid_size"])
+
+    new_value_periods = specs["policy_step_periods"] + 1
+    trans_mat = specs["beliefs_trans_mat"]
+
+    policy_states_delta = (np.arange(trans_mat.shape[0]) - policy_state_67) * specs[
+        "SRA_grid_size"
+    ]
+
+    step_function_vals = np.zeros(life_span) + policy_state_67
+    continous_exp_values = np.zeros(life_span)
+
+    for i in range(1, life_span):
+        if np.isin(i, new_value_periods):
+            step_function_vals[i] = step_function_vals[i - 1] + 1
+        else:
+            step_function_vals[i] = step_function_vals[i - 1]
+
+        trans_mat_iter = np.linalg.matrix_power(trans_mat, i)
+
+        continous_exp_values[i] = (
+            trans_mat_iter[policy_state_67, :] @ policy_states_delta
+        )
+
+    step_function_vals = step_function_vals * specs["SRA_grid_size"] + specs["min_SRA"]
+    continous_exp_values += 67
+
+    ages = np.arange(life_span) + 30
+    fig, ax = plt.subplots()
+    ax.plot(ages, step_function_vals, label="Step function")
+    ax.plot(ages, continous_exp_values, label="Continous expectation")
+    ax.legend()
+    fig.tight_layout()
+    fig.savefig(
+        path_dict["plots"] + "counterfactual_design_1.png", transparent=True, dpi=300
+    )

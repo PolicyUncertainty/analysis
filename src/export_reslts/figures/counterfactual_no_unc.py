@@ -6,10 +6,10 @@ from model_code.derive_specs import read_and_derive_specs
 
 def plot_full_time(paths_dict):
     data_unc = pd.read_pickle(
-        paths_dict["intermediate_data"] + "sim_data_1_unc.pkl"
+        paths_dict["intermediate_data"] + "data_baseline.pkl"
     ).reset_index()
     data_no_unc = pd.read_pickle(
-        paths_dict["intermediate_data"] + "sim_data_1_no_unc.pkl"
+        paths_dict["intermediate_data"] + "data_no_unc.pkl"
     ).reset_index()
 
     specs = read_and_derive_specs(paths_dict["specs"])
@@ -37,10 +37,10 @@ def plot_full_time(paths_dict):
 
 def plot_values_by_age(paths_dict):
     data_unc = pd.read_pickle(
-        paths_dict["intermediate_data"] + "sim_data_1_unc.pkl"
+        paths_dict["intermediate_data"] + "data_baseline.pkl"
     ).reset_index()
     data_no_unc = pd.read_pickle(
-        paths_dict["intermediate_data"] + "sim_data_1_no_unc.pkl"
+        paths_dict["intermediate_data"] + "data_no_unc.pkl"
     ).reset_index()
 
     est_params = pd.read_pickle(paths_dict["est_results"] + "est_params.pkl")
@@ -72,6 +72,8 @@ def plot_values_by_age(paths_dict):
     ]
     data_unc["real_util"] = data_unc["real_taste_shock"] + data_unc["utility"]
     data_no_unc["real_util"] = data_no_unc["real_taste_shock"] + data_no_unc["utility"]
+
+    # Get periodic mean utility
     mean_real_util_unc = (
         data_unc.groupby("period")["real_util"].mean().sort_index().values
     )
@@ -88,6 +90,7 @@ def plot_values_by_age(paths_dict):
         mean_disc_util_no_unc[i] += mean_disc_util_no_unc[i + 1] * est_params["beta"]
 
     value_diff = mean_disc_util_unc - mean_disc_util_no_unc
+
     max_age = data_unc["age"].max()
     min_age = data_unc["age"].min()
     # plot average value by age
@@ -101,10 +104,10 @@ def plot_values_by_age(paths_dict):
 
 def plot_average_savings(paths_dict):
     data_unc = pd.read_pickle(
-        paths_dict["intermediate_data"] + "sim_data_1_unc.pkl"
+        paths_dict["intermediate_data"] + "data_baseline.pkl"
     ).reset_index()
     data_no_unc = pd.read_pickle(
-        paths_dict["intermediate_data"] + "sim_data_1_no_unc.pkl"
+        paths_dict["intermediate_data"] + "data_no_unc.pkl"
     ).reset_index()
 
     specs = read_and_derive_specs(paths_dict["specs"])

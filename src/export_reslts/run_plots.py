@@ -12,9 +12,9 @@ path_dict = create_path_dict(analysis_path)
 
 show_any_plots = input("Show any plots? (y/n): ") == "y"
 
-##########################################
-# Policy state plot
-##########################################
+# ##########################################
+# # Policy state plot
+# ##########################################
 if show_any_plots:
     show_policy_state_plot = input("Show policy state plot? (y/n): ") == "y"
 else:
@@ -26,9 +26,9 @@ if show_policy_state_plot:
     plt.show()
 plt.close("all")
 
-##########################################
-# Expected SRA
-##########################################
+# ##########################################
+# # Expected SRA
+# ##########################################
 if show_any_plots:
     show_expected_SRA_plot = input("Show expected SRA plot? (y/n): ") == "y"
 else:
@@ -41,9 +41,9 @@ if show_expected_SRA_plot:
 plt.close("all")
 
 
-##########################################
-# Wage plots
-##########################################
+# ##########################################
+# # Wage plots
+# ##########################################
 if show_any_plots:
     show_wage_plots = input("Show wage plots? (y/n): ") == "y"
 else:
@@ -55,9 +55,9 @@ if show_wage_plots:
     plt.show()
 plt.close("all")
 
-##########################################
-# Model fit plots
-##########################################
+# ##########################################
+# # Model fit plots
+# ##########################################
 if show_any_plots:
     show_model_fit_plots = input("Show model fit plots? (y/n): ") == "y"
 else:
@@ -70,9 +70,9 @@ if show_model_fit_plots:
 plt.close("all")
 
 
-##########################################
-# Counterfactual 1 plots
-##########################################
+# ##########################################
+# # Counterfactual 1 plots
+# ##########################################
 if show_any_plots:
     show_cf_1_plots = input("Show counterfactual 1 plots? (y/n): ") == "y"
 else:
@@ -94,23 +94,25 @@ if show_cf_1_plots & show_any_plots:
 plt.close("all")
 
 
-# ##########################################
-# # Model fit plots
-# ##########################################
-# if show_any_plots:
-#     show_model_fit_plots = input("Show model fit plots? (y/n): ") == "y"
-# else:
-#     show_model_fit_plots = False
-#
-# from export_reslts.figures.simulated_model_fit import (
-#     plot_average_wealth,
-#     plot_choice_shares,
-#     plot_choice_shares_single,
-# )
-#
-# plot_average_wealth(path_dict)
-# plot_choice_shares(path_dict)
-# plot_choice_shares_single(path_dict)
-# if show_model_fit_plots:
-#     plt.show()
-# plt.close("all")
+##########################################
+# Model fit plots
+##########################################
+if show_any_plots:
+    show_model_fit_plots = input("Show model fit plots? (y/n): ") == "y"
+else:
+    show_model_fit_plots = False
+
+from export_reslts.figures.simulated_model_fit import (
+    plot_average_wealth,
+    plot_choice_shares,
+    plot_choice_shares_single,
+    illustrate_simulated_data,
+)
+
+plot_average_wealth(path_dict)
+plot_choice_shares(path_dict)
+plot_choice_shares_single(path_dict)
+illustrate_simulated_data(path_dict)
+if show_model_fit_plots:
+    plt.show()
+plt.close("all")

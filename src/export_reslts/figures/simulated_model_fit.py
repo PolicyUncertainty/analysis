@@ -5,7 +5,7 @@ import yaml
 
 def plot_average_wealth(paths):
     data_sim = pd.read_pickle(
-        paths["intermediate_data"] + "sim_data_1_unc.pkl"
+        paths["intermediate_data"] + "data_baseline.pkl"
     ).reset_index()
     data_decision = pd.read_pickle(paths["intermediate_data"] + "decision_data.pkl")
 
@@ -26,7 +26,7 @@ def plot_average_wealth(paths):
 
 def plot_choice_shares_single(paths):
     data_sim = pd.read_pickle(
-        paths["intermediate_data"] + "sim_data_1_unc.pkl"
+        paths["intermediate_data"] + "data_baseline.pkl"
     ).reset_index()
     data_decision = pd.read_pickle(paths["intermediate_data"] + "decision_data.pkl")
 
@@ -53,7 +53,7 @@ def plot_choice_shares_single(paths):
 
 def plot_choice_shares(paths):
     data_sim = pd.read_pickle(
-        paths["intermediate_data"] + "sim_data_1_unc.pkl"
+        paths["intermediate_data"] + "data_baseline.pkl"
     ).reset_index()
     data_decision = pd.read_pickle(paths["intermediate_data"] + "decision_data.pkl")
 
@@ -72,7 +72,7 @@ def plot_choice_shares(paths):
 
 
 def illustrate_simulated_data(paths):
-    df = pd.read_pickle(paths["intermediate_data"] + "sim_data_1_unc.pkl").reset_index()
+    df = pd.read_pickle(paths["intermediate_data"] + "data_baseline.pkl").reset_index()
     import matplotlib.pyplot as plt
 
     # %%

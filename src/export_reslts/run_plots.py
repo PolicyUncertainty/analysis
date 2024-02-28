@@ -88,9 +88,13 @@ if show_any_plots:
 else:
     show_cf_2_plots = False
 
-from export_reslts.figures.counterfactual_bias import plot_savings_over_age
+from export_reslts.figures.counterfactual_bias import (
+    plot_savings_over_age,
+    plot_step_functions,
+)
 
 plot_savings_over_age(path_dict)
+plot_step_functions(path_dict)
 if show_cf_2_plots:
     plt.show()
 plt.close("all")

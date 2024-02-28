@@ -49,4 +49,7 @@ def trajectory_plot(path_dict):
     ax.plot(ages, step_function_vals, label="Step function")
     ax.plot(ages, continous_exp_values, label="Continous expectation")
     ax.legend()
-    fig.savefig(path_dict["plots"] + "sim_design_1.png")
+    fig.tight_layout()
+    fig.savefig(
+        path_dict["plots"] + "counterfactual_design_1.png", transparent=True, dpi=300
+    )

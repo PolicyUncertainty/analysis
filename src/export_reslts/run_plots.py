@@ -27,6 +27,21 @@ if show_policy_state_plot:
 plt.close("all")
 
 ##########################################
+# Expected SRA
+##########################################
+if show_any_plots:
+    show_expected_SRA_plot = input("Show expected SRA plot? (y/n): ") == "y"
+else:
+    show_expected_SRA_plot = False
+from export_reslts.figures.expected_SRA_plots import plot_markov_process
+
+plot_markov_process(path_dict)
+if show_expected_SRA_plot:
+    plt.show()
+plt.close("all")
+
+
+##########################################
 # Wage plots
 ##########################################
 if show_any_plots:

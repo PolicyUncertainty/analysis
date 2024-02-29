@@ -68,11 +68,12 @@ def estimate_wage_parameters(paths):
         entity_effects=True,
         # time_effects=True,
     )
-
     coefficients = model.fit().params[0:3]
+    # model.fit().std_errors
     coefficients.loc["income_shock_std"] = np.sqrt(
-        model.fit().resid_ss / (merged_df.shape[0] - 2)
+        model.fit().resid_ss / (merged_df.shape[0] - 14763)
     )
+
     print("Estimated wage equation coefficients:\n{}".format(coefficients.to_string()))
 
     # Export regression coefficients

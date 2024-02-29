@@ -37,7 +37,7 @@ def plot_markov_process(paths_dict):
         std_vals.append(std)
 
     # Plot the results
-    fig, ax = plt.subplots(figsize=(12, 6))
+    fig, ax = plt.subplots()
     ax.plot(range(0, n_periods + 1), mean_vals)
     ax.fill_between(
         range(0, n_periods + 1),

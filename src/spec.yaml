@@ -44,3 +44,10 @@ second_cdf_point: 68.5
 # cohorts for which process parameters are estimated
 min_birth_year: 1947
 max_birth_year: 2000
+
+
+###############################################################################
+# Simulation parameters
+###############################################################################
+n_agents: 100_000
+seed: 123

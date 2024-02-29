@@ -28,7 +28,7 @@ from model_code.policy_states_belief import update_specs_exp_ret_age_trans_mat
 
 # %%
 # Set specifications
-n_agents = 100000
+n_agents = 10000
 seeed = 123
 params = pickle.load(open(path_dict["est_results"] + "est_params.pkl", "rb"))
 # %%

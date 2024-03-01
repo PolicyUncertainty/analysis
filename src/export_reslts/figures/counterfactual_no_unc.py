@@ -84,10 +84,11 @@ def trajectory_plot(path_dict):
 
     ages = np.arange(plot_span) + specs["start_age"]
     fig, ax = plt.subplots()
-    ax.plot(ages, step_function_vals, label="Step function")
-    ax.plot(ages, continous_exp_values, label="Continous expectation")
+    ax.plot(ages, step_function_vals, label=r"Step function $\alpha = 0.042$")
+    ax.plot(ages, continous_exp_values, label=r"Continous expectation $\alpha = 0.042$")
     ax.legend()
     ax.set_ylabel("SRA")
     ax.set_xlabel("Age")
+    ax.set_ylim([67, 71])
     fig.tight_layout()
     fig.savefig(path_dict["plots"] + "cf_no_unc_design.png", transparent=True, dpi=300)

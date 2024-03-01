@@ -12,9 +12,11 @@ from set_paths import create_path_dict
 path_dict = create_path_dict(analysis_path)
 # Import jax and set jax to work with 64bit
 import jax
-import pickle
 
 jax.config.update("jax_enable_x64", True)
+
+import pickle
+
 from simulation.policy_state_scenarios.step_function import (
     update_specs_for_step_function_scale_1,
     update_specs_for_step_function_scale_05,
@@ -30,17 +32,8 @@ from simulation.simulate_scenario import solve_and_simulate_scenario
 # Set specifications
 n_agents = 10000
 seeed = 123
-params = pickle.load(open(path_dict["est_results"] + "em_result.pkl", "rb"))
-import inspect
+params = pickle.load(open(path_dict["est_results"] + "est_params.pkl", "rb"))
 
-for i in inspect.getmembers(params):
-    # to remove private and protected
-    # functions
-    if not i[0].startswith("_"):
-        # To remove other methods that
-        # doesnot start with a underscore
-        if not inspect.ismethod(i[1]):
-            print(i)
 # %%
 ###################################################################
 # Uncertainty counterfactual

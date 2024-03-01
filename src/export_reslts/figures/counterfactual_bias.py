@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from export_reslts.figures.tools import create_step_function_values
+from export_reslts.tools import create_step_function_values
 from model_code.derive_specs import generate_derived_and_data_derived_specs
 from model_code.derive_specs import read_and_derive_specs
 from simulation.policy_state_scenarios.step_function import (
@@ -31,12 +31,12 @@ def plot_step_functions(path_dict):
 
     ages = np.arange(plot_span) + specs["start_age"]
     fig, ax = plt.subplots()
-    ax.plot(ages, step_vals_scale_1, label="SRA estimated")
-    ax.plot(ages, step_vals_scale_05, label="SRA increase half")
-    ax.plot(ages, step_vals_scale_2, label="SRA increase double")
+    ax.plot(ages, step_vals_scale_05, label=r"slow increase $\alpha = 0.021$")
+    ax.plot(ages, step_vals_scale_2, label=r"fast increase $\alpha = 0.082$")
     ax.legend()
     ax.set_ylabel("SRA")
     ax.set_xlabel("Age")
+    ax.set_ylim([67, 71])
     fig.tight_layout()
     fig.savefig(path_dict["plots"] + "cf_bias_step_functions.png")
 

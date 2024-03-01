@@ -23,36 +23,14 @@ def estimate_model(path_dict, load_model):
         "beta": 0.97,
     }
 
-    model, options, params = specify_model(
-        path_dict=path_dict,
-        params=start_params_all,
-        update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
-        policy_state_trans_func=expected_SRA_probs_estimation,
-        load_model=load_model,
+    individual_likelihood = create_ll_from_paths(
+        start_params_all, path_dict, load_model
     )
 
-    # Load data
-    data_decision = pd.read_pickle(path_dict["intermediate_data"] + "decision_data.pkl")
-    data_decision = data_decision[data_decision["lagged_choice"] != 2]
-    data_decision["wealth"] = data_decision["wealth"].clip(lower=1e-16)
-    # Now transform for dcegm
-    states_dict = {
-        name: data_decision[name].values for name in model["state_space_names"]
-    }
-
-    # Create savings grid
-    savings_grid = create_savings_grid()
-
-    # Create likelihood function
-    individual_likelihood = create_individual_likelihood_function_for_model(
-        model=model,
-        options=options,
-        observed_states=states_dict,
-        observed_wealth=data_decision["wealth"].values,
-        observed_choices=data_decision["choice"].values,
-        exog_savings_grid=savings_grid,
-        params_all=start_params_all,
-    )
+    def individual_likelihood_print(params):
+        ll_value = individual_likelihood(params)[0]
+        print("Params, ", params, " with ll value, ", ll_value)
+        return ll_value
 
     params_to_estimate_names = [
         # "mu",
@@ -62,11 +40,6 @@ def estimate_model(path_dict, load_model):
         # "lambda",
     ]
     start_params = {name: start_params_all[name] for name in params_to_estimate_names}
-
-    def individual_likelihood_print(params):
-        ll_value = individual_likelihood(params)
-        print("Params, ", params, " with ll value, ", ll_value)
-        return ll_value
 
     lower_bounds = {
         # "mu": 1e-12,
@@ -97,3 +70,37 @@ def estimate_model(path_dict, load_model):
     pickle.dump(
         start_params_all, open(path_dict["est_results"] + "est_params_1.pkl", "wb")
     )
+
+
+def create_ll_from_paths(start_params_all, path_dict, load_model):
+    model, options, params = specify_model(
+        path_dict=path_dict,
+        params=start_params_all,
+        update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
+        policy_state_trans_func=expected_SRA_probs_estimation,
+        load_model=load_model,
+    )
+
+    # Load data
+    data_decision = pd.read_pickle(path_dict["intermediate_data"] + "decision_data.pkl")
+    data_decision = data_decision[data_decision["lagged_choice"] != 2]
+    data_decision["wealth"] = data_decision["wealth"].clip(lower=1e-16)
+    # Now transform for dcegm
+    states_dict = {
+        name: data_decision[name].values for name in model["state_space_names"]
+    }
+
+    # Create savings grid
+    savings_grid = create_savings_grid()
+
+    # Create likelihood function
+    individual_likelihood = create_individual_likelihood_function_for_model(
+        model=model,
+        options=options,
+        observed_states=states_dict,
+        observed_wealth=data_decision["wealth"].values,
+        observed_choices=data_decision["choice"].values,
+        exog_savings_grid=savings_grid,
+        params_all=start_params_all,
+    )
+    return individual_likelihood

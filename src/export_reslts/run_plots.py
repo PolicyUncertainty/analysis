@@ -66,14 +66,12 @@ else:
 from export_reslts.figures.counterfactual_no_unc import (
     plot_average_savings,
     plot_full_time,
-    plot_values_by_age,
     trajectory_plot,
 )
 
 trajectory_plot(path_dict)
 plot_average_savings(path_dict)
-plot_full_time(path_dict)
-plot_values_by_age(path_dict)
+# plot_full_time(path_dict)
 if show_cf_1_plots & show_any_plots:
     plt.show()
 

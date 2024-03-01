@@ -8,10 +8,10 @@ from export_reslts.tools import create_realized_taste_shock
 
 def calc_compensated_variation(path_dict):
     df_base = pd.read_pickle(
-        path_dict["intermediate_data"] + "data_baseline.pkl"
+        path_dict["intermediate_data"] + "sim_data/data_real_scale_05.pkl"
     ).reset_index()
     df_count = pd.read_pickle(
-        path_dict["intermediate_data"] + "data_2_scale.pkl"
+        path_dict["intermediate_data"] + "sim_data/data_subj_scale_05.pkl"
     ).reset_index()
 
     df_base = create_realized_taste_shock(df_base)
@@ -40,7 +40,8 @@ def calc_adjusted_scale(df_base, df_count, params, n_agents):
     partial_adjustment = lambda scale_in: create_adjusted_difference(
         df_count, disc_sum_base, n_agents, params, scale_in
     )
-    scale = opt.brentq(partial_adjustment, 0, 10)
+
+    scale = opt.brentq(partial_adjustment, -1, 10)
 
     return scale
 

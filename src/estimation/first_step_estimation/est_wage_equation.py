@@ -68,7 +68,11 @@ def estimate_wage_parameters(paths):
         entity_effects=True,
         # time_effects=True,
     )
-    coefficients = model.fit().params[0:3]
+    fitted_model = model.fit(
+        cov_type="clustered", cluster_entity=True, cluster_time=True
+    )
+    coefficients = fitted_model.params[0:3]
+
     # model.fit().std_errors
     coefficients.loc["income_shock_std"] = np.sqrt(
         model.fit().resid_ss / (merged_df.shape[0] - 14763)

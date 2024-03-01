@@ -30,9 +30,18 @@ from simulation.simulate_scenario import solve_and_simulate_scenario
 # Set specifications
 n_agents = 10000
 seeed = 123
-params = pickle.load(open(path_dict["est_results"] + "est_params.pkl", "rb"))
-# %%
+params = pickle.load(open(path_dict["est_results"] + "em_result.pkl", "rb"))
+import inspect
 
+for i in inspect.getmembers(params):
+    # to remove private and protected
+    # functions
+    if not i[0].startswith("_"):
+        # To remove other methods that
+        # doesnot start with a underscore
+        if not inspect.ismethod(i[1]):
+            print(i)
+# %%
 ###################################################################
 # Uncertainty counterfactual
 ###################################################################

@@ -9,7 +9,8 @@ src_folder = Path(__file__).resolve().parents[2]
 sys.path.append(str(src_folder))
 
 from model_code.budget_equation import budget_constraint
-from model_code.budget_equation import calc_net_income
+from model_code.budget_equation import calc_net_income_working
+from model_code.budget_equation import calc_net_income_pensions
 
 SAVINGS_GRID = np.linspace(10, 100, 5)
 INTEREST_RATE_GRID = np.linspace(0.01, 0.1, 2)
@@ -92,7 +93,7 @@ def test_budget_worker(gamma, income_shock, experience, interest_rate, savings):
     labor_income = gamma + gamma * experience + gamma * experience**2 + income_shock
     if labor_income < options["min_wage"]:
         labor_income = options["min_wage"]
-    net_labor_income = calc_net_income(labor_income * 12)
+    net_labor_income = calc_net_income_working(labor_income * 12)
     np.testing.assert_almost_equal(
         wealth, savings * (1 + interest_rate) + net_labor_income
     )
@@ -155,11 +156,14 @@ def test_retiree(
         - (actual_retirement_age - SRA_at_resolution)
         * options["early_retirement_penalty"]
     )
-    retirement_income = pension_point_value * pension_factor * exp
+    retirement_income = calc_net_income_pensions(
+        pension_point_value * pension_factor * exp * 12
+    )
     if savings < options["unemployment_wealth_thresh"]:
         retirement_income = np.maximum(
-            retirement_income, options["unemployment_benefits"]
+            retirement_income, options["unemployment_benefits"] * 12
         )
+
     np.testing.assert_almost_equal(
-        wealth, savings * (1 + interest_rate) + retirement_income * 12
+        wealth, savings * (1 + interest_rate) + retirement_income
     )

@@ -16,6 +16,7 @@ def specify_model(
     params,
     load_model=False,
 ):
+    """Generate model and options dictionaries."""
     # Generate model_specs
     specs, params = generate_specs_and_update_params(path_dict, params)
 

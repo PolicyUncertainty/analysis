@@ -15,7 +15,7 @@ max_SRA: 72
 ret_years_before_SRA: 4
 min_ret_age: 63
 max_ret_age: 72
-exp_cap: 40 # maximum of exp accumulated
+exp_cap: 44 # maximum of exp accumulated
 # Parameters of the policy environment
 unemployment_benefits: 0.65
 unemployment_wealth_thresh: 10.5
@@ -44,3 +44,10 @@ second_cdf_point: 68.5
 # cohorts for which process parameters are estimated
 min_birth_year: 1947
 max_birth_year: 2000
+
+
+###############################################################################
+# Simulation parameters
+###############################################################################
+n_agents: 100_000
+seed: 123

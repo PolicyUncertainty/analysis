@@ -9,6 +9,7 @@ sys.path.insert(0, analysis_path + "src/")
 from set_paths import create_path_dict
 
 do_first_step = input("Do first step estimation? (y/n): ") == "y"
+do_model_estimatation = input("Estimate model? (y/n): ") == "y"
 paths_dict = create_path_dict(analysis_path, define_user=do_first_step)
 
 # Import jax and set jax to work with 64bit
@@ -39,4 +40,7 @@ if do_first_step:
 
     estimate_wage_parameters(paths_dict)
 
-estimate_model(paths_dict, load_model=True)
+if do_model_estimatation:
+    estimate_model(paths_dict, load_model=True)
+
+

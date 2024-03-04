@@ -1,3 +1,4 @@
+# %%
 # Set paths of project
 import sys
 from pathlib import Path
@@ -11,61 +12,123 @@ from set_paths import create_path_dict
 path_dict = create_path_dict(analysis_path)
 # Import jax and set jax to work with 64bit
 import jax
-import pickle
 
 jax.config.update("jax_enable_x64", True)
-from simulation.simulate_scenario import simulate_scenario
+
+import pickle
+
 from simulation.policy_state_scenarios.step_function import (
-    update_specs_for_step_function,
+    update_specs_for_step_function_scale_1,
+    update_specs_for_step_function_scale_05,
+    update_specs_for_step_function_scale_2,
     realized_policy_step_function,
 )
-
-# Create estimated model
-from model_code.model_solver import solve_model
+from model_code.model_solver import specify_and_solve_model
 from model_code.policy_states_belief import expected_SRA_probs_estimation
 from model_code.policy_states_belief import update_specs_exp_ret_age_trans_mat
+from simulation.simulate_scenario import solve_and_simulate_scenario
 
-est_params = pickle.load(open(path_dict["est_results"] + "est_params.pkl", "rb"))
+# %%
+# Set specifications
+n_agents = 10000
+seeed = 123
+params = pickle.load(open(path_dict["est_results"] + "est_params.pkl", "rb"))
 
-model_solution_est = solve_model(
+# %%
+###################################################################
+# Uncertainty counterfactual
+###################################################################
+# Create estimated model
+data_sim = solve_and_simulate_scenario(
     path_dict=path_dict,
-    params=est_params,
-    update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
-    policy_state_trans_func=expected_SRA_probs_estimation,
-    file_append="est",
-    load_model=True,
-    load_solution=True,
+    params=params,
+    solve_update_specs_func=update_specs_exp_ret_age_trans_mat,
+    solve_policy_trans_func=expected_SRA_probs_estimation,
+    simulate_update_specs_func=update_specs_for_step_function_scale_1,
+    simulate_policy_trans_func=realized_policy_step_function,
+    solution_exists=True,
+    file_append_sol="subj",
+    model_exists=True,
 )
-
-data_sim_1 = simulate_scenario(
+data_sim.to_pickle(path_dict["intermediate_data"] + "sim_data/data_subj_scale_1.pkl")
+del data_sim
+data_sim = solve_and_simulate_scenario(
     path_dict=path_dict,
-    params=est_params,
-    n_agents=1000,
-    seed=123,
-    update_spec_for_policy_state=update_specs_for_step_function,
-    policy_state_func_scenario=realized_policy_step_function,
-    expected_model=model_solution_est,
+    params=params,
+    solve_update_specs_func=update_specs_for_step_function_scale_1,
+    solve_policy_trans_func=realized_policy_step_function,
+    simulate_update_specs_func=update_specs_for_step_function_scale_1,
+    simulate_policy_trans_func=realized_policy_step_function,
+    solution_exists=True,
+    file_append_sol="scale_1",
+    model_exists=True,
 )
-data_sim_1.to_pickle(path_dict["intermediate_data"] + "sim_data_1_unc.pkl")
+data_sim.to_pickle(path_dict["intermediate_data"] + "sim_data/data_real_scale_1.pkl")
+del data_sim
 
 
-model_solution_step_func = solve_model(
+###################################################################
+# Counterfactual double alpha
+###################################################################
+
+data_sim = solve_and_simulate_scenario(
     path_dict=path_dict,
-    params=est_params,
-    update_spec_for_policy_state=update_specs_for_step_function,
-    policy_state_trans_func=realized_policy_step_function,
-    file_append="step",
-    load_model=True,
-    load_solution=True,
+    params=params,
+    solve_update_specs_func=update_specs_exp_ret_age_trans_mat,
+    solve_policy_trans_func=expected_SRA_probs_estimation,
+    simulate_update_specs_func=update_specs_for_step_function_scale_2,
+    simulate_policy_trans_func=realized_policy_step_function,
+    solution_exists=True,
+    file_append_sol="subj",
+    model_exists=True,
 )
+data_sim.to_pickle(path_dict["intermediate_data"] + "sim_data/data_subj_scale_2.pkl")
+del data_sim
 
-data_sim_2 = simulate_scenario(
+data_sim = solve_and_simulate_scenario(
     path_dict=path_dict,
-    params=est_params,
-    n_agents=1000,
-    seed=123,
-    update_spec_for_policy_state=update_specs_for_step_function,
-    policy_state_func_scenario=realized_policy_step_function,
-    expected_model=model_solution_step_func,
+    params=params,
+    solve_update_specs_func=update_specs_for_step_function_scale_2,
+    solve_policy_trans_func=realized_policy_step_function,
+    simulate_update_specs_func=update_specs_for_step_function_scale_2,
+    simulate_policy_trans_func=realized_policy_step_function,
+    solution_exists=True,
+    file_append_sol="scale_2",
+    model_exists=True,
 )
-data_sim_2.to_pickle(path_dict["intermediate_data"] + "sim_data_1_no_unc.pkl")
+data_sim.to_pickle(path_dict["intermediate_data"] + "sim_data/data_real_scale_2.pkl")
+del data_sim
+
+
+###################################################################
+# Counterfactual half alpha
+###################################################################
+
+data_sim = solve_and_simulate_scenario(
+    path_dict=path_dict,
+    params=params,
+    solve_update_specs_func=update_specs_exp_ret_age_trans_mat,
+    solve_policy_trans_func=expected_SRA_probs_estimation,
+    simulate_update_specs_func=update_specs_for_step_function_scale_05,
+    simulate_policy_trans_func=realized_policy_step_function,
+    solution_exists=True,
+    file_append_sol="subj",
+    model_exists=True,
+)
+data_sim.to_pickle(path_dict["intermediate_data"] + "sim_data/data_subj_scale_05.pkl")
+del data_sim
+
+data_sim = solve_and_simulate_scenario(
+    path_dict=path_dict,
+    params=params,
+    solve_update_specs_func=update_specs_for_step_function_scale_05,
+    solve_policy_trans_func=realized_policy_step_function,
+    simulate_update_specs_func=update_specs_for_step_function_scale_05,
+    simulate_policy_trans_func=realized_policy_step_function,
+    solution_exists=False,
+    file_append_sol="scale_05",
+    model_exists=True,
+)
+data_sim.to_pickle(path_dict["intermediate_data"] + "sim_data/data_real_scale_05.pkl")
+del data_sim
+# %%

@@ -27,7 +27,7 @@ else:
     custom_load_data = True
 
 # Load options and generate auxiliary options
-from derive_specs import read_and_derive_specs
+from model_code.derive_specs import read_and_derive_specs
 
 
 specs = read_and_derive_specs(paths_dict["specs"])
@@ -40,12 +40,11 @@ from process_data.gather_decision_data import gather_decision_data
 if custom_load_data:
     LOAD_DATA = input("Load choice & decision data from pickle files? (y/n): ") == "y"
 
-gather_decision_data(
+df = gather_decision_data(
     paths_dict,
     specs,
     load_data=LOAD_DATA,
 )
-
 # %%
 # Step 2: Prepare expectation data
 # --------------------------------------------------------------------------------------

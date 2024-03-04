@@ -3,7 +3,41 @@ import pandas as pd
 from dcegm.simulation.sim_utils import create_simulation_df
 from dcegm.simulation.simulate import simulate_all_periods_for_model
 from model_code.initial_conditions_sim import generate_start_states
+from model_code.model_solver import specify_and_solve_model
 from model_code.specify_model import specify_model
+
+
+def solve_and_simulate_scenario(
+    path_dict,
+    params,
+    solve_update_specs_func,
+    solve_policy_trans_func,
+    simulate_update_specs_func,
+    simulate_policy_trans_func,
+    solution_exists,
+    file_append_sol,
+    model_exists,
+):
+    model_solution_est, model, options, params = specify_and_solve_model(
+        path_dict=path_dict,
+        params=params,
+        update_spec_for_policy_state=solve_update_specs_func,
+        policy_state_trans_func=solve_policy_trans_func,
+        file_append=file_append_sol,
+        load_model=model_exists,
+        load_solution=solution_exists,
+    )
+
+    data_sim = simulate_scenario(
+        path_dict=path_dict,
+        params=params,
+        n_agents=options["model_params"]["n_agents"],
+        seed=options["model_params"]["seed"],
+        update_spec_for_policy_state=simulate_update_specs_func,
+        policy_state_func_scenario=simulate_policy_trans_func,
+        expected_model=model_solution_est,
+    )
+    return data_sim
 
 
 def simulate_scenario(
@@ -56,8 +90,12 @@ def simulate_scenario(
     df["total_income"] = (
         df.groupby("agent")["wealth_at_beginning"].shift(-1) - df["savings"]
     )
-    df["savings_dec"] = (
-        df.groupby("agent")["total_income"].shift(-1) - df["consumption"]
+    df["total_income"] = (
+        df.groupby("agent")["wealth_at_beginning"].shift(-1) - df["savings"]
+    )
+    df["savings_dec"] = df["total_income"] - df["consumption"]
+    df["age"] = (
+        df.index.get_level_values("period") + options["model_params"]["start_age"]
     )
 
     return df

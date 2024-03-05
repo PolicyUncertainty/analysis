@@ -40,7 +40,7 @@ from process_data.gather_decision_data import gather_decision_data
 if custom_load_data:
     LOAD_DATA = input("Load choice & decision data from pickle files? (y/n): ") == "y"
 
-df = gather_decision_data(
+df_estimation_sample = gather_decision_data(
     paths_dict,
     specs,
     load_data=LOAD_DATA,
@@ -55,4 +55,4 @@ if custom_load_data:
         input("Load policy expectation parameters from pickle files? (y/n): ") == "y"
     )
 
-estimate_truncated_normal(paths_dict, specs, load_data=LOAD_DATA)
+df_exp_policy_dist = estimate_truncated_normal(paths_dict, specs, load_data=LOAD_DATA)

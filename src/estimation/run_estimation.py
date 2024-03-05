@@ -30,17 +30,19 @@ if do_first_step:
     data_expectation = pd.read_pickle(
         paths_dict["intermediate_data"] + "policy_expect_data.pkl"
     )
-    est_expected_SRA(paths_dict, data_expectation)
-    estimate_expected_SRA_variance(paths_dict, data_expectation)
+    alpha_hat = est_expected_SRA(paths_dict, data_expectation)
+    sigma_sq_hat = estimate_expected_SRA_variance(paths_dict, data_expectation)
+
+    policy_params = {"alpha_hat": alpha_hat, "sigma_sq_hat": sigma_sq_hat}
 
     # Estimate wage parameter
     from estimation.first_step_estimation.est_wage_equation import (
         estimate_wage_parameters,
     )
 
-    estimate_wage_parameters(paths_dict)
+    wage_parameters = estimate_wage_parameters(paths_dict)
 
 if do_model_estimatation:
-    estimate_model(paths_dict, load_model=True)
+    estimation_results = estimate_model(paths_dict, load_model=True)
 
 

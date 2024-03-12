@@ -21,7 +21,14 @@ from estimation.estimate_setup import estimate_model
 
 
 if do_first_step:
-    # Estimate policy expectation
+
+    # Estimate parameters of SRA truncated normal distributions
+    from estimation.first_step_estimation.est_SRA_expectations import estimate_truncated_normal
+    from model_code.derive_specs import read_and_derive_specs
+    specs = read_and_derive_specs(paths_dict["specs"])
+    df_exp_policy_dist = estimate_truncated_normal(paths_dict, specs, load_data=False)
+
+    # Estimate SRA random walk
     from estimation.first_step_estimation.est_SRA_random_walk import (
         estimate_expected_SRA_variance,
         est_expected_SRA,
@@ -44,5 +51,4 @@ if do_first_step:
 
 if do_model_estimatation:
     estimation_results = estimate_model(paths_dict, load_model=True)
-
-
+    print(estimation_results)

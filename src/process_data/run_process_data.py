@@ -48,7 +48,7 @@ df_estimation_sample = gather_decision_data(
 # %%
 # Step 2: Prepare expectation data
 # --------------------------------------------------------------------------------------
-from process_data.est_SRA_expectations import estimate_truncated_normal
+from estimation.first_step_estimation.est_SRA_expectations import estimate_truncated_normal
 
 if custom_load_data:
     LOAD_DATA = (

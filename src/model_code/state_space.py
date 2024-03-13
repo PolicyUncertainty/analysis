@@ -13,13 +13,11 @@ def sparsity_condition(period, lagged_choice, retirement_age_id, experience, opt
     max_ret_age = options["max_ret_age"]
     max_init_experience = options["max_init_experience"]
     min_ret_age_state_space = options["min_ret_age"]
-    SRA_pol_state = options["min_SRA"] + retirement_age_id * options["SRA_grid_size"]
-    min_ret_age_pol_state = apply_retirement_constraint_for_SRA(SRA_pol_state, options)
 
     age = start_age + period
     actual_retirement_age = min_ret_age_state_space + retirement_age_id
     # You cannot retire before the earliest retirement age
-    if (age <= min_ret_age_pol_state) & (lagged_choice == 2):
+    if (age <= options["min_SRA"]) & (lagged_choice == 2):
         return False
     # After the maximum retirement age, you must be retired
     elif (age > max_ret_age) & (lagged_choice != 2):

@@ -1,4 +1,5 @@
 import pickle
+import time
 
 import estimagic as em
 import pandas as pd
@@ -28,7 +29,10 @@ def estimate_model(path_dict, load_model):
     )
 
     def individual_likelihood_print(params):
+        start = time.time()
         ll_value = individual_likelihood(params)[0]
+        end = time.time()
+        print("Likelihood evaluation took, ", end - start)
         print("Params, ", params, " with ll value, ", ll_value)
         return ll_value
 

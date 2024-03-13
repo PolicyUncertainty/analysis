@@ -4,11 +4,11 @@ import numpy as np
 import pandas as pd
 
 
-def gather_decision_data(paths, options, load_data=False):
+def process_soep_core(paths, options, load_data=False):
     if not os.path.exists(paths["intermediate_data"]):
         os.makedirs(paths["intermediate_data"])
 
-    out_file_path = paths["intermediate_data"] + "decision_data.pkl"
+    out_file_path = paths["intermediate_data"] + "soep_core_estimation_sample.pkl"
 
     if load_data:
         data = pd.read_pickle(out_file_path)
@@ -25,8 +25,8 @@ def gather_decision_data(paths, options, load_data=False):
     start_age = options["start_age"]
     exp_cap = options["exp_cap"]
 
-    # Load and merge data state data from SOEP core and SOEP RV VSKT (all but wealth)
-    merged_data = load_and_merge_data(soep_c38, soep_rv, min_ret_age)
+    # Load and merge data state data from SOEP core (all but wealth)
+    merged_data = load_and_merge_data(soep_c38)
 
     # wealth data from SOEP C38 (hwealth.dta)
     merged_data = gather_wealth_data(soep_c38, merged_data, options)
@@ -66,50 +66,25 @@ def gather_decision_data(paths, options, load_data=False):
     )
     merged_data = merged_data[merged_data["experience"].notna()]
 
+    # gross monthly wage
+    merged_data.rename(columns={"pglabgro": "wage"}, inplace=True)
+
     # additional filters based on model setup
     merged_data = enforce_model_choice_restriction(
         merged_data, min_ret_age, options["max_ret_age"]
     )
 
-    # Keep relevant columns (i.e. state variables)
-    merged_data = merged_data[
-        [
-            "choice",
-            "period",
-            "lagged_choice",
-            "policy_state",
-            "policy_state_value",
-            "retirement_age_id",
-            "experience",
-            "wealth",
-        ]
-    ]
-    merged_data = merged_data.astype(
-        {
-            "choice": "int8",
-            "lagged_choice": "int8",
-            "policy_state": "int8",
-            "retirement_age_id": "int8",
-            "experience": "int8",
-            "wealth": "float32",
-            "period": "int8",
-        }
-    )
-    # Anonymize data
-    merged_data.reset_index(drop=True, inplace=True)
-
-    print(str(len(merged_data)) + " in final sample.")
-
-    # Save data
+    # save data
     merged_data.to_pickle(out_file_path)
+
     return merged_data
 
 
-def load_and_merge_data(soep_c38, soep_rv, min_ret_age):
+def load_and_merge_data(soep_c38):
     # Load SOEP core data
     pgen_data = pd.read_stata(
         f"{soep_c38}/pgen.dta",
-        columns=["syear", "pid", "hid", "pgemplst", "pgexpft", "pgstib", "pgpartz"],
+        columns=["syear", "pid", "hid", "pgemplst", "pgexpft", "pgstib", "pgpartz", "pglabgro"],
         convert_categoricals=False,
     )
     pathl_data = pd.read_stata(

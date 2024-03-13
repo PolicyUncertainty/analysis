@@ -1,70 +1,37 @@
 # Description: This file estimates the parameters of the MONTHLY wage equation using the SOEP data.
 # We estimate the following equation:
-# wage = beta_0 + beta_1 * full_time_exp + beta_2 * full_time_exp^2 + individual_FE + time_FE + epsilon
+# wage = beta_0 + beta_1 * experience + beta_2 * experience^2 + individual_FE + time_FE + epsilon
 import numpy as np
 import pandas as pd
 from linearmodels.panel.model import PanelOLS
 from model_code.derive_specs import read_and_derive_specs
 
 
-def estimate_wage_parameters(paths):
+def estimate_wage_parameters(paths, wage_data):
     specs = read_and_derive_specs(paths["specs"])
-    # unpack path to SOEP core
-    soep_c38 = paths["soep_c38"]
 
-    # unpack options
-    start_year = specs["start_year"]
-    end_year = specs["end_year"]
-    exp_cap = (specs["exp_cap"],)
+    # wage truncation
     truncation_percentiles = [
-        specs["wage_trunc_low_perc"],
-        specs["wage_trunc_high_perc"],
+    specs["wage_trunc_low_perc"],
+    specs["wage_trunc_high_perc"],
+    ]
+    wage_percentiles = wage_data["experience"].quantile(truncation_percentiles)
+    wage_data = wage_data[
+        (wage_data["experience"] >= wage_percentiles.iloc[0])
+        & (wage_data["wage"] <= wage_percentiles.iloc[1])
     ]
 
-    # get relevant data (sex, employment status, gross income, full time experience) from SOEP core
-    pgen_df = pd.read_stata(
-        f"{soep_c38}/pgen.dta",
-        columns=["syear", "hid", "pid", "pgemplst", "pglabgro", "pgexpft"],
-        convert_categoricals=False,
-    )
-    ppathl_df = pd.read_stata(
-        f"{soep_c38}/ppathl.dta", columns=["pid", "hid", "syear", "sex", "gebjahr"]
-    )
-    merged_df = pd.merge(
-        pgen_df,
-        ppathl_df[["pid", "hid", "syear", "sex", "gebjahr"]],
-        on=["pid", "hid", "syear"],
-        how="inner",
-    )
-
-    # restrict sample
-    merged_df = merged_df[merged_df["sex"] == "[1] maennlich"]  # only men
-    merged_df = merged_df[
-        (merged_df["syear"] >= start_year) & (merged_df["syear"] <= end_year)
-    ]
-    merged_df = merged_df[merged_df["pgemplst"] == 1]  # only full time
-    merged_df = merged_df[
-        (merged_df["pgexpft"] >= 0) & (merged_df["pgexpft"] <= exp_cap)
-    ]
-    pglabgro_percentiles = merged_df["pglabgro"].quantile(truncation_percentiles)
-    merged_df = merged_df[
-        (merged_df["pglabgro"] >= pglabgro_percentiles.iloc[0])
-        & (merged_df["pglabgro"] <= pglabgro_percentiles.iloc[1])
-    ]
-
-    # Prepare estimation
-    merged_df["year"] = merged_df["syear"].astype("category")
-    merged_df = merged_df.set_index(["pid", "syear"])
-    merged_df = merged_df.rename(
-        columns={"pgexpft": "full_time_exp", "pglabgro": "wage"}
-    )
-    merged_df["full_time_exp_sq"] = merged_df["full_time_exp"] ** 2
-    merged_df["constant"] = np.ones(len(merged_df))
+    # prepare estimation
+    wage_data["year"] = wage_data["syear"].astype("category")
+    wage_data = wage_data.set_index(["pid", "syear"])
+    
+    wage_data["experience_sq"] = wage_data["experience"] ** 2
+    wage_data["constant"] = np.ones(len(wage_data))
 
     # estimate parametric regression, save parameters
     model = PanelOLS(
-        dependent=merged_df["wage"] / specs["wealth_unit"],
-        exog=merged_df[["constant", "full_time_exp", "full_time_exp_sq", "year"]],
+        dependent=wage_data["wage"] / specs["wealth_unit"],
+        exog=wage_data[["constant", "experience", "experience_sq", "year"]],
         entity_effects=True,
         # time_effects=True,
     )
@@ -73,9 +40,10 @@ def estimate_wage_parameters(paths):
     )
     coefficients = fitted_model.params[0:3]
 
-    # model.fit().std_errors
+    # model.fit().std_errors.
+    # TODO: fix degrees of freedom hardcoding
     coefficients.loc["income_shock_std"] = np.sqrt(
-        model.fit().resid_ss / (merged_df.shape[0] - 14763)
+        model.fit().resid_ss / (wage_data.shape[0] - 14763)
     )
 
     print("Estimated wage equation coefficients:\n{}".format(coefficients.to_string()))

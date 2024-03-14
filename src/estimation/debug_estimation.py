@@ -53,9 +53,9 @@ est_model, model, options, params = specify_and_solve_model(
     update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
     policy_state_trans_func=expected_SRA_probs_estimation,
     # note: file_append is used to load the model and solution from the file specified by the string
-    file_append="est",
+    file_append="subj",
     load_model=True,
-    load_solution=True,
+    load_solution=False,
 )
 
 
@@ -90,10 +90,14 @@ from dcegm.likelihood import calc_choice_probs_for_observed_states
 def create_choice_probs_for_each_observation(
     value_solved, endog_grid_solved, params, data_decision, model, options
 ):
+    model_structure = model["model_structure"]
     states_dict = {
-        name: data_decision[name].values for name in model["state_space_names"]
+        name: data_decision[name].values
+        for name in model_structure["state_space_names"]
     }
-    observed_state_choice_indexes = create_observed_choice_indexes(states_dict, model)
+    observed_state_choice_indexes = create_observed_choice_indexes(
+        states_dict, model_structure
+    )
     choice_probs_observations = calc_choice_probs_for_observed_states(
         value_solved=value_solved,
         endog_grid_solved=endog_grid_solved,

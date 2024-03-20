@@ -17,7 +17,7 @@ def sparsity_condition(period, lagged_choice, retirement_age_id, experience, opt
     age = start_age + period
     actual_retirement_age = min_ret_age_state_space + retirement_age_id
     # You cannot retire before the earliest retirement age
-    if (age <= options["min_SRA"]) & (lagged_choice == 2):
+    if (age <= min_ret_age_state_space) & (lagged_choice == 2):
         return False
     # After the maximum retirement age, you must be retired
     elif (age > max_ret_age) & (lagged_choice != 2):
@@ -80,14 +80,13 @@ def state_specific_choice_set(period, lagged_choice, policy_state, options):
     SRA_pol_state = options["min_SRA"] + policy_state * options["SRA_grid_size"]
     min_ret_age_pol_state = apply_retirement_constraint_for_SRA(SRA_pol_state, options)
 
-    # First check if the person is not in the voluntary retirement range.
-    if age < min_ret_age_pol_state:
+    # retirement is absorbing
+    if lagged_choice == 2:
+        return np.array([2])
+    # Check if the person is not in the voluntary retirement range.
+    elif age < min_ret_age_pol_state:
         return np.array([0, 1])
     elif age >= options["max_ret_age"]:
-        return np.array([2])
-
-    # If all choices possible, then check if already retired
-    if lagged_choice == 2:  # retirement is absorbing
         return np.array([2])
     else:
         return np.array([0, 1, 2])

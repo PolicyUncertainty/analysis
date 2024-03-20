@@ -91,7 +91,8 @@ def create_ll_from_paths(start_params_all, path_dict, load_model):
     data_decision["wealth"] = data_decision["wealth"].clip(lower=1e-16)
     # Now transform for dcegm
     states_dict = {
-        name: data_decision[name].values for name in model["state_space_names"]
+        name: data_decision[name].values
+        for name in model["model_structure"]["state_space_names"]
     }
 
     # Create savings grid

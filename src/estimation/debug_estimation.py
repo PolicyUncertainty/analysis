@@ -54,17 +54,35 @@ est_model, model, options, params = specify_and_solve_model(
     policy_state_trans_func=expected_SRA_probs_estimation,
     # note: file_append is used to load the model and solution from the file specified by the string
     file_append="subj",
-    load_model=False,
+    load_model=True,
     load_solution=False,
 )
-# value_expec = pickle.load(open("value.pkl", "rb"))
-# indexer = pickle.load(open("map_state_choice_to_index.pkl", "rb"))
-# state_choice_space = model["model_structure"]["state_choice_space"]
-#
-# state_choice_tuple = (state_choice_space[:, 0],state_choice_space[:, 1],state_choice_space[:, 2],state_choice_space[:, 3],state_choice_space[:, 4],state_choice_space[:, 5],)
-# reiindex = indexer[state_choice_tuple]
-# value_diff = est_model["value"] - value_expec[reiindex]
-# value_not_nan = value_diff[~np.isnan(value_diff)]
+value = est_model["value"]
+policy = est_model["policy"]
+endog_grid = est_model["endog_grid"]
+state_choice_space = model["model_structure"]["state_choice_space"]
+state_space_names = model["model_structure"]["state_space_names"]
+state_space_indexer = model["model_structure"]["state_space_indexer"]
+compute_exog_prob = model["model_funcs"]["compute_exog_transition_vec"]
+
+import matplotlib.pyplot as plt
+
+breakpoint()
+value_expec = pickle.load(open("value.pkl", "rb"))
+indexer = pickle.load(open("map_state_choice_to_index.pkl", "rb"))
+state_choice_space = model["model_structure"]["state_choice_space"]
+
+state_choice_tuple = (
+    state_choice_space[:, 0],
+    state_choice_space[:, 1],
+    state_choice_space[:, 2],
+    state_choice_space[:, 3],
+    state_choice_space[:, 4],
+    state_choice_space[:, 5],
+)
+reiindex = indexer[state_choice_tuple]
+value_diff = est_model["value"] - value_expec[reiindex]
+value_not_nan = value_diff[~np.isnan(value_diff)]
 
 
 # %%

@@ -20,14 +20,14 @@ specs = read_and_derive_specs(paths_dict["specs"])
 # %%
 # process SOEP core data, generate decision data and wage data
 # --------------------------------------------------------------------------------------
-from process_data.process_soep_core import process_soep_core
+from process_data.create_structural_est_sample import create_structural_est_sample
+from process_data.create_wage_est_sample import create_wage_est_sample
 from process_data.derive_datasets import gather_decision_data
 from process_data.derive_datasets import gather_wage_data
 
 LOAD_DATA = False	
-soep_core_df = process_soep_core(paths_dict, specs, load_data=LOAD_DATA)
-gather_decision_data(paths_dict, df=soep_core_df, load_data=LOAD_DATA)
-gather_wage_data(paths_dict, df=soep_core_df, load_data=LOAD_DATA)
+#structural_est_df = create_structural_est_sample(paths_dict, specs, load_data=LOAD_DATA)
+wage_est_df = create_wage_est_sample(paths_dict, specs, load_data=LOAD_DATA)
 
 # %%
 # process SOEP IS, generate SRA data

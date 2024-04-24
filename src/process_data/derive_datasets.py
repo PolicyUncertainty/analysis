@@ -40,7 +40,7 @@ def gather_decision_data(paths, df = None, load_data=False):
         }
     )
 
-    print(str(len(df)) + " observations in final decision data.")
+    print(str(len(df)) + " observations in final structural estimation dataset.")
 
     # Anonymize and save data
     df.reset_index(drop=True, inplace=True)

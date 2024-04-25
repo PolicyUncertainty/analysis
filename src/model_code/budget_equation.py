@@ -7,15 +7,21 @@ def budget_constraint(
     experience,
     policy_state,  # current applicable SRA identifyer
     retirement_age_id,
+    education,
     savings_end_of_previous_period,  # A_{t-1}
     income_shock_previous_period,  # epsilon_{t - 1}
     params,
     options,
 ):
     # fetch necessary parameters (gammas for wage, pension_point_value & ERP for pension)
-    gamma_0 = options["gamma_0"]
-    gamma_1 = options["gamma_1"]
-    gamma_2 = options["gamma_2"]
+    # fetch necessary parameters (gammas for wage, pension_point_value & ERP for pension)
+    # As gamma is in options, we will save it as numpy array. The classical
+    # indexing options["gamma_0"][education] does not work.  However in general you
+    # can use numpy take to be able to take from any axis. We will just use
+    # jax.numpy.take which works!
+    gamma_0 = jnp.take(options["gamma_0"], education)
+    gamma_1 = jnp.take(options["gamma_1"], education)
+    gamma_2 = jnp.take(options["gamma_2"], education)
     pension_point_value = options["pension_point_value"]
     ERP = options["early_retirement_penalty"]
 

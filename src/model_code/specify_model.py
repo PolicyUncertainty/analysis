@@ -40,6 +40,7 @@ def specify_model(
                 "experience": np.arange(n_periods, dtype=int),
                 "retirement_age_id": np.arange(n_possible_ret_ages, dtype=int),
                 "sparsity_condition": sparsity_condition,
+                "education": np.arange(2, dtype=int),
             },
             "exogenous_processes": {
                 "policy_state": {

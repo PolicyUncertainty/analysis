@@ -1,4 +1,5 @@
 import pickle
+import time
 
 import estimagic as em
 import pandas as pd
@@ -28,7 +29,10 @@ def estimate_model(path_dict, load_model):
     )
 
     def individual_likelihood_print(params):
+        start = time.time()
         ll_value = individual_likelihood(params)[0]
+        end = time.time()
+        print("Likelihood evaluation took, ", end - start)
         print("Params, ", params, " with ll value, ", ll_value)
         return ll_value
 
@@ -87,7 +91,8 @@ def create_ll_from_paths(start_params_all, path_dict, load_model):
     data_decision["wealth"] = data_decision["wealth"].clip(lower=1e-16)
     # Now transform for dcegm
     states_dict = {
-        name: data_decision[name].values for name in model["state_space_names"]
+        name: data_decision[name].values
+        for name in model["model_structure"]["state_space_names"]
     }
 
     # Create savings grid

@@ -53,10 +53,36 @@ est_model, model, options, params = specify_and_solve_model(
     update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
     policy_state_trans_func=expected_SRA_probs_estimation,
     # note: file_append is used to load the model and solution from the file specified by the string
-    file_append="est",
+    file_append="subj",
     load_model=True,
-    load_solution=True,
+    load_solution=False,
 )
+value = est_model["value"]
+policy = est_model["policy"]
+endog_grid = est_model["endog_grid"]
+state_choice_space = model["model_structure"]["state_choice_space"]
+state_space_names = model["model_structure"]["state_space_names"]
+state_space_indexer = model["model_structure"]["state_space_indexer"]
+compute_exog_prob = model["model_funcs"]["compute_exog_transition_vec"]
+
+import matplotlib.pyplot as plt
+
+breakpoint()
+value_expec = pickle.load(open("value.pkl", "rb"))
+indexer = pickle.load(open("map_state_choice_to_index.pkl", "rb"))
+state_choice_space = model["model_structure"]["state_choice_space"]
+
+state_choice_tuple = (
+    state_choice_space[:, 0],
+    state_choice_space[:, 1],
+    state_choice_space[:, 2],
+    state_choice_space[:, 3],
+    state_choice_space[:, 4],
+    state_choice_space[:, 5],
+)
+reiindex = indexer[state_choice_tuple]
+value_diff = est_model["value"] - value_expec[reiindex]
+value_not_nan = value_diff[~np.isnan(value_diff)]
 
 
 # %%
@@ -90,10 +116,14 @@ from dcegm.likelihood import calc_choice_probs_for_observed_states
 def create_choice_probs_for_each_observation(
     value_solved, endog_grid_solved, params, data_decision, model, options
 ):
+    model_structure = model["model_structure"]
     states_dict = {
-        name: data_decision[name].values for name in model["state_space_names"]
+        name: data_decision[name].values
+        for name in model_structure["state_space_names"]
     }
-    observed_state_choice_indexes = create_observed_choice_indexes(states_dict, model)
+    observed_state_choice_indexes = create_observed_choice_indexes(
+        states_dict, model_structure
+    )
     choice_probs_observations = calc_choice_probs_for_observed_states(
         value_solved=value_solved,
         endog_grid_solved=endog_grid_solved,
@@ -128,6 +158,7 @@ def create_choice_probs_for_each_observation(
 choice_probs_each_obs = jnp.take_along_axis(
     choice_probs_observations, data_decision["choice"].values[:, None], axis=1
 )[:, 0]
+breakpoint()
 explained_0 = data_decision[data_decision["choice"] == 0]["choice_0"].mean()
 explained_1 = data_decision[data_decision["choice"] == 1]["choice_1"].mean()
 explained_2 = data_decision[data_decision["choice"] == 2]["choice_2"].mean()

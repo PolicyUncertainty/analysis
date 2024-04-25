@@ -41,6 +41,4 @@ if do_first_step:
     estimate_wage_parameters(paths_dict)
 
 if do_model_estimatation:
-    estimate_model(paths_dict, load_model=True)
-
-
+    estimate_model(paths_dict, load_model=False)

@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from model_code.budget_equation import calc_net_income_pensions
-from model_code.budget_equation import calc_net_income_working
+from tax_and_transfer import calc_net_income_pensions, calc_net_income_working
 from model_code.derive_specs import generate_derived_and_data_derived_specs
 
 

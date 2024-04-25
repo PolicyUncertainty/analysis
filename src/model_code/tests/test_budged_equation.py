@@ -9,8 +9,7 @@ src_folder = Path(__file__).resolve().parents[2]
 sys.path.append(str(src_folder))
 
 from model_code.budget_equation import budget_constraint
-from model_code.budget_equation import calc_net_income_working
-from model_code.budget_equation import calc_net_income_pensions
+from tax_and_transfer import calc_net_income_pensions, calc_net_income_working
 
 SAVINGS_GRID = np.linspace(10, 100, 5)
 INTEREST_RATE_GRID = np.linspace(0.01, 0.1, 2)

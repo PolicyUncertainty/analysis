@@ -1,7 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from tax_and_transfer import calc_net_income_pensions, calc_net_income_working
 from model_code.derive_specs import generate_derived_and_data_derived_specs
+from wealth_and_budget.tax_and_transfer import calc_net_income_pensions
+from wealth_and_budget.tax_and_transfer import calc_net_income_working
 
 
 def plot_incomes(path_dict):

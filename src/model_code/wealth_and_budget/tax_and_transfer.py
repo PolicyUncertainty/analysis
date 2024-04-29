@@ -1,5 +1,6 @@
 from jax import numpy as jnp
 
+
 def calc_unemployment_benefits(options, savings_end_of_previous_period):
     means_test = savings_end_of_previous_period < options["unemployment_wealth_thresh"]
     # Unemployment benefits

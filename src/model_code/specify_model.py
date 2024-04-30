@@ -4,8 +4,10 @@ from dcegm.pre_processing.setup_model import setup_and_save_model
 from model_code.derive_specs import generate_specs_and_update_params
 from model_code.state_space import create_state_space_functions
 from model_code.state_space import sparsity_condition
-from model_code.utility_functions import create_final_period_utility_functions
-from model_code.utility_functions import create_utility_functions
+from utility_functions.main_utility_functions import (
+    create_final_period_utility_functions,
+)
+from utility_functions.main_utility_functions import create_utility_functions
 from wealth_and_budget.main_budget_equation import budget_constraint
 
 

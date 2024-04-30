@@ -137,6 +137,7 @@ def test_retiree(
         "unemployment_benefits": 50,
         "min_wage": 100,
         "unemployment_wealth_thresh": 100,
+        "wealth_unit": 1_000,
     }
     params = {"interest_rate": interest_rate}
     wealth = budget_constraint(
@@ -157,7 +158,7 @@ def test_retiree(
         * options["early_retirement_penalty"]
     )
     retirement_income = calc_net_income_pensions(
-        pension_point_value * pension_factor * exp * 12
+        pension_point_value * pension_factor * exp * 12, options
     )
     if savings < options["unemployment_wealth_thresh"]:
         retirement_income = np.maximum(

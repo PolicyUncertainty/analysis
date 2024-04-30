@@ -27,9 +27,9 @@ def plot_incomes(path_dict):
     net_wages = np.zeros_like(gross_wages)
     net_pensions = np.zeros_like(gross_wages)
     for i, exp in enumerate(exp_levels):
-        net_wages[i] = calc_net_income_working(gross_wages[i])
+        net_wages[i] = calc_net_income_working(gross_wages[i], specs)
         gross_pension = specs["pension_point_value"] * exp * 12
-        net_pensions[i] = calc_net_income_pensions(gross_pension)
+        net_pensions[i] = calc_net_income_pensions(gross_pension, specs)
         net_pensions[i] = np.maximum(yearly_unemployment, net_pensions[i])
 
     fig, ax = plt.subplots()
@@ -61,7 +61,7 @@ def plot_wages(path_dict):
 
     net_wages = np.zeros_like(gross_wages)
     for i, exp in enumerate(exp_levels):
-        net_wages[i] = calc_net_income_working(gross_wages[i])
+        net_wages[i] = calc_net_income_working(gross_wages[i], specs)
 
     unemployment_benefits = (
         np.ones_like(exp_levels) * specs["unemployment_benefits"] * 12

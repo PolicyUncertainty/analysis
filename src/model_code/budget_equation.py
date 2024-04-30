@@ -85,7 +85,7 @@ def calc_net_income_working(gross_income, options):
     )
     inc_tax = calc_inc_tax(gross_income_full - ssc)
     net_income = gross_income_full - inc_tax - ssc
-    return net_income * options["wealth_unit"]
+    return net_income / options["wealth_unit"]
 
 
 def calc_inc_tax(gross_income):

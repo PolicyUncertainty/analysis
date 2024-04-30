@@ -35,6 +35,7 @@ def test_budget_unemployed(unemployment_benefits, savings, interest_rate):
         "unemployment_benefits": unemployment_benefits,
         "min_wage": 1.1,
         "unemployment_wealth_thresh": 25,
+        "wealth_unit": 1_000,
     }
     params = {"interest_rate": interest_rate}
     wealth = budget_constraint(
@@ -78,6 +79,7 @@ def test_budget_worker(gamma, income_shock, experience, interest_rate, savings):
         "unemployment_benefits": 0,
         "min_wage": 100,
         "unemployment_wealth_thresh": 10,
+        "wealth_unit": 1_000,
     }
     params = {"interest_rate": interest_rate}
     wealth = budget_constraint(
@@ -93,7 +95,7 @@ def test_budget_worker(gamma, income_shock, experience, interest_rate, savings):
     labor_income = gamma + gamma * experience + gamma * experience**2 + income_shock
     if labor_income < options["min_wage"]:
         labor_income = options["min_wage"]
-    net_labor_income = calc_net_income_working(labor_income * 12)
+    net_labor_income = calc_net_income_working(labor_income * 12, options)
     np.testing.assert_almost_equal(
         wealth, savings * (1 + interest_rate) + net_labor_income
     )

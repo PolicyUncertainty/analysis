@@ -7,7 +7,7 @@ from process_data.create_structural_est_sample import (
     load_and_merge_soep_core, create_choice_variable, filter_data, create_education_type
 )
 
-def create_wage_est_sample(paths, options, load_data=False):
+def create_wage_est_sample(paths, load_data=False, options=None):
     if not os.path.exists(paths["intermediate_data"]):
         os.makedirs(paths["intermediate_data"])
 

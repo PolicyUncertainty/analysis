@@ -12,7 +12,8 @@ from pathlib import Path
 analysis_path = str(Path(__file__).resolve().parents[2]) + "/"
 sys.path.insert(0, analysis_path + "src")
 
-from process_data.derive_datasets import gather_decision_data
+#from process_data.derive_datasets import gather_decision_data
+from create_structural_est_sample import create_structural_est_sample
 from set_paths import create_path_dict
 
 # As we do not keep our data in github these tests can only be run locally
@@ -46,7 +47,7 @@ def test_decision_data_no_missing_values(
     paths_dict, options, policy_step_size, load_data=True
 ):
     """This functions asserts that there are no missing values for any states."""
-    dec_dat = gather_decision_data(
+    dec_dat = create_structural_est_sample(
         paths_dict,
         load_data=load_data,
     )
@@ -65,7 +66,7 @@ def test_decision_data_no_ret_before_min_ret_age(
     paths_dict, options, policy_step_size, load_data=LOAD_SAVED_DATA
 ):
     """This functions asserts that nobody is retired before min_ret_age."""
-    dec_dat = gather_decision_data(
+    dec_dat = create_structural_est_sample(
         paths_dict,
         load_data=load_data,
     )
@@ -80,7 +81,7 @@ def test_decision_data_no_work_after_max_ret_age(
     paths_dict, options, policy_step_size, load_data=LOAD_SAVED_DATA
 ):
     """This functions asserts that there are no working after max_ret_age."""
-    dec_dat = gather_decision_data(
+    dec_dat = create_structural_est_sample(
         paths_dict,
         load_data=load_data,
     )
@@ -109,7 +110,7 @@ def test_decision_data_exp_cap(
     paths_dict, options, policy_step_size, load_data=LOAD_SAVED_DATA
 ):
     """This functions asserts that experience is smaller or equal to age and exp_cap."""
-    dec_dat = gather_decision_data(
+    dec_dat = create_structural_est_sample(
         paths_dict,
         load_data=load_data,
     )
@@ -122,7 +123,7 @@ def test_decision_data_retirement_is_absorbing(
     paths_dict, options, policy_step_size, load_data=LOAD_SAVED_DATA
 ):
     """This functions asserts that retirement is absorbing."""
-    dec_dat = gather_decision_data(
+    dec_dat = create_structural_est_sample(
         paths_dict,
         load_data=load_data,
     )

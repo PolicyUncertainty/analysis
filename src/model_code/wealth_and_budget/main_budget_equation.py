@@ -21,13 +21,12 @@ def budget_constraint(
     pension_point_value = options["pension_point_value"]
     ERP = options["early_retirement_penalty"]
 
-    # generate actual retirement age and SRA at resolution
-    SRA_at_resolution = options["min_SRA"] + policy_state * options["SRA_grid_size"]
-    actual_retirement_age = options["min_ret_age"] + retirement_age_id
+    # Calculate deduction for pension
+    deduction = calc_deduction(policy_state, retirement_age_id, options)
 
     # calculate applicable SRA and pension deduction/increase factor
     # (malus for early retirement, bonus for late retirement)
-    pension_factor = 1 - (actual_retirement_age - SRA_at_resolution) * ERP
+    pension_factor = 1 - deduction * ERP
     retirement_income_gross = pension_point_value * experience * pension_factor * 12
     retirement_income = calc_net_income_pensions(retirement_income_gross)
 
@@ -59,3 +58,9 @@ def budget_constraint(
     wealth = (1 + params["interest_rate"]) * savings_end_of_previous_period + income
 
     return wealth
+
+
+def calc_deduction(policy_state, retirement_age_id, options):
+    SRA_at_resolution = options["min_SRA"] + policy_state * options["SRA_grid_size"]
+    actual_retirement_age = options["min_ret_age"] + retirement_age_id
+    return actual_retirement_age - SRA_at_resolution

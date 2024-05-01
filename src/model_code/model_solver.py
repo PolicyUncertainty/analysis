@@ -2,7 +2,7 @@ import pickle
 
 from dcegm.solve import get_solve_func_for_model
 from model_code.specify_model import specify_model
-from wealth_and_budget.savings_grid import create_savings_grid
+from model_code.wealth_and_budget.savings_grid import create_savings_grid
 
 
 def specify_and_solve_model(

@@ -30,9 +30,10 @@ def observed_model_fit(paths_dict):
     data_decision["wealth"] = data_decision["wealth"].clip(lower=1e-16)
     data_decision["age"] = data_decision["period"] + specs["start_age"]
     data_decision = data_decision[data_decision["age"] < 75]
-
+    model_structure = model["model_structure"]
     states_dict = {
-        name: data_decision[name].values for name in model["state_space_names"]
+        name: data_decision[name].values
+        for name in model_structure["state_space_names"]
     }
     observed_state_choice_indexes = create_observed_choice_indexes(states_dict, model)
     choice_probs_observations = calc_choice_probs_for_observed_states(

@@ -35,12 +35,11 @@ def specify_and_solve_model(
     savings_grid = create_savings_grid()
 
     solve_func = get_solve_func_for_model(model, savings_grid, options)
-    value, policy_left, policy_right, endog_grid = solve_func(params)
+    value, policy, endog_grid = solve_func(params)
 
     solution = {
         "value": value,
-        "policy_left": policy_left,
-        "policy_right": policy_right,
+        "policy": policy,
         "endog_grid": endog_grid,
     }
 

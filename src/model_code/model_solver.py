@@ -20,7 +20,7 @@ def specify_and_solve_model(
     )
 
     # Generate model_specs
-    model, options, params = specify_model(
+    model_collection, options_collection, params = specify_model(
         path_dict=path_dict,
         update_spec_for_policy_state=update_spec_for_policy_state,
         policy_state_trans_func=policy_state_trans_func,
@@ -30,7 +30,7 @@ def specify_and_solve_model(
 
     if load_solution:
         solution_est = pickle.load(open(solution_file, "rb"))
-        return solution_est, model, options, params
+        return solution_est, model_collection, options_collection, params
 
     savings_grid = create_savings_grid()
 

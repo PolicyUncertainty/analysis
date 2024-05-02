@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 
-def create_structural_est_sample(paths, options, load_data=False):
+def create_structural_est_sample(paths, load_data=False, options=None):
     if not os.path.exists(paths["intermediate_data"]):
         os.makedirs(paths["intermediate_data"])
 

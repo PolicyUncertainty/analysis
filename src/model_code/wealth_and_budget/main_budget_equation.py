@@ -4,7 +4,7 @@ from model_code.wealth_and_budget.tax_and_transfer import calc_net_income_workin
 from model_code.wealth_and_budget.tax_and_transfer import calc_unemployment_benefits
 
 
-def budget_constraint(
+def main_budget_constraint(
     lagged_choice,  # d_{t-1}
     experience,
     policy_state,  # current applicable SRA identifyer

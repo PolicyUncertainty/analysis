@@ -1,4 +1,4 @@
-def create_utility_functions():
+def create_main_utility_functions():
     return {
         "utility": utility_func,
         "inverse_marginal_utility": inverse_marginal,

@@ -8,7 +8,7 @@ import pytest
 src_folder = Path(__file__).resolve().parents[2]
 sys.path.append(str(src_folder))
 
-from wealth_and_budget.main_budget_equation import budget_constraint
+from wealth_and_budget.main_budget_equation import main_budget_constraint
 from wealth_and_budget.tax_and_transfer import (
     calc_net_income_pensions,
     calc_net_income_working,
@@ -39,7 +39,7 @@ def test_budget_unemployed(unemployment_benefits, savings, interest_rate):
         "unemployment_wealth_thresh": 25,
     }
     params = {"interest_rate": interest_rate}
-    wealth = budget_constraint(
+    wealth = main_budget_constraint(
         lagged_choice=0,
         experience=30,
         policy_state=0,
@@ -82,7 +82,7 @@ def test_budget_worker(gamma, income_shock, experience, interest_rate, savings):
         "unemployment_wealth_thresh": 10,
     }
     params = {"interest_rate": interest_rate}
-    wealth = budget_constraint(
+    wealth = main_budget_constraint(
         lagged_choice=1,
         experience=experience,
         policy_state=0,
@@ -141,7 +141,7 @@ def test_retiree(
         "unemployment_wealth_thresh": 100,
     }
     params = {"interest_rate": interest_rate}
-    wealth = budget_constraint(
+    wealth = main_budget_constraint(
         lagged_choice=2,
         experience=exp,
         policy_state=policy_state,

@@ -3,7 +3,7 @@ from model_code.wealth_and_budget.tax_and_transfer import calc_net_income_pensio
 from model_code.wealth_and_budget.tax_and_transfer import calc_unemployment_benefits
 
 
-def budget_constraint(
+def old_age_budget_constraint(
     experience,
     deduction_state,
     savings_end_of_previous_period,  # A_{t-1}

@@ -7,8 +7,16 @@ from model_code.state_space import sparsity_condition
 from model_code.utility_functions.final_period import (
     create_final_period_utility_functions,
 )
-from model_code.utility_functions.main_utility_functions import create_utility_functions
-from model_code.wealth_and_budget.main_budget_equation import budget_constraint
+from model_code.utility_functions.main_utility_functions import (
+    create_main_utility_functions,
+)
+from model_code.utility_functions.old_age_utility_functions import (
+    create_old_age_utility_functions,
+)
+from model_code.wealth_and_budget.main_budget_equation import main_budget_constraint
+from model_code.wealth_and_budget.old_age_budget_equation import (
+    old_age_budget_constraint,
+)
 
 
 def specify_model(
@@ -31,15 +39,16 @@ def specify_model(
     # Load specifications
     n_periods_main = specs["n_periods_main"]
     n_possible_ret_ages = specs["n_possible_ret_ages"]
-    n_policy_states = speoptions_maincs["n_policy_states"]
+    n_policy_states = specs["n_policy_states"]
     choices = np.arange(specs["n_choices"], dtype=int)
+    n_experience_levels_max = n_periods_main + specs["max_init_experience"]
 
     options_main = {
         "state_space": {
             "n_periods": n_periods_main,
             "choices": choices,
             "endogenous_states": {
-                "experience": np.arange(n_periods_main, dtype=int),
+                "experience": np.arange(n_experience_levels_max, dtype=int),
                 "retirement_age_id": np.arange(n_possible_ret_ages, dtype=int),
                 "sparsity_condition": sparsity_condition,
             },
@@ -55,10 +64,9 @@ def specify_model(
 
     options_old_age = {
         "state_space": {
-            "n_periods": specs["n_periods_old_ageö"],
-            "choices": choices,
+            "n_periods": specs["n_periods_old_age"],
             "endogenous_states": {
-                "deduction_state": np.arange(specs["deduction_state"], dtype=int),
+                "deduction_state": np.arange(specs["n_deduction_states"], dtype=int),
             },
         },
         "model_params": specs,
@@ -68,9 +76,9 @@ def specify_model(
         model_main = load_and_setup_model(
             options=options_main,
             state_space_functions=create_state_space_functions(),
-            utility_functions=create_utility_functions(),
+            utility_functions=create_main_utility_functions(),
             utility_functions_final_period=create_final_period_utility_functions(),
-            budget_constraint=budget_constraint,
+            budget_constraint=main_budget_constraint,
             path=path_dict["intermediate_data"] + "model.pkl",
         )
 
@@ -78,11 +86,24 @@ def specify_model(
         model_main = setup_and_save_model(
             options=options_main,
             state_space_functions=create_state_space_functions(),
-            utility_functions=create_utility_functions(),
+            utility_functions=create_main_utility_functions(),
             utility_functions_final_period=create_final_period_utility_functions(),
-            budget_constraint=budget_constraint,
+            budget_constraint=main_budget_constraint,
+            path=path_dict["intermediate_data"] + "model.pkl",
+        )
+        print("Main model specified.")
+
+        max_exp = model_main["model_structure"]["state_space_dict"]["experience"].max()
+        options_old_age["state_space"]["endogenous_states"]["experience"] = np.arange(
+            max_exp, dtype=int
+        )
+        model_old_age = setup_and_save_model(
+            options=options_old_age,
+            utility_functions=create_old_age_utility_functions(),
+            utility_functions_final_period=create_final_period_utility_functions(),
+            budget_constraint=old_age_budget_constraint,
             path=path_dict["intermediate_data"] + "model.pkl",
         )
 
     print("Model specified.")
-    return model, [options_main, options_old_age], params
+    return model_main, [options_main, options_old_age], params

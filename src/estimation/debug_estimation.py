@@ -54,7 +54,7 @@ est_model, model, options, params = specify_and_solve_model(
     policy_state_trans_func=expected_SRA_probs_estimation,
     # note: file_append is used to load the model and solution from the file specified by the string
     file_append="subj",
-    load_model=True,
+    load_model=False,
     load_solution=False,
 )
 value = est_model["value"]

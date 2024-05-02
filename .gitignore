@@ -11,4 +11,4 @@ policy_expect_data.pkl
 *model*pkl
 *probs.pkl
 data*.pkl
-sum_probs_old.txt
+sum_probs_*.txt

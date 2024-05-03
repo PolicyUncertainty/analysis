@@ -47,7 +47,7 @@ def create_wage_est_sample(paths, load_data=False, options=None):
     # gross monthly wage
     merged_data.rename(columns={"pglabgro": "wage"}, inplace=True)
     merged_data = merged_data[merged_data["wage"].notna()]
-    merged_data = merged_data[merged_data["wage"] >= 0]
+    merged_data = merged_data[merged_data["wage"] > 0]
     print(str(len(merged_data)) + " observations after dropping invalid wage values.")
 
     # education

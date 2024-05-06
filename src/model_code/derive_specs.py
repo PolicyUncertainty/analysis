@@ -1,3 +1,4 @@
+import jax.numpy as jnp
 import numpy as np
 import pandas as pd
 import yaml
@@ -60,8 +61,8 @@ def read_and_derive_specs(spec_path):
     )
     specs["deduction_state_values"] = unique_deduct_values
     specs["n_deduction_states"] = unique_deduct_values.shape[0]
-    specs["old_age_state_index_mapping"] = index_mapping.reshape(
-        (specs["n_policy_states"], specs["n_possible_ret_ages"])
+    specs["old_age_state_index_mapping"] = jnp.array(
+        index_mapping.reshape((specs["n_policy_states"], specs["n_possible_ret_ages"]))
     )
 
     specs["SRA_values_policy_states"] = np.arange(

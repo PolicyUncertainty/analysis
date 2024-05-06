@@ -1,11 +1,14 @@
+import jax.numpy as jnp
 from dcegm.interface import policy_for_state_choice_vec
 from dcegm.interface import value_for_state_choice_vec
 
 
 def create_switch_utility_functions_dict(old_age_model):
-    old_age_model_structure = old_age_model["model_structure"]
-    map_state_choice_to_index = old_age_model_structure["map_state_choice_to_index"]
-    state_space_names = old_age_model_structure["state_space_names"]
+    old_age_model_struct = old_age_model["model_structure"]
+    map_state_choice_to_index = jnp.array(
+        old_age_model_struct["map_state_choice_to_index"]
+    )
+    state_space_names = old_age_model_struct["state_space_names"]
     utility_function_old_age = old_age_model["model_funcs"]["compute_utility"]
     marginal_utility_function_old_age = old_age_model["model_funcs"][
         "compute_marginal_utility"
@@ -19,8 +22,10 @@ def create_switch_utility_functions_dict(old_age_model):
         ]
         state_choice_vec = {
             "period": 0,
+            "lagged_choice": 0,
             "experience": experience,
             "deduction_state": deduction_state,
+            "dummy_exog": 0,
             "choice": 0,
         }
 
@@ -44,8 +49,10 @@ def create_switch_utility_functions_dict(old_age_model):
         ]
         state_choice_vec = {
             "period": 0,
+            "lagged_choice": 0,
             "experience": experience,
             "deduction_state": deduction_state,
+            "dummy_exog": 0,
             "choice": 0,
         }
 

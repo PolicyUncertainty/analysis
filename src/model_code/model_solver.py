@@ -46,6 +46,8 @@ def specify_and_solve_model(
     params["policy_old_age"] = policy_old_age
     params["endog_grid_old_age"] = endog_grid_old_age
 
+    print("Old age model solved")
+
     solve_func_main = get_solve_func_for_model(
         model_collection["model_main"], savings_grid, options_collection["options_main"]
     )

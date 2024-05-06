@@ -3,6 +3,7 @@ import numpy as np
 
 
 def budget_constraint(
+    education,
     lagged_choice,  # d_{t-1}
     experience,
     policy_state,  # current applicable SRA identifyer
@@ -13,9 +14,8 @@ def budget_constraint(
     options,
 ):
     # fetch necessary parameters (gammas for wage, pension_point_value & ERP for pension)
-    gamma_0 = options["gamma_0"]
-    gamma_1 = options["gamma_1"]
-    gamma_2 = options["gamma_2"]
+    gamma_0 = jnp.take(options["gamma_0"], education)
+    gamma_1 = jnp.take(options["gamma_1"], education)
     pension_point_value = options["pension_point_value"]
     ERP = options["early_retirement_penalty"]
 
@@ -34,10 +34,11 @@ def budget_constraint(
     unemployment_benefits = means_test * options["unemployment_benefits"] * 12
     # Labor income
     labor_income = (
+        jnp.exp(
         gamma_0
-        + gamma_1 * experience
-        + gamma_2 * experience**2
+        + gamma_1 * jnp.log(experience + 1)
         + income_shock_previous_period
+        )/options["wealth_unit"]
     )
     labor_income_with_min = jnp.maximum(labor_income, options["min_wage"]) * 12
     net_labor_income = calc_net_income_working(labor_income_with_min, options)

@@ -122,4 +122,14 @@ def specify_model(
         )
 
     print("Model specified.")
-    return [model_main, model_old_age], [options_main, options_old_age], params
+
+    options_collections = {
+        "options_main": options_main,
+        "options_old_age": options_old_age,
+    }
+
+    model_collection = {
+        "model_main": model_main,
+        "model_old_age": model_old_age,
+    }
+    return model_collection, options_collections, params

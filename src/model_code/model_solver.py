@@ -28,21 +28,38 @@ def specify_and_solve_model(
         load_model=load_model,
     )
 
-    if load_solution:
-        solution_est = pickle.load(open(solution_file, "rb"))
-        return solution_est, model_collection, options_collection, params
+    # if load_solution:
+    #     solution_est = pickle.load(open(solution_file, "rb"))
+    #     return solution_est, model_collection, options_collection, params
 
     savings_grid = create_savings_grid()
 
-    solve_func = get_solve_func_for_model(model, savings_grid, options)
-    value, policy, endog_grid = solve_func(params)
+    solve_func_old_age = get_solve_func_for_model(
+        model_collection["model_old_age"],
+        savings_grid,
+        options_collection["options_old_age"],
+    )
+
+    value_old_age, policy_old_age, endog_grid_old_age = solve_func_old_age(params)
+
+    params["value_old_age"] = value_old_age
+    params["policy_old_age"] = policy_old_age
+    params["endog_grid_old_age"] = endog_grid_old_age
+
+    solve_func_main = get_solve_func_for_model(
+        model_collection["model_main"], savings_grid, options_collection["options_main"]
+    )
+    value, policy, endog_grid = solve_func_main(params)
 
     solution = {
         "value": value,
         "policy": policy,
         "endog_grid": endog_grid,
+        "value_old_age": value_old_age,
+        "policy_old_age": policy_old_age,
+        "endog_grid_old_age": endog_grid_old_age,
     }
 
     pickle.dump(solution, open(solution_file, "wb"))
 
-    return solution, model, options, params
+    return solution, model_collection, options_collection, params

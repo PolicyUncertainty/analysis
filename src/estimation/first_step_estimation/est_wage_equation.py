@@ -8,16 +8,23 @@ from linearmodels.panel.model import PanelOLS
 from model_code.derive_specs import read_and_derive_specs
 
 
-def estimate_wage_parameters(wage_data):
-    coefficients = [0] * len(wage_data["education"].unique())
+def estimate_wage_parameters(paths_dict):
+    wage_data = pd.read_pickle(
+        paths_dict["intermediate_data"] + "wage_estimation_sample.pkl"
+    )
+
+    # prepare estimation data
     wage_data["ln_wage"] = np.log(wage_data["wage"])
     wage_data["experience"] = wage_data["experience"] + 1
     wage_data["ln_exp"] = np.log(wage_data["experience"])
 
-    # prepare estimation
+    # prepare format
     wage_data["year"] = wage_data["syear"].astype("category")
     wage_data = wage_data.set_index(["pid", "syear"])
     wage_data["constant"] = np.ones(len(wage_data))
+
+    # Initialize empty container for coefficients
+    coefficients = [0] * len(wage_data["education"].unique())
     for education in wage_data["education"].unique():
         wage_data_edu = wage_data[wage_data["education"] == education]
         # estimate parametric regression, save parameters
@@ -30,9 +37,13 @@ def estimate_wage_parameters(wage_data):
         fitted_model = model.fit(
             cov_type="clustered", cluster_entity=True, cluster_time=True
         )
-        coefficients[education] = list(fitted_model.params[0:2])
+        coefficients[education] = fitted_model.params[0:2]
         income_shock_std = np.sqrt(fitted_model.resids.var())
-        coefficients[education] = coefficients[education] + [income_shock_std]
+        coefficients[education].loc["income_shock_std"] = income_shock_std
+        coefficients[education].name = education
+
+    wage_parameters = pd.DataFrame(coefficients)
+    wage_parameters.to_csv(paths_dict["est_results"] + "wage_eq_params.csv")
     return coefficients
 
 

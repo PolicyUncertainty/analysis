@@ -17,9 +17,9 @@ def generate_derived_and_data_derived_specs(path_dict):
     wage_params = pd.read_csv(
         path_dict["est_results"] + "wage_eq_params.csv", index_col=0
     )
-    specs["gamma_0"] = wage_params["constant"].values
-    specs["gamma_1"] = wage_params["ln_exp"].values
-    specs["income_shock_scale"] = wage_params["income_shock_std"].values.mean()
+    specs["gamma_0"] = wage_params["0"].values
+    specs["gamma_1"] = wage_params["1"].values
+    specs["income_shock_scale"] = wage_params["2"].values.mean()
 
     # calculate value of pension point based on unweighted average wage over 40 years
     # of work

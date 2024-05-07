@@ -49,10 +49,15 @@ if do_first_step:
 
     wage_data = pd.read_pickle(paths_dict["intermediate_data"] + "wage_estimation_sample.pkl")
     wage_parameters = estimate_wage_parameters(wage_data)
+    from estimation.first_step_estimation.est_wage_equation import plot_wages_by_edu
+    plot_wages_by_edu(wage_parameters)
 
-    #from estimation.first_step_estimation.est_wage_equation_new import plot_wages_by_edu
-    #plot_wages_by_edu(wage_parameters)
+    # Save wage parameters
+    wage_parameters_df = pd.DataFrame(wage_parameters)
+    wage_parameters_df.to_csv(paths_dict["est_results"] + "wage_eq_params.csv")
 
 if do_model_estimatation:
     estimation_results = estimate_model(paths_dict, load_model=True)
     print(estimation_results)
+
+# %%

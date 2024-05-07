@@ -21,10 +21,12 @@ from estimation.estimate_setup import estimate_model
 
 
 if do_first_step:
-
     # Estimate parameters of SRA truncated normal distributions
-    from estimation.first_step_estimation.est_SRA_expectations import estimate_truncated_normal
+    from estimation.first_step_estimation.est_SRA_expectations import (
+        estimate_truncated_normal,
+    )
     from model_code.derive_specs import read_and_derive_specs
+
     specs = read_and_derive_specs(paths_dict["specs"])
     df_exp_policy_dist = estimate_truncated_normal(paths_dict, specs, load_data=False)
 
@@ -47,10 +49,12 @@ if do_first_step:
         estimate_wage_parameters,
     )
 
-    wage_data = pd.read_pickle(paths_dict["intermediate_data"] + "wage_estimation_sample.pkl")
+    wage_data = pd.read_pickle(
+        paths_dict["intermediate_data"] + "wage_estimation_sample.pkl"
+    )
     wage_parameters = estimate_wage_parameters(wage_data)
-    #from estimation.first_step_estimation.est_wage_equation import plot_wages_by_edu
-    #plot_wages_by_edu(wage_parameters)
+    # from estimation.first_step_estimation.est_wage_equation import plot_wages_by_edu
+    # plot_wages_by_edu(wage_parameters)
 
     # Save wage parameters
     wage_parameters_df = pd.DataFrame(wage_parameters)

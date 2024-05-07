@@ -24,8 +24,8 @@ BENEFITS_GRID = np.linspace(10, 100, 5)
 )
 def test_budget_unemployed(unemployment_benefits, savings, interest_rate):
     options = {
-        "gamma_0": np.array([1,1]),
-        "gamma_1": np.array([1,1]),
+        "gamma_0": np.array([1, 1]),
+        "gamma_1": np.array([1, 1]),
         "pension_point_value": 1,
         "early_retirement_penalty": 0.01,
         "min_SRA": 63,
@@ -64,11 +64,20 @@ EDUCATION_GRID = [0, 1]
 @pytest.mark.parametrize(
     "gamma, income_shock, experience, interest_rate, savings, education",
     list(
-        product(GAMMA_GRID, BENEFITS_GRID, EXP_GRID, INTEREST_RATE_GRID, SAVINGS_GRID, EDUCATION_GRID)
+        product(
+            GAMMA_GRID,
+            BENEFITS_GRID,
+            EXP_GRID,
+            INTEREST_RATE_GRID,
+            SAVINGS_GRID,
+            EDUCATION_GRID,
+        )
     ),
 )
-def test_budget_worker(gamma, income_shock, experience, interest_rate, savings, education):
-    gamma_array = np.array([gamma,gamma-0.01])
+def test_budget_worker(
+    gamma, income_shock, experience, interest_rate, savings, education
+):
+    gamma_array = np.array([gamma, gamma - 0.01])
     options = {
         "gamma_0": gamma_array,
         "gamma_1": gamma_array,
@@ -94,7 +103,14 @@ def test_budget_worker(gamma, income_shock, experience, interest_rate, savings, 
         params=params,
         options=options,
     )
-    labor_income = np.exp(gamma_array[education] + gamma_array[education] * np.log(experience+1) + income_shock) / options["wealth_unit"]
+    labor_income = (
+        np.exp(
+            gamma_array[education]
+            + gamma_array[education] * np.log(experience + 1)
+            + income_shock
+        )
+        / options["wealth_unit"]
+    )
     if labor_income < options["min_wage"]:
         labor_income = options["min_wage"]
     net_labor_income = calc_net_income_working(labor_income * 12, options)
@@ -130,8 +146,8 @@ def test_retiree(
     point_value = 0.9
     actual_retirement_age = min_ret_age + ret_age_id
     options = {
-        "gamma_0": np.array([1,1]),
-        "gamma_1": np.array([1,1]),
+        "gamma_0": np.array([1, 1]),
+        "gamma_1": np.array([1, 1]),
         "pension_point_value": point_value,
         "early_retirement_penalty": erp,
         "min_SRA": min_SRA,

@@ -104,12 +104,14 @@ def create_structural_est_sample(paths, load_data=False, options=None):
         }
     )
 
-    print(str(len(merged_data)) + " observations in final structural estimation dataset.")
+    print(
+        str(len(merged_data)) + " observations in final structural estimation dataset."
+    )
 
     # Anonymize and save data
     merged_data.reset_index(drop=True, inplace=True)
     merged_data.to_pickle(out_file_path)
-    
+
     # save data
     merged_data.to_pickle(out_file_path)
 
@@ -120,7 +122,17 @@ def load_and_merge_soep_core(soep_c38):
     # Load SOEP core data
     pgen_data = pd.read_stata(
         f"{soep_c38}/pgen.dta",
-        columns=["syear", "pid", "hid", "pgemplst", "pgexpft", "pgstib", "pgpartz", "pglabgro", "pgpsbil"],
+        columns=[
+            "syear",
+            "pid",
+            "hid",
+            "pgemplst",
+            "pgexpft",
+            "pgstib",
+            "pgpartz",
+            "pglabgro",
+            "pgpsbil",
+        ],
         convert_categoricals=False,
     )
     pathl_data = pd.read_stata(
@@ -387,15 +399,20 @@ def create_experience_variable(pgexpft, exp_cap):
     )
     return experience
 
+
 def create_education_type(merged_data):
-    """This function creates the education type variable for the structural model (1 if 
+    """This function creates the education type variable for the structural model (1 if
     individual has at least Fachhochschulreife)."""
     merged_data = merged_data[merged_data["pgpsbil"].notna()]
     merged_data["education"] = 0
-    merged_data.loc[merged_data["pgpsbil"] == 3, "education"] = 1 # Fachhochschulreife
-    merged_data.loc[merged_data["pgpsbil"] == 4, "education"] = 1 # Abitur
-    print(str(len(merged_data)) + " left after dropping people with missing education values.")
+    merged_data.loc[merged_data["pgpsbil"] == 3, "education"] = 1  # Fachhochschulreife
+    merged_data.loc[merged_data["pgpsbil"] == 4, "education"] = 1  # Abitur
+    print(
+        str(len(merged_data))
+        + " left after dropping people with missing education values."
+    )
     return merged_data
+
 
 def enforce_model_choice_restriction(merged_data, min_ret_age, max_ret_age):
     """This function filters the choice data according to the model setup.

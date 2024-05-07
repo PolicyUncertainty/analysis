@@ -35,10 +35,9 @@ def budget_constraint(
     # Labor income
     labor_income = (
         jnp.exp(
-        gamma_0
-        + gamma_1 * jnp.log(experience + 1)
-        + income_shock_previous_period
-        )/options["wealth_unit"]
+            gamma_0 + gamma_1 * jnp.log(experience + 1) + income_shock_previous_period
+        )
+        / options["wealth_unit"]
     )
     labor_income_with_min = jnp.maximum(labor_income, options["min_wage"]) * 12
     net_labor_income = calc_net_income_working(labor_income_with_min, options)

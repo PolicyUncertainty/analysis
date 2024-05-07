@@ -23,12 +23,13 @@ specs = read_and_derive_specs(paths_dict["specs"])
 from process_data.create_structural_est_sample import create_structural_est_sample
 from process_data.create_wage_est_sample import create_wage_est_sample
 
-LOAD_DATA = False	
-structural_est_df = create_structural_est_sample(paths_dict, load_data=LOAD_DATA, options=specs)
+LOAD_DATA = False
+structural_est_df = create_structural_est_sample(
+    paths_dict, load_data=LOAD_DATA, options=specs
+)
 wage_est_df = create_wage_est_sample(paths_dict, load_data=LOAD_DATA, options=specs)
 
 # %%
 # process SOEP IS, generate SRA data
 # --------------------------------------------------------------------------------------
-#from process_data.process_soep_is import process_soep_is
-
+# from process_data.process_soep_is import process_soep_is

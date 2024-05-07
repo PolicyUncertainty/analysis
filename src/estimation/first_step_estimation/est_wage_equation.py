@@ -1,15 +1,14 @@
 # Description: This file estimates the parameters of the MONTHLY wage equation using the SOEP panel data.
 # We estimate the following equation:
 # ln_wage = beta_0 + beta_1 * ln_(exp+1) + individual_FE + time_FE + epsilon
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from linearmodels.panel.model import PanelOLS
 from model_code.derive_specs import read_and_derive_specs
-import matplotlib.pyplot as plt
 
 
 def estimate_wage_parameters(wage_data):
-
     coefficients = [0] * len(wage_data["education"].unique())
     wage_data["ln_wage"] = np.log(wage_data["wage"])
     wage_data["experience"] = wage_data["experience"] + 1
@@ -35,8 +34,10 @@ def estimate_wage_parameters(wage_data):
         income_shock_std = np.sqrt(fitted_model.resids.var())
         coefficients[education] = coefficients[education] + [income_shock_std]
     return coefficients
-    
+
+
 # visualize wages by experience
+
 
 def plot_wages_by_edu(coefficients):
     fig, ax = plt.subplots()

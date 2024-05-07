@@ -31,7 +31,9 @@ def estimate_wage_parameters(wage_data):
         fitted_model = model.fit(
             cov_type="clustered", cluster_entity=True, cluster_time=True
         )
-        coefficients[education] = fitted_model.params[0:2]   
+        coefficients[education] = list(fitted_model.params[0:2])
+        income_shock_std = np.sqrt(fitted_model.resids.var())
+        coefficients[education] = coefficients[education] + [income_shock_std]
     return coefficients
     
 # visualize wages by experience

@@ -26,7 +26,7 @@ def generate_derived_and_data_derived_specs(path_dict):
     specs["pension_point_value"] = 27.2 / specs["wealth_unit"]
 
     # max initial experience
-    data_decision = pd.read_pickle(path_dict["intermediate_data"] + "decision_data.pkl")
+    data_decision = pd.read_pickle(path_dict["intermediate_data"] + "structural_estimation_sample.pkl")
     specs["max_init_experience"] = (
         data_decision["experience"] - data_decision["period"]
     ).max()

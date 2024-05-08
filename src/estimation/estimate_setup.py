@@ -88,7 +88,7 @@ def create_ll_from_paths(start_params_all, path_dict, load_model):
     )
 
     # Load data
-    data_decision = pd.read_pickle(path_dict["intermediate_data"] + "decision_data.pkl")
+    data_decision = pd.read_pickle(path_dict["intermediate_data"] + "structural_estimation_sample.pkl")
     data_decision = data_decision[data_decision["lagged_choice"] != 2]
     data_decision["wealth"] = data_decision["wealth"].clip(lower=1e-16)
     # Now transform for dcegm

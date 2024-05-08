@@ -15,7 +15,13 @@ def create_switch_utility_functions_dict(old_age_model):
     ]
 
     def switch_utility(
-        resources, retirement_age_id, policy_state, experience, options, params
+        resources,
+        retirement_age_id,
+        education,
+        policy_state,
+        experience,
+        options,
+        params,
     ):
         deduction_state = options["old_age_state_index_mapping"][
             policy_state, retirement_age_id
@@ -23,6 +29,7 @@ def create_switch_utility_functions_dict(old_age_model):
         state_choice_vec = {
             "period": 0,
             "lagged_choice": 0,
+            "education": education,
             "experience": experience,
             "deduction_state": deduction_state,
             "dummy_exog": 0,
@@ -42,7 +49,13 @@ def create_switch_utility_functions_dict(old_age_model):
         return value
 
     def marginal_switch_utility(
-        resources, retirement_age_id, policy_state, experience, options, params
+        resources,
+        retirement_age_id,
+        education,
+        policy_state,
+        experience,
+        options,
+        params,
     ):
         deduction_state = options["old_age_state_index_mapping"][
             policy_state, retirement_age_id
@@ -50,6 +63,7 @@ def create_switch_utility_functions_dict(old_age_model):
         state_choice_vec = {
             "period": 0,
             "lagged_choice": 0,
+            "education": education,
             "experience": experience,
             "deduction_state": deduction_state,
             "dummy_exog": 0,

@@ -2,12 +2,7 @@ import pickle
 import time
 
 import estimagic as em
-import pandas as pd
-from dcegm.likelihood import create_individual_likelihood_function_for_model
-from model_code.policy_states_belief import expected_SRA_probs_estimation
-from model_code.policy_states_belief import update_specs_exp_ret_age_trans_mat
-from model_code.specify_model import specify_model
-from wealth_and_budget.savings_grid import create_savings_grid
+from estimation.specify_likelihood import create_ll_from_paths
 
 
 def estimate_model(path_dict, load_model):
@@ -65,7 +60,7 @@ def estimate_model(path_dict, load_model):
         params=start_params,
         lower_bounds=lower_bounds,
         upper_bounds=upper_bounds,
-        algorithm="scipy_lbfgsb",
+        algorithm="scilikelihood_funcpy_lbfgsb",
         logging="test_log.db",
         error_handling="continue",
     )
@@ -76,40 +71,3 @@ def estimate_model(path_dict, load_model):
     )
 
     return result
-
-
-def create_ll_from_paths(start_params_all, path_dict, load_model):
-    model, options, params = specify_model(
-        path_dict=path_dict,
-        params=start_params_all,
-        update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
-        policy_state_trans_func=expected_SRA_probs_estimation,
-        load_model=load_model,
-    )
-
-    # Load data
-    data_decision = pd.read_pickle(
-        path_dict["intermediate_data"] + "structural_estimation_sample.pkl"
-    )
-    data_decision = data_decision[data_decision["lagged_choice"] != 2]
-    data_decision["wealth"] = data_decision["wealth"].clip(lower=1e-16)
-    # Now transform for dcegm
-    states_dict = {
-        name: data_decision[name].values
-        for name in model["model_structure"]["state_space_names"]
-    }
-
-    # Create savings grid
-    savings_grid = create_savings_grid()
-
-    # Create likelihood function
-    individual_likelihood = create_individual_likelihood_function_for_model(
-        model=model,
-        options=options,
-        observed_states=states_dict,
-        observed_wealth=data_decision["wealth"].values,
-        observed_choices=data_decision["choice"].values,
-        exog_savings_grid=savings_grid,
-        params_all=start_params_all,
-    )
-    return individual_likelihood

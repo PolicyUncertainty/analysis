@@ -70,6 +70,7 @@ def specify_model(
         "state_space": {
             "n_periods": specs["n_periods_old_age"],
             "endogenous_states": {
+                "education": np.arange(specs["n_education_types"], dtype=int),
                 "deduction_state": np.arange(specs["n_deduction_states"], dtype=int),
             },
         },

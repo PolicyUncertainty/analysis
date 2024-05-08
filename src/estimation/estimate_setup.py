@@ -60,7 +60,7 @@ def estimate_model(path_dict, load_model):
         params=start_params,
         lower_bounds=lower_bounds,
         upper_bounds=upper_bounds,
-        algorithm="scilikelihood_funcpy_lbfgsb",
+        algorithm="scipy_lbfgsb",
         logging="test_log.db",
         error_handling="continue",
     )

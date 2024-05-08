@@ -3,8 +3,8 @@ import pickle
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from dcegm.likelihood import calc_choice_probs_for_observed_states
-from dcegm.likelihood import create_observed_choice_indexes
+from dcegm.interface import get_state_choice_index_per_state
+from dcegm.likelihood import calc_choice_probs_for_states
 from model_code.derive_specs import generate_derived_and_data_derived_specs
 from model_code.model_solver import specify_and_solve_model
 from model_code.policy_states_belief import expected_SRA_probs_estimation
@@ -35,8 +35,12 @@ def observed_model_fit(paths_dict):
         name: data_decision[name].values
         for name in model_structure["state_space_names"]
     }
-    observed_state_choice_indexes = create_observed_choice_indexes(states_dict, model)
-    choice_probs_observations = calc_choice_probs_for_observed_states(
+    observed_state_choice_indexes = get_state_choice_index_per_state(
+        states=states_dict,
+        map_state_choice_to_index=model["model_structure"]["map_state_choice_to_index"],
+        state_space_names=model["model_structure"]["state_space_names"],
+    )
+    choice_probs_observations = calc_choice_probs_for_states(
         value_solved=est_model["value"],
         endog_grid_solved=est_model["endog_grid"],
         params=params,

@@ -57,7 +57,6 @@ est_model, model, options, params = specify_and_solve_model(
     load_model=True,
     load_solution=False,
 )
-breakpoint()
 value = est_model["value"]
 policy = est_model["policy"]
 endog_grid = est_model["endog_grid"]
@@ -87,8 +86,8 @@ data_decision = load_and_modify_data(paths_dict, options)
 
 # %%
 # create choice probs for each observation
-from dcegm.likelihood import create_observed_choice_indexes
-from dcegm.likelihood import calc_choice_probs_for_observed_states
+from dcegm.interface import get_state_choice_index_per_state
+from dcegm.likelihood import calc_choice_probs_for_states
 
 
 def create_choice_probs_for_each_observation(
@@ -99,10 +98,12 @@ def create_choice_probs_for_each_observation(
         name: data_decision[name].values
         for name in model_structure["state_space_names"]
     }
-    observed_state_choice_indexes = create_observed_choice_indexes(
-        states_dict, model_structure
+    observed_state_choice_indexes = get_state_choice_index_per_state(
+        states=states_dict,
+        map_state_choice_to_index=model_structure["map_state_choice_to_index"],
+        state_space_names=model_structure["state_space_names"],
     )
-    choice_probs_observations = calc_choice_probs_for_observed_states(
+    choice_probs_observations = calc_choice_probs_for_states(
         value_solved=value_solved,
         endog_grid_solved=endog_grid_solved,
         params=params,
@@ -136,7 +137,6 @@ def create_choice_probs_for_each_observation(
 choice_probs_each_obs = jnp.take_along_axis(
     choice_probs_observations, data_decision["choice"].values[:, None], axis=1
 )[:, 0]
-breakpoint()
 explained_0 = data_decision[data_decision["choice"] == 0]["choice_0"].mean()
 explained_1 = data_decision[data_decision["choice"] == 1]["choice_1"].mean()
 explained_2 = data_decision[data_decision["choice"] == 2]["choice_2"].mean()

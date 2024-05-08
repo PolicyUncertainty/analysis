@@ -21,7 +21,7 @@ def old_age_budget_constraint(
     # between actual retirement age and SRA at resolution
     pension_factor = 1 - deduction_state * ERP
     retirement_income_gross = pension_point_value * experience * pension_factor * 12
-    retirement_income = calc_net_income_pensions(retirement_income_gross)
+    retirement_income = calc_net_income_pensions(retirement_income_gross, options)
 
     unemployment_benefits = calc_unemployment_benefits(
         savings_end_of_previous_period=savings_end_of_previous_period,

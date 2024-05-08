@@ -8,7 +8,7 @@ sys.path.insert(0, analysis_path + "src/")
 
 from set_paths import create_path_dict
 
-#do_first_step = input("Do first step estimation? (y/n): ") == "y"
+# do_first_step = input("Do first step estimation? (y/n): ") == "y"
 estimate_sra = input("Estimate SRA process? (y/n): ") == "y"
 estimate_wage = input("Estimate wage? (y/n): ") == "y"
 do_model_estimatation = input("Estimate model? (y/n): ") == "y"
@@ -31,10 +31,7 @@ if estimate_sra:
 
     specs = read_and_derive_specs(paths_dict["specs"])
 
-
-    df_exp_policy_dist = estimate_truncated_normal(
-        paths_dict, specs, load_data=False
-    )
+    df_exp_policy_dist = estimate_truncated_normal(paths_dict, specs, load_data=False)
 
     # Estimate SRA random walk
     from estimation.first_step_estimation.est_SRA_random_walk import (
@@ -46,7 +43,6 @@ if estimate_sra:
     estimate_expected_SRA_variance(paths_dict)
 
 if estimate_wage:
-
     # Estimate wage parameter
     from estimation.first_step_estimation.est_wage_equation import (
         estimate_wage_parameters,
@@ -57,7 +53,7 @@ if estimate_wage:
     # plot_wages_by_edu(wage_parameters)
 
 if do_model_estimatation:
-    estimation_results = estimate_model(paths_dict, load_model=False)
+    estimation_results = estimate_model(paths_dict, load_model=True)
     print(estimation_results)
 
 # %%

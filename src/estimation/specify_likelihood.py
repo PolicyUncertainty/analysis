@@ -82,7 +82,7 @@ def create_ll_from_paths(start_params_all, path_dict, load_model):
 
         params_updated["value_old_age"] = value_old_age
         params_updated["policy_old_age"] = policy_old_age
-        params_updated["endog_gird_old_age"] = endog_grid_old_age
+        params_updated["endog_grid_old_age"] = endog_grid_old_age
 
         value_main, policy_main, endog_grid_main = solve_func_main(params_updated)
 

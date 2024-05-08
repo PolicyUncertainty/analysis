@@ -1,10 +1,15 @@
 import numpy as np
+import pandas as pd
 from statsmodels import api as sm
 
 
-def est_expected_SRA(paths, df):
+def est_expected_SRA(paths):
+    df = pd.read_pickle(paths["intermediate_data"] + "policy_expect_data.pkl")
     x_var = "time_to_ret"
     weights = "fweights"
+
+    # truncate data: remove birth years outside before 1964
+    df = df.query("birth_year >= 1964")
 
     # calculate current policy state for each observation
     df["exp_SRA_increase"] = df["ex_val"] - df["current_SRA"]
@@ -29,7 +34,12 @@ def est_expected_SRA(paths, df):
     return alpha_hat
 
 
-def estimate_expected_SRA_variance(paths, df):
+def estimate_expected_SRA_variance(paths):
+    df = pd.read_pickle(paths["intermediate_data"] + "policy_expect_data.pkl")
+
+    # truncate data: remove birth years outside before 1964
+    df = df.query("birth_year >= 1964")
+
     # divide estimated variances by time to retirement
     sigma_sq_hat = df["var"] / df["time_to_ret"]
 

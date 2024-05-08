@@ -75,6 +75,8 @@ def estimate_model(path_dict, load_model):
         start_params_all, open(path_dict["est_results"] + "est_params_1.pkl", "wb")
     )
 
+    return result
+
 
 def create_ll_from_paths(start_params_all, path_dict, load_model):
     model, options, params = specify_model(

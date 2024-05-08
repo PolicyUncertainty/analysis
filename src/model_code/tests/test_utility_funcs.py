@@ -4,10 +4,12 @@ from pathlib import Path
 src_folder = Path(__file__).resolve().parents[2]
 sys.path.append(str(src_folder))
 import pytest
-from utility_functions.main_utility_functions import (
+from model_code.utility_functions.main_utility_functions import (
     utility_func,
     inverse_marginal,
     marg_utility,
+)
+from model_code.utility_functions.final_period import (
     utility_final_consume_all,
     marginal_utility_final_consume_all,
 )
@@ -90,9 +92,8 @@ def test_bequest(consumption, mu, bequest_scale):
         "bequest_scale": bequest_scale,
     }
     bequest = bequest_scale * (consumption ** (1 - mu) / (1 - mu))
-    random_choice = np.random.choice(np.array([0, 1, 2]))
     np.testing.assert_almost_equal(
-        utility_final_consume_all(random_choice, consumption, params, None), bequest
+        utility_final_consume_all(resources=consumption, params=params), bequest
     )
 
 
@@ -100,16 +101,13 @@ def test_bequest(consumption, mu, bequest_scale):
     "consumption, mu, bequest_scale",
     list(product(CONSUMPTION_GRID, MU_GRID, BEQUEST_SCALE)),
 )
-def test_beqzest_marginal(consumption, mu, bequest_scale):
+def test_bequest_marginal(consumption, mu, bequest_scale):
     params = {
         "mu": mu,
         "bequest_scale": bequest_scale,
     }
-    random_choice = np.random.choice(np.array([0, 1, 2]))
-    bequest = jax.jacfwd(utility_final_consume_all, argnums=1)(
-        random_choice, consumption, params, None
-    )
+    bequest = jax.jacfwd(utility_final_consume_all, argnums=0)(consumption, params)
     np.testing.assert_almost_equal(
-        marginal_utility_final_consume_all(random_choice, consumption, params, None),
+        marginal_utility_final_consume_all(resources=consumption, params=params),
         bequest,
     )

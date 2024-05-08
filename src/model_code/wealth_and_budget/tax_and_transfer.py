@@ -8,18 +8,22 @@ def calc_unemployment_benefits(options, savings_end_of_previous_period):
     return unemployment_benefits
 
 
-def calc_net_income_pensions(gross_income):
-    ssc = calc_health_ltc_contr(gross_income)
-    inc_tax = calc_inc_tax(gross_income - ssc)
-    net_income = gross_income - inc_tax - ssc
-    return net_income
+def calc_net_income_pensions(gross_income, options):
+    gross_income_full = gross_income * options["wealth_unit"]
+    ssc = calc_health_ltc_contr(gross_income_full)
+    inc_tax = calc_inc_tax(gross_income_full - ssc)
+    net_income = gross_income_full - inc_tax - ssc
+    return net_income / options["wealth_unit"]
 
 
-def calc_net_income_working(gross_income):
-    ssc = calc_pension_unempl_contr(gross_income) + calc_health_ltc_contr(gross_income)
-    inc_tax = calc_inc_tax(gross_income - ssc)
-    net_income = gross_income - inc_tax - ssc
-    return net_income
+def calc_net_income_working(gross_income, options):
+    gross_income_full = gross_income * options["wealth_unit"]
+    ssc = calc_pension_unempl_contr(gross_income_full) + calc_health_ltc_contr(
+        gross_income_full
+    )
+    inc_tax = calc_inc_tax(gross_income_full - ssc)
+    net_income = gross_income_full - inc_tax - ssc
+    return net_income / options["wealth_unit"]
 
 
 def calc_inc_tax(gross_income):

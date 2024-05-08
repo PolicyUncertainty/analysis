@@ -1,11 +1,6 @@
-# dependencies:
-#   - original data saved on local machines,
-#   - functions for steps 0-3 in src\steps folder
-#   - src\spec.yaml
-# output: data (decisions and outside_parameters) saved in output folder
 # %%
-# Step 0: Set paths and parameters
-# ----------------------------------------------------------------------------------------------
+# set paths and parameters
+# --------------------------------------------------------------------------------------
 import sys
 from pathlib import Path
 
@@ -16,16 +11,6 @@ from set_paths import create_path_dict
 
 paths_dict = create_path_dict(analysis_path, define_user=True)
 
-# Specify load data from pickle files
-custom_load_data = False
-load_data_prompt = input("Load data from pickle files? (y/n/[c]ustom for every step): ")
-if load_data_prompt == "y":
-    LOAD_DATA = True
-elif load_data_prompt == "n":
-    LOAD_DATA = False
-else:
-    custom_load_data = True
-
 # Load options and generate auxiliary options
 from model_code.derive_specs import read_and_derive_specs
 
@@ -33,26 +18,18 @@ from model_code.derive_specs import read_and_derive_specs
 specs = read_and_derive_specs(paths_dict["specs"])
 
 # %%
-# Step 1: Get choice and state variables from policy_step_sizeSOEP core and SOEP RV VSKT
-# ----------------------------------------------------------------------------------------------
-from process_data.gather_decision_data import gather_decision_data
-
-if custom_load_data:
-    LOAD_DATA = input("Load choice & decision data from pickle files? (y/n): ") == "y"
-
-df = gather_decision_data(
-    paths_dict,
-    specs,
-    load_data=LOAD_DATA,
-)
-# %%
-# Step 2: Prepare expectation data
+# process SOEP core data, generate decision data and wage data
 # --------------------------------------------------------------------------------------
-from process_data.est_SRA_expectations import estimate_truncated_normal
+from process_data.create_structural_est_sample import create_structural_est_sample
+from process_data.create_wage_est_sample import create_wage_est_sample
 
-if custom_load_data:
-    LOAD_DATA = (
-        input("Load policy expectation parameters from pickle files? (y/n): ") == "y"
-    )
+LOAD_DATA = False
+structural_est_df = create_structural_est_sample(
+    paths_dict, load_data=LOAD_DATA, options=specs
+)
+wage_est_df = create_wage_est_sample(paths_dict, load_data=LOAD_DATA, options=specs)
 
-estimate_truncated_normal(paths_dict, specs, load_data=LOAD_DATA)
+# %%
+# process SOEP IS, generate SRA data
+# --------------------------------------------------------------------------------------
+# from process_data.process_soep_is import process_soep_is

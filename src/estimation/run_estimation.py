@@ -8,9 +8,11 @@ sys.path.insert(0, analysis_path + "src/")
 
 from set_paths import create_path_dict
 
-do_first_step = input("Do first step estimation? (y/n): ") == "y"
+#do_first_step = input("Do first step estimation? (y/n): ") == "y"
+estimate_sra = input("Estimate SRA process? (y/n): ") == "y"
+estimate_wage = input("Estimate wage? (y/n): ") == "y"
 do_model_estimatation = input("Estimate model? (y/n): ") == "y"
-paths_dict = create_path_dict(analysis_path, define_user=do_first_step)
+paths_dict = create_path_dict(analysis_path, define_user=estimate_sra)
 
 # Import jax and set jax to work with 64bit
 import jax
@@ -20,18 +22,30 @@ import pandas as pd
 from estimation.estimate_setup import estimate_model
 
 
-if do_first_step:
-    # Estimate policy expectation
+if estimate_sra:
+    # Estimate parameters of SRA truncated normal distributions
+    from estimation.first_step_estimation.est_SRA_expectations import (
+        estimate_truncated_normal,
+    )
+    from model_code.derive_specs import read_and_derive_specs
+
+    specs = read_and_derive_specs(paths_dict["specs"])
+
+
+    df_exp_policy_dist = estimate_truncated_normal(
+        paths_dict, specs, load_data=False
+    )
+
+    # Estimate SRA random walk
     from estimation.first_step_estimation.est_SRA_random_walk import (
         estimate_expected_SRA_variance,
         est_expected_SRA,
     )
 
-    data_expectation = pd.read_pickle(
-        paths_dict["intermediate_data"] + "policy_expect_data.pkl"
-    )
-    est_expected_SRA(paths_dict, data_expectation)
-    estimate_expected_SRA_variance(paths_dict, data_expectation)
+    est_expected_SRA(paths_dict)
+    estimate_expected_SRA_variance(paths_dict)
+
+if estimate_wage:
 
     # Estimate wage parameter
     from estimation.first_step_estimation.est_wage_equation import (
@@ -39,6 +53,11 @@ if do_first_step:
     )
 
     estimate_wage_parameters(paths_dict)
+    # from estimation.first_step_estimation.est_wage_equation import plot_wages_by_edu
+    # plot_wages_by_edu(wage_parameters)
 
 if do_model_estimatation:
-    estimate_model(paths_dict, load_model=False)
+    estimation_results = estimate_model(paths_dict, load_model=False)
+    print(estimation_results)
+
+# %%

@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from process_data.gather_decision_data import create_policy_state
+from process_data.create_structural_est_sample import create_policy_state
 
 
 def plot_SRA_2007_reform(path_dict):

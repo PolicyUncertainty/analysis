@@ -52,6 +52,7 @@ def specify_model(
             "choices": choices,
             "endogenous_states": {
                 "experience": np.arange(n_experience_levels_max, dtype=int),
+                "education": np.arange(specs["n_education_types"], dtype=int),
                 "retirement_age_id": np.arange(n_possible_ret_ages, dtype=int),
                 "sparsity_condition": sparsity_condition,
             },

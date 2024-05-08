@@ -2,14 +2,16 @@ import sys
 from itertools import product
 from pathlib import Path
 
+import jax
 import numpy as np
 import pytest
 
+jax.config.update("jax_enable_x64", True)
 src_folder = Path(__file__).resolve().parents[2]
 sys.path.append(str(src_folder))
 
-from wealth_and_budget.main_budget_equation import main_budget_constraint
-from wealth_and_budget.tax_and_transfer import (
+from model_code.wealth_and_budget.main_budget_equation import main_budget_constraint
+from model_code.wealth_and_budget.tax_and_transfer import (
     calc_net_income_pensions,
     calc_net_income_working,
 )
@@ -26,9 +28,8 @@ BENEFITS_GRID = np.linspace(10, 100, 5)
 )
 def test_budget_unemployed(unemployment_benefits, savings, interest_rate):
     options = {
-        "gamma_0": 1,
-        "gamma_1": 1,
-        "gamma_2": 1,
+        "gamma_0": np.array([1, 1]),
+        "gamma_1": np.array([1, 1]),
         "pension_point_value": 1,
         "early_retirement_penalty": 0.01,
         "min_SRA": 63,
@@ -37,9 +38,11 @@ def test_budget_unemployed(unemployment_benefits, savings, interest_rate):
         "unemployment_benefits": unemployment_benefits,
         "min_wage": 1.1,
         "unemployment_wealth_thresh": 25,
+        "wealth_unit": 1_000,
     }
     params = {"interest_rate": interest_rate}
     wealth = main_budget_constraint(
+        education=0,
         lagged_choice=0,
         experience=30,
         policy_state=0,
@@ -59,19 +62,29 @@ def test_budget_unemployed(unemployment_benefits, savings, interest_rate):
 
 GAMMA_GRID = np.linspace(0.1, 0.9, 3)
 EXP_GRID = np.linspace(10, 30, 3)
+EDUCATION_GRID = [0, 1]
 
 
 @pytest.mark.parametrize(
-    "gamma, income_shock, experience, interest_rate, savings",
+    "gamma, income_shock, experience, interest_rate, savings, education",
     list(
-        product(GAMMA_GRID, BENEFITS_GRID, EXP_GRID, INTEREST_RATE_GRID, SAVINGS_GRID)
+        product(
+            GAMMA_GRID,
+            BENEFITS_GRID,
+            EXP_GRID,
+            INTEREST_RATE_GRID,
+            SAVINGS_GRID,
+            EDUCATION_GRID,
+        )
     ),
 )
-def test_budget_worker(gamma, income_shock, experience, interest_rate, savings):
+def test_budget_worker(
+    gamma, income_shock, experience, interest_rate, savings, education
+):
+    gamma_array = np.array([gamma, gamma - 0.01])
     options = {
-        "gamma_0": gamma,
-        "gamma_1": gamma,
-        "gamma_2": gamma,
+        "gamma_0": gamma_array,
+        "gamma_1": gamma_array,
         "pension_point_value": 1,
         "early_retirement_penalty": 0.01,
         "min_SRA": 63,
@@ -80,9 +93,11 @@ def test_budget_worker(gamma, income_shock, experience, interest_rate, savings):
         "unemployment_benefits": 0,
         "min_wage": 100,
         "unemployment_wealth_thresh": 10,
+        "wealth_unit": 1_000,
     }
     params = {"interest_rate": interest_rate}
     wealth = main_budget_constraint(
+        education=education,
         lagged_choice=1,
         experience=experience,
         policy_state=0,
@@ -92,10 +107,17 @@ def test_budget_worker(gamma, income_shock, experience, interest_rate, savings):
         params=params,
         options=options,
     )
-    labor_income = gamma + gamma * experience + gamma * experience**2 + income_shock
+    labor_income = (
+        np.exp(
+            gamma_array[education]
+            + gamma_array[education] * np.log(experience + 1)
+            + income_shock
+        )
+        / options["wealth_unit"]
+    )
     if labor_income < options["min_wage"]:
         labor_income = options["min_wage"]
-    net_labor_income = calc_net_income_working(labor_income * 12)
+    net_labor_income = calc_net_income_working(labor_income * 12, options)
     np.testing.assert_almost_equal(
         wealth, savings * (1 + interest_rate) + net_labor_income
     )
@@ -128,9 +150,8 @@ def test_retiree(
     point_value = 0.9
     actual_retirement_age = min_ret_age + ret_age_id
     options = {
-        "gamma_0": 1,
-        "gamma_1": 1,
-        "gamma_2": 1,
+        "gamma_0": np.array([1, 1]),
+        "gamma_1": np.array([1, 1]),
         "pension_point_value": point_value,
         "early_retirement_penalty": erp,
         "min_SRA": min_SRA,
@@ -139,9 +160,11 @@ def test_retiree(
         "unemployment_benefits": 50,
         "min_wage": 100,
         "unemployment_wealth_thresh": 100,
+        "wealth_unit": 1_000,
     }
     params = {"interest_rate": interest_rate}
     wealth = main_budget_constraint(
+        education=0,
         lagged_choice=2,
         experience=exp,
         policy_state=policy_state,
@@ -159,7 +182,7 @@ def test_retiree(
         * options["early_retirement_penalty"]
     )
     retirement_income = calc_net_income_pensions(
-        pension_point_value * pension_factor * exp * 12
+        pension_point_value * pension_factor * exp * 12, options
     )
     if savings < options["unemployment_wealth_thresh"]:
         retirement_income = np.maximum(

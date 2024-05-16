@@ -12,5 +12,4 @@ policy_expect_data.pkl
 *probs.pkl
 data*.pkl
 probs_*.txt
-intermediate_data/*
-!intermediate_data/cpi_base_2010.csv
+intermediate_data/

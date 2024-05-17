@@ -55,8 +55,9 @@ est_model, model, options, params = specify_and_solve_model(
     # note: file_append is used to load the model and solution from the file specified by the string
     file_append="subj",
     load_model=True,
-    load_solution=False,
+    load_solution=True,
 )
+breakpoint()
 value = est_model["value"]
 policy = est_model["policy"]
 endog_grid = est_model["endog_grid"]
@@ -68,7 +69,7 @@ def load_and_modify_data(paths_dict, options):
     start_age = options["model_params"]["start_age"]
 
     data_decision = pd.read_pickle(
-        paths_dict["intermediate_data"] + "decision_data.pkl"
+        paths_dict["intermediate_data"] + "structural_estimation_sample.pkl"
     )
     data_decision["wealth"] = data_decision["wealth"].clip(lower=1e-16)
     data_decision["age"] = data_decision["period"] + start_age

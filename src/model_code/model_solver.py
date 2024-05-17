@@ -28,9 +28,9 @@ def specify_and_solve_model(
         load_model=load_model,
     )
 
-    # if load_solution:
-    #     solution_est = pickle.load(open(solution_file, "rb"))
-    #     return solution_est, model_collection, options_collection, params
+    if load_solution:
+        solution_est = pickle.load(open(solution_file, "rb"))
+        return solution_est, model_collection, options_collection, params
 
     savings_grid = create_savings_grid()
 

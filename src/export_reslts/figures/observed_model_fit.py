@@ -12,7 +12,7 @@ from model_code.policy_states_belief import update_specs_exp_ret_age_trans_mat
 
 
 def observed_model_fit(paths_dict):
-    params = pickle.load(open(paths_dict["est_results"] + "est_params.pkl", "rb"))
+    params = pickle.load(open(paths_dict["est_results"] + "est_params_1.pkl", "rb"))
     specs = generate_derived_and_data_derived_specs(paths_dict)
 
     est_model, model, options, params = specify_and_solve_model(
@@ -24,8 +24,9 @@ def observed_model_fit(paths_dict):
         load_model=True,
         load_solution=True,
     )
+
     data_decision = pd.read_pickle(
-        paths_dict["intermediate_data"] + "decision_data.pkl"
+        paths_dict["intermediate_data"] + "structural_estimation_sample.pkl"
     )
     data_decision["wealth"] = data_decision["wealth"].clip(lower=1e-16)
     data_decision["age"] = data_decision["period"] + specs["start_age"]
@@ -35,7 +36,9 @@ def observed_model_fit(paths_dict):
         name: data_decision[name].values
         for name in model_structure["state_space_names"]
     }
-    observed_state_choice_indexes = create_observed_choice_indexes(states_dict, model)
+    observed_state_choice_indexes = create_observed_choice_indexes(
+        states_dict, model_structure
+    )
     choice_probs_observations = calc_choice_probs_for_observed_states(
         value_solved=est_model["value"],
         endog_grid_solved=est_model["endog_grid"],

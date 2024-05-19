@@ -58,7 +58,9 @@ def simulate_scenario(
         load_model=True,
     )
 
-    data_decision = pd.read_pickle(path_dict["intermediate_data"] + "decision_data.pkl")
+    data_decision = pd.read_pickle(
+        path_dict["intermediate_data"] + "structural_estimation_sample.pkl"
+    )
     initial_states, wealth_agents = generate_start_states(
         data_decision, n_agents, seed, options
     )

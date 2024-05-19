@@ -7,7 +7,9 @@ def plot_average_wealth(paths):
     data_sim = pd.read_pickle(
         paths["intermediate_data"] + "data_baseline.pkl"
     ).reset_index()
-    data_decision = pd.read_pickle(paths["intermediate_data"] + "decision_data.pkl")
+    data_decision = pd.read_pickle(
+        paths["intermediate_data"] + "structural_estimation_sample.pkl"
+    )
 
     specs = yaml.safe_load(open(paths["specs"]))
 
@@ -28,7 +30,9 @@ def plot_choice_shares_single(paths):
     data_sim = pd.read_pickle(
         paths["intermediate_data"] + "data_baseline.pkl"
     ).reset_index()
-    data_decision = pd.read_pickle(paths["intermediate_data"] + "decision_data.pkl")
+    data_decision = pd.read_pickle(
+        paths["intermediate_data"] + "structural_estimation_sample.pkl"
+    )
 
     specs = yaml.safe_load(open(paths["specs"]))
 
@@ -55,7 +59,9 @@ def plot_choice_shares(paths):
     data_sim = pd.read_pickle(
         paths["intermediate_data"] + "data_baseline.pkl"
     ).reset_index()
-    data_decision = pd.read_pickle(paths["intermediate_data"] + "decision_data.pkl")
+    data_decision = pd.read_pickle(
+        paths["intermediate_data"] + "structural_estimation_sample.pkl"
+    )
 
     specs = yaml.safe_load(open(paths["specs"]))
 

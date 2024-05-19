@@ -91,7 +91,7 @@ def load_and_modify_data(paths_dict, options):
     start_age = options["model_params"]["start_age"]
 
     data_decision = pd.read_pickle(
-        paths_dict["intermediate_data"] + "decision_data.pkl"
+        paths_dict["intermediate_data"] + "structural_estimation_sample.pkl"
     )
     data_decision["wealth"] = data_decision["wealth"].clip(lower=1e-16)
     data_decision["age"] = data_decision["period"] + start_age

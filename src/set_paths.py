@@ -1,7 +1,9 @@
 # Set data paths according to user.
+import jax
 
 
 def create_path_dict(analysis_path, define_user=False, user=None):
+    jax.config.update("jax_enable_x64", True)
     if define_user:
         if user is None:
             user = input("Enter user name ([b]runo/ [m]ax): ")

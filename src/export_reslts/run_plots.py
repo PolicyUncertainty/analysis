@@ -44,16 +44,16 @@ plt.close("all")
 # ##########################################
 # # Wage plots
 # ##########################################
-# if show_any_plots:
-#     show_wage_plots = input("Show wage plots? (y/n): ") == "y"
-# else:
-#     show_wage_plots = False
-# from export_reslts.figures.income_plots import plot_incomes
-#
-# plot_incomes(path_dict)
-# if show_wage_plots:
-#     plt.show()
-# plt.close("all")
+if show_any_plots:
+    show_wage_plots = input("Show wage plots? (y/n): ") == "y"
+else:
+    show_wage_plots = False
+from export_reslts.figures.income_plots import plot_incomes
+
+plot_incomes(path_dict)
+if show_wage_plots:
+    plt.show()
+plt.close("all")
 
 
 # ##########################################

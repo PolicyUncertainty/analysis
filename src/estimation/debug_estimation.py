@@ -53,11 +53,19 @@ est_model, model, options, params = specify_and_solve_model(
     update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
     policy_state_trans_func=expected_SRA_probs_estimation,
     # note: file_append is used to load the model and solution from the file specified by the string
-    file_append="subj",
+    file_append="old_age",
     load_model=True,
     load_solution=True,
 )
-breakpoint()
+est_model_batches = pickle.load(
+    open(
+        paths_dict["intermediate_data"] + "solved_models/model_solution_batches.pkl",
+        "rb",
+    )
+)
+model_batches = pickle.load(open(paths_dict["intermediate_data"] + "model.pkl", "rb"))
+
+
 value = est_model["value"]
 policy = est_model["policy"]
 endog_grid = est_model["endog_grid"]

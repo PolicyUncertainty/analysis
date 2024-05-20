@@ -73,8 +73,7 @@ def simulate_scenario(
         seed=seed,
         endog_grid_solved=expected_model["endog_grid"],
         value_solved=expected_model["value"],
-        policy_left_solved=expected_model["policy_left"],
-        policy_right_solved=expected_model["policy_right"],
+        policy_solved=expected_model["policy"],
         choice_range=jnp.arange(options["model_params"]["n_choices"], dtype=jnp.int16),
         model=model,
     )

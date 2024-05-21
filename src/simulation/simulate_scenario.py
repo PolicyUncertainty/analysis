@@ -1,7 +1,7 @@
 import jax.numpy as jnp
 import pandas as pd
 from dcegm.simulation.sim_utils import create_simulation_df
-from dcegm.simulation.simulate import simulate_all_periods_for_model
+from dcegm.simulation.simulate import simulate_all_periods
 from model_code.initial_conditions_sim import generate_start_states
 from model_code.model_solver import specify_and_solve_model
 from model_code.specify_model import specify_model
@@ -65,7 +65,7 @@ def simulate_scenario(
         data_decision, n_agents, seed, options
     )
 
-    sim_dict = simulate_all_periods_for_model(
+    sim_dict = simulate_all_periods(
         states_initial=initial_states,
         resources_initial=wealth_agents,
         n_periods=options["model_params"]["n_periods"],
@@ -74,7 +74,6 @@ def simulate_scenario(
         endog_grid_solved=expected_model["endog_grid"],
         value_solved=expected_model["value"],
         policy_solved=expected_model["policy"],
-        choice_range=jnp.arange(options["model_params"]["n_choices"], dtype=jnp.int16),
         model=model,
     )
     df = create_simulation_df(sim_dict)

@@ -47,7 +47,7 @@ from model_code.model_solver import specify_and_solve_model
 from model_code.policy_states_belief import expected_SRA_probs_estimation
 from model_code.policy_states_belief import update_specs_exp_ret_age_trans_mat
 
-est_model, model, options, params = specify_and_solve_model(
+est_model, model_collection, option_collection, params = specify_and_solve_model(
     path_dict=paths_dict,
     params=params,
     update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
@@ -57,18 +57,18 @@ est_model, model, options, params = specify_and_solve_model(
     load_model=True,
     load_solution=True,
 )
-est_model_batches = pickle.load(
-    open(
-        paths_dict["intermediate_data"] + "solved_models/model_solution_batches.pkl",
-        "rb",
-    )
-)
-model_batches = pickle.load(open(paths_dict["intermediate_data"] + "model.pkl", "rb"))
-
-
-value = est_model["value"]
-policy = est_model["policy"]
-endog_grid = est_model["endog_grid"]
+# est_model_batches = pickle.load(
+#     open(
+#         paths_dict["intermediate_data"] + "solved_models/model_solution_batches.pkl",
+#         "rb",
+#     )
+# )
+# model_batches = pickle.load(open(paths_dict["intermediate_data"] + "model.pkl", "rb"))
+#
+#
+# value = est_model["value"]
+# policy = est_model["policy"]
+# endog_grid = est_model["endog_grid"]
 
 
 # %%
@@ -91,7 +91,7 @@ def load_and_modify_data(paths_dict, options):
     return data_decision
 
 
-data_decision = load_and_modify_data(paths_dict, options)
+data_decision = load_and_modify_data(paths_dict, option_collection["options_main"])
 
 # %%
 # create choice probs for each observation
@@ -107,6 +107,7 @@ def create_choice_probs_for_each_observation(
         name: data_decision[name].values
         for name in model_structure["state_space_names"]
     }
+    breakpoint()
     observed_state_choice_indexes = get_state_choice_index_per_state(
         states=states_dict,
         map_state_choice_to_index=model_structure["map_state_choice_to_index"],
@@ -138,14 +139,15 @@ def create_choice_probs_for_each_observation(
     endog_grid_solved=est_model["endog_grid"],
     params=params,
     data_decision=data_decision,
-    model=model,
-    options=options,
+    model=model_collection["model_main"],
+    options=option_collection["options_main"],
 )
 # %%
 # test if all predicted probabilities of choices conditional on state are not nan
 choice_probs_each_obs = jnp.take_along_axis(
     choice_probs_observations, data_decision["choice"].values[:, None], axis=1
 )[:, 0]
+breakpoint()
 explained_0 = data_decision[data_decision["choice"] == 0]["choice_0"].mean()
 explained_1 = data_decision[data_decision["choice"] == 1]["choice_1"].mean()
 explained_2 = data_decision[data_decision["choice"] == 2]["choice_2"].mean()

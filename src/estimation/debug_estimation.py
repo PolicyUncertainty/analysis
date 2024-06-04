@@ -59,13 +59,21 @@ est_model, model_collection, option_collection, params = specify_and_solve_model
 )
 # est_model_batches = pickle.load(
 #     open(
-#         paths_dict["intermediate_data"] + "solved_models/model_solution_batches.pkl",
+#         paths_dict["intermediate_data"] + "solved_models/model_solution_subj.pkl",
 #         "rb",
 #     )
 # )
 # model_batches = pickle.load(open(paths_dict["intermediate_data"] + "model.pkl", "rb"))
 #
+# id_state_batches = -1
+# last_state_choice = model_batches["model_structure"]["state_choice_space"][id_state_batches, :]
+# state_space_names = model_batches["model_structure"]["state_space_names"]
 #
+# map_to_deduction_state = option_collection["options_main"]["model_params"]["old_age_state_index_mapping"]
+# policy_state = model_batches["model_structure"]["state_choice"][id_state_batches, :
+
+
+breakpoint()
 # value = est_model["value"]
 # policy = est_model["policy"]
 # endog_grid = est_model["endog_grid"]
@@ -81,7 +89,7 @@ def load_and_modify_data(paths_dict, options):
     )
     data_decision["wealth"] = data_decision["wealth"].clip(lower=1e-16)
     data_decision["age"] = data_decision["period"] + start_age
-    data_decision = data_decision[data_decision["age"] < 75]
+    data_decision = data_decision[data_decision["lagged_choice"] < 2]
     data_decision["wealth_tercile"] = data_decision.groupby("age")["wealth"].transform(
         lambda x: pd.qcut(x, 3, labels=False)
     )
@@ -107,7 +115,6 @@ def create_choice_probs_for_each_observation(
         name: data_decision[name].values
         for name in model_structure["state_space_names"]
     }
-    breakpoint()
     observed_state_choice_indexes = get_state_choice_index_per_state(
         states=states_dict,
         map_state_choice_to_index=model_structure["map_state_choice_to_index"],

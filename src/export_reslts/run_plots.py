@@ -69,9 +69,9 @@ from export_reslts.figures.counterfactual_no_unc import (
     trajectory_plot,
 )
 
-trajectory_plot(path_dict)
-# plot_average_savings(path_dict)
-# plot_full_time(path_dict)
+# trajectory_plot(path_dict)
+plot_average_savings(path_dict)
+plot_full_time(path_dict)
 if show_cf_1_plots & show_any_plots:
     plt.show()
 
@@ -91,7 +91,7 @@ from export_reslts.figures.counterfactual_bias import (
     plot_step_functions,
 )
 
-# plot_savings_over_age(path_dict)
+plot_savings_over_age(path_dict)
 plot_step_functions(path_dict)
 if show_cf_2_plots:
     plt.show()

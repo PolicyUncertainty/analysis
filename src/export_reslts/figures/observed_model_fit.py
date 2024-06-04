@@ -12,7 +12,7 @@ from model_code.policy_states_belief import update_specs_exp_ret_age_trans_mat
 
 
 def observed_model_fit(paths_dict):
-    params = pickle.load(open(paths_dict["est_results"] + "est_params_1.pkl", "rb"))
+    params = pickle.load(open(paths_dict["est_results"] + "est_params.pkl", "rb"))
     specs = generate_derived_and_data_derived_specs(paths_dict)
 
     est_model, model, options, params = specify_and_solve_model(

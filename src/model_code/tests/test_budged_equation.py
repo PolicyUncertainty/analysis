@@ -2,15 +2,19 @@ import sys
 from itertools import product
 from pathlib import Path
 
+import jax
 import numpy as np
 import pytest
 
+jax.config.update("jax_enable_x64", True)
 src_folder = Path(__file__).resolve().parents[2]
 sys.path.append(str(src_folder))
 
-from model_code.budget_equation import budget_constraint
-from model_code.budget_equation import calc_net_income_working
-from model_code.budget_equation import calc_net_income_pensions
+from model_code.wealth_and_budget.main_budget_equation import main_budget_constraint
+from model_code.wealth_and_budget.tax_and_transfer import (
+    calc_net_income_pensions,
+    calc_net_income_working,
+)
 
 SAVINGS_GRID = np.linspace(10, 100, 5)
 INTEREST_RATE_GRID = np.linspace(0.01, 0.1, 2)
@@ -37,7 +41,7 @@ def test_budget_unemployed(unemployment_benefits, savings, interest_rate):
         "wealth_unit": 1_000,
     }
     params = {"interest_rate": interest_rate}
-    wealth = budget_constraint(
+    wealth = main_budget_constraint(
         education=0,
         lagged_choice=0,
         experience=30,
@@ -92,7 +96,7 @@ def test_budget_worker(
         "wealth_unit": 1_000,
     }
     params = {"interest_rate": interest_rate}
-    wealth = budget_constraint(
+    wealth = main_budget_constraint(
         education=education,
         lagged_choice=1,
         experience=experience,
@@ -159,7 +163,7 @@ def test_retiree(
         "wealth_unit": 1_000,
     }
     params = {"interest_rate": interest_rate}
-    wealth = budget_constraint(
+    wealth = main_budget_constraint(
         education=0,
         lagged_choice=2,
         experience=exp,

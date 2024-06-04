@@ -3,7 +3,7 @@ import pickle
 import estimagic as sm
 import jax
 import numpy as np
-from estimation.estimate_setup import create_ll_from_paths
+from estimation.specify_likelihood import create_ll_from_paths
 
 # Import jax and set jax to work with 64bit
 jax.config.update("jax_enable_x64", True)

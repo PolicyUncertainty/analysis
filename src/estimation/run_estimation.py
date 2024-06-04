@@ -49,8 +49,6 @@ if estimate_wage:
     )
 
     estimate_wage_parameters(paths_dict)
-    # from estimation.first_step_estimation.est_wage_equation import plot_wages_by_edu
-    # plot_wages_by_edu(wage_parameters)
 
 if do_model_estimatation:
     estimation_results = estimate_model(paths_dict, load_model=True)

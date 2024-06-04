@@ -23,7 +23,6 @@ from simulation.policy_state_scenarios.step_function import (
     update_specs_for_step_function_scale_2,
     realized_policy_step_function,
 )
-from model_code.model_solver import specify_and_solve_model
 from model_code.policy_states_belief import expected_SRA_probs_estimation
 from model_code.policy_states_belief import update_specs_exp_ret_age_trans_mat
 from simulation.simulate_scenario import solve_and_simulate_scenario
@@ -59,7 +58,7 @@ data_sim = solve_and_simulate_scenario(
     solve_policy_trans_func=realized_policy_step_function,
     simulate_update_specs_func=update_specs_for_step_function_scale_1,
     simulate_policy_trans_func=realized_policy_step_function,
-    solution_exists=True,
+    solution_exists=False,
     file_append_sol="scale_1",
     model_exists=True,
 )
@@ -92,7 +91,7 @@ data_sim = solve_and_simulate_scenario(
     solve_policy_trans_func=realized_policy_step_function,
     simulate_update_specs_func=update_specs_for_step_function_scale_2,
     simulate_policy_trans_func=realized_policy_step_function,
-    solution_exists=True,
+    solution_exists=False,
     file_append_sol="scale_2",
     model_exists=True,
 )
@@ -111,7 +110,7 @@ data_sim = solve_and_simulate_scenario(
     solve_policy_trans_func=expected_SRA_probs_estimation,
     simulate_update_specs_func=update_specs_for_step_function_scale_05,
     simulate_policy_trans_func=realized_policy_step_function,
-    solution_exists=True,
+    solution_exists=False,
     file_append_sol="subj",
     model_exists=True,
 )

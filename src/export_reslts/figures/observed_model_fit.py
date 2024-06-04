@@ -22,10 +22,11 @@ def observed_model_fit(paths_dict):
         policy_state_trans_func=expected_SRA_probs_estimation,
         file_append="subj",
         load_model=True,
-        load_solution=True,
+        load_solution=False,
     )
+
     data_decision = pd.read_pickle(
-        paths_dict["intermediate_data"] + "decision_data.pkl"
+        paths_dict["intermediate_data"] + "structural_estimation_sample.pkl"
     )
     data_decision["wealth"] = data_decision["wealth"].clip(lower=1e-16)
     data_decision["age"] = data_decision["period"] + specs["start_age"]
@@ -35,6 +36,7 @@ def observed_model_fit(paths_dict):
         name: data_decision[name].values
         for name in model_structure["state_space_names"]
     }
+
     observed_state_choice_indexes = get_state_choice_index_per_state(
         states=states_dict,
         map_state_choice_to_index=model["model_structure"]["map_state_choice_to_index"],
@@ -55,25 +57,31 @@ def observed_model_fit(paths_dict):
     data_decision["choice_1"] = choice_probs_observations[:, 1]
     data_decision["choice_2"] = choice_probs_observations[:, 2]
 
-    choice_shares_obs = (
-        data_decision.groupby(["age"])["choice"].value_counts(normalize=True).unstack()
-    )
+    file_append = ["low", "high"]
 
-    fig, axes = plt.subplots(1, 3, figsize=(10, 5))
-    labels = ["Unemployment", "Employment", "Retirement"]
-    for choice, ax in enumerate(axes):
-        choice_shares_predicted = data_decision.groupby(["age"])[
-            f"choice_{choice}"
-        ].mean()
-        choice_shares_predicted.plot(ax=ax, label="Simulated")
-        choice_shares_obs[choice].plot(ax=ax, label="Observed", ls="--")
-        ax.set_xlabel("Age")
-        ax.set_ylabel("Choice share")
-        ax.set_title(f"{labels[choice]}")
-        ax.set_ylim([-0.05, 1.05])
-        if choice == 0:
-            ax.legend(loc="upper left")
-    fig.tight_layout()
-    fig.savefig(
-        paths_dict["plots"] + "observed_model_fit.png", transparent=True, dpi=300
-    )
+    for edu in range(2):
+        data_edu = data_decision[data_decision["education"] == edu]
+        choice_shares_obs = (
+            data_edu.groupby(["age"])["choice"].value_counts(normalize=True).unstack()
+        )
+
+        fig, axes = plt.subplots(1, 3, figsize=(10, 5))
+        labels = ["Unemployment", "Employment", "Retirement"]
+        for choice, ax in enumerate(axes):
+            choice_shares_predicted = data_edu.groupby(["age"])[
+                f"choice_{choice}"
+            ].mean()
+            choice_shares_predicted.plot(ax=ax, label="Simulated")
+            choice_shares_obs[choice].plot(ax=ax, label="Observed", ls="--")
+            ax.set_xlabel("Age")
+            ax.set_ylabel("Choice share")
+            ax.set_title(f"{labels[choice]}")
+            ax.set_ylim([-0.05, 1.05])
+            if choice == 0:
+                ax.legend(loc="upper left")
+        fig.tight_layout()
+        fig.savefig(
+            paths_dict["plots"] + f"observed_model_fit_{file_append[edu]}.png",
+            transparent=True,
+            dpi=300,
+        )

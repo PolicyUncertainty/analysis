@@ -45,15 +45,3 @@ def estimate_wage_parameters(paths_dict):
     wage_parameters = pd.DataFrame(coefficients)
     wage_parameters.to_csv(paths_dict["est_results"] + "wage_eq_params.csv")
     return coefficients
-
-
-# visualize wages by experience
-
-
-def plot_wages_by_edu(coefficients):
-    fig, ax = plt.subplots()
-    for i, coef in enumerate(coefficients):
-        wage = np.exp(coef[0] + coef[1] * np.log(range(1, 46)))
-        ax.plot(range(1, 46), wage, label=i)
-    ax.legend()
-    plt.show()

@@ -43,15 +43,15 @@ def plot_step_functions(path_dict):
 
 def plot_savings_over_age(paths_dict):
     data_baseline = pd.read_pickle(
-        paths_dict["intermediate_data"] + "data_baseline.pkl"
+        paths_dict["intermediate_data"] + "sim_data/data_subj_scale_1.pkl"
     ).reset_index()
 
     data_05_scale = pd.read_pickle(
-        paths_dict["intermediate_data"] + "data_05_scale.pkl"
+        paths_dict["intermediate_data"] + "sim_data/data_subj_scale_05.pkl"
     ).reset_index()
 
     data_2_scale = pd.read_pickle(
-        paths_dict["intermediate_data"] + "data_2_scale.pkl"
+        paths_dict["intermediate_data"] + "sim_data/data_subj_scale_2.pkl"
     ).reset_index()
 
     specs = read_and_derive_specs(paths_dict["specs"])

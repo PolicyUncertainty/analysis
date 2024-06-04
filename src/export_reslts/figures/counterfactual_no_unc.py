@@ -12,10 +12,10 @@ from simulation.policy_state_scenarios.step_function import (
 
 def plot_full_time(paths_dict):
     data_no_unc = pd.read_pickle(
-        paths_dict["intermediate_data"] + "sim_data/data_real_scale_05.pkl"
+        paths_dict["intermediate_data"] + "sim_data/data_real_scale_1.pkl"
     ).reset_index()
     data_unc = pd.read_pickle(
-        paths_dict["intermediate_data"] + "sim_data/data_subj_scale_05.pkl"
+        paths_dict["intermediate_data"] + "sim_data/data_subj_scale_1.pkl"
     ).reset_index()
 
     specs = read_and_derive_specs(paths_dict["specs"])
@@ -41,10 +41,10 @@ def plot_full_time(paths_dict):
 
 def plot_average_savings(paths_dict):
     data_no_unc = pd.read_pickle(
-        paths_dict["intermediate_data"] + "sim_data/data_real_scale_2.pkl"
+        paths_dict["intermediate_data"] + "sim_data/data_real_scale_1.pkl"
     ).reset_index()
     data_unc = pd.read_pickle(
-        paths_dict["intermediate_data"] + "sim_data/data_subj_scale_2.pkl"
+        paths_dict["intermediate_data"] + "sim_data/data_subj_scale_1.pkl"
     ).reset_index()
 
     savings_unc = data_unc.groupby("age")["savings_dec"].mean()

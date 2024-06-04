@@ -69,10 +69,10 @@ def estimate_model(path_dict, load_model):
         logging="test_log.db",
         error_handling="continue",
     )
-    pickle.dump(result, open(path_dict["est_results"] + "em_result_1.pkl", "wb"))
+    pickle.dump(result, open(path_dict["est_results"] + "em_result.pkl", "wb"))
     start_params_all.update(result.params)
     pickle.dump(
-        start_params_all, open(path_dict["est_results"] + "est_params_1.pkl", "wb")
+        start_params_all, open(path_dict["est_results"] + "est_params.pkl", "wb")
     )
 
     return result
@@ -88,7 +88,9 @@ def create_ll_from_paths(start_params_all, path_dict, load_model):
     )
 
     # Load data
-    data_decision = pd.read_pickle(path_dict["intermediate_data"] + "structural_estimation_sample.pkl")
+    data_decision = pd.read_pickle(
+        path_dict["intermediate_data"] + "structural_estimation_sample.pkl"
+    )
     data_decision = data_decision[data_decision["lagged_choice"] != 2]
     data_decision["wealth"] = data_decision["wealth"].clip(lower=1e-16)
     # Now transform for dcegm

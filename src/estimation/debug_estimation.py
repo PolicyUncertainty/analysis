@@ -57,20 +57,46 @@ est_model, model_collection, option_collection, params = specify_and_solve_model
     load_model=True,
     load_solution=True,
 )
-# est_model_batches = pickle.load(
-#     open(
-#         paths_dict["intermediate_data"] + "solved_models/model_solution_subj.pkl",
-#         "rb",
-#     )
-# )
-# model_batches = pickle.load(open(paths_dict["intermediate_data"] + "model.pkl", "rb"))
-#
-# id_state_batches = -1
-# last_state_choice = model_batches["model_structure"]["state_choice_space"][id_state_batches, :]
-# state_space_names = model_batches["model_structure"]["state_space_names"]
-#
-# map_to_deduction_state = option_collection["options_main"]["model_params"]["old_age_state_index_mapping"]
-# policy_state = model_batches["model_structure"]["state_choice"][id_state_batches, :
+est_model_batches = pickle.load(
+    open(
+        paths_dict["intermediate_data"] + "solved_models/model_solution_subj.pkl",
+        "rb",
+    )
+)
+model_batches = pickle.load(open(paths_dict["intermediate_data"] + "model.pkl", "rb"))
+
+state_space_names = model_batches["model_structure"]["state_space_names"]
+state_choice_space = model_batches["model_structure"]["state_choice_space"]
+state_choice_space_dict = model_batches["model_structure"]["state_choice_space_dict"]
+map_to_deduction_state = option_collection["options_main"]["model_params"][
+    "old_age_state_index_mapping"
+]
+
+id_state_batches = -1
+last_state_choice = state_choice_space[id_state_batches, :]
+
+education = state_choice_space_dict["education"][id_state_batches]
+policy_state = state_choice_space_dict["policy_state"][id_state_batches]
+experience = state_choice_space_dict["experience"][id_state_batches]
+retirement_age_id = state_choice_space_dict["retirement_age_id"][id_state_batches]
+deduction_state = map_to_deduction_state[policy_state, retirement_age_id]
+state_old_age = {
+    "period": option_collection["options_old_age"]["state_space"]["n_periods"] - 1,
+    "lagged_choice": 0,
+    "education": education,
+    "experience": experience,
+    "deduction_state": deduction_state,
+    "choice": 0,
+    "dummy_exog": 0,
+}
+from dcegm.interface import get_state_choice_index_per_state
+
+model_structure_old_age = model_collection["model_old_age"]["model_structure"]
+observed_state_choice_indexes = get_state_choice_index_per_state(
+    states=state_old_age,
+    map_state_choice_to_index=model_structure_old_age["map_state_choice_to_index"],
+    state_space_names=model_structure_old_age["state_space_names"],
+)
 
 
 breakpoint()

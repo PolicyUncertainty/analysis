@@ -1,0 +1,42 @@
+
+# %%
+# Set paths of project
+import sys
+from pathlib import Path
+
+analysis_path = str(Path(__file__).resolve().parents[2]) + "/"
+sys.path.insert(0, analysis_path + "submodules/dcegm/src/")
+sys.path.insert(0, analysis_path + "src/")
+import matplotlib.pyplot as plt
+from set_paths import create_path_dict
+
+path_dict = create_path_dict(analysis_path)
+
+# %%
+# utility plos
+params = {
+    "mu": 0.5,
+    "dis_util_work": 1,
+    "dis_util_unemployed": 2,
+}
+from export_reslts.figures.utility_plots import plot_utility_by_choice
+plot_utility_by_choice(path_dict, params)
+plt.show()
+plt.close("all")
+
+# %%
+# budget constraint plos
+from export_reslts.figures.income_plots import plot_incomes
+plot_incomes(path_dict)
+plt.show()
+plt.close("all")
+# %%
+
+# %%
+# SRA plots
+from export_reslts.figures.pension_npv import plot_pension_npv_by_age
+plot_pension_npv_by_age(path_dict)
+plt.show()
+plt.close("all")
+
+# %%

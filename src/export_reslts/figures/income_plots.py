@@ -12,9 +12,10 @@ def plot_incomes(path_dict):
     gross_wages = (
         np.maximum(
             (
-                specs["gamma_0"]
-                + specs["gamma_1"] * exp_levels
-                + specs["gamma_2"] * exp_levels**2
+                np.exp(
+                    specs["gamma_0"][1] + specs["gamma_1"][1] * np.log(exp_levels + 1)
+                )
+                / specs["wealth_unit"]
             ),
             specs["min_wage"],
         )
@@ -74,3 +75,5 @@ def plot_wages(path_dict):
     ax.legend(loc="upper left")
     ax.set_xlabel("Experience")
     ax.set_ylabel("Average wage")
+
+

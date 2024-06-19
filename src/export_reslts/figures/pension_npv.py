@@ -21,16 +21,17 @@ def plot_pension_npv_by_age(paths, edu=0):
     retirement_income_net = calc_net_income_pensions(retirement_income_gross, specs)
 
     # calculate net present value of retirement income at age 67
-    npv_67 = retirement_income_net / discount_rate - (retirement_income_net/ discount_rate / (1 + discount_rate)) ** (end_age - 67) 
+    npv_67 = retirement_income_net / discount_rate - (retirement_income_net/ discount_rate) / (1 + discount_rate) ** (end_age - 67) 
     
     # calculate net present value of retirement income at different ages
     npv_by_age = np.full(67 - start_age + 1, npv_67)
     discount_factor_by_age = np.power(1 + discount_rate, np.arange(67 - start_age+1))
     npv_by_age = npv_by_age / discount_factor_by_age
     npv_by_age_reversed = npv_by_age[::-1]
-
-    # plot
     plt.plot(np.arange(start_age, 68), npv_by_age_reversed)
+    plt.xlabel("Age")
+    plt.ylabel("NPV of retirement income (1000 €)")
+
 
 
 

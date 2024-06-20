@@ -55,7 +55,7 @@ est_model, model_collection, option_collection, params = specify_and_solve_model
     # note: file_append is used to load the model and solution from the file specified by the string
     file_append="old_age",
     load_model=True,
-    load_solution=True,
+    load_solution=False,
 )
 est_model_batches = pickle.load(
     open(
@@ -72,16 +72,21 @@ map_to_deduction_state = option_collection["options_main"]["model_params"][
     "old_age_state_index_mapping"
 ]
 
-id_state_batches = -1
-last_state_choice = state_choice_space[id_state_batches, :]
+id_state_batches = -35_000
 
 education = state_choice_space_dict["education"][id_state_batches]
 policy_state = state_choice_space_dict["policy_state"][id_state_batches]
 experience = state_choice_space_dict["experience"][id_state_batches]
 retirement_age_id = state_choice_space_dict["retirement_age_id"][id_state_batches]
+choice = state_choice_space_dict["choice"][id_state_batches]
+lagged_choice = state_choice_space_dict["lagged_choice"][id_state_batches]
+period = state_choice_space_dict["period"][id_state_batches]
+
 deduction_state = map_to_deduction_state[policy_state, retirement_age_id]
 state_old_age = {
-    "period": option_collection["options_old_age"]["state_space"]["n_periods"] - 1,
+    "period": period
+    - option_collection["options_main"]["state_space"]["n_periods"]
+    + 1,
     "lagged_choice": 0,
     "education": education,
     "experience": experience,
@@ -97,6 +102,39 @@ observed_state_choice_indexes = get_state_choice_index_per_state(
     map_state_choice_to_index=model_structure_old_age["map_state_choice_to_index"],
     state_space_names=model_structure_old_age["state_space_names"],
 )
+value_old_age = est_model["value_old_age"][observed_state_choice_indexes[0]]
+endog_grid_old_age = est_model["endog_grid_old_age"][observed_state_choice_indexes[0]]
+policy_old_age = est_model["policy_old_age"][observed_state_choice_indexes[0]]
+exog_grid = endog_grid_old_age - policy_old_age
+value_batches = est_model_batches["value"][id_state_batches]
+endog_grid_batches = est_model_batches["endog_grid"][id_state_batches]
+policy_batches = est_model_batches["policy"][id_state_batches]
+exog_grid_batches = endog_grid_batches - policy_batches
+from model_code.wealth_and_budget.old_age_budget_equation import (
+    old_age_budget_constraint,
+)
+
+next_period_wealth = np.empty_like(exog_grid)
+for i, saving in enumerate(exog_grid):
+    next_period_wealth[i] = old_age_budget_constraint(
+        experience=experience,
+        deduction_state=deduction_state,
+        savings_end_of_previous_period=saving,
+        income_shock_previous_period=None,
+        params=params,
+        options=option_collection["options_old_age"]["model_params"],
+    )
+
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots()
+ax.plot(endog_grid_old_age, value_old_age, label="old age")
+# ax.plot(endog_grid_batches, value_batches, label="batches")
+# ax.plot(exog_grid, policy_old_age, label="old age")
+# ax.plot(exog_grid_batches, policy_batches, label="batches")
+ax.set_title("value")
+ax.legend()
+plt.show()
 
 
 breakpoint()

@@ -15,11 +15,13 @@ def old_age_budget_constraint(
     pension_point_value = options["pension_point_value"]
     ERP = options["early_retirement_penalty"]
 
+    deduction = jnp.take(options["deduction_state_values"], deduction_state)
+
     # calculate applicable SRA and pension deduction/increase factor
     # (malus for early retirement, bonus for late retirement)
     # In the old age problem we have a deduction state, which corresponds to difference
     # between actual retirement age and SRA at resolution
-    pension_factor = 1 - deduction_state * ERP
+    pension_factor = 1 - deduction * ERP
     retirement_income_gross = pension_point_value * experience * pension_factor * 12
     retirement_income = calc_net_income_pensions(retirement_income_gross, options)
 

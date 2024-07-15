@@ -47,7 +47,7 @@ from model_code.model_solver import specify_and_solve_model
 from model_code.policy_states_belief import expected_SRA_probs_estimation
 from model_code.policy_states_belief import update_specs_exp_ret_age_trans_mat
 
-est_model, model_collection, option_collection, params = specify_and_solve_model(
+est_model, model_collection, params = specify_and_solve_model(
     path_dict=paths_dict,
     params=params,
     update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
@@ -65,12 +65,12 @@ est_model_batches = pickle.load(
 )
 model_batches = pickle.load(open(paths_dict["intermediate_data"] + "model.pkl", "rb"))
 
+options_main = model_collection["model_main"]["options"]
+
 state_space_names = model_batches["model_structure"]["state_space_names"]
 state_choice_space = model_batches["model_structure"]["state_choice_space"]
 state_choice_space_dict = model_batches["model_structure"]["state_choice_space_dict"]
-map_to_deduction_state = option_collection["options_main"]["model_params"][
-    "old_age_state_index_mapping"
-]
+map_to_deduction_state = options_main["model_params"]["old_age_state_index_mapping"]
 
 id_state_batches = -35_000
 
@@ -84,9 +84,7 @@ period = state_choice_space_dict["period"][id_state_batches]
 
 deduction_state = map_to_deduction_state[policy_state, retirement_age_id]
 state_old_age = {
-    "period": period
-    - option_collection["options_main"]["state_space"]["n_periods"]
-    + 1,
+    "period": period - options_main["state_space"]["n_periods"] + 1,
     "lagged_choice": 0,
     "education": education,
     "experience": experience,
@@ -122,7 +120,7 @@ for i, saving in enumerate(exog_grid):
         savings_end_of_previous_period=saving,
         income_shock_previous_period=None,
         params=params,
-        options=option_collection["options_old_age"]["model_params"],
+        options=model_collection["model_old_age"]["options"]["model_params"],
     )
 
 import matplotlib.pyplot as plt

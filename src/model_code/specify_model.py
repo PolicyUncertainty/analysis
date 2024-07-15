@@ -20,6 +20,7 @@ from model_code.wealth_and_budget.main_budget_equation import main_budget_constr
 from model_code.wealth_and_budget.old_age_budget_equation import (
     old_age_budget_constraint,
 )
+from model_code.wealth_and_budget.savings_grid import create_savings_grid
 
 
 def specify_model(
@@ -81,6 +82,8 @@ def specify_model(
         specs["exp_cap"] + 1, dtype=int
     )
 
+    savings_grid = create_savings_grid()
+
     if load_model:
         model_old_age = load_and_setup_model(
             options=options_old_age,
@@ -108,6 +111,7 @@ def specify_model(
             utility_functions=create_old_age_utility_functions(),
             utility_functions_final_period=create_final_period_utility_functions(),
             budget_constraint=old_age_budget_constraint,
+            exog_savings_grid=savings_grid,
             path=path_dict["intermediate_data"] + "model_old_age.pkl",
         )
 
@@ -120,18 +124,14 @@ def specify_model(
                 model_old_age
             ),
             budget_constraint=main_budget_constraint,
+            exog_savings_grid=savings_grid,
             path=path_dict["intermediate_data"] + "model_main.pkl",
         )
 
     print("Model specified.")
 
-    options_collections = {
-        "options_main": options_main,
-        "options_old_age": options_old_age,
-    }
-
     model_collection = {
         "model_main": model_main,
         "model_old_age": model_old_age,
     }
-    return model_collection, options_collections, params
+    return model_collection, params

@@ -2,7 +2,6 @@ import pickle
 
 from dcegm.solve import get_solve_func_for_model
 from model_code.specify_model import specify_model
-from model_code.wealth_and_budget.savings_grid import create_savings_grid
 
 
 def specify_and_solve_model(
@@ -20,7 +19,7 @@ def specify_and_solve_model(
     )
 
     # Generate model_specs
-    model_collection, options_collection, params = specify_model(
+    model_collection, params = specify_model(
         path_dict=path_dict,
         update_spec_for_policy_state=update_spec_for_policy_state,
         policy_state_trans_func=policy_state_trans_func,
@@ -30,14 +29,10 @@ def specify_and_solve_model(
 
     if load_solution:
         solution_est = pickle.load(open(solution_file, "rb"))
-        return solution_est, model_collection, options_collection, params
-
-    savings_grid = create_savings_grid()
+        return solution_est, model_collection, params
 
     solve_func_old_age = get_solve_func_for_model(
-        model_collection["model_old_age"],
-        savings_grid,
-        options_collection["options_old_age"],
+        model=model_collection["model_old_age"],
     )
 
     value_old_age, policy_old_age, endog_grid_old_age = solve_func_old_age(params)
@@ -48,9 +43,7 @@ def specify_and_solve_model(
 
     print("Old age model solved")
 
-    solve_func_main = get_solve_func_for_model(
-        model_collection["model_main"], savings_grid, options_collection["options_main"]
-    )
+    solve_func_main = get_solve_func_for_model(model=model_collection["model_main"])
     value, policy, endog_grid = solve_func_main(params)
 
     solution = {
@@ -64,4 +57,4 @@ def specify_and_solve_model(
 
     pickle.dump(solution, open(solution_file, "wb"))
 
-    return solution, model_collection, options_collection, params
+    return solution, model_collection, params

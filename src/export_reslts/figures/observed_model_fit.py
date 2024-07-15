@@ -15,7 +15,7 @@ def observed_model_fit(paths_dict):
     params = pickle.load(open(paths_dict["est_results"] + "est_params.pkl", "rb"))
     specs = generate_derived_and_data_derived_specs(paths_dict)
 
-    est_model, model, options, params = specify_and_solve_model(
+    est_model, model_collection, params = specify_and_solve_model(
         path_dict=paths_dict,
         params=params,
         update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
@@ -25,13 +25,15 @@ def observed_model_fit(paths_dict):
         load_solution=False,
     )
 
+    model_main = model_collection["model_main"]
+
     data_decision = pd.read_pickle(
         paths_dict["intermediate_data"] + "structural_estimation_sample.pkl"
     )
     data_decision["wealth"] = data_decision["wealth"].clip(lower=1e-16)
     data_decision["age"] = data_decision["period"] + specs["start_age"]
     data_decision = data_decision[data_decision["age"] < 75]
-    model_structure = model["model_structure"]
+    model_structure = model_main["model_structure"]
     states_dict = {
         name: data_decision[name].values
         for name in model_structure["state_space_names"]
@@ -39,8 +41,10 @@ def observed_model_fit(paths_dict):
 
     observed_state_choice_indexes = get_state_choice_index_per_state(
         states=states_dict,
-        map_state_choice_to_index=model["model_structure"]["map_state_choice_to_index"],
-        state_space_names=model["model_structure"]["state_space_names"],
+        map_state_choice_to_index=model_main["model_structure"][
+            "map_state_choice_to_index"
+        ],
+        state_space_names=model_main["model_structure"]["state_space_names"],
     )
     choice_probs_observations = calc_choice_probs_for_states(
         value_solved=est_model["value"],
@@ -49,8 +53,10 @@ def observed_model_fit(paths_dict):
         observed_states=states_dict,
         state_choice_indexes=observed_state_choice_indexes,
         oberseved_wealth=data_decision["wealth"].values,
-        choice_range=np.arange(options["model_params"]["n_choices"], dtype=int),
-        compute_utility=model["model_funcs"]["compute_utility"],
+        choice_range=np.arange(
+            model_main["options"]["model_params"]["n_choices"], dtype=int
+        ),
+        compute_utility=model_main["model_funcs"]["compute_utility"],
     )
     choice_probs_observations = np.nan_to_num(choice_probs_observations, nan=0.0)
     data_decision["choice_0"] = choice_probs_observations[:, 0]

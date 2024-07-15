@@ -50,7 +50,7 @@ def simulate_scenario(
     expected_model,
 ):
     # Generate dcegm model for project specs
-    model, options, params = specify_model(
+    model_collection, params = specify_model(
         path_dict=path_dict,
         params=params,
         update_spec_for_policy_state=update_spec_for_policy_state,
@@ -61,14 +61,18 @@ def simulate_scenario(
     data_decision = pd.read_pickle(
         path_dict["intermediate_data"] + "structural_estimation_sample.pkl"
     )
+    main_model = model_collection["model_main"]
+
     initial_states, wealth_agents = generate_start_states(
-        data_decision, n_agents, seed, options
+        data_decision, n_agents, seed, model_collection["model_main"]["options"]
     )
 
     sim_dict = simulate_all_periods(
         states_initial=initial_states,
         resources_initial=wealth_agents,
-        n_periods=options["model_params"]["n_periods"],
+        n_periods=model_collection["model_main"]["options"]["model_params"][
+            "n_periods"
+        ],
         params=params,
         seed=seed,
         endog_grid_solved=expected_model["endog_grid"],

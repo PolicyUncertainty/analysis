@@ -2,6 +2,7 @@ import numpy as np
 from dcegm.pre_processing.setup_model import load_and_setup_model
 from dcegm.pre_processing.setup_model import setup_and_save_model
 from model_code.budget_equation import budget_constraint
+from model_code.budget_equation import create_savings_grid
 from model_code.derive_specs import generate_specs_and_update_params
 from model_code.state_space import create_state_space_functions
 from model_code.state_space import sparsity_condition
@@ -52,6 +53,8 @@ def specify_model(
         "model_params": specs,
     }
 
+    savings_grid = create_savings_grid()
+
     if load_model:
         model = load_and_setup_model(
             options=options,
@@ -69,8 +72,9 @@ def specify_model(
             utility_functions=create_utility_functions(),
             utility_functions_final_period=create_final_period_utility_functions(),
             budget_constraint=budget_constraint,
+            exog_savings_grid=savings_grid,
             path=path_dict["intermediate_data"] + "model.pkl",
         )
 
     print("Model specified.")
-    return model, options, params
+    return model, params

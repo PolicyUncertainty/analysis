@@ -18,7 +18,7 @@ def solve_and_simulate_scenario(
     file_append_sol,
     model_exists,
 ):
-    model_solution_est, model, options, params = specify_and_solve_model(
+    model_solution_est, model, params = specify_and_solve_model(
         path_dict=path_dict,
         params=params,
         update_spec_for_policy_state=solve_update_specs_func,
@@ -27,12 +27,13 @@ def solve_and_simulate_scenario(
         load_model=model_exists,
         load_solution=solution_exists,
     )
+    model_params = model["options"]["model_params"]
 
     data_sim = simulate_scenario(
         path_dict=path_dict,
         params=params,
-        n_agents=options["model_params"]["n_agents"],
-        seed=options["model_params"]["seed"],
+        n_agents=model_params["n_agents"],
+        seed=model_params["seed"],
         update_spec_for_policy_state=simulate_update_specs_func,
         policy_state_func_scenario=simulate_policy_trans_func,
         expected_model=model_solution_est,
@@ -50,13 +51,15 @@ def simulate_scenario(
     expected_model,
 ):
     # Generate dcegm model for project specs
-    model, options, params = specify_model(
+    model, params = specify_model(
         path_dict=path_dict,
         params=params,
         update_spec_for_policy_state=update_spec_for_policy_state,
         policy_state_trans_func=policy_state_func_scenario,
         load_model=True,
     )
+
+    options = model["options"]
 
     data_decision = pd.read_pickle(
         path_dict["intermediate_data"] + "structural_estimation_sample.pkl"

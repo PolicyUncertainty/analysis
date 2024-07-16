@@ -47,7 +47,7 @@ from model_code.model_solver import specify_and_solve_model
 from model_code.policy_states_belief import expected_SRA_probs_estimation
 from model_code.policy_states_belief import update_specs_exp_ret_age_trans_mat
 
-est_model, model, options, params = specify_and_solve_model(
+est_model, model, params = specify_and_solve_model(
     path_dict=paths_dict,
     params=params,
     update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
@@ -83,6 +83,8 @@ state_choice_tuple = (
 reiindex = indexer[state_choice_tuple]
 value_diff = est_model["value"] - value_expec[reiindex]
 value_not_nan = value_diff[~np.isnan(value_diff)]
+
+options = model["options"]
 
 
 # %%

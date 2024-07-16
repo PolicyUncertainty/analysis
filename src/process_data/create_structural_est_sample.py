@@ -2,6 +2,7 @@ import os
 
 import numpy as np
 import pandas as pd
+from process_data.soep_vars import create_choice_variable
 from process_data.soep_vars import create_education_type
 
 
@@ -36,9 +37,7 @@ def create_structural_est_sample(paths, load_data=False, options=None):
     merged_data = deflate_wealth(merged_data, paths)
 
     # (labor) choice
-    merged_data = create_choice_variable(
-        merged_data,
-    )
+    merged_data = create_choice_variable(merged_data)
 
     # filter data
     merged_data = filter_data(merged_data, start_year, end_year, start_age)
@@ -62,10 +61,7 @@ def create_structural_est_sample(paths, load_data=False, options=None):
     merged_data["retirement_age_id"] = 0
 
     # experience
-    merged_data["experience"] = create_experience_variable(
-        merged_data["pgexpft"], exp_cap
-    )
-    merged_data = merged_data[merged_data["experience"].notna()]
+    merged_data = create_experience_variable(merged_data, exp_cap)
 
     # gross monthly wage
     merged_data.rename(columns={"pglabgro": "wage"}, inplace=True)
@@ -129,6 +125,7 @@ def load_and_merge_soep_core(soep_c38):
             "hid",
             "pgemplst",
             "pgexpft",
+            "pgexppt",
             "pgstib",
             "pgpartz",
             "pglabgro",
@@ -334,28 +331,6 @@ def create_lagged_choice_variable(merged_data, start_year, end_year, start_age):
     return merged_data
 
 
-def create_choice_variable(merged_data):
-    """This function creates the choice variable for the structural model.
-
-    TODO: This function assumes retirees with part-time employment as full-time retirees.
-
-    """
-    merged_data["choice"] = np.nan
-    soep_empl_choice = merged_data["pgemplst"]
-    soep_empl_status = merged_data["pgstib"]
-    # rv_ret_choice = merged_data["STATUS_2"]
-
-    # Now assign emploayment choices
-    merged_data.loc[soep_empl_choice == 5, "choice"] = 0
-    merged_data.loc[soep_empl_choice == 1, "choice"] = 1
-
-    # Finally retirement choice
-    merged_data.loc[soep_empl_status == 13, "choice"] = 2
-    # merged_data.loc[rv_ret_choice == "RTB"] = 2
-    merged_data = merged_data[merged_data["choice"].notna()]
-    return merged_data
-
-
 def create_policy_state(gebjahr):
     """This function creates the policy state according to the 2007 reform."""
     # Default state is 67
@@ -385,20 +360,21 @@ def modify_policy_state(policy_states, options):
     return policy_states_values, policy_id
 
 
-def create_experience_variable(pgexpft, exp_cap):
+def create_experience_variable(data, exp_cap):
     """This function creates the experience variable for the structural model and
     enforces the experience cap."""
-    experience = pgexpft.astype(float).round()
-    # Filter out invalid experience values
-    experience = experience[(experience >= 0)]
-    experience = experience[experience.notna()]
+
+    data["experience"] = (data["pgexpft"] + 0.5 * data["pgexppt"]).astype(float).round()
+    # Filter out observations with invalid full-time
+    data = data[data["pgexpft"] >= 0]
     # Enforce experience cap
-    experience[experience > exp_cap] = exp_cap
+    data.loc[data["experience"] > exp_cap, "experience"] = exp_cap
+    # Drop old columns
+    data.drop(columns=["pgexpft", "pgexppt"], inplace=True)
     print(
-        str(len(experience))
-        + " left after dropping people with invalid experience values."
+        str(len(data)) + " left after dropping people with invalid experience values."
     )
-    return experience
+    return data
 
 
 def enforce_model_choice_restriction(merged_data, min_ret_age, max_ret_age):

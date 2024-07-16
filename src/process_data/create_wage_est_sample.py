@@ -2,9 +2,9 @@ import os
 
 import numpy as np
 import pandas as pd
-from process_data.create_structural_est_sample import create_choice_variable
 from process_data.create_structural_est_sample import filter_data
 from process_data.create_structural_est_sample import load_and_merge_soep_core
+from process_data.soep_vars import create_choice_variable
 from process_data.soep_vars import create_education_type
 
 

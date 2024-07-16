@@ -2,6 +2,7 @@ import os
 
 import numpy as np
 import pandas as pd
+from process_data.soep_vars import create_education_type
 
 
 def create_structural_est_sample(paths, load_data=False, options=None):
@@ -398,20 +399,6 @@ def create_experience_variable(pgexpft, exp_cap):
         + " left after dropping people with invalid experience values."
     )
     return experience
-
-
-def create_education_type(merged_data):
-    """This function creates the education type variable for the structural model (1 if
-    individual has at least Fachhochschulreife)."""
-    merged_data = merged_data[merged_data["pgpsbil"].notna()]
-    merged_data["education"] = 0
-    merged_data.loc[merged_data["pgpsbil"] == 3, "education"] = 1  # Fachhochschulreife
-    merged_data.loc[merged_data["pgpsbil"] == 4, "education"] = 1  # Abitur
-    print(
-        str(len(merged_data))
-        + " left after dropping people with missing education values."
-    )
-    return merged_data
 
 
 def enforce_model_choice_restriction(merged_data, min_ret_age, max_ret_age):

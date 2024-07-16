@@ -15,7 +15,7 @@ def observed_model_fit(paths_dict):
     params = pickle.load(open(paths_dict["est_results"] + "est_params.pkl", "rb"))
     specs = generate_derived_and_data_derived_specs(paths_dict)
 
-    est_model, model, options, params = specify_and_solve_model(
+    est_model, model, params = specify_and_solve_model(
         path_dict=paths_dict,
         params=params,
         update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
@@ -24,6 +24,7 @@ def observed_model_fit(paths_dict):
         load_model=True,
         load_solution=False,
     )
+    options = model["options"]
 
     data_decision = pd.read_pickle(
         paths_dict["intermediate_data"] + "structural_estimation_sample.pkl"

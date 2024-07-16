@@ -16,23 +16,23 @@ def create_education_type(data):
     return data
 
 
-def create_choice_variable(merged_data):
+def create_choice_variable(data):
     """This function creates the choice variable for the structural model.
 
     TODO: This function assumes retirees with part-time employment as full-time retirees.
 
     """
-    merged_data["choice"] = np.nan
-    soep_empl_choice = merged_data["pgemplst"]
-    soep_empl_status = merged_data["pgstib"]
+    data["choice"] = np.nan
+    soep_empl_choice = data["pgemplst"]
+    soep_empl_status = data["pgstib"]
     # rv_ret_choice = merged_data["STATUS_2"]
 
     # Now assign emploayment choices
-    merged_data.loc[soep_empl_choice == 5, "choice"] = 0
-    merged_data.loc[soep_empl_choice == 1, "choice"] = 1
+    data.loc[soep_empl_choice == 5, "choice"] = 0
+    data.loc[soep_empl_choice == 1, "choice"] = 1
 
     # Finally retirement choice
-    merged_data.loc[soep_empl_status == 13, "choice"] = 2
+    data.loc[soep_empl_status == 13, "choice"] = 2
     # merged_data.loc[rv_ret_choice == "RTB"] = 2
-    merged_data = merged_data[merged_data["choice"].notna()]
+    merged_data = data[data["choice"].notna()]
     return merged_data

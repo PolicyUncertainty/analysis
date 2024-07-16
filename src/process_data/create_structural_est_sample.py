@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 from process_data.soep_vars import create_choice_variable
 from process_data.soep_vars import create_education_type
+from process_data.soep_vars import create_experience_variable_with_cap
 
 
 def create_structural_est_sample(paths, load_data=False, options=None):
@@ -16,10 +17,6 @@ def create_structural_est_sample(paths, load_data=False, options=None):
         data = pd.read_pickle(out_file_path)
         return data
 
-    # Set file paths
-    soep_c38 = paths["soep_c38"]
-    soep_rv = paths["soep_rv"]
-
     # Export parameters from options
     start_year = options["start_year"]
     end_year = options["end_year"]
@@ -28,11 +25,12 @@ def create_structural_est_sample(paths, load_data=False, options=None):
     exp_cap = options["exp_cap"]
 
     # Load and merge data state data from SOEP core (all but wealth)
-    merged_data = load_and_merge_soep_core(soep_c38)
+    merged_data = load_and_merge_soep_core(soep_c38_path=paths["soep_c38"])
 
     # wealth data from SOEP C38 (hwealth.dta)
-    merged_data = gather_wealth_data(soep_c38, merged_data, options)
+    merged_data = gather_wealth_data(paths["soep_c38"], merged_data, options)
     merged_data = create_hh_cons_equivalence_data(merged_data)
+    # Wealth hack. Until we have family context
     merged_data["wealth"] = merged_data["wealth"] / merged_data["cons_equiv"]
     merged_data = deflate_wealth(merged_data, paths)
 
@@ -61,10 +59,7 @@ def create_structural_est_sample(paths, load_data=False, options=None):
     merged_data["retirement_age_id"] = 0
 
     # experience
-    merged_data = create_experience_variable(merged_data, exp_cap)
-
-    # gross monthly wage
-    merged_data.rename(columns={"pglabgro": "wage"}, inplace=True)
+    merged_data = create_experience_variable_with_cap(merged_data, exp_cap)
 
     # education
     merged_data = create_education_type(merged_data)
@@ -115,10 +110,10 @@ def create_structural_est_sample(paths, load_data=False, options=None):
     return merged_data
 
 
-def load_and_merge_soep_core(soep_c38):
+def load_and_merge_soep_core(soep_c38_path):
     # Load SOEP core data
     pgen_data = pd.read_stata(
-        f"{soep_c38}/pgen.dta",
+        f"{soep_c38_path}/pgen.dta",
         columns=[
             "syear",
             "pid",
@@ -134,12 +129,12 @@ def load_and_merge_soep_core(soep_c38):
         convert_categoricals=False,
     )
     pathl_data = pd.read_stata(
-        f"{soep_c38}/ppathl.dta",
+        f"{soep_c38_path}/ppathl.dta",
         columns=["pid", "hid", "syear", "sex", "gebjahr", "rv_id"],
         convert_categoricals=False,
     )
     hl_data = pd.read_stata(
-        f"{soep_c38}/hl.dta",
+        f"{soep_c38_path}/hl.dta",
         columns=["hid", "syear", "hlc0043"],
         convert_categoricals=False,
     )
@@ -194,10 +189,10 @@ def load_and_merge_soep_core(soep_c38):
     return merged_data
 
 
-def gather_wealth_data(soep_c38, merged_data, options):
+def gather_wealth_data(soep_c38_path, merged_data, options):
     # Load SOEP core data
     wealth_data = pd.read_stata(
-        f"{soep_c38}/hwealth.dta",
+        f"{soep_c38_path}/hwealth.dta",
         columns=["hid", "syear", "w011ha"],
         convert_categoricals=False,
     )
@@ -279,7 +274,8 @@ def filter_data(merged_data, start_year, end_year, start_age):
     """This function filters the data according to the model setup.
 
     Specifically, it filters out young people, women, and years outside of estimation
-    range.
+    range. It leaves one year younger and one year below in the sample to construct
+    lagged_choice.
 
     """
 
@@ -358,23 +354,6 @@ def modify_policy_state(policy_states, options):
     policy_id = np.around(policy_states / SRA_grid_size).astype(int)
     policy_states_values = min_SRA + policy_id * SRA_grid_size
     return policy_states_values, policy_id
-
-
-def create_experience_variable(data, exp_cap):
-    """This function creates the experience variable for the structural model and
-    enforces the experience cap."""
-
-    data["experience"] = (data["pgexpft"] + 0.5 * data["pgexppt"]).astype(float).round()
-    # Filter out observations with invalid full-time
-    data = data[data["pgexpft"] >= 0]
-    # Enforce experience cap
-    data.loc[data["experience"] > exp_cap, "experience"] = exp_cap
-    # Drop old columns
-    data.drop(columns=["pgexpft", "pgexppt"], inplace=True)
-    print(
-        str(len(data)) + " left after dropping people with invalid experience values."
-    )
-    return data
 
 
 def enforce_model_choice_restriction(merged_data, min_ret_age, max_ret_age):

@@ -86,3 +86,15 @@ def sum_experience_variables(data):
         str(len(data)) + " left after dropping people with invalid experience values."
     )
     return data
+
+
+def generate_job_separation_var(data):
+    """This function generates a job separation variable.
+
+    The function creates a new column job_sep which is 1 if the individual got fired
+    from the last job.
+
+    """
+    data["job_sep"] = 0
+    data.loc[data["plb0304_h"].isin([1, 3, 5]), "job_sep"] = 1
+    return data

@@ -3,7 +3,6 @@ import os
 import numpy as np
 import pandas as pd
 from process_data.create_structural_est_sample import filter_data
-from process_data.create_structural_est_sample import load_and_merge_soep_core
 from process_data.soep_vars import create_choice_variable
 from process_data.soep_vars import create_education_type
 from process_data.soep_vars import sum_experience_variables
@@ -83,4 +82,38 @@ def create_wage_est_sample(paths, load_data=False, options=None):
     # save data
     merged_data.to_pickle(out_file_path)
 
+    return merged_data
+
+
+def load_and_merge_soep_core(soep_c38_path):
+    # Load SOEP core data
+    pgen_data = pd.read_stata(
+        f"{soep_c38_path}/pgen.dta",
+        columns=[
+            "syear",
+            "pid",
+            "hid",
+            "pgemplst",
+            "pgexpft",
+            "pgexppt",
+            "pgstib",
+            "pglabgro",
+            "pgpsbil",
+        ],
+        convert_categoricals=False,
+    )
+    pathl_data = pd.read_stata(
+        f"{soep_c38_path}/ppathl.dta",
+        columns=["pid", "hid", "syear", "sex", "gebjahr"],
+        convert_categoricals=False,
+    )
+
+    # Merge pgen data with pathl data and hl data
+    merged_data = pd.merge(
+        pgen_data, pathl_data, on=["pid", "hid", "syear"], how="inner"
+    )
+
+    merged_data["age"] = merged_data["syear"] - merged_data["gebjahr"]
+    del pgen_data, pathl_data
+    print(str(len(merged_data)) + " observations in SOEP C38 core.")
     return merged_data

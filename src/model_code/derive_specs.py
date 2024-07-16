@@ -13,18 +13,18 @@ def generate_specs_and_update_params(path_dict, start_params):
 def generate_derived_and_data_derived_specs(path_dict):
     specs = read_and_derive_specs(path_dict["specs"])
 
-    # Generate number of policy states between 67 and min_SRA
+    # wages
     wage_params = pd.read_csv(
         path_dict["est_results"] + "wage_eq_params.csv", index_col=0
     )
+
     specs["gamma_0"] = wage_params["constant"].values
     specs["gamma_1"] = wage_params["ln_exp"].values
     specs["income_shock_scale"] = wage_params["income_shock_std"].values.mean()
 
-    # calculate value of pension point based on unweighted average wage over 40 years
-    # of work
-    specs["pension_point_value"] = 27.2 / specs["wealth_unit"]
-
+    # pensions
+    specs["pension_point_value"] = 0.75 * specs["pension_point_value_west_2010"] + 0.25 * specs["pension_point_value_east_2010"] / specs["wealth_unit"]
+    specs=pension_adjustment_factor(specs, path_dict)
     # max initial experience
     data_decision = pd.read_pickle(path_dict["intermediate_data"] + "structural_estimation_sample.pkl")
     specs["max_init_experience"] = (
@@ -50,3 +50,38 @@ def read_and_derive_specs(spec_path):
     )
 
     return specs
+
+
+def pension_adjustment_factor(specs, path_dict):
+    wage_params = pd.read_csv(
+        path_dict["est_results"] + "wage_eq_params.csv", index_col=0
+    )
+    wage_params_full_sample = pd.read_csv(
+        path_dict["est_results"] + "wage_eq_params_full_sample.csv", index_col=0
+    )
+
+    experience = np.arange(0, specs["exp_cap"] + 1)
+    breakpoint()
+    wage_by_experience_low = labor_income = (
+        np.exp(
+            wage_params.loc[0, "constant"] + wage_params.loc[0,"ln_exp"] * np.log(experience + 1)
+        )
+    )
+    wage_by_experience_high = labor_income = (
+        np.exp(
+            wage_params.loc[1, "constant"] + wage_params.loc[1,"ln_exp"] * np.log(experience + 1)
+        )
+    )
+    breakpoint()
+    wage_by_experience_average = labor_income = (
+        np.exp(
+            wage_params_full_sample["constant"] + wage_params_full_sample["ln_exp"] * np.log(experience + 1)
+        )
+    )
+    adjustment_factor_by_exp_low = wage_by_experience_low / wage_by_experience_average
+    adjustment_factor_by_exp_high = wage_by_experience_high / wage_by_experience_average
+    specs["adjustment_factor_by_exp_and_edu"] = np.array(
+        [adjustment_factor_by_exp_low, adjustment_factor_by_exp_high]
+    )
+    return specs
+

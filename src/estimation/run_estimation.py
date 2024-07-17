@@ -11,14 +11,10 @@ from set_paths import create_path_dict
 # do_first_step = input("Do first step estimation? (y/n): ") == "y"
 estimate_sra = input("Estimate SRA process? (y/n): ") == "y"
 estimate_wage = input("Estimate wage? (y/n): ") == "y"
+estimate_job_sep = input("Estimate job separation? (y/n): ") == "y"
 do_model_estimatation = input("Estimate model? (y/n): ") == "y"
 paths_dict = create_path_dict(analysis_path, define_user=estimate_sra)
 
-# Import jax and set jax to work with 64bit
-import jax
-
-jax.config.update("jax_enable_x64", True)
-import pandas as pd
 from estimation.estimate_setup import estimate_model
 
 
@@ -49,6 +45,14 @@ if estimate_wage:
     )
 
     estimate_wage_parameters(paths_dict)
+
+if estimate_job_sep:
+    # Estimate job separation
+    from estimation.first_step_estimation.est_job_sep import est_job_sep
+
+    specs = read_and_derive_specs(paths_dict["specs"])
+
+    est_job_sep(paths_dict, specs, load_data=True)
 
 if do_model_estimatation:
     estimation_results = estimate_model(paths_dict, load_model=False)

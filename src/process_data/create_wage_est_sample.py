@@ -8,7 +8,7 @@ from process_data.soep_vars import create_education_type
 from process_data.soep_vars import sum_experience_variables
 
 
-def create_wage_est_sample(paths, load_data=False, options=None):
+def create_wage_est_sample(paths, specs, load_data=False):
     if not os.path.exists(paths["intermediate_data"]):
         os.makedirs(paths["intermediate_data"])
 
@@ -18,10 +18,10 @@ def create_wage_est_sample(paths, load_data=False, options=None):
         data = pd.read_pickle(out_file_path)
         return data
 
-    # Export parameters from options
-    start_year = options["start_year"]
-    end_year = options["end_year"]
-    start_age = options["start_age"]
+    # Export parameters from specs
+    start_year = specs["start_year"]
+    end_year = specs["end_year"]
+    start_age = specs["start_age"]
 
     # Load and merge data state data from SOEP core (all but wealth)
     merged_data = load_and_merge_soep_core(paths["soep_c38"])

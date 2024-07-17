@@ -9,7 +9,7 @@ from process_data.soep_vars import create_education_type
 from process_data.soep_vars import generate_job_separation_var
 
 
-def create_job_sep_sample(paths, load_data=False, options=None):
+def create_job_sep_sample(paths, specs, load_data=False):
     if not os.path.exists(paths["intermediate_data"]):
         os.makedirs(paths["intermediate_data"])
 
@@ -19,10 +19,10 @@ def create_job_sep_sample(paths, load_data=False, options=None):
         data = pd.read_pickle(out_file_path)
         return data
 
-    # Export parameters from options
-    start_year = options["start_year"]
-    end_year = options["end_year"]
-    start_age = options["start_age"]
+    # Export parameters from specs
+    start_year = specs["start_year"]
+    end_year = specs["end_year"]
+    start_age = specs["start_age"]
 
     # Load and merge data state data from SOEP core
     merged_data = load_and_merge_soep_core(paths["soep_c38"])
@@ -47,33 +47,28 @@ def create_job_sep_sample(paths, load_data=False, options=None):
     merged_data = merged_data[
         (merged_data["lagged_choice"] == 1) | (merged_data["plb0282_h"] == 1)
     ]
+    print(f"{len(merged_data)} observations in job separation sample.")
 
     # Create age at which one got fired
     merged_data["age_fired"] = merged_data["age"] - 1
 
+    merged_data.reset_index(drop=True, inplace=True)
+
     # Keep relevant columns
     merged_data = merged_data[
         [
-            "pid",
-            "age",
-            "experience",
-            "wage",
+            "age_fired",
             "education",
-            "syear",
+            "job_sep",
         ]
     ]
     merged_data = merged_data.astype(
         {
-            "pid": np.int32,
-            "syear": np.int32,
-            "age": np.int32,
-            "experience": np.int32,
-            "wage": np.float64,
+            "age_fired": np.int32,
             "education": np.int32,
+            "job_sep": np.int32,
         }
     )
-
-    print(str(len(merged_data)) + " observations in final wage estimation dataset.")
 
     # save data
     merged_data.to_pickle(out_file_path)

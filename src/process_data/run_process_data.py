@@ -30,6 +30,7 @@ from process_data.create_job_sep_sample import create_job_sep_sample
 
 if string_in == "a" or string_in == "s":
     create_structural_est_sample(paths_dict, options=specs, load_data=False)
+
 if string_in == "a" or string_in == "w":
     create_wage_est_sample(paths_dict, specs=specs, load_data=False)
 

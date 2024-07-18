@@ -61,27 +61,23 @@ def pension_adjustment_factor(specs, path_dict):
     )
 
     experience = np.arange(0, specs["exp_cap"] + 1)
-    breakpoint()
-    wage_by_experience_low = labor_income = (
+    wage_by_experience_low = (
         np.exp(
             wage_params.loc[0, "constant"] + wage_params.loc[0,"ln_exp"] * np.log(experience + 1)
         )
     )
-    wage_by_experience_high = labor_income = (
+    wage_by_experience_high =  (
         np.exp(
             wage_params.loc[1, "constant"] + wage_params.loc[1,"ln_exp"] * np.log(experience + 1)
         )
     )
-    breakpoint()
-    wage_by_experience_average = labor_income = (
+    wage_by_experience_average = (
         np.exp(
-            wage_params_full_sample["constant"] + wage_params_full_sample["ln_exp"] * np.log(experience + 1)
+            wage_params_full_sample.loc["constant"].values + wage_params_full_sample.loc["ln_exp"].values * np.log(experience + 1)
         )
     )
     adjustment_factor_by_exp_low = wage_by_experience_low / wage_by_experience_average
     adjustment_factor_by_exp_high = wage_by_experience_high / wage_by_experience_average
-    specs["adjustment_factor_by_exp_and_edu"] = np.array(
-        [adjustment_factor_by_exp_low, adjustment_factor_by_exp_high]
-    )
+    specs["adjustment_factor_by_exp_and_edu"] = np.array([adjustment_factor_by_exp_low, adjustment_factor_by_exp_high])
     return specs
 

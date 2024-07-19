@@ -1,4 +1,5 @@
 import numpy as np
+import jax.numpy as jnp
 import pandas as pd
 import yaml
 
@@ -61,23 +62,23 @@ def pension_adjustment_factor(specs, path_dict):
     )
 
     experience = np.arange(0, specs["exp_cap"] + 1)
-    wage_by_experience_low = (
-        np.exp(
-            wage_params.loc[0, "constant"] + wage_params.loc[0,"ln_exp"] * np.log(experience + 1)
-        )
-    )
-    wage_by_experience_high =  (
-        np.exp(
-            wage_params.loc[1, "constant"] + wage_params.loc[1,"ln_exp"] * np.log(experience + 1)
-        )
-    )
     wage_by_experience_average = (
         np.exp(
             wage_params_full_sample.loc["constant"].values + wage_params_full_sample.loc["ln_exp"].values * np.log(experience + 1)
         )
     )
-    adjustment_factor_by_exp_low = wage_by_experience_low / wage_by_experience_average
-    adjustment_factor_by_exp_high = wage_by_experience_high / wage_by_experience_average
-    specs["adjustment_factor_by_exp_and_edu"] = np.array([adjustment_factor_by_exp_low, adjustment_factor_by_exp_high])
+    # if number of education types changes, this needs to be adjusted
+    wage_by_experience = np.ndarray(shape=(2, len(experience)))
+    adjustment_factor_by_exp = np.ndarray(shape=(2, len(experience)))
+    for education in [0, 1]:
+        wage_by_experience[education] = (
+            np.exp(
+                wage_params.loc[education, "constant"] + wage_params.loc[education,"ln_exp"] * np.log(experience + 1)
+            )
+            )
+        adjustment_factor_by_exp[education] = wage_by_experience[education] / wage_by_experience_average
+        for i in range(1, len(experience)):
+            adjustment_factor_by_exp[education, i] = adjustment_factor_by_exp[education, 1:i+1].mean()
+    specs["pension_adjustment_by_edu_and_exp"] = jnp.asarray(adjustment_factor_by_exp)
     return specs
 

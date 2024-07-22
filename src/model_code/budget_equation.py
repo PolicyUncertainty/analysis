@@ -95,10 +95,9 @@ def calc_gross_pension_income(
     pension_factor = 1 - (actual_retirement_age - SRA_at_resolution) * ERP
 
     # Pension point value by education and experience
-    pension_point_value = (
-        options["adjustment_factor_by_edu_and_exp"][education, experience]
-        * options["pension_point_value"]
-    )
+    pension_point_value = options["pension_point_value_by_edu_exp"][
+        education, experience
+    ]
 
     retirement_income_gross = pension_point_value * experience * pension_factor * 12
     return retirement_income_gross

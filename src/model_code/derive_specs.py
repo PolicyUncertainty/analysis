@@ -19,8 +19,8 @@ def generate_derived_and_data_derived_specs(path_dict):
         path_dict["est_results"] + "wage_eq_params.csv", index_col=0
     )
 
-    specs["gamma_0"] = wage_params["constant"].values
-    specs["gamma_1"] = wage_params["ln_exp"].values
+    specs["gamma_0"] = jnp.asarray(wage_params["constant"].values)
+    specs["gamma_1"] = jnp.asarray(wage_params["ln_exp"].values)
     specs["income_shock_scale"] = wage_params["income_shock_std"].values.mean()
 
     # pensions
@@ -28,7 +28,9 @@ def generate_derived_and_data_derived_specs(path_dict):
         0.75 * specs["pension_point_value_west_2010"]
         + 0.25 * specs["pension_point_value_east_2010"] / specs["wealth_unit"]
     )
-    specs = pension_adjustment_factor(specs, path_dict)
+    specs["pension_point_value_by_edu_exp"] = pension_adjustment_factor(
+        specs, path_dict
+    )
     # max initial experience
     data_decision = pd.read_pickle(
         path_dict["intermediate_data"] + "structural_estimation_sample.pkl"
@@ -86,5 +88,4 @@ def pension_adjustment_factor(specs, path_dict):
             adjustment_factor_by_exp[education, i] = adjustment_factor_by_exp[
                 education, 1 : i + 1
             ].mean()
-    specs["pension_adjustment_by_edu_and_exp"] = jnp.asarray(adjustment_factor_by_exp)
-    return specs
+    return jnp.asarray(adjustment_factor_by_exp) * specs["pension_point_value"]

@@ -13,19 +13,8 @@ def budget_constraint(
     params,
     options,
 ):
-    # gross pension income
-    retirement_income_gross = calc_gross_pension_income(
-        experience=experience,
-        education=education,
-        policy_state=policy_state,
-        retirement_age_id=retirement_age_id,
-        options=options,
-    )
-    retirement_income = calc_net_income_pensions(retirement_income_gross, options)
-
-    means_test = savings_end_of_previous_period < options["unemployment_wealth_thresh"]
-
     # Unemployment benefits
+    means_test = savings_end_of_previous_period < options["unemployment_wealth_thresh"]
     unemployment_benefits = means_test * options["unemployment_benefits"] * 12
 
     # Gross labor income
@@ -36,6 +25,16 @@ def budget_constraint(
         options=options,
     )
     net_labor_income = calc_net_income_working(gross_labor_income, options)
+
+    # Retirement income
+    retirement_income_gross = calc_gross_pension_income(
+        experience=experience,
+        education=education,
+        policy_state=policy_state,
+        retirement_age_id=retirement_age_id,
+        options=options,
+    )
+    retirement_income = calc_net_income_pensions(retirement_income_gross, options)
 
     # bools of last period decision: income is payed in following period!
     was_worker = lagged_choice == 1

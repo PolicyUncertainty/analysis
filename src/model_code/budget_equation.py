@@ -13,20 +13,14 @@ def budget_constraint(
     params,
     options,
 ):
-    # fetch necessary parameters (gammas for wage, pension_point_value & ERP for pension)
-    gamma_0 = jnp.take(options["gamma_0"], education)
-    gamma_1 = jnp.take(options["gamma_1"], education)
-    pension_point_value = options["pension_point_value"]
-    ERP = options["early_retirement_penalty"]
-
-    # generate actual retirement age and SRA at resolution
-    SRA_at_resolution = options["min_SRA"] + policy_state * options["SRA_grid_size"]
-    actual_retirement_age = options["min_ret_age"] + retirement_age_id
-
-    # calculate applicable SRA and pension deduction/increase factor
-    # (malus for early retirement, bonus for late retirement)
-    pension_factor = 1 - (actual_retirement_age - SRA_at_resolution) * ERP
-    retirement_income_gross = pension_point_value * experience * pension_factor * 12
+    # gross pension income
+    retirement_income_gross = calc_gross_pension_income(
+        experience=experience,
+        education=education,
+        policy_state=policy_state,
+        retirement_age_id=retirement_age_id,
+        options=options,
+    )
     retirement_income = calc_net_income_pensions(retirement_income_gross, options)
 
     means_test = savings_end_of_previous_period < options["unemployment_wealth_thresh"]
@@ -34,15 +28,14 @@ def budget_constraint(
     # Unemployment benefits
     unemployment_benefits = means_test * options["unemployment_benefits"] * 12
 
-    # Labor income
-    labor_income = (
-        jnp.exp(
-            gamma_0 + gamma_1 * jnp.log(experience + 1) + income_shock_previous_period
-        )
-        / options["wealth_unit"]
+    # Gross labor income
+    gross_labor_income = calculate_gross_labor_income(
+        experience=experience,
+        education=education,
+        income_shock=income_shock_previous_period,
+        options=options,
     )
-    labor_income_with_min = jnp.maximum(labor_income, options["min_wage"]) * 12
-    net_labor_income = calc_net_income_working(labor_income_with_min, options)
+    net_labor_income = calc_net_income_working(gross_labor_income, options)
 
     # bools of last period decision: income is payed in following period!
     was_worker = lagged_choice == 1
@@ -72,19 +65,43 @@ def create_savings_grid():
     return savings_grid
 
 
+def calculate_gross_labor_income(experience, education, income_shock, options):
+    """Calculate the gross labor income.
+
+    As we estimate the wage equation outside of the model, we fetch the experience
+    returns from options.
+
+    """
+    gamma_0 = options["gamma_0"][education]
+    gamma_1 = options["gamma_1"][education]
+    labor_income = jnp.exp(gamma_0 + gamma_1 * jnp.log(experience + 1) + income_shock)
+
+    labor_income_min_checked = (
+        jnp.maximum(labor_income / options["wealth_unit"], options["min_wage"]) * 12
+    )
+
+    return labor_income_min_checked
+
+
 def calc_gross_pension_income(
-    experience, education, actual_retirement_age, SRA_at_resolution, options
+    experience, education, policy_state, retirement_age_id, options
 ):
-    pension_point_value = options["pension_point_value"]
+    """Calculate the gross pension income."""
+    # generate actual retirement age and SRA at resolution
+    SRA_at_resolution = options["min_SRA"] + policy_state * options["SRA_grid_size"]
+    actual_retirement_age = options["min_ret_age"] + retirement_age_id
+
     # deduction (bonus) factor for early (late) retirement
     ERP = options["early_retirement_penalty"]
     pension_factor = 1 - (actual_retirement_age - SRA_at_resolution) * ERP
+
+    # Pension point value by education and experience
+    pension_point_value = (
+        options["adjustment_factor_by_edu_and_exp"][education, experience]
+        * options["pension_point_value"]
+    )
+
     retirement_income_gross = pension_point_value * experience * pension_factor * 12
-    # education adjustment
-    adjustment_factor = options["adjustment_factor_by_edu_and_exp"][education][
-        experience
-    ]
-    retirement_income_gross *= adjustment_factor
     return retirement_income_gross
 
 

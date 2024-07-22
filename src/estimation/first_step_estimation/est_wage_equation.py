@@ -9,7 +9,7 @@ from model_code.derive_specs import read_and_derive_specs
 
 
 def estimate_wage_parameters(paths_dict):
-    """ Estimate the wage parameters for each education group in the sample. """
+    """Estimate the wage parameters for each education group in the sample."""
     wage_data = prepare_estimation_data(paths_dict)
 
     # Initialize empty container for coefficients
@@ -34,8 +34,9 @@ def estimate_wage_parameters(paths_dict):
     wage_parameters.to_csv(paths_dict["est_results"] + "wage_eq_params.csv")
     return coefficients
 
+
 def estimate_average_wage_parameters(paths_dict):
-    """ Estimate the average wage parameters for all individuals in the sample. """
+    """Estimate the average wage parameters for all individuals in the sample."""
     wage_data = prepare_estimation_data(paths_dict)
 
     # estimate parametric regression, save parameters

@@ -33,7 +33,7 @@ def budget_constraint(
 
     # Unemployment benefits
     unemployment_benefits = means_test * options["unemployment_benefits"] * 12
-    
+
     # Labor income
     labor_income = (
         jnp.exp(
@@ -71,16 +71,22 @@ def create_savings_grid():
     )
     return savings_grid
 
-def calc_gross_pension_income(experience, education, actual_retirement_age, SRA_at_resolution, options):
+
+def calc_gross_pension_income(
+    experience, education, actual_retirement_age, SRA_at_resolution, options
+):
     pension_point_value = options["pension_point_value"]
     # deduction (bonus) factor for early (late) retirement
     ERP = options["early_retirement_penalty"]
     pension_factor = 1 - (actual_retirement_age - SRA_at_resolution) * ERP
     retirement_income_gross = pension_point_value * experience * pension_factor * 12
     # education adjustment
-    adjustment_factor = options["adjustment_factor_by_edu_and_exp"][education][experience]
+    adjustment_factor = options["adjustment_factor_by_edu_and_exp"][education][
+        experience
+    ]
     retirement_income_gross *= adjustment_factor
     return retirement_income_gross
+
 
 def calc_net_income_pensions(gross_income, options):
     gross_income_full = gross_income * options["wealth_unit"]

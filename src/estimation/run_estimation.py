@@ -46,7 +46,8 @@ if estimate_wage:
     # Estimate wage parameters
     # Average wage parameters are estimated to compute education-specific pensions
     from estimation.first_step_estimation.est_wage_equation import (
-        estimate_wage_parameters, estimate_average_wage_parameters
+        estimate_wage_parameters,
+        estimate_average_wage_parameters,
     )
 
     estimate_wage_parameters(paths_dict)

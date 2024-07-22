@@ -1,4 +1,4 @@
-#%% Set paths of project
+# %% Set paths of project
 import sys
 from pathlib import Path
 
@@ -12,7 +12,7 @@ path_dict = create_path_dict(analysis_path)
 
 show_any_plots = input("Show any plots? (y/n): ") == "y"
 
-#%% ##########################################
+# %% ##########################################
 # # Policy state plot
 # ##########################################
 if show_any_plots:
@@ -26,7 +26,7 @@ if show_policy_state_plot:
     plt.show()
 plt.close("all")
 
-#%% ##########################################
+# %% ##########################################
 # # Expected SRA
 # ##########################################
 if show_any_plots:
@@ -41,7 +41,7 @@ if show_expected_SRA_plot:
 plt.close("all")
 
 
-#%% ##########################################
+# %% ##########################################
 # # Wage plots
 # ##########################################
 if show_any_plots:
@@ -56,7 +56,7 @@ if show_wage_plots:
 plt.close("all")
 
 
-#%% ##########################################
+# %% ##########################################
 # # Counterfactual 1 plots
 # ##########################################
 if show_any_plots:
@@ -78,7 +78,7 @@ if show_cf_1_plots & show_any_plots:
 plt.close("all")
 
 
-#%%##########################################
+# %%##########################################
 # Counterfactual 2 plots
 ###########################################
 if show_any_plots:
@@ -97,7 +97,7 @@ if show_cf_2_plots:
     plt.show()
 plt.close("all")
 
-#%%##########################################
+# %%##########################################
 # # Model fit plots
 # ##########################################
 if show_any_plots:

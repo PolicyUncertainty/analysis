@@ -25,7 +25,8 @@ BENEFITS_GRID = np.linspace(10, 100, 5)
     list(product(BENEFITS_GRID, SAVINGS_GRID, INTEREST_RATE_GRID)),
 )
 def test_budget_unemployed(unemployment_benefits, savings, interest_rate):
-    specs = generate_derived_and_data_derived_specs(create_path_dict(analysis_path))
+    path_dict = create_path_dict(analysis_path)
+    specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
     specs["unemployment_benefits"] = unemployment_benefits
 
     params = {"interest_rate": interest_rate}
@@ -69,8 +70,10 @@ EDUCATION_GRID = [0, 1]
 def test_budget_worker(
     gamma, income_shock, experience, interest_rate, savings, education
 ):
+    path_dict = create_path_dict(analysis_path)
+    specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
+
     gamma_array = np.array([gamma, gamma - 0.01])
-    specs = generate_derived_and_data_derived_specs(create_path_dict(analysis_path))
     specs["gamma_0"] = gamma_array
     specs["gamma_1"] = gamma_array
 
@@ -123,7 +126,8 @@ def test_retiree(
     ret_age_id,
 ):
     education = 0
-    specs = generate_derived_and_data_derived_specs(create_path_dict(analysis_path))
+    path_dict = create_path_dict(analysis_path)
+    specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
 
     actual_retirement_age = specs["min_ret_age"] + ret_age_id
 

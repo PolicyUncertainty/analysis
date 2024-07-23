@@ -11,7 +11,7 @@ def generate_specs_and_update_params(path_dict, start_params):
     return specs, start_params
 
 
-def generate_derived_and_data_derived_specs(path_dict):
+def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     specs = read_and_derive_specs(path_dict["specs"])
 
     # wages
@@ -25,14 +25,31 @@ def generate_derived_and_data_derived_specs(path_dict):
 
     # pensions
     specs["pension_point_value_by_edu_exp"] = calculate_pension_values(specs, path_dict)
-    # max initial experience
-    data_decision = pd.read_pickle(
-        path_dict["intermediate_data"] + "structural_estimation_sample.pkl"
-    )
-    specs["max_init_experience"] = (
-        data_decision["experience"] - data_decision["period"]
-    ).max()
+
+    # Set initial experience
+    specs["max_init_experience"] = create_initial_exp(path_dict, load_precomputed)
+
     return specs
+
+
+def create_initial_exp(path_dict, load_precomputed):
+    # Initial experience
+    if load_precomputed:
+        max_init_experience = int(
+            np.loadtxt(path_dict["intermediate_data"] + "max_init_exp.txt")
+        )
+    else:
+        # max initial experience
+        data_decision = pd.read_pickle(
+            path_dict["intermediate_data"] + "structural_estimation_sample.pkl"
+        )
+        max_init_experience = (
+            data_decision["experience"] - data_decision["period"]
+        ).max()
+        np.savetxt(
+            path_dict["intermediate_data"] + "max_init_exp.txt", [max_init_experience]
+        )
+    return max_init_experience
 
 
 def read_and_derive_specs(spec_path):

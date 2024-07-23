@@ -8,9 +8,9 @@ import pytest
 analysis_path = str(Path(__file__).resolve().parents[3]) + "/"
 sys.path.insert(0, analysis_path + "src/")
 
-from wealth_and_budget.budget_equation import budget_constraint
-from wealth_and_budget.wages import calc_net_income_working
-from wealth_and_budget.pensions import calc_net_income_pensions
+from model_code.wealth_and_budget.budget_equation import budget_constraint
+from model_code.wealth_and_budget.wages import calc_net_income_working
+from model_code.wealth_and_budget.pensions import calc_net_income_pensions
 from model_code.derive_specs import generate_derived_and_data_derived_specs
 from set_paths import create_path_dict
 

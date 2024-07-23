@@ -6,8 +6,8 @@ from model_code.state_space import create_state_space_functions
 from model_code.state_space import sparsity_condition
 from model_code.utility_functions import create_final_period_utility_functions
 from model_code.utility_functions import create_utility_functions
-from wealth_and_budget.budget_equation import budget_constraint
-from wealth_and_budget.budget_equation import create_savings_grid
+from model_code.wealth_and_budget.budget_equation import budget_constraint
+from model_code.wealth_and_budget.savings_grid import create_savings_grid
 
 
 def specify_model(

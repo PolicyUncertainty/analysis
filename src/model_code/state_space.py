@@ -92,7 +92,10 @@ def state_specific_choice_set(period, lagged_choice, policy_state, job_offer, op
     elif age >= options["max_ret_age"]:
         return np.array([2])
     else:
-        return np.array([0, 1, 2])
+        if job_offer == 0:
+            return np.array([0, 2])
+        else:
+            return np.array([0, 1, 2])
 
 
 def apply_retirement_constraint_for_SRA(SRA, options):

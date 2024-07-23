@@ -43,15 +43,18 @@ if estimate_sra:
     estimate_expected_SRA_variance(paths_dict)
 
 if estimate_wage:
-    # Estimate wage parameter
+    # Estimate wage parameters
+    # Average wage parameters are estimated to compute education-specific pensions
     from estimation.first_step_estimation.est_wage_equation import (
         estimate_wage_parameters,
+        estimate_average_wage_parameters,
     )
 
     estimate_wage_parameters(paths_dict)
+    estimate_average_wage_parameters(paths_dict)
 
 if do_model_estimatation:
-    estimation_results = estimate_model(paths_dict, load_model=False)
+    estimation_results = estimate_model(paths_dict, load_model=True)
     print(estimation_results)
 
 # %%

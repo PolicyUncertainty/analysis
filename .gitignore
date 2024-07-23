@@ -12,4 +12,6 @@ policy_expect_data.pkl
 *probs.pkl
 data*.pkl
 probs_*.txt
-intermediate_data/
+
+# Ignore intermediate data pickle files
+output/intermediate_data/*.pkl

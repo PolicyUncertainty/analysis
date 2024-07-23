@@ -5,12 +5,14 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-src_folder = Path(__file__).resolve().parents[2]
-sys.path.append(str(src_folder))
+analysis_path = str(Path(__file__).resolve().parents[3]) + "/"
+sys.path.insert(0, analysis_path + "src/")
 
 from model_code.budget_equation import budget_constraint
 from model_code.budget_equation import calc_net_income_working
 from model_code.budget_equation import calc_net_income_pensions
+from model_code.derive_specs import generate_derived_and_data_derived_specs
+from set_paths import create_path_dict
 
 SAVINGS_GRID = np.linspace(10, 100, 5)
 INTEREST_RATE_GRID = np.linspace(0.01, 0.1, 2)
@@ -23,19 +25,9 @@ BENEFITS_GRID = np.linspace(10, 100, 5)
     list(product(BENEFITS_GRID, SAVINGS_GRID, INTEREST_RATE_GRID)),
 )
 def test_budget_unemployed(unemployment_benefits, savings, interest_rate):
-    options = {
-        "gamma_0": np.array([1, 1]),
-        "gamma_1": np.array([1, 1]),
-        "pension_point_value": 1,
-        "early_retirement_penalty": 0.01,
-        "min_SRA": 63,
-        "SRA_grid_size": 0.5,
-        "min_ret_age": 65,
-        "unemployment_benefits": unemployment_benefits,
-        "min_wage": 1.1,
-        "unemployment_wealth_thresh": 25,
-        "wealth_unit": 1_000,
-    }
+    specs = generate_derived_and_data_derived_specs(create_path_dict(analysis_path))
+    specs["unemployment_benefits"] = unemployment_benefits
+
     params = {"interest_rate": interest_rate}
     wealth = budget_constraint(
         education=0,
@@ -46,9 +38,9 @@ def test_budget_unemployed(unemployment_benefits, savings, interest_rate):
         savings_end_of_previous_period=savings,
         income_shock_previous_period=0,
         params=params,
-        options=options,
+        options=specs,
     )
-    if savings < options["unemployment_wealth_thresh"]:
+    if savings < specs["unemployment_wealth_thresh"]:
         np.testing.assert_almost_equal(
             wealth, savings * (1 + interest_rate) + unemployment_benefits * 12
         )
@@ -57,7 +49,7 @@ def test_budget_unemployed(unemployment_benefits, savings, interest_rate):
 
 
 GAMMA_GRID = np.linspace(0.1, 0.9, 3)
-EXP_GRID = np.linspace(10, 30, 3)
+EXP_GRID = np.linspace(10, 30, 3, dtype=int)
 EDUCATION_GRID = [0, 1]
 
 
@@ -78,19 +70,10 @@ def test_budget_worker(
     gamma, income_shock, experience, interest_rate, savings, education
 ):
     gamma_array = np.array([gamma, gamma - 0.01])
-    options = {
-        "gamma_0": gamma_array,
-        "gamma_1": gamma_array,
-        "pension_point_value": 1,
-        "early_retirement_penalty": 0.01,
-        "min_SRA": 63,
-        "SRA_grid_size": 0.5,
-        "min_ret_age": 65,
-        "unemployment_benefits": 0,
-        "min_wage": 100,
-        "unemployment_wealth_thresh": 10,
-        "wealth_unit": 1_000,
-    }
+    specs = generate_derived_and_data_derived_specs(create_path_dict(analysis_path))
+    specs["gamma_0"] = gamma_array
+    specs["gamma_1"] = gamma_array
+
     params = {"interest_rate": interest_rate}
     wealth = budget_constraint(
         education=education,
@@ -101,7 +84,7 @@ def test_budget_worker(
         savings_end_of_previous_period=savings,
         income_shock_previous_period=income_shock,
         params=params,
-        options=options,
+        options=specs,
     )
     labor_income = (
         np.exp(
@@ -109,19 +92,19 @@ def test_budget_worker(
             + gamma_array[education] * np.log(experience + 1)
             + income_shock
         )
-        / options["wealth_unit"]
+        / specs["wealth_unit"]
     )
-    if labor_income < options["min_wage"]:
-        labor_income = options["min_wage"]
-    net_labor_income = calc_net_income_working(labor_income * 12, options)
+    if labor_income < specs["min_wage"]:
+        labor_income = specs["min_wage"]
+    net_labor_income = calc_net_income_working(labor_income * 12, specs)
     np.testing.assert_almost_equal(
         wealth, savings * (1 + interest_rate) + net_labor_income
     )
 
 
-EXP_GRID = np.linspace(10, 30, 3)
-POLICY_STATE_GRID = np.linspace(0, 2, 3)
-RET_AGE_GRID = np.linspace(0, 2, 3)
+EXP_GRID = np.linspace(10, 30, 3, dtype=int)
+POLICY_STATE_GRID = np.linspace(0, 2, 3, dtype=int)
+RET_AGE_GRID = np.linspace(0, 2, 3, dtype=int)
 
 
 @pytest.mark.parametrize(
@@ -139,28 +122,14 @@ def test_retiree(
     policy_state,
     ret_age_id,
 ):
-    min_ret_age = 63
-    min_SRA = 65
-    SRA_grid_size = 0.25
-    erp = 0.36
-    point_value = 0.9
-    actual_retirement_age = min_ret_age + ret_age_id
-    options = {
-        "gamma_0": np.array([1, 1]),
-        "gamma_1": np.array([1, 1]),
-        "pension_point_value": point_value,
-        "early_retirement_penalty": erp,
-        "min_SRA": min_SRA,
-        "SRA_grid_size": SRA_grid_size,
-        "min_ret_age": min_ret_age,
-        "unemployment_benefits": 50,
-        "min_wage": 100,
-        "unemployment_wealth_thresh": 100,
-        "wealth_unit": 1_000,
-    }
+    education = 0
+    specs = generate_derived_and_data_derived_specs(create_path_dict(analysis_path))
+
+    actual_retirement_age = specs["min_ret_age"] + ret_age_id
+
     params = {"interest_rate": interest_rate}
     wealth = budget_constraint(
-        education=0,
+        education=education,
         lagged_choice=2,
         experience=exp,
         policy_state=policy_state,
@@ -168,21 +137,21 @@ def test_retiree(
         savings_end_of_previous_period=savings,
         income_shock_previous_period=0,
         params=params,
-        options=options,
+        options=specs,
     )
-    pension_point_value = options["pension_point_value"]
-    SRA_at_resolution = options["min_SRA"] + policy_state * options["SRA_grid_size"]
+    pension_point_value = specs["pension_point_value_by_edu_exp"][education, exp]
+    SRA_at_resolution = specs["min_SRA"] + policy_state * specs["SRA_grid_size"]
     pension_factor = (
         1
         - (actual_retirement_age - SRA_at_resolution)
-        * options["early_retirement_penalty"]
+        * specs["early_retirement_penalty"]
     )
     retirement_income = calc_net_income_pensions(
-        pension_point_value * pension_factor * exp * 12, options
+        pension_point_value * pension_factor * exp * 12, specs
     )
-    if savings < options["unemployment_wealth_thresh"]:
+    if savings < specs["unemployment_wealth_thresh"]:
         retirement_income = np.maximum(
-            retirement_income, options["unemployment_benefits"] * 12
+            retirement_income, specs["unemployment_benefits"] * 12
         )
 
     np.testing.assert_almost_equal(

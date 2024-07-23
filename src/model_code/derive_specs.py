@@ -24,13 +24,7 @@ def generate_derived_and_data_derived_specs(path_dict):
     specs["income_shock_scale"] = wage_params["income_shock_std"].values.mean()
 
     # pensions
-    specs["pension_point_value"] = (
-        0.75 * specs["pension_point_value_west_2010"]
-        + 0.25 * specs["pension_point_value_east_2010"] / specs["wealth_unit"]
-    )
-    specs["pension_point_value_by_edu_exp"] = pension_adjustment_factor(
-        specs, path_dict
-    )
+    specs["pension_point_value_by_edu_exp"] = calculate_pension_values(specs, path_dict)
     # max initial experience
     data_decision = pd.read_pickle(
         path_dict["intermediate_data"] + "structural_estimation_sample.pkl"
@@ -60,7 +54,7 @@ def read_and_derive_specs(spec_path):
     return specs
 
 
-def pension_adjustment_factor(specs, path_dict):
+def calculate_pension_values(specs, path_dict):
     wage_params = pd.read_csv(
         path_dict["est_results"] + "wage_eq_params.csv", index_col=0
     )
@@ -88,4 +82,11 @@ def pension_adjustment_factor(specs, path_dict):
             adjustment_factor_by_exp[education, i] = adjustment_factor_by_exp[
                 education, 1 : i + 1
             ].mean()
-    return jnp.asarray(adjustment_factor_by_exp) * specs["pension_point_value"]
+
+    # Generate average pension point value weighted by east and west
+    # pensions
+    pension_point_value = (
+        0.75 * specs["pension_point_value_west_2010"]
+        + 0.25 * specs["pension_point_value_east_2010"]
+    ) / specs["wealth_unit"]
+    return jnp.asarray(adjustment_factor_by_exp) * pension_point_value

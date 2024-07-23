@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from model_code.budget_equation import calc_net_income_pensions
-from model_code.budget_equation import calc_net_income_working
 from model_code.derive_specs import generate_derived_and_data_derived_specs
+from wealth_and_budget.pensions import calc_net_income_pensions
+from wealth_and_budget.wages import calc_net_income_working
 
 
 def plot_pension_npv_by_age(paths, edu=0):

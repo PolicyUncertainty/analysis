@@ -1,13 +1,13 @@
 import numpy as np
 from dcegm.pre_processing.setup_model import load_and_setup_model
 from dcegm.pre_processing.setup_model import setup_and_save_model
-from model_code.budget_equation import budget_constraint
-from model_code.budget_equation import create_savings_grid
 from model_code.derive_specs import generate_specs_and_update_params
 from model_code.state_space import create_state_space_functions
 from model_code.state_space import sparsity_condition
 from model_code.utility_functions import create_final_period_utility_functions
 from model_code.utility_functions import create_utility_functions
+from model_code.wealth_and_budget.budget_equation import budget_constraint
+from model_code.wealth_and_budget.savings_grid import create_savings_grid
 
 
 def specify_model(

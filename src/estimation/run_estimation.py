@@ -37,12 +37,15 @@ if estimate_sra:
     est_SRA_params(paths_dict)
 
 if estimate_wage:
-    # Estimate wage parameter
+    # Estimate wage parameters
+    # Average wage parameters are estimated to compute education-specific pensions
     from estimation.first_step_estimation.est_wage_equation import (
         estimate_wage_parameters,
+        estimate_average_wage_parameters,
     )
 
     estimate_wage_parameters(paths_dict)
+    estimate_average_wage_parameters(paths_dict)
 
 if estimate_job_sep:
     # Estimate job separation

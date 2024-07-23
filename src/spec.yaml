@@ -3,6 +3,10 @@
 ###############################################################################
 # mathematical model features
 quadrature_points_stochastic: 5
+# Fixed structural parameters, we will not estimate
+interest_rate: 0.03
+discount_factor: 0.97
+
 # economic model parameters
 start_age: 30
 end_age: 85

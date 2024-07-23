@@ -3,26 +3,15 @@ import time
 
 import estimagic as em
 import pandas as pd
+import yaml
 from dcegm.likelihood import create_individual_likelihood_function_for_model
-from model_code.budget_equation import create_savings_grid
 from model_code.policy_states_belief import expected_SRA_probs_estimation
 from model_code.policy_states_belief import update_specs_exp_ret_age_trans_mat
 from model_code.specify_model import specify_model
 
 
 def estimate_model(path_dict, load_model):
-    start_params_all = {
-        # Utility parameters
-        "mu": 0.8,
-        "dis_util_work": 4.0,
-        "dis_util_unemployed": 1.0,
-        "bequest_scale": 1.3,
-        # Taste and income shock scale
-        "lambda": 1,
-        # Interest rate and discount factor
-        "interest_rate": 0.03,
-        "beta": 0.97,
-    }
+    start_params_all = yaml.safe_load(open(path_dict["start_params"], "rb"))
 
     individual_likelihood = create_ll_from_paths(
         start_params_all, path_dict, load_model
@@ -42,6 +31,10 @@ def estimate_model(path_dict, load_model):
         "dis_util_unemployed",
         # "bequest_scale",
         # "lambda",
+        "job_finding_logit_const",
+        "job_finding_logit_age",
+        "job_finding_logit_age_squ",
+        "job_finding_logit_high_educ",
     ]
     start_params = {name: start_params_all[name] for name in params_to_estimate_names}
 
@@ -51,6 +44,10 @@ def estimate_model(path_dict, load_model):
         "dis_util_unemployed": 1e-12,
         # "bequest_scale": 1e-12,
         # "lambda": 1e-12,
+        "job_finding_logit_const": -10,
+        "job_finding_logit_age": -10,
+        "job_finding_logit_age_squ": -10,
+        "job_finding_logit_high_educ": -10,
     }
     upper_bounds = {
         # "mu": 5,
@@ -58,6 +55,10 @@ def estimate_model(path_dict, load_model):
         "dis_util_unemployed": 50,
         # "bequest_scale": 20,
         # "lambda": 1,
+        "job_finding_logit_const": 10,
+        "job_finding_logit_age": 10,
+        "job_finding_logit_age_squ": 10,
+        "job_finding_logit_high_educ": 10,
     }
 
     result = em.minimize(

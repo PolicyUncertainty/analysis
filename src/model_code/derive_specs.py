@@ -7,6 +7,8 @@ def generate_specs_and_update_params(path_dict, start_params):
     specs = generate_derived_and_data_derived_specs(path_dict)
     # Assign income shock scale to start_params_all
     start_params["sigma"] = specs["income_shock_scale"]
+    start_params["interest_rate"] = specs["interest_rate"]
+    start_params["beta"] = specs["discount_factor"]
     return specs, start_params
 
 
@@ -26,7 +28,9 @@ def generate_derived_and_data_derived_specs(path_dict):
     specs["pension_point_value"] = 27.2 / specs["wealth_unit"]
 
     # max initial experience
-    data_decision = pd.read_pickle(path_dict["intermediate_data"] + "structural_estimation_sample.pkl")
+    data_decision = pd.read_pickle(
+        path_dict["intermediate_data"] + "structural_estimation_sample.pkl"
+    )
     specs["max_init_experience"] = (
         data_decision["experience"] - data_decision["period"]
     ).max()

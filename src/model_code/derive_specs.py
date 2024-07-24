@@ -8,6 +8,8 @@ def generate_specs_and_update_params(path_dict, start_params):
     specs = generate_derived_and_data_derived_specs(path_dict)
     # Assign income shock scale to start_params_all
     start_params["sigma"] = specs["income_shock_scale"]
+    start_params["interest_rate"] = specs["interest_rate"]
+    start_params["beta"] = specs["discount_factor"]
     return specs, start_params
 
 
@@ -28,7 +30,6 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
 
     # Set initial experience
     specs["max_init_experience"] = create_initial_exp(path_dict, load_precomputed)
-
     return specs
 
 

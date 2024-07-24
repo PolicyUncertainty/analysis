@@ -75,7 +75,7 @@ def update_state_space(
     return next_state
 
 
-def state_specific_choice_set(period, lagged_choice, policy_state, options):
+def state_specific_choice_set(period, lagged_choice, policy_state, job_offer, options):
     age = period + options["start_age"]
     SRA_pol_state = options["min_SRA"] + policy_state * options["SRA_grid_size"]
     min_ret_age_pol_state = apply_retirement_constraint_for_SRA(SRA_pol_state, options)
@@ -85,11 +85,17 @@ def state_specific_choice_set(period, lagged_choice, policy_state, options):
         return np.array([2])
     # Check if the person is not in the voluntary retirement range.
     elif age < min_ret_age_pol_state:
-        return np.array([0, 1])
+        if job_offer == 0:
+            return np.array([0])
+        else:
+            return np.array([0, 1])
     elif age >= options["max_ret_age"]:
         return np.array([2])
     else:
-        return np.array([0, 1, 2])
+        if job_offer == 0:
+            return np.array([0, 2])
+        else:
+            return np.array([0, 1, 2])
 
 
 def apply_retirement_constraint_for_SRA(SRA, options):

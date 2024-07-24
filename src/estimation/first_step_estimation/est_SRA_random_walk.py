@@ -3,6 +3,12 @@ import pandas as pd
 from statsmodels import api as sm
 
 
+def est_SRA_params(paths):
+    alpha_hat = est_expected_SRA(paths)
+    sigma_sq_hat = estimate_expected_SRA_variance(paths)
+    return alpha_hat, sigma_sq_hat
+
+
 def est_expected_SRA(paths):
     df = pd.read_pickle(paths["intermediate_data"] + "policy_expect_data.pkl")
     x_var = "time_to_ret"

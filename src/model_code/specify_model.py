@@ -48,6 +48,10 @@ def specify_model(
                     "transition": policy_state_trans_func,
                     "states": np.arange(n_policy_states, dtype=int),
                 },
+                "job_offer": {
+                    "transition": policy_state_trans_func,
+                    "states": np.arange(2, dtype=int),
+                },
             },
         },
         "model_params": specs,

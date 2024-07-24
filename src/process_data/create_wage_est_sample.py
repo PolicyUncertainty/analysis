@@ -2,13 +2,13 @@ import os
 
 import numpy as np
 import pandas as pd
-from process_data.create_structural_est_sample import create_choice_variable
-from process_data.create_structural_est_sample import create_education_type
 from process_data.create_structural_est_sample import filter_data
-from process_data.create_structural_est_sample import load_and_merge_soep_core
+from process_data.soep_vars import create_choice_variable
+from process_data.soep_vars import create_education_type
+from process_data.soep_vars import sum_experience_variables
 
 
-def create_wage_est_sample(paths, load_data=False, options=None):
+def create_wage_est_sample(paths, specs, load_data=False):
     if not os.path.exists(paths["intermediate_data"]):
         os.makedirs(paths["intermediate_data"])
 
@@ -18,41 +18,30 @@ def create_wage_est_sample(paths, load_data=False, options=None):
         data = pd.read_pickle(out_file_path)
         return data
 
-    # Set file paths
-    soep_c38 = paths["soep_c38"]
-
-    # Export parameters from options
-    start_year = options["start_year"]
-    end_year = options["end_year"]
-    start_age = options["start_age"]
+    # Export parameters from specs
+    start_year = specs["start_year"]
+    end_year = specs["end_year"]
+    start_age = specs["start_age"]
 
     # Load and merge data state data from SOEP core (all but wealth)
-    merged_data = load_and_merge_soep_core(soep_c38)
+    merged_data = load_and_merge_soep_core(paths["soep_c38"])
 
     # filter data (age, sex, estimation period)
     merged_data = filter_data(merged_data, start_year, end_year, start_age, no_women=False)
 
     # create labor choice, keep only working
-    merged_data = create_choice_variable(
-        merged_data,
-    )
+    merged_data = create_choice_variable(merged_data)
     merged_data = merged_data[merged_data["choice"] == 1]
     print(
         str(len(merged_data)) + " observations after dropping non-working individuals."
     )
 
-    # experience (note: unlike in structural estimation, we do not round or enforce a cap on experience here)
-    merged_data["experience"] = merged_data["pgexpft"]
-    merged_data = merged_data[merged_data["experience"].notna()]
-    merged_data = merged_data[merged_data["experience"] >= 0]
-    print(
-        str(len(merged_data))
-        + " observations after dropping invalid experience values."
-    )
+    # experience, where we use the sum of part and full time (note: unlike in
+    # structural estimation, we do not round or enforce a cap on experience here)
+    merged_data = sum_experience_variables(merged_data)
 
     # gross monthly wage
     merged_data.rename(columns={"pglabgro": "wage"}, inplace=True)
-    merged_data = merged_data[merged_data["wage"].notna()]
     merged_data = merged_data[merged_data["wage"] > 0]
     print(str(len(merged_data)) + " observations after dropping invalid wage values.")
 
@@ -89,4 +78,38 @@ def create_wage_est_sample(paths, load_data=False, options=None):
     # save data
     merged_data.to_pickle(out_file_path)
 
+    return merged_data
+
+
+def load_and_merge_soep_core(soep_c38_path):
+    # Load SOEP core data
+    pgen_data = pd.read_stata(
+        f"{soep_c38_path}/pgen.dta",
+        columns=[
+            "syear",
+            "pid",
+            "hid",
+            "pgemplst",
+            "pgexpft",
+            "pgexppt",
+            "pgstib",
+            "pglabgro",
+            "pgpsbil",
+        ],
+        convert_categoricals=False,
+    )
+    pathl_data = pd.read_stata(
+        f"{soep_c38_path}/ppathl.dta",
+        columns=["pid", "hid", "syear", "sex", "gebjahr"],
+        convert_categoricals=False,
+    )
+
+    # Merge pgen data with pathl data and hl data
+    merged_data = pd.merge(
+        pgen_data, pathl_data, on=["pid", "hid", "syear"], how="inner"
+    )
+
+    merged_data["age"] = merged_data["syear"] - merged_data["gebjahr"]
+    del pgen_data, pathl_data
+    print(str(len(merged_data)) + " observations in SOEP C38 core.")
     return merged_data

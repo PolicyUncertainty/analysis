@@ -27,7 +27,7 @@ def create_wage_est_sample(paths, specs, load_data=False):
     merged_data = load_and_merge_soep_core(paths["soep_c38"])
 
     # filter data (age, sex, estimation period)
-    merged_data = filter_data(merged_data, start_year, end_year, start_age)
+    merged_data = filter_data(merged_data, start_year, end_year, start_age, no_women=False)
 
     # create labor choice, keep only working
     merged_data = create_choice_variable(merged_data)

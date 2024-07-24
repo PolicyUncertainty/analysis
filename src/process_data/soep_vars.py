@@ -92,7 +92,7 @@ def generate_job_separation_var(data):
     """This function generates a job separation variable.
 
     The function creates a new column job_sep which is 1 if the individual got fired
-    from the last job.
+    from the last job. It uses plb0304_h from the soep pl data.
 
     """
     data["job_sep"] = 0

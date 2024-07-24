@@ -2,7 +2,7 @@ import os
 
 import numpy as np
 import pandas as pd
-from process_data.create_structural_est_sample import create_lagged_choice_variable
+from process_data.create_structural_est_sample import create_lagged_and_lead_variables
 from process_data.create_structural_est_sample import filter_data
 from process_data.soep_vars import create_choice_variable
 from process_data.soep_vars import create_education_type
@@ -33,16 +33,17 @@ def create_job_sep_sample(paths, specs, load_data=False):
 
     # create choice and lagged choice variable
     merged_data = create_choice_variable(merged_data)
+
+    # Job separation
+    merged_data = generate_job_separation_var(merged_data)
+
     # lagged choice
-    merged_data = create_lagged_choice_variable(
+    merged_data = create_lagged_and_lead_variables(
         merged_data, start_year, end_year, start_age
     )
 
     # education
     merged_data = create_education_type(merged_data)
-
-    # Job separation
-    merged_data = generate_job_separation_var(merged_data)
 
     # Now restrict sample to all who worked last period or did loose their job
     merged_data = merged_data[

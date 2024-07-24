@@ -56,7 +56,7 @@ if estimate_job_sep:
 if do_model_estimatation:
     from estimation.estimate_setup import estimate_model
 
-    estimation_results = estimate_model(paths_dict, load_model=False)
+    estimation_results = estimate_model(paths_dict, load_model=True)
     print(estimation_results)
 
 # %%

@@ -100,12 +100,25 @@ def create_ll_from_paths(start_params_all, path_dict, load_model):
         for name in model["model_structure"]["state_space_names"]
     }
 
+    def weight_func(**kwargs):
+        job_offer = kwargs["job_offer"]
+        return model["model_funcs"]["processed_exog_funcs"]["job_offer"](**kwargs)[
+            job_offer
+        ]
+
+    unobserved_state_specs = {
+        "observed_bool": data_decision["full_observed_state"],
+        "weight_func": weight_func,
+        "states": ["job_offer"],
+    }
+
     # Create likelihood function
     individual_likelihood = create_individual_likelihood_function_for_model(
         model=model,
         observed_states=states_dict,
         observed_wealth=data_decision["wealth"].values,
         observed_choices=data_decision["choice"].values,
+        unobserved_state_specs=unobserved_state_specs,
         params_all=start_params_all,
     )
     return individual_likelihood

@@ -16,14 +16,14 @@ def job_offer_process_transition(params, options, education, period, choice):
     # Probability of job destruction
     job_sep_prob = options["job_sep_probs"][education, period]
 
-    job_finding_prob = calc_job_finding_prob(params, education, period)
+    job_finding_prob = calc_job_finding_prob(params, education, period, options)
 
     # Transition probability
     prob_value_0 = (
         job_sep_prob * labor_choice + (1 - job_finding_prob) * unemployment_choice
     )
 
-    return prob_value_0, 1 - prob_value_0
+    return jnp.array([prob_value_0, 1 - prob_value_0])
 
 
 def calc_job_finding_prob(params, education, period, options):

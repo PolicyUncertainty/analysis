@@ -16,16 +16,17 @@ from model_code.derive_specs import read_and_derive_specs
 
 specs = read_and_derive_specs(paths_dict["specs"])
 string_in = input(
-    """Which dataset should be created? \n\n- all (a)\n- structural (s)\n- wage (w)\n"""
-    """- job separation (j)\n Please write the according letter:"""
+    """Which dataset should be created? \n\n- [a]ll \n- [s]tructural \n- [w]age \n"""
+    """- wage [p]artner \n- [j]ob separation \n Please write the corresponding letter:"""
 )
 
 
 # %%
-# Create relevant datasets. Ask for first if all schould be created or just some
+# Create relevant datasets.
 # --------------------------------------------------------------------------------------
 from process_data.create_structural_est_sample import create_structural_est_sample
 from process_data.create_wage_est_sample import create_wage_est_sample
+from process_data.create_partner_wage_est_sample import create_partner_wage_est_sample
 from process_data.create_job_sep_sample import create_job_sep_sample
 
 if string_in == "a" or string_in == "s":
@@ -34,5 +35,10 @@ if string_in == "a" or string_in == "s":
 if string_in == "a" or string_in == "w":
     create_wage_est_sample(paths_dict, specs=specs, load_data=False)
 
+if string_in == "a" or string_in == "p":
+    create_partner_wage_est_sample(paths_dict, specs=specs, load_data=False)
+
 if string_in == "a" or string_in == "j":
     create_job_sep_sample(paths_dict, specs=specs, load_data=False)
+
+

@@ -21,13 +21,13 @@ def create_partner_wage_est_sample(paths, specs, load_data=False):
     end_year = specs["end_year"]
     start_age = specs["start_age"]
 
-    # gather vars and filter 
-    # note: include women, exclude singles
-    # note2: keep only working full time and part time
-
     df = load_and_merge_soep_core(paths["soep_c38"])
     df = filter_data(df, start_year, end_year, start_age, no_women=False)
-    
+
+    df.rename(columns={"pglabgro": "wage"}, inplace=True)
+    df = df[df["wage"] > 0]
+    print(str(len(df)) + " observations after dropping invalid wage values.")
+
     df = df[df["parid"] >= 0]
     print(str(len(df)) + " observations after dropping singles.")
 
@@ -36,10 +36,9 @@ def create_partner_wage_est_sample(paths, specs, load_data=False):
     print(str(len(df)) + " observations after unemployed and retirees.")
 
     df = create_education_type(df)
-    
-    # get partner data ("var_p") for each individual
-    df = merge_couples(df)
-
+    df = merge_couples(df) #partner data called {var}_p 
+    df = keep_relevant_columns(df)
+    df.to_pickle(out_file_path)
     return df
     
 def load_and_merge_soep_core(soep_c38_path):
@@ -84,3 +83,36 @@ def merge_couples(df):
     print(str(len(merged_data)) + " observations after merging couples.")
     return merged_data
     
+def keep_relevant_columns(df):
+    df = df[
+        [
+            "pid",
+            "parid",
+            "age",
+            "wage",
+            "education",
+            "syear",
+            "choice",
+            "age_p",
+            "wage_p",
+            "education_p",
+            "choice_p",
+        ]
+    ]
+    df = df.astype(
+        {
+            "pid": np.int32,
+            "parid": np.int32,
+            "syear": np.int32,
+            "age": np.int32,
+            "wage": np.float64,
+            "education": np.int32,
+            "choice": np.int32,
+            "age_p": np.int32,
+            "wage_p": np.float64,
+            "education_p": np.int32,
+            "choice_p": np.int32,
+        }
+    )
+    print(str(len(df)) + " observations in final wage estimation dataset.")
+    return df

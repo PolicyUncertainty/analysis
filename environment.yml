@@ -33,3 +33,4 @@ dependencies:
 
       # Local installation of dcegm and package itself
       - -e .
+      - -e ./submodules/dcegm/

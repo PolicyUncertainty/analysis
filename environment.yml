@@ -32,4 +32,4 @@ dependencies:
       - jaxlib
 
       # Local installation of dcegm and package itself
-      - install -e .
+      - -e ../

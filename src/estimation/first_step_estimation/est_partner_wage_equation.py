@@ -7,12 +7,16 @@ import numpy as np
 import pandas as pd
 from linearmodels.panel.model import PanelOLS
 from model_code.derive_specs import read_and_derive_specs
-from est_wage_equation import prepare_estimation_data
+from estimation.first_step_estimation.est_wage_equation import prepare_estimation_data
 
 def estimate_partner_wage_parameters(paths_dict):
     """Estimate the wage parameters for each education group in the sample."""
-    wage_data = prepare_estimation_data(paths_dict)
-
+    # load and modify data
+    wage_data = pd.read_pickle(
+        paths_dict["intermediate_data"] + "partner_wage_estimation_sample.pkl"
+    )
+    wage_data = prepare_estimation_data(wage_data)
+    breakpoint()
     # Initialize empty container for coefficients
     coefficients = [0] * len(wage_data["education"].unique())
     for education in wage_data["education"].unique():

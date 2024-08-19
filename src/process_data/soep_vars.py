@@ -37,6 +37,7 @@ def create_choice_variable(data):
     data = data[data["choice"].notna()]
     return data
 
+
 def create_choice_variable_with_part_time(data):
     """This function creates the choice variable for the structural model.
 
@@ -102,11 +103,16 @@ def sum_experience_variables(data):
 
     # If both are valid use the sum
     data.loc[~invalid_ft_exp & ~invalid_pt_exp, "experience"] = (
-        data.loc[~invalid_ft_exp & ~invalid_pt_exp, "pgexpft"] + 0.5 * data.loc[~invalid_ft_exp & ~invalid_pt_exp, "pgexppt"]
+        data.loc[~invalid_ft_exp & ~invalid_pt_exp, "pgexpft"]
+        + 0.5 * data.loc[~invalid_ft_exp & ~invalid_pt_exp, "pgexppt"]
     )
     # If only one is valid use the valid one
-    data.loc[invalid_ft_exp & ~invalid_pt_exp, "experience"] = 0.5 * data.loc[invalid_ft_exp & ~invalid_pt_exp, "pgexppt"]
-    data.loc[~invalid_ft_exp & invalid_pt_exp, "experience"] = data.loc[~invalid_ft_exp & invalid_pt_exp, "pgexpft"]
+    data.loc[invalid_ft_exp & ~invalid_pt_exp, "experience"] = (
+        0.5 * data.loc[invalid_ft_exp & ~invalid_pt_exp, "pgexppt"]
+    )
+    data.loc[~invalid_ft_exp & invalid_pt_exp, "experience"] = data.loc[
+        ~invalid_ft_exp & invalid_pt_exp, "pgexpft"
+    ]
     # If both are invalid drop observations
     data = data[data["experience"].notna()]
     print(

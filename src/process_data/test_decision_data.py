@@ -16,15 +16,13 @@ from set_paths import create_path_dict
 IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 
 
-
 # These function tests the decision data for consistency (cf. model state space sparsity condition).
 
 from model_code.derive_specs import generate_derived_and_data_derived_specs
 
+
 @pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Test doesn't work in Github Actions.")
-def test_decision_data_no_missing_values(
-    load_data=True
-):
+def test_decision_data_no_missing_values(load_data=True):
     """This functions asserts that there are no missing values for any states."""
     paths_dict = create_path_dict()
 
@@ -43,9 +41,7 @@ def test_decision_data_no_missing_values(
 
 
 @pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Test doesn't work in Github Actions.")
-def test_decision_data_no_ret_before_min_ret_age(
-    load_data=LOAD_SAVED_DATA
-):  
+def test_decision_data_no_ret_before_min_ret_age(load_data=LOAD_SAVED_DATA):
     """This functions asserts that nobody is retired before min_ret_age."""
     paths_dict = create_path_dict()
     options = generate_derived_and_data_derived_specs(paths_dict, load_precomputed=True)
@@ -61,9 +57,7 @@ def test_decision_data_no_ret_before_min_ret_age(
 
 
 @pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Test doesn't work in Github Actions.")
-def test_decision_data_no_work_after_max_ret_age(
-    load_data=LOAD_SAVED_DATA
-):
+def test_decision_data_no_work_after_max_ret_age(load_data=LOAD_SAVED_DATA):
     """This functions asserts that there are no working after max_ret_age."""
     paths_dict = create_path_dict()
     options = generate_derived_and_data_derived_specs(paths_dict, load_precomputed=True)
@@ -93,9 +87,7 @@ def test_decision_data_no_work_after_max_ret_age(
 
 
 @pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Test doesn't work in Github Actions.")
-def test_decision_data_exp_cap(
-    load_data=LOAD_SAVED_DATA
-):
+def test_decision_data_exp_cap(load_data=LOAD_SAVED_DATA):
     """This functions asserts that experience is smaller or equal to age and exp_cap."""
     paths_dict = create_path_dict()
     options = generate_derived_and_data_derived_specs(paths_dict, load_precomputed=True)
@@ -109,12 +101,10 @@ def test_decision_data_exp_cap(
 
 
 @pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Test doesn't work in Github Actions.")
-def test_decision_data_retirement_is_absorbing(
-    load_data=LOAD_SAVED_DATA
-):
+def test_decision_data_retirement_is_absorbing(load_data=LOAD_SAVED_DATA):
     """This functions asserts that retirement is absorbing."""
     paths_dict = create_path_dict()
-    
+
     dec_dat = create_structural_est_sample(
         paths_dict,
         load_data=load_data,

@@ -8,6 +8,7 @@ import pandas as pd
 from linearmodels.panel.model import PanelOLS
 from model_code.derive_specs import read_and_derive_specs
 
+
 def estimate_partner_wage_parameters(paths_dict, est_men):
     """Estimate the wage parameters partners by education group in the sample.
     Est_men is a boolean that determines whether the estimation is done
@@ -22,7 +23,7 @@ def estimate_partner_wage_parameters(paths_dict, est_men):
         out_file_path = paths_dict["est_results"] + "partner_wage_eq_params_men.csv"
     else:
         wage_data = wage_data[wage_data["sex"] == 2]
-        out_file_path = paths_dict["est_results"] + "partner_wage_eq_params_women.csv"   
+        out_file_path = paths_dict["est_results"] + "partner_wage_eq_params_women.csv"
     wage_data = prepare_estimation_data(wage_data)
 
     # Initialize empty container for coefficients
@@ -46,6 +47,7 @@ def estimate_partner_wage_parameters(paths_dict, est_men):
     wage_parameters = pd.DataFrame(coefficients)
     wage_parameters.to_csv(out_file_path)
     return coefficients
+
 
 def prepare_estimation_data(wage_data):
     """Prepare the data for the wage estimation."""

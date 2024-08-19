@@ -197,7 +197,7 @@ def load_and_merge_soep_core(soep_c38_path):
 def filter_data(merged_data, start_year, end_year, start_age, no_women=True):
     """This function filters the data according to the model setup.
 
-    Specifically, it filters out young people, women (if no_women=True), and 
+    Specifically, it filters out young people, women (if no_women=True), and
     years outside of estimation range. It leaves one year younger and one year
     below in the sample to construct lagged_choice.
 

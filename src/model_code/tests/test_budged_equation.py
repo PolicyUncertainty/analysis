@@ -50,6 +50,7 @@ EXP_GRID = np.linspace(10, 30, 3, dtype=int)
 EDUCATION_GRID = [0, 1]
 INCOME_SHOCK_GRID = np.linspace(-0.5, 0.5, 3)
 
+
 @pytest.mark.parametrize(
     "gamma, income_shock, experience, interest_rate, savings, education",
     list(

@@ -1,8 +1,9 @@
 # Set data paths according to user.
 import jax
+from pathlib import Path
 
 
-def create_path_dict(analysis_path, define_user=False, user=None):
+def create_path_dict(define_user=False, user=None):
     jax.config.update("jax_enable_x64", True)
     if define_user:
         if user is None:
@@ -26,6 +27,8 @@ def create_path_dict(analysis_path, define_user=False, user=None):
         }
     else:
         paths_dict = {}
+
+    analysis_path = str(Path(__file__).resolve().parents[1]) + "/"
 
     paths_dict = {
         **paths_dict,

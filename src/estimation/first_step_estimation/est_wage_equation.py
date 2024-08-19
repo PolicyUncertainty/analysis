@@ -1,5 +1,5 @@
 # Description: This file estimates the parameters of the MONTHLY wage equation using the SOEP panel data.
-# We estimate the following equation:
+# We estimate the following equation for each education level:
 # ln_wage = beta_0 + beta_1 * ln_(exp+1) + individual_FE + time_FE + epsilon
 import matplotlib.pyplot as plt
 import numpy as np
@@ -9,9 +9,13 @@ from model_code.derive_specs import read_and_derive_specs
 
 
 def estimate_wage_parameters(paths_dict):
-    """Estimate the wage parameters for each education group in the sample."""
-    wage_data = prepare_estimation_data(paths_dict)
-
+    """Estimate the wage parameters for each education group in the sample."""    
+    # load and modify data
+    wage_data = pd.read_pickle(
+        paths_dict["intermediate_data"] + "wage_estimation_sample.pkl"
+    )
+    wage_data = prepare_estimation_data(wage_data)
+    
     # Initialize empty container for coefficients
     coefficients = [0] * len(wage_data["education"].unique())
     for education in wage_data["education"].unique():
@@ -58,16 +62,14 @@ def estimate_average_wage_parameters(paths_dict):
     return coefficients
 
 
-def prepare_estimation_data(paths_dict):
-    # Load data
-    wage_data = pd.read_pickle(
-        paths_dict["intermediate_data"] + "wage_estimation_sample.pkl"
-    )
-
-    # prepare estimation data
+def prepare_estimation_data(wage_data):
+    """Prepare the data for the wage estimation."""
+    # wage data
     wage_data["ln_wage"] = np.log(wage_data["wage"])
     wage_data["experience"] = wage_data["experience"] + 1
     wage_data["ln_exp"] = np.log(wage_data["experience"])
+    wage_data["ln_age"] = np.log(wage_data["age"])
+
 
     # prepare format
     wage_data["year"] = wage_data["syear"].astype("category")

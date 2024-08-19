@@ -1,12 +1,8 @@
 import sys
 from itertools import product
-from pathlib import Path
 
 import numpy as np
 import pytest
-
-analysis_path = str(Path(__file__).resolve().parents[3]) + "/"
-sys.path.insert(0, analysis_path + "src/")
 
 from model_code.wealth_and_budget.budget_equation import budget_constraint
 from model_code.wealth_and_budget.wages import calc_net_income_working
@@ -25,7 +21,7 @@ BENEFITS_GRID = np.linspace(10, 100, 5)
     list(product(BENEFITS_GRID, SAVINGS_GRID, INTEREST_RATE_GRID)),
 )
 def test_budget_unemployed(unemployment_benefits, savings, interest_rate):
-    path_dict = create_path_dict(analysis_path)
+    path_dict = create_path_dict()
     specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
     specs["unemployment_benefits"] = unemployment_benefits
 
@@ -52,14 +48,14 @@ def test_budget_unemployed(unemployment_benefits, savings, interest_rate):
 GAMMA_GRID = np.linspace(0.1, 0.9, 3)
 EXP_GRID = np.linspace(10, 30, 3, dtype=int)
 EDUCATION_GRID = [0, 1]
-
+INCOME_SHOCK_GRID = np.linspace(-0.5, 0.5, 3)
 
 @pytest.mark.parametrize(
     "gamma, income_shock, experience, interest_rate, savings, education",
     list(
         product(
             GAMMA_GRID,
-            BENEFITS_GRID,
+            INCOME_SHOCK_GRID,
             EXP_GRID,
             INTEREST_RATE_GRID,
             SAVINGS_GRID,
@@ -70,7 +66,7 @@ EDUCATION_GRID = [0, 1]
 def test_budget_worker(
     gamma, income_shock, experience, interest_rate, savings, education
 ):
-    path_dict = create_path_dict(analysis_path)
+    path_dict = create_path_dict()
     specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
 
     gamma_array = np.array([gamma, gamma - 0.01])
@@ -126,7 +122,7 @@ def test_retiree(
     ret_age_id,
 ):
     education = 0
-    path_dict = create_path_dict(analysis_path)
+    path_dict = create_path_dict()
     specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
 
     actual_retirement_age = specs["min_ret_age"] + ret_age_id

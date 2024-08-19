@@ -27,15 +27,35 @@ def create_choice_variable(data):
     soep_empl_status = data["pgstib"]
     # rv_ret_choice = merged_data["STATUS_2"]
 
-    # Now assign emploayment choices
+    # assign emploayment choices
     data.loc[soep_empl_choice == 5, "choice"] = 0
     data.loc[soep_empl_choice == 1, "choice"] = 1
 
-    # Finally retirement choice
+    # assign retirement choice
     data.loc[soep_empl_status == 13, "choice"] = 2
     # merged_data.loc[rv_ret_choice == "RTB"] = 2
-    merged_data = data[data["choice"].notna()]
-    return merged_data
+    data = data[data["choice"].notna()]
+    return data
+
+def create_choice_variable_with_part_time(data):
+    """This function creates the choice variable for the structural model.
+
+    It includes part-time employment as a separate choice. (0: unemployed, 1: full-time, 2: retired, 3: part-time)
+    """
+    data["choice"] = np.nan
+    soep_empl_choice = data["pgemplst"]
+    soep_empl_status = data["pgstib"]
+
+    # assign emploayment choices
+    data.loc[soep_empl_choice == 5, "choice"] = 0
+    data.loc[soep_empl_choice == 1, "choice"] = 1
+    data.loc[soep_empl_choice == 2, "choice"] = 3
+
+    # assign retirement choice
+    data.loc[soep_empl_status == 13, "choice"] = 2
+    # merged_data.loc[rv_ret_choice == "RTB"] = 2
+    data = data[data["choice"].notna()]
+    return data
 
 
 def create_experience_variable_with_cap(data, exp_cap):

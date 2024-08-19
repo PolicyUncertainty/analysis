@@ -1,8 +1,3 @@
-import sys
-from pathlib import Path
-
-src_folder = Path(__file__).resolve().parents[2]
-sys.path.append(str(src_folder))
 import pytest
 from model_code.utility_functions import (
     utility_func,

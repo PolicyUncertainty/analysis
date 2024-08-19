@@ -45,8 +45,8 @@ def estimate_model(path_dict, load_model):
         # "bequest_scale": 1e-12,
         # "lambda": 1e-12,
         "job_finding_logit_const": -10,
-        "job_finding_logit_age": -10,
-        "job_finding_logit_age_squ": -10,
+        "job_finding_logit_age": -0.5,
+        "job_finding_logit_age_squ": -0.05,
         "job_finding_logit_high_educ": -10,
     }
     upper_bounds = {
@@ -56,8 +56,8 @@ def estimate_model(path_dict, load_model):
         # "bequest_scale": 20,
         # "lambda": 1,
         "job_finding_logit_const": 10,
-        "job_finding_logit_age": 10,
-        "job_finding_logit_age_squ": 10,
+        "job_finding_logit_age": 0.5,
+        "job_finding_logit_age_squ": 0.05,
         "job_finding_logit_high_educ": 10,
     }
 

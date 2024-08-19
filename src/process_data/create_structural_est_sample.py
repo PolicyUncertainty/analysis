@@ -64,7 +64,7 @@ def create_structural_est_sample(paths, load_data=False, options=None):
     # education
     merged_data = create_education_type(merged_data)
 
-    # additional filters based on model setup
+    # additional restrictions based on model setup
     merged_data = enforce_model_choice_restriction(
         merged_data, min_ret_age, options["max_ret_age"]
     )
@@ -270,12 +270,12 @@ def deflate_wealth(merged_data, path_dict):
     return merged_data
 
 
-def filter_data(merged_data, start_year, end_year, start_age):
+def filter_data(merged_data, start_year, end_year, start_age, no_women=True):
     """This function filters the data according to the model setup.
 
-    Specifically, it filters out young people, women, and years outside of estimation
-    range. It leaves one year younger and one year below in the sample to construct
-    lagged_choice.
+    Specifically, it filters out young people, women (if no_women=True), and 
+    years outside of estimation range. It leaves one year younger and one year
+    below in the sample to construct lagged_choice.
 
     """
 
@@ -290,8 +290,9 @@ def filter_data(merged_data, start_year, end_year, start_age):
         + str(start_age)
         + " years old."
     )
-    merged_data = merged_data[(merged_data["sex"] == 1)]
-    print(str(len(merged_data)) + " left after dropping women.")
+    if no_women:
+        merged_data = merged_data[(merged_data["sex"] == 1)]
+        print(str(len(merged_data)) + " left after dropping women.")
     merged_data = merged_data.loc[
         ((slice(None), range(start_year - 1, end_year + 1))), :
     ]

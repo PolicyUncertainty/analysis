@@ -1,23 +1,19 @@
 # Set paths of project
-import sys
+#import sys
 from pathlib import Path
 
 from model_code.derive_specs import read_and_derive_specs
-
-analysis_path = str(Path(__file__).resolve().parents[2]) + "/"
-sys.path.insert(0, analysis_path + "submodules/dcegm/src/")
-sys.path.insert(0, analysis_path + "src/")
-
 from set_paths import create_path_dict
 
 # do_first_step = input("Do first step estimation? (y/n): ") == "y"
 estimate_sra = input("Estimate SRA process? (y/n): ") == "y"
 estimate_wage = input("Estimate wage? (y/n): ") == "y"
+estimate_partner_wage = input("Estimate partner wage? (y/n): ") == "y"
 estimate_job_sep = input("Estimate job separation? (y/n): ") == "y"
 do_model_estimatation = input("Estimate model? (y/n): ") == "y"
 
 
-paths_dict = create_path_dict(analysis_path, define_user=estimate_sra)
+paths_dict = create_path_dict(define_user=estimate_sra)
 specs = read_and_derive_specs(paths_dict["specs"])
 
 
@@ -46,6 +42,15 @@ if estimate_wage:
 
     estimate_wage_parameters(paths_dict)
     estimate_average_wage_parameters(paths_dict)
+
+if estimate_partner_wage:
+    # Estimate partner wage parameters for men and women
+    from estimation.first_step_estimation.est_partner_wage_equation import (
+        estimate_partner_wage_parameters,
+    )
+
+    estimate_partner_wage_parameters(paths_dict, True)
+    estimate_partner_wage_parameters(paths_dict, False)
 
 if estimate_job_sep:
     # Estimate job separation

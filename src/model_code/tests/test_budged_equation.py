@@ -48,14 +48,14 @@ def test_budget_unemployed(unemployment_benefits, savings, interest_rate):
 GAMMA_GRID = np.linspace(0.1, 0.9, 3)
 EXP_GRID = np.linspace(10, 30, 3, dtype=int)
 EDUCATION_GRID = [0, 1]
-
+INCOME_SHOCK_GRID = np.linspace(-0.5, 0.5, 3)
 
 @pytest.mark.parametrize(
     "gamma, income_shock, experience, interest_rate, savings, education",
     list(
         product(
             GAMMA_GRID,
-            BENEFITS_GRID,
+            INCOME_SHOCK_GRID,
             EXP_GRID,
             INTEREST_RATE_GRID,
             SAVINGS_GRID,

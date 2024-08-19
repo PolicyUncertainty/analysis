@@ -1,10 +1,6 @@
 # Set paths of project
-import sys
+#import sys
 from pathlib import Path
-
-analysis_path = str(Path(__file__).resolve().parents[2]) + "/"
-sys.path.insert(0, analysis_path + "submodules/dcegm/src/")
-sys.path.insert(0, analysis_path + "src/")
 
 from model_code.derive_specs import read_and_derive_specs
 from set_paths import create_path_dict
@@ -17,7 +13,7 @@ estimate_job_sep = input("Estimate job separation? (y/n): ") == "y"
 do_model_estimatation = input("Estimate model? (y/n): ") == "y"
 
 
-paths_dict = create_path_dict(analysis_path, define_user=estimate_sra)
+paths_dict = create_path_dict(define_user=estimate_sra)
 specs = read_and_derive_specs(paths_dict["specs"])
 
 

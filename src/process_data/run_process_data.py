@@ -1,15 +1,9 @@
 # %%
 # set paths and parameters
 # --------------------------------------------------------------------------------------
-import sys
-from pathlib import Path
-
-analysis_path = str(Path(__file__).resolve().parents[2]) + "/"
-sys.path.insert(0, analysis_path + "src/")
-
 from set_paths import create_path_dict
 
-paths_dict = create_path_dict(analysis_path, define_user=True)
+paths_dict = create_path_dict(define_user=True)
 
 # Load options and generate auxiliary options
 from model_code.derive_specs import read_and_derive_specs

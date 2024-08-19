@@ -1,4 +1,4 @@
-# Description: This file estimates the parameters of the MONTHLY wage equation using the SOEP panel data.
+# Description: This file estimates the parameters of the HOURLY wage equation using the SOEP panel data.
 # We estimate the following equation for each education level:
 # ln_partner_wage = beta_0 + beta_1 * ln(age) individual_FE + time_FE + epsilon
 
@@ -31,7 +31,7 @@ def estimate_partner_wage_parameters(paths_dict, est_men):
         wage_data_edu = wage_data[wage_data["education"] == education]
         # estimate parametric regression, save parameters
         model = PanelOLS(
-            dependent=wage_data_edu["ln_partner_wage"],
+            dependent=wage_data_edu["ln_partner_hrl_wage"],
             exog=wage_data_edu[["constant", "ln_age", "year"]],
             entity_effects=True,
         )
@@ -47,15 +47,13 @@ def estimate_partner_wage_parameters(paths_dict, est_men):
     wage_parameters.to_csv(out_file_path)
     return coefficients
 
-
 def prepare_estimation_data(wage_data):
     """Prepare the data for the wage estimation."""
-    # wage data
-    wage_data["ln_wage"] = np.log(wage_data["wage"])
+    # own data
     wage_data["ln_age"] = np.log(wage_data["age"])
 
     # partner data
-    wage_data["ln_partner_wage"] = np.log(wage_data["wage_p"])
+    wage_data["ln_partner_hrl_wage"] = np.log(wage_data["hourly_wage_p"])
 
     # prepare format
     wage_data["year"] = wage_data["syear"].astype("category")

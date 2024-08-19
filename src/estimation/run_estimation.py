@@ -48,12 +48,13 @@ if estimate_wage:
     estimate_average_wage_parameters(paths_dict)
 
 if estimate_partner_wage:
-    # Estimate partner wage parameters
+    # Estimate partner wage parameters for men and women
     from estimation.first_step_estimation.est_partner_wage_equation import (
         estimate_partner_wage_parameters,
     )
 
-    estimate_partner_wage_parameters(paths_dict)
+    estimate_partner_wage_parameters(paths_dict, True)
+    estimate_partner_wage_parameters(paths_dict, False)
 
 if estimate_job_sep:
     # Estimate job separation

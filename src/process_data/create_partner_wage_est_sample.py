@@ -55,6 +55,7 @@ def load_and_merge_soep_core(soep_c38_path):
             "pgstib",
             "pglabgro",
             "pgpsbil",
+            "pgvebzeit",
         ],
         convert_categoricals=False,
     )
@@ -93,10 +94,12 @@ def keep_relevant_columns(df):
             "education",
             "syear",
             "choice",
+            "sex",
             "age_p",
             "wage_p",
             "education_p",
             "choice_p",
+            "sex_p"
         ]
     ]
     df = df.astype(
@@ -108,10 +111,12 @@ def keep_relevant_columns(df):
             "wage": np.float64,
             "education": np.int32,
             "choice": np.int32,
+            "sex": np.int32,
             "age_p": np.int32,
             "wage_p": np.float64,
             "education_p": np.int32,
             "choice_p": np.int32,
+            "sex_p": np.int32
         }
     )
     print(str(len(df)) + " observations in final wage estimation dataset.")

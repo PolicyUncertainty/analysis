@@ -30,6 +30,10 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
 
     # Set initial experience
     specs["max_init_experience"] = create_initial_exp(path_dict, load_precomputed)
+
+    specs["job_sep_probs"] = jnp.asarray(
+        np.loadtxt(path_dict["est_results"] + "job_sep_probs.csv", delimiter=",")
+    )
     return specs
 
 

@@ -34,5 +34,3 @@ if string_in == "a" or string_in == "p":
 
 if string_in == "a" or string_in == "j":
     create_job_sep_sample(paths_dict, specs=specs, load_data=False)
-
-

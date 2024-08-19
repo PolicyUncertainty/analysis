@@ -5,6 +5,8 @@ import pandas as pd
 from process_data.soep_vars import create_choice_variable
 from process_data.soep_vars import create_education_type
 from process_data.soep_vars import create_experience_variable_with_cap
+from process_data.soep_vars import generate_job_separation_var
+from process_data.wealth import add_wealth
 
 
 def create_structural_est_sample(paths, load_data=False, options=None):
@@ -27,29 +29,30 @@ def create_structural_est_sample(paths, load_data=False, options=None):
     # Load and merge data state data from SOEP core (all but wealth)
     merged_data = load_and_merge_soep_core(soep_c38_path=paths["soep_c38"])
 
-    # wealth data from SOEP C38 (hwealth.dta)
-    merged_data = gather_wealth_data(paths["soep_c38"], merged_data, options)
-    merged_data = create_hh_cons_equivalence_data(merged_data)
-    # Wealth hack. Until we have family context
-    merged_data["wealth"] = merged_data["wealth"] / merged_data["cons_equiv"]
-    merged_data = deflate_wealth(merged_data, paths)
+    # filter data. Leave additional years in for lagging and leading
+    merged_data = filter_data(merged_data, start_year, end_year, start_age)
 
     # (labor) choice
     merged_data = create_choice_variable(merged_data)
 
-    # filter data
-    merged_data = filter_data(merged_data, start_year, end_year, start_age)
-
-    # period
-    merged_data["period"] = merged_data["age"] - start_age
+    # Job separation
+    merged_data = generate_job_separation_var(merged_data)
 
     # lagged choice
-    merged_data = create_lagged_choice_variable(
+    merged_data = create_lagged_and_lead_variables(
         merged_data, start_year, end_year, start_age
     )
 
+    # Add wealth data
+    merged_data = add_wealth(merged_data, paths, options)
+
+    # Now create more observed choice variables
+    # period
+    merged_data["period"] = merged_data["age"] - start_age
+
     # policy_state
     merged_data["policy_state"] = create_policy_state(merged_data["gebjahr"])
+
     (
         merged_data["policy_state_value"],
         merged_data["policy_state"],
@@ -69,6 +72,9 @@ def create_structural_est_sample(paths, load_data=False, options=None):
         merged_data, min_ret_age, options["max_ret_age"]
     )
 
+    # Construct job offer state
+    merged_data = determine_observed_job_offers(merged_data)
+
     # Keep relevant columns (i.e. state variables)
     merged_data = merged_data[
         [
@@ -78,9 +84,11 @@ def create_structural_est_sample(paths, load_data=False, options=None):
             "policy_state",
             "policy_state_value",
             "retirement_age_id",
+            "job_offer",
             "experience",
             "wealth",
             "education",
+            "full_observed_state",
         ]
     ]
     merged_data = merged_data.astype(
@@ -89,10 +97,12 @@ def create_structural_est_sample(paths, load_data=False, options=None):
             "lagged_choice": "int8",
             "policy_state": "int8",
             "retirement_age_id": "int8",
+            "job_offer": "int8",
             "experience": "int8",
             "wealth": "float32",
             "period": "int8",
             "education": "int8",
+            "full_observed_state": "bool",
         }
     )
 
@@ -108,6 +118,24 @@ def create_structural_est_sample(paths, load_data=False, options=None):
     merged_data.to_pickle(out_file_path)
 
     return merged_data
+
+
+def determine_observed_job_offers(data):
+    data["job_offer"] = -99
+    data["full_observed_state"] = False
+
+    # Individuals working have job offer equal to 1 and are fully observed
+    data.loc[data["choice"] == 1, "job_offer"] = 1
+    data.loc[data["choice"] == 1, "full_observed_state"] = True
+
+    # Individuals who are unemployed or retird and are fired this period have job offer
+    # equalto 0. This includes individuals with lagged choice unemployment, as they
+    # might be interviewed after firing.
+    mask = (data["choice"].isin([0, 2])) & (data["job_sep_this_year"] == 1)
+    data.loc[mask, "job_offer"] = 0
+    data.loc[mask, "full_observed_state"] = True
+
+    return data
 
 
 def load_and_merge_soep_core(soep_c38_path):
@@ -133,147 +161,43 @@ def load_and_merge_soep_core(soep_c38_path):
         columns=["pid", "hid", "syear", "sex", "gebjahr", "rv_id"],
         convert_categoricals=False,
     )
+    # Merge pgen data with pathl data and hl data
+    merged_data = pd.merge(
+        pgen_data, pathl_data, on=["pid", "hid", "syear"], how="inner"
+    )
+
+    # Add pl data
+    pl_data_reader = pd.read_stata(
+        f"{soep_c38_path}/pl.dta",
+        columns=["pid", "hid", "syear", "plb0304_h"],
+        chunksize=100000,
+        convert_categoricals=False,
+    )
+    pl_data = pd.DataFrame()
+    for itm in pl_data_reader:
+        pl_data = pd.concat([pl_data, itm])
+    merged_data = pd.merge(
+        merged_data, pl_data, on=["pid", "hid", "syear"], how="inner"
+    )
+
+    # Now get household level data
     hl_data = pd.read_stata(
         f"{soep_c38_path}/hl.dta",
         columns=["hid", "syear", "hlc0043"],
         convert_categoricals=False,
-    )
-
-    # Merge pgen data with pathl data and hl data
-    merged_data = pd.merge(
-        pgen_data, pathl_data, on=["pid", "hid", "syear"], how="inner"
     )
     merged_data = pd.merge(merged_data, hl_data, on=["hid", "syear"], how="left")
 
     merged_data["age"] = merged_data["syear"] - merged_data["gebjahr"]
     del pgen_data, pathl_data, hl_data
     print(str(len(merged_data)) + " observations in SOEP C38 core.")
-
-    # Calculate age and filter out missing rv_id values for people older than minimum retirement age
-
-    # merged_data = merged_data[
-    #     (merged_data["rv_id"] >= 0)
-    #     | ((merged_data["rv_id"] < 0) & (merged_data["age"] < min_ret_age))
-    # ]
-    # merged_data["rv_id"].replace(-2, pd.NA, inplace=True)
-    #
-    # print(
-    #     str(len(merged_data))
-    #     + " left after dropping over "
-    #     + str(min_ret_age)
-    #     + " year olds w/o SOEP-RV ID."
-    # )
-    #
-    # # Load SOEP RV VSKT data
-    # rv_data = pd.read_stata(
-    #     f"{soep_rv}/vskt/SUF.SOEP-RV.VSKT.2020.var.1-0.dta",
-    #     columns=["rv_id", "JAHR", "STATUS_2", "MONAT"],
-    # )
-    # # Check if rv_id is in rv data
-    # merged_data = merged_data[
-    #     (merged_data["age"] < min_ret_age)
-    #     | merged_data["rv_id"].isin(rv_data["rv_id"].unique())
-    # ]
-    #
-    # print(
-    #     str(len(merged_data))
-    #     + " left after dropping people with missing SOEP-RV ID in SOEP-RV VSKT."
-    # )
-    #
-    # # Prepare merge data
-    # merged_data["MONAT"] = 12
-    # rv_data["syear"] = rv_data["JAHR"]
-    #
-    # # Merge with SOEP core data
-    # merged_data = merged_data.merge(rv_data, on=["rv_id", "syear", "MONAT"], how="left")
-    return merged_data
-
-
-def gather_wealth_data(soep_c38_path, merged_data, options):
-    # Load SOEP core data
-    wealth_data = pd.read_stata(
-        f"{soep_c38_path}/hwealth.dta",
-        columns=["hid", "syear", "w011ha"],
-        convert_categoricals=False,
-    )
-    wealth_data["hid"] = wealth_data["hid"].astype(int)
-
-    # for each household, create a row for each year between min and max syear
-    min_max_syear = wealth_data.groupby("hid")["syear"].agg(["min", "max"])
-    all_combinations = pd.concat(
-        [
-            pd.DataFrame({"hid": hid, "syear": range(row["min"], row["max"] + 1)})
-            for hid, row in min_max_syear.iterrows()
-        ]
-    )
-    wealth_data_full = pd.merge(
-        all_combinations, wealth_data, on=["hid", "syear"], how="left"
-    )
-
-    # Set 'hid' and 'syear' as the index
-    wealth_data_full.set_index(["hid", "syear"], inplace=True)
-    wealth_data_full.sort_index(inplace=True)
-
-    # Interpolate the missing values for each household
-    wealth_data_full["w011ha"] = wealth_data_full.groupby("hid")["w011ha"].transform(
-        lambda group: group.interpolate(method="linear")
-    )
-
-    # rename to "wealth" and change unit to 1000s of euros
-    wealth_data_full.rename(columns={"w011ha": "wealth"}, inplace=True)
-    wealth_data_full["wealth"] = wealth_data_full["wealth"] / options["wealth_unit"]
-
-    merged_data = merged_data.merge(wealth_data_full, on=["hid", "syear"], how="left")
-
-    merged_data = merged_data[(merged_data["wealth"].notna())]
-
-    merged_data.loc[merged_data["wealth"] < 0, "wealth"] = 0
-
-    print(str(len(merged_data)) + " left after dropping people with missing wealth.")
-
-    return merged_data
-
-
-def create_hh_cons_equivalence_data(merged_data):
-    """This function creates the household consumption equivalence scale following the
-    OECD-modified equivalence scale."""
-    # partner (>0 means has partner)
-    merged_data["has_partner"] = 0
-    merged_data.loc[merged_data["pgpartz"] >= 1, "has_partner"] = 1
-
-    # number of children (<0 means 0 or "no info", which is treated as 0)
-    merged_data["n_children"] = merged_data["hlc0043"]
-    merged_data.loc[merged_data["n_children"] < 0, "n_children"] = 0
-
-    # consumption equivalence scale
-    merged_data["cons_equiv"] = (
-        1 + 0.5 * merged_data["has_partner"] + 0.3 * merged_data["n_children"]
-    )
-
-    # drop missing values
-    merged_data = merged_data[merged_data["cons_equiv"].notna()]
-
-    print(
-        str(len(merged_data))
-        + " left after dropping people with missing consumption equivalence scale."
-    )
-    return merged_data
-
-
-def deflate_wealth(merged_data, path_dict):
-    """This function deflates the wealth variable using the consumer price index."""
-    cpi_data = pd.read_csv(
-        path_dict["intermediate_data"] + "cpi_base_2010.csv", index_col=0
-    )
-    merged_data = merged_data.merge(cpi_data, left_on="syear", right_index=True)
-    merged_data["wealth"] = merged_data["wealth"] / merged_data["cpi"]
     return merged_data
 
 
 def filter_data(merged_data, start_year, end_year, start_age, no_women=True):
     """This function filters the data according to the model setup.
 
-    Specifically, it filters out young people, women (if no_women=True), and 
+    Specifically, it filters out young people, women (if no_women=True), and
     years outside of estimation range. It leaves one year younger and one year
     below in the sample to construct lagged_choice.
 
@@ -294,7 +218,7 @@ def filter_data(merged_data, start_year, end_year, start_age, no_women=True):
         merged_data = merged_data[(merged_data["sex"] == 1)]
         print(str(len(merged_data)) + " left after dropping women.")
     merged_data = merged_data.loc[
-        ((slice(None), range(start_year - 1, end_year + 1))), :
+        ((slice(None), range(start_year - 1, end_year + 2))), :
     ]
     print(
         str(len(merged_data))
@@ -303,12 +227,15 @@ def filter_data(merged_data, start_year, end_year, start_age, no_women=True):
     return merged_data
 
 
-def create_lagged_choice_variable(merged_data, start_year, end_year, start_age):
+def create_lagged_and_lead_variables(merged_data, start_year, end_year, start_age):
     """This function creates the lagged choice variable and drops missing lagged
     choices."""
-    # Create full index with all possible combinations of pid and syear
+    # Create full index with all possible combinations of pid and syear. Otherwise if
+    # we just shift the data, people having missing years in their observations get
+    # assigned variables from multi years back.
+    pid_indexes = merged_data.index.get_level_values(0).unique()
     full_index = pd.MultiIndex.from_product(
-        [merged_data.index.levels[0], range(start_year - 1, end_year + 1)],
+        [pid_indexes, range(start_year - 1, end_year + 2)],
         names=["pid", "syear"],
     )
     full_container = pd.DataFrame(
@@ -316,12 +243,18 @@ def create_lagged_choice_variable(merged_data, start_year, end_year, start_age):
     )
     full_container.update(merged_data)
     full_container["lagged_choice"] = full_container.groupby(["pid"])["choice"].shift()
+    full_container["job_sep_this_year"] = full_container.groupby(["pid"])[
+        "job_sep"
+    ].shift(-1)
     merged_data = full_container[full_container["lagged_choice"].notna()]
+    merged_data = merged_data[merged_data["job_sep_this_year"].notna()]
 
-    # Delete entries of persons missing 2021, but observed in 2020.
+    # We now have observations with a valid lagged or lead variable but not with
+    # actual valid state variables. Delete those by looking at the choice variable.
     merged_data = merged_data[merged_data["choice"].notna()]
 
-    # Delete people who are start_age - 1 years old
+    # We left too young people in the sample to construct lagged choice. Delete those
+    # now.
     merged_data = merged_data[merged_data["age"] >= start_age]
 
     print(str(len(merged_data)) + " left after filtering missing lagged choices.")

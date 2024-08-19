@@ -37,6 +37,7 @@ def create_choice_variable(data):
     data = data[data["choice"].notna()]
     return data
 
+
 def create_choice_variable_with_part_time(data):
     """This function creates the choice variable for the structural model.
 
@@ -93,13 +94,25 @@ def sum_experience_variables(data):
 
     # Initialize empty experience column
     data["experience"] = np.nan
+
+    # Check if years of part plus full time exceed age minus 14 (not allowed to work before)
+    max_exp = data["age"] - 14
+    exp_exceeding = ((data["pgexpft"] + data["pgexppt"]) - max_exp).clip(lower=0)
+    # Deduct exceeding experience from part time experience. Assume if worked both, you worked full
+    data.loc[:, "pgexppt"] -= exp_exceeding
+
     # If both are valid use the sum
     data.loc[~invalid_ft_exp & ~invalid_pt_exp, "experience"] = (
-        data["pgexpft"] + 0.5 * data["pgexppt"]
+        data.loc[~invalid_ft_exp & ~invalid_pt_exp, "pgexpft"]
+        + 0.5 * data.loc[~invalid_ft_exp & ~invalid_pt_exp, "pgexppt"]
     )
     # If only one is valid use the valid one
-    data.loc[invalid_ft_exp & ~invalid_pt_exp, "experience"] = 0.5 * data["pgexppt"]
-    data.loc[~invalid_ft_exp & invalid_pt_exp, "experience"] = data["pgexpft"]
+    data.loc[invalid_ft_exp & ~invalid_pt_exp, "experience"] = (
+        0.5 * data.loc[invalid_ft_exp & ~invalid_pt_exp, "pgexppt"]
+    )
+    data.loc[~invalid_ft_exp & invalid_pt_exp, "experience"] = data.loc[
+        ~invalid_ft_exp & invalid_pt_exp, "pgexpft"
+    ]
     # If both are invalid drop observations
     data = data[data["experience"].notna()]
     print(
@@ -112,7 +125,7 @@ def generate_job_separation_var(data):
     """This function generates a job separation variable.
 
     The function creates a new column job_sep which is 1 if the individual got fired
-    from the last job.
+    from the last job. It uses plb0304_h from the soep pl data.
 
     """
     data["job_sep"] = 0

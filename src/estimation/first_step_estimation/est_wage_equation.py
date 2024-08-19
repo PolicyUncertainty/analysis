@@ -9,13 +9,13 @@ from model_code.derive_specs import read_and_derive_specs
 
 
 def estimate_wage_parameters(paths_dict):
-    """Estimate the wage parameters for each education group in the sample."""    
+    """Estimate the wage parameters for each education group in the sample."""
     # load and modify data
     wage_data = pd.read_pickle(
         paths_dict["intermediate_data"] + "wage_estimation_sample.pkl"
     )
     wage_data = prepare_estimation_data(wage_data)
-    
+
     # Initialize empty container for coefficients
     coefficients = [0] * len(wage_data["education"].unique())
     for education in wage_data["education"].unique():
@@ -69,7 +69,6 @@ def prepare_estimation_data(wage_data):
     wage_data["experience"] = wage_data["experience"] + 1
     wage_data["ln_exp"] = np.log(wage_data["experience"])
     wage_data["ln_age"] = np.log(wage_data["age"])
-
 
     # prepare format
     wage_data["year"] = wage_data["syear"].astype("category")

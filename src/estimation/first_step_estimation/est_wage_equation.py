@@ -70,9 +70,6 @@ def prepare_estimation_data(wage_data):
     wage_data["ln_exp"] = np.log(wage_data["experience"])
     wage_data["ln_age"] = np.log(wage_data["age"])
 
-    # partner data
-    try: wage_data["ln_partner_wage"] = np.log(wage_data["wage_p"])
-    except KeyError: pass
 
     # prepare format
     wage_data["year"] = wage_data["syear"].astype("category")

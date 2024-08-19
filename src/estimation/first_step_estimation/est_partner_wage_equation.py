@@ -7,7 +7,6 @@ import numpy as np
 import pandas as pd
 from linearmodels.panel.model import PanelOLS
 from model_code.derive_specs import read_and_derive_specs
-from estimation.first_step_estimation.est_wage_equation import prepare_estimation_data
 
 def estimate_partner_wage_parameters(paths_dict):
     """Estimate the wage parameters for each education group in the sample."""
@@ -16,7 +15,6 @@ def estimate_partner_wage_parameters(paths_dict):
         paths_dict["intermediate_data"] + "partner_wage_estimation_sample.pkl"
     )
     wage_data = prepare_estimation_data(wage_data)
-    breakpoint()
     # Initialize empty container for coefficients
     coefficients = [0] * len(wage_data["education"].unique())
     for education in wage_data["education"].unique():
@@ -38,3 +36,20 @@ def estimate_partner_wage_parameters(paths_dict):
     wage_parameters = pd.DataFrame(coefficients)
     wage_parameters.to_csv(paths_dict["est_results"] + "partner_wage_eq_params.csv")
     return coefficients
+
+
+def prepare_estimation_data(wage_data):
+    """Prepare the data for the wage estimation."""
+    # wage data
+    wage_data["ln_wage"] = np.log(wage_data["wage"])
+    wage_data["ln_age"] = np.log(wage_data["age"])
+
+    # partner data
+    wage_data["ln_partner_wage"] = np.log(wage_data["wage_p"])
+
+    # prepare format
+    wage_data["year"] = wage_data["syear"].astype("category")
+    wage_data = wage_data.set_index(["pid", "syear"])
+    wage_data["constant"] = np.ones(len(wage_data))
+
+    return wage_data

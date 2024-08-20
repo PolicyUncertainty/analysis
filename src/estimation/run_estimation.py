@@ -7,6 +7,7 @@ from model_code.derive_specs import read_and_derive_specs
 estimate_sra = input("Estimate SRA process? (y/n): ") == "y"
 estimate_wage = input("Estimate wage? (y/n): ") == "y"
 estimate_partner_wage = input("Estimate partner wage? (y/n): ") == "y"
+estimate_partner_transitions = input("Estimate partner transitions? (y/n): ") == "y"
 estimate_job_sep = input("Estimate job separation? (y/n): ") == "y"
 do_model_estimatation = input("Estimate model? (y/n): ") == "y"
 
@@ -62,4 +63,11 @@ if do_model_estimatation:
     estimation_results = estimate_model(paths_dict, load_model=False)
     print(estimation_results)
 
+if estimate_partner_transitions:
+    # Estimate partner transitions
+    from estimation.first_step_estimation.est_partner_transitions import (
+        estimate_partner_transitions,
+    )
+
+    estimate_partner_transitions(paths_dict, specs)
 # %%

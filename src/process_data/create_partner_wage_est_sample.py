@@ -91,8 +91,9 @@ def merge_couples(df, keep_singles=False):
     Partner variables are market '_p' in the merged dataset."""
     df = df.reset_index()
     df_partners = df.copy()
+    
     if keep_singles:
-        df_partners[df_partners["parid"] < 0] = np.nan
+        df_partners.loc[df_partners["parid"] < 0, "parid"] = np.nan
         merge_string = "left"
     else:
         merge_string = "inner"

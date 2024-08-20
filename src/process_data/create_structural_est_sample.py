@@ -1,5 +1,4 @@
 import os
-
 import numpy as np
 import pandas as pd
 from process_data.soep_vars import create_choice_variable
@@ -156,14 +155,14 @@ def load_and_merge_soep_core(soep_c38_path):
         ],
         convert_categoricals=False,
     )
-    pathl_data = pd.read_stata(
+    ppathl_data = pd.read_stata(
         f"{soep_c38_path}/ppathl.dta",
         columns=["pid", "hid", "syear", "sex", "gebjahr", "rv_id"],
         convert_categoricals=False,
     )
     # Merge pgen data with pathl data and hl data
     merged_data = pd.merge(
-        pgen_data, pathl_data, on=["pid", "hid", "syear"], how="inner"
+        pgen_data, ppathl_data, on=["pid", "hid", "syear"], how="inner"
     )
 
     # Add pl data
@@ -189,7 +188,6 @@ def load_and_merge_soep_core(soep_c38_path):
     merged_data = pd.merge(merged_data, hl_data, on=["hid", "syear"], how="left")
 
     merged_data["age"] = merged_data["syear"] - merged_data["gebjahr"]
-    del pgen_data, pathl_data, hl_data
     print(str(len(merged_data)) + " observations in SOEP C38 core.")
     return merged_data
 

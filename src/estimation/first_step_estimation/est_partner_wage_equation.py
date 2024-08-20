@@ -14,17 +14,7 @@ def estimate_partner_wage_parameters(paths_dict, est_men):
     Est_men is a boolean that determines whether the estimation is done
     for men or for women.
     """
-    # load and modify data
-    wage_data = pd.read_pickle(
-        paths_dict["intermediate_data"] + "partner_wage_estimation_sample.pkl"
-    )
-    if est_men == True:
-        wage_data = wage_data[wage_data["sex"] == 1]
-        out_file_path = paths_dict["est_results"] + "partner_wage_eq_params_men.csv"
-    else:
-        wage_data = wage_data[wage_data["sex"] == 2]
-        out_file_path = paths_dict["est_results"] + "partner_wage_eq_params_women.csv"
-    wage_data = prepare_estimation_data(wage_data)
+    wage_data = prepare_estimation_data(paths_dict, est_men=est_men)
 
     # Initialize empty container for coefficients
     coefficients = [0] * len(wage_data["education"].unique())
@@ -45,12 +35,26 @@ def estimate_partner_wage_parameters(paths_dict, est_men):
         coefficients[education].name = education
 
     wage_parameters = pd.DataFrame(coefficients)
+
+    append = "men" if est_men else "women"
+    out_file_path = paths_dict["est_results"] + f"partner_wage_eq_params_{append}.csv"
     wage_parameters.to_csv(out_file_path)
     return coefficients
 
 
-def prepare_estimation_data(wage_data):
+def prepare_estimation_data(paths_dict, est_men):
     """Prepare the data for the wage estimation."""
+    # load and modify data
+    wage_data = pd.read_pickle(
+        paths_dict["intermediate_data"] + "partner_wage_estimation_sample.pkl"
+    )
+    if est_men:
+        sex_var = 1
+    else:
+        sex_var = 2
+
+    wage_data = wage_data[wage_data["sex"] == sex_var]
+
     # own data
     wage_data["ln_age"] = np.log(wage_data["age"])
 

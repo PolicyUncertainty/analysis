@@ -4,10 +4,20 @@ from set_paths import create_path_dict
 from model_code.derive_specs import read_and_derive_specs
 
 
+input_str = input(
+    "\n\n Which of the following steps do you want to estimate? Please type the corresponding letter. "
+    "\n\n 1 First step ('f' for all in this category):"
+    "\n   - [s]ra process"
+    "\n   - [w]age"
+    "\n   - [p]artner wage"
+    "\n   - [j]ob separation"
+    "\n   - partner [t]ransition"
+    "\n\n 2 Estimate [m]odel."
+    "\n\n Input: "
+)
+# Set define user only to true if estimate SRA process as we need raw soep data there
+define_user = True if input_str == "s" else False
 
-input_str = input("Which of the following steps do you want to estimate? Please type the corresponding letter. \n 1 First ('f' for all in this category): \n [s]ra process \n [w]age \n [p]artner wage \n [j]ob separation \n \partner [t]ransition \n \n 2 Estimate [m]odel. \n Input: ")
-
-if input_str == "s": define_user = True
 paths_dict = create_path_dict(define_user=define_user)
 specs = read_and_derive_specs(paths_dict["specs"])
 

@@ -10,8 +10,14 @@ from model_code.derive_specs import read_and_derive_specs
 
 specs = read_and_derive_specs(paths_dict["specs"])
 string_in = input(
-    """Which dataset should be created? \n\n- [a]ll \n- [s]tructural \n- [w]age \n"""
-    """- wage [p]artner \n- [j]ob separation \n- partner [t]ransition \n Please write the corresponding letter:"""
+    """Which dataset should be created? 
+    \n\n- [a]ll
+    \n- [s]tructural
+    \n- [w]age
+    \n- wage [p]artner
+    \n- [j]ob separation
+    \n- partner [t]ransition
+    \n\n Please write the corresponding letter:"""
 )
 
 

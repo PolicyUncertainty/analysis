@@ -11,7 +11,7 @@ from model_code.derive_specs import read_and_derive_specs
 specs = read_and_derive_specs(paths_dict["specs"])
 string_in = input(
     """Which dataset should be created? \n\n- [a]ll \n- [s]tructural \n- [w]age \n"""
-    """- wage [p]artner \n- [j]ob separation \n Please write the corresponding letter:"""
+    """- wage [p]artner \n- [j]ob separation \n- partner [t]ransition \n Please write the corresponding letter:"""
 )
 
 
@@ -22,6 +22,8 @@ from process_data.create_structural_est_sample import create_structural_est_samp
 from process_data.create_wage_est_sample import create_wage_est_sample
 from process_data.create_partner_wage_est_sample import create_partner_wage_est_sample
 from process_data.create_job_sep_sample import create_job_sep_sample
+from process_data.create_partner_transition_sample import create_partner_transition_sample
+
 
 if string_in == "a" or string_in == "s":
     create_structural_est_sample(paths_dict, options=specs, load_data=False)
@@ -34,3 +36,9 @@ if string_in == "a" or string_in == "p":
 
 if string_in == "a" or string_in == "j":
     create_job_sep_sample(paths_dict, specs=specs, load_data=False)
+
+if string_in == "a" or string_in == "t":
+    create_partner_transition_sample(paths_dict, specs=specs, load_data=False)
+# %%
+
+

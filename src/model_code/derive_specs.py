@@ -28,6 +28,11 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     # pensions
     specs["pension_point_value_by_edu_exp"] = calculate_pension_values(specs, path_dict)
 
+    # partner income
+    specs["partner_hrly_wage"] = calculate_partner_wage(path_dict)
+    specs["partner_hours"] = calculate_partner_hours(path_dict)
+    specs["partner_pension"] = calculate_partner_pension(path_dict)
+
     # Set initial experience
     specs["max_init_experience"] = create_initial_exp(path_dict, load_precomputed)
 
@@ -112,3 +117,36 @@ def calculate_pension_values(specs, path_dict):
         + 0.25 * specs["pension_point_value_east_2010"]
     ) / specs["wealth_unit"]
     return jnp.asarray(adjustment_factor_by_exp) * pension_point_value
+
+def calculate_partner_hrly_wage(path_dict):
+    specs = read_and_derive_specs(path_dict["specs"])
+    start_age = specs["start_age"]
+    end_age = specs["end_age"]
+
+    # wage equation: ln(partner_wage(sex, edu)) = constant(sex, edu) + beta(sex, edu) * ln(age)
+    partner_wage_params_men = pd.read_pickle(
+        path_dict["intermediate_data"] + "partner_wage_estimation_sample_men.pkl"
+    )
+    partner_wage_params_women = pd.read_pickle(
+        path_dict["intermediate_data"] + "partner_wage_estimation_sample_women.pkl"
+    )
+    ages = np.arange(start_age, end_age + 1)
+    
+    partner_wages_men = np.zeros((2, len(ages)))
+    partner_wages_women = np.zeros(2, len(ages))
+    for edu in [0, 1]:
+        partner_wages_men[edu] = np.exp(
+            partner_wage_params_men["constant"].values[edu] + partner_wage_params_men["ln_age"].values[edu] * np.log(ages)
+        )
+        partner_wages_women[edu] = np.exp(
+            partner_wages_women["constant"].values[edu] + partner_wages_women["ln_age"].values[edu] * np.log(ages)
+        )
+    
+    partner_wages = np.concatenate(partner_wages_men, partner_wages_women)
+    return jnp.asarray(partner_wages)
+
+
+
+
+
+

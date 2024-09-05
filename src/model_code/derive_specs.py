@@ -29,7 +29,7 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     specs["pension_point_value_by_edu_exp"] = calculate_pension_values(specs, path_dict)
 
     # partner income
-    specs["partner_hrly_wage"] = calculate_partner_wage(path_dict)
+    specs["partner_hrly_wage"] = calculate_partner_hrly_wage(path_dict)
     specs["partner_hours"] = calculate_partner_hours(path_dict)
     specs["partner_pension"] = calculate_partner_pension(path_dict)
 
@@ -119,7 +119,7 @@ def calculate_pension_values(specs, path_dict):
     return jnp.asarray(adjustment_factor_by_exp) * pension_point_value
 
 def calculate_partner_hrly_wage(path_dict):
-    
+    """Calculate average hourly wage of working partners (i.e. conditional on working hours > 0)"""
     specs = read_and_derive_specs(path_dict["specs"])
     start_age = specs["start_age"]
     end_age = specs["end_age"]
@@ -147,7 +147,7 @@ def calculate_partner_hrly_wage(path_dict):
     return jnp.asarray(partner_wages)
 
 def calculate_partner_hours(path_dict):
-    """Calculate average hours worked by *working* partners (i.e. conditional on working hours > 0)"""
+    """Calculate average hours worked by working partners (i.e. conditional on working hours > 0)"""
     # load data
     df = pd.read_pickle(path_dict["intermediate_data"] + "partner_wage_estimation_sample.pkl")
     

@@ -119,6 +119,7 @@ def calculate_pension_values(specs, path_dict):
     return jnp.asarray(adjustment_factor_by_exp) * pension_point_value
 
 def calculate_partner_hrly_wage(path_dict):
+    
     specs = read_and_derive_specs(path_dict["specs"])
     start_age = specs["start_age"]
     end_age = specs["end_age"]
@@ -145,7 +146,16 @@ def calculate_partner_hrly_wage(path_dict):
     partner_wages = np.concatenate(partner_wages_men, partner_wages_women)
     return jnp.asarray(partner_wages)
 
-
+def calculate_partner_hours(path_dict):
+    """Calculate average hours worked by *working* partners (i.e. conditional on working hours > 0)"""
+    # load data
+    df = pd.read_pickle(path_dict["intermediate_data"] + "partner_wage_estimation_sample.pkl")
+    
+    # calculate average hours worked by partner by age, sex and education
+    cov_list = ["sex", "education", "age"]
+    partner_hours = df.groupby(cov_list)["working_hours_p"].mean()
+    
+    return jnp.asarray(partner_hours)    
 
 
 

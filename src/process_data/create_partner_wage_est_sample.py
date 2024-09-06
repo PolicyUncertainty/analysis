@@ -120,6 +120,7 @@ def keep_relevant_columns(df):
             "syear",
             "choice",
             "sex",
+            "working_hours",
             "hourly_wage",
             "age_p",
             "wage_p",
@@ -127,6 +128,7 @@ def keep_relevant_columns(df):
             "choice_p",
             "sex_p",
             "hourly_wage_p",
+            "working_hours_p",
         ]
     ]
     df = df.astype(
@@ -139,6 +141,7 @@ def keep_relevant_columns(df):
             "education": np.int32,
             "choice": np.int32,
             "sex": np.int32,
+            "working_hours": np.float64,
             "hourly_wage": np.float64,
             "age_p": np.int32,
             "wage_p": np.float64,
@@ -146,6 +149,7 @@ def keep_relevant_columns(df):
             "choice_p": np.int32,
             "sex_p": np.int32,
             "hourly_wage_p": np.float64,
+            "working_hours_p": np.float64,
         }
     )
     print(str(len(df)) + " observations in final wage estimation dataset.")

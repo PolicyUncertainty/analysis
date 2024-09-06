@@ -5,7 +5,7 @@ from model_code.derive_specs import read_and_derive_specs
 
 
 
-input_str = input("Which of the following steps do you want to estimate? Please type the corresponding letter. \n 1 First ('f' for all in this category): \n [s]ra process \n [w]age \n [p]artner wage \n [j]ob separation \n \partner [t]ransition \n \n 2 Estimate [m]odel. \n Input: ")
+input_str = input("Which of the following steps do you want to estimate? Please type the corresponding letter. \n 1 First ('f' for all in this category): \n [s]ra process \n [w]age \n [p]artner wage \n [j]ob separation \n partner [t]ransition \n \n 2 Estimate [m]odel. \n Input: ")
 
 if input_str == "s": define_user = True
 else: define_user = False

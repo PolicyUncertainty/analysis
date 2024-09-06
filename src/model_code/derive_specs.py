@@ -119,42 +119,47 @@ def calculate_pension_values(specs, path_dict):
     return jnp.asarray(adjustment_factor_by_exp) * pension_point_value
 
 def calculate_partner_hrly_wage(path_dict):
-    """Calculate average hourly wage of working partners (i.e. conditional on working hours > 0)"""
+    """Calculates average hourly wage of working partners (i.e. conditional on working hours > 0).
+    Produces partner_hrly_wage array of shape (2, n_education_types, n_ages)"""
     specs = read_and_derive_specs(path_dict["specs"])
     start_age = specs["start_age"]
-    end_age = specs["end_age"]
+    end_age = specs["max_ret_age"]
+    ages = np.arange(start_age, end_age + 1)
+    n_edu_types = specs["n_education_types"]
 
     # wage equation: ln(partner_wage(sex, edu)) = constant(sex, edu) + beta(sex, edu) * ln(age)
-    partner_wage_params_men = pd.read_pickle(
-        path_dict["intermediate_data"] + "partner_wage_estimation_sample_men.pkl"
+    partner_wage_params_men = pd.read_csv(
+        path_dict["est_results"] + "partner_wage_eq_params_men.csv"
     )
-    partner_wage_params_women = pd.read_pickle(
-        path_dict["intermediate_data"] + "partner_wage_estimation_sample_women.pkl"
+    partner_wage_params_women = pd.read_csv(
+        path_dict["est_results"] + "partner_wage_eq_params_women.csv"
     )
-    ages = np.arange(start_age, end_age + 1)
+    partner_wage_params_men['sex'] = 0
+    partner_wage_params_women['sex'] = 1
+    partner_wage_params = pd.concat([partner_wage_params_men, partner_wage_params_women])
+    partner_wage_params = partner_wage_params.rename(columns={partner_wage_params.columns[0]: 'edu'})
     
-    partner_wages_men = np.zeros((2, len(ages)))
-    partner_wages_women = np.zeros(2, len(ages))
-    for edu in [0, 1]:
-        partner_wages_men[edu] = np.exp(
-            partner_wage_params_men["constant"].values[edu] + partner_wage_params_men["ln_age"].values[edu] * np.log(ages)
-        )
-        partner_wages_women[edu] = np.exp(
-            partner_wages_women["constant"].values[edu] + partner_wages_women["ln_age"].values[edu] * np.log(ages)
-        )
     
-    partner_wages = np.concatenate(partner_wages_men, partner_wages_women)
+    partner_wages = np.zeros((2, n_edu_types, len(ages)))
+
+    for edu in np.arange(0, n_edu_types):
+        for sex in [0, 1]:
+            beta_0 = partner_wage_params.loc[(partner_wage_params['edu'] == edu) & (partner_wage_params['sex'] == sex), 'constant'].values[0]
+            beta_1 = partner_wage_params.loc[(partner_wage_params['edu'] == edu) & (partner_wage_params['sex'] == sex), 'ln_age'].values[0]
+            partner_wages[sex, edu] = np.exp(beta_0 + beta_1 * np.log(ages))
     return jnp.asarray(partner_wages)
+    
+
 
 def calculate_partner_hours(path_dict):
-    """Calculate average hours worked by working partners (i.e. conditional on working hours > 0)"""
+    """Calculates average hours worked by working partners (i.e. conditional on working hours > 0)"""
     # load data
     df = pd.read_pickle(path_dict["intermediate_data"] + "partner_wage_estimation_sample.pkl")
-    
+
     # calculate average hours worked by partner by age, sex and education
     cov_list = ["sex", "education", "age"]
     partner_hours = df.groupby(cov_list)["working_hours_p"].mean()
-    
+    # todo: müssen wir uns nochmal angucken, die sind ein bisschen noisy. eventuell wieder age-bins machen. 
     return jnp.asarray(partner_hours)    
 
 

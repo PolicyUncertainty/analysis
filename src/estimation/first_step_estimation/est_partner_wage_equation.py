@@ -49,9 +49,9 @@ def prepare_estimation_data(paths_dict, est_men):
         paths_dict["intermediate_data"] + "partner_wage_estimation_sample.pkl"
     )
     if est_men:
-        sex_var = 1
+        sex_var = 0
     else:
-        sex_var = 2
+        sex_var = 1
 
     wage_data = wage_data[wage_data["sex"] == sex_var]
 

@@ -212,9 +212,12 @@ def filter_data(merged_data, start_year, end_year, start_age, no_women=True):
         + str(start_age)
         + " years old."
     )
+    merged_data.loc[:, "sex"] = merged_data["sex"] - 1    
     if no_women:
-        merged_data = merged_data[(merged_data["sex"] == 1)]
+        merged_data = merged_data[(merged_data["sex"] == 0)]
         print(str(len(merged_data)) + " left after dropping women.")
+    else:
+        merged_data = merged_data[(merged_data["sex"] >= 0)]
     merged_data = merged_data.loc[
         ((slice(None), range(start_year - 1, end_year + 2))), :
     ]

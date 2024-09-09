@@ -70,6 +70,8 @@ def load_and_merge_soep_core(soep_c38_path):
 
     merged_data["age"] = merged_data["syear"] - merged_data["gebjahr"]
     del pgen_data, pathl_data
+    merged_data.loc[:, "sex"] = merged_data["sex"] - 1
+    merged_data["sex"] = merged[merged_data["sex"] >= 0]
     print(str(len(merged_data)) + " observations in SOEP C38 core.")
     return merged_data
 

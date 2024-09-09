@@ -147,6 +147,7 @@ def calculate_partner_hrly_wage(path_dict):
             beta_0 = partner_wage_params.loc[(partner_wage_params['edu'] == edu) & (partner_wage_params['sex'] == sex), 'constant'].values[0]
             beta_1 = partner_wage_params.loc[(partner_wage_params['edu'] == edu) & (partner_wage_params['sex'] == sex), 'ln_age'].values[0]
             partner_wages[sex, edu] = np.exp(beta_0 + beta_1 * np.log(ages))
+    
     return jnp.asarray(partner_wages)
     
 

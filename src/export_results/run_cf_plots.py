@@ -13,7 +13,7 @@ if show_any_plots:
     show_cf_1_plots = input("Show counterfactual 1 plots? (y/n): ") == "y"
 else:
     show_cf_1_plots = False
-from export_reslts.figures.counterfactual_no_unc import (
+from export_results.figures.counterfactual_no_unc import (
     plot_average_savings,
     plot_full_time,
     trajectory_plot,
@@ -36,7 +36,7 @@ if show_any_plots:
 else:
     show_cf_2_plots = False
 
-from export_reslts.figures.counterfactual_bias import (
+from export_results.figures.counterfactual_bias import (
     plot_savings_over_age,
     plot_step_functions,
 )

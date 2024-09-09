@@ -13,7 +13,7 @@ if show_any_plots:
     show_model_fit_plots = input("Show model fit plots? (y/n): ") == "y"
 else:
     show_model_fit_plots = False
-from export_reslts.figures.observed_model_fit import observed_model_fit
+from export_results.figures.observed_model_fit import observed_model_fit
 
 observed_model_fit(path_dict)
 if show_model_fit_plots:
@@ -28,7 +28,7 @@ if show_any_plots:
 else:
     show_model_fit_plots = False
 
-from export_reslts.figures.simulated_model_fit import (
+from export_results.figures.simulated_model_fit import (
     plot_average_wealth,
     plot_choice_shares,
     plot_choice_shares_single,

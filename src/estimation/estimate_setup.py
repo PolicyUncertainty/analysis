@@ -103,7 +103,6 @@ def create_ll_from_paths(start_params_all, path_dict, load_model):
     data_decision = data_decision[data_decision["period"] > 0]
     # Also already retired individuals hold no identification
     data_decision = data_decision[data_decision["lagged_choice"] != 2]
-    breakpoint()
     data_decision["wealth"] = data_decision["wealth"].clip(lower=1e-16)
     # Now transform for dcegm
     states_dict = {

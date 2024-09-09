@@ -130,7 +130,11 @@ def determine_observed_job_offers(data):
     Assume lagged choice equal to 0 (unemployed), then the state is partially observed:
         - If choice is working, then the state is fully observed and there is a job offer
         - If choice is different, then one is not observed
-            """
+
+    Lagged choice equal to 2(retired), will be dropped as only choice equal to 2 is allowed
+
+    Therefore the unobserved job offer states are, where individuals are unemployed and remain unemployed or retire.
+    """
     data["job_offer"] = -99
     data["full_observed_state"] = False
 

@@ -33,9 +33,20 @@ plot_markov_process(path_dict)
 plt.show()
 plt.close("all")
 
-from export_reslts.figures.pension_npv import plot_pension_npv_by_age
+# %% ##########################################
+# # Policy state plot
+# ##########################################
+from export_reslts.figures.policy_states import plot_SRA_2007_reform
 
-plot_pension_npv_by_age(path_dict)
+plot_SRA_2007_reform(path_dict)
 plt.show()
 plt.close("all")
+
+
+#
+# from export_reslts.figures.pension_npv import plot_pension_npv_by_age
+#
+# plot_pension_npv_by_age(path_dict)
+# plt.show()
+# plt.close("all")
 # %%

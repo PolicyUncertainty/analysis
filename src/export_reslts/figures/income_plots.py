@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from model_code.derive_specs import generate_derived_and_data_derived_specs
-from wealth_and_budget.pensions import calc_net_income_pensions
-from wealth_and_budget.wages import calc_net_income_working
+from model_code.wealth_and_budget.pensions import calc_net_income_pensions
+from model_code.wealth_and_budget.wages import calc_net_income_working
 
 
 def plot_incomes(path_dict):
@@ -37,7 +37,8 @@ def plot_incomes(path_dict):
 
         net_wages = np.zeros_like(gross_wages)
         net_pensions = np.zeros_like(gross_wages)
-        gross_pensions = specs["pension_point_value"] * exp_levels * 12
+        # Calculate pensions times experience
+        gross_pensions = specs["pension_point_value_by_edu_exp"][edu, :] * exp_levels * 12
         gross_pensions = np.maximum(gross_pensions, unemployment_benefits)
 
         for i, exp in enumerate(exp_levels):

@@ -21,7 +21,6 @@ def estimate_model(path_dict, load_model):
     # last_end = pkl.load(open(path_dict["est_results"] + "est_params.pkl", "rb"))
     # start_params_all.update(last_end)
 
-
     individual_likelihood = create_ll_from_paths(
         start_params_all, path_dict, load_model
     )
@@ -40,10 +39,9 @@ def estimate_model(path_dict, load_model):
         "dis_util_unemployed",
         # "bequest_scale",
         # "lambda",
-        # "job_finding_logit_const",
-        # "job_finding_logit_age",
-        # "job_finding_logit_age_squ",
-        # "job_finding_logit_high_educ",
+        "job_finding_logit_const",
+        "job_finding_logit_age",
+        "job_finding_logit_high_educ",
     ]
     start_params = {name: start_params_all[name] for name in params_to_estimate_names}
 
@@ -57,7 +55,6 @@ def estimate_model(path_dict, load_model):
         # "lambda": 1e-12,
         "job_finding_logit_const": -10,
         "job_finding_logit_age": -0.5,
-        "job_finding_logit_age_squ": -0.05,
         "job_finding_logit_high_educ": -10,
     }
     lower_bounds = {name: lower_bounds_all[name] for name in params_to_estimate_names}
@@ -69,7 +66,6 @@ def estimate_model(path_dict, load_model):
         # "lambda": 1,
         "job_finding_logit_const": 10,
         "job_finding_logit_age": 0.5,
-        "job_finding_logit_age_squ": 0.05,
         "job_finding_logit_high_educ": 10,
     }
     upper_bounds = {name: upper_bounds_all[name] for name in params_to_estimate_names}
@@ -107,6 +103,7 @@ def create_ll_from_paths(start_params_all, path_dict, load_model):
     data_decision = data_decision[data_decision["period"] > 0]
     # Also already retired individuals hold no identification
     data_decision = data_decision[data_decision["lagged_choice"] != 2]
+    breakpoint()
     data_decision["wealth"] = data_decision["wealth"].clip(lower=1e-16)
     # Now transform for dcegm
     states_dict = {
@@ -133,7 +130,7 @@ def create_ll_from_paths(start_params_all, path_dict, load_model):
         "pre_period_states": relevant_prev_period_state_choices_dict,
         "pre_period_choices": data_decision["lagged_choice"].values,
     }
-    breakpoint()
+
     # Create likelihood function
     individual_likelihood = create_individual_likelihood_function_for_model(
         model=model,
@@ -149,25 +146,26 @@ def create_ll_from_paths(start_params_all, path_dict, load_model):
 def create_job_offer_params_from_start(path_dict):
 
     struct_est_sample = pd.read_pickle(path_dict["struct_est_sample"])
+
     specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
 
 
     logit_df = struct_est_sample[struct_est_sample["lagged_choice"] == 0][["period", "education", "choice"]].copy()
     logit_df["age"] = logit_df["period"] + specs["start_age"]
-    logit_df["age_squ"] = logit_df["age"] ** 2
     logit_df = logit_df[logit_df["age"] < 65]
     logit_df = logit_df[logit_df["choice"] != 2]
     logit_df["intercept"] = 1
 
-    logit_model = sm.Logit(logit_df["choice"], logit_df[["intercept", "age", "age_squ", "education"]])
+    logit_model = sm.Logit(logit_df["choice"], logit_df[["intercept", "age", "education"]])
     logit_fitted = logit_model.fit()
-    # plot
+    # # plot
     # logit_df["prob"] = logit_fitted.predict()
     # import matplotlib.pyplot as plt
     # pred = logit_df.groupby(["education", "age"])["prob"].mean()
     # plt.plot(pred.loc[0], label="low")
     # plt.plot(pred.loc[1], label="high")
-    #
+    # logit_df.groupby(["age", "education"])["choice"].mean().unstack().plot()
+    # # logit_df.groupby(["age", "education"])["choice"].size().plot()
     # plt.legend()
     # plt.show()
 
@@ -176,7 +174,6 @@ def create_job_offer_params_from_start(path_dict):
     job_offer_params = {
         "job_finding_logit_const": params["intercept"],
         "job_finding_logit_age": params["age"],
-        "job_finding_logit_age_squ": params["age_squ"],
         "job_finding_logit_high_educ": params["education"],
     }
     return job_offer_params

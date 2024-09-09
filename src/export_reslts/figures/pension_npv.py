@@ -1,15 +1,14 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from model_code.derive_specs import generate_derived_and_data_derived_specs
-from wealth_and_budget.pensions import calc_net_income_pensions
-from wealth_and_budget.wages import calc_net_income_working
+from model_code.wealth_and_budget.pensions import calc_net_income_pensions
 
 
 def plot_pension_npv_by_age(paths, edu=0):
     # Generate derived specs
     specs = generate_derived_and_data_derived_specs(paths)
-    # breakpoint()
-    pension_point_value = specs["pension_point_value"]
+    # Select highes pension point value
+    pension_point_value = specs["pension_point_value"][edu, -1]
     start_age = specs["start_age"]
     end_age = specs["end_age"]
     discount_rate = 0.03

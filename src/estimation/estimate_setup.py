@@ -39,9 +39,10 @@ def estimate_model(path_dict, load_model):
         "dis_util_unemployed",
         # "bequest_scale",
         # "lambda",
-        "job_finding_logit_const",
-        "job_finding_logit_age",
-        "job_finding_logit_high_educ",
+        # "job_finding_logit_const",
+        # "job_finding_logit_above_49",
+        # "job_finding_logit_age",
+        # "job_finding_logit_high_educ",
     ]
     start_params = {name: start_params_all[name] for name in params_to_estimate_names}
 
@@ -54,6 +55,7 @@ def estimate_model(path_dict, load_model):
         # "bequest_scale": 1e-12,
         # "lambda": 1e-12,
         "job_finding_logit_const": -10,
+        "job_finding_logit_above_49": -10,
         "job_finding_logit_age": -0.5,
         "job_finding_logit_high_educ": -10,
     }
@@ -65,6 +67,7 @@ def estimate_model(path_dict, load_model):
         # "bequest_scale": 20,
         # "lambda": 1,
         "job_finding_logit_const": 10,
+        "job_finding_logit_above_49": 10,
         "job_finding_logit_age": 0.5,
         "job_finding_logit_high_educ": 10,
     }
@@ -98,12 +101,7 @@ def create_ll_from_paths(start_params_all, path_dict, load_model):
     )
 
     # Load data
-    data_decision = pd.read_pickle(path_dict["struct_est_sample"])
-    # We need to filter observations in period 0 because of job offer weighting
-    data_decision = data_decision[data_decision["period"] > 0]
-    # Also already retired individuals hold no identification
-    data_decision = data_decision[data_decision["lagged_choice"] != 2]
-    data_decision["wealth"] = data_decision["wealth"].clip(lower=1e-16)
+    data_decision = load_and_prep_data(path_dict)
     # Now transform for dcegm
     states_dict = {
         name: data_decision[name].values
@@ -142,37 +140,50 @@ def create_ll_from_paths(start_params_all, path_dict, load_model):
     return individual_likelihood
 
 
+def load_and_prep_data(path_dict):
+    # Load data
+    data_decision = pd.read_pickle(path_dict["struct_est_sample"])
+    # We need to filter observations in period 0 because of job offer weighting
+    data_decision = data_decision[data_decision["period"] > 0]
+    # Also already retired individuals hold no identification
+    data_decision = data_decision[data_decision["lagged_choice"] != 2]
+    data_decision["wealth"] = data_decision["wealth"].clip(lower=1e-16)
+    return data_decision
+
 def create_job_offer_params_from_start(path_dict):
 
     struct_est_sample = pd.read_pickle(path_dict["struct_est_sample"])
 
     specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
 
-
-    logit_df = struct_est_sample[struct_est_sample["lagged_choice"] == 0][["period", "education", "choice"]].copy()
+    logit_df = struct_est_sample[struct_est_sample["lagged_choice"] == 0][
+        ["period", "education", "choice"]
+    ].copy()
     logit_df["age"] = logit_df["period"] + specs["start_age"]
+
+    # logit_df["above_49"] = 0
+    # logit_df.loc[logit_df["age"] > 49, "above_49"] = 1
+
     logit_df = logit_df[logit_df["age"] < 65]
     logit_df = logit_df[logit_df["choice"] != 2]
     logit_df["intercept"] = 1
 
-    logit_model = sm.Logit(logit_df["choice"], logit_df[["intercept", "age", "education"]])
+    logit_vars = [
+        "intercept",
+        "age",
+        # "above_49",
+        "education",
+    ]
+
+    logit_model = sm.Logit(logit_df["choice"], logit_df[logit_vars])
     logit_fitted = logit_model.fit()
-    # # plot
-    # logit_df["prob"] = logit_fitted.predict()
-    # import matplotlib.pyplot as plt
-    # pred = logit_df.groupby(["education", "age"])["prob"].mean()
-    # plt.plot(pred.loc[0], label="low")
-    # plt.plot(pred.loc[1], label="high")
-    # logit_df.groupby(["age", "education"])["choice"].mean().unstack().plot()
-    # # logit_df.groupby(["age", "education"])["choice"].size().plot()
-    # plt.legend()
-    # plt.show()
 
     params = logit_fitted.params
 
     job_offer_params = {
         "job_finding_logit_const": params["intercept"],
         "job_finding_logit_age": params["age"],
+        # "job_finding_logit_above_49": params["above_49"],
         "job_finding_logit_high_educ": params["education"],
     }
     return job_offer_params

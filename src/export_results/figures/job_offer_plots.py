@@ -41,7 +41,7 @@ def plot_job_separation(path_dict):
 
     fig, (ax1, ax2) = plt.subplots(ncols=2)
 
-    for edu in range(2):
+    for edu in range(n_education_types):
         ax1.plot(
             np.arange(n_working_periods),
             job_sep_probs[edu, :],
@@ -52,6 +52,9 @@ def plot_job_separation(path_dict):
             job_offer_probs[edu, :],
             label=f"Education {edu}",
         )
+
+    ax1.set_title("Job destruction rates")
+    ax2.set_title("Job offer rates at start params (job finding rate)")
 
     ax1.legend()
     ax2.legend()

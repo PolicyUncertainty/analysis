@@ -31,7 +31,7 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     # partner income
     specs["partner_hrly_wage"] = calculate_partner_hrly_wage(path_dict)
     specs["partner_hours"] = calculate_partner_hours(path_dict)
-    specs["partner_pension"] = calculate_partner_pension(path_dict)
+    #specs["partner_pension"] = calculate_partner_pension(path_dict)
 
     # Set initial experience
     specs["max_init_experience"] = create_initial_exp(path_dict, load_precomputed)
@@ -120,7 +120,7 @@ def calculate_pension_values(specs, path_dict):
 
 def calculate_partner_hrly_wage(path_dict):
     """Calculates average hourly wage of working partners (i.e. conditional on working hours > 0).
-    Produces partner_hrly_wage array of shape (2, n_education_types, n_ages)"""
+    Produces partner_hrly_wage array of shape (n_sexes, n_education_types, n_working_periods)"""
     specs = read_and_derive_specs(path_dict["specs"])
     start_age = specs["start_age"]
     end_age = specs["max_ret_age"]
@@ -147,21 +147,39 @@ def calculate_partner_hrly_wage(path_dict):
             beta_0 = partner_wage_params.loc[(partner_wage_params['edu'] == edu) & (partner_wage_params['sex'] == sex), 'constant'].values[0]
             beta_1 = partner_wage_params.loc[(partner_wage_params['edu'] == edu) & (partner_wage_params['sex'] == sex), 'ln_age'].values[0]
             partner_wages[sex, edu] = np.exp(beta_0 + beta_1 * np.log(ages))
-    
+        
     return jnp.asarray(partner_wages)
     
 
 
 def calculate_partner_hours(path_dict):
-    """Calculates average hours worked by working partners (i.e. conditional on working hours > 0)"""
-    # load data
+    """Calculates average hours worked by working partners (i.e. conditional on working hours > 0)
+    Produces partner_hours array of shape (n_sexes, n_education_types, n_working_periods)"""
+    specs = read_and_derive_specs(path_dict["specs"])
+    start_age = specs["start_age"]
+    end_age = specs["max_ret_age"]
+    # load data, filter, create age bins 
     df = pd.read_pickle(path_dict["intermediate_data"] + "partner_wage_estimation_sample.pkl")
+    df = df[df["age"] >= start_age]
+    df = df[df["age"] <= end_age]
+    df["age_bin"] = np.floor(df["age"] / 10) * 10
+    df.loc[df["age"] > 60, "age_bin"] = 60
+    df["period"] = df["age"] - start_age
 
     # calculate average hours worked by partner by age, sex and education
-    cov_list = ["sex", "education", "age"]
+    cov_list = ["sex", "education", "age_bin"]
     partner_hours = df.groupby(cov_list)["working_hours_p"].mean()
-    # todo: müssen wir uns nochmal angucken, die sind ein bisschen noisy. eventuell wieder age-bins machen. 
-    return jnp.asarray(partner_hours)    
+    # populate numpy ndarray which maps state to average hours worked by partner
+    partner_hours_np = np.zeros((2, specs["n_education_types"], end_age - start_age + 1))
+    for sex in [0, 1]:
+        for edu in range(specs["n_education_types"]):
+            for t in range(end_age - start_age + 1):
+                if t + start_age >= 60:
+                    age_bin = 60
+                else:
+                    age_bin = int(np.floor((t + start_age)/ 10) * 10)
+                partner_hours_np[(sex, edu, t)] = partner_hours[(sex, edu, age_bin)]
+    return jnp.asarray(partner_hours_np)    
 
 
 

@@ -23,7 +23,7 @@ def create_partner_wage_est_sample(paths, specs, load_data=False):
 
     df = load_and_merge_soep_core(paths["soep_c38"])
     df = filter_data(df, start_year, end_year, start_age, no_women=False)
-    df = wages_and_working_hours(df)
+    df = wages_and_working_hours(df.copy())
 
     df = df[df["parid"] >= 0]
     print(str(len(df)) + " observations after dropping singles.")
@@ -33,6 +33,7 @@ def create_partner_wage_est_sample(paths, specs, load_data=False):
     print(str(len(df)) + " observations after unemployed and retirees.")
 
     df = create_education_type(df)
+    breakpoint()
     df = merge_couples(df)  # partner data called {var}_p
     df = keep_relevant_columns(df)
     df.to_pickle(out_file_path)
@@ -70,8 +71,6 @@ def load_and_merge_soep_core(soep_c38_path):
 
     merged_data["age"] = merged_data["syear"] - merged_data["gebjahr"]
     del pgen_data, pathl_data
-    merged_data.loc[:, "sex"] = merged_data["sex"] - 1
-    merged_data["sex"] = merged[merged_data["sex"] >= 0]
     print(str(len(merged_data)) + " observations in SOEP C38 core.")
     return merged_data
 
@@ -81,7 +80,7 @@ def wages_and_working_hours(df):
     df = df[df["wage"] > 0]
     print(str(len(df)) + " observations after dropping invalid wage values.")
     # working hours = contractual hours per week
-    df.rename(columns={"pgvebzeit": "working_hours"}, inplace=True)
+    df = df.rename(columns={"pgvebzeit": "working_hours"})
     df = df[df["working_hours"] > 0]
     print(str(len(df)) + " observations after dropping invalid working hours.")
     df["hourly_wage"] = df["wage"] / (df["working_hours"] * (52 / 12))
@@ -154,5 +153,5 @@ def keep_relevant_columns(df):
             "working_hours_p": np.float64,
         }
     )
-    print(str(len(df)) + " observations in final wage estimation dataset.")
+    print(str(len(df)) + " observations in final partner wage estimation dataset. \n ----------------")
     return df

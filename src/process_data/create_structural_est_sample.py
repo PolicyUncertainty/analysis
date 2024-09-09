@@ -106,7 +106,7 @@ def create_structural_est_sample(paths, load_data=False, options=None):
     )
 
     print(
-        str(len(merged_data)) + " observations in final structural estimation dataset."
+        str(len(merged_data)) + " observations in final structural estimation dataset. \n ----------------" 
     )
 
     # Anonymize and save data

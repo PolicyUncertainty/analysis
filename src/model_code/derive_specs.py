@@ -162,7 +162,6 @@ def calculate_partner_hours(path_dict):
     partner_hours = pd.read_csv(
         path_dict["est_results"] + "partner_hours.csv", index_col=[0, 1, 2], dtype={"sex": int, "education": int, "age_bin": int}
     )
-    breakpoint()
     # populate numpy ndarray which maps state to average hours worked by partner
     partner_hours_np = np.zeros((2, specs["n_education_types"], end_age - start_age + 1))
     for sex in [0, 1]:

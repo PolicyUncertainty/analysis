@@ -18,8 +18,8 @@ def estimate_model(path_dict, load_model):
     job_sep_params = create_job_offer_params_from_start(path_dict)
     start_params_all.update(job_sep_params)
 
-    # last_end = pkl.load(open(path_dict["est_results"] + "est_params.pkl", "rb"))
-    # start_params_all.update(last_end)
+    last_end = pkl.load(open(path_dict["est_results"] + "est_params.pkl", "rb"))
+    start_params_all.update(last_end)
 
     individual_likelihood = create_ll_from_paths(
         start_params_all, path_dict, load_model
@@ -39,10 +39,9 @@ def estimate_model(path_dict, load_model):
         "dis_util_unemployed",
         # "bequest_scale",
         # "lambda",
-        # "job_finding_logit_const",
-        # "job_finding_logit_above_49",
-        # "job_finding_logit_age",
-        # "job_finding_logit_high_educ",
+        "job_finding_logit_const",
+        "job_finding_logit_age",
+        "job_finding_logit_high_educ",
     ]
     start_params = {name: start_params_all[name] for name in params_to_estimate_names}
 
@@ -55,7 +54,6 @@ def estimate_model(path_dict, load_model):
         # "bequest_scale": 1e-12,
         # "lambda": 1e-12,
         "job_finding_logit_const": -10,
-        "job_finding_logit_above_49": -10,
         "job_finding_logit_age": -0.5,
         "job_finding_logit_high_educ": -10,
     }
@@ -67,7 +65,6 @@ def estimate_model(path_dict, load_model):
         # "bequest_scale": 20,
         # "lambda": 1,
         "job_finding_logit_const": 10,
-        "job_finding_logit_above_49": 10,
         "job_finding_logit_age": 0.5,
         "job_finding_logit_high_educ": 10,
     }
@@ -85,7 +82,7 @@ def estimate_model(path_dict, load_model):
     pickle.dump(result, open(path_dict["est_results"] + "em_result.pkl", "wb"))
     start_params_all.update(result.params)
     pickle.dump(
-        start_params_all, open(path_dict["est_results"] + "est_params.pkl", "wb")
+        start_params_all, open(path_dict["est_results"] + "est_params_2.pkl", "wb")
     )
 
     return result

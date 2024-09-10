@@ -62,10 +62,18 @@ def load_and_merge_soep_core(soep_c38_path):
         ],
         convert_categoricals=False,
     )
+    pequiv_data = pd.read_stata(
+        # d11107: number of children in household
+        f"{soep_c38_path}/pequiv.dta",
+        columns=["pid", "syear", "d11107"],
+    )
     merged_data = pd.merge(
         pgen_data, ppathl_data, on=["pid", "hid", "syear"], how="inner"
     )
-    
+    merged_data = pd.merge(
+        merged_data, pequiv_data, on=["pid", "syear"], how="inner"
+    )
+    merged_data.rename(columns={"d11107": "children"}, inplace=True)
     merged_data["age"] = merged_data["syear"] - merged_data["gebjahr"]
     return merged_data
 
@@ -113,7 +121,7 @@ def span_dataframe(merged_data, start_year, end_year):
 
 
 def keep_relevant_columns(df):
-    df= df[["age", "sex", "education", "partner_state","lagged_partner_state"]]
+    df= df[["age", "sex", "education", "partner_state","lagged_partner_state", "children"]]
     return df
 
 

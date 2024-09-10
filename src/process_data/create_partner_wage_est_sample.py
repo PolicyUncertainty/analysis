@@ -33,7 +33,6 @@ def create_partner_wage_est_sample(paths, specs, load_data=False):
     print(str(len(df)) + " observations after unemployed and retirees.")
 
     df = create_education_type(df)
-    breakpoint()
     df = merge_couples(df)  # partner data called {var}_p
     df = keep_relevant_columns(df)
     df.to_pickle(out_file_path)

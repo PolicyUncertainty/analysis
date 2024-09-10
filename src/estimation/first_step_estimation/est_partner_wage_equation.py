@@ -70,8 +70,7 @@ def prepare_estimation_data(paths_dict, est_men):
 
 
 def calculate_partner_hours(path_dict):
-    """Calculates average hours worked by working partners (i.e. conditional on working hours > 0)
-    Produces partner_hours array of shape (n_sexes, n_education_types, n_working_periods)"""
+    """Calculates average hours worked by working partners (i.e. conditional on working hours > 0)"""
     specs = read_and_derive_specs(path_dict["specs"])
     start_age = specs["start_age"]
     end_age = specs["max_ret_age"]

@@ -3,6 +3,8 @@
 
 import numpy as np
 import pandas as pd
+from model_code.derive_specs import read_and_derive_specs
+
 
 def estimate_partner_transitions(paths_dict, specs):
     """Estimate the partner state transition matrix."""
@@ -33,3 +35,26 @@ def prepare_transition_data(paths_dict, specs):
     transition_data = transition_data[transition_data["age"] <= end_age]
     transition_data["age_bin"] = np.floor(transition_data["age"] / 10) * 10
     return transition_data
+
+
+def calculate_nb_children(path_dict, specs):
+    """Calculate the number of children in the household for each individual conditional on sex, education and age bin."""
+    specs = read_and_derive_specs(path_dict["specs"])
+    start_age = specs["start_age"]
+    end_age = specs["end_age"]
+    # load data, filter, create age bins
+    df = pd.read_pickle(path_dict["intermediate_data"] + "partner_transition_estimation_sample.pkl")
+    df = df[df["age"] >= start_age]
+    df = df[df["age"] <= end_age]
+    df["age_bin"] = np.floor(df["age"] / 5) * 5
+    df["period"] = df["age"] - start_age
+
+    # calculate average hours worked by partner by age, sex and education
+    cov_list = ["sex", "education", "age"]        
+    nb_children = df.groupby(cov_list)["children"].mean()
+
+    # save to csv
+    out_file_path = path_dict["est_results"] + f"nb_children.csv"
+    nb_children.to_csv(out_file_path)
+    breakpoint()
+    return nb_children

@@ -33,6 +33,9 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     specs["partner_hours"] = calculate_partner_hours(path_dict)
     #specs["partner_pension"] = calculate_partner_pension(path_dict)
 
+    # family transitions
+    specs["children_by_state"] = predict_children_by_state(path_dict) 
+
     # Set initial experience
     specs["max_init_experience"] = create_initial_exp(path_dict, load_precomputed)
 
@@ -175,5 +178,22 @@ def calculate_partner_hours(path_dict):
     return jnp.asarray(partner_hours_np)    
 
 
-
-
+def predict_children_by_state(path_dict):
+    """Predicts the number of children in the household for each individual conditional on state.
+    Produces children array of shape (n_sexes, n_education_types, n_has_partner_states, n_periods)"""
+    specs = read_and_derive_specs(path_dict["specs"])
+    n_periods = specs["end_age"] - specs["start_age"] + 1
+    params = pd.read_csv(
+        path_dict["est_results"] + "nb_children_estimates.csv", index_col=[0]
+    )
+    # populate numpy ndarray which maps state to average number of children
+    children = np.zeros((2, specs["n_education_types"], 2, n_periods))
+    for sex in [0, 1]:
+        for edu in range(specs["n_education_types"]):
+            for has_partner in [0, 1]:
+                for t in range(n_periods): 
+                    mask = (params.loc['sex'] == sex) & (params.loc['education'] == edu) & (params.loc['has_partner'] == has_partner)
+                    matching_params = params.loc[:, mask]
+                    predicted_nb_children = matching_params.loc['const'] + matching_params.loc['period'] * t + matching_params.loc['period_sq'] * t**2
+                    children[sex, edu, has_partner, t] = np.maximum(0, predicted_nb_children)
+    return jnp.asarray(children)

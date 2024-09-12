@@ -69,16 +69,22 @@ def estimate_nb_children(paths_dict, specs):
     df["period_sq"] = df["period"]**2
     df["has_partner"] = (df["partner_state"] > 0).astype(int)
     # estimate OLS for each combination of sex, education and has_partner
-    estimates = pd.DataFrame()
+    num_params = 3
+    index = ["sex", "education", "has_partner", "const", "period", "period_sq"]
+    estimates = pd.DataFrame(index=index)
+    i = 0
     for sex in [0, 1]:
-        for education in [0, 1]:
+        for education in range(specs["n_education_types"]):
             for has_partner in [0, 1]:
                 df_reduced = df[(df["sex"] == sex) & (df["education"] == education) & (df["has_partner"] == has_partner)]
                 X = df_reduced[["period", "period_sq"]]
                 X = sm.add_constant(X)
                 Y = df_reduced["children"]
                 model = sm.OLS(Y, X).fit()
-                params = model.params.to_frame(name=(sex, education, has_partner))
-                estimates = pd.concat([estimates, params], axis=1)
-    breakpoint()
+                column = [sex , education, has_partner, model.params["const"], model.params["period"], model.params["period_sq"]]
+                estimates[i] = column
+                i += 1
+    out_file_path = paths_dict["est_results"] + "nb_children_estimates.csv"
+    estimates.to_csv(out_file_path)
+    # plot results
     return estimates

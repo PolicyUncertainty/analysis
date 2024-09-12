@@ -29,10 +29,11 @@ def job_offer_process_transition(params, options, education, period, choice):
 def calc_job_finding_prob(params, education, period, options):
     high_edu = education == 1
     age = period + options["start_age"]
+    # above_49 = age > 49
     exp_value = jnp.exp(
         params["job_finding_logit_const"]
         + params["job_finding_logit_age"] * age
-        + params["job_finding_logit_age_squ"] * age**2
+        # + params["job_finding_logit_above_49"] * above_49
         + params["job_finding_logit_high_educ"] * high_edu
     )
     prob = exp_value / (1 + exp_value)

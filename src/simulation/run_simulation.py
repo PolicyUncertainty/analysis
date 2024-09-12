@@ -38,7 +38,7 @@ data_sim = solve_and_simulate_scenario(
     solve_policy_trans_func=expected_SRA_probs_estimation,
     simulate_update_specs_func=update_specs_for_step_function_scale_1,
     simulate_policy_trans_func=realized_policy_step_function,
-    solution_exists=True,
+    solution_exists=False,
     file_append_sol="subj",
     model_exists=True,
 )

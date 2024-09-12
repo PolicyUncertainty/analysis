@@ -2,8 +2,8 @@ import pickle
 
 import pandas as pd
 import scipy.optimize as opt
-from export_reslts.tools import create_discounted_sum_utilities
-from export_reslts.tools import create_realized_taste_shock
+from export_results.tools import create_discounted_sum_utilities
+from export_results.tools import create_realized_taste_shock
 
 
 def calc_compensated_variation(path_dict):

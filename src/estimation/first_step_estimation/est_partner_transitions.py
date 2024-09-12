@@ -6,6 +6,7 @@ import statsmodels.api as sm
 from model_code.derive_specs import read_and_derive_specs
 
 
+
 def estimate_partner_transitions(paths_dict, specs):
     """Estimate the partner state transition matrix."""
     transition_data = prepare_transition_data(paths_dict, specs)

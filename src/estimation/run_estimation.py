@@ -4,13 +4,19 @@ from set_paths import create_path_dict
 
 
 input_str = input(
-    "Which of the following steps do you want to estimate? Please type the corresponding letter. \n 1 First ('f' for all in this category): \n [s]ra process \n [w]age \n [p]artner wage \n [j]ob separation \n partner [t]ransition \n \n 2 Estimate [m]odel. \n Input: "
+    "\n\n Which of the following steps do you want to estimate? Please type the corresponding letter. "
+    "\n\n 1 First step ('f' for all in this category):"
+    "\n   - [s]ra process"
+    "\n   - [w]age"
+    "\n   - [p]artner wage"
+    "\n   - [j]ob separation"
+    "\n   - partner [t]ransition"
+    "\n\n 2 Estimate [m]odel."
+    "\n\n Input: "
 )
+# Set define user only to true if estimate SRA process as we need raw soep data there
+define_user = True if input_str in ["f", "s"] else False
 
-if input_str == "s":
-    define_user = True
-else:
-    define_user = False
 paths_dict = create_path_dict(define_user=define_user)
 specs = read_and_derive_specs(paths_dict["specs"])
 
@@ -70,7 +76,7 @@ if input_str == "f" or input_str == "t":
 if input_str == "m":
     from estimation.estimate_setup import estimate_model
 
-    estimation_results = estimate_model(paths_dict, load_model=False)
+    estimation_results = estimate_model(paths_dict, load_model=True)
     print(estimation_results)
 
 

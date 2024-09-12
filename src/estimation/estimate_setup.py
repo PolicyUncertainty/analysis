@@ -1,15 +1,16 @@
 import pickle
-import time
-import statsmodels.api as sm
 import pickle as pkl
+import time
+
 import estimagic as em
 import pandas as pd
+import statsmodels.api as sm
 import yaml
 from dcegm.likelihood import create_individual_likelihood_function_for_model
+from model_code.derive_specs import generate_derived_and_data_derived_specs
 from model_code.policy_states_belief import expected_SRA_probs_estimation
 from model_code.policy_states_belief import update_specs_exp_ret_age_trans_mat
 from model_code.specify_model import specify_model
-from model_code.derive_specs import generate_derived_and_data_derived_specs
 
 
 def estimate_model(path_dict, load_model):
@@ -82,7 +83,7 @@ def estimate_model(path_dict, load_model):
     pickle.dump(result, open(path_dict["est_results"] + "em_result.pkl", "wb"))
     start_params_all.update(result.params)
     pickle.dump(
-        start_params_all, open(path_dict["est_results"] + "est_params_2.pkl", "wb")
+        start_params_all, open(path_dict["est_results"] + "est_params.pkl", "wb")
     )
 
     return result
@@ -147,8 +148,8 @@ def load_and_prep_data(path_dict):
     data_decision["wealth"] = data_decision["wealth"].clip(lower=1e-16)
     return data_decision
 
-def create_job_offer_params_from_start(path_dict):
 
+def create_job_offer_params_from_start(path_dict):
     struct_est_sample = pd.read_pickle(path_dict["struct_est_sample"])
 
     specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
@@ -168,7 +169,6 @@ def create_job_offer_params_from_start(path_dict):
     logit_vars = [
         "intercept",
         "age",
-        # "above_49",
         "education",
     ]
 
@@ -180,7 +180,6 @@ def create_job_offer_params_from_start(path_dict):
     job_offer_params = {
         "job_finding_logit_const": params["intercept"],
         "job_finding_logit_age": params["age"],
-        # "job_finding_logit_above_49": params["above_49"],
         "job_finding_logit_high_educ": params["education"],
     }
     return job_offer_params

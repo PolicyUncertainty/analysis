@@ -43,7 +43,6 @@ data_sim = solve_and_simulate_scenario(
     model_exists=True,
 )
 data_sim.to_pickle(path_dict["intermediate_data"] + "sim_data/data_subj_scale_1.pkl")
-breakpoint()
 del data_sim
 data_sim = solve_and_simulate_scenario(
     path_dict=path_dict,

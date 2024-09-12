@@ -47,7 +47,7 @@ def plot_markov_process(paths_dict):
     )
     ax.set_xlabel("Time to retirement")
     ax.set_ylabel("SRA")
-    ax.legend()
+    # ax.legend()
     fig.tight_layout()
     fig.savefig(
         paths_dict["plots"] + "expectation_process.png", transparent=True, dpi=300

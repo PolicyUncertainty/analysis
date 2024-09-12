@@ -39,4 +39,5 @@ def create_path_dict(define_user=False, user=None):
         "est_params": analysis_path + "output/est_results/est_params.pkl",
         "plots": analysis_path + "output/plots/",
     }
+    paths_dict["struct_est_sample"] = paths_dict["intermediate_data"] + "structural_estimation_sample.pkl"
     return paths_dict

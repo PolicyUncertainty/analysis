@@ -120,6 +120,21 @@ def create_structural_est_sample(paths, load_data=False, options=None):
 
 
 def determine_observed_job_offers(data):
+    """Determine if a job offer is observed and if so what it is. The function implements the following rule:
+
+    Assume lagged choice equal to 1 (working), then the state is fully observed:
+        - If choice equal 1 (continued working), then there is a job offer, i.e. equal to 1
+        - If choice is unemployed (0) or retired (2) and you got fired then job offer equal 0
+        - Same as before, but not fired then job offer equal to 1
+
+    Assume lagged choice equal to 0 (unemployed), then the state is partially observed:
+        - If choice is working, then the state is fully observed and there is a job offer
+        - If choice is different, then one is not observed
+
+    Lagged choice equal to 2(retired), will be dropped as only choice equal to 2 is allowed
+
+    Therefore the unobserved job offer states are, where individuals are unemployed and remain unemployed or retire.
+    """
     data["job_offer"] = -99
     data["full_observed_state"] = False
 
@@ -128,11 +143,17 @@ def determine_observed_job_offers(data):
     data.loc[data["choice"] == 1, "full_observed_state"] = True
 
     # Individuals who are unemployed or retird and are fired this period have job offer
-    # equalto 0. This includes individuals with lagged choice unemployment, as they
+    # equal to 0. This includes individuals with lagged choice unemployment, as they
     # might be interviewed after firing.
-    mask = (data["choice"].isin([0, 2])) & (data["job_sep_this_year"] == 1)
-    data.loc[mask, "job_offer"] = 0
-    data.loc[mask, "full_observed_state"] = True
+    # Update: Use only employed people. Talk about that!!!
+    maskfired = (data["choice"].isin([0, 2])) & (data["job_sep_this_year"] == 1) & (data["lagged_choice"] == 1)
+    data.loc[maskfired, "job_offer"] = 0
+    data.loc[maskfired, "full_observed_state"] = True
+
+    # Everybody who was not fired is also fully observed an has an job offer
+    mask_not_fired = (data["choice"].isin([0, 2])) & (data["job_sep_this_year"] == 0) & (data["lagged_choice"] == 1)
+    data.loc[mask_not_fired, "job_offer"] = 1
+    data.loc[mask_not_fired, "full_observed_state"] = True
 
     return data
 

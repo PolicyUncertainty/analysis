@@ -4,11 +4,7 @@ dis_util_work: 4.0
 dis_util_unemployed: 1.0
 bequest_scale: 1.3
 
-# Job separation params
-job_finding_logit_const: 0.5
-job_finding_logit_age: 0.01
-job_finding_logit_age_squ: 0.01
-job_finding_logit_high_educ: 0.1
+# Job separation params are set internally driven by data
 
 # Taste and income shock scale
 lambda: 1

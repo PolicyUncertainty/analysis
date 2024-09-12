@@ -23,7 +23,6 @@ def observed_model_fit(paths_dict):
         load_model=True,
         load_solution=True,
     )
-    options = model["options"]
 
     data_decision = pd.read_pickle(
         paths_dict["intermediate_data"] + "structural_estimation_sample.pkl"

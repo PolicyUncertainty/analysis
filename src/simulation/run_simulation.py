@@ -38,11 +38,12 @@ data_sim = solve_and_simulate_scenario(
     solve_policy_trans_func=expected_SRA_probs_estimation,
     simulate_update_specs_func=update_specs_for_step_function_scale_1,
     simulate_policy_trans_func=realized_policy_step_function,
-    solution_exists=True,
+    solution_exists=False,
     file_append_sol="subj",
     model_exists=True,
 )
 data_sim.to_pickle(path_dict["intermediate_data"] + "sim_data/data_subj_scale_1.pkl")
+breakpoint()
 del data_sim
 data_sim = solve_and_simulate_scenario(
     path_dict=path_dict,

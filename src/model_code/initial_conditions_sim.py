@@ -55,5 +55,6 @@ def generate_start_states(observed_data, n_agents, seed, options):
         "lagged_choice": jnp.array(lagged_choice, dtype=jnp.int64),
         "policy_state": jnp.zeros_like(exp_agents, dtype=jnp.int64) + 8,
         "retirement_age_id": jnp.zeros_like(exp_agents, dtype=jnp.int64),
+        "job_offer": jnp.ones_like(exp_agents, dtype=jnp.int64),
     }
     return states, wealth_agents

@@ -3,8 +3,7 @@ import pickle
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from dcegm.likelihood import calc_choice_probs_for_observed_states
-from dcegm.likelihood import create_observed_choice_indexes
+from dcegm.likelihood import create_choice_prob_func_unobserved_states
 from model_code.derive_specs import generate_derived_and_data_derived_specs
 from model_code.model_solver import specify_and_solve_model
 from model_code.policy_states_belief import expected_SRA_probs_estimation
@@ -22,7 +21,7 @@ def observed_model_fit(paths_dict):
         policy_state_trans_func=expected_SRA_probs_estimation,
         file_append="subj",
         load_model=True,
-        load_solution=False,
+        load_solution=True,
     )
     options = model["options"]
 
@@ -37,23 +36,46 @@ def observed_model_fit(paths_dict):
         name: data_decision[name].values
         for name in model_structure["state_space_names"]
     }
-    observed_state_choice_indexes = create_observed_choice_indexes(
-        states_dict, model_structure
-    )
-    choice_probs_observations = calc_choice_probs_for_observed_states(
-        value_solved=est_model["value"],
-        endog_grid_solved=est_model["endog_grid"],
-        params=params,
-        observed_states=states_dict,
-        state_choice_indexes=observed_state_choice_indexes,
-        oberseved_wealth=data_decision["wealth"].values,
-        choice_range=np.arange(options["model_params"]["n_choices"], dtype=int),
-        compute_utility=model["model_funcs"]["compute_utility"],
-    )
-    choice_probs_observations = np.nan_to_num(choice_probs_observations, nan=0.0)
-    data_decision["choice_0"] = choice_probs_observations[:, 0]
-    data_decision["choice_1"] = choice_probs_observations[:, 1]
-    data_decision["choice_2"] = choice_probs_observations[:, 2]
+
+    def weight_func(**kwargs):
+        # We need to weight the unobserved job offer state for each of its possible values
+        # The weight function is called with job offer new beeing the unobserved state
+        job_offer = kwargs["job_offer_new"]
+        return model["model_funcs"]["processed_exog_funcs"]["job_offer"](**kwargs)[
+            job_offer
+        ]
+
+    relevant_prev_period_state_choices_dict = {
+        "period": data_decision["period"].values - 1,
+        "education": data_decision["education"].values,
+    }
+    unobserved_state_specs = {
+        "observed_bool": data_decision["full_observed_state"].values,
+        "weight_func": weight_func,
+        "states": ["job_offer"],
+        "pre_period_states": relevant_prev_period_state_choices_dict,
+        "pre_period_choices": data_decision["lagged_choice"].values,
+    }
+
+    for choice in range(3):
+        choice_vals = np.ones_like(data_decision["choice"].values) * choice
+        choice_prob_func = create_choice_prob_func_unobserved_states(
+            model=model,
+            observed_states=states_dict,
+            observed_wealth=data_decision["wealth"].values,
+            observed_choices=choice_vals,
+            unobserved_state_specs=unobserved_state_specs,
+            weight_full_states=False
+        )
+
+        choice_probs_observations = choice_prob_func(
+            value_in=est_model["value"],
+            endog_grid_in=est_model["endog_grid"],
+            params_in=params,
+        )
+
+        choice_probs_observations = np.nan_to_num(choice_probs_observations, nan=0.0)
+        data_decision[f"choice_{choice}"] = choice_probs_observations
 
     file_append = ["low", "high"]
 

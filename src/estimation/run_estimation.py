@@ -16,7 +16,7 @@ input_str = input(
     "\n\n Input: "
 )
 # Set define user only to true if estimate SRA process as we need raw soep data there
-define_user = True if input_str == "s" else False
+define_user = True if input_str in ["f", "s"] else False
 
 paths_dict = create_path_dict(define_user=define_user)
 specs = read_and_derive_specs(paths_dict["specs"])
@@ -73,7 +73,7 @@ if input_str == "f" or input_str == "t":
 if input_str == "m":
     from estimation.estimate_setup import estimate_model
 
-    estimation_results = estimate_model(paths_dict, load_model=True)
+    estimation_results = estimate_model(paths_dict, load_model=False)
     print(estimation_results)
 
 

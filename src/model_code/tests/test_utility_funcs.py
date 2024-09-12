@@ -1,14 +1,13 @@
-import pytest
-from model_code.utility_functions import (
-    utility_func,
-    inverse_marginal,
-    marg_utility,
-    utility_final_consume_all,
-    marginal_utility_final_consume_all,
-)
-import numpy as np
 from itertools import product
+
 import jax
+import numpy as np
+import pytest
+from model_code.utility_functions import inverse_marginal
+from model_code.utility_functions import marg_utility
+from model_code.utility_functions import marginal_utility_final_consume_all
+from model_code.utility_functions import utility_final_consume_all
+from model_code.utility_functions import utility_func
 
 jax.config.update("jax_enable_x64", True)
 

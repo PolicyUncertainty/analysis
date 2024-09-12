@@ -41,7 +41,9 @@ def create_choice_variable(data):
 def create_choice_variable_with_part_time(data):
     """This function creates the choice variable for the structural model.
 
-    It includes part-time employment as a separate choice. (0: unemployed, 1: full-time, 2: retired, 3: part-time)
+    It includes part-time employment as a separate choice. (0: unemployed, 1: full-time,
+    2: retired, 3: part-time)
+
     """
     data["choice"] = np.nan
     soep_empl_choice = data["pgemplst"]

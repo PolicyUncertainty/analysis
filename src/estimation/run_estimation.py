@@ -1,14 +1,16 @@
 # Set paths of project
+from model_code.derive_specs import read_and_derive_specs
 from set_paths import create_path_dict
 
-from model_code.derive_specs import read_and_derive_specs
 
+input_str = input(
+    "Which of the following steps do you want to estimate? Please type the corresponding letter. \n 1 First ('f' for all in this category): \n [s]ra process \n [w]age \n [p]artner wage \n [j]ob separation \n partner [t]ransition \n \n 2 Estimate [m]odel. \n Input: "
+)
 
-
-input_str = input("Which of the following steps do you want to estimate? Please type the corresponding letter. \n 1 First ('f' for all in this category): \n [s]ra process \n [w]age \n [p]artner wage \n [j]ob separation \n partner [t]ransition \n \n 2 Estimate [m]odel. \n Input: ")
-
-if input_str == "s": define_user = True
-else: define_user = False
+if input_str == "s":
+    define_user = True
+else:
+    define_user = False
 paths_dict = create_path_dict(define_user=define_user)
 specs = read_and_derive_specs(paths_dict["specs"])
 
@@ -41,7 +43,8 @@ if input_str == "f" or input_str == "w":
 if input_str == "f" or input_str == "p":
     # Estimate partner wage parameters for men and women
     from estimation.first_step_estimation.est_partner_wage_equation import (
-        estimate_partner_wage_parameters, calculate_partner_hours
+        estimate_partner_wage_parameters,
+        calculate_partner_hours,
     )
 
     estimate_partner_wage_parameters(paths_dict, est_men=True)
@@ -57,12 +60,13 @@ if input_str == "f" or input_str == "j":
 if input_str == "f" or input_str == "t":
     # Estimate partner transitions
     from estimation.first_step_estimation.est_partner_transitions import (
-        estimate_partner_transitions, estimate_nb_children
+        estimate_partner_transitions,
+        estimate_nb_children,
     )
 
     estimate_partner_transitions(paths_dict, specs)
     estimate_nb_children(paths_dict, specs)
-    
+
 if input_str == "m":
     from estimation.estimate_setup import estimate_model
 

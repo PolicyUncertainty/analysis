@@ -1,14 +1,11 @@
-
-import pytest
-import numpy as np
 from itertools import product
 
-from model_code.state_space import (
-    sparsity_condition,
-    update_state_space,
-    state_specific_choice_set,
-    apply_retirement_constraint_for_SRA,
-)
+import numpy as np
+import pytest
+from model_code.state_space import apply_retirement_constraint_for_SRA
+from model_code.state_space import sparsity_condition
+from model_code.state_space import state_specific_choice_set
+from model_code.state_space import update_state_space
 
 
 # tests of update state space

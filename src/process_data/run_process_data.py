@@ -22,7 +22,9 @@ from process_data.create_structural_est_sample import create_structural_est_samp
 from process_data.create_wage_est_sample import create_wage_est_sample
 from process_data.create_partner_wage_est_sample import create_partner_wage_est_sample
 from process_data.create_job_sep_sample import create_job_sep_sample
-from process_data.create_partner_transition_sample import create_partner_transition_sample
+from process_data.create_partner_transition_sample import (
+    create_partner_transition_sample,
+)
 
 
 if string_in == "a" or string_in == "s":
@@ -40,5 +42,3 @@ if string_in == "a" or string_in == "j":
 if string_in == "a" or string_in == "t":
     create_partner_transition_sample(paths_dict, specs=specs, load_data=False)
 # %%
-
-

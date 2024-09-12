@@ -57,11 +57,11 @@ if input_str == "f" or input_str == "j":
 if input_str == "f" or input_str == "t":
     # Estimate partner transitions
     from estimation.first_step_estimation.est_partner_transitions import (
-        estimate_partner_transitions, calculate_nb_children
+        estimate_partner_transitions, estimate_nb_children
     )
 
     estimate_partner_transitions(paths_dict, specs)
-    calculate_nb_children(paths_dict, specs)
+    estimate_nb_children(paths_dict, specs)
     
 if input_str == "m":
     from estimation.estimate_setup import estimate_model

@@ -3,6 +3,7 @@
 
 import numpy as np
 import pandas as pd
+import statsmodels.api as sm
 from model_code.derive_specs import read_and_derive_specs
 
 
@@ -42,19 +43,42 @@ def calculate_nb_children(path_dict, specs):
     specs = read_and_derive_specs(path_dict["specs"])
     start_age = specs["start_age"]
     end_age = specs["end_age"]
-    # load data, filter, create age bins
+    # load data, filter, create age bins and has_partner state
     df = pd.read_pickle(path_dict["intermediate_data"] + "partner_transition_estimation_sample.pkl")
     df = df[df["age"] >= start_age]
     df = df[df["age"] <= end_age]
     df["age_bin"] = np.floor(df["age"] / 5) * 5
     df["period"] = df["age"] - start_age
+    df["has_partner"] = (df["partner_state"] > 0).astype(int)
 
     # calculate average hours worked by partner by age, sex and education
-    cov_list = ["sex", "education", "age"]        
+    cov_list = ["sex", "education", "has_partner", "age"]        
     nb_children = df.groupby(cov_list)["children"].mean()
-
-    # save to csv
-    out_file_path = path_dict["est_results"] + f"nb_children.csv"
-    nb_children.to_csv(out_file_path)
-    breakpoint()
     return nb_children
+
+def estimate_nb_children(paths_dict, specs):
+    """Estimate the number of children in the household for each individual conditional on sex, education and age bin."""
+    specs = read_and_derive_specs(paths_dict["specs"])
+    start_age = specs["start_age"]
+    end_age = specs["end_age"]
+   # load data, filter, create period and has_partner state
+    df = pd.read_pickle(paths_dict["intermediate_data"] + "partner_transition_estimation_sample.pkl")
+    df = df[df["age"] >= start_age]
+    df = df[df["age"] <= end_age]
+    df["period"] = df["age"] - start_age
+    df["period_sq"] = df["period"]**2
+    df["has_partner"] = (df["partner_state"] > 0).astype(int)
+    # estimate OLS for each combination of sex, education and has_partner
+    estimates = pd.DataFrame()
+    for sex in [0, 1]:
+        for education in [0, 1]:
+            for has_partner in [0, 1]:
+                df_reduced = df[(df["sex"] == sex) & (df["education"] == education) & (df["has_partner"] == has_partner)]
+                X = df_reduced[["period", "period_sq"]]
+                X = sm.add_constant(X)
+                Y = df_reduced["children"]
+                model = sm.OLS(Y, X).fit()
+                params = model.params.to_frame(name=(sex, education, has_partner))
+                estimates = pd.concat([estimates, params], axis=1)
+    breakpoint()
+    return estimates

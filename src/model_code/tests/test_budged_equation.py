@@ -30,7 +30,9 @@ def test_budget_unemployed(
     unemployment_benefits, savings, interest_rate, paths_and_specs
 ):
     path_dict, specs = paths_and_specs
-    specs["unemployment_benefits"] = unemployment_benefits
+
+    specs_internal = copy.deepcopy(specs)
+    specs_internal["unemployment_benefits"] = unemployment_benefits
 
     params = {"interest_rate": interest_rate}
     wealth = budget_constraint(
@@ -42,9 +44,9 @@ def test_budget_unemployed(
         savings_end_of_previous_period=savings,
         income_shock_previous_period=0,
         params=params,
-        options=specs,
+        options=specs_internal,
     )
-    if savings < specs["unemployment_wealth_thresh"]:
+    if savings < specs_internal["unemployment_wealth_thresh"]:
         np.testing.assert_almost_equal(
             wealth, savings * (1 + interest_rate) + unemployment_benefits * 12
         )
@@ -72,16 +74,17 @@ INCOME_SHOCK_GRID = np.linspace(-0.5, 0.5, 3)
     ),
 )
 def test_budget_worker(
-    gamma, income_shock, experience, interest_rate, savings, education
+    gamma, income_shock, experience, interest_rate, savings, education, paths_and_specs
 ):
-    path_dict = create_path_dict()
-    specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
+    path_dict, specs = paths_and_specs
 
+    specs_internal = copy.deepcopy(specs)
     gamma_array = np.array([gamma, gamma - 0.01])
-    specs["gamma_0"] = gamma_array
-    specs["gamma_1"] = gamma_array
+    specs_internal["gamma_0"] = gamma_array
+    specs_internal["gamma_1"] = gamma_array
 
     params = {"interest_rate": interest_rate}
+
     wealth = budget_constraint(
         education=education,
         lagged_choice=1,
@@ -91,7 +94,7 @@ def test_budget_worker(
         savings_end_of_previous_period=savings,
         income_shock_previous_period=income_shock,
         params=params,
-        options=specs,
+        options=specs_internal,
     )
     labor_income = (
         np.exp(
@@ -99,11 +102,12 @@ def test_budget_worker(
             + gamma_array[education] * np.log(experience + 1)
             + income_shock
         )
-        / specs["wealth_unit"]
+        / specs_internal["wealth_unit"]
     )
-    if labor_income < specs["min_wage"]:
-        labor_income = specs["min_wage"]
-    net_labor_income = calc_net_income_working(labor_income * 12, specs)
+    if labor_income < specs_internal["min_wage"]:
+        labor_income = specs_internal["min_wage"]
+    net_labor_income = calc_net_income_working(labor_income * 12, specs_internal)
+
     np.testing.assert_almost_equal(
         wealth, savings * (1 + interest_rate) + net_labor_income
     )

@@ -1,4 +1,5 @@
 import os
+
 import numpy as np
 import pandas as pd
 from process_data.soep_vars import create_choice_variable
@@ -106,7 +107,8 @@ def create_structural_est_sample(paths, load_data=False, options=None):
     )
 
     print(
-        str(len(merged_data)) + " observations in final structural estimation dataset. \n ----------------" 
+        str(len(merged_data))
+        + " observations in final structural estimation dataset. \n ----------------"
     )
 
     # Anonymize and save data
@@ -216,9 +218,9 @@ def load_and_merge_soep_core(soep_c38_path):
 def filter_data(merged_data, start_year, end_year, start_age, no_women=True):
     """This function filters the data according to the model setup.
 
-    Specifically, it filters out young people, women (if no_women=True), and
-    years outside of estimation range. It leaves one year younger and one year
-    below in the sample to construct lagged_choice.
+    Specifically, it filters out young people, women (if no_women=True), and years
+    outside of estimation range. It leaves one year younger and one year below in the
+    sample to construct lagged_choice.
 
     """
 
@@ -233,7 +235,7 @@ def filter_data(merged_data, start_year, end_year, start_age, no_women=True):
         + str(start_age)
         + " years old."
     )
-    merged_data.loc[:, "sex"] = merged_data["sex"] - 1    
+    merged_data.loc[:, "sex"] = merged_data["sex"] - 1
     if no_women:
         merged_data = merged_data[(merged_data["sex"] == 0)]
         print(str(len(merged_data)) + " left after dropping women.")

@@ -1,12 +1,12 @@
+import copy
 from itertools import product
 
 import numpy as np
 import pytest
-
-from model_code.wealth_and_budget.budget_equation import budget_constraint
-from model_code.wealth_and_budget.wages import calc_net_income_working
-from model_code.wealth_and_budget.pensions import calc_net_income_pensions
 from model_code.derive_specs import generate_derived_and_data_derived_specs
+from model_code.wealth_and_budget.budget_equation import budget_constraint
+from model_code.wealth_and_budget.pensions import calc_net_income_pensions
+from model_code.wealth_and_budget.wages import calc_net_income_working
 from set_paths import create_path_dict
 
 SAVINGS_GRID = np.linspace(10, 100, 5)
@@ -15,14 +15,24 @@ INTEREST_RATE_GRID = np.linspace(0.01, 0.1, 2)
 BENEFITS_GRID = np.linspace(10, 100, 5)
 
 
+@pytest.fixture(scope="module")
+def paths_and_specs():
+    path_dict = create_path_dict()
+    specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
+    return path_dict, specs
+
+
 @pytest.mark.parametrize(
     "unemployment_benefits, savings, interest_rate",
     list(product(BENEFITS_GRID, SAVINGS_GRID, INTEREST_RATE_GRID)),
 )
-def test_budget_unemployed(unemployment_benefits, savings, interest_rate):
-    path_dict = create_path_dict()
-    specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
-    specs["unemployment_benefits"] = unemployment_benefits
+def test_budget_unemployed(
+    unemployment_benefits, savings, interest_rate, paths_and_specs
+):
+    path_dict, specs = paths_and_specs
+
+    specs_internal = copy.deepcopy(specs)
+    specs_internal["unemployment_benefits"] = unemployment_benefits
 
     params = {"interest_rate": interest_rate}
     wealth = budget_constraint(
@@ -34,9 +44,9 @@ def test_budget_unemployed(unemployment_benefits, savings, interest_rate):
         savings_end_of_previous_period=savings,
         income_shock_previous_period=0,
         params=params,
-        options=specs,
+        options=specs_internal,
     )
-    if savings < specs["unemployment_wealth_thresh"]:
+    if savings < specs_internal["unemployment_wealth_thresh"]:
         np.testing.assert_almost_equal(
             wealth, savings * (1 + interest_rate) + unemployment_benefits * 12
         )
@@ -64,16 +74,17 @@ INCOME_SHOCK_GRID = np.linspace(-0.5, 0.5, 3)
     ),
 )
 def test_budget_worker(
-    gamma, income_shock, experience, interest_rate, savings, education
+    gamma, income_shock, experience, interest_rate, savings, education, paths_and_specs
 ):
-    path_dict = create_path_dict()
-    specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
+    path_dict, specs = paths_and_specs
 
+    specs_internal = copy.deepcopy(specs)
     gamma_array = np.array([gamma, gamma - 0.01])
-    specs["gamma_0"] = gamma_array
-    specs["gamma_1"] = gamma_array
+    specs_internal["gamma_0"] = gamma_array
+    specs_internal["gamma_1"] = gamma_array
 
     params = {"interest_rate": interest_rate}
+
     wealth = budget_constraint(
         education=education,
         lagged_choice=1,
@@ -83,7 +94,7 @@ def test_budget_worker(
         savings_end_of_previous_period=savings,
         income_shock_previous_period=income_shock,
         params=params,
-        options=specs,
+        options=specs_internal,
     )
     labor_income = (
         np.exp(
@@ -91,11 +102,12 @@ def test_budget_worker(
             + gamma_array[education] * np.log(experience + 1)
             + income_shock
         )
-        / specs["wealth_unit"]
+        / specs_internal["wealth_unit"]
     )
-    if labor_income < specs["min_wage"]:
-        labor_income = specs["min_wage"]
-    net_labor_income = calc_net_income_working(labor_income * 12, specs)
+    if labor_income < specs_internal["min_wage"]:
+        labor_income = specs_internal["min_wage"]
+    net_labor_income = calc_net_income_working(labor_income * 12, specs_internal)
+
     np.testing.assert_almost_equal(
         wealth, savings * (1 + interest_rate) + net_labor_income
     )
@@ -120,10 +132,11 @@ def test_retiree(
     exp,
     policy_state,
     ret_age_id,
+    paths_and_specs,
 ):
     education = 0
-    path_dict = create_path_dict()
-    specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
+
+    path_dict, specs = paths_and_specs
 
     actual_retirement_age = specs["min_ret_age"] + ret_age_id
 

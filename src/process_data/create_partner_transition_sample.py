@@ -1,19 +1,22 @@
-#%%
+# %%
 import os
+
 import numpy as np
 import pandas as pd
-
-from process_data.create_structural_est_sample import filter_data
-from process_data.soep_vars import create_education_type
-from process_data.soep_vars import create_choice_variable_with_part_time
 from process_data.create_partner_wage_est_sample import merge_couples
+from process_data.create_structural_est_sample import filter_data
+from process_data.soep_vars import create_choice_variable_with_part_time
+from process_data.soep_vars import create_education_type
 
-#%%
+
+# %%
 def create_partner_transition_sample(paths, specs, load_data=False):
     if not os.path.exists(paths["intermediate_data"]):
         os.makedirs(paths["intermediate_data"])
 
-    out_file_path = paths["intermediate_data"] + "partner_transition_estimation_sample.pkl"
+    out_file_path = (
+        paths["intermediate_data"] + "partner_transition_estimation_sample.pkl"
+    )
 
     if load_data:
         data = pd.read_pickle(out_file_path)
@@ -28,10 +31,13 @@ def create_partner_transition_sample(paths, specs, load_data=False):
     df = create_education_type(df)
     df = create_choice_variable_with_part_time(df)
     df = span_dataframe(df, start_year, end_year)
-    df = merge_couples(df, keep_singles = True)
+    df = merge_couples(df, keep_singles=True)
     df = create_partner_state(df, start_age)
     df = keep_relevant_columns(df)
-    print(str(len(df)) + " observations in the final partner transition sample.  \n ----------------")
+    print(
+        str(len(df))
+        + " observations in the final partner transition sample.  \n ----------------"
+    )
     df.to_pickle(out_file_path)
     return df
 
@@ -52,25 +58,25 @@ def load_and_merge_soep_core(soep_c38_path):
     )
     ppathl_data = pd.read_stata(
         f"{soep_c38_path}/ppathl.dta",
-        columns=[
-            "syear",
-            "pid",
-            "hid",
-            "sex",
-            "parid",
-            "gebjahr"
-        ],
+        columns=["syear", "pid", "hid", "sex", "parid", "gebjahr"],
         convert_categoricals=False,
+    )
+    pequiv_data = pd.read_stata(
+        # d11107: number of children in household
+        f"{soep_c38_path}/pequiv.dta",
+        columns=["pid", "syear", "d11107"],
     )
     merged_data = pd.merge(
         pgen_data, ppathl_data, on=["pid", "hid", "syear"], how="inner"
     )
-    
+    merged_data = pd.merge(merged_data, pequiv_data, on=["pid", "syear"], how="inner")
+    merged_data.rename(columns={"d11107": "children"}, inplace=True)
     merged_data["age"] = merged_data["syear"] - merged_data["gebjahr"]
     return merged_data
 
+
 def create_partner_state(df, start_age):
-    '''0: no partner, 1: working-age partner, 2: retired partner'''
+    """0: no partner, 1: working-age partner, 2: retired partner"""
     # has to be done for both state and lagged state
     # people with a partner whose choice is not observed stay in this category
     df.loc[:, "partner_state"] = np.nan
@@ -89,8 +95,12 @@ def create_partner_state(df, start_age):
     df = df[df["partner_state"].notna()]
     # We left people who are too young in the sample to construct lagged choice. Delete those now.
     df = df[df["age"] >= start_age]
-    print(str(len(df)) + " observations after dropping people with a partner whose choice is not observed.")
+    print(
+        str(len(df))
+        + " observations after dropping people with a partner whose choice is not observed."
+    )
     return df
+
 
 def span_dataframe(merged_data, start_year, end_year):
     """This function creates the lagged choice variable and drops missing lagged
@@ -113,8 +123,7 @@ def span_dataframe(merged_data, start_year, end_year):
 
 
 def keep_relevant_columns(df):
-    df= df[["age", "sex", "education", "partner_state","lagged_partner_state"]]
+    df = df[
+        ["age", "sex", "education", "partner_state", "lagged_partner_state", "children"]
+    ]
     return df
-
-
-

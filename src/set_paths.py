@@ -1,6 +1,7 @@
 # Set data paths according to user.
-import jax
 from pathlib import Path
+
+import jax
 
 
 def create_path_dict(define_user=False, user=None):

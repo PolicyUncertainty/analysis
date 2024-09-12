@@ -1,10 +1,10 @@
 import os
+
 import numpy as np
 import pandas as pd
-
 from process_data.create_structural_est_sample import filter_data
-from process_data.soep_vars import create_education_type
 from process_data.soep_vars import create_choice_variable_with_part_time
+from process_data.soep_vars import create_education_type
 
 
 def create_partner_wage_est_sample(paths, specs, load_data=False):
@@ -33,7 +33,6 @@ def create_partner_wage_est_sample(paths, specs, load_data=False):
     print(str(len(df)) + " observations after unemployed and retirees.")
 
     df = create_education_type(df)
-    breakpoint()
     df = merge_couples(df)  # partner data called {var}_p
     df = keep_relevant_columns(df)
     df.to_pickle(out_file_path)
@@ -89,10 +88,13 @@ def wages_and_working_hours(df):
 
 def merge_couples(df, keep_singles=False):
     """This function merges couples based on the 'parid' identifier.
-    Partner variables are market '_p' in the merged dataset."""
+
+    Partner variables are market '_p' in the merged dataset.
+
+    """
     df = df.reset_index()
     df_partners = df.copy()
-    
+
     if keep_singles:
         df_partners.loc[df_partners["parid"] < 0, "parid"] = np.nan
         merge_string = "left"
@@ -153,5 +155,8 @@ def keep_relevant_columns(df):
             "working_hours_p": np.float64,
         }
     )
-    print(str(len(df)) + " observations in final partner wage estimation dataset. \n ----------------")
+    print(
+        str(len(df))
+        + " observations in final partner wage estimation dataset. \n ----------------"
+    )
     return df

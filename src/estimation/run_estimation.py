@@ -50,11 +50,12 @@ if input_str == "f" or input_str == "w":
 if input_str == "f" or input_str == "p":
     # Estimate partner wage parameters for men and women
     from estimation.first_step_estimation.est_partner_wage_equation import (
-        estimate_partner_wage_parameters,
+        estimate_partner_wage_parameters, calculate_partner_hours
     )
 
-    estimate_partner_wage_parameters(paths_dict, True)
-    estimate_partner_wage_parameters(paths_dict, False)
+    estimate_partner_wage_parameters(paths_dict, est_men=True)
+    estimate_partner_wage_parameters(paths_dict, est_men=False)
+    calculate_partner_hours(paths_dict)
 
 if input_str == "f" or input_str == "j":
     # Estimate job separation

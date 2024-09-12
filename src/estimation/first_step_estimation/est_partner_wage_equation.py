@@ -49,9 +49,9 @@ def prepare_estimation_data(paths_dict, est_men):
         paths_dict["intermediate_data"] + "partner_wage_estimation_sample.pkl"
     )
     if est_men:
-        sex_var = 1
+        sex_var = 0
     else:
-        sex_var = 2
+        sex_var = 1
 
     wage_data = wage_data[wage_data["sex"] == sex_var]
 
@@ -67,3 +67,28 @@ def prepare_estimation_data(paths_dict, est_men):
     wage_data["constant"] = np.ones(len(wage_data))
 
     return wage_data
+
+
+def calculate_partner_hours(path_dict):
+    """Calculates average hours worked by working partners (i.e. conditional on working hours > 0)
+    Produces partner_hours array of shape (n_sexes, n_education_types, n_working_periods)"""
+    specs = read_and_derive_specs(path_dict["specs"])
+    start_age = specs["start_age"]
+    end_age = specs["max_ret_age"]
+    # load data, filter, create age bins 
+    df = pd.read_pickle(path_dict["intermediate_data"] + "partner_wage_estimation_sample.pkl")
+    df = df[df["age"] >= start_age]
+    df = df[df["age"] <= end_age]
+    df["age_bin"] = np.floor(df["age"] / 10) * 10
+    df.loc[df["age"] > 60, "age_bin"] = 60
+    df["period"] = df["age"] - start_age
+
+    # calculate average hours worked by partner by age, sex and education
+    cov_list = ["sex", "education", "age_bin"]
+    partner_hours = df.groupby(cov_list)["working_hours_p"].mean()
+
+    # save to csv
+    out_file_path = path_dict["est_results"] + f"partner_hours.csv"
+    partner_hours.to_csv(out_file_path)
+    return partner_hours    
+

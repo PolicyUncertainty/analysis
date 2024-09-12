@@ -31,7 +31,7 @@ def create_partner_transition_sample(paths, specs, load_data=False):
     df = merge_couples(df, keep_singles = True)
     df = create_partner_state(df, start_age)
     df = keep_relevant_columns(df)
-    print(str(len(df)) + " observations in the final partner transition sample.")
+    print(str(len(df)) + " observations in the final partner transition sample.  \n ----------------")
     df.to_pickle(out_file_path)
     return df
 

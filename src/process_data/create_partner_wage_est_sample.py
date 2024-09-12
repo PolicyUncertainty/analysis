@@ -23,7 +23,7 @@ def create_partner_wage_est_sample(paths, specs, load_data=False):
 
     df = load_and_merge_soep_core(paths["soep_c38"])
     df = filter_data(df, start_year, end_year, start_age, no_women=False)
-    df = wages_and_working_hours(df)
+    df = wages_and_working_hours(df.copy())
 
     df = df[df["parid"] >= 0]
     print(str(len(df)) + " observations after dropping singles.")
@@ -33,6 +33,7 @@ def create_partner_wage_est_sample(paths, specs, load_data=False):
     print(str(len(df)) + " observations after unemployed and retirees.")
 
     df = create_education_type(df)
+    breakpoint()
     df = merge_couples(df)  # partner data called {var}_p
     df = keep_relevant_columns(df)
     df.to_pickle(out_file_path)
@@ -79,7 +80,7 @@ def wages_and_working_hours(df):
     df = df[df["wage"] > 0]
     print(str(len(df)) + " observations after dropping invalid wage values.")
     # working hours = contractual hours per week
-    df.rename(columns={"pgvebzeit": "working_hours"}, inplace=True)
+    df = df.rename(columns={"pgvebzeit": "working_hours"})
     df = df[df["working_hours"] > 0]
     print(str(len(df)) + " observations after dropping invalid working hours.")
     df["hourly_wage"] = df["wage"] / (df["working_hours"] * (52 / 12))
@@ -120,6 +121,7 @@ def keep_relevant_columns(df):
             "syear",
             "choice",
             "sex",
+            "working_hours",
             "hourly_wage",
             "age_p",
             "wage_p",
@@ -127,6 +129,7 @@ def keep_relevant_columns(df):
             "choice_p",
             "sex_p",
             "hourly_wage_p",
+            "working_hours_p",
         ]
     ]
     df = df.astype(
@@ -139,6 +142,7 @@ def keep_relevant_columns(df):
             "education": np.int32,
             "choice": np.int32,
             "sex": np.int32,
+            "working_hours": np.float64,
             "hourly_wage": np.float64,
             "age_p": np.int32,
             "wage_p": np.float64,
@@ -146,7 +150,8 @@ def keep_relevant_columns(df):
             "choice_p": np.int32,
             "sex_p": np.int32,
             "hourly_wage_p": np.float64,
+            "working_hours_p": np.float64,
         }
     )
-    print(str(len(df)) + " observations in final wage estimation dataset.")
+    print(str(len(df)) + " observations in final partner wage estimation dataset. \n ----------------")
     return df

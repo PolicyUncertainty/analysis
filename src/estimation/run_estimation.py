@@ -10,7 +10,7 @@ input_str = input(
     "\n   - [w]age"
     "\n   - [p]artner wage"
     "\n   - [j]ob separation"
-    "\n   - partner [t]ransition"
+    "\n   - family [t]ransition"
     "\n\n 2 Estimate [m]odel."
     "\n\n Input: "
 )
@@ -65,7 +65,7 @@ if input_str == "f" or input_str == "j":
 
 if input_str == "f" or input_str == "t":
     # Estimate partner transitions
-    from estimation.first_step_estimation.est_partner_transitions import (
+    from estimation.first_step_estimation.est_family_transitions import (
         estimate_partner_transitions,
         estimate_nb_children,
     )

@@ -1,3 +1,4 @@
+import copy
 from itertools import product
 
 import numpy as np
@@ -14,13 +15,21 @@ INTEREST_RATE_GRID = np.linspace(0.01, 0.1, 2)
 BENEFITS_GRID = np.linspace(10, 100, 5)
 
 
+@pytest.fixture(scope="module")
+def paths_and_specs():
+    path_dict = create_path_dict()
+    specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
+    return path_dict, specs
+
+
 @pytest.mark.parametrize(
     "unemployment_benefits, savings, interest_rate",
     list(product(BENEFITS_GRID, SAVINGS_GRID, INTEREST_RATE_GRID)),
 )
-def test_budget_unemployed(unemployment_benefits, savings, interest_rate):
-    path_dict = create_path_dict()
-    specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
+def test_budget_unemployed(
+    unemployment_benefits, savings, interest_rate, paths_and_specs
+):
+    path_dict, specs = paths_and_specs
     specs["unemployment_benefits"] = unemployment_benefits
 
     params = {"interest_rate": interest_rate}
@@ -119,10 +128,11 @@ def test_retiree(
     exp,
     policy_state,
     ret_age_id,
+    paths_and_specs,
 ):
     education = 0
-    path_dict = create_path_dict()
-    specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
+
+    path_dict, specs = paths_and_specs
 
     actual_retirement_age = specs["min_ret_age"] + ret_age_id
 

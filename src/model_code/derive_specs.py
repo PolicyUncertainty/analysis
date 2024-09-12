@@ -195,7 +195,9 @@ def calculate_partner_hours(path_dict):
                     age_bin = 60
                 else:
                     age_bin = int(np.floor((t + start_age) / 10) * 10)
-                partner_hours_np[(sex, edu, t)] = partner_hours.loc[(sex, edu, age_bin)]
+                partner_hours_np[sex, edu, t] = partner_hours.loc[
+                    (sex, edu, age_bin), "working_hours_p"
+                ]
     return jnp.asarray(partner_hours_np)
 
 
@@ -210,7 +212,7 @@ def predict_children_by_state(path_dict):
     specs = read_and_derive_specs(path_dict["specs"])
     n_periods = specs["end_age"] - specs["start_age"] + 1
     params = pd.read_csv(
-        path_dict["est_results"] + "nb_children_estimates.csv", index_col=[0]
+        path_dict["est_results"] + "nb_children_estimates.csv", index_col=[0, 1, 2]
     )
     # populate numpy ndarray which maps state to average number of children
     children = np.zeros((2, specs["n_education_types"], 2, n_periods))
@@ -218,16 +220,10 @@ def predict_children_by_state(path_dict):
         for edu in range(specs["n_education_types"]):
             for has_partner in [0, 1]:
                 for t in range(n_periods):
-                    mask = (
-                        (params.loc["sex"] == sex)
-                        & (params.loc["education"] == edu)
-                        & (params.loc["has_partner"] == has_partner)
-                    )
-                    matching_params = params.loc[:, mask]
                     predicted_nb_children = (
-                        matching_params.loc["const"]
-                        + matching_params.loc["period"] * t
-                        + matching_params.loc["period_sq"] * t**2
+                        params.loc[(sex, edu, has_partner), "const"]
+                        + params.loc[(sex, edu, has_partner), "period"] * t
+                        + params.loc[(sex, edu, has_partner), "period_sq"] * t**2
                     )
                     children[sex, edu, has_partner, t] = np.maximum(
                         0, predicted_nb_children

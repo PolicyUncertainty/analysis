@@ -73,7 +73,7 @@ if input_str == "f" or input_str == "t":
 if input_str == "m":
     from estimation.estimate_setup import estimate_model
 
-    estimation_results = estimate_model(paths_dict, load_model=False)
+    estimation_results = estimate_model(paths_dict, load_model=True)
     print(estimation_results)
 
 

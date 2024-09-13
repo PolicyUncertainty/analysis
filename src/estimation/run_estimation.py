@@ -43,7 +43,7 @@ if input_str == "f" or input_str == "w":
         estimate_average_wage_parameters,
     )
 
-    estimate_wage_parameters(paths_dict)
+    estimate_wage_parameters(paths_dict, specs)
     estimate_average_wage_parameters(paths_dict)
 
 if input_str == "f" or input_str == "p":

@@ -8,32 +8,38 @@ from linearmodels.panel.model import PanelOLS
 from model_code.derive_specs import read_and_derive_specs
 
 
-def estimate_wage_parameters(paths_dict):
+def estimate_wage_parameters(paths_dict, specs):
     """Estimate the wage parameters for each education group in the sample."""
     # load and modify data
     wage_data = prepare_estimation_data(paths_dict)
 
+    edu_types = list(range(specs["n_education_types"]))
+    model_params = ["constant", "ln_exp"]
     # Initialize empty container for coefficients
-    coefficients = [0] * len(wage_data["education"].unique())
+    wage_parameters = pd.DataFrame(
+        index=pd.Index(data=edu_types, name="education"),
+        columns=model_params + ["income_shock_std"],
+    )
     for education in wage_data["education"].unique():
         wage_data_edu = wage_data[wage_data["education"] == education]
         # estimate parametric regression, save parameters
         model = PanelOLS(
             dependent=wage_data_edu["ln_wage"],
-            exog=wage_data_edu[["constant", "ln_exp", "year"]],
+            exog=wage_data_edu[model_params + ["year"]],
             entity_effects=True,
         )
         fitted_model = model.fit(
             cov_type="clustered", cluster_entity=True, cluster_time=True
         )
-        coefficients[education] = fitted_model.params[0:2]
-        income_shock_std = np.sqrt(fitted_model.resids.var())
-        coefficients[education].loc["income_shock_std"] = income_shock_std
-        coefficients[education].name = education
+        # Assign estimated parameters (column list corresponds to model params, so only these are assigned)
+        wage_parameters.loc[education] = fitted_model.params
 
-    wage_parameters = pd.DataFrame(coefficients)
+        # Get estimate for income shock std
+        income_shock_std = np.sqrt(fitted_model.resids.var())
+        wage_parameters.loc[education, "income_shock_std"] = income_shock_std
+
     wage_parameters.to_csv(paths_dict["est_results"] + "wage_eq_params.csv")
-    return coefficients
+    return wage_parameters
 
 
 def estimate_average_wage_parameters(paths_dict):

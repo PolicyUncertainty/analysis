@@ -2,8 +2,7 @@ import jax.numpy as jnp
 import numpy as np
 import pandas as pd
 import yaml
-from specs.family_specs import calculate_partner_hours
-from specs.family_specs import calculate_partner_hrly_wage
+from specs.family_specs import calculate_partner_wages
 from specs.family_specs import predict_children_by_state
 from specs.family_specs import read_in_partner_transition_specs
 from specs.income_specs import calculate_pension_values
@@ -25,15 +24,15 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     specs["pension_point_value_by_edu_exp"] = calculate_pension_values(specs, path_dict)
 
     # partner income
-    specs["partner_hrly_wage"] = calculate_partner_hrly_wage(path_dict, specs)
-    specs["partner_hours"] = calculate_partner_hours(path_dict, specs)
+    specs["partner_wage"] = calculate_partner_wages(path_dict, specs)
+    # specs["partner_hours"] = calculate_partner_hours(path_dict, specs)
     # specs["partner_pension"] = calculate_partner_pension(path_dict)
 
     # family transitions
     specs["children_by_state"] = predict_children_by_state(path_dict, specs)
 
     # Read in family transitions
-    specs["partner_trans_mat"] = read_in_partner_transition_specs(path_dict, specs)
+    specs = read_in_partner_transition_specs(path_dict, specs)
 
     # Set initial experience
     specs["max_init_experience"] = create_initial_exp(path_dict, load_precomputed)

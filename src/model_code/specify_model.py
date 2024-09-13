@@ -63,7 +63,7 @@ def specify_model(
                 },
                 "partner_state": {
                     "transition": partner_transition,
-                    "states": np.arange(4, dtype=int),
+                    "states": np.arange(specs["n_partner_states"], dtype=int),
                 },
             },
         },

@@ -10,11 +10,6 @@ def estimate_partner_transitions(paths_dict, specs):
     """Estimate the partner state transition matrix."""
     transition_data = prepare_transition_data(paths_dict, specs)
 
-    sexes = transition_data["sex"].unique()
-    edu_levels = transition_data["education"].unique()
-    age_bins = transition_data["age_bin"].unique()
-    states = transition_data["partner_state"].unique()
-
     cov_list = ["sex", "education", "age_bin", "lagged_partner_state"]
     trans_mat_df = transition_data.groupby(cov_list)["partner_state"].value_counts(
         normalize=True

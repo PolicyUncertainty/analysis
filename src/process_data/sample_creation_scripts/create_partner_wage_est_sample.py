@@ -1,10 +1,13 @@
 import os
 
-import numpy as np
 import pandas as pd
+from process_data.sample_creation_scripts.create_partner_transition_sample import (
+    create_partner_state,
+)
 from process_data.sample_creation_scripts.create_structural_est_sample import (
     filter_data,
 )
+from process_data.sample_creation_scripts.partner_code import merge_couples
 from process_data.var_resources.soep_vars import create_choice_variable_with_part_time
 from process_data.var_resources.soep_vars import create_education_type
 
@@ -31,12 +34,13 @@ def create_partner_wage_est_sample(paths, specs, load_data=False):
     print(str(len(df)) + " observations after dropping singles.")
 
     df = create_choice_variable_with_part_time(df)
-    df = df[(df["choice"] == 1) | (df["choice"] == 3)]
-    print(str(len(df)) + " observations after unemployed and retirees.")
-
     df = create_education_type(df)
-    df = merge_couples(df)  # partner data called {var}_p
-    df = keep_relevant_columns(df)
+    df = merge_couples(df)
+
+    # Create partner state and drop if partner is absent or in non-working age
+    df = create_partner_state(df, start_age)
+    df = df[df["partner_state"] == 1]
+
     df.to_pickle(out_file_path)
     return df
 
@@ -78,87 +82,11 @@ def load_and_merge_soep_core(soep_c38_path):
 
 def wages_and_working_hours(df):
     df.rename(columns={"pglabgro": "wage"}, inplace=True)
-    df = df[df["wage"] > 0]
+    df.loc[df["wage"] < 0, "wage"] = 0
     print(str(len(df)) + " observations after dropping invalid wage values.")
     # working hours = contractual hours per week
-    df = df.rename(columns={"pgvebzeit": "working_hours"})
-    df = df[df["working_hours"] > 0]
-    print(str(len(df)) + " observations after dropping invalid working hours.")
-    df["hourly_wage"] = df["wage"] / (df["working_hours"] * (52 / 12))
-    return df
-
-
-def merge_couples(df, keep_singles=False):
-    """This function merges couples based on the 'parid' identifier.
-
-    Partner variables are market '_p' in the merged dataset.
-
-    """
-    df = df.reset_index()
-    df_partners = df.copy()
-
-    if keep_singles:
-        df_partners.loc[df_partners["parid"] < 0, "parid"] = np.nan
-        merge_string = "left"
-    else:
-        merge_string = "inner"
-    merged_data = pd.merge(
-        df,
-        df_partners,
-        how=merge_string,
-        left_on=["hid", "syear", "parid"],
-        right_on=["hid", "syear", "pid"],
-        suffixes=("", "_p"),
-    )
-    print(str(len(merged_data)) + " observations after merging couples.")
-    return merged_data
-
-
-def keep_relevant_columns(df):
-    df = df[
-        [
-            "pid",
-            "parid",
-            "age",
-            "wage",
-            "education",
-            "syear",
-            "choice",
-            "sex",
-            "working_hours",
-            "hourly_wage",
-            "age_p",
-            "wage_p",
-            "education_p",
-            "choice_p",
-            "sex_p",
-            "hourly_wage_p",
-            "working_hours_p",
-        ]
-    ]
-    df = df.astype(
-        {
-            "pid": np.int32,
-            "parid": np.int32,
-            "syear": np.int32,
-            "age": np.int32,
-            "wage": np.float64,
-            "education": np.int32,
-            "choice": np.int32,
-            "sex": np.int32,
-            "working_hours": np.float64,
-            "hourly_wage": np.float64,
-            "age_p": np.int32,
-            "wage_p": np.float64,
-            "education_p": np.int32,
-            "choice_p": np.int32,
-            "sex_p": np.int32,
-            "hourly_wage_p": np.float64,
-            "working_hours_p": np.float64,
-        }
-    )
-    print(
-        str(len(df))
-        + " observations in final partner wage estimation dataset. \n ----------------"
-    )
+    # df = df.rename(columns={"pgvebzeit": "working_hours"})
+    # df = df[df["working_hours"] > 0]
+    # print(str(len(df)) + " observations after dropping invalid working hours.")
+    # df["hourly_wage"] = df["wage"] / (df["working_hours"] * (52 / 12))
     return df

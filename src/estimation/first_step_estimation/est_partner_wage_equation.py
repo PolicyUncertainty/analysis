@@ -21,7 +21,7 @@ def estimate_partner_wage_parameters(paths_dict, specs, est_men):
     # Initialize empty container for coefficients
     wage_parameters = pd.DataFrame(
         index=pd.Index(data=edu_labels, name="education"),
-        columns=model_params + ["income_shock_std"],
+        columns=model_params,
     )
 
     for edu_val, edu_label in enumerate(edu_labels):

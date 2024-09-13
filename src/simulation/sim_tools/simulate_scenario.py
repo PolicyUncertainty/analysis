@@ -1,7 +1,7 @@
 import pandas as pd
 from dcegm.simulation.sim_utils import create_simulation_df
 from dcegm.simulation.simulate import simulate_all_periods
-from model_code.model_solver import specify_and_solve_model
+from model_code.specify_model import specify_and_solve_model
 from model_code.specify_model import specify_model
 from simulation.sim_tools.initial_conditions_sim import generate_start_states
 

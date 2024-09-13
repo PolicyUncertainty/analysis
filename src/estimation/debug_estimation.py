@@ -29,7 +29,7 @@ from model_code.stochastic_processes.policy_states_belief import (
 from model_code.stochastic_processes.policy_states_belief import (
     update_specs_exp_ret_age_trans_mat,
 )
-from model_code.model_solver import specify_and_solve_model
+from model_code.specify_model import specify_and_solve_model
 
 # # Generate model_specs
 # model, params = specify_model(

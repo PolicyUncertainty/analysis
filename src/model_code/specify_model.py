@@ -1,6 +1,9 @@
+import pickle
+
 import numpy as np
 from dcegm.pre_processing.setup_model import load_and_setup_model
 from dcegm.pre_processing.setup_model import setup_and_save_model
+from dcegm.solve import get_solve_func_for_model
 from model_code.derive_specs import generate_specs_and_update_params
 from model_code.state_space import create_state_space_functions
 from model_code.state_space import sparsity_condition
@@ -87,3 +90,44 @@ def specify_model(
 
     print("Model specified.")
     return model, params
+
+
+def specify_and_solve_model(
+    path_dict,
+    file_append,
+    params,
+    update_spec_for_policy_state,
+    policy_state_trans_func,
+    load_model,
+    load_solution,
+):
+    """Specify and solve model.
+
+    Also includes possibility to save solutions.
+
+    """
+
+    # Generate model_specs
+    model, params = specify_model(
+        path_dict=path_dict,
+        update_spec_for_policy_state=update_spec_for_policy_state,
+        policy_state_trans_func=policy_state_trans_func,
+        params=params,
+        load_model=load_model,
+    )
+
+    solution_file = path_dict["intermediate_data"] + (
+        f"solved_models/model_solution" f"_{file_append}.pkl"
+    )
+    if load_solution:
+        solution = pickle.load(open(solution_file, "rb"))
+        return solution, model, params
+    else:
+        solution = {}
+        (
+            solution["value"],
+            solution["policy"],
+            solution["endog_grid"],
+        ) = get_solve_func_for_model(model)(params)
+        pickle.dump(solution, open(solution_file, "wb"))
+        return solution, model, params

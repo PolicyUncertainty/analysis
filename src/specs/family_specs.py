@@ -125,11 +125,11 @@ def predict_children_by_state(path_dict, specs):
     for sex in [0, 1]:
         for edu in range(specs["n_education_types"]):
             for has_partner in [0, 1]:
-                for t in range(n_periods):
+                for period in range(n_periods):
                     predicted_nb_children = (
                         params.loc[(sex, edu, has_partner), "const"]
-                        + params.loc[(sex, edu, has_partner), "period"] * t
-                        + params.loc[(sex, edu, has_partner), "period_sq"] * t**2
+                        + params.loc[(sex, edu, has_partner), "period"] * period
+                        + params.loc[(sex, edu, has_partner), "period_sq"] * period**2
                     )
                     children[sex, edu, has_partner, t] = np.maximum(
                         0, predicted_nb_children

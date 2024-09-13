@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from model_code.wealth_and_budget.pensions import calc_gross_pension_income
-from model_code.wealth_and_budget.pensions import calc_pensions
-from model_code.wealth_and_budget.wages import calc_labor_income
+from model_code.wealth_and_budget.pensions import calc_pensions_after_ssc
+from model_code.wealth_and_budget.wages import calc_labor_income_after_ssc
 from model_code.wealth_and_budget.wages import calculate_gross_labor_income
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
@@ -33,14 +33,14 @@ def plot_incomes(path_dict):
         gross_pensions = np.zeros_like(exp_levels, dtype=float)
         for i, exp in enumerate(exp_levels):
             gross_wages[i] = calculate_gross_labor_income(exp, edu, 0, specs)
-            net_wages[i] = calc_labor_income(exp, edu, 0, specs)
+            net_wages[i] = calc_labor_income_after_ssc(exp, edu, 0, specs)
 
             gross_pensions[i] = np.maximum(
                 calc_gross_pension_income(exp, edu, 0, 2, specs), yearly_unemployment
             )
 
             net_pensions[i] = np.maximum(
-                calc_pensions(exp, edu, 0, 2, specs), yearly_unemployment
+                calc_pensions_after_ssc(exp, edu, 0, 2, specs), yearly_unemployment
             )
 
         ax.plot(exp_levels, net_wages, label="Average net wage")

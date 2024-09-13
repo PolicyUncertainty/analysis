@@ -1,8 +1,7 @@
-from model_code.wealth_and_budget.tax_and_transfers import calc_health_ltc_contr
-from model_code.wealth_and_budget.tax_and_transfers import calc_inc_tax
+from model_code.wealth_and_budget.tax_and_ssc import calc_after_ssc_income_pensioneer
 
 
-def calc_pensions(
+def calc_pensions_after_ssc(
     experience,
     education,
     policy_state,
@@ -17,7 +16,9 @@ def calc_pensions(
         retirement_age_id=retirement_age_id,
         options=options,
     )
-    retirement_income = calc_net_income_pensions(retirement_income_gross, options)
+    retirement_income = calc_after_ssc_income_pensioneer(
+        retirement_income_gross, options
+    )
     return retirement_income
 
 
@@ -40,11 +41,3 @@ def calc_gross_pension_income(
 
     retirement_income_gross = pension_point_value * experience * pension_factor * 12
     return retirement_income_gross
-
-
-def calc_net_income_pensions(gross_income, options):
-    gross_income_full = gross_income * options["wealth_unit"]
-    ssc = calc_health_ltc_contr(gross_income_full)
-    inc_tax = calc_inc_tax(gross_income_full - ssc)
-    net_income = gross_income_full - inc_tax - ssc
-    return net_income / options["wealth_unit"]

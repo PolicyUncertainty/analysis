@@ -1,7 +1,9 @@
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
-from process_data.create_job_sep_sample import create_job_sep_sample
+from process_data.sample_creation_scripts.create_job_sep_sample import (
+    create_job_sep_sample,
+)
 
 
 def est_job_sep(paths_dict, specs, load_data=False):

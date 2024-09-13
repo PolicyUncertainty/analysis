@@ -24,11 +24,19 @@ string_in = input(
 # %%
 # Create relevant datasets.
 # --------------------------------------------------------------------------------------
-from process_data.create_structural_est_sample import create_structural_est_sample
-from process_data.create_wage_est_sample import create_wage_est_sample
-from process_data.create_partner_wage_est_sample import create_partner_wage_est_sample
-from process_data.create_job_sep_sample import create_job_sep_sample
-from process_data.create_partner_transition_sample import (
+from process_data.sample_creation_scripts.create_structural_est_sample import (
+    create_structural_est_sample,
+)
+from process_data.sample_creation_scripts.create_wage_est_sample import (
+    create_wage_est_sample,
+)
+from process_data.sample_creation_scripts.create_partner_wage_est_sample import (
+    create_partner_wage_est_sample,
+)
+from process_data.sample_creation_scripts.create_job_sep_sample import (
+    create_job_sep_sample,
+)
+from process_data.sample_creation_scripts.create_partner_transition_sample import (
     create_partner_transition_sample,
 )
 

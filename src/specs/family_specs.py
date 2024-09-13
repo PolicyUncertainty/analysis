@@ -1,10 +1,9 @@
 import numpy as np
 import pandas as pd
 from jax import numpy as jnp
-from specs.derive_specs import read_and_derive_specs
 
 
-def calculate_partner_hrly_wage(path_dict):
+def calculate_partner_hrly_wage(path_dict, specs):
     """Calculates average hourly wage of working partners (i.e. conditional on working
     hours > 0).
 
@@ -12,7 +11,6 @@ def calculate_partner_hrly_wage(path_dict):
     n_working_periods)
 
     """
-    specs = read_and_derive_specs(path_dict["specs"])
     start_age = specs["start_age"]
     end_age = specs["max_ret_age"]
     ages = np.arange(start_age, end_age + 1)
@@ -53,11 +51,10 @@ def calculate_partner_hrly_wage(path_dict):
     return jnp.asarray(partner_wages)
 
 
-def calculate_partner_hours(path_dict):
+def calculate_partner_hours(path_dict, specs):
     """Calculates average hours worked by working partners (i.e. conditional on working
     hours > 0) Produces partner_hours array of shape (n_sexes, n_education_types,
     n_working_periods)"""
-    specs = read_and_derive_specs(path_dict["specs"])
     start_age = specs["start_age"]
     end_age = specs["max_ret_age"]
     # load data
@@ -83,7 +80,7 @@ def calculate_partner_hours(path_dict):
     return jnp.asarray(partner_hours_np)
 
 
-def predict_children_by_state(path_dict):
+def predict_children_by_state(path_dict, specs):
     """Predicts the number of children in the household for each individual conditional
     on state.
 
@@ -91,7 +88,6 @@ def predict_children_by_state(path_dict):
     n_periods)
 
     """
-    specs = read_and_derive_specs(path_dict["specs"])
     n_periods = specs["end_age"] - specs["start_age"] + 1
     params = pd.read_csv(
         path_dict["est_results"] + "nb_children_estimates.csv", index_col=[0, 1, 2]

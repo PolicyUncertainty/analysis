@@ -15,7 +15,7 @@ def estimate_wage_parameters(paths_dict, specs):
     # load and modify data
     wage_data = prepare_estimation_data(paths_dict)
 
-    edu_labels = specs["education_lables"] + ["all"]
+    edu_labels = specs["education_labels"] + ["all"]
     model_params = ["constant", "ln_exp"]
     # Initialize empty container for coefficients
     wage_parameters = pd.DataFrame(

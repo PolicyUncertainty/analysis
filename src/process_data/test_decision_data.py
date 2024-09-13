@@ -6,7 +6,9 @@ import pytest
 LOAD_SAVED_DATA = True
 
 # from process_data.derive_datasets import gather_decision_data
-from process_data.create_structural_est_sample import create_structural_est_sample
+from process_data.sample_creation_scripts.create_structural_est_sample import (
+    create_structural_est_sample,
+)
 from set_paths import create_path_dict
 
 # As we do not keep our data in github these tests can only be run locally

@@ -24,12 +24,12 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     specs["pension_point_value_by_edu_exp"] = calculate_pension_values(specs, path_dict)
 
     # partner income
-    specs["partner_hrly_wage"] = calculate_partner_hrly_wage(path_dict)
-    specs["partner_hours"] = calculate_partner_hours(path_dict)
+    specs["partner_hrly_wage"] = calculate_partner_hrly_wage(path_dict, specs)
+    specs["partner_hours"] = calculate_partner_hours(path_dict, specs)
     # specs["partner_pension"] = calculate_partner_pension(path_dict)
 
     # family transitions
-    specs["children_by_state"] = predict_children_by_state(path_dict)
+    specs["children_by_state"] = predict_children_by_state(path_dict, specs)
 
     # Set initial experience
     specs["max_init_experience"] = create_initial_exp(path_dict, load_precomputed)

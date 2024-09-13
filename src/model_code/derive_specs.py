@@ -20,10 +20,13 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     wage_params = pd.read_csv(
         path_dict["est_results"] + "wage_eq_params.csv", index_col=0
     )
+    edu_labels = specs["education_labels"]
 
-    specs["gamma_0"] = jnp.asarray(wage_params["constant"].values)
-    specs["gamma_1"] = jnp.asarray(wage_params["ln_exp"].values)
-    specs["income_shock_scale"] = wage_params["income_shock_std"].values.mean()
+    specs["gamma_0"] = jnp.asarray(wage_params.loc[edu_labels, "constant"].values)
+    specs["gamma_1"] = jnp.asarray(wage_params.loc[edu_labels, "ln_exp"].values)
+    specs["income_shock_scale"] = wage_params.loc[
+        edu_labels, "income_shock_std"
+    ].values.mean()
 
     # pensions
     specs["pension_point_value_by_edu_exp"] = calculate_pension_values(specs, path_dict)
@@ -88,29 +91,30 @@ def calculate_pension_values(specs, path_dict):
     wage_params = pd.read_csv(
         path_dict["est_results"] + "wage_eq_params.csv", index_col=0
     )
-    wage_params_full_sample = pd.read_csv(
-        path_dict["est_results"] + "wage_eq_params_full_sample.csv", index_col=0
+
+    # Create possible experience values
+    experience = np.arange(0, specs["exp_cap"] + 1)
+
+    wage_by_experience_average = np.exp(
+        wage_params.loc["all", "constant"]
+        + wage_params.loc["all", "ln_exp"] * np.log(experience + 1)
     )
 
-    experience = np.arange(0, specs["exp_cap"] + 1)
-    wage_by_experience_average = np.exp(
-        wage_params_full_sample.loc["constant"].values
-        + wage_params_full_sample.loc["ln_exp"].values * np.log(experience + 1)
-    )
-    # if number of education types changes, this needs to be adjusted
-    wage_by_experience = np.ndarray(shape=(2, len(experience)))
-    adjustment_factor_by_exp = np.ndarray(shape=(2, len(experience)))
-    for education in [0, 1]:
-        wage_by_experience[education] = np.exp(
-            wage_params.loc[education, "constant"]
-            + wage_params.loc[education, "ln_exp"] * np.log(experience + 1)
+    n_edu_types = specs["n_education_types"]
+    # Create adjustment factor for pension point value container
+    adjustment_factor_by_exp = np.ndarray(shape=(n_edu_types, len(experience)))
+
+    for edu_index, edu_label in enumerate(specs["education_labels"]):
+        wage_by_experience_edu = np.exp(
+            wage_params.loc[edu_label, "constant"]
+            + wage_params.loc[edu_label, "ln_exp"] * np.log(experience + 1)
         )
-        adjustment_factor_by_exp[education] = (
-            wage_by_experience[education] / wage_by_experience_average
+        adjustment_factor_by_exp[edu_index, :] = (
+            wage_by_experience_edu / wage_by_experience_average
         )
         for i in range(1, len(experience)):
-            adjustment_factor_by_exp[education, i] = adjustment_factor_by_exp[
-                education, 1 : i + 1
+            adjustment_factor_by_exp[edu_index, i] = adjustment_factor_by_exp[
+                edu_index, 1 : i + 1
             ].mean()
 
     # Generate average pension point value weighted by east and west

@@ -4,7 +4,7 @@ from model_code.wealth_and_budget.tax_and_transfers import calc_inc_tax
 from model_code.wealth_and_budget.tax_and_transfers import calc_pension_unempl_contr
 
 
-def calc_labor_income(experience, education, partner_state, income_shock, options):
+def calc_labor_income(experience, education, income_shock, options):
     # Gross labor income
     gross_labor_income = calculate_gross_labor_income(
         experience=experience,

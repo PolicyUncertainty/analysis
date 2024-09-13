@@ -9,19 +9,27 @@ from model_code.derive_specs import read_and_derive_specs
 
 
 def estimate_wage_parameters(paths_dict, specs):
-    """Estimate the wage parameters for each education group in the sample."""
+    """Estimate the wage parameters for each education group in the sample.
+
+    Also estimate for all individuals.
+
+    """
     # load and modify data
     wage_data = prepare_estimation_data(paths_dict)
 
-    edu_types = list(range(specs["n_education_types"]))
+    edu_labels = specs["education_lables"] + ["all"]
     model_params = ["constant", "ln_exp"]
     # Initialize empty container for coefficients
     wage_parameters = pd.DataFrame(
-        index=pd.Index(data=edu_types, name="education"),
+        index=pd.Index(data=edu_labels, name="education"),
         columns=model_params + ["income_shock_std"],
     )
-    for education in wage_data["education"].unique():
-        wage_data_edu = wage_data[wage_data["education"] == education]
+    for edu_val, edu_label in enumerate(edu_labels):
+        if edu_label == "all":
+            wage_data_edu = wage_data
+        else:
+            wage_data_edu = wage_data[wage_data["education"] == edu_val]
+
         # estimate parametric regression, save parameters
         model = PanelOLS(
             dependent=wage_data_edu["ln_wage"],
@@ -32,38 +40,14 @@ def estimate_wage_parameters(paths_dict, specs):
             cov_type="clustered", cluster_entity=True, cluster_time=True
         )
         # Assign estimated parameters (column list corresponds to model params, so only these are assigned)
-        wage_parameters.loc[education] = fitted_model.params
+        wage_parameters.loc[edu_label] = fitted_model.params
 
         # Get estimate for income shock std
         income_shock_std = np.sqrt(fitted_model.resids.var())
-        wage_parameters.loc[education, "income_shock_std"] = income_shock_std
+        wage_parameters.loc[edu_label, "income_shock_std"] = income_shock_std
 
     wage_parameters.to_csv(paths_dict["est_results"] + "wage_eq_params.csv")
     return wage_parameters
-
-
-def estimate_average_wage_parameters(paths_dict):
-    """Estimate the average wage parameters for all individuals in the sample."""
-
-    wage_data = prepare_estimation_data(paths_dict)
-
-    # estimate parametric regression, save parameters
-    model = PanelOLS(
-        dependent=wage_data["ln_wage"],
-        exog=wage_data[["constant", "ln_exp", "year"]],
-        entity_effects=True,
-    )
-    fitted_model = model.fit(
-        cov_type="clustered", cluster_entity=True, cluster_time=True
-    )
-    coefficients = fitted_model.params[0:2]
-    income_shock_std = np.sqrt(fitted_model.resids.var())
-    coefficients.loc["income_shock_std"] = income_shock_std
-    coefficients.name = "all"
-
-    wage_parameters = pd.DataFrame(coefficients)
-    wage_parameters.to_csv(paths_dict["est_results"] + "wage_eq_params_full_sample.csv")
-    return coefficients
 
 
 def prepare_estimation_data(paths_dict):

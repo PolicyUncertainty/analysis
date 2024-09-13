@@ -40,11 +40,9 @@ if input_str == "f" or input_str == "w":
     # Average wage parameters are estimated to compute education-specific pensions
     from estimation.first_step_estimation.est_wage_equation import (
         estimate_wage_parameters,
-        estimate_average_wage_parameters,
     )
 
     estimate_wage_parameters(paths_dict, specs)
-    estimate_average_wage_parameters(paths_dict)
 
 if input_str == "f" or input_str == "p":
     # Estimate partner wage parameters for men and women

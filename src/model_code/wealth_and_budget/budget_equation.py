@@ -8,6 +8,7 @@ def budget_constraint(
     education,
     lagged_choice,  # d_{t-1}
     experience,
+    partner_state,
     policy_state,  # current applicable SRA identifyer
     retirement_age_id,
     savings_end_of_previous_period,  # A_{t-1}
@@ -24,6 +25,7 @@ def budget_constraint(
     labor_income = calc_labor_income(
         experience=experience,
         education=education,
+        partner_state=partner_state,
         income_shock=income_shock_previous_period,
         options=options,
     )

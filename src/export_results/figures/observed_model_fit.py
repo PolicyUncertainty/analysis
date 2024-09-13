@@ -6,8 +6,12 @@ import pandas as pd
 from dcegm.likelihood import create_choice_prob_func_unobserved_states
 from model_code.derive_specs import generate_derived_and_data_derived_specs
 from model_code.model_solver import specify_and_solve_model
-from model_code.policy_states_belief import expected_SRA_probs_estimation
-from model_code.policy_states_belief import update_specs_exp_ret_age_trans_mat
+from model_code.stochastic_processes.policy_states_belief import (
+    expected_SRA_probs_estimation,
+)
+from model_code.stochastic_processes.policy_states_belief import (
+    update_specs_exp_ret_age_trans_mat,
+)
 
 
 def observed_model_fit(paths_dict):
@@ -64,7 +68,7 @@ def observed_model_fit(paths_dict):
             observed_wealth=data_decision["wealth"].values,
             observed_choices=choice_vals,
             unobserved_state_specs=unobserved_state_specs,
-            weight_full_states=False
+            weight_full_states=False,
         )
 
         choice_probs_observations = choice_prob_func(

@@ -1,9 +1,9 @@
-import numpy as np
 import matplotlib.pyplot as plt
-from model_code.derive_specs import generate_derived_and_data_derived_specs
-from model_code.job_offers import job_offer_process_transition
+import numpy as np
 import yaml
 from estimation.estimate_setup import create_job_offer_params_from_start
+from model_code.derive_specs import generate_derived_and_data_derived_specs
+from model_code.stochastic_processes.job_offers import job_offer_process_transition
 
 
 def plot_job_separation(path_dict):
@@ -14,7 +14,6 @@ def plot_job_separation(path_dict):
 
     job_sep_params = create_job_offer_params_from_start(path_dict)
     start_params_all.update(job_sep_params)
-
 
     n_working_periods = 45
     n_education_types = specs["n_education_types"]
@@ -28,16 +27,15 @@ def plot_job_separation(path_dict):
                 options=specs,
                 education=edu,
                 period=period,
-                choice=1
+                choice=1,
             )[0]
             job_offer_probs[edu, period] = job_offer_process_transition(
                 params=start_params_all,
                 options=specs,
                 education=edu,
                 period=period,
-                choice=0
+                choice=0,
             )[1]
-
 
     fig, (ax1, ax2) = plt.subplots(ncols=2)
 

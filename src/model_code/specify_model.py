@@ -2,9 +2,9 @@ import numpy as np
 from dcegm.pre_processing.setup_model import load_and_setup_model
 from dcegm.pre_processing.setup_model import setup_and_save_model
 from model_code.derive_specs import generate_specs_and_update_params
-from model_code.job_offers import job_offer_process_transition
 from model_code.state_space import create_state_space_functions
 from model_code.state_space import sparsity_condition
+from model_code.stochastic_processes.job_offers import job_offer_process_transition
 from model_code.utility_functions import create_final_period_utility_functions
 from model_code.utility_functions import create_utility_functions
 from model_code.wealth_and_budget.budget_equation import budget_constraint
@@ -52,6 +52,10 @@ def specify_model(
                 "job_offer": {
                     "transition": job_offer_process_transition,
                     "states": np.arange(2, dtype=int),
+                },
+                "partner_state": {
+                    "transition": partner_state_transition,
+                    "states": np.arange(4, dtype=int),
                 },
             },
         },

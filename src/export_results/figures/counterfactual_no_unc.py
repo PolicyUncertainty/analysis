@@ -4,7 +4,9 @@ from export_results.tools import create_step_function_values
 from matplotlib import pyplot as plt
 from model_code.derive_specs import generate_derived_and_data_derived_specs
 from model_code.derive_specs import read_and_derive_specs
-from model_code.policy_states_belief import update_specs_exp_ret_age_trans_mat
+from model_code.stochastic_processes.policy_states_belief import (
+    update_specs_exp_ret_age_trans_mat,
+)
 from simulation.policy_state_scenarios.step_function import (
     update_specs_for_step_function_scale_1,
 )

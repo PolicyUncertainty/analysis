@@ -3,7 +3,7 @@ from itertools import product
 import numpy as np
 import pytest
 from model_code.derive_specs import generate_derived_and_data_derived_specs
-from model_code.job_offers import job_offer_process_transition
+from model_code.stochastic_processes.job_offers import job_offer_process_transition
 from set_paths import create_path_dict
 
 EDU_GRID = [0, 1]

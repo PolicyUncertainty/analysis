@@ -53,8 +53,8 @@ if input_str == "f" or input_str == "p":
         calculate_partner_hours,
     )
 
-    estimate_partner_wage_parameters(paths_dict, est_men=True)
-    estimate_partner_wage_parameters(paths_dict, est_men=False)
+    estimate_partner_wage_parameters(paths_dict, specs, est_men=True)
+    estimate_partner_wage_parameters(paths_dict, specs, est_men=False)
     calculate_partner_hours(paths_dict)
 
 if input_str == "f" or input_str == "j":

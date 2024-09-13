@@ -5,6 +5,7 @@ import yaml
 from specs.family_specs import calculate_partner_hours
 from specs.family_specs import calculate_partner_hrly_wage
 from specs.family_specs import predict_children_by_state
+from specs.family_specs import read_in_partner_transition_specs
 from specs.income_specs import calculate_pension_values
 from specs.income_specs import process_wage_params
 
@@ -30,6 +31,9 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
 
     # family transitions
     specs["children_by_state"] = predict_children_by_state(path_dict, specs)
+
+    # Read in family transitions
+    specs["partner_trans_mat"] = read_in_partner_transition_specs(path_dict, specs)
 
     # Set initial experience
     specs["max_init_experience"] = create_initial_exp(path_dict, load_precomputed)

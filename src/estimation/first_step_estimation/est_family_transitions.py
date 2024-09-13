@@ -103,10 +103,7 @@ def estimate_nb_children(paths_dict, specs):
                 X = sm.add_constant(X)
                 Y = df_reduced["children"]
                 model = sm.OLS(Y, X).fit()
-                for column in columns:
-                    estimates.loc[(sex, education, has_partner), column] = model.params[
-                        column
-                    ]
+                estimates.loc[(sex, education, has_partner), columns] = model.params
 
     out_file_path = paths_dict["est_results"] + "nb_children_estimates.csv"
     estimates.to_csv(out_file_path)

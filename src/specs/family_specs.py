@@ -3,9 +3,9 @@ import pandas as pd
 from jax import numpy as jnp
 
 
-def calculate_partner_wages(path_dict, specs):
+def calculate_partner_incomes(path_dict, specs):
     """Calculate income of working aged partner."""
-    periods = np.arange(0, specs["n_periods"] + 1, dtype=int)
+    periods = np.arange(0, specs["n_periods"], dtype=int)
     n_edu_types = len(specs["education_labels"])
 
     # Only do this for men now
@@ -22,9 +22,11 @@ def calculate_partner_wages(path_dict, specs):
                 partner_wage_params_men.loc[edu_label, "constant"]
                 + partner_wage_params_men.loc[edu_label, "period"] * period
                 + partner_wage_params_men.loc[edu_label, "period_sq"] * period**2
-            )
+            ) / specs["wealth_unit"]
 
-    return partner_wages
+    # Wealth hack
+    partner_pension = partner_wages.mean(axis=1) * 0.48
+    return partner_wages, partner_pension
 
 
 # def  calculate_partner_hrly_wage(path_dict, specs):

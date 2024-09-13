@@ -17,16 +17,11 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     specs = read_and_derive_specs(path_dict["specs"])
 
     # wages
-    wage_params = pd.read_csv(
-        path_dict["est_results"] + "wage_eq_params.csv", index_col=0
-    )
-    edu_labels = specs["education_labels"]
-
-    specs["gamma_0"] = jnp.asarray(wage_params.loc[edu_labels, "constant"].values)
-    specs["gamma_1"] = jnp.asarray(wage_params.loc[edu_labels, "ln_exp"].values)
-    specs["income_shock_scale"] = wage_params.loc[
-        edu_labels, "income_shock_std"
-    ].values.mean()
+    (
+        specs["gamma_0"],
+        specs["gamma_1"],
+        specs["income_shock_scale"],
+    ) = process_wage_params(path_dict, specs)
 
     # pensions
     specs["pension_point_value_by_edu_exp"] = calculate_pension_values(specs, path_dict)
@@ -46,6 +41,19 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
         np.loadtxt(path_dict["est_results"] + "job_sep_probs.csv", delimiter=",")
     )
     return specs
+
+
+def process_wage_params(path_dict, specs):
+    # wages
+    wage_params = pd.read_csv(
+        path_dict["est_results"] + "wage_eq_params.csv", index_col=0
+    )
+    edu_labels = specs["education_labels"]
+
+    gamma_0 = jnp.asarray(wage_params.loc[edu_labels, "constant"].values)
+    gamma_1 = jnp.asarray(wage_params.loc[edu_labels, "ln_exp"].values)
+    income_shock_scale = wage_params.loc[edu_labels, "income_shock_std"].values.mean()
+    return gamma_0, gamma_1, income_shock_scale
 
 
 def create_initial_exp(path_dict, load_precomputed):

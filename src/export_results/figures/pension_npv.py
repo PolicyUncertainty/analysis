@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from model_code.derive_specs import generate_derived_and_data_derived_specs
 from model_code.wealth_and_budget.pensions import calc_net_income_pensions
+from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
 def plot_pension_npv_by_age(paths, edu=0):

@@ -1,6 +1,6 @@
 # Set paths of project
-from model_code.derive_specs import read_and_derive_specs
 from set_paths import create_path_dict
+from specs.derive_specs import read_and_derive_specs
 
 
 input_str = input(
@@ -40,11 +40,9 @@ if input_str == "f" or input_str == "w":
     # Average wage parameters are estimated to compute education-specific pensions
     from estimation.first_step_estimation.est_wage_equation import (
         estimate_wage_parameters,
-        estimate_average_wage_parameters,
     )
 
-    estimate_wage_parameters(paths_dict)
-    estimate_average_wage_parameters(paths_dict)
+    estimate_wage_parameters(paths_dict, specs)
 
 if input_str == "f" or input_str == "p":
     # Estimate partner wage parameters for men and women
@@ -53,8 +51,8 @@ if input_str == "f" or input_str == "p":
         calculate_partner_hours,
     )
 
-    estimate_partner_wage_parameters(paths_dict, est_men=True)
-    estimate_partner_wage_parameters(paths_dict, est_men=False)
+    estimate_partner_wage_parameters(paths_dict, specs, est_men=True)
+    estimate_partner_wage_parameters(paths_dict, specs, est_men=False)
     calculate_partner_hours(paths_dict)
 
 if input_str == "f" or input_str == "j":

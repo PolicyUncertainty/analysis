@@ -1,16 +1,10 @@
 # %%
 # Set paths of project
-import matplotlib.pyplot as plt
-
 from set_paths import create_path_dict
 
 paths_dict = create_path_dict()
 
-import pickle
 import jax
-import numpy as np
-import pandas as pd
-import jax.numpy as jnp
 import yaml
 
 jax.config.update("jax_enable_x64", True)
@@ -29,10 +23,13 @@ params["dis_util_work"] = 1.4911161193847658e-09
 params["dis_util_unemployed"] = 50
 
 
-from model_code.policy_states_belief import expected_SRA_probs_estimation
-from model_code.policy_states_belief import update_specs_exp_ret_age_trans_mat
-from model_code.specify_model import specify_model
-from model_code.model_solver import specify_and_solve_model
+from model_code.stochastic_processes.policy_states_belief import (
+    expected_SRA_probs_estimation,
+)
+from model_code.stochastic_processes.policy_states_belief import (
+    update_specs_exp_ret_age_trans_mat,
+)
+from model_code.specify_model import specify_and_solve_model
 
 # # Generate model_specs
 # model, params = specify_model(
@@ -55,8 +52,8 @@ solution, model, params = specify_and_solve_model(
 
 
 from estimation.estimate_setup import load_and_prep_data
+
 data_decision = load_and_prep_data(paths_dict)
-from estimation.estimate_setup import create_ll_from_paths
 # individual_likelihood = create_ll_from_paths(
 #     params, paths_dict, load_model=False
 # )

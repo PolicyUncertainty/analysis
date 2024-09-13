@@ -16,9 +16,13 @@ from simulation.policy_state_scenarios.step_function import (
     update_specs_for_step_function_scale_2,
     realized_policy_step_function,
 )
-from model_code.policy_states_belief import expected_SRA_probs_estimation
-from model_code.policy_states_belief import update_specs_exp_ret_age_trans_mat
-from simulation.simulate_scenario import solve_and_simulate_scenario
+from model_code.stochastic_processes.policy_states_belief import (
+    expected_SRA_probs_estimation,
+)
+from model_code.stochastic_processes.policy_states_belief import (
+    update_specs_exp_ret_age_trans_mat,
+)
+from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 
 # %%
 # Set specifications

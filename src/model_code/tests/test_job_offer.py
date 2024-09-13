@@ -2,9 +2,9 @@ from itertools import product
 
 import numpy as np
 import pytest
-from model_code.derive_specs import generate_derived_and_data_derived_specs
-from model_code.job_offers import job_offer_process_transition
+from model_code.stochastic_processes.job_offers import job_offer_process_transition
 from set_paths import create_path_dict
+from specs.derive_specs import generate_derived_and_data_derived_specs
 
 EDU_GRID = [0, 1]
 PERIOD_GRID = np.arange(0, 20, 2, dtype=int)

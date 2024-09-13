@@ -2,8 +2,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from export_results.tools import create_step_function_values
-from model_code.derive_specs import generate_derived_and_data_derived_specs
-from model_code.derive_specs import read_and_derive_specs
 from simulation.policy_state_scenarios.step_function import (
     update_specs_for_step_function_scale_05,
 )
@@ -13,6 +11,8 @@ from simulation.policy_state_scenarios.step_function import (
 from simulation.policy_state_scenarios.step_function import (
     update_specs_for_step_function_scale_2,
 )
+from specs.derive_specs import generate_derived_and_data_derived_specs
+from specs.derive_specs import read_and_derive_specs
 
 
 def plot_step_functions(path_dict):

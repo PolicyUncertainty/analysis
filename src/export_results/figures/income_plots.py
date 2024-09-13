@@ -1,14 +1,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from model_code.derive_specs import generate_derived_and_data_derived_specs
-from model_code.wealth_and_budget.pensions import (
-    calc_gross_pension_income,
-    calc_pensions,
-)
-from model_code.wealth_and_budget.wages import (
-    calc_labor_income,
-    calculate_gross_labor_income,
-)
+from model_code.wealth_and_budget.pensions import calc_gross_pension_income
+from model_code.wealth_and_budget.pensions import calc_pensions
+from model_code.wealth_and_budget.wages import calc_labor_income
+from model_code.wealth_and_budget.wages import calculate_gross_labor_income
+from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
 def plot_incomes(path_dict):

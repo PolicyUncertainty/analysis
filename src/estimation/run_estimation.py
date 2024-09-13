@@ -1,6 +1,6 @@
 # Set paths of project
-from model_code.derive_specs import read_and_derive_specs
 from set_paths import create_path_dict
+from specs.derive_specs import read_and_derive_specs
 
 
 input_str = input(

@@ -1,11 +1,10 @@
 # Description: This file estimates the parameters of the HOURLY wage equation using the SOEP panel data.
 # We estimate the following equation for each education level:
 # ln_partner_wage = beta_0 + beta_1 * ln(age) individual_FE + time_FE + epsilon
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from linearmodels.panel.model import PanelOLS
-from model_code.derive_specs import read_and_derive_specs
+from specs.derive_specs import read_and_derive_specs
 
 
 def estimate_partner_wage_parameters(paths_dict, specs, est_men):

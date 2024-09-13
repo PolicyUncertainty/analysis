@@ -3,7 +3,7 @@
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
-from model_code.derive_specs import read_and_derive_specs
+from specs.derive_specs import read_and_derive_specs
 
 
 def estimate_partner_transitions(paths_dict, specs):

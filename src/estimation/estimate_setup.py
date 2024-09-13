@@ -7,7 +7,6 @@ import pandas as pd
 import statsmodels.api as sm
 import yaml
 from dcegm.likelihood import create_individual_likelihood_function_for_model
-from model_code.derive_specs import generate_derived_and_data_derived_specs
 from model_code.specify_model import specify_model
 from model_code.stochastic_processes.policy_states_belief import (
     expected_SRA_probs_estimation,
@@ -15,6 +14,7 @@ from model_code.stochastic_processes.policy_states_belief import (
 from model_code.stochastic_processes.policy_states_belief import (
     update_specs_exp_ret_age_trans_mat,
 )
+from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
 def estimate_model(path_dict, load_model):

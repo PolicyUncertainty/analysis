@@ -4,7 +4,6 @@ import numpy as np
 from dcegm.pre_processing.setup_model import load_and_setup_model
 from dcegm.pre_processing.setup_model import setup_and_save_model
 from dcegm.solve import get_solve_func_for_model
-from model_code.derive_specs import generate_specs_and_update_params
 from model_code.state_space import create_state_space_functions
 from model_code.state_space import sparsity_condition
 from model_code.stochastic_processes.job_offers import job_offer_process_transition
@@ -12,6 +11,7 @@ from model_code.utility_functions import create_final_period_utility_functions
 from model_code.utility_functions import create_utility_functions
 from model_code.wealth_and_budget.budget_equation import budget_constraint
 from model_code.wealth_and_budget.savings_grid import create_savings_grid
+from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
 def specify_model(
@@ -23,7 +23,11 @@ def specify_model(
 ):
     """Generate model and options dictionaries."""
     # Generate model_specs
-    specs, params = generate_specs_and_update_params(path_dict, params)
+    specs, params = generate_derived_and_data_derived_specs(path_dict, params)
+    # Assign income shock scale to start_params_all
+    params["sigma"] = specs["income_shock_scale"]
+    params["interest_rate"] = specs["interest_rate"]
+    params["beta"] = specs["discount_factor"]
 
     # Execute load first step estimation data
     specs = update_spec_for_policy_state(
@@ -56,10 +60,10 @@ def specify_model(
                     "transition": job_offer_process_transition,
                     "states": np.arange(2, dtype=int),
                 },
-                "partner_state": {
-                    "transition": partner_state_transition,
-                    "states": np.arange(4, dtype=int),
-                },
+                # "partner_state": {
+                #     "transition": partner_state_transition,
+                #     "states": np.arange(4, dtype=int),
+                # },
             },
         },
         "model_params": specs,

@@ -6,11 +6,11 @@ from set_paths import create_path_dict
 paths_dict = create_path_dict(define_user=True)
 
 # Load options and generate auxiliary options
-from model_code.derive_specs import read_and_derive_specs
+from specs.derive_specs import read_and_derive_specs
 
 specs = read_and_derive_specs(paths_dict["specs"])
 string_in = input(
-    """Which dataset should be created? 
+    """Which dataset should be created?
     \n\n- [a]ll
     \n- [s]tructural
     \n- [w]age

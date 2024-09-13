@@ -2,8 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import yaml
 from estimation.estimate_setup import create_job_offer_params_from_start
-from model_code.derive_specs import generate_derived_and_data_derived_specs
 from model_code.stochastic_processes.job_offers import job_offer_process_transition
+from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
 def plot_job_separation(path_dict):

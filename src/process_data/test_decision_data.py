@@ -5,9 +5,6 @@ import pytest
 
 LOAD_SAVED_DATA = True
 
-import yaml
-
-
 # from process_data.derive_datasets import gather_decision_data
 from process_data.create_structural_est_sample import create_structural_est_sample
 from set_paths import create_path_dict
@@ -18,7 +15,7 @@ IN_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 
 # These function tests the decision data for consistency (cf. model state space sparsity condition).
 
-from model_code.derive_specs import generate_derived_and_data_derived_specs
+from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
 @pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Test doesn't work in Github Actions.")

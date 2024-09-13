@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from dcegm.likelihood import create_choice_prob_func_unobserved_states
-from model_code.derive_specs import generate_derived_and_data_derived_specs
 from model_code.specify_model import specify_and_solve_model
 from model_code.stochastic_processes.policy_states_belief import (
     expected_SRA_probs_estimation,
@@ -12,6 +11,7 @@ from model_code.stochastic_processes.policy_states_belief import (
 from model_code.stochastic_processes.policy_states_belief import (
     update_specs_exp_ret_age_trans_mat,
 )
+from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
 def observed_model_fit(paths_dict):

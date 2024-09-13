@@ -5,9 +5,9 @@ import pandas as pd
 from process_data.sample_creation_scripts.create_structural_est_sample import (
     filter_data,
 )
-from process_data.soep_vars import create_choice_variable
-from process_data.soep_vars import create_education_type
-from process_data.soep_vars import sum_experience_variables
+from process_data.var_resources.soep_vars import create_choice_variable
+from process_data.var_resources.soep_vars import create_education_type
+from process_data.var_resources.soep_vars import sum_experience_variables
 
 
 def create_wage_est_sample(paths, specs, load_data=False):

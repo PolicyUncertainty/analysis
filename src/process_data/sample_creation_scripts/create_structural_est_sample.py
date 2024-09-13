@@ -2,11 +2,11 @@ import os
 
 import numpy as np
 import pandas as pd
-from process_data.soep_vars import create_choice_variable
-from process_data.soep_vars import create_education_type
-from process_data.soep_vars import create_experience_variable_with_cap
-from process_data.soep_vars import generate_job_separation_var
-from process_data.wealth import add_wealth
+from process_data.var_resources.soep_vars import create_choice_variable
+from process_data.var_resources.soep_vars import create_education_type
+from process_data.var_resources.soep_vars import create_experience_variable_with_cap
+from process_data.var_resources.soep_vars import generate_job_separation_var
+from process_data.var_resources.wealth import add_wealth
 
 
 def create_structural_est_sample(paths, load_data=False, options=None):

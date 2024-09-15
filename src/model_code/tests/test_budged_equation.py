@@ -167,15 +167,24 @@ def test_budget_worker(
     )
     income_after_ssc = labor_income_year - sscs_worker / specs_internal["wealth_unit"]
 
-    nb_children = specs_internal["children_by_state"][
-        0, education, partner_state, period
-    ]
     has_partner_int = (partner_state > 0).astype(int)
     unemployment_benefits = calc_unemployment_benefits(
         savings, education, has_partner_int, period, specs_internal
     )
 
-    if partner_state == 1:
+    nb_children = specs_internal["children_by_state"][
+        0, education, partner_state, period
+    ]
+    child_benefits = nb_children * specs_internal["child_benefit"] * 12
+    if partner_state == 0:
+        tax_total = calc_inc_tax_for_single_income(income_after_ssc, specs_internal)
+        total_net_income = income_after_ssc - tax_total + child_benefits
+        checked_income = np.maximum(total_net_income, unemployment_benefits)
+        np.testing.assert_almost_equal(
+            wealth, savings * (1 + interest_rate) + checked_income
+        )
+
+    elif partner_state == 1:
         partner_wage_year = specs_internal["partner_wage"][education, period] * 12
 
         partner_wage_scaled = partner_wage_year * specs_internal["wealth_unit"]
@@ -192,13 +201,9 @@ def test_budget_worker(
             calc_inc_tax_for_single_income(total_income_after_ssc / 2, specs_internal)
             * 2
         )
-        total_net_income = total_income_after_ssc - tax_toal
-        total_net_income_plus_child_benefits = (
-            total_net_income + nb_children * specs_internal["child_benefit"] * 12
-        )
-        checked_income = np.maximum(
-            total_net_income_plus_child_benefits, unemployment_benefits
-        )
+        total_net_income = total_income_after_ssc + child_benefits - tax_toal
+
+        checked_income = np.maximum(total_net_income, unemployment_benefits)
         np.testing.assert_almost_equal(
             wealth, savings * (1 + interest_rate) + checked_income
         )

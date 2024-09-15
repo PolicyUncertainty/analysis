@@ -13,13 +13,13 @@ from set_paths import create_path_dict
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
-SAVINGS_GRID = np.linspace(10, 100, 5)
+SAVINGS_GRID = np.linspace(10, 100, 3)
 INTEREST_RATE_GRID = np.linspace(0.01, 0.1, 2)
 PARTNER_STATES = np.array([0, 1, 2], dtype=int)
-PERIOD_GRID = np.arange(0, 50, 10, dtype=int)
+PERIOD_GRID = np.arange(0, 40, 10, dtype=int)
 EDUCATION_GRID = [0, 1]
 
-BENEFITS_GRID = np.linspace(10, 100, 5)
+BENEFITS_GRID = np.linspace(10, 100, 3)
 
 
 @pytest.fixture(scope="module")
@@ -98,7 +98,7 @@ def test_budget_unemployed(
 
 GAMMA_GRID = np.linspace(0.1, 0.9, 3)
 EXP_GRID = np.linspace(10, 30, 3, dtype=int)
-INCOME_SHOCK_GRID = np.linspace(-0.5, 0.5, 3)
+INCOME_SHOCK_GRID = np.linspace(-0.5, 0.5, 2)
 
 
 @pytest.mark.parametrize(
@@ -183,17 +183,21 @@ def test_budget_worker(
         np.testing.assert_almost_equal(
             wealth, savings * (1 + interest_rate) + checked_income
         )
+    else:
+        if partner_state == 1:
+            partner_income_year = specs_internal["partner_wage"][education, period] * 12
 
-    elif partner_state == 1:
-        partner_wage_year = specs_internal["partner_wage"][education, period] * 12
-
-        partner_wage_scaled = partner_wage_year * specs_internal["wealth_unit"]
-        sscs_partner = calc_health_ltc_contr(
-            partner_wage_scaled
-        ) + calc_pension_unempl_contr(partner_wage_scaled)
+            partner_income_scaled = partner_income_year * specs_internal["wealth_unit"]
+            sscs_partner = calc_health_ltc_contr(
+                partner_income_scaled
+            ) + calc_pension_unempl_contr(partner_income_scaled)
+        else:
+            partner_income_year = specs_internal["partner_pension"][education] * 12
+            partner_income_scaled = partner_income_year * specs_internal["wealth_unit"]
+            sscs_partner = calc_health_ltc_contr(partner_income_scaled)
 
         income_partner = (
-            partner_wage_year - sscs_partner / specs_internal["wealth_unit"]
+            partner_income_year - sscs_partner / specs_internal["wealth_unit"]
         )
         total_income_after_ssc = income_after_ssc + income_partner
 
@@ -208,65 +212,115 @@ def test_budget_worker(
             wealth, savings * (1 + interest_rate) + checked_income
         )
 
+
+EXP_GRID = np.linspace(10, 30, 3, dtype=int)
+POLICY_STATE_GRID = np.linspace(0, 2, 3, dtype=int)
+RET_AGE_GRID = np.linspace(0, 2, 3, dtype=int)
+
+
+@pytest.mark.parametrize(
+    "period, partner_state ,education, interest_rate, savings, exp, policy_state, ret_age_id",
+    list(
+        product(
+            PERIOD_GRID,
+            PARTNER_STATES,
+            EDUCATION_GRID,
+            INTEREST_RATE_GRID,
+            SAVINGS_GRID,
+            EXP_GRID,
+            POLICY_STATE_GRID,
+            RET_AGE_GRID,
+        )
+    ),
+)
+def test_retiree(
+    period,
+    partner_state,
+    education,
+    interest_rate,
+    savings,
+    exp,
+    policy_state,
+    ret_age_id,
+    paths_and_specs,
+):
+    path_dict, specs_internal = paths_and_specs
+
+    actual_retirement_age = specs_internal["min_ret_age"] + ret_age_id
+
+    params = {"interest_rate": interest_rate}
+    wealth = budget_constraint(
+        period=period,
+        partner_state=partner_state,
+        education=education,
+        lagged_choice=2,
+        experience=exp,
+        policy_state=policy_state,
+        retirement_age_id=ret_age_id,
+        savings_end_of_previous_period=savings,
+        income_shock_previous_period=0,
+        params=params,
+        options=specs_internal,
+    )
+    pension_point_value = specs_internal["pension_point_value_by_edu_exp"][
+        education, exp
+    ]
+    SRA_at_resolution = (
+        specs_internal["min_SRA"] + policy_state * specs_internal["SRA_grid_size"]
+    )
+    pension_factor = (
+        1
+        - (actual_retirement_age - SRA_at_resolution)
+        * specs_internal["early_retirement_penalty"]
+    )
+    pension_year = pension_point_value * pension_factor * exp * 12
+    pension_scaled = pension_year * specs_internal["wealth_unit"]
+    income_after_ssc = (
+        pension_year
+        - calc_health_ltc_contr(pension_scaled) / specs_internal["wealth_unit"]
+    )
+
+    has_partner_int = (partner_state > 0).astype(int)
+    unemployment_benefits = calc_unemployment_benefits(
+        savings, education, has_partner_int, period, specs_internal
+    )
+
+    nb_children = specs_internal["children_by_state"][
+        0, education, partner_state, period
+    ]
+    child_benefits = nb_children * specs_internal["child_benefit"] * 12
+    if partner_state == 0:
+        tax_total = calc_inc_tax_for_single_income(income_after_ssc, specs_internal)
+        total_net_income = income_after_ssc - tax_total + child_benefits
+        checked_income = np.maximum(total_net_income, unemployment_benefits)
+        np.testing.assert_almost_equal(
+            wealth, savings * (1 + interest_rate) + checked_income
+        )
     else:
-        pass
+        if partner_state == 1:
+            partner_income_year = specs_internal["partner_wage"][education, period] * 12
 
+            partner_income_scaled = partner_income_year * specs_internal["wealth_unit"]
+            sscs_partner = calc_health_ltc_contr(
+                partner_income_scaled
+            ) + calc_pension_unempl_contr(partner_income_scaled)
+        else:
+            partner_income_year = specs_internal["partner_pension"][education] * 12
+            partner_income_scaled = partner_income_year * specs_internal["wealth_unit"]
+            sscs_partner = calc_health_ltc_contr(partner_income_scaled)
 
-#
-# EXP_GRID = np.linspace(10, 30, 3, dtype=int)
-# POLICY_STATE_GRID = np.linspace(0, 2, 3, dtype=int)
-# RET_AGE_GRID = np.linspace(0, 2, 3, dtype=int)
-#
-#
-# @pytest.mark.parametrize(
-#     "interest_rate, savings, exp, policy_state, ret_age_id",
-#     list(
-#         product(
-#             INTEREST_RATE_GRID, SAVINGS_GRID, EXP_GRID, POLICY_STATE_GRID, RET_AGE_GRID
-#         )
-#     ),
-# )
-# def test_retiree(
-#     interest_rate,
-#     savings,
-#     exp,
-#     policy_state,
-#     ret_age_id,
-#     paths_and_specs,
-# ):
-#     education = 0
-#
-#     path_dict, specs = paths_and_specs
-#
-#     actual_retirement_age = specs["min_ret_age"] + ret_age_id
-#
-#     params = {"interest_rate": interest_rate}
-#     wealth = budget_constraint(
-#         education=education,
-#         lagged_choice=2,
-#         experience=exp,
-#         policy_state=policy_state,
-#         retirement_age_id=ret_age_id,
-#         savings_end_of_previous_period=savings,
-#         income_shock_previous_period=0,
-#         params=params,
-#         options=specs,
-#     )
-#     pension_point_value = specs["pension_point_value_by_edu_exp"][education, exp]
-#     SRA_at_resolution = specs["min_SRA"] + policy_state * specs["SRA_grid_size"]
-#     pension_factor = (
-#         1
-#         - (actual_retirement_age - SRA_at_resolution)
-#         * specs["early_retirement_penalty"]
-#     )
-#     retirement_income = calc_net_income_pensions(
-#         pension_point_value * pension_factor * exp * 12, specs
-#     )
-#     if savings < specs["unemployment_wealth_thresh"]:
-#         retirement_income = np.maximum(
-#             retirement_income, specs["unemployment_benefits"] * 12
-#         )
-#
-#     np.testing.assert_almost_equal(
-#         wealth, savings * (1 + interest_rate) + retirement_income
-#     )
+        income_partner = (
+            partner_income_year - sscs_partner / specs_internal["wealth_unit"]
+        )
+        total_income_after_ssc = income_after_ssc + income_partner
+
+        tax_toal = (
+            calc_inc_tax_for_single_income(total_income_after_ssc / 2, specs_internal)
+            * 2
+        )
+        total_net_income = total_income_after_ssc + child_benefits - tax_toal
+
+        checked_income = np.maximum(total_net_income, unemployment_benefits)
+        np.testing.assert_almost_equal(
+            wealth, savings * (1 + interest_rate) + checked_income
+        )

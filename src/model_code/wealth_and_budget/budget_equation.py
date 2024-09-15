@@ -76,6 +76,7 @@ def budget_constraint(
         period=period,
         options=options,
     )
+
     total_income = jnp.maximum(total_net_income + child_benefits, unemployment_benefits)
     # calculate beginning of period wealth M_t
     wealth = (

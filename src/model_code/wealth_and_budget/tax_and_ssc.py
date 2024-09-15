@@ -94,7 +94,7 @@ def calc_after_ssc_income_worker(gross_wage, options):
 def calc_after_ssc_income_pensioneer(gross_pesnion, options):
     """Calculate the net income after social security contributions."""
     income_scaled = gross_pesnion * options["wealth_unit"]
-    ssc = calc_pension_unempl_contr(income_scaled)
+    ssc = calc_health_ltc_contr(income_scaled)
     return gross_pesnion - ssc / options["wealth_unit"]
 
 

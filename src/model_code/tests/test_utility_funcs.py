@@ -189,7 +189,7 @@ def test_bequest(consumption, mu, bequest_scale):
     "consumption, mu, bequest_scale",
     list(product(CONSUMPTION_GRID, MU_GRID, BEQUEST_SCALE)),
 )
-def test_beqzest_marginal(consumption, mu, bequest_scale):
+def test_bequest_marginal(consumption, mu, bequest_scale):
     params = {
         "mu": mu,
         "bequest_scale": bequest_scale,

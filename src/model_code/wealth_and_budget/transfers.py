@@ -1,6 +1,6 @@
-def calc_child_benefits(education, has_partner, period, options):
+def calc_child_benefits(education, has_partner_int, period, options):
     """Calculate the child benefits."""
-    nb_children = options["children_by_state"][0, education, has_partner, period]
+    nb_children = options["children_by_state"][0, education, has_partner_int, period]
     return nb_children * options["child_benefit"] * 12
 
 

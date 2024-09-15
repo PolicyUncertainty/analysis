@@ -1,5 +1,5 @@
 from jax import numpy as jnp
-from model_code.wealth_and_budget.partner_income import calc_partner_income
+from model_code.wealth_and_budget.partner_income import calc_partner_income_after_ssc
 from model_code.wealth_and_budget.pensions import calc_pensions_after_ssc
 from model_code.wealth_and_budget.tax_and_ssc import calc_net_household_income
 from model_code.wealth_and_budget.transfers import calc_child_benefits
@@ -21,15 +21,16 @@ def budget_constraint(
     options,
 ):
     # Calculate partner income
-    partner_income_after_ssc = calc_partner_income(
+    partner_income_after_ssc = calc_partner_income_after_ssc(
         partner_state=partner_state, options=options, education=education, period=period
     )
+    has_partner_int = (partner_state > 0).astype(int)
 
     # Income lagged choice 0
     unemployment_benefits = calc_unemployment_benefits(
         savings=savings_end_of_previous_period,
         education=education,
-        has_partner=partner_state > 0,
+        has_partner_int=has_partner_int,
         period=period,
         options=options,
     )
@@ -66,17 +67,16 @@ def budget_constraint(
     total_net_income = calc_net_household_income(
         own_income=own_income_after_ssc,
         partner_income=partner_income_after_ssc,
-        has_partner=partner_state > 0,
+        has_partner_int=has_partner_int,
         options=options,
     )
     child_benefits = calc_child_benefits(
         education=education,
-        has_partner=partner_state > 0,
+        has_partner=has_partner_int,
         period=period,
         options=options,
     )
     total_income = jnp.maximum(total_net_income + child_benefits, unemployment_benefits)
-
     # calculate beginning of period wealth M_t
     wealth = (
         1 + params["interest_rate"]

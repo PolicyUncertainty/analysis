@@ -4,18 +4,18 @@ def calc_child_benefits(education, has_partner, period, options):
     return nb_children * options["child_benefit"] * 12
 
 
-def calc_unemployment_benefits(savings, education, has_partner, period, options):
+def calc_unemployment_benefits(savings, education, has_partner_int, period, options):
     # Unemployment benefits
     means_test = savings < options["unemployment_wealth_thresh"]
 
     # Unemployment benefits for children living in the household
-    nb_children = options["children_by_state"][0, education, has_partner, period]
+    nb_children = options["children_by_state"][0, education, has_partner_int, period]
     unemployment_benefits_children = (
-        nb_children * options["child_unemployment_benefit"] * 12
+        nb_children * options["child_unemployment_benefits"] * 12
     )
 
     # Unemployment benefits for adults living in the household
-    nb_adults = 1 + has_partner
+    nb_adults = 1 + has_partner_int
     unemployment_benefits_adults = nb_adults * options["unemployment_benefits"] * 12
 
     # Total unemployment benefits

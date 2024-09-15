@@ -131,7 +131,7 @@ def predict_children_by_state(path_dict, specs):
                         + params.loc[(sex, edu, has_partner), "period"] * period
                         + params.loc[(sex, edu, has_partner), "period_sq"] * period**2
                     )
-                    children[sex, edu, has_partner, t] = np.maximum(
+                    children[sex, edu, has_partner, period] = np.maximum(
                         0, predicted_nb_children
                     )
     return jnp.asarray(children)

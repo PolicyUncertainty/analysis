@@ -1,13 +1,13 @@
 import jax.numpy as jnp
 
 
-def calc_net_household_income(own_income, partner_income, has_partner, options):
+def calc_net_household_income(own_income, partner_income, has_partner_int, options):
     """Calculate the income tax for a couple."""
     # Calculate the income tax for the couple
     family_income = own_income + partner_income
 
     # Calculate split factor. 1 if single, 2 if partnered
-    split_factor = 1 + has_partner
+    split_factor = 1 + has_partner_int
     income_tax_split = calc_inc_tax_for_single_income(
         family_income / split_factor, options
     )

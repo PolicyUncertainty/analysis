@@ -39,7 +39,7 @@ def marg_utility(consumption, partner_state, education, period, params, options)
     cons_scale = consumption_scale(partner_state, education, period, options)
 
     mu = params["mu"]
-    marg_util = (consumption / cons_scale) ** -mu
+    marg_util = (consumption / cons_scale) ** -mu * (1 / cons_scale)
     return marg_util
 
 
@@ -49,7 +49,7 @@ def inverse_marginal(
     cons_scale = consumption_scale(partner_state, education, period, options)
 
     mu = params["mu"]
-    return (marginal_utility ** (-1 / mu)) * cons_scale
+    return ((marginal_utility * cons_scale) ** (-1 / mu)) * cons_scale
 
 
 def utility_final_consume_all(
@@ -70,7 +70,7 @@ def marginal_utility_final_consume_all(choice, resources, params, options):
 
 
 def consumption_scale(partner_state, education, period, options):
-    has_partner = partner_state > 0
+    has_partner = (partner_state > 0).astype(int)
     nb_children = options["children_by_state"][0, education, has_partner, period]
     hh_size = 1 + has_partner + nb_children
     return jnp.sqrt(hh_size)

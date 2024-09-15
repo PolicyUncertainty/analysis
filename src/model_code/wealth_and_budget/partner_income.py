@@ -2,7 +2,7 @@ from model_code.wealth_and_budget.tax_and_ssc import calc_after_ssc_income_pensi
 from model_code.wealth_and_budget.tax_and_ssc import calc_after_ssc_income_worker
 
 
-def calc_partner_income(partner_state, options, education, period):
+def calc_partner_income_after_ssc(partner_state, options, education, period):
     """Calculate the partner income after deduction of ssc."""
     partner_wage = options["partner_wage"][education, period]
     partner_wage_after_ssc = calc_after_ssc_income_worker(

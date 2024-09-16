@@ -10,9 +10,15 @@ specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True
 ######################################
 # Family chracteristics
 ######################################
-from export_results.figures.family_params import plot_children
+from export_results.figures.family_params import (
+    plot_children,
+    plot_partner_wage,
+    plot_marriage_and_divorce,
+)
 
 plot_children(path_dict, specs)
+plot_partner_wage(path_dict, specs)
+plot_marriage_and_divorce(path_dict, specs)
 plt.show()
 plt.close("all")
 

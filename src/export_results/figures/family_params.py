@@ -47,3 +47,93 @@ def plot_children(paths_dict, specs):
             ax.set_ylim([0, 2.5])
             ax.set_title(f"{sex_label}, {partner_label}")
             ax.legend()
+
+
+def plot_partner_wage(paths_dict, specs):
+    """Plot the partner wage by age."""
+    df = pd.read_pickle(
+        paths_dict["intermediate_data"] + "partner_wage_estimation_sample.pkl"
+    )
+
+    start_age = specs["start_age"]
+    end_age = specs["end_age"]
+    df = df[df["age"] <= end_age]
+
+    wage_data = df.groupby(["sex", "education", "age"])["wage_p"].mean()
+    partner_wage_est = specs["partner_wage"] * specs["wealth_unit"]
+
+    fig, ax = plt.subplots()
+    ages = np.arange(start_age, end_age + 1)
+    for edu_val, edu_label in enumerate(specs["education_labels"]):
+        ax.plot(
+            ages,
+            wage_data.loc[(0, edu_val, slice(start_age, end_age))],
+            label=f"edu {edu_label}",
+        )
+        ax.plot(
+            ages,
+            partner_wage_est[edu_val, :],
+            linestyle="--",
+            label=f"edu {edu_label} est",
+        )
+
+    ax.legend()
+    ax.set_title("Partner wage by age")
+
+    # calculate avewealth_shock_scalerage hours worked by partner by
+
+
+def plot_marriage_and_divorce(paths_dict, specs):
+    """Illustrate the marriage and divorce rates by age."""
+
+    start_age = specs["start_age"]
+    end_age = specs["end_age"]
+    df = pd.read_pickle(
+        paths_dict["intermediate_data"] + "partner_transition_estimation_sample.pkl"
+    )
+    grouped_shares = df.groupby(["sex", "education", "age"])[
+        "partner_state"
+    ].value_counts(normalize=True)
+    edu_shares_single = grouped_shares.loc[
+        (0, slice(None), slice(start_age, end_age), 0)
+    ]
+
+    ages = np.arange(start_age, end_age + 1)
+    initial_dist = np.zeros(specs["n_partner_states"])
+
+    fig, ax = plt.subplots(figsize=(12, 8))
+    for edu, edu_label in enumerate(specs["education_labels"]):
+        initial_dist[0] = edu_shares_single.loc[(0, edu, start_age, 0)]
+        initial_dist[1] = 1 - initial_dist[0]
+        shares_over_time = markov_simulator(
+            initial_dist, specs["partner_trans_mat"][edu, :, :, :]
+        )
+        marriage_prob_edu_est = 1 - shares_over_time[:, 0]
+        marriage_prob_edu_data = (
+            1 - edu_shares_single.loc[(0, edu, slice(None), 0)].values
+        )
+
+        ax.plot(ages, marriage_prob_edu_est, label=f"edu {edu_label} est")
+        ax.plot(
+            ages, marriage_prob_edu_data, linestyle="--", label=f"edu {edu_label} data"
+        )
+
+    ax.set_title("Marriage shares")
+    ax.legend()
+
+
+def markov_simulator(initial_dist, trans_probs):
+    """Simulate a Markov process."""
+    n_periods = trans_probs.shape[0]
+    n_states = initial_dist.shape[0]
+    final_dist = np.zeros((n_periods, n_states))
+    final_dist[0, :] = initial_dist
+
+    for t in range(n_periods - 1):
+        current_dist = final_dist[t, :]
+        for state in range(n_states - 1):
+            final_dist[t + 1, state] = current_dist @ trans_probs[t, :, state]
+
+        final_dist[t + 1, -1] = 1 - final_dist[t + 1, :-1].sum()
+
+    return final_dist

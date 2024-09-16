@@ -104,7 +104,6 @@ def create_ll_from_paths(start_params_all, path_dict, load_model):
 
     # Load data
     data_decision = load_and_prep_data(path_dict)
-    breakpoint()
     # Now transform for dcegm
     states_dict = {
         name: data_decision[name].values

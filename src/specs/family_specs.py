@@ -26,7 +26,7 @@ def calculate_partner_incomes(path_dict, specs):
 
     # Wealth hack
     partner_pension = partner_wages.mean(axis=1) * 0.48
-    return partner_wages, partner_pension
+    return jnp.asarray(partner_wages), jnp.asarray(partner_pension)
 
 
 # def  calculate_partner_hrly_wage(path_dict, specs):

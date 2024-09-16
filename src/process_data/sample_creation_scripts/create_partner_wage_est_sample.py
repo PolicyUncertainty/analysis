@@ -24,7 +24,7 @@ def create_partner_wage_est_sample(paths, specs, load_data=False):
 
     df = load_and_merge_soep_core(paths["soep_c38"])
     df = filter_data(df, start_year, end_year, start_age, no_women=False)
-    df = wages_and_working_hours(df.copy())
+    df = create_wages(df.copy())
 
     # Drop singles
     df = df[df["parid"] >= 0]
@@ -36,6 +36,7 @@ def create_partner_wage_est_sample(paths, specs, load_data=False):
     df = create_partner_state(df)
     df = df[df["partner_state"] == 1]
 
+    df.reset_index(inplace=True)
     df.to_pickle(out_file_path)
     return df
 
@@ -71,11 +72,12 @@ def load_and_merge_soep_core(soep_c38_path):
 
     merged_data["age"] = merged_data["syear"] - merged_data["gebjahr"]
     del pgen_data, pathl_data
+    merged_data.set_index(["pid", "syear"], inplace=True)
     print(str(len(merged_data)) + " observations in SOEP C38 core.")
     return merged_data
 
 
-def wages_and_working_hours(df):
+def create_wages(df):
     df.rename(columns={"pglabgro": "wage"}, inplace=True)
     df.loc[df["wage"] < 0, "wage"] = 0
     print(str(len(df)) + " observations after dropping invalid wage values.")

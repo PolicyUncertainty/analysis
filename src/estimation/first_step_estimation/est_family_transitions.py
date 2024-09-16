@@ -34,41 +34,21 @@ def prepare_transition_data(paths_dict, specs):
     return transition_data
 
 
-def calculate_nb_children(path_dict, specs):
-    """Calculate the number of children in the household for each individual conditional
-    on sex, education and age bin."""
-    specs = read_and_derive_specs(path_dict["specs"])
-    start_age = specs["start_age"]
-    end_age = specs["end_age"]
-    # load data, filter, create age bins and has_partner state
-    df = pd.read_pickle(
-        path_dict["intermediate_data"] + "partner_transition_estimation_sample.pkl"
-    )
-    df = df[df["age"] >= start_age]
-    df = df[df["age"] <= end_age]
-    df["age_bin"] = np.floor(df["age"] / 5) * 5
-    df["period"] = df["age"] - start_age
-    df["has_partner"] = (df["partner_state"] > 0).astype(int)
-
-    # calculate average hours worked by partner by age, sex and education
-    cov_list = ["sex", "education", "has_partner", "age"]
-    nb_children = df.groupby(cov_list)["children"].mean()
-    breakpoint()
-    return nb_children
-
-
 def estimate_nb_children(paths_dict, specs):
     """Estimate the number of children in the household for each individual conditional
     on sex, education and age bin."""
-    specs = read_and_derive_specs(paths_dict["specs"])
-    start_age = specs["start_age"]
-    end_age = specs["end_age"]
     # load data, filter, create period and has_partner state
     df = pd.read_pickle(
         paths_dict["intermediate_data"] + "partner_transition_estimation_sample.pkl"
     )
+
+    start_age = specs["start_age"]
+    end_age = specs["end_age"]
+
     df = df[df["age"] >= start_age]
-    df = df[df["age"] <= end_age]
+
+    # Filter out individuals below 63 for better estimation
+    df = df[df["age"] <= 60]
     df["period"] = df["age"] - start_age
     df["period_sq"] = df["period"] ** 2
     df["has_partner"] = (df["partner_state"] > 0).astype(int)

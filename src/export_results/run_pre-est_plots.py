@@ -1,8 +1,20 @@
 # %% Set paths of project
 import matplotlib.pyplot as plt
 from set_paths import create_path_dict
+from specs.derive_specs import generate_derived_and_data_derived_specs
 
 path_dict = create_path_dict()
+specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
+
+
+######################################
+# Family chracteristics
+######################################
+from export_results.figures.family_params import plot_children
+
+plot_children(path_dict, specs)
+plt.show()
+plt.close("all")
 
 
 # %% ########################################
@@ -11,11 +23,11 @@ path_dict = create_path_dict()
 from export_results.figures.utility import plot_utility
 
 
-
 ###################
 # Job offer plots
 ###################
 from export_results.figures.job_offer_plots import plot_job_separation
+
 plot_job_separation(path_dict)
 plt.show()
 plt.close("all")

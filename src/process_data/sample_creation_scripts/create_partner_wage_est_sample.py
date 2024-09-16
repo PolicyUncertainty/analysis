@@ -1,14 +1,10 @@
 import os
 
 import pandas as pd
-from process_data.sample_creation_scripts.create_partner_transition_sample import (
-    create_partner_state,
-)
 from process_data.sample_creation_scripts.create_structural_est_sample import (
     filter_data,
 )
-from process_data.sample_creation_scripts.partner_code import merge_couples
-from process_data.var_resources.soep_vars import create_choice_variable_with_part_time
+from process_data.sample_creation_scripts.partner_code import create_partner_state
 from process_data.var_resources.soep_vars import create_education_type
 
 
@@ -30,15 +26,14 @@ def create_partner_wage_est_sample(paths, specs, load_data=False):
     df = filter_data(df, start_year, end_year, start_age, no_women=False)
     df = wages_and_working_hours(df.copy())
 
+    # Drop singles
     df = df[df["parid"] >= 0]
     print(str(len(df)) + " observations after dropping singles.")
 
-    df = create_choice_variable_with_part_time(df)
     df = create_education_type(df)
-    df = merge_couples(df)
 
     # Create partner state and drop if partner is absent or in non-working age
-    df = create_partner_state(df, start_age)
+    df = create_partner_state(df)
     df = df[df["partner_state"] == 1]
 
     df.to_pickle(out_file_path)

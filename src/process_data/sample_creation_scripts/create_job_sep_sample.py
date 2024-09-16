@@ -130,5 +130,6 @@ def load_and_merge_soep_core(soep_c38_path):
 
     merged_data["age"] = merged_data["syear"] - merged_data["gebjahr"]
     del pgen_data, pathl_data
+    merged_data.set_index(["pid", "syear"], inplace=True)
     print(str(len(merged_data)) + " observations in SOEP C38 core.")
     return merged_data

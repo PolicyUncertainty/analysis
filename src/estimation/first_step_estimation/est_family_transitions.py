@@ -53,6 +53,7 @@ def calculate_nb_children(path_dict, specs):
     # calculate average hours worked by partner by age, sex and education
     cov_list = ["sex", "education", "has_partner", "age"]
     nb_children = df.groupby(cov_list)["children"].mean()
+    breakpoint()
     return nb_children
 
 

@@ -6,8 +6,12 @@ import pandas as pd
 from process_data.sample_creation_scripts.create_structural_est_sample import (
     filter_data,
 )
-from process_data.sample_creation_scripts.partner_code import merge_couples
-from process_data.var_resources.soep_vars import create_choice_variable_with_part_time
+from process_data.sample_creation_scripts.data_tools import filter_below_age
+from process_data.sample_creation_scripts.data_tools import filter_by_sex
+from process_data.sample_creation_scripts.data_tools import filter_est_years
+from process_data.sample_creation_scripts.partner_code import (
+    create_partner_and_lagged_state,
+)
 from process_data.var_resources.soep_vars import create_education_type
 
 
@@ -29,12 +33,24 @@ def create_partner_transition_sample(paths, specs, load_data=False):
     start_age = specs["start_age"]
 
     df = load_and_merge_soep_core(paths["soep_c38"])
-    df = filter_data(df, start_year, end_year, start_age, no_women=False)
+
     df = create_education_type(df)
-    df = create_choice_variable_with_part_time(df)
+
+    # Filter estimation years
+    df = filter_est_years(df, start_year, end_year)
+
+    # The following code is dependent on span dataframe being called first.
+    # In particular the lagged partner state must be after span dataframe and create partner state.
+    # We should rewrite this
     df = span_dataframe(df, start_year, end_year)
-    df = merge_couples(df, keep_singles=True)
-    df = create_partner_state(df, start_age)
+
+    # In this function also merging is called
+    df = create_partner_and_lagged_state(df)
+
+    # Filter age and sex
+    df = filter_below_age(df, start_age)
+    df = filter_by_sex(df, no_women=False)
+
     df = keep_relevant_columns(df)
     print(
         str(len(df))
@@ -74,34 +90,9 @@ def load_and_merge_soep_core(soep_c38_path):
     merged_data = pd.merge(merged_data, pequiv_data, on=["pid", "syear"], how="inner")
     merged_data.rename(columns={"d11107": "children"}, inplace=True)
     merged_data["age"] = merged_data["syear"] - merged_data["gebjahr"]
+    merged_data.set_index(["pid", "syear"], inplace=True)
+    print(str(len(merged_data)) + " observations in SOEP C38 core.")
     return merged_data
-
-
-def create_partner_state(df, start_age):
-    """0: no partner, 1: working-age partner, 2: retired partner"""
-    # has to be done for both state and lagged state
-    # people with a partner whose choice is not observed stay in this category
-    df.loc[:, "partner_state"] = np.nan
-    # no partner (no parid)
-    df.loc[:, "partner_state"] = np.where(df["parid"] < 0, 0, df["partner_state"])
-    # working-age partner (choice 0, 1, 3)
-    df.loc[:, "partner_state"] = np.where(df["choice_p"] == 0, 1, df["partner_state"])
-    df.loc[:, "partner_state"] = np.where(df["choice_p"] == 1, 1, df["partner_state"])
-    df.loc[:, "partner_state"] = np.where(df["choice_p"] == 3, 1, df["partner_state"])
-    # retired partner (choice 2)
-    df.loc[:, "partner_state"] = np.where(df["choice_p"] == 2, 2, df["partner_state"])
-    # drop nans
-    # df = df[df[string + "partner_state"].notna()]
-    df["lagged_partner_state"] = df.groupby(["pid"])["partner_state"].shift()
-    df = df[df["lagged_partner_state"].notna()]
-    df = df[df["partner_state"].notna()]
-    # We left people who are too young in the sample to construct lagged choice. Delete those now.
-    df = df[df["age"] >= start_age]
-    print(
-        str(len(df))
-        + " observations after dropping people with a partner whose choice is not observed."
-    )
-    return df
 
 
 def span_dataframe(merged_data, start_year, end_year):

@@ -27,7 +27,7 @@ def create_choice_variable(data):
     soep_empl_status = data["pgstib"]
     # rv_ret_choice = merged_data["STATUS_2"]
 
-    # assign emploayment choices
+    # assign employment choices
     data.loc[soep_empl_choice == 5, "choice"] = 0
     data.loc[soep_empl_choice == 1, "choice"] = 1
 
@@ -130,6 +130,6 @@ def generate_job_separation_var(data):
     from the last job. It uses plb0304_h from the soep pl data.
 
     """
-    data["job_sep"] = 0
+    data.loc[:, "job_sep"] = 0
     data.loc[data["plb0304_h"].isin([1, 3, 5]), "job_sep"] = 1
     return data

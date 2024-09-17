@@ -48,38 +48,6 @@ def plot_children(paths_dict, specs):
             ax.set_title(f"{sex_label}, {partner_label}")
             ax.legend()
 
-
-def plot_partner_wage(paths_dict, specs):
-    """Plot the partner wage by age."""
-    df = pd.read_pickle(
-        paths_dict["intermediate_data"] + "partner_wage_estimation_sample.pkl"
-    )
-
-    start_age = specs["start_age"]
-    end_age = specs["end_age"]
-    df = df[df["age"] <= end_age]
-
-    wage_data = df.groupby(["sex", "education", "age"])["wage_p"].mean()
-    partner_wage_est = specs["partner_wage"] * specs["wealth_unit"]
-
-    fig, ax = plt.subplots()
-    ages = np.arange(start_age, end_age + 1)
-    for edu_val, edu_label in enumerate(specs["education_labels"]):
-        ax.plot(
-            ages,
-            wage_data.loc[(0, edu_val, slice(start_age, end_age))],
-            label=f"edu {edu_label}",
-        )
-        ax.plot(
-            ages,
-            partner_wage_est[edu_val, :],
-            linestyle="--",
-            label=f"edu {edu_label} est",
-        )
-
-    ax.legend()
-    ax.set_title("Partner wage by age")
-
     # calculate avewealth_shock_scalerage hours worked by partner by
 
 

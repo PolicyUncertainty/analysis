@@ -39,7 +39,6 @@ def budget_constraint(
     labor_income_after_ssc = calc_labor_income_after_ssc(
         experience=experience,
         education=education,
-        # partner_state=partner_state,
         income_shock=income_shock_previous_period,
         options=options,
     )
@@ -78,6 +77,8 @@ def budget_constraint(
     )
 
     total_income = jnp.maximum(total_net_income + child_benefits, unemployment_benefits)
+    # if (period > 20) & (partner_state == 1):
+    #     breakpoint()
     # calculate beginning of period wealth M_t
     wealth = (
         1 + params["interest_rate"]

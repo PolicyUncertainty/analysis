@@ -15,12 +15,10 @@ exec_family = input("Exectue family characteristics? (y/n) ") == "y"
 if exec_family:
     from export_results.figures.family_params import (
         plot_children,
-        plot_partner_wage,
         plot_marriage_and_divorce,
     )
 
     plot_children(path_dict, specs)
-    plot_partner_wage(path_dict, specs)
     plot_marriage_and_divorce(path_dict, specs)
     plt.show()
     plt.close("all")
@@ -56,11 +54,18 @@ if exec_job_offer:
 # # Budget plots
 # ##########################################
 exec_budget = input("Execute budget plots? (y/n)") == "y"
-from export_results.figures.income_plots import plot_incomes, plot_total_income
+from export_results.figures.income_plots import (
+    plot_incomes,
+    plot_total_income,
+    plot_partner_wage,
+    plot_child_benefits,
+)
 
 if exec_budget:
     plot_incomes(path_dict)
+    plot_partner_wage(path_dict, specs)
     plot_total_income(specs)
+    plot_child_benefits(specs)
     plt.show()
     plt.close("all")
 

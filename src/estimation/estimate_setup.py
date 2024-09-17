@@ -17,7 +17,7 @@ from model_code.stochastic_processes.policy_states_belief import (
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
-def estimate_model(path_dict, params_to_estimate_names, load_model):
+def estimate_model(path_dict, params_to_estimate_names, file_append, load_model):
     start_params_all = yaml.safe_load(open(path_dict["start_params"], "rb"))
 
     job_sep_params = create_job_offer_params_from_start(path_dict)
@@ -74,10 +74,13 @@ def estimate_model(path_dict, params_to_estimate_names, load_model):
         logging="test_log.db",
         error_handling="continue",
     )
-    pickle.dump(result, open(path_dict["est_results"] + "em_result.pkl", "wb"))
+    pickle.dump(
+        result, open(path_dict["est_results"] + f"em_result_{file_append}.pkl", "wb")
+    )
     start_params_all.update(result.params)
     pickle.dump(
-        start_params_all, open(path_dict["est_results"] + "est_params.pkl", "wb")
+        start_params_all,
+        open(path_dict["est_results"] + f"est_params_{file_append}.pkl", "wb"),
     )
 
     return result

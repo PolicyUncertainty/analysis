@@ -86,7 +86,10 @@ if input_str == "m":
     ]
 
     estimation_results = estimate_model(
-        paths_dict, params_to_estimate_names=params_to_estimate_names, load_model=True
+        paths_dict,
+        params_to_estimate_names=params_to_estimate_names,
+        file_append="new",
+        load_model=True,
     )
     print(estimation_results)
 

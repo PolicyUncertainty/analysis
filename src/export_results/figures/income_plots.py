@@ -25,7 +25,7 @@ def plot_incomes(path_dict):
 
         ax.plot(exp_levels, unemployment_benefits, label="Unemployment benefits")
 
-        # Initialize emoty containers
+        # Initialize empty containers
         gross_wages = np.zeros_like(exp_levels, dtype=float)
         net_wages = np.zeros_like(exp_levels, dtype=float)
 

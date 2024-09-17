@@ -2,12 +2,13 @@
 import matplotlib.pyplot as plt
 from set_paths import create_path_dict
 from specs.derive_specs import generate_derived_and_data_derived_specs
+import pandas as pd
 
 path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
 
 
-######################################
+#%%###################################
 # Family chracteristics
 ######################################
 from export_results.figures.family_params import (
@@ -26,12 +27,16 @@ plt.close("all")
 # %% ########################################
 # # Utility plots
 # ##########################################
+params = pd.read_pickle(path_dict["est_results"] + "est_params.pkl")
 from export_results.figures.utility import plot_utility
+plot_utility(params, specs)
+plt.show()
+plt.close("all")
 
 
-###################
+# %% ########################################
 # Job offer plots
-###################
+# ##########################################
 from export_results.figures.job_offer_plots import plot_job_separation
 
 plot_job_separation(path_dict)

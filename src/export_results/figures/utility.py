@@ -1,28 +1,53 @@
 # %%
 import matplotlib.pyplot as plt
 import numpy as np
+from model_code.utility_functions import consumption_scale
 from model_code.utility_functions import utility_func
-
-
-default_params = {"mu": 0.5, "dis_util_work": 0.1, "dis_util_unemployed": 0.2}
 
 # %%
 
 
-def plot_utility(params=default_params, options = None):
+def plot_utility(params, specs):
     consumption = np.linspace(0.5, 4, 100)
-    partner_state = np.array([1])
+    partner_state = np.array(1)
     education = 1
     period = 35
-    choice = [0, 1, 2]
-    
 
-    plt.plot(
-        utility_func(consumption, partner_state, education, period, choice[0], params, options), consumption, label="Unemployed"
-    )
-    plt.plot(utility_func(consumption, partner_state, education, period, choice[1], params, options), consumption, label="Working")
-    plt.plot(utility_func(consumption, partner_state, education, period, choice[2], params, options), consumption, label="Retired")
-    plt.legend()
-    plt.ylabel("Consumption")
-    plt.xlabel("Utility")
-    plt.title("Utility function (reversed axes)")
+    choice_labels = ["Unemployed", "Working", "Retired"]
+    fig, ax = plt.subplots()
+    for choice, choice_label in enumerate(choice_labels):
+        utilities = np.zeros_like(consumption)
+        for i, c in enumerate(consumption):
+            utilities[i] = utility_func(
+                c, partner_state, education, period, choice, params, specs
+            )
+        ax.plot(
+            utilities,
+            consumption,
+            label=choice_label,
+        )
+    ax.legend()
+    ax.set_xlabel("Utility")
+    ax.set_ylabel("Consumption")
+    ax.set_title("Utility function (reversed axes)")
+
+
+def plot_cons_scale(specs):
+    n_periods = specs["n_periods"]
+    married_labels = ["Single", "Partnered"]
+    edu_labels = specs["education_labels"]
+    fig, axs = plt.subplots(ncols=2)
+    for married_val, married_label in enumerate(married_labels):
+        for edu_val, edu_label in enumerate(edu_labels):
+            cons_scale = np.zeros(n_periods)
+            for period in range(n_periods):
+                cons_scale[period] = consumption_scale(
+                    np.array(married_val), edu_val, period, specs
+                )
+            axs[married_val].plot(cons_scale, label=edu_label)
+            axs[married_val].set_title(married_label)
+            axs[married_val].set_xlabel("Period")
+
+            axs[married_val].legend()
+            axs[married_val].set_ylim([1, 2])
+    axs[0].set_ylabel("Consumption scale")

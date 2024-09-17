@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from model_code.wealth_and_budget.budget_equation import budget_constraint
 from model_code.wealth_and_budget.pensions import calc_gross_pension_income
 from model_code.wealth_and_budget.pensions import calc_pensions_after_ssc
 from model_code.wealth_and_budget.wages import calc_labor_income_after_ssc
@@ -55,6 +56,35 @@ def plot_incomes(path_dict):
 
     fig.tight_layout()
     fig.savefig(path_dict["plots"] + "incomes.png", transparent=True, dpi=300)
+
+
+def plot_total_income(specs):
+    params = {"interest_rate": 0.0}
+    exp_levels = np.arange(0, specs["exp_cap"] + 1)
+    marriage_labels = ["Single", "Partnered"]
+    edu_labels = specs["education_labesl"]
+
+    fig, axs = plt.subplots(ncols=2)
+    for married_val, married_label in enumerate(marriage_labels):
+        for edu_val, edu_label in enumerate(edu_labels):
+            total_income = np.zeros_like(exp_levels)
+            for i, exp in enumerate(exp_levels):
+                total_income[i] = budget_constraint(
+                    period=exp,
+                    education=edu_val,
+                    lagged_choice=1,
+                    experience=exp,
+                    partner_state=married_val,
+                    policy_state=0,
+                    retirement_age_id=0,
+                    savings_end_of_previous_period=0,
+                    income_shock_previous_period=0,
+                    params=params,
+                    options=specs,
+                )
+            axs[married_val].plot(exp_levels, total_income, label=edu_label)
+        axs[married_val].set_title(married_label)
+        axs[married_val].legend()
 
 
 # def plot_wages(path_dict):

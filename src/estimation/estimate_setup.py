@@ -17,7 +17,7 @@ from model_code.stochastic_processes.policy_states_belief import (
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
-def estimate_model(path_dict, load_model):
+def estimate_model(path_dict, params_to_estimate_names, load_model):
     start_params_all = yaml.safe_load(open(path_dict["start_params"], "rb"))
 
     job_sep_params = create_job_offer_params_from_start(path_dict)
@@ -30,6 +30,8 @@ def estimate_model(path_dict, load_model):
         start_params_all, path_dict, load_model
     )
 
+    start_params = {name: start_params_all[name] for name in params_to_estimate_names}
+
     def individual_likelihood_print(params):
         start = time.time()
         ll_value = individual_likelihood(params)[0]
@@ -38,25 +40,13 @@ def estimate_model(path_dict, load_model):
         print("Params, ", params, " with ll value, ", ll_value)
         return ll_value
 
-    params_to_estimate_names = [
-        # "mu",
-        "dis_util_work",
-        "dis_util_unemployed",
-        # "bequest_scale",
-        # "lambda",
-        "job_finding_logit_const",
-        "job_finding_logit_age",
-        "job_finding_logit_high_educ",
-    ]
-    start_params = {name: start_params_all[name] for name in params_to_estimate_names}
-
     # Define for all parameters the bounds. We do not need to do that for those
     # not estimated. They will selected afterwards.
     lower_bounds_all = {
-        # "mu": 1e-12,
+        "mu": 1e-12,
         "dis_util_work": 1e-12,
         "dis_util_unemployed": 1e-12,
-        # "bequest_scale": 1e-12,
+        "bequest_scale": 1e-12,
         # "lambda": 1e-12,
         "job_finding_logit_const": -10,
         "job_finding_logit_age": -0.5,
@@ -64,10 +54,10 @@ def estimate_model(path_dict, load_model):
     }
     lower_bounds = {name: lower_bounds_all[name] for name in params_to_estimate_names}
     upper_bounds_all = {
-        # "mu": 5,
+        "mu": 2,
         "dis_util_work": 50,
         "dis_util_unemployed": 50,
-        # "bequest_scale": 20,
+        "bequest_scale": 5,
         # "lambda": 1,
         "job_finding_logit_const": 10,
         "job_finding_logit_age": 0.5,

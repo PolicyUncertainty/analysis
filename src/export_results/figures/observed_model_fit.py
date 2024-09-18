@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from dcegm.likelihood import create_choice_prob_func_unobserved_states
+from estimation.estimate_setup import load_and_prep_data
 from model_code.specify_model import specify_and_solve_model
 from model_code.stochastic_processes.policy_states_belief import (
     expected_SRA_probs_estimation,
@@ -25,19 +26,17 @@ def observed_model_fit(paths_dict):
         policy_state_trans_func=expected_SRA_probs_estimation,
         file_append="subj",
         load_model=True,
-        load_solution=False,
+        load_solution=True,
     )
 
-    data_decision = pd.read_pickle(
-        paths_dict["intermediate_data"] + "structural_estimation_sample.pkl"
+    data_decision, _ = load_and_prep_data(
+        paths_dict, params, model, drop_retirees=False
     )
-    data_decision["wealth"] = data_decision["wealth"].clip(lower=1e-16)
     data_decision["age"] = data_decision["period"] + specs["start_age"]
     data_decision = data_decision[data_decision["age"] < 75]
-    model_structure = model["model_structure"]
     states_dict = {
         name: data_decision[name].values
-        for name in model_structure["state_space_names"]
+        for name in model["model_structure"]["state_space_names"]
     }
 
     def weight_func(**kwargs):
@@ -65,7 +64,7 @@ def observed_model_fit(paths_dict):
         choice_prob_func = create_choice_prob_func_unobserved_states(
             model=model,
             observed_states=states_dict,
-            observed_wealth=data_decision["wealth"].values,
+            observed_wealth=data_decision["adjusted_wealth"].values,
             observed_choices=choice_vals,
             unobserved_state_specs=unobserved_state_specs,
             weight_full_states=False,

@@ -73,7 +73,7 @@ def estimate_model(path_dict, params_to_estimate_names, file_append, load_model)
         lower_bounds=lower_bounds,
         upper_bounds=upper_bounds,
         algorithm="scipy_lbfgsb",
-        logging="test_log.db",
+        # logging="test_log.db",
         error_handling="continue",
     )
     pickle.dump(
@@ -98,19 +98,7 @@ def create_ll_from_paths(start_params_all, path_dict, load_model):
     )
 
     # Load data
-    data_decision = load_and_prep_data(path_dict)
-    # Now transform for dcegm
-    states_dict = {
-        name: data_decision[name].values
-        for name in model["model_structure"]["state_space_names"]
-    }
-    # We can adjust wealth outside, as it does not depend on estimated parameters (only on interest rate)
-    adjusted_wealth = adjust_observed_wealth(
-        observed_states_dict=states_dict,
-        wealth=data_decision["wealth"].values,
-        params=start_params_all,
-        model=model,
-    )
+    data_decision, states_dict = load_and_prep_data(path_dict, start_params_all, model)
 
     def weight_func(**kwargs):
         # We need to weight the unobserved job offer state for each of its possible values
@@ -136,7 +124,7 @@ def create_ll_from_paths(start_params_all, path_dict, load_model):
     individual_likelihood = create_individual_likelihood_function_for_model(
         model=model,
         observed_states=states_dict,
-        observed_wealth=adjusted_wealth,
+        observed_wealth=data_decision["adjusted_wealth"].values,
         observed_choices=data_decision["choice"].values,
         unobserved_state_specs=unobserved_state_specs,
         params_all=start_params_all,
@@ -144,14 +132,30 @@ def create_ll_from_paths(start_params_all, path_dict, load_model):
     return individual_likelihood
 
 
-def load_and_prep_data(path_dict):
+def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):
     # Load data
     data_decision = pd.read_pickle(path_dict["struct_est_sample"])
     # We need to filter observations in period 0 because of job offer weighting
     data_decision = data_decision[data_decision["period"] > 0]
     # Also already retired individuals hold no identification
-    data_decision = data_decision[data_decision["lagged_choice"] != 2]
-    return data_decision
+    if drop_retirees:
+        data_decision = data_decision[data_decision["lagged_choice"] != 2]
+    # We can adjust wealth outside, as it does not depend on estimated parameters
+    # (only on interest rate)
+    # Now transform for dcegm
+    states_dict = {
+        name: data_decision[name].values
+        for name in model["model_structure"]["state_space_names"]
+    }
+
+    adjusted_wealth = adjust_observed_wealth(
+        observed_states_dict=states_dict,
+        wealth=data_decision["wealth"].values,
+        params=start_params,
+        model=model,
+    )
+    data_decision["adjusted_wealth"] = adjusted_wealth
+    return data_decision, states_dict
 
 
 def create_job_offer_params_from_start(path_dict):

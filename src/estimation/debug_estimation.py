@@ -29,9 +29,10 @@ from model_code.stochastic_processes.policy_states_belief import (
 from model_code.stochastic_processes.policy_states_belief import (
     update_specs_exp_ret_age_trans_mat,
 )
-from model_code.specify_model import specify_and_solve_model
 
-# # Generate model_specs
+# from model_code.specify_model import specify_and_solve_model,
+#
+# # # Generate model_specs
 # model, params = specify_model(
 #     path_dict=paths_dict,
 #     update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
@@ -40,20 +41,20 @@ from model_code.specify_model import specify_and_solve_model
 #     load_model=False,
 # )
 
-solution, model, params = specify_and_solve_model(
-    path_dict=paths_dict,
-    file_append="test_groß",
-    params=params,
-    update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
-    policy_state_trans_func=expected_SRA_probs_estimation,
-    load_model=True,
-    load_solution=True,
-)
+# solution, model, params = specify_and_solve_model(
+#     path_dict=paths_dict,
+#     file_append="test_groß",
+#     params=params,
+#     update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
+#     policy_state_trans_func=expected_SRA_probs_estimation,
+#     load_model=True,
+#     load_solution=True,
+# )
 
 
 from estimation.estimate_setup import load_and_prep_data
 
-data_decision = load_and_prep_data(paths_dict)
+# data_decision, states_dict = load_and_prep_data(path_dict, params, model)
 # individual_likelihood = create_ll_from_paths(
 #     params, paths_dict, load_model=False
 # )

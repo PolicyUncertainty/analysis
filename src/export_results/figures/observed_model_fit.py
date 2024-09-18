@@ -25,7 +25,7 @@ def observed_model_fit(paths_dict):
         policy_state_trans_func=expected_SRA_probs_estimation,
         file_append="subj",
         load_model=True,
-        load_solution=True,
+        load_solution=False,
     )
 
     data_decision = pd.read_pickle(

@@ -3,10 +3,12 @@ import pickle as pkl
 import time
 
 import estimagic as em
+import matplotlib.pyplot as plt
 import pandas as pd
 import statsmodels.api as sm
 import yaml
 from dcegm.likelihood import create_individual_likelihood_function_for_model
+from dcegm.wealth_correction import adjust_observed_wealth
 from model_code.specify_model import specify_model
 from model_code.stochastic_processes.policy_states_belief import (
     expected_SRA_probs_estimation,
@@ -102,6 +104,13 @@ def create_ll_from_paths(start_params_all, path_dict, load_model):
         name: data_decision[name].values
         for name in model["model_structure"]["state_space_names"]
     }
+    # We can adjust wealth outside, as it does not depend on estimated parameters (only on interest rate)
+    adjusted_wealth = adjust_observed_wealth(
+        observed_states_dict=states_dict,
+        wealth=data_decision["wealth"].values,
+        params=start_params_all,
+        model=model,
+    )
 
     def weight_func(**kwargs):
         # We need to weight the unobserved job offer state for each of its possible values
@@ -127,7 +136,7 @@ def create_ll_from_paths(start_params_all, path_dict, load_model):
     individual_likelihood = create_individual_likelihood_function_for_model(
         model=model,
         observed_states=states_dict,
-        observed_wealth=data_decision["wealth"].values,
+        observed_wealth=adjusted_wealth,
         observed_choices=data_decision["choice"].values,
         unobserved_state_specs=unobserved_state_specs,
         params_all=start_params_all,
@@ -142,7 +151,6 @@ def load_and_prep_data(path_dict):
     data_decision = data_decision[data_decision["period"] > 0]
     # Also already retired individuals hold no identification
     data_decision = data_decision[data_decision["lagged_choice"] != 2]
-    data_decision["wealth"] = data_decision["wealth"].clip(lower=1e-16)
     return data_decision
 
 

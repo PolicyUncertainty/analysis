@@ -107,7 +107,7 @@ data_sim = solve_and_simulate_scenario(
     solve_policy_trans_func=expected_SRA_probs_estimation,
     simulate_update_specs_func=update_specs_for_step_function_scale_05,
     simulate_policy_trans_func=realized_policy_step_function,
-    solution_exists=False,
+    solution_exists=True,
     file_append_sol="subj",
     model_exists=True,
 )
@@ -127,4 +127,11 @@ data_sim = solve_and_simulate_scenario(
 )
 data_sim.to_pickle(path_dict["intermediate_data"] + "sim_data/data_real_scale_05.pkl")
 del data_sim
+
+
+# New counterfactual:
+# Baseline SRA stays at 67
+# Comparision with vorschlag rat: Alle 10 ein halbes jahr
+# Comparision mit: Alle 10 ein Jahr
+
 # %%

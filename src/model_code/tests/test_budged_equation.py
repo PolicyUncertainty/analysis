@@ -19,8 +19,6 @@ PARTNER_STATES = np.array([0, 1, 2], dtype=int)
 PERIOD_GRID = np.arange(0, 40, 10, dtype=int)
 EDUCATION_GRID = [0, 1]
 
-BENEFITS_GRID = np.linspace(10, 100, 3)
-
 
 @pytest.fixture(scope="module")
 def paths_and_specs():
@@ -30,13 +28,12 @@ def paths_and_specs():
 
 
 @pytest.mark.parametrize(
-    "period, partner_state, education, unemployment_benefits, savings, interest_rate",
+    "period, partner_state, education, savings, interest_rate",
     list(
         product(
             PERIOD_GRID,
             PARTNER_STATES,
             EDUCATION_GRID,
-            BENEFITS_GRID,
             SAVINGS_GRID,
             INTEREST_RATE_GRID,
         )
@@ -46,7 +43,6 @@ def test_budget_unemployed(
     period,
     partner_state,
     education,
-    unemployment_benefits,
     savings,
     interest_rate,
     paths_and_specs,
@@ -54,7 +50,6 @@ def test_budget_unemployed(
     path_dict, specs = paths_and_specs
 
     specs_internal = copy.deepcopy(specs)
-    specs_internal["unemployment_benefits"] = unemployment_benefits
 
     params = {"interest_rate": interest_rate}
     wealth = budget_constraint(
@@ -88,8 +83,21 @@ def test_budget_unemployed(
     if savings < specs_internal["unemployment_wealth_thresh"]:
         unemployment_benefits = (1 + has_partner) * specs_internal[
             "unemployment_benefits"
-        ] + specs_internal["child_unemployment_benefits"] * nb_children
-        income = np.maximum(unemployment_benefits * 12, net_partner_plus_child_benefits)
+        ]
+        unemployment_benefits_children = (
+            specs_internal["child_unemployment_benefits"] * nb_children
+        )
+        unemployment_benefits_housing = specs_internal[
+            "unemployment_benefits_housing"
+        ] * (1 + 0.5 * has_partner)
+        unemployment_benefits_total = (
+            unemployment_benefits
+            + unemployment_benefits_children
+            + unemployment_benefits_housing
+        )
+        income = np.maximum(
+            unemployment_benefits_total * 12, net_partner_plus_child_benefits
+        )
     else:
         income = net_partner_plus_child_benefits
 

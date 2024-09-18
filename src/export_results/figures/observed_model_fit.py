@@ -15,7 +15,7 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
 def observed_model_fit(paths_dict):
-    params = pickle.load(open(paths_dict["est_results"] + "est_params.pkl", "rb"))
+    params = pickle.load(open(paths_dict["est_results"] + "est_params_wo_mu.pkl", "rb"))
     specs = generate_derived_and_data_derived_specs(paths_dict)
 
     est_model, model, params = specify_and_solve_model(

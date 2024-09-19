@@ -1,5 +1,6 @@
 import pickle
 
+import jax.numpy as jnp
 import numpy as np
 from dcegm.pre_processing.setup_model import load_and_setup_model
 from dcegm.pre_processing.setup_model import setup_and_save_model
@@ -25,6 +26,10 @@ def specify_model(
     """Generate model and options dictionaries."""
     # Generate model_specs
     specs = generate_derived_and_data_derived_specs(path_dict, params)
+    specs["partner_wage"] = jnp.zeros_like(specs["partner_wage"])
+    specs["partner_pension"] = jnp.zeros_like(specs["partner_pension"])
+    specs["children_by_state"] = jnp.zeros_like(specs["children_by_state"])
+
     # Assign income shock scale to start_params_all
     params["sigma"] = specs["income_shock_scale"]
     params["interest_rate"] = specs["interest_rate"]

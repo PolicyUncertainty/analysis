@@ -84,9 +84,7 @@ def test_budget_unemployed(
         unemployment_benefits = (1 + has_partner) * specs_internal[
             "unemployment_benefits"
         ]
-        unemployment_benefits_children = (
-            specs_internal["child_unemployment_benefits"] * nb_children
-        )
+        unemployment_benefits_children = specs_internal["child_benefit"] * nb_children
         unemployment_benefits_housing = specs_internal[
             "unemployment_benefits_housing"
         ] * (1 + 0.5 * has_partner)

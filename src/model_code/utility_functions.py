@@ -72,5 +72,5 @@ def marginal_utility_final_consume_all(choice, resources, params, options):
 def consumption_scale(partner_state, education, period, options):
     has_partner = (partner_state > 0).astype(int)
     nb_children = options["children_by_state"][0, education, has_partner, period]
-    hh_size = 1 + has_partner + nb_children
-    return jnp.sqrt(hh_size)
+    cons_scale = 1 + nb_children * 0.3
+    return cons_scale

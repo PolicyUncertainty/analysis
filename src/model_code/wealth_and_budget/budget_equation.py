@@ -77,8 +77,6 @@ def budget_constraint(
     )
 
     total_income = jnp.maximum(total_net_income + child_benefits, unemployment_benefits)
-    # if (period > 20) & (partner_state == 1):
-    #     breakpoint()
     # calculate beginning of period wealth M_t
     wealth = (
         1 + params["interest_rate"]

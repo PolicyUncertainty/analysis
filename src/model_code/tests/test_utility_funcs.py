@@ -42,7 +42,7 @@ def test_consumption_cale(partner_state, education, period, paths_and_specs):
     cons_scale = consumption_scale(partner_state, education, period, options)
     has_partner = int(partner_state > 0)
     nb_children = options["children_by_state"][0, education, has_partner, period]
-    cons_scale_model = np.sqrt(1 + has_partner + nb_children)
+    cons_scale_model = 1 + 0.4 * has_partner + 0.3 * nb_children
     np.testing.assert_almost_equal(cons_scale, cons_scale_model)
 
 

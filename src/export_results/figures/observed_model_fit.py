@@ -16,7 +16,7 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
 def observed_model_fit(paths_dict):
-    params = pickle.load(open(paths_dict["est_results"] + "est_params_wo_mu.pkl", "rb"))
+    params = pickle.load(open(paths_dict["est_results"] + "est_params.pkl", "rb"))
     specs = generate_derived_and_data_derived_specs(paths_dict)
 
     est_model, model, params = specify_and_solve_model(
@@ -64,7 +64,7 @@ def observed_model_fit(paths_dict):
         choice_prob_func = create_choice_prob_func_unobserved_states(
             model=model,
             observed_states=states_dict,
-            observed_wealth=data_decision["adjusted_wealth"].values,
+            observed_wealth=data_decision["wealth"].values,
             observed_choices=choice_vals,
             unobserved_state_specs=unobserved_state_specs,
             weight_full_states=False,
@@ -80,30 +80,39 @@ def observed_model_fit(paths_dict):
         data_decision[f"choice_{choice}"] = choice_probs_observations
 
     file_append = ["low", "high"]
+    partner_labels = ["Single", "Partnered"]
+    data_decision["married"] = (data_decision["partner_state"] > 0).astype(int)
 
-    for edu in range(2):
-        data_edu = data_decision[data_decision["education"] == edu]
-        choice_shares_obs = (
-            data_edu.groupby(["age"])["choice"].value_counts(normalize=True).unstack()
-        )
+    for partner_val, partner_label in enumerate(partner_labels):
+        for edu in range(2):
+            data_subset = data_decision[
+                (data_decision["education"] == edu)
+                & (data_decision["married"] == partner_val)
+            ]
+            choice_shares_obs = (
+                data_subset.groupby(["age"])["choice"]
+                .value_counts(normalize=True)
+                .unstack()
+            )
 
-        fig, axes = plt.subplots(1, 3, figsize=(10, 5))
-        labels = ["Unemployment", "Employment", "Retirement"]
-        for choice, ax in enumerate(axes):
-            choice_shares_predicted = data_edu.groupby(["age"])[
-                f"choice_{choice}"
-            ].mean()
-            choice_shares_predicted.plot(ax=ax, label="Simulated")
-            choice_shares_obs[choice].plot(ax=ax, label="Observed", ls="--")
-            ax.set_xlabel("Age")
-            ax.set_ylabel("Choice share")
-            ax.set_title(f"{labels[choice]}")
-            ax.set_ylim([-0.05, 1.05])
-            if choice == 0:
-                ax.legend(loc="upper left")
-        fig.tight_layout()
-        fig.savefig(
-            paths_dict["plots"] + f"observed_model_fit_{file_append[edu]}.png",
-            transparent=True,
-            dpi=300,
-        )
+            fig, axes = plt.subplots(1, 3, figsize=(10, 5))
+            labels = ["Unemployment", "Employment", "Retirement"]
+            for choice, ax in enumerate(axes):
+                choice_shares_predicted = data_subset.groupby(["age"])[
+                    f"choice_{choice}"
+                ].mean()
+                choice_shares_predicted.plot(ax=ax, label="Simulated")
+                choice_shares_obs[choice].plot(ax=ax, label="Observed", ls="--")
+                ax.set_xlabel("Age")
+                ax.set_ylabel("Choice share")
+                ax.set_title(f"{labels[choice]}")
+                ax.set_ylim([-0.05, 1.05])
+                if choice == 0:
+                    ax.legend(loc="upper left")
+            fig.tight_layout()
+            fig.savefig(
+                paths_dict["plots"]
+                + f"observed_model_fit_{partner_label}_{file_append[edu]}.png",
+                transparent=True,
+                dpi=300,
+            )

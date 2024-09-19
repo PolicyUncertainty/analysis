@@ -29,4 +29,5 @@ def calc_unemployment_benefits(savings, education, has_partner_int, period, opti
         + unemployment_benefits_children
         + unemployment_benefits_housing
     )
+
     return unemployment_benefits * 12

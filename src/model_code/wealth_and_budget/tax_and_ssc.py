@@ -7,7 +7,7 @@ def calc_net_household_income(own_income, partner_income, has_partner_int, optio
     family_income = own_income + partner_income
 
     # Calculate split factor. 1 if single, 2 if partnered
-    split_factor = 1
+    split_factor = 1 + has_partner_int
     income_tax_split = calc_inc_tax_for_single_income(
         family_income / split_factor, options
     )

@@ -34,7 +34,10 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     specs["children_by_state"] = predict_children_by_state(path_dict, specs)
 
     # Read in family transitions
-    specs = read_in_partner_transition_specs(path_dict, specs)
+    (
+        specs["partner_trans_mat"],
+        specs["n_partner_states"],
+    ) = read_in_partner_transition_specs(path_dict, specs)
 
     # Set initial experience
     specs["max_init_experience"] = create_initial_exp(path_dict, load_precomputed)

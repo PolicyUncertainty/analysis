@@ -178,7 +178,4 @@ def read_in_partner_transition_specs(paths_dict, specs):
                         edu, period, current_state, next_state
                     ] = full_series.loc[(0, edu, age_bin, current_state, next_state)]
 
-    # Save in specs
-    specs["partner_trans_mat"] = jnp.asarray(male_trans_probs)
-    specs["n_partner_states"] = n_partner_states
-    return specs
+    return jnp.asarray(male_trans_probs), n_partner_states

@@ -25,7 +25,7 @@ exp_cap: 44 # maximum of exp accumulated
 unemployment_benefits: 0.35
 unemployment_benefits_housing: 0.3
 unemployment_wealth_thresh: 10.5
-# child_unemployment_benefits: 0.25
+child_unemployment_benefits: 0.25
 child_benefit: 0.184
 min_wage: 1.36
 early_retirement_penalty: 0.036

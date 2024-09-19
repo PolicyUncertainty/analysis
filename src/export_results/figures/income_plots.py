@@ -46,9 +46,9 @@ def plot_incomes(path_dict):
                 calc_pensions_after_ssc(exp, edu, 0, 2, specs), yearly_unemployment
             )
 
-        ax.plot(exp_levels, net_wages, label="Average net wage")
+        ax.plot(exp_levels, net_wages, label="Average after ssc wage")
         ax.plot(exp_levels, gross_wages, label="Average gross wage", ls="--")
-        ax.plot(exp_levels, net_pensions, label="Average net pension")
+        ax.plot(exp_levels, net_pensions, label="Average after ssc pension")
         ax.plot(exp_levels, gross_pensions, label="Average gross pension", ls="--")
 
         ax.legend(loc="upper left")
@@ -56,6 +56,7 @@ def plot_incomes(path_dict):
         ax.set_ylabel("Average income")
         ax.set_title(f"{labels[edu]}")
 
+    fig.suptitle("After sssc income")
     fig.tight_layout()
     fig.savefig(path_dict["plots"] + "incomes.png", transparent=True, dpi=300)
 
@@ -93,6 +94,8 @@ def plot_total_income(specs):
         axs[married_val].set_xlabel("Period equals experience")
         axs[married_val].set_ylim([0, 80])
         axs[married_val].legend()
+
+    fig.suptitle("Total income")
 
 
 def plot_partner_wage(paths_dict, specs):
@@ -149,6 +152,7 @@ def plot_child_benefits(specs):
         axs[partner_val].set_title(partner_label)
         axs[partner_val].set_xlabel("Periods")
         axs[partner_val].legend()
+    fig.suptitle("Child benefits")
 
 
 # def plot_wages(path_dict):

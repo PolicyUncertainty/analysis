@@ -1,23 +1,41 @@
+import pickle
+
 import matplotlib.pyplot as plt
 import pandas as pd
 import yaml
+from estimation.estimate_setup import load_and_prep_data
+from model_code.specify_model import specify_and_solve_model
+from model_code.stochastic_processes.policy_states_belief import (
+    expected_SRA_probs_estimation,
+)
+from model_code.stochastic_processes.policy_states_belief import (
+    update_specs_exp_ret_age_trans_mat,
+)
 
 
 def plot_average_wealth(paths):
     data_sim = pd.read_pickle(
         paths["intermediate_data"] + "sim_data/data_subj_scale_1.pkl"
     ).reset_index()
-    data_decision = pd.read_pickle(
-        paths["intermediate_data"] + "structural_estimation_sample.pkl"
-    )
-
     specs = yaml.safe_load(open(paths["specs"]))
 
+    params = pickle.load(open(paths["est_results"] + "est_params.pkl", "rb"))
+    est_model, model, params = specify_and_solve_model(
+        path_dict=paths,
+        params=params,
+        update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
+        policy_state_trans_func=expected_SRA_probs_estimation,
+        file_append="subj",
+        load_model=True,
+        load_solution=True,
+    )
+    data_decision, _ = load_and_prep_data(paths, params, model, drop_retirees=False)
     data_decision["age"] = data_decision["period"] + specs["start_age"]
+
     data_sim["age"] = data_sim["period"] + specs["start_age"]
 
     average_wealth_sim = data_sim.groupby("age")["wealth_at_beginning"].median()
-    average_wealth_obs = data_decision.groupby("age")["wealth"].median()
+    average_wealth_obs = data_decision.groupby("age")["adjusted_wealth"].median()
     ages = data_sim["age"].unique()
     n_ages = len(ages)
 

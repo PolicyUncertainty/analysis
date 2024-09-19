@@ -42,7 +42,7 @@ data_sim = solve_and_simulate_scenario(
     solve_policy_trans_func=expected_SRA_probs_estimation,
     simulate_update_specs_func=update_specs_for_step_function_scale_1,
     simulate_policy_trans_func=realized_policy_step_function,
-    solution_exists=False,
+    solution_exists=True,
     file_append_sol="subj",
     model_exists=True,
 )
@@ -61,7 +61,6 @@ data_sim = solve_and_simulate_scenario(
 )
 data_sim.to_pickle(path_dict["intermediate_data"] + "sim_data/data_real_scale_1.pkl")
 del data_sim
-
 
 ###################################################################
 # Counterfactual double alpha
@@ -94,7 +93,6 @@ data_sim = solve_and_simulate_scenario(
 )
 data_sim.to_pickle(path_dict["intermediate_data"] + "sim_data/data_real_scale_2.pkl")
 del data_sim
-
 
 ###################################################################
 # Counterfactual half alpha

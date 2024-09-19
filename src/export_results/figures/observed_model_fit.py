@@ -26,7 +26,7 @@ def observed_model_fit(paths_dict):
         policy_state_trans_func=expected_SRA_probs_estimation,
         file_append="subj",
         load_model=True,
-        load_solution=False,
+        load_solution=True,
     )
 
     data_decision, _ = load_and_prep_data(
@@ -64,7 +64,7 @@ def observed_model_fit(paths_dict):
         choice_prob_func = create_choice_prob_func_unobserved_states(
             model=model,
             observed_states=states_dict,
-            observed_wealth=data_decision["wealth"].values,
+            observed_wealth=data_decision["adjusted_wealth"].values,
             observed_choices=choice_vals,
             unobserved_state_specs=unobserved_state_specs,
             weight_full_states=False,

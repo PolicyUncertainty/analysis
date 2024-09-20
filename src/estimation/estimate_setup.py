@@ -2,10 +2,10 @@ import pickle
 import pickle as pkl
 import time
 
-import estimagic as em
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import numpy as np
+import optimagic as om
 import pandas as pd
 import statsmodels.api as sm
 import yaml
@@ -33,14 +33,17 @@ def estimate_model(path_dict, params_to_estimate_names, file_append, load_model)
 
     # Spread out to edu types
     specs = generate_derived_and_data_derived_specs(path_dict)
-    start_params_all["dis_util_work"] = (
-        jnp.ones(specs["n_education_types"], dtype=jnp.float64)
-        * start_params_all["dis_util_work"]
-    )
-    start_params_all["dis_util_unemployed"] = (
-        jnp.ones(specs["n_education_types"], dtype=jnp.float64)
-        * start_params_all["dis_util_unemployed"]
-    )
+    start_params_all["dis_util_work_high"] = start_params_all["dis_util_work"]
+    start_params_all["dis_util_work_low"] = start_params_all["dis_util_work"]
+    start_params_all.pop("dis_util_work")
+
+    start_params_all["dis_util_unemployed_high"] = start_params_all[
+        "dis_util_unemployed"
+    ]
+    start_params_all["dis_util_unemployed_low"] = start_params_all[
+        "dis_util_unemployed"
+    ]
+    start_params_all.pop("dis_util_unemployed")
 
     individual_likelihood = create_ll_from_paths(
         start_params_all, path_dict, load_model
@@ -60,8 +63,10 @@ def estimate_model(path_dict, params_to_estimate_names, file_append, load_model)
     # not estimated. They will selected afterwards.
     lower_bounds_all = {
         "mu": 1e-12,
-        "dis_util_work": jnp.array([1e-12, 1e-12], dtype=jnp.float64),
-        "dis_util_unemployed": jnp.array([1e-12, 1e-12], dtype=jnp.float64),
+        "dis_util_work_high": 1e-12,
+        "dis_util_work_low": 1e-12,
+        "dis_util_unemployed_high": 1e-12,
+        "dis_util_unemployed_low": 1e-12,
         "bequest_scale": 1e-12,
         "lambda": 1e-12,
         "job_finding_logit_const": -5,
@@ -71,21 +76,24 @@ def estimate_model(path_dict, params_to_estimate_names, file_append, load_model)
     lower_bounds = {name: lower_bounds_all[name] for name in params_to_estimate_names}
     upper_bounds_all = {
         "mu": 2,
-        "dis_util_work": jnp.array([5, 5], dtype=jnp.float64),
-        "dis_util_unemployed": jnp.array([5, 5], dtype=jnp.float64),
+        "dis_util_work_high": 5,
+        "dis_util_work_low": 5,
+        "dis_util_unemployed_high": 5,
+        "dis_util_unemployed_low": 5,
         "bequest_scale": 5,
         "lambda": 1,
         "job_finding_logit_const": 5,
         "job_finding_logit_age": 0.5,
         "job_finding_logit_high_educ": 5,
     }
+
     upper_bounds = {name: upper_bounds_all[name] for name in params_to_estimate_names}
 
-    result = em.minimize(
-        criterion=individual_likelihood_print,
+    bounds = om.Bounds(lower=lower_bounds, upper=upper_bounds)
+    result = om.minimize(
+        fun=individual_likelihood_print,
         params=start_params,
-        lower_bounds=lower_bounds,
-        upper_bounds=upper_bounds,
+        bounds=bounds,
         algorithm="scipy_lbfgsb",
         # logging="test_log.db",
         error_handling="continue",

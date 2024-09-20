@@ -73,10 +73,10 @@ def test_utility_func(
 ):
     params = {
         "mu": mu,
-        "dis_util_work": jnp.array([dis_util_work, dis_util_work + 1]),
-        "dis_util_unemployed": jnp.array(
-            [dis_util_unemployed, dis_util_unemployed + 1]
-        ),
+        "dis_util_work_high": dis_util_work + 1,
+        "dis_util_work_low": dis_util_work,
+        "dis_util_unemployed_high": dis_util_unemployed + 1,
+        "dis_util_unemployed_low": dis_util_unemployed,
     }
     options = paths_and_specs[1]
     cons_scale = consumption_scale(partner_state, education, period, options)
@@ -135,10 +135,10 @@ def test_marginal_utility(
     options = paths_and_specs[1]
     params = {
         "mu": mu,
-        "dis_util_work": jnp.array([dis_util_work, dis_util_work + 1]),
-        "dis_util_unemployed": jnp.array(
-            [dis_util_unemployed, dis_util_unemployed + 1]
-        ),
+        "dis_util_work_high": dis_util_work + 1,
+        "dis_util_work_low": dis_util_work,
+        "dis_util_unemployed_high": dis_util_unemployed + 1,
+        "dis_util_unemployed_low": dis_util_unemployed,
     }
     random_choice = np.random.choice(np.array([0, 1, 2]))
     marg_util_jax = jax.jacfwd(utility_func, argnums=0)(

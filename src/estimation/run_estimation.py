@@ -75,9 +75,11 @@ if input_str == "m":
     from estimation.estimate_setup import estimate_model
 
     params_to_estimate_names = [
-        "mu",
-        "dis_util_work",
-        "dis_util_unemployed",
+        # "mu",
+        "dis_util_work_high",
+        "dis_util_work_low",
+        "dis_util_unemployed_high",
+        "dis_util_unemployed_low",
         "bequest_scale",
         # "lambda",
         "job_finding_logit_const",

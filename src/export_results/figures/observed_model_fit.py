@@ -17,7 +17,7 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 
 def observed_model_fit(paths_dict):
     params = pickle.load(
-        open(paths_dict["est_results"] + "est_params_util_jo.pkl", "rb")
+        open(paths_dict["est_results"] + "est_params_fedor_lamda.pkl", "rb")
     )
     # pickle.load(open(paths_dict["est_results"] + "em_result_util_jo.pkl", "rb"))
 
@@ -28,7 +28,7 @@ def observed_model_fit(paths_dict):
         params=params,
         update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
         policy_state_trans_func=expected_SRA_probs_estimation,
-        file_append="subj",
+        file_append="fedor_lamda",
         load_model=True,
         load_solution=True,
     )
@@ -91,15 +91,12 @@ def observed_model_fit(paths_dict):
     )
     data_decision["prob_choice_observed"] = prob_choice_observed
 
-    mask = prob_choice_observed < 1e-10
     # Negative ll contributions are positive numbers. The smaller the better the fit
     # Add high fixed punishment for not explained choices
-    neg_likelihood_contributions = -np.log(prob_choice_observed) + mask * 999
+    neg_likelihood_contributions = (-np.log(prob_choice_observed)).clip(max=999)
 
     data_decision["likelihood_contrib"] = neg_likelihood_contributions
     data_decision["age_bin"] = np.floor(data_decision["age"] / 10) * 10
-    data_decision = data_decision[data_decision["lagged_choice"] != 2]
-    # breakpoint()
 
     file_append = ["low", "high"]
     partner_labels = ["Single", "Partnered"]

@@ -3,6 +3,7 @@ import pickle as pkl
 import time
 
 import estimagic as em
+import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -26,8 +27,20 @@ def estimate_model(path_dict, params_to_estimate_names, file_append, load_model)
     job_sep_params = create_job_offer_params_from_start(path_dict)
     start_params_all.update(job_sep_params)
 
+    # Assign start params from before
     last_end = pkl.load(open(path_dict["est_results"] + "est_params.pkl", "rb"))
     start_params_all.update(last_end)
+
+    # Spread out to edu types
+    specs = generate_derived_and_data_derived_specs(path_dict)
+    start_params_all["dis_util_work"] = (
+        jnp.ones(specs["n_education_types"], dtype=jnp.float64)
+        * start_params_all["dis_util_work"]
+    )
+    start_params_all["dis_util_unemployed"] = (
+        jnp.ones(specs["n_education_types"], dtype=jnp.float64)
+        * start_params_all["dis_util_unemployed"]
+    )
 
     individual_likelihood = create_ll_from_paths(
         start_params_all, path_dict, load_model
@@ -47,8 +60,8 @@ def estimate_model(path_dict, params_to_estimate_names, file_append, load_model)
     # not estimated. They will selected afterwards.
     lower_bounds_all = {
         "mu": 1e-12,
-        "dis_util_work": 1e-12,
-        "dis_util_unemployed": 1e-12,
+        "dis_util_work": jnp.array([1e-12, 1e-12], dtype=jnp.float64),
+        "dis_util_unemployed": jnp.array([1e-12, 1e-12], dtype=jnp.float64),
         "bequest_scale": 1e-12,
         "lambda": 1e-12,
         "job_finding_logit_const": -5,
@@ -58,8 +71,8 @@ def estimate_model(path_dict, params_to_estimate_names, file_append, load_model)
     lower_bounds = {name: lower_bounds_all[name] for name in params_to_estimate_names}
     upper_bounds_all = {
         "mu": 2,
-        "dis_util_work": 5,
-        "dis_util_unemployed": 5,
+        "dis_util_work": jnp.array([5, 5], dtype=jnp.float64),
+        "dis_util_unemployed": jnp.array([5, 5], dtype=jnp.float64),
         "bequest_scale": 5,
         "lambda": 1,
         "job_finding_logit_const": 5,
@@ -129,7 +142,7 @@ def create_ll_from_paths(start_params_all, path_dict, load_model):
         observed_choices=data_decision["choice"].values,
         unobserved_state_specs=unobserved_state_specs,
         params_all=start_params_all,
-        weights=data_decision["age_weights"].values,
+        # weights=data_decision["age_weights"].values,
     )
     return individual_likelihood
 
@@ -143,16 +156,16 @@ def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):
     if drop_retirees:
         data_decision = data_decision[data_decision["lagged_choice"] != 2]
 
-    data_decision["age"] = (
-        data_decision["period"] + model["options"]["model_params"]["start_age"]
-    )
-    data_decision["age_bin"] = np.floor(data_decision["age"] / 10)
-    data_decision.loc[data_decision["age_bin"] > 6, "age_bin"] = 6
-    age_bin_av_size = data_decision.shape[0] / data_decision["age_bin"].nunique()
-    data_decision.loc[:, "age_weights"] = 1.0
-    data_decision.loc[:, "age_weights"] = age_bin_av_size / data_decision.groupby(
-        "age_bin"
-    )["age_weights"].transform("sum")
+    # data_decision["age"] = (
+    #     data_decision["period"] + model["options"]["model_params"]["start_age"]
+    # )
+    # data_decision["age_bin"] = np.floor(data_decision["age"] / 10)
+    # data_decision.loc[data_decision["age_bin"] > 6, "age_bin"] = 6
+    # age_bin_av_size = data_decision.shape[0] / data_decision["age_bin"].nunique()
+    # data_decision.loc[:, "age_weights"] = 1.0
+    # data_decision.loc[:, "age_weights"] = age_bin_av_size / data_decision.groupby(
+    #     "age_bin"
+    # )["age_weights"].transform("sum")
 
     # We can adjust wealth outside, as it does not depend on estimated parameters
     # (only on interest rate)

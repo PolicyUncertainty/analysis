@@ -1,6 +1,7 @@
 from itertools import product
 
 import jax
+import jax.numpy as jnp
 import numpy as np
 import pytest
 from model_code.utility_functions import consumption_scale
@@ -72,8 +73,10 @@ def test_utility_func(
 ):
     params = {
         "mu": mu,
-        "dis_util_work": dis_util_work,
-        "dis_util_unemployed": dis_util_unemployed,
+        "dis_util_work": jnp.array([dis_util_work, dis_util_work + 1]),
+        "dis_util_unemployed": jnp.array(
+            [dis_util_unemployed, dis_util_unemployed + 1]
+        ),
     }
     options = paths_and_specs[1]
     cons_scale = consumption_scale(partner_state, education, period, options)
@@ -89,7 +92,7 @@ def test_utility_func(
             params=params,
             options=options,
         ),
-        cons_utility - dis_util_work,
+        cons_utility - (dis_util_work + education),
     )
     np.testing.assert_almost_equal(
         utility_func(
@@ -101,7 +104,7 @@ def test_utility_func(
             params=params,
             options=options,
         ),
-        cons_utility - dis_util_unemployed,
+        cons_utility - (dis_util_unemployed + education),
     )
 
 
@@ -132,8 +135,10 @@ def test_marginal_utility(
     options = paths_and_specs[1]
     params = {
         "mu": mu,
-        "dis_util_work": dis_util_work,
-        "dis_util_unemployed": dis_util_unemployed,
+        "dis_util_work": jnp.array([dis_util_work, dis_util_work + 1]),
+        "dis_util_unemployed": jnp.array(
+            [dis_util_unemployed, dis_util_unemployed + 1]
+        ),
     }
     random_choice = np.random.choice(np.array([0, 1, 2]))
     marg_util_jax = jax.jacfwd(utility_func, argnums=0)(

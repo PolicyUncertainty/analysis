@@ -23,8 +23,8 @@ def utility_func(
     cons_scale = consumption_scale(partner_state, education, period, options)
     # Reading parameters
     mu = params["mu"]
-    dis_util_work = params["dis_util_work"]
-    dis_util_unemployed = params["dis_util_unemployed"]
+    dis_util_work = params["dis_util_work"][education]
+    dis_util_unemployed = params["dis_util_unemployed"][education]
     # Check which choice we have
     is_working = choice == 1
     is_unemployed = choice == 0

@@ -25,7 +25,7 @@ def specify_model(
 ):
     """Generate model and options dictionaries."""
     # Generate model_specs
-    specs = generate_derived_and_data_derived_specs(path_dict, params)
+    specs = generate_derived_and_data_derived_specs(path_dict)
 
     # Assign income shock scale to start_params_all
     params["sigma"] = specs["income_shock_scale"]

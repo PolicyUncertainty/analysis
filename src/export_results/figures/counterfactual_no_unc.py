@@ -51,7 +51,7 @@ def plot_average_savings(paths_dict):
 
     savings_unc = data_unc.groupby("age")["savings_dec"].mean()
     savings_no_unc = data_no_unc.groupby("age")["savings_dec"].mean()
-    savings_increase = savings_no_unc[:35].mean() / savings_unc[:35].mean()
+    savings_increase = savings_unc[:35] / savings_no_unc[:35]
 
     fig, ax = plt.subplots()
     ax.plot(savings_unc, label="Uncertainty")

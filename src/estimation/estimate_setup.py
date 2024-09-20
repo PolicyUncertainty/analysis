@@ -128,6 +128,7 @@ def create_ll_from_paths(start_params_all, path_dict, load_model):
         observed_choices=data_decision["choice"].values,
         unobserved_state_specs=unobserved_state_specs,
         params_all=start_params_all,
+        weights=data_decision["weights"].values,
     )
     return individual_likelihood
 
@@ -139,7 +140,27 @@ def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):
     data_decision = data_decision[data_decision["period"] > 0]
     # Also already retired individuals hold no identification
     if drop_retirees:
+        n_retirees_in_edu_before = (
+            data_decision.groupby(["education"])["choice"]
+            .value_counts()
+            .loc[(slice(None), 2)]
+        )
         data_decision = data_decision[data_decision["lagged_choice"] != 2]
+        n_retirees_in_edu_after = (
+            data_decision.groupby(["education"])["choice"]
+            .value_counts()
+            .loc[(slice(None), 2)]
+        )
+        data_decision.loc[:, "weights"] = 1.0
+        for edu in data_decision["education"].unique():
+            edu_ret_mask = (data_decision["education"] == edu) & (
+                data_decision["choice"] == 2
+            )
+            weight_adj = (
+                n_retirees_in_edu_before.loc[edu] / n_retirees_in_edu_after.loc[edu]
+            )
+            data_decision.loc[edu_ret_mask, "weights"] = weight_adj
+
     # We can adjust wealth outside, as it does not depend on estimated parameters
     # (only on interest rate)
     # Now transform for dcegm

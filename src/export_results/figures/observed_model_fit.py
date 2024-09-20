@@ -16,7 +16,11 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
 def observed_model_fit(paths_dict):
-    params = pickle.load(open(paths_dict["est_results"] + "est_params.pkl", "rb"))
+    params = pickle.load(
+        open(paths_dict["est_results"] + "est_params_util_jo.pkl", "rb")
+    )
+    # pickle.load(open(paths_dict["est_results"] + "em_result_util_jo.pkl", "rb"))
+
     specs = generate_derived_and_data_derived_specs(paths_dict)
 
     est_model, model, params = specify_and_solve_model(
@@ -61,23 +65,41 @@ def observed_model_fit(paths_dict):
 
     for choice in range(3):
         choice_vals = np.ones_like(data_decision["choice"].values) * choice
-        choice_prob_func = create_choice_prob_func_unobserved_states(
-            model=model,
-            observed_states=states_dict,
-            observed_wealth=data_decision["adjusted_wealth"].values,
-            observed_choices=choice_vals,
-            unobserved_state_specs=unobserved_state_specs,
+        choice_probs_observations = choice_probs_for_choice_vals(
+            choice_vals,
+            states_dict,
+            data_decision,
+            model,
+            unobserved_state_specs,
+            params,
+            est_model,
             weight_full_states=False,
-        )
-
-        choice_probs_observations = choice_prob_func(
-            value_in=est_model["value"],
-            endog_grid_in=est_model["endog_grid"],
-            params_in=params,
         )
 
         choice_probs_observations = np.nan_to_num(choice_probs_observations, nan=0.0)
         data_decision[f"choice_{choice}"] = choice_probs_observations
+
+    prob_choice_observed = choice_probs_for_choice_vals(
+        data_decision["choice"].values,
+        states_dict,
+        data_decision,
+        model,
+        unobserved_state_specs,
+        params,
+        est_model,
+        weight_full_states=True,
+    )
+    data_decision["prob_choice_observed"] = prob_choice_observed
+
+    mask = prob_choice_observed < 1e-10
+    # Negative ll contributions are positive numbers. The smaller the better the fit
+    # Add high fixed punishment for not explained choices
+    neg_likelihood_contributions = -np.log(prob_choice_observed) + mask * 999
+
+    data_decision["likelihood_contrib"] = neg_likelihood_contributions
+    data_decision["age_bin"] = np.floor(data_decision["age"] / 10) * 10
+    data_decision = data_decision[data_decision["lagged_choice"] != 2]
+    # breakpoint()
 
     file_append = ["low", "high"]
     partner_labels = ["Single", "Partnered"]
@@ -117,3 +139,30 @@ def observed_model_fit(paths_dict):
             transparent=True,
             dpi=300,
         )
+
+
+def choice_probs_for_choice_vals(
+    choice_vals,
+    states_dict,
+    data_decision,
+    model,
+    unobserved_state_specs,
+    params,
+    est_model,
+    weight_full_states,
+):
+    choice_prob_func = create_choice_prob_func_unobserved_states(
+        model=model,
+        observed_states=states_dict,
+        observed_wealth=data_decision["adjusted_wealth"].values,
+        observed_choices=choice_vals,
+        unobserved_state_specs=unobserved_state_specs,
+        weight_full_states=weight_full_states,
+    )
+
+    choice_probs_observations = choice_prob_func(
+        value_in=est_model["value"],
+        endog_grid_in=est_model["endog_grid"],
+        params_in=params,
+    )
+    return choice_probs_observations

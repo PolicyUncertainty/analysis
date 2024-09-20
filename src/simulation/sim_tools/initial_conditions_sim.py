@@ -48,6 +48,12 @@ def generate_start_states(observed_data, n_agents, seed, options):
     lagged_choice = np.ones_like(exp_agents)
     lagged_choice[exp_agents == 0] = 0
 
+    # Draw random partner states
+    partner_shares = start_period_data["partner_state"].value_counts(normalize=True)
+    partner_probs = np.zeros(3, dtype=float)
+    partner_probs[partner_shares.index] = partner_shares.values
+    partner_states = np.random.choice(3, n_agents, p=partner_probs)
+
     states = {
         "period": jnp.zeros_like(exp_agents, dtype=jnp.int64),
         "experience": jnp.array(exp_agents, dtype=jnp.int64),
@@ -56,5 +62,6 @@ def generate_start_states(observed_data, n_agents, seed, options):
         "policy_state": jnp.zeros_like(exp_agents, dtype=jnp.int64) + 8,
         "retirement_age_id": jnp.zeros_like(exp_agents, dtype=jnp.int64),
         "job_offer": jnp.ones_like(exp_agents, dtype=jnp.int64),
+        "partner_state": jnp.array(partner_states, dtype=jnp.int64),
     }
     return states, wealth_agents

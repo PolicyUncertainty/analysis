@@ -50,15 +50,15 @@ def estimate_model(path_dict, params_to_estimate_names, file_append, load_model)
         "dis_util_unemployed": 1e-12,
         "bequest_scale": 1e-12,
         "lambda": 1e-12,
-        "job_finding_logit_const": -10,
+        "job_finding_logit_const": -5,
         "job_finding_logit_age": -0.5,
-        "job_finding_logit_high_educ": -10,
+        "job_finding_logit_high_educ": -5,
     }
     lower_bounds = {name: lower_bounds_all[name] for name in params_to_estimate_names}
     upper_bounds_all = {
         "mu": 2,
-        "dis_util_work": 10,
-        "dis_util_unemployed": 10,
+        "dis_util_work": 5,
+        "dis_util_unemployed": 5,
         "bequest_scale": 5,
         "lambda": 1,
         "job_finding_logit_const": 5,

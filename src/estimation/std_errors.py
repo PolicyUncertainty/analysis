@@ -3,7 +3,7 @@ import pickle
 import estimagic as sm
 import jax
 import numpy as np
-from estimation.estimate_setup import create_ll_from_paths
+from estimation.estimate_setup import create_ll_func_from_path
 
 # Import jax and set jax to work with 64bit
 jax.config.update("jax_enable_x64", True)
@@ -17,7 +17,7 @@ path_dict = create_path_dict()
 
 params = pickle.load(open(path_dict["est_results"] + "est_params.pkl", "rb"))
 
-individual_likelihood = create_ll_from_paths(
+individual_likelihood = create_ll_func_from_path(
     start_params_all=params, path_dict=path_dict, load_model=True
 )
 

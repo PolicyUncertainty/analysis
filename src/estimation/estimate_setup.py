@@ -32,7 +32,6 @@ def estimate_model(path_dict, params_to_estimate_names, file_append, load_model)
     start_params_all.update(last_end)
 
     # Spread out to edu types
-    specs = generate_derived_and_data_derived_specs(path_dict)
     start_params_all["dis_util_work_high"] = start_params_all["dis_util_work"]
     start_params_all["dis_util_work_low"] = start_params_all["dis_util_work"]
     start_params_all.pop("dis_util_work")
@@ -45,7 +44,7 @@ def estimate_model(path_dict, params_to_estimate_names, file_append, load_model)
     ]
     start_params_all.pop("dis_util_unemployed")
 
-    individual_likelihood = create_ll_from_paths(
+    individual_likelihood, weights = create_ll_from_paths(
         start_params_all, path_dict, load_model
     )
 
@@ -53,11 +52,11 @@ def estimate_model(path_dict, params_to_estimate_names, file_append, load_model)
 
     def individual_likelihood_print(params):
         start = time.time()
-        ll_value = individual_likelihood(params)[0]
+        ll_value = individual_likelihood(params)
         end = time.time()
         print("Likelihood evaluation took, ", end - start)
         print("Params, ", params, " with ll value, ", ll_value)
-        return ll_value
+        return weights @ ll_value
 
     # Define for all parameters the bounds. We do not need to do that for those
     # not estimated. They will selected afterwards.
@@ -150,9 +149,8 @@ def create_ll_from_paths(start_params_all, path_dict, load_model):
         observed_choices=data_decision["choice"].values,
         unobserved_state_specs=unobserved_state_specs,
         params_all=start_params_all,
-        # weights=data_decision["age_weights"].values,
     )
-    return individual_likelihood
+    return individual_likelihood, data_decision["age_weights"].values
 
 
 def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):
@@ -164,16 +162,16 @@ def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):
     if drop_retirees:
         data_decision = data_decision[data_decision["lagged_choice"] != 2]
 
-    # data_decision["age"] = (
-    #     data_decision["period"] + model["options"]["model_params"]["start_age"]
-    # )
-    # data_decision["age_bin"] = np.floor(data_decision["age"] / 10)
-    # data_decision.loc[data_decision["age_bin"] > 6, "age_bin"] = 6
-    # age_bin_av_size = data_decision.shape[0] / data_decision["age_bin"].nunique()
-    # data_decision.loc[:, "age_weights"] = 1.0
-    # data_decision.loc[:, "age_weights"] = age_bin_av_size / data_decision.groupby(
-    #     "age_bin"
-    # )["age_weights"].transform("sum")
+    data_decision["age"] = (
+        data_decision["period"] + model["options"]["model_params"]["start_age"]
+    )
+    data_decision["age_bin"] = np.floor(data_decision["age"] / 10)
+    data_decision.loc[data_decision["age_bin"] > 6, "age_bin"] = 6
+    age_bin_av_size = data_decision.shape[0] / data_decision["age_bin"].nunique()
+    data_decision.loc[:, "age_weights"] = 1.0
+    data_decision.loc[:, "age_weights"] = age_bin_av_size / data_decision.groupby(
+        "age_bin"
+    )["age_weights"].transform("sum")
 
     # We can adjust wealth outside, as it does not depend on estimated parameters
     # (only on interest rate)

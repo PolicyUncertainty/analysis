@@ -16,9 +16,7 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
 def observed_model_fit(paths_dict):
-    params = pickle.load(
-        open(paths_dict["est_results"] + "est_params_fedor_lamda.pkl", "rb")
-    )
+    params = pickle.load(open(paths_dict["est_results"] + "est_params_edu.pkl", "rb"))
     # pickle.load(open(paths_dict["est_results"] + "em_result_util_jo.pkl", "rb"))
 
     specs = generate_derived_and_data_derived_specs(paths_dict)
@@ -28,7 +26,7 @@ def observed_model_fit(paths_dict):
         params=params,
         update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
         policy_state_trans_func=expected_SRA_probs_estimation,
-        file_append="fedor_lamda",
+        file_append="edu",
         load_model=True,
         load_solution=True,
     )
@@ -87,9 +85,10 @@ def observed_model_fit(paths_dict):
         unobserved_state_specs,
         params,
         est_model,
-        weight_full_states=True,
+        weight_full_states=False,
     )
     data_decision["prob_choice_observed"] = prob_choice_observed
+    data_decision.groupby(["education", "choice"])["prob_choice_observed"].mean()
 
     # Negative ll contributions are positive numbers. The smaller the better the fit
     # Add high fixed punishment for not explained choices

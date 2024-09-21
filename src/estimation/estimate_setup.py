@@ -52,11 +52,12 @@ def estimate_model(path_dict, params_to_estimate_names, file_append, load_model)
 
     def individual_likelihood_print(params):
         start = time.time()
-        ll_value = individual_likelihood(params)
+        ll_value_individual = individual_likelihood(params)
         end = time.time()
+        ll_value = jnp.dot(weights, ll_value_individual)
         print("Likelihood evaluation took, ", end - start)
         print("Params, ", params, " with ll value, ", ll_value)
-        return weights @ ll_value
+        return ll_value
 
     # Define for all parameters the bounds. We do not need to do that for those
     # not estimated. They will selected afterwards.

@@ -38,6 +38,7 @@ def create_effects_table(df_base, df_cf, params, path_dict, scenario_name):
         ]
 
     sol_table.to_latex(path_dict["tables"] + f"effects_table_{scenario_name}.tex")
+    sol_table.to_csv(path_dict["tables"] + f"effects_table_{scenario_name}.csv")
 
 
 def calc_savings_increase(df_base, df_cf):

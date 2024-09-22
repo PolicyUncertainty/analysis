@@ -22,25 +22,24 @@ def realized_policy_step_function(policy_state, period, choice, options):
     return trans_vector
 
 
-def update_specs_for_step_function_scale_1(specs, path_dict):
-    return update_specs_step_function_with_scale(specs, path_dict, 1)
-
-
-def update_specs_for_step_function_scale_2(specs, path_dict):
-    return update_specs_step_function_with_scale(specs, path_dict, 2)
-
-
-def update_specs_for_step_function_scale_05(specs, path_dict):
-    return update_specs_step_function_with_scale(specs, path_dict, 0.5)
-
-
-def update_specs_step_function_with_scale(specs, path_dict, scale):
+def create_update_function_for_scale(path_dict, scale):
     # Load the estimates
     alpha_hat = np.loadtxt(path_dict["est_results"] + "exp_val_params.txt") * scale
+    return create_update_function_for_slope(alpha_hat)
+
+
+def create_update_function_for_slope(slope):
+    def update_specs_for_step_function_with_slope(specs, path_dict):
+        return update_specs_step_function_with_scale(specs, slope)
+
+    return update_specs_for_step_function_with_slope
+
+
+def update_specs_step_function_with_scale(specs, slope):
     # Generate policy state steps for individuals who start in 0. First calculate the
     # per year expected increase in policy state
     life_span = specs["end_age"] - specs["start_age"] + 1
-    per_period_expec_increase = np.arange(life_span) * alpha_hat
+    per_period_expec_increase = np.arange(life_span) * slope
     # Then round to the nearest value, which you can do by multiplying with the
     # inverse of the grid size. In the baseline case 1 / 0.25 = 4
     multiplier = 1 / specs["SRA_grid_size"]

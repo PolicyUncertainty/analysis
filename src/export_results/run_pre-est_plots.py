@@ -7,7 +7,6 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
 
-
 # %%###################################
 # Family chracteristics
 ######################################

@@ -28,7 +28,7 @@ from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 # Set specifications
 n_agents = 10000
 seeed = 123
-params = pickle.load(open(path_dict["est_results"] + "est_params_util_jo.pkl", "rb"))
+params = pickle.load(open(path_dict["est_results"] + "est_params_all.pkl", "rb"))
 
 # %%
 ###################################################################
@@ -55,7 +55,7 @@ data_sim = solve_and_simulate_scenario(
     solve_policy_trans_func=realized_policy_step_function,
     simulate_update_specs_func=update_specs_for_step_function_scale_1,
     simulate_policy_trans_func=realized_policy_step_function,
-    solution_exists=False,
+    solution_exists=True,
     file_append_sol="scale_1",
     model_exists=True,
 )

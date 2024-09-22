@@ -1,9 +1,10 @@
 import jax.numpy as jnp
 import numpy as np
 import pandas as pd
+from dcegm.wealth_correction import adjust_observed_wealth
 
 
-def generate_start_states(observed_data, n_agents, seed, options):
+def generate_start_states(observed_data, params, model, n_agents, seed):
     np.random.seed(seed)
     # Define start wealth
     start_period_data = observed_data[
@@ -15,21 +16,27 @@ def generate_start_states(observed_data, n_agents, seed, options):
     n_agents_edu_types = np.round(edu_shares.sort_index() * n_agents).astype(int)
     edu_agents = np.repeat(edu_shares.index, n_agents_edu_types)
 
+    states_dict = {
+        name: start_period_data[name].values
+        for name in model["model_structure"]["state_space_names"]
+    }
+    start_period_data.loc[:, "adjusted_wealth"] = adjust_observed_wealth(
+        observed_states_dict=states_dict,
+        wealth=start_period_data["wealth"].values,
+        params=params,
+        model=model,
+    )
+
     wealth_agents = np.empty(n_agents, np.float64)
     for edu in edu_shares.index:
         n_agents_edu = n_agents_edu_types.loc[edu]
         start_period_data_edu = start_period_data[start_period_data["education"] == edu]
         # Draw between 25th and 75th percentile of wealth for each education level
         wealth_agents[edu_agents == edu] = np.random.uniform(
-            start_period_data_edu["wealth"].quantile(0.25),
-            start_period_data_edu["wealth"].quantile(0.75),
+            start_period_data_edu["adjusted_wealth"].quantile(0.25),
+            start_period_data_edu["adjusted_wealth"].quantile(0.75),
             n_agents_edu,
         )
-
-    # This can be kicked out once we correct the wealth by lagged choice.
-    wealth_agents = np.clip(
-        wealth_agents, options["model_params"]["unemployment_benefits"] * 12, None
-    )
 
     # Generate experience
     exp_agents = np.empty(n_agents, np.int16)

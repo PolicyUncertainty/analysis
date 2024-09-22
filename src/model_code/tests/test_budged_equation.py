@@ -57,7 +57,7 @@ def test_budget_unemployed(
         partner_state=partner_state,
         education=education,
         lagged_choice=0,
-        experience=30,
+        experience=2,
         policy_state=0,
         retirement_age_id=0,
         savings_end_of_previous_period=savings,

@@ -61,7 +61,6 @@ data_sim = solve_and_simulate_scenario(
 )
 data_sim.to_pickle(path_dict["intermediate_data"] + "sim_data/data_real_scale_1.pkl")
 del data_sim
-
 ###################################################################
 # Counterfactual double alpha
 ###################################################################

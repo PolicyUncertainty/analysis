@@ -60,11 +60,8 @@ def simulate_scenario(
 
     options = model["options"]
 
-    data_decision = pd.read_pickle(
-        path_dict["intermediate_data"] + "structural_estimation_sample.pkl"
-    )
     initial_states, wealth_agents = generate_start_states(
-        data_decision, params, model, n_agents, seed
+        path_dict, params, model, n_agents, seed
     )
 
     sim_dict = simulate_all_periods(

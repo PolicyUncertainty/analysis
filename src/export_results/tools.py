@@ -4,13 +4,13 @@ import numpy as np
 def create_realized_taste_shock(df):
     df["real_taste_shock"] = np.nan
     df.loc[df["choice"] == 0, "real_taste_shock"] = df.loc[
-        df["choice"] == 0, "taste_shock_0"
+        df["choice"] == 0, "taste_shocks_0"
     ]
     df.loc[df["choice"] == 1, "real_taste_shock"] = df.loc[
-        df["choice"] == 1, "taste_shock_1"
+        df["choice"] == 1, "taste_shocks_1"
     ]
     df.loc[df["choice"] == 2, "real_taste_shock"] = df.loc[
-        df["choice"] == 2, "taste_shock_2"
+        df["choice"] == 2, "taste_shocks_2"
     ]
     return df
 

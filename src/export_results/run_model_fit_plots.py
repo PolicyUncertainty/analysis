@@ -39,7 +39,7 @@ plot_average_wealth(path_dict)
 # plot_choice_shares(path_dict)
 # plot_choice_shares_single(path_dict)
 # illustrate_simulated_data(path_dict)
-if show_model_fit_plots:
+if show_sim_plots:
     plt.show()
 plt.close("all")
 

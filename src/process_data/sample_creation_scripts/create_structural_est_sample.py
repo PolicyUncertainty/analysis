@@ -50,6 +50,7 @@ def create_structural_est_sample(paths, load_data=False, options=None):
 
     # Add wealth data
     df = add_wealth(df, paths, options)
+    # df.to_pickle(paths["intermediate_data"] + "wealth_sample.pkl")
 
     # Now create more observed choice variables
     # period

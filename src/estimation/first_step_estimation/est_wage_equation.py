@@ -18,10 +18,7 @@ def estimate_wage_parameters(paths_dict, specs):
     edu_labels = specs["education_labels"] + ["all"]
     model_params = ["constant", "ln_exp"]
     # Initialize empty container for coefficients
-    wage_parameters = pd.DataFrame(
-        index=pd.Index(data=edu_labels, name="education"),
-        columns=model_params + ["income_shock_std"],
-    )
+    wage_parameters = pd.DataFrame()
     for edu_val, edu_label in enumerate(edu_labels):
         if edu_label == "all":
             wage_data_edu = wage_data
@@ -38,13 +35,26 @@ def estimate_wage_parameters(paths_dict, specs):
             cov_type="clustered", cluster_entity=True, cluster_time=True
         )
         # Assign estimated parameters (column list corresponds to model params, so only these are assigned)
-        wage_parameters.loc[edu_label] = fitted_model.params
+        for param in model_params:
+            wage_parameters.loc[edu_label, param] = fitted_model.params[param]
+            wage_parameters.loc[edu_label, param + "_std"] = fitted_model.std_errors[
+                param
+            ]
 
         # Get estimate for income shock std
-        income_shock_std = np.sqrt(fitted_model.resids.var())
+        rss = fitted_model.resids.T @ fitted_model.resids
+        n_minus_k = wage_data_edu.shape[0] - fitted_model.params.shape[0]
+        income_shock_var = rss / n_minus_k
+        income_shock_std = np.sqrt(income_shock_var)
         wage_parameters.loc[edu_label, "income_shock_std"] = income_shock_std
+        wage_parameters.loc[edu_label, "income_shock_std_std"] = np.sqrt(
+            (2 * income_shock_var**2) / n_minus_k
+        )
 
     wage_parameters.to_csv(paths_dict["est_results"] + "wage_eq_params.csv")
+    wage_parameters.T.to_latex(
+        paths_dict["tables"] + "wage_eq_params.tex", float_format="%.4f"
+    )
     return wage_parameters
 
 

@@ -101,13 +101,13 @@ data_sim = solve_and_simulate_scenario(
     params=params,
     solve_update_specs_func=update_specs_exp_ret_age_trans_mat,
     solve_policy_trans_func=expected_SRA_probs_estimation,
-    simulate_update_specs_func=create_update_function_for_slope(0.5),
+    simulate_update_specs_func=create_update_function_for_slope(0.1),
     simulate_policy_trans_func=realized_policy_step_function,
     solution_exists=True,
     file_append_sol="subj",
     model_exists=True,
 )
-data_sim.to_pickle(path_dict["intermediate_data"] + "sim_data/data_incr_05.pkl")
+data_sim.to_pickle(path_dict["intermediate_data"] + "sim_data/data_incr_01.pkl")
 del data_sim
 
 # New counterfactual:

@@ -127,13 +127,13 @@ def observed_model_fit(paths_dict):
             if choice == 0:
                 ax.legend(loc="upper left")
         # Fig title
-        fig.suptitle(f"Choice shares {specs['education_labels'][edu]}")
         fig.tight_layout()
         fig.savefig(
             paths_dict["plots"] + f"observed_model_fit_{file_append[edu]}.png",
             transparent=True,
             dpi=300,
         )
+        fig.suptitle(f"Choice shares {specs['education_labels'][edu]}")
 
 
 def choice_probs_for_choice_vals(

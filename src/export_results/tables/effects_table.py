@@ -9,15 +9,15 @@ def create_effects_table(df_base, df_cf, params, path_dict, scenario_name):
     savings_increase_all = calc_savings_increase(df_base, df_cf)
     av_ret_age_diff_all = cacl_av_ret_age_diff_months(df_base, df_cf)
     labor_supply_diff_all = calc_labor_supply_diff(df_base, df_cf)
-    cv = calc_compensated_variation(df_base, df_cf, params)
+    cv = calc_compensated_variation(df_base, df_cf, params, specs)
 
     sol_table = pd.DataFrame(
         index=["all"],
         columns=[
-            "savings_increase",
-            "av_ret_age_diff_months",
-            "labor_supply_diff_ppp",
-            "cv_cons_increase",
+            "savings increase",
+            "av ret age diff months",
+            "labor supply diff ppp",
+            "cv cons increase",
         ],
         data=[[savings_increase_all, av_ret_age_diff_all, labor_supply_diff_all, cv]],
     )
@@ -28,7 +28,7 @@ def create_effects_table(df_base, df_cf, params, path_dict, scenario_name):
         savings_increase_edu = calc_savings_increase(df_base_edu, df_cf_edu)
         av_ret_age_diff_edu = cacl_av_ret_age_diff_months(df_base_edu, df_cf_edu)
         labor_supply_diff_edu = calc_labor_supply_diff(df_base_edu, df_cf_edu)
-        cv_edu = calc_compensated_variation(df_base_edu, df_cf_edu, params)
+        cv_edu = calc_compensated_variation(df_base_edu, df_cf_edu, params, specs)
 
         sol_table.loc[edu_label] = [
             savings_increase_edu,

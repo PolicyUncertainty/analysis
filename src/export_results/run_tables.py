@@ -45,9 +45,9 @@ def print_av_ret_age(df):
     )
 
 
-print_av_ret_age(data_no_inc)
-print_av_ret_age(data_005)
-print_av_ret_age(data_01)
+# print_av_ret_age(data_no_inc)
+# print_av_ret_age(data_005)
+# print_av_ret_age(data_01)
 create_effects_table(
     df_base=data_no_inc,
     df_cf=data_005,

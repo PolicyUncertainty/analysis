@@ -47,7 +47,7 @@ def calc_adjusted_scale(df_base, df_count, params, n_agents):
 
     scale = opt.brentq(partial_adjustment, -1, 10)
 
-    return scale / disc_sum_base
+    return scale
 
 
 def create_adjusted_difference(df_count, disc_sum_base, n_agents, params, scale):
@@ -61,7 +61,6 @@ def create_adjusted_difference(df_count, disc_sum_base, n_agents, params, scale)
     adjusted_disc_sum = (
         adjusted_real_util * (beta ** df_count["period"])
     ).sum() / n_agents
-    print(scale, adjusted_disc_sum - disc_sum_base)
     return adjusted_disc_sum - disc_sum_base
 
 

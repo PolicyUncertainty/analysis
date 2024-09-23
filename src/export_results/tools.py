@@ -2,7 +2,7 @@ import numpy as np
 
 
 def create_realized_taste_shock(df):
-    df["real_taste_shock"] = np.nan
+    df.loc[:, "real_taste_shock"] = np.nan
     df.loc[df["choice"] == 0, "real_taste_shock"] = df.loc[
         df["choice"] == 0, "taste_shocks_0"
     ]

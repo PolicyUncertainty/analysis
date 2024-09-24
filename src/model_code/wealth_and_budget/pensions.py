@@ -32,7 +32,8 @@ def calc_gross_pension_income(
 
     # deduction (bonus) factor for early (late) retirement
     ERP = options["early_retirement_penalty"]
-    pension_factor = 1 - (actual_retirement_age - SRA_at_resolution) * ERP
+    pension_deduction = (SRA_at_resolution - actual_retirement_age) * ERP
+    pension_factor = 1 - pension_deduction
 
     # Pension point value by education and experience
     pension_point_value = options["pension_point_value_by_edu_exp"][

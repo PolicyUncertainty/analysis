@@ -23,30 +23,13 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 
 def estimate_model(path_dict, params_to_estimate_names, file_append, load_model):
     start_params_all = yaml.safe_load(open(path_dict["start_params"], "rb"))
-    lambda_start = start_params_all["lambda"]
 
     job_sep_params = create_job_offer_params_from_start(path_dict)
     start_params_all.update(job_sep_params)
 
     # Assign start params from before
-    last_end = pkl.load(open(path_dict["est_results"] + "est_params_new.pkl", "rb"))
+    last_end = pkl.load(open(path_dict["est_results"] + "est_params_all.pkl", "rb"))
     start_params_all.update(last_end)
-
-    # Assign lambda
-    start_params_all["lambda"] = lambda_start
-
-    # Spread out to edu types
-    start_params_all["dis_util_work_high"] = start_params_all["dis_util_work"]
-    start_params_all["dis_util_work_low"] = start_params_all["dis_util_work"]
-    start_params_all.pop("dis_util_work")
-
-    start_params_all["dis_util_unemployed_high"] = start_params_all[
-        "dis_util_unemployed"
-    ]
-    start_params_all["dis_util_unemployed_low"] = start_params_all[
-        "dis_util_unemployed"
-    ]
-    start_params_all.pop("dis_util_unemployed")
 
     individual_likelihood, weights = create_ll_from_paths(
         start_params_all, path_dict, load_model

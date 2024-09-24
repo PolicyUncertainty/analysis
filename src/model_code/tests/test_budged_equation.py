@@ -276,11 +276,11 @@ def test_retiree(
     SRA_at_resolution = (
         specs_internal["min_SRA"] + policy_state * specs_internal["SRA_grid_size"]
     )
-    pension_factor = (
-        1
-        - (actual_retirement_age - SRA_at_resolution)
-        * specs_internal["early_retirement_penalty"]
-    )
+    deduction_factor = (SRA_at_resolution - actual_retirement_age) * specs_internal[
+        "early_retirement_penalty"
+    ]
+    pension_factor = 1 - deduction_factor
+
     pension_year = pension_point_value * pension_factor * exp * 12
     pension_scaled = pension_year * specs_internal["wealth_unit"]
     income_after_ssc = (

@@ -15,18 +15,27 @@ sim_dir = path_dict["intermediate_data"] + "sim_data/"
 ###############################################
 data_no_unc = pd.read_pickle(sim_dir + "data_real_scale_1.pkl")
 data_unc = pd.read_pickle(sim_dir + "data_subj_scale_1.pkl")
-create_effects_table(
-    df_base=data_unc,
-    df_cf=data_no_unc,
-    params=params,
-    path_dict=path_dict,
-    scenario_name="no_uncertainty",
-)
+# create_effects_table(
+#     df_base=data_unc,
+#     df_cf=data_no_unc,
+#     params=params,
+#     path_dict=path_dict,
+#     scenario_name="no_uncertainty",
+# )
 
 ###############################################
 # Policy trajectories
 ###############################################
+from export_results.tables.cv import create_real_utility, create_disc_sum
+
 data_no_inc = pd.read_pickle(sim_dir + "data_no_increase.pkl")
+data_no_inc = create_real_utility(data_no_inc)
+disc_sum_no_inc = create_disc_sum(data_no_inc, params, reset_index=True)
+
+data_no_inc_no_unc = pd.read_pickle(sim_dir + "data_no_inc_no_unc.pkl")
+data_no_inc_no_unc = create_real_utility(data_no_inc_no_unc)
+disc_sum_no_inc_no_unc = create_disc_sum(data_no_inc_no_unc, params, reset_index=True)
+
 data_005 = pd.read_pickle(sim_dir + "data_incr_005.pkl")
 data_01 = pd.read_pickle(sim_dir + "data_incr_01.pkl")
 
@@ -45,9 +54,9 @@ def print_av_ret_age(df):
     )
 
 
-# print_av_ret_age(data_no_inc)
-# print_av_ret_age(data_005)
-# print_av_ret_age(data_01)
+print_av_ret_age(data_no_inc)
+print_av_ret_age(data_005)
+print_av_ret_age(data_01)
 create_effects_table(
     df_base=data_no_inc,
     df_cf=data_005,

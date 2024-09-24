@@ -44,26 +44,26 @@ def generate_start_states(path_dict, params, model, n_agents, seed):
         wealth_edu = start_period_data_edu["adjusted_wealth"].values
 
         # # From now use uniform from 30 to 70th quantile
-        # wealth_agents[edu_agents == edu] = np.random.uniform(
-        #             start_period_data_edu["adjusted_wealth"].quantile(0.3),
-        #             start_period_data_edu["adjusted_wealth"].quantile(0.7),
-        #             n_agents_edu,
-        # )
-        if edu == 1:
-            # Filter out high outliers for high
-            wealth_edu = wealth_edu[wealth_edu < np.quantile(wealth_edu, 0.85)]
-
-        median = np.quantile(wealth_edu, 0.5)
-        fscale = min_unemployment_benefits - 0.01
-
-        # Estimate pareto wealth distribution. Take single unemployment benefits as minimum.
-        shape_param, loc_param, scale_param = pareto.fit(wealth_edu, fscale=fscale)
-
-        # Adjust shape to ensure the median is as desired
-        adjusted_shape = np.log(2) / np.log(median / fscale)
-        wealth_agents[edu_agents == edu] = pareto.rvs(
-            adjusted_shape, loc=loc_param, scale=fscale, size=n_agents_edu
+        wealth_agents[edu_agents == edu] = np.random.uniform(
+            start_period_data_edu["adjusted_wealth"].quantile(0.3),
+            start_period_data_edu["adjusted_wealth"].quantile(0.7),
+            n_agents_edu,
         )
+        # if edu == 1:
+        #     # Filter out high outliers for high
+        #     wealth_edu = wealth_edu[wealth_edu < np.quantile(wealth_edu, 0.85)]
+        #
+        # median = np.quantile(wealth_edu, 0.5)
+        # fscale = min_unemployment_benefits - 0.01
+        #
+        # # # Adjust shape to ensure the median is as desired
+        # # adjusted_shape = np.log(2) / np.log(median / fscale)
+        #
+        # # Estimate pareto wealth distribution. Take single unemployment benefits as minimum.
+        # shape_param, loc_param, scale_param = pareto.fit(wealth_edu, fscale=fscale)
+        #
+        # wealth_agents[edu_agents == edu] = pareto.rvs(shape_param, loc=loc_param, scale=fscale, size=n_agents_edu)
+        # breakpoint()
 
     # Generate experience
     exp_agents = np.empty(n_agents, np.int16)

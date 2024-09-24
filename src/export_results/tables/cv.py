@@ -8,11 +8,8 @@ from export_results.tools import create_realized_taste_shock
 
 
 def calc_compensated_variation(df_base, df_cf, params, specs):
-    df_base = create_realized_taste_shock(df_base)
-    df_cf = create_realized_taste_shock(df_cf)
-
-    df_base.loc[:, "real_util"] = df_base["utility"] + df_base["real_taste_shock"]
-    df_cf.loc[:, "real_util"] = df_cf["utility"] + df_cf["real_taste_shock"]
+    df_base = create_real_utility(df_base)
+    df_cf = create_real_utility(df_cf)
 
     df_base.reset_index(inplace=True)
     df_cf.reset_index(inplace=True)
@@ -25,13 +22,17 @@ def calc_compensated_variation(df_base, df_cf, params, specs):
     return cv
 
 
+def create_real_utility(df):
+    df = create_realized_taste_shock(df)
+    df.loc[:, "real_util"] = df["utility"] + df["real_taste_shock"]
+    return df
+
+
 def calc_adjusted_scale(df_base, df_count, params, n_agents):
     mu = params["mu"]
-    beta = params["beta"]
-    disc_sum_base = (
-        df_base["real_util"] * (beta ** df_base["period"])
-    ).sum() / n_agents
-    # disc_sum_count = (df_count["real_util"] * (beta ** df_count["period"])).sum() / n_agents
+
+    disc_sum_base = create_disc_sum(df_base, params)
+    disc_sum_count = create_disc_sum(df_count, params)
 
     df_count.loc[:, "cons_utility"] = (
         ((df_count["consumption"] / df_count["cons_scale"]) ** (1 - mu)) - 1
@@ -45,9 +46,18 @@ def calc_adjusted_scale(df_base, df_count, params, n_agents):
         df_count, disc_sum_base, n_agents, params, scale_in
     )
 
-    scale = opt.brentq(partial_adjustment, -1, 10)
+    # scale = opt.brentq(partial_adjustment, -1, 10)
 
-    return scale
+    return disc_sum_count / disc_sum_base
+
+
+def create_disc_sum(df, params, reset_index=False):
+    beta = params["beta"]
+    if reset_index:
+        df.reset_index(inplace=True)
+    n_agents = df["agent"].nunique()
+    df.loc[:, "disc_util"] = df["real_util"] * (beta ** df["period"])
+    return df.groupby("agent")["disc_util"].sum().median()
 
 
 def create_adjusted_difference(df_count, disc_sum_base, n_agents, params, scale):

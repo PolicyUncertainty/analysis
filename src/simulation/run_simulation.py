@@ -80,34 +80,6 @@ data_sim = solve_and_simulate_scenario(
 data_sim.to_pickle(path_dict["intermediate_data"] + "sim_data/data_no_increase.pkl")
 del data_sim
 
-data_sim = solve_and_simulate_scenario(
-    path_dict=path_dict,
-    params=params,
-    solve_update_specs_func=create_update_function_for_slope(0),
-    solve_policy_trans_func=realized_policy_step_function,
-    simulate_update_specs_func=create_update_function_for_slope(0),
-    simulate_policy_trans_func=realized_policy_step_function,
-    solution_exists=False,
-    file_append_sol="00",
-    model_exists=True,
-)
-data_sim.to_pickle(path_dict["intermediate_data"] + "sim_data/data_no_inc_no_unc.pkl")
-del data_sim
-
-data_sim = solve_and_simulate_scenario(
-    path_dict=path_dict,
-    params=params,
-    solve_update_specs_func=create_update_function_for_slope(0.05),
-    solve_policy_trans_func=realized_policy_step_function,
-    simulate_update_specs_func=create_update_function_for_slope(0.05),
-    simulate_policy_trans_func=realized_policy_step_function,
-    solution_exists=False,
-    file_append_sol="005",
-    model_exists=True,
-)
-data_sim.to_pickle(path_dict["intermediate_data"] + "sim_data/data_005_no_unc.pkl")
-del data_sim
-
 # Increase of 0.05
 data_sim = solve_and_simulate_scenario(
     path_dict=path_dict,
@@ -144,3 +116,31 @@ del data_sim
 # Comparision mit: Alle 10 ein Jahr
 
 # %%
+#
+# data_sim = solve_and_simulate_scenario(
+#     path_dict=path_dict,
+#     params=params,
+#     solve_update_specs_func=create_update_function_for_slope(0),
+#     solve_policy_trans_func=realized_policy_step_function,
+#     simulate_update_specs_func=create_update_function_for_slope(0),
+#     simulate_policy_trans_func=realized_policy_step_function,
+#     solution_exists=False,
+#     file_append_sol="00",
+#     model_exists=True,
+# )
+# data_sim.to_pickle(path_dict["intermediate_data"] + "sim_data/data_no_inc_no_unc.pkl")
+# del data_sim
+#
+# data_sim = solve_and_simulate_scenario(
+#     path_dict=path_dict,
+#     params=params,
+#     solve_update_specs_func=create_update_function_for_slope(0.05),
+#     solve_policy_trans_func=realized_policy_step_function,
+#     simulate_update_specs_func=create_update_function_for_slope(0.05),
+#     simulate_policy_trans_func=realized_policy_step_function,
+#     solution_exists=False,
+#     file_append_sol="005",
+#     model_exists=True,
+# )
+# data_sim.to_pickle(path_dict["intermediate_data"] + "sim_data/data_005_no_unc.pkl")
+# del data_sim

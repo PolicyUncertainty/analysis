@@ -46,9 +46,9 @@ def calc_adjusted_scale(df_base, df_count, params, n_agents):
         df_count, disc_sum_base, n_agents, params, scale_in
     )
 
-    # scale = opt.brentq(partial_adjustment, -1, 10)
+    scale = opt.brentq(partial_adjustment, -1, 10)
 
-    return disc_sum_count / disc_sum_base
+    return 1 + scale
 
 
 def create_disc_sum(df, params, reset_index=False):

@@ -30,6 +30,7 @@ def estimate_model(path_dict, params_to_estimate_names, file_append, load_model)
     # Assign start params from before
     last_end = pkl.load(open(path_dict["est_results"] + "est_params_all.pkl", "rb"))
     start_params_all.update(last_end)
+    start_params_all["bequest_scale"] = 1
 
     individual_likelihood, weights = create_ll_from_paths(
         start_params_all, path_dict, load_model

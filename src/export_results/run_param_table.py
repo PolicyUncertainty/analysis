@@ -15,13 +15,28 @@ params_util = [
     # "lambda",
 ]
 
-params_job = [
-    "job_finding_logit_const",
-    "job_finding_logit_age",
-    "job_finding_logit_high_educ",
-]
-
 params = pickle.load(open(path_dict["est_results"] + "est_params_all.pkl", "rb"))
 std_errors = pickle.load(open(path_dict["est_results"] + "std_errors_all.pkl", "rb"))
 
 util_df = pd.DataFrame()
+for choice_label in ["work", "unemployed"]:
+    for edu_label in ["low", "high"]:
+        non_edu_name = f"dis_util_{choice_label}"
+        param_name = f"dis_util_{choice_label}_{edu_label}"
+        util_df.loc[non_edu_name, edu_label] = f"{params[param_name]:.4f}"
+        util_df.loc[non_edu_name + "_se", edu_label] = f"({std_errors[param_name]:.4f})"
+
+util_df.to_latex(path_dict["tables"] + "util.tex")
+
+row_names = {
+    "job_finding_logit_const": "Constant",
+    "job_finding_logit_age": "Age",
+    "job_finding_logit_high_educ": "High education",
+}
+job_offer_df = pd.DataFrame()
+
+for param_name, row_name in row_names.items():
+    job_offer_df.loc[row_name, "value"] = f"{params[param_name]:.4f}"
+    job_offer_df.loc[row_name + "_se", "value"] = f"({std_errors[param_name]:.4f})"
+
+job_offer_df.to_latex(path_dict["tables"] + "job_offer.tex")

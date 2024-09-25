@@ -30,7 +30,7 @@ params_to_estimate_names = [
     "dis_util_work_low",
     "dis_util_unemployed_high",
     "dis_util_unemployed_low",
-    "bequest_scale",
+    # "bequest_scale",
     # "lambda",
     "job_finding_logit_const",
     "job_finding_logit_age",
@@ -39,17 +39,26 @@ params_to_estimate_names = [
 
 params_est = {name: params[name] for name in params_to_estimate_names}
 
-unravel_func = ravel_pytree(params_est)[0]
-contributions_base = individual_likelihood(params_est)
+unravel_func = ravel_pytree(params_est)[1]
+# contributions_base = individual_likelihood(params_est)
+# pickle.dump(contributions_base, open("contributions_base.pkl", "wb"))
+contributions_base = pickle.load(open("contributions_base.pkl", "rb"))
 
-scores = np.zeros((contributions_base.shape[0], len(params_to_estimate_names)))
+# scores = np.zeros((contributions_base.shape[0], len(params_to_estimate_names)))
+# pickle.dump(scores, open("scores.pkl", "wb"))
+scores = pickle.load(open("scores.pkl", "rb"))
+
+eps = 1e-6
 for param_id, param_name in enumerate(params_to_estimate_names):
+    print(param_id)
     params_plus = params_est.copy()
-    params_plus[param_name] += 1e-6
-    contributions_plus = individual_likelihood(params_est)
+    params_plus[param_name] += eps
+    contributions_plus = individual_likelihood(params_plus)
 
-    scores_param = (contributions_plus - contributions_base) / (1e-6)
+    scores_param = (contributions_plus - contributions_base) / eps
     scores[:, param_id] = scores_param
+    pickle.dump(scores, open("scores.pkl", "wb"))
+
 
 weighted_scores = scores * hessian_weights
 hessian = weighted_scores.T @ weighted_scores / n_obs

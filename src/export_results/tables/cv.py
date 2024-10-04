@@ -31,47 +31,63 @@ def create_real_utility(df):
 def calc_adjusted_scale(df_base, df_count, params, n_agents):
     mu = params["mu"]
 
-    disc_sum_base = create_disc_sum(df_base, params)
-    disc_sum_count = create_disc_sum(df_count, params)
+    disc_sum_cf = create_disc_sum(df_count, params)
 
-    df_count.loc[:, "cons_utility"] = (
-        ((df_count["consumption"] / df_count["cons_scale"]) ** (1 - mu)) - 1
-    ) / (1 - mu)
+    cons_base = df_base["consumption"].values
+    cons_scale_base = df_base["cons_scale"].values
 
-    df_count.loc[:, "non_cons_utility"] = (
-        df_count["real_util"] - df_count["cons_utility"]
-    )
+    cons_utility_base = (((cons_base / cons_scale_base) ** (1 - mu)) - 1) / (1 - mu)
+
+    no_cons_utility_base = df_base["real_util"].values - cons_utility_base
+
+    disc_factor_base = params["beta"] ** df_count["period"].values
 
     partial_adjustment = lambda scale_in: create_adjusted_difference(
-        df_count, disc_sum_base, n_agents, params, scale_in
+        cons_base=cons_base,
+        cons_scale_base=cons_scale_base,
+        no_cons_utility_base=no_cons_utility_base,
+        disc_factor_base=disc_factor_base,
+        disc_sum_cf=disc_sum_cf,
+        n_agents=n_agents,
+        params=params,
+        scale=scale_in,
     )
 
-    scale = opt.brentq(partial_adjustment, -1, 10)
+    scale = opt.brentq(partial_adjustment, -0.5, 10)
 
-    return 1 + scale
+    return scale
+
+
+def create_adjusted_difference(
+    cons_base,
+    cons_scale_base,
+    no_cons_utility_base,
+    disc_factor_base,
+    disc_sum_cf,
+    n_agents,
+    params,
+    scale,
+):
+    adjusted_cons = cons_base * (1 + scale)
+    adjusted_cons_util = cons_utility(adjusted_cons, cons_scale_base, params["mu"])
+
+    adjusted_util = adjusted_cons_util + no_cons_utility_base
+    adjusted_disc_sum = (adjusted_util * disc_factor_base).sum() / n_agents
+
+    return adjusted_disc_sum - disc_sum_cf
+
+
+def cons_utility(consumption, cons_scale, mu):
+    return ((consumption / cons_scale) ** (1 - mu) - 1) / (1 - mu)
 
 
 def create_disc_sum(df, params, reset_index=False):
     beta = params["beta"]
     if reset_index:
         df.reset_index(inplace=True)
-    n_agents = df["agent"].nunique()
     df.loc[:, "disc_util"] = df["real_util"] * (beta ** df["period"])
-    return df.groupby("agent")["disc_util"].sum().median()
 
-
-def create_adjusted_difference(df_count, disc_sum_base, n_agents, params, scale):
-    mu = params["mu"]
-    beta = params["beta"]
-    adjusted_cons = df_count["consumption"] * (1 + scale)
-    adjusted_cons_util = (
-        ((adjusted_cons / df_count["cons_scale"]) ** (1 - mu)) - 1
-    ) / (1 - mu)
-    adjusted_real_util = adjusted_cons_util + df_count["non_cons_utility"]
-    adjusted_disc_sum = (
-        adjusted_real_util * (beta ** df_count["period"])
-    ).sum() / n_agents
-    return adjusted_disc_sum - disc_sum_base
+    return df.groupby("agent")["disc_util"].sum().mean()
 
 
 def add_number_cons_scale(df, specs):

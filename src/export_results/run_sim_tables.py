@@ -21,7 +21,7 @@ create_effects_table(
     path_dict=path_dict,
     scenario_name="no_uncertainty",
 )
-
+print("Uncertainty done")
 ###############################################
 # Policy trajectories
 ###############################################
@@ -36,6 +36,7 @@ create_effects_table(
     path_dict=path_dict,
     scenario_name="0_05_inc",
 )
+print("0.05 done")
 create_effects_table(
     df_base=data_no_inc,
     df_cf=data_01,

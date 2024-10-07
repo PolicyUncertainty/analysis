@@ -3,7 +3,7 @@
 # ln_partner_wage = beta_0 + beta_1 * ln(age) individual_FE + time_FE + epsilon
 import numpy as np
 import pandas as pd
-from linearmodels.panel.model import PanelOLS
+import statsmodels.api as sm
 from specs.derive_specs import read_and_derive_specs
 
 
@@ -14,33 +14,42 @@ def estimate_partner_wage_parameters(paths_dict, specs, est_men):
     women.
 
     """
-    wage_data = prepare_estimation_data(paths_dict, est_men=est_men)
+    wage_data = prepare_estimation_data(paths_dict, specs, est_men=est_men)
 
-    edu_types = list(range(specs["n_education_types"]))
-    model_params = ["constant", "ln_age"]
+    edu_labels = specs["education_labels"]
+    model_params = ["constant", "period", "period_sq"]
     # Initialize empty container for coefficients
     wage_parameters = pd.DataFrame(
-        index=pd.Index(data=edu_types, name="education"),
-        columns=model_params + ["income_shock_std"],
+        index=pd.Index(data=edu_labels, name="education"),
+        columns=model_params,
     )
 
-    for education in wage_data["education"].unique():
-        wage_data_edu = wage_data[wage_data["education"] == education]
-        # estimate parametric regression, save parameters
-        model = PanelOLS(
-            dependent=wage_data_edu["ln_partner_hrl_wage"],
-            exog=wage_data_edu[model_params + ["year"]],
-            entity_effects=True,
+    for edu_val, edu_label in enumerate(edu_labels):
+        # Filter df
+        wage_data_edu = wage_data[wage_data["education"] == edu_val]
+        wage_data_edu = sm.add_constant(wage_data_edu)
+        # make ols regression
+        model = sm.OLS(
+            endog=wage_data_edu["wage_p"],
+            exog=sm.add_constant(wage_data_edu[["constant", "period", "period_sq"]]),
+            missing="drop",
         )
-        fitted_model = model.fit(
-            cov_type="clustered", cluster_entity=True, cluster_time=True
-        )
-        # Assign estimated parameters (column list corresponds to model params, so only these are assigned)
-        wage_parameters.loc[education] = fitted_model.params
+        fitted_model = model.fit()
 
-        # Get estimate for income shock std
-        income_shock_std = np.sqrt(fitted_model.resids.var())
-        wage_parameters.loc[education, "income_shock_std"] = income_shock_std
+        # Assign estimated parameters (column list corresponds to model params, so only these are assigned)
+        wage_parameters.loc[edu_label] = fitted_model.params
+
+        # # Get estimate for income shock std
+        # income_shock_std = np.sqrt(fitted_model.resids.var())
+        # wage_parameters.loc[education, "income_shock_std"] = income_shock_std
+
+        # # Plot fitted values
+        # wage_data_edu["wage_pred"] = fitted_model.predict()
+        # wage_data_edu.groupby("age")["wage_pred"].mean().plot()
+        # wage_data_edu.groupby("age")["wage_p"].mean().plot()
+        # import matplotlib.pyplot as plt
+        # plt.show()
+        # breakpoint()
 
     append = "men" if est_men else "women"
     out_file_path = paths_dict["est_results"] + f"partner_wage_eq_params_{append}.csv"
@@ -48,7 +57,7 @@ def estimate_partner_wage_parameters(paths_dict, specs, est_men):
     return wage_parameters
 
 
-def prepare_estimation_data(paths_dict, est_men):
+def prepare_estimation_data(paths_dict, specs, est_men):
     """Prepare the data for the wage estimation."""
     # load and modify data
     wage_data = pd.read_pickle(
@@ -61,11 +70,15 @@ def prepare_estimation_data(paths_dict, est_men):
 
     wage_data = wage_data[wage_data["sex"] == sex_var]
 
-    # own data
-    wage_data["ln_age"] = np.log(wage_data["age"])
+    # Add period
+    wage_data["period"] = wage_data["age"] - specs["start_age"]
+    wage_data["period_sq"] = wage_data["period"] ** 2
+
+    # We only want to look at working age people
+    wage_data = wage_data[wage_data["age"] < specs["max_ret_age"]]
 
     # partner data
-    wage_data["ln_partner_hrl_wage"] = np.log(wage_data["hourly_wage_p"])
+    # wage_data["ln_partner_hrl_wage"] = np.log(wage_data["hourly_wage_p"])
 
     # prepare format
     wage_data["year"] = wage_data["syear"].astype("category")

@@ -49,9 +49,9 @@ def plot_average_savings(paths_dict):
         paths_dict["intermediate_data"] + "sim_data/data_subj_scale_1.pkl"
     ).reset_index()
 
-    savings_unc = data_unc.groupby("age")["savings_dec"].mean()
-    savings_no_unc = data_no_unc.groupby("age")["savings_dec"].mean()
-    savings_increase = savings_no_unc[:35].mean() / savings_unc[:35].mean()
+    savings_unc = data_unc.groupby("age")["savings_dec"].median()
+    savings_no_unc = data_no_unc.groupby("age")["savings_dec"].median()
+    savings_increase = savings_unc[:35] / savings_no_unc[:35]
 
     fig, ax = plt.subplots()
     ax.plot(savings_unc, label="Uncertainty")

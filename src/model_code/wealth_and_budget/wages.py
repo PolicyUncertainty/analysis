@@ -1,10 +1,8 @@
 from jax import numpy as jnp
-from model_code.wealth_and_budget.tax_and_transfers import calc_health_ltc_contr
-from model_code.wealth_and_budget.tax_and_transfers import calc_inc_tax
-from model_code.wealth_and_budget.tax_and_transfers import calc_pension_unempl_contr
+from model_code.wealth_and_budget.tax_and_ssc import calc_after_ssc_income_worker
 
 
-def calc_labor_income(experience, education, income_shock, options):
+def calc_labor_income_after_ssc(experience, education, income_shock, options):
     # Gross labor income
     gross_labor_income = calculate_gross_labor_income(
         experience=experience,
@@ -12,7 +10,7 @@ def calc_labor_income(experience, education, income_shock, options):
         income_shock=income_shock,
         options=options,
     )
-    net_labor_income = calc_net_income_working(gross_labor_income, options)
+    net_labor_income = calc_after_ssc_income_worker(gross_labor_income, options)
     return net_labor_income
 
 
@@ -32,13 +30,3 @@ def calculate_gross_labor_income(experience, education, income_shock, options):
     )
 
     return labor_income_min_checked
-
-
-def calc_net_income_working(gross_income, options):
-    gross_income_full = gross_income * options["wealth_unit"]
-    ssc = calc_pension_unempl_contr(gross_income_full) + calc_health_ltc_contr(
-        gross_income_full
-    )
-    inc_tax = calc_inc_tax(gross_income_full - ssc)
-    net_income = gross_income_full - inc_tax - ssc
-    return net_income / options["wealth_unit"]

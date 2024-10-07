@@ -8,9 +8,6 @@ def add_wealth(data, path_dict, options):
     # Gather wealth data
     data = gather_wealth_data(path_dict["soep_c38"], data, options)
 
-    # Create household consumption equivalence scale
-    data = create_hh_cons_equivalence_data(data)
-
     # Deflate wealth
     data = deflate_wealth(data, path_dict)
 
@@ -61,32 +58,6 @@ def gather_wealth_data(soep_c38_path, merged_data, options):
 
     print(str(len(merged_data)) + " left after dropping people with missing wealth.")
 
-    return merged_data
-
-
-def create_hh_cons_equivalence_data(merged_data):
-    """This function creates the household consumption equivalence scale following the
-    OECD-modified equivalence scale."""
-    # partner (>0 means has partner)
-    merged_data["has_partner"] = 0
-    merged_data.loc[merged_data["pgpartz"] >= 1, "has_partner"] = 1
-
-    # number of children (<0 means 0 or "no info", which is treated as 0)
-    merged_data["n_children"] = merged_data["hlc0043"]
-    merged_data.loc[merged_data["n_children"] < 0, "n_children"] = 0
-
-    # consumption equivalence scale
-    merged_data["cons_equiv"] = (
-        1 + 0.5 * merged_data["has_partner"] + 0.3 * merged_data["n_children"]
-    )
-
-    # drop missing values
-    merged_data = merged_data[merged_data["cons_equiv"].notna()]
-
-    print(
-        str(len(merged_data))
-        + " left after dropping people with missing consumption equivalence scale."
-    )
     return merged_data
 
 

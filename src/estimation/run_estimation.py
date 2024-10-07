@@ -53,7 +53,7 @@ if input_str == "f" or input_str == "p":
 
     estimate_partner_wage_parameters(paths_dict, specs, est_men=True)
     estimate_partner_wage_parameters(paths_dict, specs, est_men=False)
-    calculate_partner_hours(paths_dict)
+    # calculate_partner_hours(paths_dict)
 
 if input_str == "f" or input_str == "j":
     # Estimate job separation
@@ -74,7 +74,25 @@ if input_str == "f" or input_str == "t":
 if input_str == "m":
     from estimation.estimate_setup import estimate_model
 
-    estimation_results = estimate_model(paths_dict, load_model=True)
+    params_to_estimate_names = [
+        # "mu",
+        "dis_util_work_high",
+        "dis_util_work_low",
+        "dis_util_unemployed_high",
+        "dis_util_unemployed_low",
+        "bequest_scale",
+        # "lambda",
+        "job_finding_logit_const",
+        "job_finding_logit_age",
+        "job_finding_logit_high_educ",
+    ]
+
+    estimation_results = estimate_model(
+        paths_dict,
+        params_to_estimate_names=params_to_estimate_names,
+        file_append="new",
+        load_model=True,
+    )
     print(estimation_results)
 
 

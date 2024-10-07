@@ -16,5 +16,9 @@ probs_*.txt
 # Ignore intermediate data pickle files
 output/intermediate_data/*.pkl
 
+# Ignore intermediate pcikle files
+contributions_base.pkl
+scores.pkl
+
 # Installation files
 *.egg-info/

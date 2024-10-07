@@ -2,6 +2,10 @@ import os
 
 import numpy as np
 import pandas as pd
+from process_data.sample_creation_scripts.data_tools import filter_below_age
+from process_data.sample_creation_scripts.data_tools import filter_by_sex
+from process_data.sample_creation_scripts.data_tools import filter_est_years
+from process_data.sample_creation_scripts.partner_code import create_partner_state
 from process_data.var_resources.soep_vars import create_choice_variable
 from process_data.var_resources.soep_vars import create_education_type
 from process_data.var_resources.soep_vars import create_experience_variable_with_cap
@@ -27,98 +31,85 @@ def create_structural_est_sample(paths, load_data=False, options=None):
     exp_cap = options["exp_cap"]
 
     # Load and merge data state data from SOEP core (all but wealth)
-    merged_data = load_and_merge_soep_core(soep_c38_path=paths["soep_c38"])
+    df = load_and_merge_soep_core(soep_c38_path=paths["soep_c38"])
 
-    # filter data. Leave additional years in for lagging and leading
-    merged_data = filter_data(merged_data, start_year, end_year, start_age)
+    # Create partner state(Merges also partners)
+    df = create_partner_state(df, filter_missing=True)
 
     # (labor) choice
-    merged_data = create_choice_variable(merged_data)
+    df = create_choice_variable(df)
+
+    # filter data. Leave additional years in for lagging and leading. For now no women
+    df = filter_data(df, start_year, end_year, start_age, no_women=True)
 
     # Job separation
-    merged_data = generate_job_separation_var(merged_data)
+    df = generate_job_separation_var(df)
 
     # lagged choice
-    merged_data = create_lagged_and_lead_variables(
-        merged_data, start_year, end_year, start_age
-    )
+    df = create_lagged_and_lead_variables(df, start_year, end_year, start_age)
 
     # Add wealth data
-    merged_data = add_wealth(merged_data, paths, options)
+    df = add_wealth(df, paths, options)
+    # df.to_pickle(paths["intermediate_data"] + "wealth_sample.pkl")
 
     # Now create more observed choice variables
     # period
-    merged_data["period"] = merged_data["age"] - start_age
+    df["period"] = df["age"] - start_age
 
     # policy_state
-    merged_data["policy_state"] = create_policy_state(merged_data["gebjahr"])
+    df["policy_state"] = create_policy_state(df["gebjahr"])
 
     (
-        merged_data["policy_state_value"],
-        merged_data["policy_state"],
-    ) = modify_policy_state(merged_data["policy_state"], options)
+        df["policy_state_value"],
+        df["policy_state"],
+    ) = modify_policy_state(df["policy_state"], options)
 
     # retirement_age_id (dummy 0 for now)
-    merged_data["retirement_age_id"] = 0
+    df["retirement_age_id"] = 0
 
     # experience
-    merged_data = create_experience_variable_with_cap(merged_data, exp_cap)
+    df = create_experience_variable_with_cap(df, exp_cap)
 
     # education
-    merged_data = create_education_type(merged_data)
+    df = create_education_type(df)
 
     # additional restrictions based on model setup
-    merged_data = enforce_model_choice_restriction(
-        merged_data, min_ret_age, options["max_ret_age"]
-    )
+    df = enforce_model_choice_restriction(df, min_ret_age, options["max_ret_age"])
 
     # Construct job offer state
-    merged_data = determine_observed_job_offers(merged_data)
+    df = determine_observed_job_offers(df)
 
-    # Keep relevant columns (i.e. state variables)
-    merged_data = merged_data[
-        [
-            "choice",
-            "period",
-            "lagged_choice",
-            "policy_state",
-            "policy_state_value",
-            "retirement_age_id",
-            "job_offer",
-            "experience",
-            "wealth",
-            "education",
-            "full_observed_state",
-        ]
-    ]
-    merged_data = merged_data.astype(
-        {
-            "choice": "int8",
-            "lagged_choice": "int8",
-            "policy_state": "int8",
-            "retirement_age_id": "int8",
-            "job_offer": "int8",
-            "experience": "int8",
-            "wealth": "float32",
-            "period": "int8",
-            "education": "int8",
-            "full_observed_state": "bool",
-        }
-    )
+    # Keep relevant columns (i.e. state variables) and set their minimal datatype
+    type_dict = {
+        "period": "int8",
+        "choice": "int8",
+        "lagged_choice": "int8",
+        "policy_state": "int8",
+        "policy_state_value": "float32",
+        "retirement_age_id": "int8",
+        "partner_state": "int8",
+        "job_offer": "int8",
+        "experience": "int8",
+        "wealth": "float32",
+        "education": "int8",
+        "full_observed_state": "bool",
+    }
+    df = df[list(type_dict.keys())]
+    df = df.astype(type_dict)
 
     print(
-        str(len(merged_data))
+        str(len(df))
         + " observations in final structural estimation dataset. \n ----------------"
     )
 
     # Anonymize and save data
-    merged_data.reset_index(drop=True, inplace=True)
-    merged_data.to_pickle(out_file_path)
+    df.reset_index(drop=True, inplace=True)
+    df.to_pickle(out_file_path)
 
     # save data
-    merged_data.to_pickle(out_file_path)
+    df.to_pickle(out_file_path)
 
-    return merged_data
+    return df
 
 
 def determine_observed_job_offers(data):
@@ -190,7 +181,7 @@ def load_and_merge_soep_core(soep_c38_path):
     )
     ppathl_data = pd.read_stata(
         f"{soep_c38_path}/ppathl.dta",
-        columns=["pid", "hid", "syear", "sex", "gebjahr", "rv_id"],
+        columns=["pid", "hid", "syear", "sex", "gebjahr", "parid", "rv_id"],
         convert_categoricals=False,
     )
     # Merge pgen data with pathl data and hl data
@@ -221,6 +212,7 @@ def load_and_merge_soep_core(soep_c38_path):
     merged_data = pd.merge(merged_data, hl_data, on=["hid", "syear"], how="left")
 
     merged_data["age"] = merged_data["syear"] - merged_data["gebjahr"]
+    merged_data.set_index(["pid", "syear"], inplace=True)
     print(str(len(merged_data)) + " observations in SOEP C38 core.")
     return merged_data
 
@@ -233,31 +225,11 @@ def filter_data(merged_data, start_year, end_year, start_age, no_women=True):
     sample to construct lagged_choice.
 
     """
+    merged_data = filter_below_age(merged_data, start_age - 1)
 
-    # Set pid and syear as index
-    merged_data.set_index(["pid", "syear"], inplace=True)
+    merged_data = filter_by_sex(merged_data, no_women=no_women)
 
-    # filter out young people, women, and years outside of estimation range
-    merged_data = merged_data[merged_data["age"] >= start_age - 1]
-    print(
-        str(len(merged_data))
-        + " left after dropping people under "
-        + str(start_age)
-        + " years old."
-    )
-    merged_data.loc[:, "sex"] = merged_data["sex"] - 1
-    if no_women:
-        merged_data = merged_data[(merged_data["sex"] == 0)]
-        print(str(len(merged_data)) + " left after dropping women.")
-    else:
-        merged_data = merged_data[(merged_data["sex"] >= 0)]
-    merged_data = merged_data.loc[
-        ((slice(None), range(start_year - 1, end_year + 2))), :
-    ]
-    print(
-        str(len(merged_data))
-        + " left after dropping people outside of estimation years."
-    )
+    merged_data = filter_est_years(merged_data, start_year, end_year)
     return merged_data
 
 

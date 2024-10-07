@@ -4,6 +4,7 @@ import estimagic as sm
 import jax
 import numpy as np
 from estimation.estimate_setup import create_ll_from_paths
+from jax.flatten_util import ravel_pytree
 
 # Import jax and set jax to work with 64bit
 jax.config.update("jax_enable_x64", True)
@@ -15,30 +16,57 @@ from set_paths import create_path_dict
 path_dict = create_path_dict()
 
 
-params = pickle.load(open(path_dict["est_results"] + "est_params.pkl", "rb"))
+params = pickle.load(open(path_dict["est_results"] + "est_params_all.pkl", "rb"))
 
-individual_likelihood = create_ll_from_paths(
-    start_params_all=params, path_dict=path_dict, load_model=True
+individual_likelihood, weights = create_ll_from_paths(
+    params, path_dict, load_model=True
 )
+n_obs = weights.sum()
+hessian_weights = np.sqrt(weights)[:, None]
 
-ll_value_base, contributions_base = individual_likelihood(params)
+params_to_estimate_names = [
+    # "mu",
+    "dis_util_work_high",
+    "dis_util_work_low",
+    "dis_util_unemployed_high",
+    "dis_util_unemployed_low",
+    # "bequest_scale",
+    # "lambda",
+    "job_finding_logit_const",
+    "job_finding_logit_age",
+    "job_finding_logit_high_educ",
+]
 
-params_work_1 = params.copy()
-params_work_1["dis_util_work"] += 1e-6
-_, contributions_work_1 = individual_likelihood(params_work_1)
+params_est = {name: params[name] for name in params_to_estimate_names}
 
-params_unemployed_1 = params.copy()
-params_unemployed_1["dis_util_unemployed"] += 1e-6
-_, contributions_unemployed_1 = individual_likelihood(params_unemployed_1)
+unravel_func = ravel_pytree(params_est)[1]
+# contributions_base = individual_likelihood(params_est)
+# pickle.dump(contributions_base, open("contributions_base.pkl", "wb"))
+contributions_base = pickle.load(open("contributions_base.pkl", "rb"))
 
-score_work = (contributions_work_1 - contributions_base) / (1e-6)
-score_unemployed = (contributions_unemployed_1 - contributions_base) / (1e-6)
+# scores = np.zeros((contributions_base.shape[0], len(params_to_estimate_names)))
+# pickle.dump(scores, open("scores.pkl", "wb"))
+scores = pickle.load(open("scores.pkl", "rb"))
 
-scores = np.zeros((score_work.shape[0], 2))
-scores[:, 0] = score_work
-scores[:, 1] = score_unemployed
+eps = 1e-6
+for param_id, param_name in enumerate(params_to_estimate_names):
+    print(param_id)
+    params_plus = params_est.copy()
+    params_plus[param_name] += eps
+    contributions_plus = individual_likelihood(params_plus)
 
-hessian = scores.T @ scores
-std_errors = np.sqrt(np.diag(np.linalg.inv(hessian)))
+    scores_param = (contributions_plus - contributions_base) / eps
+    scores[:, param_id] = scores_param
+    pickle.dump(scores, open("scores.pkl", "wb"))
 
-pickle.dump(std_errors, open(path_dict["est_results"] + "std_errors.pkl", "wb"))
+
+weighted_scores = scores * hessian_weights
+hessian = weighted_scores.T @ weighted_scores / n_obs
+std_errors = np.sqrt(np.diag(np.linalg.inv(hessian) / n_obs))
+
+pickle.dump(
+    unravel_func(std_errors),
+    open(path_dict["est_results"] + "std_errors_all.pkl", "wb"),
+)
+# array([0.00717759, 0.00455941, 0.02647084, 0.01402793, 0.26843421,
+#        0.08585728, 0.00139075, 0.04709085])

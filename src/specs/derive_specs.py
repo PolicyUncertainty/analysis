@@ -2,9 +2,9 @@ import jax.numpy as jnp
 import numpy as np
 import pandas as pd
 import yaml
-from specs.family_specs import calculate_partner_hours
-from specs.family_specs import calculate_partner_hrly_wage
+from specs.family_specs import calculate_partner_incomes
 from specs.family_specs import predict_children_by_state
+from specs.family_specs import read_in_partner_transition_specs
 from specs.income_specs import calculate_pension_values
 from specs.income_specs import process_wage_params
 
@@ -24,12 +24,20 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     specs["pension_point_value_by_edu_exp"] = calculate_pension_values(specs, path_dict)
 
     # partner income
-    specs["partner_hrly_wage"] = calculate_partner_hrly_wage(path_dict, specs)
-    specs["partner_hours"] = calculate_partner_hours(path_dict, specs)
+    specs["partner_wage"], specs["partner_pension"] = calculate_partner_incomes(
+        path_dict, specs
+    )
+    # specs["partner_hours"] = calculate_partner_hours(path_dict, specs)
     # specs["partner_pension"] = calculate_partner_pension(path_dict)
 
     # family transitions
     specs["children_by_state"] = predict_children_by_state(path_dict, specs)
+
+    # Read in family transitions
+    (
+        specs["partner_trans_mat"],
+        specs["n_partner_states"],
+    ) = read_in_partner_transition_specs(path_dict, specs)
 
     # Set initial experience
     specs["max_init_experience"] = create_initial_exp(path_dict, load_precomputed)
@@ -65,6 +73,8 @@ def read_and_derive_specs(spec_path):
 
     # Number of periods in model
     specs["n_periods"] = specs["end_age"] - specs["start_age"] + 1
+    # Number of education types
+    specs["n_education_types"] = len(specs["education_labels"])
     # you can retire from min retirement age until max retirement age
     specs["n_possible_ret_ages"] = specs["max_ret_age"] - specs["min_ret_age"] + 1
     specs["n_policy_states"] = int(

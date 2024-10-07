@@ -6,6 +6,8 @@ paths_dict = create_path_dict()
 
 import jax
 import yaml
+import pickle as pkl
+import numpy as np
 
 jax.config.update("jax_enable_x64", True)
 
@@ -15,12 +17,12 @@ path_dict = create_path_dict()
 from estimation.estimate_setup import create_job_offer_params_from_start
 
 # %%
-params = yaml.safe_load(open(path_dict["start_params"], "rb"))
+params = pkl.load(open(path_dict["est_params"], "rb"))
 
-job_sep_params = create_job_offer_params_from_start(path_dict)
-params.update(job_sep_params)
-params["dis_util_work"] = 1.4911161193847658e-09
-params["dis_util_unemployed"] = 50
+# job_sep_params = create_job_offer_params_from_start(path_dict)
+# params.update(job_sep_params)
+# params["dis_util_work"] = 1.4911161193847658e-09
+# params["dis_util_unemployed"] = 50
 
 
 from model_code.stochastic_processes.policy_states_belief import (
@@ -29,31 +31,60 @@ from model_code.stochastic_processes.policy_states_belief import (
 from model_code.stochastic_processes.policy_states_belief import (
     update_specs_exp_ret_age_trans_mat,
 )
-from model_code.specify_model import specify_and_solve_model
+
+from model_code.specify_model import specify_model
 
 # # Generate model_specs
-# model, params = specify_model(
-#     path_dict=paths_dict,
-#     update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
-#     policy_state_trans_func=expected_SRA_probs_estimation,
-#     params=params,
-#     load_model=False,
-# )
-
-solution, model, params = specify_and_solve_model(
+model, params = specify_model(
     path_dict=paths_dict,
-    file_append="test_groß",
-    params=params,
     update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
     policy_state_trans_func=expected_SRA_probs_estimation,
+    params=params,
     load_model=True,
-    load_solution=True,
 )
+from estimation.estimate_setup import load_and_prep_data
+
+data_decision, states_dict = load_and_prep_data(path_dict, params, model)
+sc = {
+    name: data_decision[name].values[209]
+    for name in model["model_structure"]["state_space_names"]
+}
+sc["choice"] = 1
+sc["partner_state"] = 1
+sc["policy_state"] = 0
+prob_vector = model["model_funcs"]["compute_exog_transition_vec"](**sc, params=params)
+job_probs = model["model_funcs"]["processed_exog_funcs"]["job_offer"](
+    **sc, params=params
+)
+partner_probs = model["model_funcs"]["processed_exog_funcs"]["partner_state"](
+    **sc, params=params
+)
+policy_probs = model["model_funcs"]["processed_exog_funcs"]["policy_state"](
+    **sc, params=params
+)
+for exog_var in range(prob_vector.shape[0]):
+    child_exog_states = model["model_funcs"]["exog_state_mapping"](exog_var)
+    prob_calc = (
+        job_probs[child_exog_states["job_offer"]]
+        * partner_probs[child_exog_states["partner_state"]]
+        * policy_probs[child_exog_states["policy_state"]]
+    )
+    assert np.isclose(prob_vector[exog_var], prob_calc)
+
+
+# solution, model, params = specify_and_solve_model(
+#     path_dict=paths_dict,
+#     file_append="test_groß",
+#     params=params,
+#     update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
+#     policy_state_trans_func=expected_SRA_probs_estimation,
+#     load_model=True,
+#     load_solution=True,
+# )
 
 
 from estimation.estimate_setup import load_and_prep_data
 
-data_decision = load_and_prep_data(paths_dict)
 # individual_likelihood = create_ll_from_paths(
 #     params, paths_dict, load_model=False
 # )

@@ -21,7 +21,7 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     ) = process_wage_params(path_dict, specs)
 
     # pensions
-    specs["pension_point_value_by_edu_exp"] = calculate_pension_values(specs, path_dict)
+    specs["ppv"], specs["mean_wage"] = calculate_pension_values(specs, path_dict)
 
     # partner income
     specs["partner_wage"], specs["partner_pension"] = calculate_partner_incomes(

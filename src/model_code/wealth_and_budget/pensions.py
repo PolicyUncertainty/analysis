@@ -1,3 +1,4 @@
+import jax.numpy as jnp
 from model_code.wealth_and_budget.tax_and_ssc import calc_after_ssc_income_pensioneer
 
 
@@ -36,9 +37,12 @@ def calc_gross_pension_income(
     pension_factor = 1 - pension_deduction
 
     # Pension point value by education and experience
-    pension_point_value = options["pension_point_value_by_edu_exp"][
-        education, experience
-    ]
+    mean_wage_all = options["mean_wage"]
+    gamma_0 = options["gamma_0"][education]
+    gamma_1_plus_1 = options["gamma_1"][education] + 1
+    total_pens_points = (
+        (jnp.exp(gamma_0) / gamma_1_plus_1) * ((experience + 1) ** gamma_1_plus_1 - 1)
+    ) / mean_wage_all
 
-    retirement_income_gross = pension_point_value * experience * pension_factor * 12
+    retirement_income_gross = options["ppv"] * total_pens_points * pension_factor * 12
     return retirement_income_gross

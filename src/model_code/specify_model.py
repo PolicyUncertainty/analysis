@@ -44,6 +44,9 @@ def specify_model(
     n_policy_states = specs["n_policy_states"]
     choices = np.arange(specs["n_choices"], dtype=int)
 
+    # Create savings grid
+    savings_grid = create_savings_grid()
+
     options = {
         "state_space": {
             "n_periods": n_periods,
@@ -68,11 +71,12 @@ def specify_model(
                     "states": np.arange(specs["n_partner_states"], dtype=int),
                 },
             },
+            "continuous_states": {
+                "wealth": savings_grid,
+            },
         },
         "model_params": specs,
     }
-
-    savings_grid = create_savings_grid()
 
     if load_model:
         model = load_and_setup_model(
@@ -91,7 +95,6 @@ def specify_model(
             utility_functions=create_utility_functions(),
             utility_functions_final_period=create_final_period_utility_functions(),
             budget_constraint=budget_constraint,
-            exog_savings_grid=savings_grid,
             path=path_dict["intermediate_data"] + "model.pkl",
         )
 

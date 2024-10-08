@@ -59,22 +59,17 @@ def inverse_marginal(
 
 
 def utility_final_consume_all(
-    choice,
-    resources,
+    wealth,
     params,
-    options,
 ):
-    mu = params["mu"]
     bequest_scale = params["bequest_scale"]
-    return params["bequest_scale"] * (
-        resources ** (1 - params["mu"]) / (1 - params["mu"])
-    )
+    return bequest_scale * (wealth ** (1 - params["mu"]) / (1 - params["mu"]))
 
 
-def marginal_utility_final_consume_all(choice, resources, params, options):
+def marginal_utility_final_consume_all(wealth, params):
     mu = params["mu"]
     bequest_scale = params["bequest_scale"]
-    return bequest_scale * (resources**-mu)
+    return bequest_scale * (wealth**-mu)
 
 
 def consumption_scale(partner_state, education, period, options):

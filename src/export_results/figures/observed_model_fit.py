@@ -27,7 +27,7 @@ def observed_model_fit(paths_dict):
         policy_state_trans_func=expected_SRA_probs_estimation,
         file_append="subj",
         load_model=True,
-        load_solution=False,
+        load_solution=True,
     )
 
     data_decision, _ = load_and_prep_data(
@@ -92,6 +92,7 @@ def observed_model_fit(paths_dict):
     # Negative ll contributions are positive numbers. The smaller the better the fit
     # Add high fixed punishment for not explained choices
     neg_likelihood_contributions = (-np.log(prob_choice_observed)).clip(max=999)
+    breakpoint()
 
     data_decision["likelihood_contrib"] = neg_likelihood_contributions
     data_decision["age_bin"] = np.floor(data_decision["age"] / 10) * 10

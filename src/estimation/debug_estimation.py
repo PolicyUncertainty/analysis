@@ -47,7 +47,7 @@ from estimation.estimate_setup import load_and_prep_data
 data_decision, states_dict = load_and_prep_data(path_dict, params, model)
 sc = {
     name: data_decision[name].values[209]
-    for name in model["model_structure"]["state_space_names"]
+    for name in model["model_structure"]["discrete_states_names"]
 }
 sc["choice"] = 1
 sc["partner_state"] = 1
@@ -117,7 +117,7 @@ from estimation.estimate_setup import load_and_prep_data
 #             state_choice_indexes = get_state_choice_index_per_state(
 #                 states=state_dict,
 #                 map_state_choice_to_index=model["model_structure"]["map_state_choice_to_index"],
-#                 state_space_names=model["model_structure"]["state_space_names"],
+#                 discrete_states_names=model["model_structure"]["discrete_states_names"],
 #             )
 #             value_state = jnp.take(
 #                 value_solved, state_choice_indexes, axis=0, mode="fill", fill_value=jnp.nan

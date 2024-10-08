@@ -39,6 +39,7 @@ def observed_model_fit(paths_dict):
         name: data_decision[name].values
         for name in model["model_structure"]["discrete_states_names"]
     }
+    states_dict["experience"] = data_decision["experience"].values
     states_dict["wealth"] = data_decision["adjusted_wealth"].values
 
     def weight_func(**kwargs):
@@ -66,7 +67,6 @@ def observed_model_fit(paths_dict):
         choice_probs_observations = choice_probs_for_choice_vals(
             choice_vals,
             states_dict,
-            data_decision,
             model,
             unobserved_state_specs,
             params,
@@ -80,7 +80,6 @@ def observed_model_fit(paths_dict):
     prob_choice_observed = choice_probs_for_choice_vals(
         data_decision["choice"].values,
         states_dict,
-        data_decision,
         model,
         unobserved_state_specs,
         params,
@@ -93,7 +92,10 @@ def observed_model_fit(paths_dict):
     # Negative ll contributions are positive numbers. The smaller the better the fit
     # Add high fixed punishment for not explained choices
     neg_likelihood_contributions = (-np.log(prob_choice_observed)).clip(max=999)
-    breakpoint()
+    org_ll = np.loadtxt("ll_org.txt")
+    org_probs = np.exp(-org_ll)
+
+    # breakpoint()
 
     data_decision["likelihood_contrib"] = neg_likelihood_contributions
     data_decision["age_bin"] = np.floor(data_decision["age"] / 10) * 10
@@ -141,7 +143,6 @@ def observed_model_fit(paths_dict):
 def choice_probs_for_choice_vals(
     choice_vals,
     states_dict,
-    data_decision,
     model,
     unobserved_state_specs,
     params,

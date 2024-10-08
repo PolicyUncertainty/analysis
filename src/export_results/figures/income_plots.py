@@ -78,7 +78,7 @@ def plot_total_income(specs):
                         period=exp,
                         education=edu_val,
                         lagged_choice=work_val,
-                        experience=exp,
+                        experience_years=exp,
                         partner_state=np.array(married_val),
                         policy_state=0,
                         retirement_age_id=0,

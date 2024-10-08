@@ -20,6 +20,10 @@ def budget_constraint(
     params,
     options,
 ):
+    # Recalculate experience
+    max_exp_period = period + options["max_init_experience"]
+    experience_years = max_exp_period * experience
+
     # Calculate partner income
     partner_income_after_ssc = calc_partner_income_after_ssc(
         partner_state=partner_state, options=options, education=education, period=period
@@ -37,7 +41,7 @@ def budget_constraint(
 
     # Income lagged choice 1
     labor_income_after_ssc = calc_labor_income_after_ssc(
-        experience=experience,
+        experience=experience_years,
         education=education,
         income_shock=income_shock_previous_period,
         options=options,
@@ -45,7 +49,7 @@ def budget_constraint(
 
     # Income from lagged choice 2
     retirement_income_after_ssc = calc_pensions_after_ssc(
-        experience=experience,
+        experience=experience_years,
         education=education,
         policy_state=policy_state,
         retirement_age_id=retirement_age_id,

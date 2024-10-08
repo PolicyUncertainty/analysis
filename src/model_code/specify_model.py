@@ -47,12 +47,14 @@ def specify_model(
     # Create savings grid
     savings_grid = create_savings_grid()
 
+    # Specify experience grid
+    experience_grid = jnp.linspace(0, 1, 15)
+
     options = {
         "state_space": {
             "n_periods": n_periods,
             "choices": choices,
             "endogenous_states": {
-                "experience": np.arange(n_periods, dtype=int),
                 "education": np.arange(specs["n_education_types"], dtype=int),
                 "retirement_age_id": np.arange(n_possible_ret_ages, dtype=int),
                 "sparsity_condition": sparsity_condition,
@@ -73,6 +75,7 @@ def specify_model(
             },
             "continuous_states": {
                 "wealth": savings_grid,
+                "experience": experience_grid,
             },
         },
         "model_params": specs,

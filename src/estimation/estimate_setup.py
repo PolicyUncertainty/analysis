@@ -134,7 +134,6 @@ def create_ll_from_paths(start_params_all, path_dict, load_model):
     individual_likelihood = create_individual_likelihood_function_for_model(
         model=model,
         observed_states=states_dict,
-        observed_wealth=data_decision["adjusted_wealth"].values,
         observed_choices=data_decision["choice"].values,
         unobserved_state_specs=unobserved_state_specs,
         params_all=start_params_all,
@@ -162,6 +161,11 @@ def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):
         "age_bin"
     )["age_weights"].transform("sum")
 
+    # Transform experience
+    max_init_exp = model["options"]["model_params"]["max_init_experience"]
+    exp_denominator = data_decision["period"].values + max_init_exp
+    data_decision["experience"] = data_decision["experience"] / exp_denominator
+
     # We can adjust wealth outside, as it does not depend on estimated parameters
     # (only on interest rate)
     # Now transform for dcegm
@@ -169,6 +173,7 @@ def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):
         name: data_decision[name].values
         for name in model["model_structure"]["discrete_states_names"]
     }
+    states_dict["experience"] = data_decision["experience"].values
     states_dict["wealth"] = data_decision["wealth"].values
 
     adjusted_wealth = adjust_observed_wealth(
@@ -177,6 +182,8 @@ def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):
         model=model,
     )
     data_decision["adjusted_wealth"] = adjusted_wealth
+    states_dict["wealth"] = data_decision["adjusted_wealth"].values
+
     return data_decision, states_dict
 
 

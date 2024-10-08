@@ -23,11 +23,13 @@ def generate_start_states(path_dict, params, model, n_agents, seed):
 
     states_dict = {
         name: start_period_data[name].values
-        for name in model["model_structure"]["state_space_names"]
+        for name in model["model_structure"]["discrete_states_names"]
     }
+    states_dict["wealth"] = start_period_data["wealth"].values
+    states_dict["experience"] = start_period_data["experience"].values
+
     start_period_data.loc[:, "adjusted_wealth"] = adjust_observed_wealth(
         observed_states_dict=states_dict,
-        wealth=start_period_data["wealth"].values,
         params=params,
         model=model,
     )

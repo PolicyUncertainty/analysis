@@ -5,13 +5,13 @@ def create_state_space_functions():
     return {
         "get_next_period_state": update_state_space,
         "get_state_specific_choice_set": state_specific_choice_set,
+        "update_continuous_state": get_next_period_experience,
     }
 
 
-def sparsity_condition(period, lagged_choice, retirement_age_id, experience, options):
+def sparsity_condition(period, lagged_choice, retirement_age_id, options):
     start_age = options["start_age"]
     max_ret_age = options["max_ret_age"]
-    max_init_experience = options["max_init_experience"]
     min_ret_age_state_space = options["min_ret_age"]
 
     age = start_age + period
@@ -28,39 +28,18 @@ def sparsity_condition(period, lagged_choice, retirement_age_id, experience, opt
     # If you are retired, your actual retirement age can at most be your current age
     elif (lagged_choice == 2) & (age <= actual_retirement_age):
         return False
-    # If you have not worked last period, you can't have worked all your live
-    elif (
-        (lagged_choice != 1)
-        & (period + max_init_experience == experience)
-        & (period > 0)
-    ):
-        return False
-    # You cannot have more experience than your age
-    elif experience > period + max_init_experience:
-        return False
-    elif experience > options["exp_cap"]:
-        return False
     else:
         return True
 
 
-def update_state_space(
-    period, choice, lagged_choice, retirement_age_id, experience, options
-):
+def update_state_space(period, choice, lagged_choice, retirement_age_id, options):
     next_state = dict()
 
     next_state["period"] = period + 1
     next_state["lagged_choice"] = choice
 
     # Create work bools
-    unemployment_bool = choice == 0
-    work_bool = choice == 1
     retirement_bool = choice == 2
-
-    # Update experience
-    below_exp_cap_bool = experience < options["exp_cap"]
-    exp_update_bool = below_exp_cap_bool * work_bool
-    next_state["experience"] = experience + exp_update_bool
 
     # Update retirement age. First create possible retirement id and then check if
     # retirement is chosen and not already retired
@@ -100,3 +79,12 @@ def state_specific_choice_set(period, lagged_choice, policy_state, job_offer, op
 
 def apply_retirement_constraint_for_SRA(SRA, options):
     return np.maximum(SRA - options["ret_years_before_SRA"], 63)
+
+
+def get_next_period_experience(period, lagged_choice, experience, options):
+    """Update experience based on lagged choice and period."""
+    max_experience_period = period + options["max_init_experience"]
+
+    return (1 / max_experience_period) * (
+        (max_experience_period - 1) * experience + (lagged_choice == 0)
+    )

@@ -15,23 +15,21 @@ def calculate_pension_values(specs, path_dict):
         wage_params.loc["all", "constant"]
         + wage_params.loc["all", "ln_exp"] * np.log(experience + 1)
     )
+    mean_wage_all = wage_by_experience_average.mean()
 
     n_edu_types = specs["n_education_types"]
     # Create adjustment factor for pension point value container
-    adjustment_factor_by_exp = np.ndarray(shape=(n_edu_types, len(experience)))
+    adjustment_factor_by_exp = np.ones(shape=(n_edu_types, len(experience)))
 
     for edu_index, edu_label in enumerate(specs["education_labels"]):
-        wage_by_experience_edu = np.exp(
-            wage_params.loc[edu_label, "constant"]
-            + wage_params.loc[edu_label, "ln_exp"] * np.log(experience + 1)
-        )
-        adjustment_factor_by_exp[edu_index, :] = (
-            wage_by_experience_edu / wage_by_experience_average
-        )
         for i in range(1, len(experience)):
-            adjustment_factor_by_exp[edu_index, i] = adjustment_factor_by_exp[
-                edu_index, 1 : i + 1
-            ].mean()
+            gamma_0 = wage_params.loc[edu_label, "constant"]
+            gamma_1_plus_1 = wage_params.loc[edu_label, "ln_exp"] + 1
+            mean_wage = (
+                (np.exp(gamma_0) / gamma_1_plus_1) * ((i + 1) ** gamma_1_plus_1 - 1)
+            ) / i
+
+            adjustment_factor_by_exp[edu_index, i] = mean_wage / mean_wage_all
 
     # Generate average pension point value weighted by east and west
     # pensions

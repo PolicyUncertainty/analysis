@@ -37,8 +37,9 @@ def observed_model_fit(paths_dict):
     data_decision = data_decision[data_decision["age"] < 75]
     states_dict = {
         name: data_decision[name].values
-        for name in model["model_structure"]["state_space_names"]
+        for name in model["model_structure"]["discrete_states_names"]
     }
+    states_dict["wealth"] = data_decision["adjusted_wealth"].values
 
     def weight_func(**kwargs):
         # We need to weight the unobserved job offer state for each of its possible values
@@ -150,7 +151,6 @@ def choice_probs_for_choice_vals(
     choice_prob_func = create_choice_prob_func_unobserved_states(
         model=model,
         observed_states=states_dict,
-        observed_wealth=data_decision["adjusted_wealth"].values,
         observed_choices=choice_vals,
         unobserved_state_specs=unobserved_state_specs,
         weight_full_states=weight_full_states,

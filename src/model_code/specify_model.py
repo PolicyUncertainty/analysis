@@ -47,9 +47,6 @@ def specify_model(
     # Create savings grid
     savings_grid = create_savings_grid()
 
-    # Specify experience grid
-    experience_grid = jnp.linspace(0, 1, 15)
-
     options = {
         "state_space": {
             "n_periods": n_periods,
@@ -75,7 +72,7 @@ def specify_model(
             },
             "continuous_states": {
                 "wealth": savings_grid,
-                "experience": experience_grid,
+                "experience": specs["experience_grid"],
             },
         },
         "model_params": specs,

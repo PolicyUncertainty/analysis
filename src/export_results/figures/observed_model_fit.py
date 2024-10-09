@@ -94,11 +94,12 @@ def observed_model_fit(paths_dict):
     neg_likelihood_contributions = (-np.log(prob_choice_observed)).clip(max=999)
     org_ll = np.loadtxt("ll_org.txt")
     org_probs = np.exp(-org_ll)
-    data_decision["prob_choice_org"] = org_probs
-    data_decision = data_decision[data_decision["lagged_choice"] != 2]
-    data_decision = data_decision[data_decision["age"] > 70]
 
-    # breakpoint()
+    data_decision["prob_choice_org"] = org_probs
+    data_decision["prob_diff"] = (
+        data_decision["prob_choice_org"] - data_decision["prob_choice_observed"]
+    ).abs()
+    breakpoint()
 
     data_decision["likelihood_contrib"] = neg_likelihood_contributions
     data_decision["age_bin"] = np.floor(data_decision["age"] / 10) * 10

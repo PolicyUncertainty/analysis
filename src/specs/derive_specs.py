@@ -40,7 +40,9 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     ) = read_in_partner_transition_specs(path_dict, specs)
 
     # Set initial experience
-    specs["max_init_experience"] = create_initial_exp(path_dict, load_precomputed)
+    specs["max_init_experience"], specs["experience_grid"] = create_model_initials(
+        path_dict, specs, load_precomputed
+    )
 
     specs["job_sep_probs"] = jnp.asarray(
         np.loadtxt(path_dict["est_results"] + "job_sep_probs.csv", delimiter=",")
@@ -48,11 +50,14 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     return specs
 
 
-def create_initial_exp(path_dict, load_precomputed):
+def create_model_initials(path_dict, specs, load_precomputed):
     # Initial experience
     if load_precomputed:
         max_init_experience = int(
             np.loadtxt(path_dict["intermediate_data"] + "max_init_exp.txt")
+        )
+        experience_grid = np.loadtxt(
+            path_dict["intermediate_data"] + "experience_grid.txt"
         )
     else:
         # max initial experience
@@ -65,7 +70,17 @@ def create_initial_exp(path_dict, load_precomputed):
         np.savetxt(
             path_dict["intermediate_data"] + "max_init_exp.txt", [max_init_experience]
         )
-    return max_init_experience
+        # experience grid
+        max_period_exp = max_init_experience + data_decision["period"]
+        data_decision["exp_share"] = data_decision["experience"].values / max_period_exp
+        experience_quantile_grid = np.linspace(0, 1, specs["n_experience_grid_points"])
+        experience_grid = (
+            data_decision["exp_share"].quantile(experience_quantile_grid).values
+        )
+        np.savetxt(
+            path_dict["intermediate_data"] + "experience_grid.txt", experience_grid
+        )
+    return max_init_experience, jnp.asarray(experience_grid)
 
 
 def read_and_derive_specs(spec_path):

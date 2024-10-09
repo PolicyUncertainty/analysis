@@ -86,5 +86,5 @@ def get_next_period_experience(period, lagged_choice, experience, options):
     max_experience_period = period + options["max_init_experience"]
 
     return (1 / max_experience_period) * (
-        (max_experience_period - 1) * experience + (lagged_choice == 0)
+        (max_experience_period - 1) * experience + (lagged_choice == 1)
     )

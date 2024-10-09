@@ -1,3 +1,4 @@
+import jax.numpy as jnp
 import numpy as np
 
 
@@ -84,7 +85,8 @@ def apply_retirement_constraint_for_SRA(SRA, options):
 def get_next_period_experience(period, lagged_choice, experience, options):
     """Update experience based on lagged choice and period."""
     max_experience_period = period + options["max_init_experience"]
+    exp_last_period = (max_experience_period - 1) * experience
+    exp_new_period = exp_last_period + (lagged_choice == 1)
+    exp_capped = jnp.minimum(exp_new_period, 44.0)
 
-    return (1 / max_experience_period) * (
-        (max_experience_period - 1) * experience + (lagged_choice == 1)
-    )
+    return (1 / max_experience_period) * exp_capped

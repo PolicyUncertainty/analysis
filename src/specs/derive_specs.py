@@ -78,9 +78,10 @@ def create_model_initials(path_dict, specs, load_precomputed):
             data_decision["exp_share"].quantile(experience_quantile_grid).values
         )
         np.savetxt(
-            path_dict["intermediate_data"] + "experience_grid.txt", experience_grid
+            path_dict["intermediate_data"] + "experience_grid.txt",
+            experience_quantile_grid,
         )
-    return max_init_experience, jnp.asarray(experience_grid)
+    return max_init_experience, jnp.asarray(experience_quantile_grid)
 
 
 def read_and_derive_specs(spec_path):

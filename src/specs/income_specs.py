@@ -9,7 +9,8 @@ def get_pension_vars(specs, path_dict):
     )
 
     # Create possible experience values
-    experience = np.arange(0, specs["exp_cap"] + 1)
+    # ToDo: Use real mean wage
+    experience = np.arange(0, 45)
 
     wage_by_experience_average = np.exp(
         wage_params.loc["all", "constant"]

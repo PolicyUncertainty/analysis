@@ -40,7 +40,7 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     ) = read_in_partner_transition_specs(path_dict, specs)
 
     # Set initial experience
-    specs["max_init_experience"] = create_model_initials(
+    specs["max_init_experience"], specs["max_experience"] = create_max_experience(
         path_dict, specs, load_precomputed
     )
 
@@ -50,12 +50,13 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     return specs
 
 
-def create_model_initials(path_dict, specs, load_precomputed):
+def create_max_experience(path_dict, specs, load_precomputed):
     # Initial experience
     if load_precomputed:
         max_init_experience = int(
             np.loadtxt(path_dict["intermediate_data"] + "max_init_exp.txt")
         )
+        max_experience = int(np.loadtxt(path_dict["intermediate_data"] + "max_exp.txt"))
     else:
         # max initial experience
         data_decision = pd.read_pickle(
@@ -67,7 +68,11 @@ def create_model_initials(path_dict, specs, load_precomputed):
         np.savetxt(
             path_dict["intermediate_data"] + "max_init_exp.txt", [max_init_experience]
         )
-    return max_init_experience
+
+        # Now max overall
+        max_experience = data_decision["experience"].max()
+        np.savetxt(path_dict["intermediate_data"] + "max_exp.txt", [max_experience])
+    return max_init_experience, max_experience
 
 
 def read_and_derive_specs(spec_path):

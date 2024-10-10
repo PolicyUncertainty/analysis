@@ -86,20 +86,6 @@ def test_decision_data_no_work_after_max_ret_age(load_data=LOAD_SAVED_DATA):
 
 
 @pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Test doesn't work in Github Actions.")
-def test_decision_data_exp_cap(load_data=LOAD_SAVED_DATA):
-    """This functions asserts that experience is smaller or equal to age and exp_cap."""
-    paths_dict = create_path_dict()
-    options = generate_derived_and_data_derived_specs(paths_dict, load_precomputed=True)
-
-    dec_dat = create_structural_est_sample(
-        paths_dict,
-        load_data=load_data,
-    )
-    assert dec_dat["experience"].max() <= options["exp_cap"]
-    assert dec_dat["experience"].max() <= dec_dat["period"].max()
-
-
-@pytest.mark.skipif(IN_GITHUB_ACTIONS, reason="Test doesn't work in Github Actions.")
 def test_decision_data_retirement_is_absorbing(load_data=LOAD_SAVED_DATA):
     """This functions asserts that retirement is absorbing."""
     paths_dict = create_path_dict()

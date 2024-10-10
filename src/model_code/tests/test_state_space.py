@@ -49,7 +49,6 @@ def test_retirement_age_update(period, lagged_choice):
     options = {
         "start_age": 25,
         "min_ret_age": 65,
-        "exp_cap": 40,
     }
     choice = 2
     retirement_age_id = 0

@@ -13,8 +13,6 @@ def budget_constraint(
     lagged_choice,  # d_{t-1}
     experience,
     partner_state,
-    policy_state,  # current applicable SRA identifyer
-    retirement_age_id,
     savings_end_of_previous_period,  # A_{t-1}
     income_shock_previous_period,  # epsilon_{t - 1}
     params,
@@ -50,10 +48,8 @@ def budget_constraint(
 
     # Income from lagged choice 2
     retirement_income_after_ssc = calc_pensions_after_ssc(
-        experience=experience_years,
+        experience_years=experience_years,
         education=education,
-        policy_state=policy_state,
-        retirement_age_id=retirement_age_id,
         options=options,
     )
 

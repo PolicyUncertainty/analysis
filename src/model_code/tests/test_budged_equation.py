@@ -62,8 +62,6 @@ def test_budget_unemployed(
         education=education,
         lagged_choice=0,
         experience=exp_cont,
-        policy_state=0,
-        retirement_age_id=0,
         savings_end_of_previous_period=savings,
         income_shock_previous_period=0,
         params=params,
@@ -156,8 +154,6 @@ def test_budget_worker(
         education=education,
         lagged_choice=1,
         experience=exp_cont,
-        policy_state=0,
-        retirement_age_id=0,
         savings_end_of_previous_period=savings,
         income_shock_previous_period=income_shock,
         params=params,
@@ -260,6 +256,102 @@ def test_retiree(
 ):
     path_dict, specs_internal = paths_and_specs
 
+    params = {"interest_rate": interest_rate}
+    max_init_exp_period = period + specs_internal["max_init_experience"]
+    exp_cont = exp / max_init_exp_period
+
+    wealth = budget_constraint(
+        period=period,
+        partner_state=partner_state,
+        education=education,
+        lagged_choice=2,
+        experience=exp_cont,
+        savings_end_of_previous_period=savings,
+        income_shock_previous_period=0,
+        params=params,
+        options=specs_internal,
+    )
+
+    pension_scaled = pension_year * specs_internal["wealth_unit"]
+    income_after_ssc = (
+        pension_year
+        - calc_health_ltc_contr(pension_scaled) / specs_internal["wealth_unit"]
+    )
+
+    has_partner_int = (partner_state > 0).astype(int)
+    unemployment_benefits = calc_unemployment_benefits(
+        savings, education, has_partner_int, period, specs_internal
+    )
+
+    nb_children = specs_internal["children_by_state"][
+        0, education, partner_state, period
+    ]
+    child_benefits = nb_children * specs_internal["child_benefit"] * 12
+    if partner_state == 0:
+        tax_total = calc_inc_tax_for_single_income(income_after_ssc, specs_internal)
+        total_net_income = income_after_ssc - tax_total + child_benefits
+        checked_income = np.maximum(total_net_income, unemployment_benefits)
+        np.testing.assert_almost_equal(
+            wealth, savings * (1 + interest_rate) + checked_income
+        )
+    else:
+        if partner_state == 1:
+            partner_income_year = specs_internal["partner_wage"][education, period] * 12
+
+            partner_income_scaled = partner_income_year * specs_internal["wealth_unit"]
+            sscs_partner = calc_health_ltc_contr(
+                partner_income_scaled
+            ) + calc_pension_unempl_contr(partner_income_scaled)
+        else:
+            partner_income_year = specs_internal["partner_pension"][education] * 12
+            partner_income_scaled = partner_income_year * specs_internal["wealth_unit"]
+            sscs_partner = calc_health_ltc_contr(partner_income_scaled)
+
+        income_partner = (
+            partner_income_year - sscs_partner / specs_internal["wealth_unit"]
+        )
+        total_income_after_ssc = income_after_ssc + income_partner
+
+        tax_toal = (
+            calc_inc_tax_for_single_income(total_income_after_ssc / 2, specs_internal)
+            * 2
+        )
+        total_net_income = total_income_after_ssc + child_benefits - tax_toal
+
+        checked_income = np.maximum(total_net_income, unemployment_benefits)
+        np.testing.assert_almost_equal(
+            wealth, savings * (1 + interest_rate) + checked_income
+        )
+
+
+@pytest.mark.parametrize(
+    "period, partner_state ,education, interest_rate, savings, exp, policy_state, ret_age_id",
+    list(
+        product(
+            PERIOD_GRID,
+            PARTNER_STATES,
+            EDUCATION_GRID,
+            INTEREST_RATE_GRID,
+            SAVINGS_GRID,
+            EXP_GRID,
+            POLICY_STATE_GRID,
+            RET_AGE_GRID,
+        )
+    ),
+)
+def test_fresh_retiree(
+    period,
+    partner_state,
+    education,
+    interest_rate,
+    savings,
+    exp,
+    policy_state,
+    ret_age_id,
+    paths_and_specs,
+):
+    path_dict, specs_internal = paths_and_specs
+
     actual_retirement_age = specs_internal["min_ret_age"] + ret_age_id
 
     params = {"interest_rate": interest_rate}
@@ -272,8 +364,6 @@ def test_retiree(
         education=education,
         lagged_choice=2,
         experience=exp_cont,
-        policy_state=policy_state,
-        retirement_age_id=ret_age_id,
         savings_end_of_previous_period=savings,
         income_shock_previous_period=0,
         params=params,

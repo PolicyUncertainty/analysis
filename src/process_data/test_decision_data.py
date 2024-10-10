@@ -33,7 +33,6 @@ def test_decision_data_no_missing_values(load_data=True):
     assert dec_dat["period"].isna().sum() == 0
     assert dec_dat["lagged_choice"].isna().sum() == 0
     assert dec_dat["policy_state"].isna().sum() == 0
-    # assert dec_dat["retirement_age_id"].isna().sum() == 0  //
     # this is the only exception because it is irrelevant for matched decisions
     assert dec_dat["experience"].isna().sum() == 0
     assert dec_dat["wealth"].isna().sum() == 0

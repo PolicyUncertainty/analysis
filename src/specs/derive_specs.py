@@ -83,9 +83,8 @@ def read_and_derive_specs(spec_path):
     # Number of education types
     specs["n_education_types"] = len(specs["education_labels"])
     # you can retire from min retirement age until max retirement age
-    specs["n_possible_ret_ages"] = specs["max_ret_age"] - specs["min_ret_age"] + 1
-    specs["n_policy_states"] = int(
-        ((specs["max_SRA"] - specs["min_SRA"]) / specs["SRA_grid_size"]) + 1
+    specs["n_policy_states"] = (
+        int(((specs["max_SRA"] - specs["min_SRA"]) / specs["SRA_grid_size"]) + 1) + 1
     )
     specs["SRA_values_policy_states"] = np.arange(
         specs["min_SRA"],

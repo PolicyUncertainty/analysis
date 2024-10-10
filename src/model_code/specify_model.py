@@ -40,7 +40,6 @@ def specify_model(
 
     # Load specifications
     n_periods = specs["n_periods"]
-    n_possible_ret_ages = specs["n_possible_ret_ages"]
     n_policy_states = specs["n_policy_states"]
     choices = np.arange(specs["n_choices"], dtype=int)
 
@@ -56,7 +55,6 @@ def specify_model(
             "choices": choices,
             "endogenous_states": {
                 "education": np.arange(specs["n_education_types"], dtype=int),
-                "retirement_age_id": np.arange(n_possible_ret_ages, dtype=int),
                 "sparsity_condition": sparsity_condition,
             },
             "exogenous_processes": {

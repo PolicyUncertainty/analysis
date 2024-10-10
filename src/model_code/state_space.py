@@ -1,58 +1,32 @@
 import jax.numpy as jnp
 import numpy as np
+from model_code.wealth_and_budget.pensions import (
+    calc_experience_for_total_pension_points,
+)
+from model_code.wealth_and_budget.pensions import calc_total_pension_points
 
 
 def create_state_space_functions():
     return {
-        "get_next_period_state": update_state_space,
         "get_state_specific_choice_set": state_specific_choice_set,
         "update_continuous_state": get_next_period_experience,
     }
 
 
-def sparsity_condition(period, lagged_choice, retirement_age_id, options):
+def sparsity_condition(period, lagged_choice, options):
     start_age = options["start_age"]
     max_ret_age = options["max_ret_age"]
     min_ret_age_state_space = options["min_ret_age"]
 
     age = start_age + period
-    actual_retirement_age = min_ret_age_state_space + retirement_age_id
     # You cannot retire before the earliest retirement age
     if (age <= min_ret_age_state_space) & (lagged_choice == 2):
         return False
     # After the maximum retirement age, you must be retired
     elif (age > max_ret_age) & (lagged_choice != 2):
         return False
-    # If you weren't retired last period, your actual retirement age is kept at minimum
-    elif (lagged_choice != 2) & (retirement_age_id > 0):
-        return False
-    # If you are retired, your actual retirement age can at most be your current age
-    elif (lagged_choice == 2) & (age <= actual_retirement_age):
-        return False
     else:
         return True
-
-
-def update_state_space(period, choice, lagged_choice, retirement_age_id, options):
-    next_state = dict()
-
-    next_state["period"] = period + 1
-    next_state["lagged_choice"] = choice
-
-    # Create work bools
-    retirement_bool = choice == 2
-
-    # Update retirement age. First create possible retirement id and then check if
-    # retirement is chosen and not already retired
-    poss_ret_id = period + options["start_age"] - options["min_ret_age"]
-    not_retired_bool = lagged_choice != 2
-    ret_age_update_bool = not_retired_bool * retirement_bool
-    next_state["retirement_age_id"] = (
-        ret_age_update_bool * poss_ret_id
-        + (1 - ret_age_update_bool) * retirement_age_id
-    )
-
-    return next_state
 
 
 def state_specific_choice_set(period, lagged_choice, policy_state, job_offer, options):
@@ -82,10 +56,50 @@ def apply_retirement_constraint_for_SRA(SRA, options):
     return np.maximum(SRA - options["ret_years_before_SRA"], 63)
 
 
-def get_next_period_experience(period, lagged_choice, experience, options):
+def get_next_period_experience(
+    period, lagged_choice, policy_state, education, experience, options
+):
     """Update experience based on lagged choice and period."""
     max_experience_period = period + options["max_init_experience"]
-    exp_last_period = (max_experience_period - 1) * experience
-    exp_new_period = exp_last_period + (lagged_choice == 1)
+    exp_years_last_period = (max_experience_period - 1) * experience
+
+    # Update if working
+    exp_new_period = exp_years_last_period + (lagged_choice == 1)
+
+    # If retired, then we update experience according to the deduction function
+    degenerate_state_id = options["n_policy_states"] - 1
+    fresh_retired = (degenerate_state_id != policy_state) & (lagged_choice == 2)
+    experience_years_with_penalty = calc_experience_years_for_pension_adjustment(
+        period, exp_years_last_period, education, policy_state, options
+    )
+    # Update if fresh retired
+    exp_new_period = (
+        1 - fresh_retired
+    ) * exp_new_period + fresh_retired * experience_years_with_penalty
 
     return (1 / max_experience_period) * exp_new_period
+
+
+def calc_experience_years_for_pension_adjustment(
+    period, experience_years, education, policy_state, options
+):
+    """Calculate the reduced experience with early retirement penalty."""
+    total_pension_points = calc_total_pension_points(
+        education=education,
+        experience_years=experience_years,
+        options=options,
+    )
+    # retirement age is last periods age
+    actual_retirement_age = options["start_age"] + period - 1
+    # SRA at retirement
+    SRA_at_retirement = options["min_SRA"] + policy_state * options["SRA_grid_size"]
+    # deduction (bonus) factor for early (late) retirement
+    ERP = options["early_retirement_penalty"]
+    pension_deduction = (SRA_at_retirement - actual_retirement_age) * ERP
+    pension_factor = 1 - pension_deduction
+    reduced_pension_points = pension_factor * total_pension_points
+
+    reduced_experience_years = calc_experience_for_total_pension_points(
+        reduced_pension_points, education, options
+    )
+    return reduced_experience_years

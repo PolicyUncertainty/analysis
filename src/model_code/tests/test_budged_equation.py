@@ -52,12 +52,16 @@ def test_budget_unemployed(
     specs_internal = copy.deepcopy(specs)
 
     params = {"interest_rate": interest_rate}
+
+    max_init_exp_period = period + specs_internal["max_init_experience"]
+    exp_cont = 2 / max_init_exp_period
+
     wealth = budget_constraint(
         period=period,
         partner_state=partner_state,
         education=education,
         lagged_choice=0,
-        experience_years=2,
+        experience=exp_cont,
         policy_state=0,
         retirement_age_id=0,
         savings_end_of_previous_period=savings,
@@ -143,13 +147,15 @@ def test_budget_worker(
     specs_internal["gamma_1"] = gamma_array
 
     params = {"interest_rate": interest_rate}
+    max_init_exp_period = period + specs_internal["max_init_experience"]
+    exp_cont = experience / max_init_exp_period
 
     wealth = budget_constraint(
         period=period,
         partner_state=partner_state,
         education=education,
         lagged_choice=1,
-        experience_years=experience,
+        experience=exp_cont,
         policy_state=0,
         retirement_age_id=0,
         savings_end_of_previous_period=savings,
@@ -257,12 +263,15 @@ def test_retiree(
     actual_retirement_age = specs_internal["min_ret_age"] + ret_age_id
 
     params = {"interest_rate": interest_rate}
+    max_init_exp_period = period + specs_internal["max_init_experience"]
+    exp_cont = exp / max_init_exp_period
+
     wealth = budget_constraint(
         period=period,
         partner_state=partner_state,
         education=education,
         lagged_choice=2,
-        experience_years=exp,
+        experience=exp_cont,
         policy_state=policy_state,
         retirement_age_id=ret_age_id,
         savings_end_of_previous_period=savings,
@@ -270,9 +279,6 @@ def test_retiree(
         params=params,
         options=specs_internal,
     )
-    pension_point_value = specs_internal["pension_point_value_by_edu_exp"][
-        education, exp
-    ]
     SRA_at_resolution = (
         specs_internal["min_SRA"] + policy_state * specs_internal["SRA_grid_size"]
     )
@@ -281,7 +287,14 @@ def test_retiree(
     ]
     pension_factor = 1 - deduction_factor
 
-    pension_year = pension_point_value * pension_factor * exp * 12
+    mean_wage_all = specs_internal["mean_wage"]
+    gamma_0 = specs_internal["gamma_0"][education]
+    gamma_1_plus_1 = specs_internal["gamma_1"][education] + 1
+    total_pens_points = (
+        (np.exp(gamma_0) / gamma_1_plus_1) * ((exp + 1) ** gamma_1_plus_1 - 1)
+    ) / mean_wage_all
+
+    pension_year = specs_internal["ppv"] * total_pens_points * pension_factor * 12
     pension_scaled = pension_year * specs_internal["wealth_unit"]
     income_after_ssc = (
         pension_year

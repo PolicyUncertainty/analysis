@@ -3,7 +3,6 @@ from itertools import product
 import numpy as np
 import pytest
 from model_code.state_space import apply_retirement_constraint_for_SRA
-from model_code.state_space import sparsity_condition
 from model_code.state_space import state_specific_choice_set
 from model_code.state_space import update_state_space
 
@@ -21,13 +20,15 @@ def test_period_and_lagged_choice_update(period, lagged_choice):
     options = {
         "start_age": 25,
         "min_ret_age": 65,
-        "exp_cap": 40,
     }
     choice = 0
     retirement_age_id = 0
-    experience = 20
     next_state = update_state_space(
-        period, choice, lagged_choice, retirement_age_id, experience, options
+        period=period,
+        choice=choice,
+        lagged_choice=lagged_choice,
+        retirement_age_id=retirement_age_id,
+        options=options,
     )
     assert next_state["period"] == period + 1
     assert next_state["lagged_choice"] == choice
@@ -52,9 +53,12 @@ def test_retirement_age_update(period, lagged_choice):
     }
     choice = 2
     retirement_age_id = 0
-    experience = 20
     next_state = update_state_space(
-        period, choice, lagged_choice, retirement_age_id, experience, options
+        period=period,
+        choice=choice,
+        lagged_choice=lagged_choice,
+        retirement_age_id=retirement_age_id,
+        options=options,
     )
     age = period + options["start_age"]
     if lagged_choice != 2:
@@ -65,32 +69,6 @@ def test_retirement_age_update(period, lagged_choice):
 
 PERIOD_GRID = np.linspace(35, 45, 1)
 CHOICE_SET = np.array([0, 1, 2])
-EXPERIENCE_GRID = np.linspace(35, 45, 2)
-
-
-@pytest.mark.parametrize(
-    "period, choice, experience",
-    list(product(PERIOD_GRID, CHOICE_SET, EXPERIENCE_GRID)),
-)
-def test_experience_update(period, choice, experience):
-    options = {
-        "start_age": 25,
-        "min_ret_age": 65,
-        "exp_cap": 40,
-    }
-    period = 35
-    choice = 1
-    lagged_choice = 1
-    retirement_age_id = 0
-    next_state = update_state_space(
-        period, choice, lagged_choice, retirement_age_id, experience, options
-    )
-    if choice == 1:
-        if experience < options["exp_cap"]:
-            assert next_state["experience"] == experience + 1
-    else:
-        assert next_state["experience"] == experience
-
 
 # tests of choice set
 

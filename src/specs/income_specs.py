@@ -3,7 +3,7 @@ import pandas as pd
 from jax import numpy as jnp
 
 
-def calculate_pension_values(specs, path_dict):
+def get_pension_vars(specs, path_dict):
     wage_params = pd.read_csv(
         path_dict["est_results"] + "wage_eq_params.csv", index_col=0
     )

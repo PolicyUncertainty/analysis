@@ -5,7 +5,7 @@ import yaml
 from specs.family_specs import calculate_partner_incomes
 from specs.family_specs import predict_children_by_state
 from specs.family_specs import read_in_partner_transition_specs
-from specs.income_specs import calculate_pension_values
+from specs.income_specs import get_pension_vars
 from specs.income_specs import process_wage_params
 
 
@@ -21,7 +21,7 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     ) = process_wage_params(path_dict, specs)
 
     # pensions
-    specs["ppv"], specs["mean_wage"] = calculate_pension_values(specs, path_dict)
+    specs["ppv"], specs["mean_wage"] = get_pension_vars(specs, path_dict)
 
     # partner income
     specs["partner_wage"], specs["partner_pension"] = calculate_partner_incomes(
@@ -40,7 +40,7 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     ) = read_in_partner_transition_specs(path_dict, specs)
 
     # Set initial experience
-    specs["max_init_experience"], specs["experience_grid"] = create_model_initials(
+    specs["max_init_experience"] = create_model_initials(
         path_dict, specs, load_precomputed
     )
 
@@ -56,9 +56,6 @@ def create_model_initials(path_dict, specs, load_precomputed):
         max_init_experience = int(
             np.loadtxt(path_dict["intermediate_data"] + "max_init_exp.txt")
         )
-        experience_grid = np.loadtxt(
-            path_dict["intermediate_data"] + "experience_grid.txt"
-        )
     else:
         # max initial experience
         data_decision = pd.read_pickle(
@@ -70,18 +67,7 @@ def create_model_initials(path_dict, specs, load_precomputed):
         np.savetxt(
             path_dict["intermediate_data"] + "max_init_exp.txt", [max_init_experience]
         )
-        # experience grid
-        max_period_exp = max_init_experience + data_decision["period"]
-        data_decision["exp_share"] = data_decision["experience"].values / max_period_exp
-        experience_quantile_grid = np.linspace(0, 1, specs["n_experience_grid_points"])
-        experience_grid = (
-            data_decision["exp_share"].quantile(experience_quantile_grid).values
-        )
-        np.savetxt(
-            path_dict["intermediate_data"] + "experience_grid.txt",
-            experience_quantile_grid,
-        )
-    return max_init_experience, jnp.asarray(experience_quantile_grid)
+    return max_init_experience
 
 
 def read_and_derive_specs(spec_path):

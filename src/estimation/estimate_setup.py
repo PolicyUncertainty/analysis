@@ -163,7 +163,7 @@ def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):
 
     # Transform experience
     max_init_exp = model["options"]["model_params"]["max_init_experience"]
-    exp_denominator = data_decision["period"].values + max_init_exp
+    exp_denominator = 44.0
     data_decision["experience"] = data_decision["experience"] / exp_denominator
 
     # We can adjust wealth outside, as it does not depend on estimated parameters

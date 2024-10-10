@@ -8,7 +8,7 @@ from process_data.sample_creation_scripts.data_tools import filter_est_years
 from process_data.sample_creation_scripts.partner_code import create_partner_state
 from process_data.var_resources.soep_vars import create_choice_variable
 from process_data.var_resources.soep_vars import create_education_type
-from process_data.var_resources.soep_vars import create_experience_variable_with_cap
+from process_data.var_resources.soep_vars import create_experience_variable
 from process_data.var_resources.soep_vars import generate_job_separation_var
 from process_data.var_resources.wealth import add_wealth
 
@@ -28,7 +28,6 @@ def create_structural_est_sample(paths, load_data=False, options=None):
     end_year = options["end_year"]
     min_ret_age = options["min_ret_age"]
     start_age = options["start_age"]
-    exp_cap = options["exp_cap"]
 
     # Load and merge data state data from SOEP core (all but wealth)
     df = load_and_merge_soep_core(soep_c38_path=paths["soep_c38"])
@@ -68,7 +67,7 @@ def create_structural_est_sample(paths, load_data=False, options=None):
     df["retirement_age_id"] = 0
 
     # experience
-    df = create_experience_variable_with_cap(df, exp_cap)
+    df = create_experience_variable(df)
 
     # education
     df = create_education_type(df)

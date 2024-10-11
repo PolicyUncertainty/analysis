@@ -138,7 +138,7 @@ from estimation.estimate_setup import load_and_prep_data
 #     plt.show()
 #
 # exp_grid = np.arange(0, 45, 1)
-# discrete_state_to_plot = {"period": 30, "lagged_choice": 1, "policy_state": 1, "retirement_age_id": 0, "job_offer": 1, "wealth": 50, "education": 0}
+# discrete_state_to_plot = {"period": 30, "lagged_choice": 1, "policy_state": 1, "job_offer": 1, "wealth": 50, "education": 0}
 # plot_value(solution["value"], solution["endog_grid"], "experience", exp_grid, discrete_state_to_plot, model, [0, 1])
 # breakpoint()
 #

@@ -21,7 +21,6 @@ def budget_constraint(
     # Recalculate experience
     max_exp_period = period + options["max_init_experience"]
     experience_years = max_exp_period * experience
-    experience_years = jnp.minimum(experience_years, 44.0)
 
     # Calculate partner income
     partner_income_after_ssc = calc_partner_income_after_ssc(

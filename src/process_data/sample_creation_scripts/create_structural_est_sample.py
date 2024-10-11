@@ -63,9 +63,6 @@ def create_structural_est_sample(paths, load_data=False, options=None):
         df["policy_state"],
     ) = modify_policy_state(df["policy_state"], options)
 
-    # retirement_age_id (dummy 0 for now)
-    df["retirement_age_id"] = 0
-
     # experience
     df = create_experience_variable(df)
 
@@ -85,7 +82,6 @@ def create_structural_est_sample(paths, load_data=False, options=None):
         "lagged_choice": "int8",
         "policy_state": "int8",
         "policy_state_value": "float32",
-        "retirement_age_id": "int8",
         "partner_state": "int8",
         "job_offer": "int8",
         "experience": "int8",

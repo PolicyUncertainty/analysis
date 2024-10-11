@@ -96,7 +96,6 @@ def generate_start_states(path_dict, params, model, n_agents, seed):
         "education": jnp.array(edu_agents, dtype=jnp.int64),
         "lagged_choice": jnp.array(lagged_choice, dtype=jnp.int64),
         "policy_state": jnp.zeros_like(exp_agents, dtype=jnp.int64) + 8,
-        "retirement_age_id": jnp.zeros_like(exp_agents, dtype=jnp.int64),
         "job_offer": jnp.ones_like(exp_agents, dtype=jnp.int64),
         "partner_state": jnp.array(partner_states, dtype=jnp.int64),
     }

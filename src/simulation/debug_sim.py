@@ -57,7 +57,6 @@ lagged_choice = 2
 experience = 40
 partner_state = 0
 # policy_state = 0
-retirement_age_id = 0
 wealth_id = 15
 savings_end_of_previous_period = model["exog_savings_grid"][wealth_id]
 income_shock_previous_period = 0
@@ -65,7 +64,7 @@ job_offer = 0
 options = model["options"]
 choice = 2
 
-# names: ['period', 'lagged_choice', 'experience', 'education', 'retirement_age_id', 'policy_state', 'job_offer', 'partner_state']
+# names: ['period', 'lagged_choice', 'experience', 'education', 'policy_state', 'job_offer', 'partner_state']
 
 for policy_state in range(29):
     all_pol_states = model["model_structure"]["map_state_choice_to_index"][
@@ -73,7 +72,6 @@ for policy_state in range(29):
         lagged_choice,
         experience,
         education,
-        retirement_age_id,
         policy_state,
         job_offer,
         partner_state,
@@ -92,7 +90,6 @@ for policy_state in range(29):
         experience,
         np.array(partner_state),
         policy_state,  # current applicable SRA identifyer
-        retirement_age_id,
         savings_end_of_previous_period,  # A_{t-1}
         income_shock_previous_period,  # epsilon_{t - 1}
         params,

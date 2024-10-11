@@ -99,7 +99,10 @@ def observed_model_fit(paths_dict):
     data_decision["prob_diff"] = (
         data_decision["prob_choice_org"] - data_decision["prob_choice_observed"]
     ).abs()
-    # breakpoint()
+    data_decision["exp_years"] = (
+        data_decision["period"] + specs["max_init_experience"]
+    ) * data_decision["experience"]
+    breakpoint()
 
     data_decision["likelihood_contrib"] = neg_likelihood_contributions
     data_decision["age_bin"] = np.floor(data_decision["age"] / 10) * 10

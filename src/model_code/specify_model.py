@@ -88,7 +88,6 @@ def specify_model(
             budget_constraint=budget_constraint,
             path=path_dict["intermediate_data"] + "model.pkl",
         )
-        model.pop("exog_grids")
 
     else:
         model = setup_and_save_model(

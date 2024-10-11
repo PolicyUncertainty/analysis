@@ -1,3 +1,4 @@
+import jax.lax
 import jax.numpy as jnp
 import numpy as np
 from model_code.wealth_and_budget.pensions import (
@@ -73,9 +74,9 @@ def get_next_period_experience(
         period, exp_years_last_period, education, policy_state, options
     )
     # Update if fresh retired
-    exp_new_period = (
-        1 - fresh_retired
-    ) * exp_new_period + fresh_retired * experience_years_with_penalty
+    exp_new_period = jax.lax.select(
+        fresh_retired, experience_years_with_penalty, exp_new_period
+    )
     return (1 / max_experience_period) * exp_new_period
 
 

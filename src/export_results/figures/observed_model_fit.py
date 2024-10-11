@@ -26,8 +26,8 @@ def observed_model_fit(paths_dict):
         update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
         policy_state_trans_func=expected_SRA_probs_estimation,
         file_append="subj",
-        load_model=False,
-        load_solution=False,
+        load_model=True,
+        load_solution=True,
     )
 
     data_decision, _ = load_and_prep_data(
@@ -77,38 +77,17 @@ def observed_model_fit(paths_dict):
         choice_probs_observations = np.nan_to_num(choice_probs_observations, nan=0.0)
         data_decision[f"choice_{choice}"] = choice_probs_observations
 
-    prob_choice_observed = choice_probs_for_choice_vals(
-        data_decision["choice"].values,
-        states_dict,
-        model,
-        unobserved_state_specs,
-        params,
-        est_model,
-        weight_full_states=False,
-    )
-    data_decision["prob_choice_observed"] = prob_choice_observed
-    data_decision.groupby(["age", "choice"])["prob_choice_observed"].mean()
-
-    # Negative ll contributions are positive numbers. The smaller the better the fit
-    # Add high fixed punishment for not explained choices
-    neg_likelihood_contributions = (-np.log(prob_choice_observed)).clip(max=999)
-    org_ll = np.loadtxt("ll_cont.txt")
-    org_probs = np.exp(-org_ll)
-
-    data_decision["prob_choice_org"] = org_probs
-    data_decision["prob_diff"] = (
-        data_decision["prob_choice_org"] - data_decision["prob_choice_observed"]
-    ).abs()
-    data_decision["exp_years"] = (
-        data_decision["period"] + specs["max_init_experience"]
-    ) * data_decision["experience"]
-    breakpoint()
-
-    data_decision["likelihood_contrib"] = neg_likelihood_contributions
-    data_decision["age_bin"] = np.floor(data_decision["age"] / 10) * 10
+    # prob_choice_observed = choice_probs_for_choice_vals(
+    #     data_decision["choice"].values,
+    #     states_dict,
+    #     model,
+    #     unobserved_state_specs,
+    #     params,
+    #     est_model,
+    #     weight_full_states=False,
+    # )
 
     file_append = ["low", "high"]
-    partner_labels = ["Single", "Partnered"]
     data_decision["married"] = (data_decision["partner_state"] > 0).astype(int)
 
     # for partner_val, partner_label in enumerate(partner_labels):

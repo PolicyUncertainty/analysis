@@ -47,7 +47,7 @@ from estimation.estimate_setup import load_and_prep_data
 data_decision, states_dict = load_and_prep_data(path_dict, params, model)
 sc = {
     name: data_decision[name].values[209]
-    for name in model["model_structure"]["state_space_names"]
+    for name in model["model_structure"]["discrete_states_names"]
 }
 sc["choice"] = 1
 sc["partner_state"] = 1
@@ -117,7 +117,7 @@ from estimation.estimate_setup import load_and_prep_data
 #             state_choice_indexes = get_state_choice_index_per_state(
 #                 states=state_dict,
 #                 map_state_choice_to_index=model["model_structure"]["map_state_choice_to_index"],
-#                 state_space_names=model["model_structure"]["state_space_names"],
+#                 discrete_states_names=model["model_structure"]["discrete_states_names"],
 #             )
 #             value_state = jnp.take(
 #                 value_solved, state_choice_indexes, axis=0, mode="fill", fill_value=jnp.nan
@@ -138,7 +138,7 @@ from estimation.estimate_setup import load_and_prep_data
 #     plt.show()
 #
 # exp_grid = np.arange(0, 45, 1)
-# discrete_state_to_plot = {"period": 30, "lagged_choice": 1, "policy_state": 1, "retirement_age_id": 0, "job_offer": 1, "wealth": 50, "education": 0}
+# discrete_state_to_plot = {"period": 30, "lagged_choice": 1, "policy_state": 1, "job_offer": 1, "wealth": 50, "education": 0}
 # plot_value(solution["value"], solution["endog_grid"], "experience", exp_grid, discrete_state_to_plot, model, [0, 1])
 # breakpoint()
 #

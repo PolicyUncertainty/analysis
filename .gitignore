@@ -19,6 +19,7 @@ output/intermediate_data/*.pkl
 # Ignore intermediate pcikle files
 contributions_base.pkl
 scores.pkl
+ll*.txt
 
 # Installation files
 *.egg-info/

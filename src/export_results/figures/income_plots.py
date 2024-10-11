@@ -13,7 +13,7 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 def plot_incomes(path_dict):
     specs = generate_derived_and_data_derived_specs(path_dict)
 
-    exp_levels = np.arange(0, specs["exp_cap"] + 1)
+    exp_levels = np.arange(0, specs["max_experience"] + 1)
 
     yearly_unemployment = specs["unemployment_benefits"] * 12
     unemployment_benefits = np.ones_like(exp_levels) * yearly_unemployment
@@ -63,7 +63,7 @@ def plot_incomes(path_dict):
 
 def plot_total_income(specs):
     params = {"interest_rate": 0.0}
-    exp_levels = np.arange(0, specs["exp_cap"] + 1)
+    exp_levels = np.arange(0, specs["max_experience"] + 1)
     marriage_labels = ["Single", "Partnered"]
     worklife_chocie_labels = ["Unemployed", "Worker"]
     edu_labels = specs["education_labels"]
@@ -74,14 +74,13 @@ def plot_total_income(specs):
             for work_val, work_label in enumerate(worklife_chocie_labels):
                 total_income = np.zeros_like(exp_levels, dtype=float)
                 for i, exp in enumerate(exp_levels):
+                    exp_share = exp / (exp + specs["max_init_experience"])
                     total_income[i] = budget_constraint(
                         period=exp,
                         education=edu_val,
                         lagged_choice=work_val,
-                        experience=exp,
+                        experience=exp_share,
                         partner_state=np.array(married_val),
-                        policy_state=0,
-                        retirement_age_id=0,
                         savings_end_of_previous_period=0,
                         income_shock_previous_period=0,
                         params=params,

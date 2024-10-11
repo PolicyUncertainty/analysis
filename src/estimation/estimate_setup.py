@@ -108,7 +108,9 @@ def create_ll_from_paths(start_params_all, path_dict, load_model):
     )
 
     # Load data
-    data_decision, states_dict = load_and_prep_data(path_dict, start_params_all, model)
+    data_decision, states_dict = load_and_prep_data(
+        path_dict, start_params_all, model, drop_retirees=True
+    )
 
     def weight_func(**kwargs):
         # We need to weight the unobserved job offer state for each of its possible values

@@ -3,6 +3,7 @@ from itertools import product
 
 import numpy as np
 import pytest
+from model_code.state_space import get_next_period_experience
 from model_code.wealth_and_budget.budget_equation import budget_constraint
 from model_code.wealth_and_budget.partner_income import calc_partner_income_after_ssc
 from model_code.wealth_and_budget.tax_and_ssc import calc_health_ltc_contr
@@ -17,6 +18,7 @@ SAVINGS_GRID = np.linspace(10, 100, 3)
 INTEREST_RATE_GRID = np.linspace(0.01, 0.1, 2)
 PARTNER_STATES = np.array([0, 1, 2], dtype=int)
 PERIOD_GRID = np.arange(0, 40, 10, dtype=int)
+OLD_AGE_PERIOD_GRID = np.arange(33, 43, 1, dtype=int)
 EDUCATION_GRID = [0, 1]
 
 
@@ -229,17 +231,15 @@ RET_AGE_GRID = np.linspace(0, 2, 3, dtype=int)
 
 
 @pytest.mark.parametrize(
-    "period, partner_state ,education, interest_rate, savings, exp, policy_state, ret_age_id",
+    "period, partner_state ,education, interest_rate, savings, exp",
     list(
         product(
-            PERIOD_GRID,
+            OLD_AGE_PERIOD_GRID,
             PARTNER_STATES,
             EDUCATION_GRID,
             INTEREST_RATE_GRID,
             SAVINGS_GRID,
             EXP_GRID,
-            POLICY_STATE_GRID,
-            RET_AGE_GRID,
         )
     ),
 )
@@ -250,8 +250,6 @@ def test_retiree(
     interest_rate,
     savings,
     exp,
-    policy_state,
-    ret_age_id,
     paths_and_specs,
 ):
     path_dict, specs_internal = paths_and_specs
@@ -271,7 +269,13 @@ def test_retiree(
         params=params,
         options=specs_internal,
     )
-
+    mean_wage_all = specs_internal["mean_wage"]
+    gamma_0 = specs_internal["gamma_0"][education]
+    gamma_1_plus_1 = specs_internal["gamma_1"][education] + 1
+    total_pens_points = (
+        (np.exp(gamma_0) / gamma_1_plus_1) * ((exp + 1) ** gamma_1_plus_1 - 1)
+    ) / mean_wage_all
+    pension_year = specs_internal["ppv"] * total_pens_points * 12
     pension_scaled = pension_year * specs_internal["wealth_unit"]
     income_after_ssc = (
         pension_year
@@ -325,17 +329,16 @@ def test_retiree(
 
 
 @pytest.mark.parametrize(
-    "period, partner_state ,education, interest_rate, savings, exp, policy_state, ret_age_id",
+    "period, partner_state ,education, interest_rate, savings, exp, policy_state",
     list(
         product(
-            PERIOD_GRID,
+            OLD_AGE_PERIOD_GRID,
             PARTNER_STATES,
             EDUCATION_GRID,
             INTEREST_RATE_GRID,
             SAVINGS_GRID,
             EXP_GRID,
             POLICY_STATE_GRID,
-            RET_AGE_GRID,
         )
     ),
 )
@@ -347,16 +350,24 @@ def test_fresh_retiree(
     savings,
     exp,
     policy_state,
-    ret_age_id,
     paths_and_specs,
 ):
     path_dict, specs_internal = paths_and_specs
 
-    actual_retirement_age = specs_internal["min_ret_age"] + ret_age_id
+    actual_retirement_age = specs_internal["start_age"] + period - 1
 
     params = {"interest_rate": interest_rate}
-    max_init_exp_period = period + specs_internal["max_init_experience"]
-    exp_cont = exp / max_init_exp_period
+    max_init_exp_prev_period = period + specs_internal["max_init_experience"] - 1
+    exp_cont_prev = exp / max_init_exp_prev_period
+
+    exp_cont = get_next_period_experience(
+        period=period,
+        lagged_choice=2,
+        policy_state=policy_state,
+        education=education,
+        experience=exp_cont_prev,
+        options=specs_internal,
+    )
 
     wealth = budget_constraint(
         period=period,

@@ -76,7 +76,6 @@ def get_next_period_experience(
     exp_new_period = (
         1 - fresh_retired
     ) * exp_new_period + fresh_retired * experience_years_with_penalty
-
     return (1 / max_experience_period) * exp_new_period
 
 

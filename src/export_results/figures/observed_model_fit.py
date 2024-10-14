@@ -16,7 +16,7 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
 def observed_model_fit(paths_dict):
-    params = pickle.load(open(paths_dict["est_results"] + "est_params_all.pkl", "rb"))
+    params = pickle.load(open(paths_dict["est_results"] + "est_params.pkl", "rb"))
 
     specs = generate_derived_and_data_derived_specs(paths_dict)
 
@@ -27,7 +27,7 @@ def observed_model_fit(paths_dict):
         policy_state_trans_func=expected_SRA_probs_estimation,
         file_append="subj",
         load_model=True,
-        load_solution=True,
+        load_solution=False,
     )
 
     data_decision, _ = load_and_prep_data(

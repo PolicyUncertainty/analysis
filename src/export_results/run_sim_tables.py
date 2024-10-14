@@ -5,7 +5,7 @@ import pandas as pd
 from set_paths import create_path_dict
 
 path_dict = create_path_dict()
-params = pickle.load(open(path_dict["est_results"] + "est_params_all.pkl", "rb"))
+params = pickle.load(open(path_dict["est_results"] + "est_params.pkl", "rb"))
 from export_results.tables.effects_table import create_effects_table
 
 sim_dir = path_dict["intermediate_data"] + "sim_data/"

@@ -27,7 +27,7 @@ from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 # Set specifications
 n_agents = 10000
 seeed = 123
-params = pickle.load(open(path_dict["est_results"] + "est_params_all.pkl", "rb"))
+params = pickle.load(open(path_dict["est_results"] + "est_params.pkl", "rb"))
 
 # %%
 ###################################################################

@@ -28,9 +28,19 @@ def estimate_model(path_dict, params_to_estimate_names, file_append, load_model)
     start_params_all.update(job_sep_params)
 
     # Assign start params from before
-    last_end = pkl.load(open(path_dict["est_results"] + "est_params_all.pkl", "rb"))
+    last_end = pkl.load(open(path_dict["est_results"] + "est_params.pkl", "rb"))
     start_params_all.update(last_end)
     start_params_all["bequest_scale"] = 1
+    last_end_cop = {
+        "dis_util_work_high": 1.7398584109319462,
+        "dis_util_work_low": 1.6425831574085783,
+        "dis_util_unemployed_high": 1.1045541156969099,
+        "dis_util_unemployed_low": 0.8274402989521529,
+        "job_finding_logit_const": 0.20670595110059004,
+        "job_finding_logit_age": -0.012669999497341398,
+        "job_finding_logit_high_educ": 0.8113322177243772,
+    }
+    start_params_all.update(last_end_cop)
 
     individual_likelihood, weights = create_ll_from_paths(
         start_params_all, path_dict, load_model
@@ -108,7 +118,9 @@ def create_ll_from_paths(start_params_all, path_dict, load_model):
     )
 
     # Load data
-    data_decision, states_dict = load_and_prep_data(path_dict, start_params_all, model)
+    data_decision, states_dict = load_and_prep_data(
+        path_dict, start_params_all, model, drop_retirees=True
+    )
 
     def weight_func(**kwargs):
         # We need to weight the unobserved job offer state for each of its possible values

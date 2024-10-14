@@ -15,7 +15,7 @@ params_util = [
     # "lambda",
 ]
 
-params = pickle.load(open(path_dict["est_results"] + "est_params_all.pkl", "rb"))
+params = pickle.load(open(path_dict["est_results"] + "est_params.pkl", "rb"))
 std_errors = pickle.load(open(path_dict["est_results"] + "std_errors_all.pkl", "rb"))
 
 util_df = pd.DataFrame()

@@ -16,7 +16,7 @@ from set_paths import create_path_dict
 path_dict = create_path_dict()
 
 
-params = pickle.load(open(path_dict["est_results"] + "est_params_all.pkl", "rb"))
+params = pickle.load(open(path_dict["est_results"] + "est_params.pkl", "rb"))
 
 individual_likelihood, weights = create_ll_from_paths(
     params, path_dict, load_model=True

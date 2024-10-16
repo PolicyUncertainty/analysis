@@ -3,35 +3,20 @@ import pandas as pd
 from jax import numpy as jnp
 
 
-def calculate_pension_values(specs, path_dict):
+def get_pension_vars(specs, path_dict):
     wage_params = pd.read_csv(
         path_dict["est_results"] + "wage_eq_params.csv", index_col=0
     )
 
     # Create possible experience values
-    experience = np.arange(0, specs["exp_cap"] + 1)
+    # ToDo: Use real mean wage
+    experience = np.arange(0, 45)
 
     wage_by_experience_average = np.exp(
         wage_params.loc["all", "constant"]
         + wage_params.loc["all", "ln_exp"] * np.log(experience + 1)
     )
-
-    n_edu_types = specs["n_education_types"]
-    # Create adjustment factor for pension point value container
-    adjustment_factor_by_exp = np.ndarray(shape=(n_edu_types, len(experience)))
-
-    for edu_index, edu_label in enumerate(specs["education_labels"]):
-        wage_by_experience_edu = np.exp(
-            wage_params.loc[edu_label, "constant"]
-            + wage_params.loc[edu_label, "ln_exp"] * np.log(experience + 1)
-        )
-        adjustment_factor_by_exp[edu_index, :] = (
-            wage_by_experience_edu / wage_by_experience_average
-        )
-        for i in range(1, len(experience)):
-            adjustment_factor_by_exp[edu_index, i] = adjustment_factor_by_exp[
-                edu_index, 1 : i + 1
-            ].mean()
+    mean_wage_all = wage_by_experience_average.mean()
 
     # Generate average pension point value weighted by east and west
     # pensions
@@ -39,7 +24,7 @@ def calculate_pension_values(specs, path_dict):
         0.75 * specs["pension_point_value_west_2010"]
         + 0.25 * specs["pension_point_value_east_2010"]
     ) / specs["wealth_unit"]
-    return jnp.asarray(adjustment_factor_by_exp) * pension_point_value
+    return pension_point_value, mean_wage_all
 
 
 def process_wage_params(path_dict, specs):

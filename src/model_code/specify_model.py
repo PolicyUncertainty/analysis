@@ -40,18 +40,21 @@ def specify_model(
 
     # Load specifications
     n_periods = specs["n_periods"]
-    n_possible_ret_ages = specs["n_possible_ret_ages"]
     n_policy_states = specs["n_policy_states"]
     choices = np.arange(specs["n_choices"], dtype=int)
+
+    # Create savings grid
+    savings_grid = create_savings_grid()
+
+    # Experience grid
+    experience_grid = jnp.linspace(0, 1, specs["n_experience_grid_points"])
 
     options = {
         "state_space": {
             "n_periods": n_periods,
             "choices": choices,
             "endogenous_states": {
-                "experience": np.arange(n_periods, dtype=int),
                 "education": np.arange(specs["n_education_types"], dtype=int),
-                "retirement_age_id": np.arange(n_possible_ret_ages, dtype=int),
                 "sparsity_condition": sparsity_condition,
             },
             "exogenous_processes": {
@@ -68,11 +71,13 @@ def specify_model(
                     "states": np.arange(specs["n_partner_states"], dtype=int),
                 },
             },
+            "continuous_states": {
+                "wealth": savings_grid,
+                "experience": experience_grid,
+            },
         },
         "model_params": specs,
     }
-
-    savings_grid = create_savings_grid()
 
     if load_model:
         model = load_and_setup_model(
@@ -91,7 +96,6 @@ def specify_model(
             utility_functions=create_utility_functions(),
             utility_functions_final_period=create_final_period_utility_functions(),
             budget_constraint=budget_constraint,
-            exog_savings_grid=savings_grid,
             path=path_dict["intermediate_data"] + "model.pkl",
         )
 

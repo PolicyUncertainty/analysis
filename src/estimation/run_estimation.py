@@ -80,7 +80,7 @@ if input_str == "m":
         "dis_util_work_low",
         "dis_util_unemployed_high",
         "dis_util_unemployed_low",
-        "bequest_scale",
+        # "bequest_scale",
         # "lambda",
         "job_finding_logit_const",
         "job_finding_logit_age",

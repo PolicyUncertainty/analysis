@@ -199,9 +199,8 @@ def test_bequest(consumption, mu, bequest_scale):
         "bequest_scale": bequest_scale,
     }
     bequest = bequest_scale * (consumption ** (1 - mu) / (1 - mu))
-    random_choice = np.random.choice(np.array([0, 1, 2]))
     np.testing.assert_almost_equal(
-        utility_final_consume_all(random_choice, consumption, params, None), bequest
+        utility_final_consume_all(consumption, params), bequest
     )
 
 
@@ -214,11 +213,8 @@ def test_bequest_marginal(consumption, mu, bequest_scale):
         "mu": mu,
         "bequest_scale": bequest_scale,
     }
-    random_choice = np.random.choice(np.array([0, 1, 2]))
-    bequest = jax.jacfwd(utility_final_consume_all, argnums=1)(
-        random_choice, consumption, params, None
-    )
+    bequest = jax.jacfwd(utility_final_consume_all, argnums=0)(consumption, params)
     np.testing.assert_almost_equal(
-        marginal_utility_final_consume_all(random_choice, consumption, params, None),
+        marginal_utility_final_consume_all(consumption, params),
         bequest,
     )

@@ -16,7 +16,7 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
 def observed_model_fit(paths_dict):
-    params = pickle.load(open(paths_dict["est_results"] + "est_params_all.pkl", "rb"))
+    params = pickle.load(open(paths_dict["est_results"] + "est_params.pkl", "rb"))
 
     specs = generate_derived_and_data_derived_specs(paths_dict)
 
@@ -37,8 +37,10 @@ def observed_model_fit(paths_dict):
     data_decision = data_decision[data_decision["age"] < 75]
     states_dict = {
         name: data_decision[name].values
-        for name in model["model_structure"]["state_space_names"]
+        for name in model["model_structure"]["discrete_states_names"]
     }
+    states_dict["experience"] = data_decision["experience"].values
+    states_dict["wealth"] = data_decision["adjusted_wealth"].values
 
     def weight_func(**kwargs):
         # We need to weight the unobserved job offer state for each of its possible values
@@ -65,7 +67,6 @@ def observed_model_fit(paths_dict):
         choice_probs_observations = choice_probs_for_choice_vals(
             choice_vals,
             states_dict,
-            data_decision,
             model,
             unobserved_state_specs,
             params,
@@ -76,28 +77,17 @@ def observed_model_fit(paths_dict):
         choice_probs_observations = np.nan_to_num(choice_probs_observations, nan=0.0)
         data_decision[f"choice_{choice}"] = choice_probs_observations
 
-    prob_choice_observed = choice_probs_for_choice_vals(
-        data_decision["choice"].values,
-        states_dict,
-        data_decision,
-        model,
-        unobserved_state_specs,
-        params,
-        est_model,
-        weight_full_states=False,
-    )
-    data_decision["prob_choice_observed"] = prob_choice_observed
-    data_decision.groupby(["age", "choice"])["prob_choice_observed"].mean()
-
-    # Negative ll contributions are positive numbers. The smaller the better the fit
-    # Add high fixed punishment for not explained choices
-    neg_likelihood_contributions = (-np.log(prob_choice_observed)).clip(max=999)
-
-    data_decision["likelihood_contrib"] = neg_likelihood_contributions
-    data_decision["age_bin"] = np.floor(data_decision["age"] / 10) * 10
+    # prob_choice_observed = choice_probs_for_choice_vals(
+    #     data_decision["choice"].values,
+    #     states_dict,
+    #     model,
+    #     unobserved_state_specs,
+    #     params,
+    #     est_model,
+    #     weight_full_states=False,
+    # )
 
     file_append = ["low", "high"]
-    partner_labels = ["Single", "Partnered"]
     data_decision["married"] = (data_decision["partner_state"] > 0).astype(int)
 
     # for partner_val, partner_label in enumerate(partner_labels):
@@ -139,7 +129,6 @@ def observed_model_fit(paths_dict):
 def choice_probs_for_choice_vals(
     choice_vals,
     states_dict,
-    data_decision,
     model,
     unobserved_state_specs,
     params,
@@ -149,7 +138,6 @@ def choice_probs_for_choice_vals(
     choice_prob_func = create_choice_prob_func_unobserved_states(
         model=model,
         observed_states=states_dict,
-        observed_wealth=data_decision["adjusted_wealth"].values,
         observed_choices=choice_vals,
         unobserved_state_specs=unobserved_state_specs,
         weight_full_states=weight_full_states,

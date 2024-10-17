@@ -5,12 +5,12 @@ import jax.numpy as jnp
 import numpy as np
 import pytest
 from model_code.utility_functions import consumption_scale
+from model_code.utility_functions import disutility_work
 from model_code.utility_functions import inverse_marginal
 from model_code.utility_functions import marg_utility
 from model_code.utility_functions import marginal_utility_final_consume_all
 from model_code.utility_functions import utility_final_consume_all
 from model_code.utility_functions import utility_func
-from model_code.utility_functions import disutility_work
 from set_paths import create_path_dict
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
@@ -47,7 +47,8 @@ def test_consumption_cale(partner_state, education, period, paths_and_specs):
     hh_size = 1 + has_partner + nb_children
     np.testing.assert_almost_equal(cons_scale, np.sqrt(hh_size))
 
-#"""
+
+# """
 @pytest.mark.parametrize(
     "consumption, partner_state, education, period, dis_util_work, dis_util_unemployed, mu",
     list(
@@ -62,7 +63,6 @@ def test_consumption_cale(partner_state, education, period, paths_and_specs):
         )
     ),
 )
-
 def test_utility_func(
     consumption,
     partner_state,
@@ -82,8 +82,7 @@ def test_utility_func(
     }
     options = paths_and_specs[1]
     cons_scale = consumption_scale(partner_state, education, period, options)
-    cons_utility = (consumption / cons_scale) ** (1 - mu) / (1 - mu) 
-    
+    cons_utility = (consumption / cons_scale) ** (1 - mu) / (1 - mu)
 
     np.testing.assert_almost_equal(
         utility_func(
@@ -95,7 +94,8 @@ def test_utility_func(
             params=params,
             options=options,
         ),
-        cons_utility * (disutility_work(choice=1, education=education, params=params) ** (1 - mu))
+        cons_utility
+        * (disutility_work(choice=1, education=education, params=params) ** (1 - mu)),
     )
 
     np.testing.assert_almost_equal(
@@ -108,9 +108,13 @@ def test_utility_func(
             params=params,
             options=options,
         ),
-        cons_utility * (disutility_work(choice=0, education=education, params=params) ** (1 - mu)),
+        cons_utility
+        * (disutility_work(choice=0, education=education, params=params) ** (1 - mu)),
     )
-#"""
+
+
+# """
+
 
 @pytest.mark.parametrize(
     "consumption, partner_state, education, period, dis_util_work, dis_util_unemployed, mu",
@@ -169,7 +173,14 @@ def test_marginal_utility(
     ),
 )
 def test_inv_marginal_utility(
-    consumption, partner_state, education, period, dis_util_work, dis_util_unemployed, mu, paths_and_specs
+    consumption,
+    partner_state,
+    education,
+    period,
+    dis_util_work,
+    dis_util_unemployed,
+    mu,
+    paths_and_specs,
 ):
     params = {
         "mu": mu,
@@ -184,7 +195,9 @@ def test_inv_marginal_utility(
         consumption, partner_state, education, period, random_choice, params, options
     )
     np.testing.assert_almost_equal(
-        inverse_marginal(marg_util, partner_state, education, period, random_choice, params, options),
+        inverse_marginal(
+            marg_util, partner_state, education, period, random_choice, params, options
+        ),
         consumption,
     )
 

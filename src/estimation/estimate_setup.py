@@ -31,6 +31,18 @@ def estimate_model(path_dict, params_to_estimate_names, file_append, load_model)
     last_end = pkl.load(open(path_dict["est_results"] + "est_params.pkl", "rb"))
     start_params_all.update(last_end)
     start_params_all["bequest_scale"] = 1
+    last_end = {
+        "mu": 1.5047157067888446,
+        "dis_util_work_high": 0.8506518010882294,
+        "dis_util_work_low": 0.9099473575263033,
+        "dis_util_unemployed_high": 1.874967955355714,
+        "dis_util_unemployed_low": 1.0496031906801804,
+        "job_finding_logit_const": 0.15094919042166413,
+        "job_finding_logit_age": -0.03065231823063151,
+        "job_finding_logit_high_educ": 0.7610909327643549,
+    }
+
+    start_params_all.update(last_end)
 
     individual_likelihood, weights = create_ll_from_paths(
         start_params_all, path_dict, load_model

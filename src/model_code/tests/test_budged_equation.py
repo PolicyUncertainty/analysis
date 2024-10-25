@@ -62,7 +62,7 @@ def test_budget_unemployed(
         period=period,
         partner_state=partner_state,
         education=education,
-        lagged_choice=0,
+        lagged_choice=1,
         experience=exp_cont,
         savings_end_of_previous_period=savings,
         income_shock_previous_period=0,
@@ -128,7 +128,7 @@ INCOME_SHOCK_GRID = np.linspace(-0.5, 0.5, 2)
         )
     ),
 )
-def test_budget_worker(
+def test_budget_ft_worker(
     period,
     partner_state,
     education,
@@ -154,14 +154,14 @@ def test_budget_worker(
         period=period,
         partner_state=partner_state,
         education=education,
-        lagged_choice=1,
+        lagged_choice=3,
         experience=exp_cont,
         savings_end_of_previous_period=savings,
         income_shock_previous_period=income_shock,
         params=params,
         options=specs_internal,
     )
-    labor_income = (
+    hourly_wage = (
         np.exp(
             gamma_array[education]
             + gamma_array[education] * np.log(experience + 1)
@@ -169,6 +169,7 @@ def test_budget_worker(
         )
         / specs_internal["wealth_unit"]
     )
+    labor_income = hourly_wage * specs["av_hours_ft"]
     if labor_income < specs_internal["min_wage"]:
         labor_income = specs_internal["min_wage"]
 
@@ -262,7 +263,7 @@ def test_retiree(
         period=period,
         partner_state=partner_state,
         education=education,
-        lagged_choice=2,
+        lagged_choice=0,
         experience=exp_cont,
         savings_end_of_previous_period=savings,
         income_shock_previous_period=0,
@@ -362,7 +363,7 @@ def test_fresh_retiree(
 
     exp_cont = get_next_period_experience(
         period=period,
-        lagged_choice=2,
+        lagged_choice=0,
         policy_state=policy_state,
         education=education,
         experience=exp_cont_prev,

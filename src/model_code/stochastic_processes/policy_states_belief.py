@@ -10,7 +10,7 @@ def expected_SRA_probs_estimation(policy_state, choice, lagged_choice, options):
     trans_vector_not_retired = jnp.take(trans_mat, policy_state, axis=0)
 
     # If fresh retired, you stay one more year in the same policy state
-    fresh_retired = (choice == 2) & (lagged_choice != 2)
+    fresh_retired = (choice == 0) & (lagged_choice != 0)
     n_policy_states = options["n_policy_states"]
     no_policy_change = jnp.zeros(n_policy_states)
     no_policy_change = no_policy_change.at[policy_state].set(1)
@@ -21,7 +21,7 @@ def expected_SRA_probs_estimation(policy_state, choice, lagged_choice, options):
     )
 
     # Check if already longer retired, then take transition probabilities for degenerate state
-    already_retired = (choice == 2) & (lagged_choice == 2)
+    already_retired = (choice == 0) & (lagged_choice == 0)
     degenerate_probs = trans_mat[-1, :]
     # Set to degenerate if already retired
     trans_vector = jax.lax.select(already_retired, degenerate_probs, trans_vector)

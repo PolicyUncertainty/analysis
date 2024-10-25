@@ -47,6 +47,11 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     specs["job_sep_probs"] = jnp.asarray(
         np.loadtxt(path_dict["est_results"] + "job_sep_probs.csv", delimiter=",")
     )
+
+    # Intermediate specs for tests only
+    specs["av_hours_ft"] = 35
+    specs["av_hours_pt"] = 20
+    specs["exp_inc_pt"] = 0.5
     return specs
 
 

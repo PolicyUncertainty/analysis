@@ -45,10 +45,15 @@ def inverse_marginal(
 
 def disutility_work(choice, education, params):
     # reading parameters
-    dis_util_work = (
-        params["dis_util_work_low"] * (1 - education)
-        + params["dis_util_work_high"] * education
+    dis_util_ft_work = (
+        params["dis_util_ft_work_low"] * (1 - education)
+        + params["dis_util_ft_work_high"] * education
     )
+    dis_util_pt_work = (
+        params["dis_util_pt_work_low"] * (1 - education)
+        + params["dis_util_pt_work_high"] * education
+    )
+
     dis_util_unemployed = (
         params["dis_util_unemployed_low"] * (1 - education)
         + params["dis_util_unemployed_high"] * education
@@ -57,14 +62,19 @@ def disutility_work(choice, education, params):
     # dis_util_only_partner_retired = params["dis_util_only_partner_retired"]
 
     # choice booleans
-    is_working = choice == 1
-    is_unemployed = choice == 0
+    is_unemployed = choice == 1
+    is_working_part_time = choice == 2
+    is_working_full_time = choice == 3
     # partner_retired = partner_state == 0
 
-    # compute eta
-    disutility = jnp.exp(
-        -dis_util_work * is_working - dis_util_unemployed * is_unemployed
+    exp_factor = (
+        dis_util_unemployed * is_unemployed
+        + dis_util_pt_work * is_working_part_time
+        + dis_util_ft_work * is_working_full_time
     )
+
+    # compute eta
+    disutility = jnp.exp(-exp_factor)
     # disutility = jnp.exp(-dis_util_work * is_working - dis_util_unemployed * is_unemployed - dis_util_only_partner_retired * partner_retired)
     return disutility
 

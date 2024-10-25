@@ -28,7 +28,14 @@ def budget_constraint(
     )
     has_partner_int = (partner_state > 0).astype(int)
 
-    # Income lagged choice 0
+    # Income from lagged choice 0
+    retirement_income_after_ssc = calc_pensions_after_ssc(
+        experience_years=experience_years,
+        education=education,
+        options=options,
+    )
+
+    # Income lagged choice 1
     unemployment_benefits = calc_unemployment_benefits(
         savings=savings_end_of_previous_period,
         education=education,
@@ -37,25 +44,19 @@ def budget_constraint(
         options=options,
     )
 
-    # Income lagged choice 1
+    # Income lagged choice 2
     labor_income_after_ssc = calc_labor_income_after_ssc(
+        lagged_choice=lagged_choice,
         experience=experience_years,
         education=education,
         income_shock=income_shock_previous_period,
         options=options,
     )
 
-    # Income from lagged choice 2
-    retirement_income_after_ssc = calc_pensions_after_ssc(
-        experience_years=experience_years,
-        education=education,
-        options=options,
-    )
-
     # Select relevant income
     # bools of last period decision: income is payed in following period!
-    was_worker = lagged_choice == 1
-    was_retired = lagged_choice == 2
+    was_worker = lagged_choice >= 2
+    was_retired = lagged_choice == 0
 
     # Aggregate over choice own income
     own_income_after_ssc = (

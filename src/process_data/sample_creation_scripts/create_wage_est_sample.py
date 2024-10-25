@@ -33,12 +33,16 @@ def create_wage_est_sample(paths, specs, load_data=False):
         merged_data, start_year, end_year, start_age, no_women=True
     )
 
-    # create labor choice, keep only working
+    # create labor choice, keep only working (2: part-time, 3: full-time)
     merged_data = create_choice_variable(merged_data)
-    merged_data = merged_data[merged_data["choice"] == 1]
+    merged_data = merged_data[merged_data["choice"] == 2]
+    merged_data = merged_data[merged_data["choice"] == 3]
     print(
         str(len(merged_data)) + " observations after dropping non-working individuals."
     )
+
+    # working hours
+    
 
     # experience, where we use the sum of part and full time (note: unlike in
     # structural estimation, we do not round or enforce a cap on experience here)

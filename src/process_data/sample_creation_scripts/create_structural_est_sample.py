@@ -92,10 +92,7 @@ def create_structural_est_sample(paths, load_data=False, options=None):
     df = df[list(type_dict.keys())]
     df = df.astype(type_dict)
 
-    print(
-        str(len(df))
-        + " observations in final structural estimation dataset. \n ----------------"
-    )
+    print_data_description(df)
 
     # Anonymize and save data
     df.reset_index(drop=True, inplace=True)
@@ -111,16 +108,16 @@ def determine_observed_job_offers(data):
     """Determine if a job offer is observed and if so what it is. The function
     implements the following rule:
 
-    Assume lagged choice equal to 1 (working), then the state is fully observed:
-        - If choice equal 1 (continued working), then there is a job offer, i.e. equal to 1
-        - If choice is unemployed (0) or retired (2) and you got fired then job offer equal 0
+    Assume lagged choice equal to 2 or 3 (working), then the state is fully observed:
+        - If choice equal 2 or 3 (continued working), then there is a job offer, i.e. equal to 1
+        - If choice is unemployed (1) or retired (0) and you got fired then job offer equal 0
         - Same as before, but not fired then job offer equal to 1
 
-    Assume lagged choice equal to 0 (unemployed), then the state is partially observed:
+    Assume lagged choice equal to 1 (unemployed), then the state is partially observed:
         - If choice is working, then the state is fully observed and there is a job offer
         - If choice is different, then one is not observed
 
-    Lagged choice equal to 2(retired), will be dropped as only choice equal to 2 is allowed
+    Lagged choice equal to 0 (retired), will be dropped as only choice equal to 0 is allowed
 
     Therefore the unobserved job offer states are, where individuals are unemployed and remain unemployed or retire.
 
@@ -129,26 +126,27 @@ def determine_observed_job_offers(data):
     data["full_observed_state"] = False
 
     # Individuals working have job offer equal to 1 and are fully observed
-    data.loc[data["choice"] == 1, "job_offer"] = 1
-    data.loc[data["choice"] == 1, "full_observed_state"] = True
-
+    data.loc[data["choice"] == 2, "job_offer"] = 1
+    data.loc[data["choice"] == 3, "job_offer"] = 1
+    data.loc[data["choice"] == 2, "full_observed_state"] = True
+    data.loc[data["choice"] == 3, "full_observed_state"] = True
     # Individuals who are unemployed or retird and are fired this period have job offer
     # equal to 0. This includes individuals with lagged choice unemployment, as they
     # might be interviewed after firing.
     # Update: Use only employed people. Talk about that!!!
     maskfired = (
-        (data["choice"].isin([0, 2]))
+        (data["choice"].isin([0, 1]))
         & (data["job_sep_this_year"] == 1)
-        & (data["lagged_choice"] == 1)
+        & (data["lagged_choice"].isin([2,3]))
     )
     data.loc[maskfired, "job_offer"] = 0
     data.loc[maskfired, "full_observed_state"] = True
 
     # Everybody who was not fired is also fully observed an has an job offer
     mask_not_fired = (
-        (data["choice"].isin([0, 2]))
+        (data["choice"].isin([0, 1]))
         & (data["job_sep_this_year"] == 0)
-        & (data["lagged_choice"] == 1)
+        & (data["lagged_choice"].isin([2,3]))
     )
     data.loc[mask_not_fired, "job_offer"] = 1
     data.loc[mask_not_fired, "full_observed_state"] = True
@@ -300,19 +298,19 @@ def enforce_model_choice_restriction(merged_data, min_ret_age, max_ret_age):
     """
     # Filter out people who are retired before min_ret_age
     merged_data = merged_data[
-        ~((merged_data["choice"] == 2) & (merged_data["age"] < min_ret_age))
+        ~((merged_data["choice"] == 0) & (merged_data["age"] < min_ret_age))
     ]
     merged_data = merged_data[
-        ~((merged_data["lagged_choice"] == 2) & (merged_data["age"] <= min_ret_age))
+        ~((merged_data["lagged_choice"] == 0) & (merged_data["age"] <= min_ret_age))
     ]
 
     # Filter out people who are working after max_ret_age
     merged_data = merged_data[
-        ~((merged_data["choice"] != 2) & (merged_data["age"] >= max_ret_age))
+        ~((merged_data["choice"] != 0) & (merged_data["age"] >= max_ret_age))
     ]
     # Filter out people who have not retirement as lagged choice after max_ret_age
     merged_data = merged_data[
-        ~((merged_data["lagged_choice"] != 2) & (merged_data["age"] > max_ret_age))
+        ~((merged_data["lagged_choice"] != 0) & (merged_data["age"] > max_ret_age))
     ]
     print(
         str(len(merged_data))
@@ -325,7 +323,7 @@ def enforce_model_choice_restriction(merged_data, min_ret_age, max_ret_age):
 
     # Filter out people who come back from retirement
     merged_data = merged_data[
-        (merged_data["lagged_choice"] != 2) | (merged_data["choice"] == 2)
+        (merged_data["lagged_choice"] != 0) | (merged_data["choice"] == 0)
     ]
 
     print(
@@ -334,16 +332,39 @@ def enforce_model_choice_restriction(merged_data, min_ret_age, max_ret_age):
     )
     return merged_data
 
+def print_data_description(df):
+    n_retirees = df.groupby("choice").size().loc[0] 
+    n_unemployed = df.groupby("choice").size().loc[1]
+    n_part_time = df.groupby("choice").size().loc[2]
+    n_full_time = df.groupby("choice").size().loc[3]
+    n_fresh_retirees = (
+        df.groupby(["choice", "lagged_choice"]).size().get((0, 1), 0)
+        + df.groupby(["choice", "lagged_choice"]).size().get((0, 2), 0)
+        + df.groupby(["choice", "lagged_choice"]).size().get((0, 3), 0)
+    )
+    print(
+        str(len(df))
+        + " left in final estimation sample."
+    )
+    print("---------------------------")
+    print("Breakdown by choice:\n" 
+          + str(n_retirees) + " retirees [0] \n"
+          "--" + str(n_fresh_retirees) + " thereof fresh retirees [0, lagged =!= 0] \n"
+          + str(n_unemployed) + " unemployed [1] \n" 
+          + str(n_part_time) + " part-time [2] \n" 
+          + str(n_full_time) + " full time [3].")
+    print("---------------------------")
 
 def print_n_retirees(merged_data):
-    n_retirees = merged_data.groupby("choice").size().loc[2]
+    n_retirees = merged_data.groupby("choice").size().loc[0]
     print(str(n_retirees) + " retirees in sample.")
 
 
 def print_n_fresh_retirees(merged_data):
     n_fresh_retirees = (
-        merged_data.groupby(["choice", "lagged_choice"]).size().loc[2, 1]
-        + merged_data.groupby(["choice", "lagged_choice"]).size().loc[2, 0]
+        merged_data.groupby(["choice", "lagged_choice"]).size().get((0, 1), 0)
+        + merged_data.groupby(["choice", "lagged_choice"]).size().get((0, 2), 0)
+        + merged_data.groupby(["choice", "lagged_choice"]).size().get((0, 3), 0)
     )
     print(str(n_fresh_retirees) + " fresh retirees in sample.")
 

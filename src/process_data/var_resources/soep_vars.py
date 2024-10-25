@@ -19,6 +19,8 @@ def create_education_type(data):
 def create_choice_variable(data):
     """This function creates the choice variable for the structural model.
 
+    0: retirement, 1: unemployed, 2: part-time, 3: full-time
+
     TODO: This function assumes retirees with part-time employment as full-time retirees.
 
     """
@@ -28,34 +30,12 @@ def create_choice_variable(data):
     # rv_ret_choice = merged_data["STATUS_2"]
 
     # assign employment choices
-    data.loc[soep_empl_choice == 5, "choice"] = 0
-    data.loc[soep_empl_choice == 1, "choice"] = 1
+    data.loc[soep_empl_choice == 5, "choice"] = 1
+    data.loc[soep_empl_choice == 2, "choice"] = 2 
+    data.loc[soep_empl_choice == 1, "choice"] = 3
 
     # assign retirement choice
-    data.loc[soep_empl_status == 13, "choice"] = 2
-    # merged_data.loc[rv_ret_choice == "RTB"] = 2
-    data = data[data["choice"].notna()]
-    return data
-
-
-def create_choice_variable_with_part_time(data):
-    """This function creates the choice variable for the structural model.
-
-    It includes part-time employment as a separate choice. (0: unemployed, 1: full-time,
-    2: retired, 3: part-time)
-
-    """
-    data["choice"] = np.nan
-    soep_empl_choice = data["pgemplst"]
-    soep_empl_status = data["pgstib"]
-
-    # assign emploayment choices
-    data.loc[soep_empl_choice == 5, "choice"] = 0
-    data.loc[soep_empl_choice == 1, "choice"] = 1
-    data.loc[soep_empl_choice == 2, "choice"] = 3
-
-    # assign retirement choice
-    data.loc[soep_empl_status == 13, "choice"] = 2
+    data.loc[soep_empl_status == 13, "choice"] = 0
     # merged_data.loc[rv_ret_choice == "RTB"] = 2
     data = data[data["choice"].notna()]
     return data

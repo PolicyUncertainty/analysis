@@ -1,16 +1,15 @@
 from itertools import product
 
 import jax
-import jax.numpy as jnp
 import numpy as np
 import pytest
-from model_code.utility_functions import consumption_scale
-from model_code.utility_functions import disutility_work
-from model_code.utility_functions import inverse_marginal
-from model_code.utility_functions import marg_utility
-from model_code.utility_functions import marginal_utility_final_consume_all
-from model_code.utility_functions import utility_final_consume_all
-from model_code.utility_functions import utility_func
+from model_code.utility.bequest_utility import marginal_utility_final_consume_all
+from model_code.utility.bequest_utility import utility_final_consume_all
+from model_code.utility.utility_functions import consumption_scale
+from model_code.utility.utility_functions import disutility_work
+from model_code.utility.utility_functions import inverse_marginal
+from model_code.utility.utility_functions import marg_utility
+from model_code.utility.utility_functions import utility_func
 from set_paths import create_path_dict
 from specs.derive_specs import generate_derived_and_data_derived_specs
 

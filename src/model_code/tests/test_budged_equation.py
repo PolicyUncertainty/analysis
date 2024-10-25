@@ -256,8 +256,8 @@ def test_retiree(
     path_dict, specs_internal = paths_and_specs
 
     params = {"interest_rate": interest_rate}
-    max_init_exp_last_period = period + specs_internal["max_init_experience"] - 1
-    exp_cont_last_period = exp / max_init_exp_last_period
+    max_init_exp_period = period + specs_internal["max_init_experience"]
+    exp_cont_last_period = exp / (max_init_exp_period - 1)
 
     exp_cont = get_next_period_experience(
         period=period,
@@ -267,6 +267,8 @@ def test_retiree(
         experience=exp_cont_last_period,
         options=specs_internal,
     )
+    # Check that experience does not get updated or added any penalty
+    np.testing.assert_allclose(exp_cont * max_init_exp_period, exp)
 
     wealth = budget_constraint(
         period=period,

@@ -49,7 +49,7 @@ def test_decision_data_no_ret_before_min_ret_age(load_data=LOAD_SAVED_DATA):
         load_data=load_data,
     )
     assert (
-        dec_dat.loc[dec_dat["choice"] == 2, "period"].min() + options["start_age"]
+        dec_dat.loc[dec_dat["choice"] == 0, "period"].min() + options["start_age"]
         >= options["min_ret_age"]
     )
 
@@ -69,7 +69,11 @@ def test_decision_data_no_work_after_max_ret_age(load_data=LOAD_SAVED_DATA):
         < options["max_ret_age"]
     )
     assert (
-        dec_dat.loc[dec_dat["choice"] == 0, "period"].max() + options["start_age"]
+        dec_dat.loc[dec_dat["choice"] == 2, "period"].max() + options["start_age"]
+        < options["max_ret_age"]
+    )
+    assert (
+        dec_dat.loc[dec_dat["choice"] == 3, "period"].max() + options["start_age"]
         < options["max_ret_age"]
     )
     assert (
@@ -78,7 +82,12 @@ def test_decision_data_no_work_after_max_ret_age(load_data=LOAD_SAVED_DATA):
         <= options["max_ret_age"]
     )
     assert (
-        dec_dat.loc[dec_dat["lagged_choice"] == 0, "period"].max()
+        dec_dat.loc[dec_dat["lagged_choice"] == 2, "period"].max()
+        + options["start_age"]
+        <= options["max_ret_age"]
+    )
+    assert (
+        dec_dat.loc[dec_dat["lagged_choice"] == 2, "period"].max()
         + options["start_age"]
         <= options["max_ret_age"]
     )
@@ -93,4 +102,4 @@ def test_decision_data_retirement_is_absorbing(load_data=LOAD_SAVED_DATA):
         paths_dict,
         load_data=load_data,
     )
-    assert dec_dat.loc[dec_dat["lagged_choice"] == 2, "choice"].unique() == 2
+    assert dec_dat.loc[dec_dat["lagged_choice"] == 0, "choice"].unique() == 0

@@ -1,4 +1,4 @@
-# Description: This file estimates the parameters of the MONTHLY wage equation using the SOEP panel data.
+# Description: This file estimates the parameters of the HOURLY wage equation using the SOEP panel data.
 # We estimate the following equation for each education level:
 # ln_wage = beta_0 + beta_1 * ln_(exp+1) + individual_FE + time_FE + epsilon
 import numpy as np
@@ -50,11 +50,22 @@ def estimate_wage_parameters(paths_dict, specs):
         wage_parameters.loc[edu_label, "income_shock_std_std"] = np.sqrt(
             (2 * income_shock_var**2) / n_minus_k
         )
-
+    # Save results
     wage_parameters.to_csv(paths_dict["est_results"] + "wage_eq_params.csv")
     wage_parameters.T.to_latex(
         paths_dict["tables"] + "wage_eq_params.tex", float_format="%.4f"
     )
+    # print wage equation
+    for edu_val, edu_label in enumerate(edu_labels):
+        print("Hourly wage equation: " + edu_label)
+        print("ln(hrly_wage) = "+str(wage_parameters.loc[edu_label, "constant"])+" + "+str(wage_parameters.loc[edu_label, "ln_exp"])+" * ln(exp+1) + epsilon")
+        hrly_wage_with_20_exp = np.exp(
+            wage_parameters.loc[edu_label, "constant"]
+            + wage_parameters.loc[edu_label, "ln_exp"] * np.log(20)
+        )
+        print("Example: hourly wage with 20 years of experience: " + str(hrly_wage_with_20_exp))
+        print("Income shock std: " + str(wage_parameters.loc[edu_label, "income_shock_std"]))
+        print("--------------------")
     return wage_parameters
 
 
@@ -65,7 +76,7 @@ def prepare_estimation_data(paths_dict):
     )
 
     # wage data
-    wage_data["ln_wage"] = np.log(wage_data["wage"])
+    wage_data["ln_wage"] = np.log(wage_data["hourly_wage"])
     wage_data["experience"] = wage_data["experience"] + 1
     wage_data["ln_exp"] = np.log(wage_data["experience"])
     wage_data["ln_age"] = np.log(wage_data["age"])

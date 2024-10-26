@@ -8,6 +8,7 @@ from process_data.sample_creation_scripts.create_structural_est_sample import (
 from process_data.var_resources.soep_vars import create_choice_variable
 from process_data.var_resources.soep_vars import create_education_type
 from process_data.var_resources.soep_vars import sum_experience_variables
+from process_data.var_resources.soep_vars import generate_working_hours
 
 
 def create_wage_est_sample(paths, specs, load_data=False):
@@ -35,14 +36,13 @@ def create_wage_est_sample(paths, specs, load_data=False):
 
     # create labor choice, keep only working (2: part-time, 3: full-time)
     merged_data = create_choice_variable(merged_data)
-    merged_data = merged_data[merged_data["choice"] == 2]
-    merged_data = merged_data[merged_data["choice"] == 3]
+    merged_data = merged_data[merged_data["choice"].isin([2, 3])]
     print(
         str(len(merged_data)) + " observations after dropping non-working individuals."
     )
 
-    # working hours
-    
+    # weekly working hours
+    merged_data = generate_working_hours(merged_data)
 
     # experience, where we use the sum of part and full time (note: unlike in
     # structural estimation, we do not round or enforce a cap on experience here)
@@ -52,7 +52,11 @@ def create_wage_est_sample(paths, specs, load_data=False):
     merged_data.rename(columns={"pglabgro": "wage"}, inplace=True)
     merged_data = merged_data[merged_data["wage"] > 0]
     print(str(len(merged_data)) + " observations after dropping invalid wage values.")
-
+    
+    # hourly wage
+    merged_data["monthly_hours"] = merged_data["working_hours"] * 52 / 12
+    merged_data["hourly_wage"] = merged_data["wage"] / merged_data["monthly_hours"]
+    
     # education
     merged_data = create_education_type(merged_data)
 
@@ -66,6 +70,7 @@ def create_wage_est_sample(paths, specs, load_data=False):
             "age",
             "experience",
             "wage",
+            "hourly_wage",
             "education",
             "syear",
         ]
@@ -77,6 +82,7 @@ def create_wage_est_sample(paths, specs, load_data=False):
             "age": np.int32,
             "experience": np.int32,
             "wage": np.float64,
+            "hourly_wage": np.float64,
             "education": np.int32,
         }
     )
@@ -103,6 +109,7 @@ def load_and_merge_soep_core(soep_c38_path):
             "pgstib",
             "pglabgro",
             "pgpsbil",
+            "pgvebzeit",
         ],
         convert_categoricals=False,
     )

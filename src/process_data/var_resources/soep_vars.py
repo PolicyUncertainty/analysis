@@ -113,3 +113,14 @@ def generate_job_separation_var(data):
     data.loc[:, "job_sep"] = 0
     data.loc[data["plb0304_h"].isin([1, 3, 5]), "job_sep"] = 1
     return data
+
+def generate_working_hours(data):
+    """This function creates a working hours variable from pgvebzeit in soep-pgen.
+    This means working hours = contractual hours per week.
+    The function drops observations where working hours are missing.
+
+    """
+    data = data.rename(columns={"pgvebzeit": "working_hours"})
+    data = data[data["working_hours"] >= 0]
+    print(str(len(data)) + " left after dropping people with missing working hours.")
+    return data

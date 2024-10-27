@@ -1,8 +1,8 @@
 # %%
 import matplotlib.pyplot as plt
 import numpy as np
-from model_code.utility_functions import consumption_scale
-from model_code.utility_functions import utility_func
+from model_code.utility.utility_functions import consumption_scale
+from model_code.utility.utility_functions import utility_func
 
 # %%
 

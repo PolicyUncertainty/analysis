@@ -16,7 +16,18 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
 def observed_model_fit(paths_dict):
-    params = pickle.load(open(paths_dict["est_results"] + "est_params.pkl", "rb"))
+    params = pickle.load(open(paths_dict["est_results"] + "est_params_new.pkl", "rb"))
+    last_end = {
+        "mu": 1.5047157067888446,
+        "dis_util_work_high": 0.8506518010882294,
+        "dis_util_work_low": 0.9099473575263033,
+        "dis_util_unemployed_high": 6,
+        "dis_util_unemployed_low": 6,
+        "job_finding_logit_const": 0.15094919042166413,
+        "job_finding_logit_age": -0.03065231823063151,
+        "job_finding_logit_high_educ": 0.7610909327643549,
+    }
+    params.update(last_end)
 
     specs = generate_derived_and_data_derived_specs(paths_dict)
 

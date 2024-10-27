@@ -9,6 +9,7 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 EDU_GRID = [0, 1]
 PERIOD_GRID = np.arange(0, 20, 2, dtype=int)
 LOGIT_PARAM_GRID = np.arange(0.1, 0.9, 0.2)
+WORK_CHOICE_GRID = [2, 3]
 
 
 @pytest.fixture(scope="module")
@@ -19,12 +20,11 @@ def paths_and_specs():
 
 
 @pytest.mark.parametrize(
-    "education, period, logit_param",
-    list(product(EDU_GRID, PERIOD_GRID, LOGIT_PARAM_GRID)),
+    "education, period, logit_param, work_choice",
+    list(product(EDU_GRID, PERIOD_GRID, LOGIT_PARAM_GRID, WORK_CHOICE_GRID)),
 )
-def test_job_destruction(education, period, logit_param, paths_and_specs):
-    # Test job destruction probs. Individual works
-    choice = 1
+def test_job_destruction(education, period, logit_param, work_choice, paths_and_specs):
+    # Test job destruction probs.
     path_dict, options = paths_and_specs
 
     # These are irrelevant!
@@ -37,5 +37,7 @@ def test_job_destruction(education, period, logit_param, paths_and_specs):
     job_dest_prob = options["job_sep_probs"][education, period]
     full_probs_expec = np.array([job_dest_prob, 1 - job_dest_prob])
 
-    probs = job_offer_process_transition(params, options, education, period, choice)
+    probs = job_offer_process_transition(
+        params, options, education, period, work_choice
+    )
     np.testing.assert_almost_equal(probs, full_probs_expec)

@@ -6,7 +6,7 @@ def realized_policy_step_function(policy_state, period, choice, options):
     # Check if the current period is a policy step period
     step_period = jnp.isin(period, options["policy_step_periods"])
     # Check if retirement is choosen
-    retirement_bool = choice == 2
+    retirement_bool = choice == 0
     # If retirement is choosen the transition vector is a zero vector with a one at the
     # current state and if we are in a step period and not retired then the transition
     # vector has probability 1 of increase in policy state. Retirement superseeds the

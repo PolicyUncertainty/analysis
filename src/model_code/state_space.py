@@ -21,10 +21,10 @@ def sparsity_condition(period, lagged_choice, options):
 
     age = start_age + period
     # You cannot retire before the earliest retirement age
-    if (age <= min_ret_age_state_space) & (lagged_choice == 2):
+    if (age <= min_ret_age_state_space) & (lagged_choice == 0):
         return False
     # After the maximum retirement age, you must be retired
-    elif (age > max_ret_age) & (lagged_choice != 2):
+    elif (age > max_ret_age) & (lagged_choice != 0):
         return False
     else:
         return True
@@ -36,21 +36,21 @@ def state_specific_choice_set(period, lagged_choice, policy_state, job_offer, op
     min_ret_age_pol_state = apply_retirement_constraint_for_SRA(SRA_pol_state, options)
 
     # retirement is absorbing
-    if lagged_choice == 2:
-        return np.array([2])
+    if lagged_choice == 0:
+        return np.array([0])
     # Check if the person is not in the voluntary retirement range.
     elif age < min_ret_age_pol_state:
         if job_offer == 0:
-            return np.array([0])
+            return np.array([1])
         else:
-            return np.array([0, 1])
+            return np.array([1, 2, 3])
     elif age >= options["max_ret_age"]:
-        return np.array([2])
+        return np.array([0])
     else:
         if job_offer == 0:
-            return np.array([0, 2])
+            return np.array([0, 1])
         else:
-            return np.array([0, 1, 2])
+            return np.array([0, 1, 2, 3])
 
 
 def apply_retirement_constraint_for_SRA(SRA, options):
@@ -64,12 +64,13 @@ def get_next_period_experience(
     max_experience_period = period + options["max_init_experience"]
     exp_years_last_period = (max_experience_period - 1) * experience
 
-    # Update if working
-    exp_new_period = exp_years_last_period + (lagged_choice == 1)
+    # Update if working part or full time
+    exp_update = (lagged_choice == 3) + (lagged_choice == 2) * options["exp_inc_pt"]
+    exp_new_period = exp_years_last_period + exp_update
 
     # If retired, then we update experience according to the deduction function
     degenerate_state_id = options["n_policy_states"] - 1
-    fresh_retired = (degenerate_state_id != policy_state) & (lagged_choice == 2)
+    fresh_retired = (degenerate_state_id != policy_state) & (lagged_choice == 0)
     experience_years_with_penalty = calc_experience_years_for_pension_adjustment(
         period, exp_years_last_period, education, policy_state, options
     )

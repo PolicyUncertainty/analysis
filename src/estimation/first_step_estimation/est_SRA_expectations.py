@@ -5,9 +5,7 @@ from functools import partial
 
 import numpy as np
 import pandas as pd
-from process_data.sample_creation_scripts.create_structural_est_sample import (
-    create_policy_state,
-)
+from process_data.structural_sample_scripts.policy_state import create_policy_state
 from scipy.optimize import root
 from scipy.stats import truncnorm
 

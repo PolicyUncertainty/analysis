@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
-from process_data.sample_creation_scripts.create_job_sep_sample import (
+from process_data.first_step_sample_scripts.create_job_sep_sample import (
     create_job_sep_sample,
 )
 

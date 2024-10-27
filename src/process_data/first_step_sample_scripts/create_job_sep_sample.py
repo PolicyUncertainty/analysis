@@ -2,15 +2,13 @@ import os
 
 import numpy as np
 import pandas as pd
-from process_data.sample_creation_scripts.create_structural_est_sample import (
+from process_data.data_tools import filter_data
+from process_data.soep_vars.education import create_education_type
+from process_data.soep_vars.job_hire_and_fire import generate_job_separation_var
+from process_data.soep_vars.work_choices import create_choice_variable
+from process_data.structural_sample_scripts.create_structural_est_sample import (
     create_lagged_and_lead_variables,
 )
-from process_data.sample_creation_scripts.create_structural_est_sample import (
-    filter_data,
-)
-from process_data.var_resources.soep_vars import create_choice_variable
-from process_data.var_resources.soep_vars import create_education_type
-from process_data.var_resources.soep_vars import generate_job_separation_var
 
 
 def create_job_sep_sample(paths, specs, load_data=False):

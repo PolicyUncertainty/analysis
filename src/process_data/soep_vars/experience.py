@@ -1,46 +1,6 @@
 import numpy as np
 
 
-def create_education_type(data):
-    """This function creates a education type from pgpsbil in soep-pgen.
-
-    The function uses a two category split of the population, encoding 1 if an
-    individual has at least Fachhochschulreife.
-
-    """
-    data = data[data["pgpsbil"].notna()]
-    data["education"] = 0
-    data.loc[data["pgpsbil"] == 3, "education"] = 1  # Fachhochschulreife
-    data.loc[data["pgpsbil"] == 4, "education"] = 1  # Abitur
-    print(str(len(data)) + " left after dropping people with missing education values.")
-    return data
-
-
-def create_choice_variable(data):
-    """This function creates the choice variable for the structural model.
-
-    0: retirement, 1: unemployed, 2: part-time, 3: full-time
-
-    TODO: This function assumes retirees with part-time employment as full-time retirees.
-
-    """
-    data["choice"] = np.nan
-    soep_empl_choice = data["pgemplst"]
-    soep_empl_status = data["pgstib"]
-    # rv_ret_choice = merged_data["STATUS_2"]
-
-    # assign employment choices
-    data.loc[soep_empl_choice == 5, "choice"] = 1
-    data.loc[soep_empl_choice == 2, "choice"] = 2 
-    data.loc[soep_empl_choice == 1, "choice"] = 3
-
-    # assign retirement choice
-    data.loc[soep_empl_status == 13, "choice"] = 0
-    # merged_data.loc[rv_ret_choice == "RTB"] = 2
-    data = data[data["choice"].notna()]
-    return data
-
-
 def create_experience_variable_with_cap(data, exp_cap):
     """This function creates an experience variable as the sum of full-time and 0.5
     weighted part-time experience.
@@ -100,27 +60,4 @@ def sum_experience_variables(data):
     print(
         str(len(data)) + " left after dropping people with invalid experience values."
     )
-    return data
-
-
-def generate_job_separation_var(data):
-    """This function generates a job separation variable.
-
-    The function creates a new column job_sep which is 1 if the individual got fired
-    from the last job. It uses plb0304_h from the soep pl data.
-
-    """
-    data.loc[:, "job_sep"] = 0
-    data.loc[data["plb0304_h"].isin([1, 3, 5]), "job_sep"] = 1
-    return data
-
-def generate_working_hours(data):
-    """This function creates a working hours variable from pgvebzeit in soep-pgen.
-    This means working hours = contractual hours per week.
-    The function drops observations where working hours are missing.
-
-    """
-    data = data.rename(columns={"pgvebzeit": "working_hours"})
-    data = data[data["working_hours"] >= 0]
-    print(str(len(data)) + " left after dropping people with missing working hours.")
     return data

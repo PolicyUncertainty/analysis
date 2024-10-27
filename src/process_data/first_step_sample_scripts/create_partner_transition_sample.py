@@ -1,18 +1,13 @@
 # %%
 import os
 
-import numpy as np
 import pandas as pd
-from process_data.sample_creation_scripts.create_structural_est_sample import (
-    filter_data,
-)
-from process_data.sample_creation_scripts.data_tools import filter_below_age
-from process_data.sample_creation_scripts.data_tools import filter_by_sex
-from process_data.sample_creation_scripts.data_tools import filter_est_years
-from process_data.sample_creation_scripts.partner_code import (
-    create_partner_and_lagged_state,
-)
-from process_data.var_resources.soep_vars import create_education_type
+from process_data.data_tools import filter_below_age
+from process_data.data_tools import filter_by_sex
+from process_data.data_tools import filter_est_years
+from process_data.data_tools import span_dataframe
+from process_data.soep_vars.education import create_education_type
+from process_data.soep_vars.partner_code import create_partner_state
 
 
 # %%
@@ -51,7 +46,10 @@ def create_partner_transition_sample(paths, specs, load_data=False):
     df = filter_below_age(df, start_age)
     df = filter_by_sex(df, no_women=False)
 
-    df = keep_relevant_columns(df)
+    df = df[
+        ["age", "sex", "education", "partner_state", "lagged_partner_state", "children"]
+    ]
+
     print(
         str(len(df))
         + " observations in the final partner transition sample.  \n ----------------"
@@ -95,28 +93,13 @@ def load_and_merge_soep_core(soep_c38_path):
     return merged_data
 
 
-def span_dataframe(merged_data, start_year, end_year):
-    """This function creates the lagged choice variable and drops missing lagged
-    choices."""
-    # Create full index with all possible combinations of pid and syear. Otherwise if
-    # we just shift the data, people having missing years in their observations get
-    # assigned variables from multi years back.
-    pid_indexes = merged_data.index.get_level_values(0).unique()
-
-    full_index = pd.MultiIndex.from_product(
-        [pid_indexes, range(start_year - 1, end_year + 2)],
-        names=["pid", "syear"],
+def create_partner_and_lagged_state(df):
+    df = create_partner_state(df)
+    df["lagged_partner_state"] = df.groupby(["pid"])["partner_state"].shift()
+    df = df[df["lagged_partner_state"].notna()]
+    df = df[df["partner_state"].notna()]
+    print(
+        str(len(df))
+        + " observations after dropping people with a partner whose choice is not observed."
     )
-    full_container = pd.DataFrame(
-        index=full_index, data=np.nan, dtype=float, columns=merged_data.columns
-    )
-    full_container.update(merged_data)
-    full_container["hid"] = full_container.groupby(["pid"])["hid"].transform("last")
-    return full_container
-
-
-def keep_relevant_columns(df):
-    df = df[
-        ["age", "sex", "education", "partner_state", "lagged_partner_state", "children"]
-    ]
     return df

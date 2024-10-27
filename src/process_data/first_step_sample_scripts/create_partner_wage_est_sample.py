@@ -1,11 +1,9 @@
 import os
 
 import pandas as pd
-from process_data.sample_creation_scripts.create_structural_est_sample import (
-    filter_data,
-)
-from process_data.sample_creation_scripts.partner_code import create_partner_state
-from process_data.var_resources.soep_vars import create_education_type
+from process_data.data_tools import filter_data
+from process_data.soep_vars.education import create_education_type
+from process_data.soep_vars.partner_code import create_partner_state
 
 
 def create_partner_wage_est_sample(paths, specs, load_data=False):

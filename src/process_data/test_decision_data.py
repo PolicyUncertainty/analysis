@@ -103,3 +103,4 @@ def test_decision_data_retirement_is_absorbing(load_data=LOAD_SAVED_DATA):
         load_data=load_data,
     )
     assert dec_dat.loc[dec_dat["lagged_choice"] == 0, "choice"].unique() == 0
+

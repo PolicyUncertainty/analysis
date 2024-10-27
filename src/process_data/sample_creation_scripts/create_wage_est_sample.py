@@ -9,6 +9,7 @@ from process_data.var_resources.soep_vars import create_choice_variable
 from process_data.var_resources.soep_vars import create_education_type
 from process_data.var_resources.soep_vars import sum_experience_variables
 from process_data.var_resources.soep_vars import generate_working_hours
+from set_paths import create_path_dict
 
 
 def create_wage_est_sample(paths, specs, load_data=False):
@@ -63,6 +64,11 @@ def create_wage_est_sample(paths, specs, load_data=False):
     # bring back indeces (pid, syear)
     merged_data = merged_data.reset_index()
 
+    print(str(len(merged_data)) + " observations in final wage estimation dataset.")
+
+    # save population averages (wages and hours) separately
+    save_population_averages(merged_data)
+
     # Keep relevant columns
     merged_data = merged_data[
         [
@@ -87,7 +93,6 @@ def create_wage_est_sample(paths, specs, load_data=False):
         }
     )
 
-    print(str(len(merged_data)) + " observations in final wage estimation dataset.")
 
     # save data
     merged_data.to_pickle(out_file_path)
@@ -129,3 +134,19 @@ def load_and_merge_soep_core(soep_c38_path):
     merged_data.set_index(["pid", "syear"], inplace=True)
     print(str(len(merged_data)) + " observations in SOEP C38 core.")
     return merged_data
+
+def save_population_averages(df):
+    """Save population average of annual wage (for pension calculation) and working hours by education (to compute annual wages).
+    We do this here (as opposed to model specs) to avoid loading the data twice."""
+    paths_dict = create_path_dict(define_user=False)
+
+    df["annual_wage"] = df["wage"] * 12  
+    pop_avg_annual_wage = df["annual_wage"].mean()
+    pop_avg_hours_worked = df["working_hours"].mean() * 52
+    pop_avg_hours_worked_by_edu = df.groupby("education")["working_hours"].mean() * 52
+    pop_avg = pd.DataFrame({"annual_wage": [pop_avg_annual_wage]})
+    for edu_level, hours in pop_avg_hours_worked_by_edu.items():
+        pop_avg[f'working_hours_{edu_level}'] = hours
+    pop_avg.to_csv(paths_dict["est_results"] + "population_averages.csv")
+    print("Population averages saved. \n Average annual wage: " + str(pop_avg_annual_wage) + "\n Average hours worked: " + str(pop_avg_hours_worked))
+    return pop_avg

@@ -14,7 +14,6 @@ def estimate_wage_parameters(paths_dict, specs):
     """
     # load and modify data
     wage_data = prepare_estimation_data(paths_dict)
-
     edu_labels = specs["education_labels"] + ["all"]
     model_params = ["constant", "ln_exp"]
     # Initialize empty container for coefficients
@@ -87,3 +86,5 @@ def prepare_estimation_data(paths_dict):
     wage_data["constant"] = np.ones(len(wage_data))
 
     return wage_data
+
+

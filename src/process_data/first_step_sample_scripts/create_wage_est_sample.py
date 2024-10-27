@@ -24,7 +24,7 @@ def create_wage_est_sample(paths, specs, load_data=False):
     df = load_and_merge_soep_core(paths["soep_c38"])
 
     # filter data (age, sex, estimation period)
-    df = filter_data(df, specs, no_women=True)
+    df = filter_data(df, specs, no_women=True, lag_and_lead_buffer_years=False)
 
     # create labor choice, keep only working (2: part-time, 3: full-time)
     df = create_choice_variable(df)
@@ -56,29 +56,20 @@ def create_wage_est_sample(paths, specs, load_data=False):
     df = df.reset_index()
     print(str(len(df)) + " observations in final wage estimation dataset.")
 
+    type_dict = {
+        "pid": np.int32,
+        "syear": np.int32,
+        "age": np.int32,
+        "experience": np.int32,
+        "monthly_wage": np.float64,
+        "hourly_wage": np.float64,
+        "monthly_hours": np.float64,
+        "working_hours": np.float64,
+        "education": np.int32,
+    }
     # Keep relevant columns
-    df = df[
-        [
-            "pid",
-            "age",
-            "experience",
-            "wage",
-            "hourly_wage",
-            "education",
-            "syear",
-        ]
-    ]
-    df = df.astype(
-        {
-            "pid": np.int32,
-            "syear": np.int32,
-            "age": np.int32,
-            "experience": np.int32,
-            "wage": np.float64,
-            "hourly_wage": np.float64,
-            "education": np.int32,
-        }
-    )
+    df = df[type_dict.keys()]
+    df = df.astype(type_dict)
 
     # save data
     df.to_pickle(out_file_path)

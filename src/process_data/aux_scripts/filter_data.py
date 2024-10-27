@@ -1,5 +1,5 @@
-def filter_est_years(df, start_year, end_year):
-    df = df.loc[(slice(None), range(start_year - 1, end_year + 2)), :]
+def filter_years(df, start_year, end_year):
+    df = df.loc[(slice(None), range(start_year, end_year + 1)), :]
     print(
         str(len(df)) + " left after dropping people outside of estimation years (+-1)."
     )
@@ -25,7 +25,7 @@ def filter_by_sex(df, no_women):
     return df
 
 
-def filter_data(merged_data, specs, no_women=True):
+def filter_data(merged_data, specs, no_women=True, lag_and_lead_buffer_years=True):
     """This function filters the data according to the model setup.
 
     Specifically, it filters out young people, women (if no_women=True), and years
@@ -37,5 +37,12 @@ def filter_data(merged_data, specs, no_women=True):
 
     merged_data = filter_by_sex(merged_data, no_women=no_women)
 
-    merged_data = filter_est_years(merged_data, specs["start_year"], specs["end_year"])
+    if lag_and_lead_buffer_years:
+        start_year = specs["start_year"] - 1
+        end_year = specs["end_year"] + 1
+    else:
+        start_year = specs["start_year"]
+        end_year = specs["end_year"]
+
+    merged_data = filter_years(merged_data, start_year, end_year)
     return merged_data

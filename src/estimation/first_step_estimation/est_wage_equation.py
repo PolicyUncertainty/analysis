@@ -12,8 +12,22 @@ def estimate_wage_parameters(paths_dict, specs):
     Also estimate for all individuals.
 
     """
-    # load and modify data
-    wage_data = prepare_estimation_data(paths_dict)
+    # Load and modify data.
+    wage_data = pd.read_pickle(
+        paths_dict["intermediate_data"] + "wage_estimation_sample.pkl"
+    )
+
+    # Hourly wage
+    wage_data["ln_wage"] = np.log(wage_data["hourly_wage"])
+
+    # Log exp and other explanatory variablesq
+    wage_data["ln_exp"] = np.log(wage_data["experience"] + 1)
+    wage_data["constant"] = np.ones(len(wage_data))
+
+    # prepare format
+    wage_data["year"] = wage_data["syear"].astype("category")
+    wage_data = wage_data.set_index(["pid", "syear"])
+
     edu_labels = specs["education_labels"] + ["all"]
     model_params = ["constant", "ln_exp"]
     # Initialize empty container for coefficients
@@ -36,14 +50,14 @@ def estimate_wage_parameters(paths_dict, specs):
         # Assign estimated parameters (column list corresponds to model params, so only these are assigned)
         for param in model_params:
             wage_parameters.loc[edu_label, param] = fitted_model.params[param]
-            wage_parameters.loc[edu_label, param + "_std"] = fitted_model.std_errors[
+            wage_parameters.loc[edu_label, param + "_ser"] = fitted_model.std_errors[
                 param
             ]
 
         # Get estimate for income shock std
         (
             wage_parameters.loc[edu_label, "income_shock_std"],
-            wage_parameters.loc[edu_label, "income_shock_std_std"],
+            wage_parameters.loc[edu_label, "income_shock_std_ser"],
         ) = est_shock_std(
             residuals=fitted_model.resids,
             n_obs=wage_data_edu.shape[0],
@@ -56,27 +70,15 @@ def estimate_wage_parameters(paths_dict, specs):
     )
     # After estimation print some summary statistics
     print_wage_equation(wage_parameters, edu_labels)
+
+    # # Now use results to deflate wages to 2010 levels to calculate some population statistics
+    # wage_data["ln_wage_deflated"]  = wage_data["ln_wage"].copy()
+    # for year in range(specs["start_year"], specs["end_year"] + 1):
+    #     wage_data.loc[wage_data["year"] == year, "ln_wage_deflated"] -= fitted_model.params[f"year.{year}"]
+    #
+    # breakpoint()
+
     return wage_parameters
-
-
-def prepare_estimation_data(paths_dict):
-    """Prepare the data for the wage estimation."""
-    wage_data = pd.read_pickle(
-        paths_dict["intermediate_data"] + "wage_estimation_sample.pkl"
-    )
-
-    # wage data
-    wage_data["ln_wage"] = np.log(wage_data["hourly_wage"])
-    wage_data["experience"] = wage_data["experience"] + 1
-    wage_data["ln_exp"] = np.log(wage_data["experience"])
-    wage_data["ln_age"] = np.log(wage_data["age"])
-
-    # prepare format
-    wage_data["year"] = wage_data["syear"].astype("category")
-    wage_data = wage_data.set_index(["pid", "syear"])
-    wage_data["constant"] = np.ones(len(wage_data))
-
-    return wage_data
 
 
 def save_population_averages(df, paths_dict):
@@ -110,8 +112,8 @@ def est_shock_std(residuals, n_obs, n_params):
     n_minus_k = n_obs - n_params
     income_shock_var = rss / n_minus_k
     income_shock_std = np.sqrt(income_shock_var)
-    income_shock_std_std = np.sqrt((2 * income_shock_var**2) / n_minus_k)
-    return income_shock_std, income_shock_std_std
+    income_shock_std_ser = np.sqrt((2 * income_shock_var**2) / n_minus_k)
+    return income_shock_std, income_shock_std_ser
 
 
 def print_wage_equation(wage_parameters, edu_labels):

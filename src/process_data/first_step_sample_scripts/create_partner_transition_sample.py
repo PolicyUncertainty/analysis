@@ -4,7 +4,7 @@ import os
 import pandas as pd
 from process_data.aux_scripts.filter_data import filter_below_age
 from process_data.aux_scripts.filter_data import filter_by_sex
-from process_data.aux_scripts.filter_data import filter_est_years
+from process_data.aux_scripts.filter_data import filter_years
 from process_data.aux_scripts.lagged_and_lead_vars import span_dataframe
 from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.partner_code import create_partner_state
@@ -28,7 +28,7 @@ def create_partner_transition_sample(paths, specs, load_data=False):
     df = create_education_type(df)
 
     # Filter estimation years
-    df = filter_est_years(df, specs["start_year"], specs["end_year"])
+    df = filter_years(df, specs["start_year"], specs["end_year"])
 
     # In this function also merging is called
     df = create_partner_and_lagged_state(df, specs)

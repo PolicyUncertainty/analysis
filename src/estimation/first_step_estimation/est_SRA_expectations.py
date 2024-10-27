@@ -5,7 +5,9 @@ from functools import partial
 
 import numpy as np
 import pandas as pd
-from process_data.structural_sample_scripts.policy_state import create_policy_state
+from process_data.structural_sample_scripts.policy_state import (
+    assign_policy_state_by_gebjahr,
+)
 from scipy.optimize import root
 from scipy.stats import truncnorm
 
@@ -52,7 +54,9 @@ def estimate_truncated_normal(paths, options, load_data=False):
     df_analysis = df_analysis[df_analysis["time_to_ret"] < 48]
 
     df_analysis["sigma_sq"] = df_analysis["var"] / df_analysis["time_to_ret"]
-    df_analysis["current_SRA"] = create_policy_state(df_analysis["birth_year"])
+    df_analysis["current_SRA"] = assign_policy_state_by_gebjahr(
+        df_analysis["birth_year"]
+    )
     df_analysis.to_pickle(out_file_path)
     return df_analysis
 

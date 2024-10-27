@@ -2,7 +2,7 @@ import os
 
 import numpy as np
 import pandas as pd
-from process_data.data_tools import filter_data
+from process_data.aux_scripts.filter_data import filter_data
 from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.experience import sum_experience_variables
 from process_data.soep_vars.hours import generate_working_hours

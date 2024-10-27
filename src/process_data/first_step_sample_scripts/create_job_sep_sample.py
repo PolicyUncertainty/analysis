@@ -2,13 +2,13 @@ import os
 
 import numpy as np
 import pandas as pd
-from process_data.data_tools import filter_data
+from process_data.aux_scripts.filter_data import filter_data
+from process_data.aux_scripts.lagged_and_lead_vars import (
+    create_lagged_and_lead_variables,
+)
 from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.job_hire_and_fire import generate_job_separation_var
 from process_data.soep_vars.work_choices import create_choice_variable
-from process_data.structural_sample_scripts.create_structural_est_sample import (
-    create_lagged_and_lead_variables,
-)
 
 
 def create_job_sep_sample(paths, specs, load_data=False):
@@ -22,50 +22,44 @@ def create_job_sep_sample(paths, specs, load_data=False):
         return data
 
     # Export parameters from specs
-    start_year = specs["start_year"]
-    end_year = specs["end_year"]
     start_age = specs["start_age"]
     max_ret_age = specs["max_ret_age"]
 
     # Load and merge data state data from SOEP core
-    merged_data = load_and_merge_soep_core(paths["soep_c38"])
+    df = load_and_merge_soep_core(paths["soep_c38"])
 
     # filter data (age, sex, estimation period)
-    merged_data = filter_data(merged_data, specs)
+    df = filter_data(df, specs)
 
     # create choice and lagged choice variable
-    merged_data = create_choice_variable(merged_data)
+    df = create_choice_variable(df)
 
     # Job separation
-    merged_data = generate_job_separation_var(merged_data)
+    df = generate_job_separation_var(df)
 
-    # lagged choice
-    merged_data = create_lagged_and_lead_variables(
-        merged_data, start_year, end_year, start_age
-    )
+    # lagged choice (Also leads the job separation variable, which we will not use.
+    df = create_lagged_and_lead_variables(df, specs)
 
     # education
-    merged_data = create_education_type(merged_data)
+    df = create_education_type(df)
 
     # Now restrict sample to all who worked last period or did loose their job
-    merged_data = merged_data[
-        (merged_data["lagged_choice"] == 1) | (merged_data["plb0282_h"] == 1)
-    ]
+    df = df[(df["lagged_choice"] == 1) | (df["plb0282_h"] == 1)]
 
-    # Create age at which one got fired
-    merged_data["age_fired"] = merged_data["age"] - 1
+    # Create age at which one got fired and rename job separation column
+    df["age_fired"] = df["age"] - 1
 
-    merged_data.reset_index(drop=True, inplace=True)
+    df.reset_index(drop=True, inplace=True)
 
     # Keep relevant columns
-    merged_data = merged_data[
+    df = df[
         [
             "age_fired",
             "education",
             "job_sep",
         ]
     ]
-    merged_data = merged_data.astype(
+    df = df.astype(
         {
             "age_fired": np.int32,
             "education": np.int32,
@@ -73,17 +67,15 @@ def create_job_sep_sample(paths, specs, load_data=False):
         }
     )
     # Rename age fired to age
-    merged_data.rename(columns={"age_fired": "age"}, inplace=True)
+    df.rename(columns={"age_fired": "age"}, inplace=True)
     # Limit age range to start age and maximum retirement age
-    merged_data = merged_data[
-        (merged_data["age"] >= start_age) & (merged_data["age"] <= max_ret_age)
-    ]
-    print(f"{len(merged_data)} observations in job separation sample.")
+    df = df[(df["age"] >= start_age) & (df["age"] <= max_ret_age)]
+    print(f"{len(df)} observations in job separation sample.")
 
     # save data
-    merged_data.to_pickle(out_file_path)
+    df.to_pickle(out_file_path)
 
-    return merged_data
+    return df
 
 
 def load_and_merge_soep_core(soep_c38_path):

@@ -1,7 +1,7 @@
 import os
 
 import pandas as pd
-from process_data.data_tools import filter_data
+from process_data.aux_scripts.filter_data import filter_data
 from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.partner_code import create_partner_state
 

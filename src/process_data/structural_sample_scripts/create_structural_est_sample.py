@@ -1,9 +1,10 @@
 import os
 
-import numpy as np
 import pandas as pd
-from process_data.data_tools import filter_data
-from process_data.data_tools import span_dataframe
+from process_data.aux_scripts.filter_data import filter_data
+from process_data.aux_scripts.lagged_and_lead_vars import (
+    create_lagged_and_lead_variables,
+)
 from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.experience import create_experience_variable
 from process_data.soep_vars.job_hire_and_fire import determine_observed_job_offers
@@ -15,7 +16,6 @@ from process_data.structural_sample_scripts.model_restrictions import (
     enforce_model_choice_restriction,
 )
 from process_data.structural_sample_scripts.policy_state import create_policy_state
-from process_data.structural_sample_scripts.policy_state import modify_policy_state
 
 
 def create_structural_est_sample(paths, specs, load_data=False):
@@ -49,17 +49,11 @@ def create_structural_est_sample(paths, specs, load_data=False):
     # Add wealth data
     df = add_wealth(df, paths, specs)
 
-    # Now create more observed choice variables
-    # period
+    # Create period
     df["period"] = df["age"] - specs["start_age"]
 
     # policy_state
-    df["policy_state"] = create_policy_state(df["gebjahr"])
-
-    (
-        df["policy_state_value"],
-        df["policy_state"],
-    ) = modify_policy_state(df["policy_state"], specs)
+    df = create_policy_state(df, specs)
 
     # experience
     df = create_experience_variable(df)
@@ -68,7 +62,7 @@ def create_structural_est_sample(paths, specs, load_data=False):
     df = create_education_type(df)
 
     # additional restrictions based on model setup
-    df = enforce_model_choice_restriction(df, min_ret_age)
+    df = enforce_model_choice_restriction(df, specs)
 
     # Construct job offer state
     was_fired_last_period = df["job_sep_this_year"] == 1
@@ -158,31 +152,6 @@ def load_and_merge_soep_core(soep_c38_path):
     merged_data["age"] = merged_data["syear"] - merged_data["gebjahr"]
     merged_data.set_index(["pid", "syear"], inplace=True)
     print(str(len(merged_data)) + " observations in SOEP C38 core.")
-    return merged_data
-
-
-def create_lagged_and_lead_variables(merged_data, specs):
-    """This function creates the lagged choice variable and drops missing lagged
-    choices."""
-
-    full_container = span_dataframe(merged_data, specs)
-
-    full_container["lagged_choice"] = full_container.groupby(["pid"])["choice"].shift()
-    full_container["job_sep_this_year"] = full_container.groupby(["pid"])[
-        "job_sep"
-    ].shift(-1)
-    merged_data = full_container[full_container["lagged_choice"].notna()]
-    merged_data = merged_data[merged_data["job_sep_this_year"].notna()]
-
-    # We now have observations with a valid lagged or lead variable but not with
-    # actual valid state variables. Delete those by looking at the choice variable.
-    merged_data = merged_data[merged_data["choice"].notna()]
-
-    # We left too young people in the sample to construct lagged choice. Delete those
-    # now.
-    merged_data = merged_data[merged_data["age"] >= specs["start_age"]]
-
-    print(str(len(merged_data)) + " left after filtering missing lagged choices.")
     return merged_data
 
 

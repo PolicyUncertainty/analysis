@@ -2,10 +2,10 @@
 import os
 
 import pandas as pd
-from process_data.data_tools import filter_below_age
-from process_data.data_tools import filter_by_sex
-from process_data.data_tools import filter_est_years
-from process_data.data_tools import span_dataframe
+from process_data.aux_scripts.filter_data import filter_below_age
+from process_data.aux_scripts.filter_data import filter_by_sex
+from process_data.aux_scripts.filter_data import filter_est_years
+from process_data.aux_scripts.lagged_and_lead_vars import span_dataframe
 from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.partner_code import create_partner_state
 
@@ -23,27 +23,18 @@ def create_partner_transition_sample(paths, specs, load_data=False):
         data = pd.read_pickle(out_file_path)
         return data
 
-    start_year = specs["start_year"]
-    end_year = specs["end_year"]
-    start_age = specs["start_age"]
-
     df = load_and_merge_soep_core(paths["soep_c38"])
 
     df = create_education_type(df)
 
     # Filter estimation years
-    df = filter_est_years(df, start_year, end_year)
-
-    # The following code is dependent on span dataframe being called first.
-    # In particular the lagged partner state must be after span dataframe and create partner state.
-    # We should rewrite this
-    df = span_dataframe(df, start_year, end_year)
+    df = filter_est_years(df, specs["start_year"], specs["end_year"])
 
     # In this function also merging is called
-    df = create_partner_and_lagged_state(df)
+    df = create_partner_and_lagged_state(df, specs)
 
     # Filter age and sex
-    df = filter_below_age(df, start_age)
+    df = filter_below_age(df, specs["start_age"])
     df = filter_by_sex(df, no_women=False)
 
     df = df[
@@ -93,7 +84,12 @@ def load_and_merge_soep_core(soep_c38_path):
     return merged_data
 
 
-def create_partner_and_lagged_state(df):
+def create_partner_and_lagged_state(df, specs):
+    # The following code is dependent on span dataframe being called first.
+    # In particular the lagged partner state must be after span dataframe and create partner state.
+    # We should rewrite this
+    df = span_dataframe(df, specs)
+
     df = create_partner_state(df)
     df["lagged_partner_state"] = df.groupby(["pid"])["partner_state"].shift()
     df = df[df["lagged_partner_state"].notna()]

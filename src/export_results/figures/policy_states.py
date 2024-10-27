@@ -1,12 +1,14 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from process_data.structural_sample_scripts.policy_state import create_policy_state
+from process_data.structural_sample_scripts.policy_state import (
+    assign_policy_state_by_gebjahr,
+)
 
 
 def plot_SRA_2007_reform(path_dict):
     gebjahr = pd.Series(data=np.arange(1945, 1966, 1), name="gebjahr")
-    policy_states = create_policy_state(gebjahr)
+    policy_states = assign_policy_state_by_gebjahr(gebjahr)
     fig, ax = plt.subplots()
     ax.plot(gebjahr, policy_states)
     ax.set_xlim(1945, 1965)

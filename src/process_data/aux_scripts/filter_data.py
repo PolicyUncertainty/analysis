@@ -1,7 +1,3 @@
-import numpy as np
-import pandas as pd
-
-
 def filter_est_years(df, start_year, end_year):
     df = df.loc[(slice(None), range(start_year - 1, end_year + 2)), :]
     print(
@@ -43,25 +39,3 @@ def filter_data(merged_data, specs, no_women=True):
 
     merged_data = filter_est_years(merged_data, specs["start_year"], specs["end_year"])
     return merged_data
-
-
-def span_dataframe(df, specs):
-    """This function spans the DataFrame over the whole observation period +-1 year, to
-    create lagged and lead variables."""
-    # Create full index with all possible combinations of pid and syear. Otherwise if
-    # we just shift the data, people having missing years in their observations get
-    # assigned variables from multi years back.
-    pid_indexes = df.index.get_level_values(0).unique()
-
-    full_index = pd.MultiIndex.from_product(
-        [pid_indexes, range(specs["start_year"] - 1, specs["end_year"] + 2)],
-        names=["pid", "syear"],
-    )
-    full_container = pd.DataFrame(
-        index=full_index, data=np.nan, dtype=float, columns=df.columns
-    )
-    full_container.update(df)
-
-    if "hid" in full_container.columns.values:
-        full_container["hid"] = full_container.groupby(["pid"])["hid"].transform("last")
-    return full_container

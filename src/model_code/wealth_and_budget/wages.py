@@ -34,11 +34,14 @@ def calculate_gross_labor_income(
     pt_work = lagged_choice == 2
     ft_work = lagged_choice == 3
 
-    average_hours = options["av_hours_pt"] * pt_work + options["av_hours_ft"] * ft_work
+    average_hours = (
+        options["av_annual_hours_pt"][education] * pt_work
+        + options["av_annual_hours_ft"][education] * ft_work
+    )
     labour_income = hourly_wage * average_hours
 
-    labor_income_min_checked = (
-        jnp.maximum(labour_income / options["wealth_unit"], options["min_wage"]) * 12
+    yearly_min_wage = options["min_wage"] * 12
+    labor_income_min_checked = jnp.maximum(
+        labour_income / options["wealth_unit"], yearly_min_wage
     )
-
     return labor_income_min_checked

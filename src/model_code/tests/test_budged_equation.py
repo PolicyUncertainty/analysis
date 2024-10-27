@@ -169,11 +169,12 @@ def test_budget_ft_worker(
         )
         / specs_internal["wealth_unit"]
     )
-    labor_income = hourly_wage * specs["av_hours_ft"]
-    if labor_income < specs_internal["min_wage"]:
-        labor_income = specs_internal["min_wage"]
+    labor_income_year = hourly_wage * specs["av_annual_hours_ft"][education]
+    # Check against min wage
+    min_wage_year = specs_internal["min_wage"] * 12
+    if labor_income_year < min_wage_year:
+        labor_income_year = min_wage_year
 
-    labor_income_year = labor_income * 12
     income_scaled = labor_income_year * specs_internal["wealth_unit"]
     sscs_worker = calc_health_ltc_contr(income_scaled) + calc_pension_unempl_contr(
         income_scaled

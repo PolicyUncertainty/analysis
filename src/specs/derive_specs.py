@@ -5,7 +5,7 @@ import yaml
 from specs.family_specs import calculate_partner_incomes
 from specs.family_specs import predict_children_by_state
 from specs.family_specs import read_in_partner_transition_specs
-from specs.income_specs import get_pension_vars
+from specs.income_specs import get_pension_point_value
 from specs.income_specs import process_wage_params
 
 
@@ -21,7 +21,7 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     ) = process_wage_params(path_dict, specs)
 
     # pensions
-    specs["ppv"], specs["mean_wage"] = get_pension_vars(specs, path_dict)
+    specs["ppv"] = get_pension_point_value(specs)
 
     # partner income
     specs["partner_wage"], specs["partner_pension"] = calculate_partner_incomes(
@@ -50,10 +50,21 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
 
     # Assign population averages
     pop_averages = pd.read_csv(
-        path_dict["est_results"] + "population_averages_working.csv", index_col=0
+        path_dict["est_results"] + "population_averages_working.csv"
+    ).iloc[0]
+    specs["av_annual_hours_ft"] = jnp.array(
+        [
+            pop_averages["annual_hours_low_ft_work"],
+            pop_averages["annual_hours_high_ft_work"],
+        ]
     )
-    specs["av_hours_ft"] = 35
-    specs["av_hours_pt"] = 20
+    specs["av_annual_hours_pt"] = jnp.array(
+        [
+            pop_averages["annual_hours_low_pt_work"],
+            pop_averages["annual_hours_high_pt_work"],
+        ]
+    )
+    specs["mean_wage"] = pop_averages["annual_mean_wage"]
     return specs
 
 

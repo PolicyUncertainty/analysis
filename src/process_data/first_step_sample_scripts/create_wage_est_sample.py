@@ -60,6 +60,7 @@ def create_wage_est_sample(paths, specs, load_data=False):
         "pid": np.int32,
         "syear": np.int32,
         "age": np.int32,
+        "choice": np.int32,
         "experience": np.int32,
         "monthly_wage": np.float64,
         "hourly_wage": np.float64,

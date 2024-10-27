@@ -32,7 +32,12 @@ def estimate_wage_parameters(paths_dict, specs):
     model_params = ["constant", "ln_exp"]
     # Initialize empty container for coefficients
     wage_parameters = pd.DataFrame()
+
+    # Initialize years for year fixed effects
+    year_fixed_effects = {}
+    years = list(range(specs["start_year"] + 1, specs["end_year"] + 1))
     for edu_val, edu_label in enumerate(edu_labels):
+        year_fixed_effects[edu_label] = {}
         if edu_label == "all":
             wage_data_edu = wage_data
         else:
@@ -54,6 +59,9 @@ def estimate_wage_parameters(paths_dict, specs):
                 param
             ]
 
+        for year in years:
+            year_fixed_effects[edu_label][year] = fitted_model.params[f"year.{year}"]
+
         # Get estimate for income shock std
         (
             wage_parameters.loc[edu_label, "income_shock_std"],
@@ -72,11 +80,18 @@ def estimate_wage_parameters(paths_dict, specs):
     print_wage_equation(wage_parameters, edu_labels)
 
     # # Now use results to deflate wages to 2010 levels to calculate some population statistics
-    # wage_data["ln_wage_deflated"]  = wage_data["ln_wage"].copy()
-    # for year in range(specs["start_year"], specs["end_year"] + 1):
-    #     wage_data.loc[wage_data["year"] == year, "ln_wage_deflated"] -= fitted_model.params[f"year.{year}"]
-    #
-    # breakpoint()
+    wage_data["ln_wage_deflated"] = wage_data["ln_wage"].copy()
+    for edu_val, edu_label in enumerate(edu_labels):
+        for year in years:
+            edu_mask = wage_data["education"] == edu_val
+            year_mask = wage_data["year"] = year
+            wage_data.loc[
+                edu_mask & year_mask, "ln_wage_deflated"
+            ] -= year_fixed_effects[edu_label][year]
+
+    wage_data["monthly_wage_deflated"] = (
+        np.exp(wage_data["ln_wage_deflated"]) * wage_data["monthly_hours"]
+    )
 
     return wage_parameters
 

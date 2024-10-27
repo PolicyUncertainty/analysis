@@ -4,19 +4,11 @@ from jax import numpy as jnp
 
 
 def get_pension_vars(specs, path_dict):
-    wage_params = pd.read_csv(
-        path_dict["est_results"] + "wage_eq_params.csv", index_col=0
+    pop_averages = pd.read_csv(
+        path_dict["est_results"] + "population_averages_working.csv", index_col=0
     )
 
-    # Create possible experience values
-    # ToDo: Use real mean wage
-    experience = np.arange(0, 45)
-
-    wage_by_experience_average = np.exp(
-        wage_params.loc["all", "constant"]
-        + wage_params.loc["all", "ln_exp"] * np.log(experience + 1)
-    )
-    mean_wage_all = wage_by_experience_average.mean()
+    mean_wage_all = pop_averages["annual_mean_wage"]
 
     # Generate average pension point value weighted by east and west
     # pensions

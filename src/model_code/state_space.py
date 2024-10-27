@@ -65,7 +65,9 @@ def get_next_period_experience(
     exp_years_last_period = (max_experience_period - 1) * experience
 
     # Update if working part or full time
-    exp_update = (lagged_choice == 3) + (lagged_choice == 2) * options["exp_inc_pt"]
+    exp_update = (lagged_choice == 3) + (lagged_choice == 2) * options[
+        "exp_increase_part_time"
+    ]
     exp_new_period = exp_years_last_period + exp_update
 
     # If retired, then we update experience according to the deduction function

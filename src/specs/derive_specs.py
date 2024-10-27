@@ -48,10 +48,12 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
         np.loadtxt(path_dict["est_results"] + "job_sep_probs.csv", delimiter=",")
     )
 
-    # Intermediate specs for tests only
+    # Assign population averages
+    pop_averages = pd.read_csv(
+        path_dict["est_results"] + "population_averages_working.csv", index_col=0
+    )
     specs["av_hours_ft"] = 35
     specs["av_hours_pt"] = 20
-    specs["exp_inc_pt"] = 0.5
     return specs
 
 

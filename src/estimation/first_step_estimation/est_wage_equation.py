@@ -79,44 +79,51 @@ def estimate_wage_parameters(paths_dict, specs):
     # After estimation print some summary statistics
     print_wage_equation(wage_parameters, edu_labels)
 
-    # # Now use results to deflate wages to 2010 levels to calculate some population statistics
-    wage_data["ln_wage_deflated"] = wage_data["ln_wage"].copy()
-    for edu_val, edu_label in enumerate(edu_labels):
-        for year in years:
-            edu_mask = wage_data["education"] == edu_val
-            year_mask = wage_data["year"] = year
-            wage_data.loc[
-                edu_mask & year_mask, "ln_wage_deflated"
-            ] -= year_fixed_effects[edu_label][year]
-
-    wage_data["monthly_wage_deflated"] = (
-        np.exp(wage_data["ln_wage_deflated"]) * wage_data["monthly_hours"]
-    )
+    calc_additional_wage_params(wage_data, year_fixed_effects, specs, paths_dict)
 
     return wage_parameters
 
 
-def save_population_averages(df, paths_dict):
+def calc_additional_wage_params(df, year_fixed_effects, specs, paths_dict):
     """Save population average of annual wage (for pension calculation) and working
     hours by education (to compute annual wages).
 
     We do this here (as opposed to model specs) to avoid loading the data twice.
 
     """
-    df["annual_wage"] = df["wage"] * 12
-    pop_avg_annual_wage = df["annual_wage"].mean()
-    pop_avg_hours_worked = df["working_hours"].mean() * 52
-    pop_avg_hours_worked_by_edu = df.groupby("education")["working_hours"].mean() * 52
-    pop_avg = pd.DataFrame({"annual_wage": [pop_avg_annual_wage]})
-    for edu_level, hours in pop_avg_hours_worked_by_edu.items():
-        pop_avg[f"working_hours_{edu_level}"] = hours
+    years = list(range(specs["start_year"] + 1, specs["end_year"] + 1))
+    edu_labels = specs["education_labels"]
 
-    pop_avg.to_csv(paths_dict["est_results"] + "population_averages.csv")
-    print(
-        "Population averages saved. \n Average annual wage: "
-        + str(pop_avg_annual_wage)
-        + "\n Average hours worked: "
-        + str(pop_avg_hours_worked)
+    # # Now use results to deflate wages to 2010 levels to calculate some population statistics
+    df["ln_wage_deflated"] = df["ln_wage"].copy()
+    for edu_val, edu_label in enumerate(edu_labels):
+        for year in years:
+            edu_mask = df["education"] == edu_val
+            year_mask = df["year"] = year
+            df.loc[edu_mask & year_mask, "ln_wage_deflated"] -= year_fixed_effects[
+                edu_label
+            ][year]
+
+    df["annual_wage_deflated"] = (
+        np.exp(df["ln_wage_deflated"]) * df["monthly_hours"]
+    ) * 12
+    pop_avg_annual_wage = df["annual_wage_deflated"].mean()
+
+    df["yearly_hours"] = df["monthly_hours"] * 12
+    avg_hours_by_edu_choice = df.groupby(["education", "choice"])["yearly_hours"].mean()
+
+    choice_mapping = {"pt_work": 2, "ft_work": 3}
+
+    edu_labels_params = ["low", "high"]
+    pop_avg = pd.DataFrame({"annual_mean_wage": [pop_avg_annual_wage]})
+    for choice, choice_var in choice_mapping.items():
+        for edu_val, edu_label in enumerate(edu_labels_params):
+            pop_avg[f"annual_hours_{edu_label}_{choice}"] = avg_hours_by_edu_choice.loc[
+                (edu_val, choice_var)
+            ]
+
+    pop_avg.to_csv(
+        paths_dict["est_results"] + "population_averages_working.csv", index=False
     )
     return pop_avg
 

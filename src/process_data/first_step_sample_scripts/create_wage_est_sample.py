@@ -21,47 +21,43 @@ def create_wage_est_sample(paths, specs, load_data=False):
         return data
 
     # Load and merge data state data from SOEP core (all but wealth)
-    merged_data = load_and_merge_soep_core(paths["soep_c38"])
+    df = load_and_merge_soep_core(paths["soep_c38"])
 
     # filter data (age, sex, estimation period)
-    merged_data = filter_data(merged_data, specs, no_women=True)
+    df = filter_data(df, specs, no_women=True)
 
     # create labor choice, keep only working (2: part-time, 3: full-time)
-    merged_data = create_choice_variable(merged_data)
-    merged_data = merged_data[merged_data["choice"].isin([2, 3])]
-    print(
-        str(len(merged_data)) + " observations after dropping non-working individuals."
-    )
+    df = create_choice_variable(df)
 
     # weekly working hours
-    merged_data = generate_working_hours(merged_data)
+    df = generate_working_hours(df)
 
     # experience, where we use the sum of part and full time (note: unlike in
     # structural estimation, we do not round or enforce a cap on experience here)
-    merged_data = sum_experience_variables(merged_data)
+    df = sum_experience_variables(df)
 
     # gross monthly wage
-    merged_data.rename(columns={"pglabgro": "wage"}, inplace=True)
-    merged_data = merged_data[merged_data["wage"] > 0]
-    print(str(len(merged_data)) + " observations after dropping invalid wage values.")
+    df.rename(columns={"pglabgro": "monthly_wage"}, inplace=True)
+    df = df[df["monthly_wage"] > 0]
+    print(str(len(df)) + " observations after dropping invalid wage values.")
 
-    # hourly wage
-    merged_data["monthly_hours"] = merged_data["working_hours"] * 52 / 12
-    merged_data["hourly_wage"] = merged_data["wage"] / merged_data["monthly_hours"]
+    # Drop retirees (and in theory also unemployed) with wages
+    df = df[df["choice"].isin([2, 3])]
+    print(str(len(df)) + " observations after dropping non-working individuals.")
+
+    # Hourly wage
+    df["monthly_hours"] = df["working_hours"] * 52 / 12
+    df["hourly_wage"] = df["monthly_wage"] / df["monthly_hours"]
 
     # education
-    merged_data = create_education_type(merged_data)
+    df = create_education_type(df)
 
     # bring back indeces (pid, syear)
-    merged_data = merged_data.reset_index()
-
-    print(str(len(merged_data)) + " observations in final wage estimation dataset.")
-
-    # save population averages (wages and hours) separately
-    save_population_averages(merged_data)
+    df = df.reset_index()
+    print(str(len(df)) + " observations in final wage estimation dataset.")
 
     # Keep relevant columns
-    merged_data = merged_data[
+    df = df[
         [
             "pid",
             "age",
@@ -72,7 +68,7 @@ def create_wage_est_sample(paths, specs, load_data=False):
             "syear",
         ]
     ]
-    merged_data = merged_data.astype(
+    df = df.astype(
         {
             "pid": np.int32,
             "syear": np.int32,
@@ -85,9 +81,9 @@ def create_wage_est_sample(paths, specs, load_data=False):
     )
 
     # save data
-    merged_data.to_pickle(out_file_path)
+    df.to_pickle(out_file_path)
 
-    return merged_data
+    return df
 
 
 def load_and_merge_soep_core(soep_c38_path):
@@ -124,30 +120,3 @@ def load_and_merge_soep_core(soep_c38_path):
     merged_data.set_index(["pid", "syear"], inplace=True)
     print(str(len(merged_data)) + " observations in SOEP C38 core.")
     return merged_data
-
-
-def save_population_averages(df):
-    """Save population average of annual wage (for pension calculation) and working
-    hours by education (to compute annual wages).
-
-    We do this here (as opposed to model specs) to avoid loading the data twice.
-
-    """
-    paths_dict = create_path_dict(define_user=False)
-
-    df["annual_wage"] = df["wage"] * 12
-    pop_avg_annual_wage = df["annual_wage"].mean()
-    pop_avg_hours_worked = df["working_hours"].mean() * 52
-    pop_avg_hours_worked_by_edu = df.groupby("education")["working_hours"].mean() * 52
-    pop_avg = pd.DataFrame({"annual_wage": [pop_avg_annual_wage]})
-    for edu_level, hours in pop_avg_hours_worked_by_edu.items():
-        pop_avg[f"working_hours_{edu_level}"] = hours
-
-    pop_avg.to_csv(paths_dict["est_results"] + "population_averages.csv")
-    print(
-        "Population averages saved. \n Average annual wage: "
-        + str(pop_avg_annual_wage)
-        + "\n Average hours worked: "
-        + str(pop_avg_hours_worked)
-    )
-    return pop_avg

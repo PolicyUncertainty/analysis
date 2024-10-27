@@ -41,30 +41,21 @@ def estimate_wage_parameters(paths_dict, specs):
             ]
 
         # Get estimate for income shock std
-        rss = fitted_model.resids.T @ fitted_model.resids
-        n_minus_k = wage_data_edu.shape[0] - fitted_model.params.shape[0]
-        income_shock_var = rss / n_minus_k
-        income_shock_std = np.sqrt(income_shock_var)
-        wage_parameters.loc[edu_label, "income_shock_std"] = income_shock_std
-        wage_parameters.loc[edu_label, "income_shock_std_std"] = np.sqrt(
-            (2 * income_shock_var**2) / n_minus_k
+        (
+            wage_parameters.loc[edu_label, "income_shock_std"],
+            wage_parameters.loc[edu_label, "income_shock_std_std"],
+        ) = est_shock_std(
+            residuals=fitted_model.resids,
+            n_obs=wage_data_edu.shape[0],
+            n_params=fitted_model.params.shape[0],
         )
     # Save results
     wage_parameters.to_csv(paths_dict["est_results"] + "wage_eq_params.csv")
     wage_parameters.T.to_latex(
         paths_dict["tables"] + "wage_eq_params.tex", float_format="%.4f"
     )
-    # print wage equation
-    for edu_val, edu_label in enumerate(edu_labels):
-        print("Hourly wage equation: " + edu_label)
-        print("ln(hrly_wage) = "+str(wage_parameters.loc[edu_label, "constant"])+" + "+str(wage_parameters.loc[edu_label, "ln_exp"])+" * ln(exp+1) + epsilon")
-        hrly_wage_with_20_exp = np.exp(
-            wage_parameters.loc[edu_label, "constant"]
-            + wage_parameters.loc[edu_label, "ln_exp"] * np.log(20)
-        )
-        print("Example: hourly wage with 20 years of experience: " + str(hrly_wage_with_20_exp))
-        print("Income shock std: " + str(wage_parameters.loc[edu_label, "income_shock_std"]))
-        print("--------------------")
+    # After estimation print some summary statistics
+    print_wage_equation(wage_parameters, edu_labels)
     return wage_parameters
 
 
@@ -88,3 +79,62 @@ def prepare_estimation_data(paths_dict):
     return wage_data
 
 
+def save_population_averages(df, paths_dict):
+    """Save population average of annual wage (for pension calculation) and working
+    hours by education (to compute annual wages).
+
+    We do this here (as opposed to model specs) to avoid loading the data twice.
+
+    """
+    df["annual_wage"] = df["wage"] * 12
+    pop_avg_annual_wage = df["annual_wage"].mean()
+    pop_avg_hours_worked = df["working_hours"].mean() * 52
+    pop_avg_hours_worked_by_edu = df.groupby("education")["working_hours"].mean() * 52
+    pop_avg = pd.DataFrame({"annual_wage": [pop_avg_annual_wage]})
+    for edu_level, hours in pop_avg_hours_worked_by_edu.items():
+        pop_avg[f"working_hours_{edu_level}"] = hours
+
+    pop_avg.to_csv(paths_dict["est_results"] + "population_averages.csv")
+    print(
+        "Population averages saved. \n Average annual wage: "
+        + str(pop_avg_annual_wage)
+        + "\n Average hours worked: "
+        + str(pop_avg_hours_worked)
+    )
+    return pop_avg
+
+
+def est_shock_std(residuals, n_obs, n_params):
+    """Estimate income shock std and its standard error."""
+    rss = residuals @ residuals
+    n_minus_k = n_obs - n_params
+    income_shock_var = rss / n_minus_k
+    income_shock_std = np.sqrt(income_shock_var)
+    income_shock_std_std = np.sqrt((2 * income_shock_var**2) / n_minus_k)
+    return income_shock_std, income_shock_std_std
+
+
+def print_wage_equation(wage_parameters, edu_labels):
+    # print wage equation
+    for edu_val, edu_label in enumerate(edu_labels):
+        print("Hourly wage equation: " + edu_label)
+        print(
+            "ln(hrly_wage) = "
+            + str(wage_parameters.loc[edu_label, "constant"])
+            + " + "
+            + str(wage_parameters.loc[edu_label, "ln_exp"])
+            + " * ln(exp+1) + epsilon"
+        )
+        hrly_wage_with_20_exp = np.exp(
+            wage_parameters.loc[edu_label, "constant"]
+            + wage_parameters.loc[edu_label, "ln_exp"] * np.log(20)
+        )
+        print(
+            "Example: hourly wage with 20 years of experience: "
+            + str(hrly_wage_with_20_exp)
+        )
+        print(
+            "Income shock std: "
+            + str(wage_parameters.loc[edu_label, "income_shock_std"])
+        )
+        print("--------------------")

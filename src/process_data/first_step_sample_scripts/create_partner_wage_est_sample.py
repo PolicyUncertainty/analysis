@@ -16,10 +16,6 @@ def create_partner_wage_est_sample(paths, specs, load_data=False):
         data = pd.read_pickle(out_file_path)
         return data
 
-    start_year = specs["start_year"]
-    end_year = specs["end_year"]
-    start_age = specs["start_age"]
-
     df = load_and_merge_soep_core(paths["soep_c38"])
     df = filter_data(df, specs, no_women=False)
     df = create_wages(df.copy())
@@ -79,9 +75,4 @@ def create_wages(df):
     df.rename(columns={"pglabgro": "wage"}, inplace=True)
     df.loc[df["wage"] < 0, "wage"] = 0
     print(str(len(df)) + " observations after dropping invalid wage values.")
-    # working hours = contractual hours per week
-    # df = df.rename(columns={"pgvebzeit": "working_hours"})
-    # df = df[df["working_hours"] > 0]
-    # print(str(len(df)) + " observations after dropping invalid working hours.")
-    # df["hourly_wage"] = df["wage"] / (df["working_hours"] * (52 / 12))
     return df

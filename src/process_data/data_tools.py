@@ -29,7 +29,7 @@ def filter_by_sex(df, no_women):
     return df
 
 
-def filter_data(merged_data, start_year, end_year, start_age, no_women=True):
+def filter_data(merged_data, specs, no_women=True):
     """This function filters the data according to the model setup.
 
     Specifically, it filters out young people, women (if no_women=True), and years
@@ -37,11 +37,11 @@ def filter_data(merged_data, start_year, end_year, start_age, no_women=True):
     sample to construct lagged_choice.
 
     """
-    merged_data = filter_below_age(merged_data, start_age - 1)
+    merged_data = filter_below_age(merged_data, specs["start_age"] - 1)
 
     merged_data = filter_by_sex(merged_data, no_women=no_women)
 
-    merged_data = filter_est_years(merged_data, start_year, end_year)
+    merged_data = filter_est_years(merged_data, specs["start_year"], specs["end_year"])
     return merged_data
 
 

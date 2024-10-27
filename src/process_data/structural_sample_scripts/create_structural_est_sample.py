@@ -28,12 +28,6 @@ def create_structural_est_sample(paths, specs, load_data=False):
         data = pd.read_pickle(out_file_path)
         return data
 
-    # Export parameters from options
-    start_year = specs["start_year"]
-    end_year = specs["end_year"]
-    min_ret_age = specs["min_ret_age"]
-    start_age = specs["start_age"]
-
     # Load and merge data state data from SOEP core (all but wealth)
     df = load_and_merge_soep_core(soep_c38_path=paths["soep_c38"])
 
@@ -44,7 +38,7 @@ def create_structural_est_sample(paths, specs, load_data=False):
     df = create_choice_variable(df)
 
     # filter data. Leave additional years in for lagging and leading. For now no women
-    df = filter_data(df, start_year, end_year, start_age, no_women=True)
+    df = filter_data(df, specs, no_women=True)
 
     # Job separation
     df = generate_job_separation_var(df)
@@ -57,7 +51,7 @@ def create_structural_est_sample(paths, specs, load_data=False):
 
     # Now create more observed choice variables
     # period
-    df["period"] = df["age"] - start_age
+    df["period"] = df["age"] - specs["start_age"]
 
     # policy_state
     df["policy_state"] = create_policy_state(df["gebjahr"])
@@ -74,7 +68,7 @@ def create_structural_est_sample(paths, specs, load_data=False):
     df = create_education_type(df)
 
     # additional restrictions based on model setup
-    df = enforce_model_choice_restriction(df, min_ret_age, specs["max_ret_age"])
+    df = enforce_model_choice_restriction(df, min_ret_age)
 
     # Construct job offer state
     was_fired_last_period = df["job_sep_this_year"] == 1

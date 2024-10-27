@@ -21,7 +21,7 @@ def create_partner_wage_est_sample(paths, specs, load_data=False):
     start_age = specs["start_age"]
 
     df = load_and_merge_soep_core(paths["soep_c38"])
-    df = filter_data(df, start_year, end_year, start_age, no_women=False)
+    df = filter_data(df, specs, no_women=False)
     df = create_wages(df.copy())
 
     # Drop singles

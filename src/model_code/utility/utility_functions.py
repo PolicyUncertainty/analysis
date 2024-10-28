@@ -71,11 +71,11 @@ def disutility_work(choice, education, params):
         dis_util_unemployed * is_unemployed
         + dis_util_pt_work * is_working_part_time
         + dis_util_ft_work * is_working_full_time
+        # + partner_retired * dis_util_only_partner_retired
     )
 
     # compute eta
     disutility = jnp.exp(-exp_factor)
-    # disutility = jnp.exp(-dis_util_work * is_working - dis_util_unemployed * is_unemployed - dis_util_only_partner_retired * partner_retired)
     return disutility
 
 

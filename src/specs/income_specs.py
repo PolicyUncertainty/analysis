@@ -22,5 +22,5 @@ def process_wage_params(path_dict, specs):
 
     gamma_0 = jnp.asarray(wage_params.loc[edu_labels, "constant"].values)
     gamma_1 = jnp.asarray(wage_params.loc[edu_labels, "ln_exp"].values)
-    income_shock_scale = wage_params.loc[edu_labels, "income_shock_std"].values.mean()
+    income_shock_scale = wage_params.loc["all", "income_shock_std"]
     return gamma_0, gamma_1, income_shock_scale

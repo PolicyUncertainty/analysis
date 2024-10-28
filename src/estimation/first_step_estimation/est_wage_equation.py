@@ -104,12 +104,11 @@ def calc_additional_wage_params(df, year_fixed_effects, specs, paths_dict):
                 edu_label
             ][year]
 
-    df["annual_wage_deflated"] = (
-        np.exp(df["ln_wage_deflated"]) * df["monthly_hours"]
-    ) * 12
+    df["yearly_hours"] = df["monthly_hours"] * 12
+
+    df["annual_wage_deflated"] = np.exp(df["ln_wage_deflated"]) * df["yearly_hours"]
     pop_avg_annual_wage = df["annual_wage_deflated"].mean()
 
-    df["yearly_hours"] = df["monthly_hours"] * 12
     avg_hours_by_edu_choice = df.groupby(["education", "choice"])["yearly_hours"].mean()
 
     choice_mapping = {"pt_work": 2, "ft_work": 3}
@@ -125,6 +124,17 @@ def calc_additional_wage_params(df, year_fixed_effects, specs, paths_dict):
     pop_avg.to_csv(
         paths_dict["est_results"] + "population_averages_working.csv", index=False
     )
+
+    print(
+        f"""Population averages saved
+            Annual mean wage {pop_avg_annual_wage}
+            Annual hours for low educated part time {pop_avg.loc[0, "annual_hours_low_pt_work"]}
+            Annual hours for high educated part time {pop_avg.loc[0, "annual_hours_high_pt_work"]}
+            Annual hours for low educated full time {pop_avg.loc[0, "annual_hours_low_ft_work"]}
+            Annual hours for high educated full time {pop_avg.loc[0, "annual_hours_high_ft_work"]}
+            """
+    )
+
     return pop_avg
 
 

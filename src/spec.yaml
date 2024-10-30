@@ -21,6 +21,7 @@ max_SRA: 72
 ret_years_before_SRA: 4
 min_ret_age: 63
 max_ret_age: 72
+informed_threshhold: 0.05
 # Assume that part time gives half a year of experience
 exp_increase_part_time: 0.5
 

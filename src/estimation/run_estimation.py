@@ -11,11 +11,12 @@ input_str = input(
     "\n   - [p]artner wage"
     "\n   - [j]ob separation"
     "\n   - family [t]ransition"
+    "\n   - [i]nformed state transition"
     "\n\n 2 Estimate [m]odel."
     "\n\n Input: "
 )
-# Set define user only to true if estimate SRA process as we need raw soep data there
-define_user = True if input_str in ["f", "s"] else False
+# Set define user only to true if estimate SRA process or informed state transition as we need raw soep data there
+define_user = True if input_str in ["f", "s", "i"] else False
 
 paths_dict = create_path_dict(define_user=define_user)
 specs = read_and_derive_specs(paths_dict["specs"])
@@ -70,6 +71,15 @@ if input_str == "f" or input_str == "t":
 
     estimate_partner_transitions(paths_dict, specs)
     estimate_nb_children(paths_dict, specs)
+
+
+if input_str == "f" or input_str == "i":
+    # Estimate informed state transition
+    from estimation.first_step_estimation.est_informed_state_transition import (
+        calibrate_uninformed_hazard_rate,
+    )
+
+    calibrate_uninformed_hazard_rate(paths_dict, specs, load_data=False)
 
 if input_str == "m":
     from estimation.estimate_setup import estimate_model

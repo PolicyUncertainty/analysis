@@ -27,14 +27,14 @@ def plot_job_separation(path_dict):
                 options=specs,
                 education=edu,
                 period=period,
-                choice=1,
+                choice=2,
             )[0]
             job_offer_probs[edu, period] = job_offer_process_transition(
                 params=start_params_all,
                 options=specs,
                 education=edu,
                 period=period,
-                choice=0,
+                choice=1,
             )[1]
 
     fig, (ax1, ax2) = plt.subplots(ncols=2)

@@ -75,20 +75,19 @@ if exec_budget:
 show_SRA = input("Execute SRA plots? (y/n)") == "y"
 from export_results.figures.expected_SRA_plots import plot_markov_process
 
-plot_markov_process(path_dict)
 if show_SRA:
+    plot_markov_process(path_dict)
     plt.show()
     plt.close("all")
 
 # %% ##########################################
 # # Policy state plot
 # ##########################################
-from export_results.figures.policy_states import plot_SRA_2007_reform
-
-plot_SRA_2007_reform(path_dict)
-plt.show()
-plt.close("all")
-
+# from export_results.figures.policy_states import plot_SRA_2007_reform
+#
+# plot_SRA_2007_reform(path_dict)
+# plt.show()
+# plt.close("all")
 
 #
 # from export_results.figures.pension_npv import plot_pension_npv_by_age

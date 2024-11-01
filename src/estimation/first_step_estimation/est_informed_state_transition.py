@@ -17,7 +17,7 @@ def calibrate_uninformed_hazard_rate(paths, options, load_data=False):
     df = classify_informed(df, options)
     moments = generate_moments(df)
     # hazard rate = constant + age * slope
-    initial_guess = [0.1, 0.01]
+    initial_guess = [0.01]
     calibrated_params = fit_moments(moments, initial_guess)
     calibrated_params.to_pickle(out_file_path)
     plot_predicted_vs_actual(moments, calibrated_params)
@@ -53,7 +53,7 @@ def fit_moments(moments, initial_guess):
     partial_obj = partial(objective_function, moments=moments)
     result = minimize(fun=partial_obj, x0=initial_guess, tol=1e-16)
     params = result.x
-    return pd.Series(params, index=["constant", "slope"])
+    return pd.Series(params)
 
 def objective_function(params, moments):
     observed_ages = moments.index
@@ -62,21 +62,31 @@ def objective_function(params, moments):
     return (predicted_shares - moments).sum()**2 
 
 def hazard_rate(params, observed_ages):
-    hazard_rate = params[0] + observed_ages * params[1]
+    # this can be changed to be a function of age
+    max_age = int(observed_ages.max()) + 1
+    ages = np.arange(max_age)
+    #hazard_rate = params[0] + ages * params[1]
+    hazard_rate = params[0] * np.ones(max_age)
     return hazard_rate
 
 def predicted_shares_by_age(predicted_hazard_rate, observed_ages):
     # assumption: at age 0, no one is informed
-    shares = np.zeros(len(observed_ages))
-    breakpoint()
-    for i, age in enumerate(observed_ages):
-        age = int(age)
-        shares[i] = predicted_hazard_rate[age]**(age)
-    return 
+    stay_uninformed_rate = 1 - predicted_hazard_rate
+    max_age = int(observed_ages.max()) + 1
+    uninformed_shares = np.ones(max_age)
+    informed_shares = np.zeros(max_age)
+    for age in range(1, max_age):
+        uninformed_shares[age] = uninformed_shares[age - 1] * stay_uninformed_rate[age]
+        informed_shares[age] = 1 - uninformed_shares[age]
+    
+    observed_ages = observed_ages.astype(int)
+    relevant_shares = pd.Series(informed_shares).loc[observed_ages].values
+    return relevant_shares
 
 def plot_predicted_vs_actual(moments, params):
-    predicted_hazard_rate = hazard_rate(params, moments.index)
+    predicted_informed_shares = predicted_shares_by_age(hazard_rate(params, moments.index), moments.index)
+    predicted_informed_shares = pd.Series(predicted_informed_shares, index=moments.index)
     plt.plot(moments, label="Actual")
-    plt.plot(predicted_hazard_rate, label="Predicted")
+    plt.plot(predicted_informed_shares, label="Predicted")
     plt.legend()
     plt.show()

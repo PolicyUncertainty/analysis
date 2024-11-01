@@ -6,6 +6,8 @@ from functools import partial
 
 
 def calibrate_uninformed_hazard_rate(paths, options, load_data=False):
+    """ This functions calibrates the hazard rate of becoming informed for the uninformed individuals with method of (weighted) moments.
+    The hazard rate is assumed to be constant but can be changed to be a function of age."""
     out_file_path = paths["intermediate_data"] + "uninformed_hazard_rate.pkl"
 
     if load_data:
@@ -15,10 +17,9 @@ def calibrate_uninformed_hazard_rate(paths, options, load_data=False):
     df = open_dataset(paths)
     df = restrict_dataset(df, options)
     df = classify_informed(df, options)
-    moments = generate_moments(df)
-    # hazard rate = constant + age * slope
+    moments, weights = generate_moments(df)
     initial_guess = [0.01]
-    calibrated_params = fit_moments(moments, initial_guess)
+    calibrated_params = fit_moments(moments, weights, initial_guess)
     calibrated_params.to_pickle(out_file_path)
     plot_predicted_vs_actual(moments, calibrated_params)
     return calibrated_params
@@ -43,23 +44,26 @@ def classify_informed(df, options):
     df["informed"] = df["belief_pens_deduct"] <= informed_threshhold
     return df
 
+
 def generate_moments(df):
-    informed_by_age = df.groupby("age")["informed"].mean()
-    return informed_by_age
+    sum_fweights = df.groupby("age")["fweights"].sum()
+    informed_sum_fweights = pd.Series(index = sum_fweights.index, data = 0, dtype=float)
+    informed_sum_fweights.update(df[df["informed"] == 1].groupby("age")["fweights"].sum())
+    informed_by_age = informed_sum_fweights / sum_fweights
+    weights = sum_fweights / sum_fweights.sum()
+    return informed_by_age, weights
 
-
-def fit_moments(moments, initial_guess):
-    #breakpoint()
-    partial_obj = partial(objective_function, moments=moments)
+def fit_moments(moments, weights, initial_guess):
+    partial_obj = partial(objective_function, moments=moments, weights=weights)
     result = minimize(fun=partial_obj, x0=initial_guess, tol=1e-16)
     params = result.x
     return pd.Series(params)
 
-def objective_function(params, moments):
+def objective_function(params, moments, weights):
     observed_ages = moments.index
     predicted_hazard_rate = hazard_rate(params, observed_ages)
     predicted_shares = predicted_shares_by_age(predicted_hazard_rate, observed_ages)
-    return (predicted_shares - moments).sum()**2 
+    return (((predicted_shares - moments)**2)*weights).sum()
 
 def hazard_rate(params, observed_ages):
     # this can be changed to be a function of age

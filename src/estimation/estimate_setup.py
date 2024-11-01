@@ -54,8 +54,10 @@ def estimate_model(path_dict, params_to_estimate_names, file_append, load_model)
     # not estimated. They will selected afterwards.
     lower_bounds_all = {
         "mu": 1e-12,
-        "dis_util_work_high": 1e-12,
-        "dis_util_work_low": 1e-12,
+        "dis_util_ft_work_high": 1e-12,
+        "dis_util_ft_work_low": 1e-12,
+        "dis_util_pt_work_high": 1e-12,
+        "dis_util_pt_work_low": 1e-12,
         "dis_util_unemployed_high": 1e-12,
         "dis_util_unemployed_low": 1e-12,
         "bequest_scale": 1e-12,
@@ -67,8 +69,10 @@ def estimate_model(path_dict, params_to_estimate_names, file_append, load_model)
     lower_bounds = {name: lower_bounds_all[name] for name in params_to_estimate_names}
     upper_bounds_all = {
         "mu": 2,
-        "dis_util_work_high": 5,
-        "dis_util_work_low": 5,
+        "dis_util_ft_work_high": 5,
+        "dis_util_ft_work_low": 5,
+        "dis_util_pt_work_high": 5,
+        "dis_util_pt_work_low": 5,
         "dis_util_unemployed_high": 5,
         "dis_util_unemployed_low": 5,
         "bequest_scale": 5,
@@ -153,7 +157,7 @@ def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):
     data_decision = data_decision[data_decision["period"] > 0]
     # Also already retired individuals hold no identification
     if drop_retirees:
-        data_decision = data_decision[data_decision["lagged_choice"] != 2]
+        data_decision = data_decision[data_decision["lagged_choice"] != 0]
 
     data_decision["age"] = (
         data_decision["period"] + model["options"]["model_params"]["start_age"]

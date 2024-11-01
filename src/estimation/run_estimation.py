@@ -76,8 +76,10 @@ if input_str == "m":
 
     params_to_estimate_names = [
         # "mu",
-        "dis_util_work_high",
-        "dis_util_work_low",
+        "dis_util_ft_work_high",
+        "dis_util_ft_work_low",
+        "dis_util_pt_work_high",
+        "dis_util_pt_work_low",
         "dis_util_unemployed_high",
         "dis_util_unemployed_low",
         # "bequest_scale",
@@ -91,7 +93,7 @@ if input_str == "m":
         paths_dict,
         params_to_estimate_names=params_to_estimate_names,
         file_append="new",
-        load_model=True,
+        load_model=False,
     )
     print(estimation_results)
 

@@ -27,7 +27,7 @@ def observed_model_fit(paths_dict):
         policy_state_trans_func=expected_SRA_probs_estimation,
         file_append="subj",
         load_model=True,
-        load_solution=False,
+        load_solution=True,
     )
 
     data_decision, _ = load_and_prep_data(
@@ -62,7 +62,7 @@ def observed_model_fit(paths_dict):
         "pre_period_choices": data_decision["lagged_choice"].values,
     }
 
-    for choice in range(3):
+    for choice in range(specs["n_choices"]):
         choice_vals = np.ones_like(data_decision["choice"].values) * choice
         choice_probs_observations = choice_probs_for_choice_vals(
             choice_vals,
@@ -92,8 +92,8 @@ def observed_model_fit(paths_dict):
             .unstack()
         )
 
-        fig, axes = plt.subplots(1, 3, figsize=(10, 5))
-        labels = ["Unemployment", "Employment", "Retirement"]
+        fig, axes = plt.subplots(1, specs["n_choices"], figsize=(10, 5))
+        labels = specs["choice_labels"]
         for choice, ax in enumerate(axes):
             choice_shares_predicted = data_subset.groupby(["age"])[
                 f"choice_{choice}"

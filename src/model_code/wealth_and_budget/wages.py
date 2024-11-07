@@ -42,7 +42,11 @@ def calculate_gross_labor_income(
     )
     labour_income = hourly_wage * average_hours
 
-    yearly_min_wage = options["min_wage"] * 12
+    # Minimum wage. Education specific as hours are different among educations.
+    yearly_min_wage_pt = options["yearly_min_wage_pt"][education]
+    yearly_min_wage_ft = options["yearly_min_wage_ft"]
+    yearly_min_wage = yearly_min_wage_pt * pt_work + yearly_min_wage_ft * ft_work
+
     labor_income_min_checked = jnp.maximum(
         labour_income / options["wealth_unit"], yearly_min_wage
     )

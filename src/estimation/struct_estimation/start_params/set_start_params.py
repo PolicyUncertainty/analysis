@@ -18,9 +18,11 @@ def create_job_offer_params_from_start(path_dict):
     specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
 
     # Filter for unemployed, because we only estimate job offer probs on them
-    df_unemployed = struct_est_sample[struct_est_sample["lagged_choice"] == 1]
+    df_unemployed = struct_est_sample[struct_est_sample["lagged_choice"] == 1].copy()
     # Create work start indicator
-    df_unemployed["work_start"] = df_unemployed["choice"].isin([2, 3]).astype(int)
+    df_unemployed.loc[:, "work_start"] = (
+        df_unemployed["choice"].isin([2, 3]).astype(int)
+    )
 
     # Filter for relevant columns
     logit_df = df_unemployed[["period", "education", "work_start"]].copy()

@@ -111,12 +111,14 @@ def test_budget_unemployed(
 GAMMA_GRID = np.linspace(0.1, 0.9, 3)
 EXP_GRID = np.linspace(10, 30, 3, dtype=int)
 INCOME_SHOCK_GRID = np.linspace(-0.5, 0.5, 2)
+WORKER_CHOICES = [2, 3]
 
 
 @pytest.mark.parametrize(
-    "period, partner_state ,education, gamma, income_shock, experience, interest_rate, savings",
+    "working_choice, period, partner_state ,education, gamma, income_shock, experience, interest_rate, savings",
     list(
         product(
+            WORKER_CHOICES,
             PERIOD_GRID,
             PARTNER_STATES,
             EDUCATION_GRID,
@@ -128,7 +130,8 @@ INCOME_SHOCK_GRID = np.linspace(-0.5, 0.5, 2)
         )
     ),
 )
-def test_budget_ft_worker(
+def test_budget_worker(
+    working_choice,
     period,
     partner_state,
     education,
@@ -154,7 +157,7 @@ def test_budget_ft_worker(
         period=period,
         partner_state=partner_state,
         education=education,
-        lagged_choice=3,
+        lagged_choice=working_choice,
         experience=exp_cont,
         savings_end_of_previous_period=savings,
         income_shock_previous_period=income_shock,
@@ -169,9 +172,18 @@ def test_budget_ft_worker(
         )
         / specs_internal["wealth_unit"]
     )
-    labor_income_year = hourly_wage * specs["av_annual_hours_ft"][education]
+    if working_choice == 2:
+        labor_income_year = (
+            hourly_wage * specs_internal["av_annual_hours_pt"][education]
+        )
+        min_wage_year = specs_internal["yearly_min_wage_pt"][education]
+    else:
+        labor_income_year = (
+            hourly_wage * specs_internal["av_annual_hours_ft"][education]
+        )
+        min_wage_year = specs_internal["yearly_min_wage_ft"]
+
     # Check against min wage
-    min_wage_year = specs_internal["min_wage"] * 12
     if labor_income_year < min_wage_year:
         labor_income_year = min_wage_year
 

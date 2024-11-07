@@ -38,7 +38,7 @@ def add_income_specs(specs, path_dict):
     specs["mean_wage"] = pop_averages["annual_mean_wage"]
 
     # Add minimum wage
-    specs["min_wage"] = add_pt_and_ft_min_wage(specs)
+    specs = add_pt_and_ft_min_wage(specs)
     return specs
 
 
@@ -49,10 +49,10 @@ def add_pt_and_ft_min_wage(specs):
         hours_ratio = (
             specs["av_annual_hours_pt"][edu] / specs["av_annual_hours_ft"][edu]
         )
-        yearly_min_wage_pt = specs["min_wage"] * hours_ratio * 12
+        yearly_min_wage_pt[edu] = specs["min_wage"] * hours_ratio * 12
 
     specs["yearly_min_wage_pt"] = jnp.asarray(yearly_min_wage_pt)
-    specs["yearly_min_wage_ft"] = specs["min_wage"] * 12
+    specs["yearly_min_wage_ft"] = spexperience_yearsecs["min_wage"] * 12
     return specs
 
 

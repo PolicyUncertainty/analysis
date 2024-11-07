@@ -44,6 +44,7 @@ def calc_total_pension_points(education, experience_years, options):
         (jnp.exp(gamma_0) / gamma_1_plus_1)
         * ((experience_years + 1) ** gamma_1_plus_1 - 1)
     ) / mean_wage_all
+    breakpoint()
     return total_pens_points
 
 

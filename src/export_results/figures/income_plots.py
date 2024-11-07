@@ -88,6 +88,7 @@ def plot_incomes(path_dict):
                 yearly_unemployment,
             )
 
+        breakpoint()
         ax.plot(
             exp_levels,
             after_ssc_pt_wages,
@@ -144,13 +145,14 @@ def plot_total_income(specs):
     params = {"interest_rate": 0.0}
     exp_levels = np.arange(0, specs["max_experience"] + 1)
     marriage_labels = ["Single", "Partnered"]
-    worklife_chocie_labels = ["Unemployed", "Worker"]
+    worklife_chocie_labels = ["Unemployed", "Part-time", "Full-time"]
     edu_labels = specs["education_labels"]
 
-    fig, axs = plt.subplots(ncols=2)
+    fig, axs = plt.subplots(ncols=2, nrows=2, figsize=(10, 10))
     for married_val, married_label in enumerate(marriage_labels):
         for edu_val, edu_label in enumerate(edu_labels):
-            for work_val, work_label in enumerate(worklife_chocie_labels):
+            for choice, work_label in enumerate(worklife_chocie_labels):
+                work_val = choice + 1
                 total_income = np.zeros_like(exp_levels, dtype=float)
                 for i, exp in enumerate(exp_levels):
                     exp_share = exp / (exp + specs["max_init_experience"])
@@ -165,13 +167,13 @@ def plot_total_income(specs):
                         params=params,
                         options=specs,
                     )
-                axs[married_val].plot(
-                    exp_levels, total_income, label=f"{edu_label} {work_label}"
+                axs[edu_val, married_val].plot(
+                    exp_levels, total_income, label=f"{work_label}"
                 )
-        axs[married_val].set_title(married_label)
-        axs[married_val].set_xlabel("Period equals experience")
-        axs[married_val].set_ylim([0, 80])
-        axs[married_val].legend()
+            axs[edu_val, married_val].set_title(f"{edu_label} and {married_label}")
+            axs[edu_val, married_val].set_xlabel("Period equals experience")
+            axs[edu_val, married_val].set_ylim([0, 80])
+            axs[edu_val, married_val].legend()
 
     fig.suptitle("Total income")
 

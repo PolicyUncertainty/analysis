@@ -47,7 +47,7 @@ def budget_constraint(
     # Income lagged choice 2
     labor_income_after_ssc = calc_labor_income_after_ssc(
         lagged_choice=lagged_choice,
-        experience=experience_years,
+        experience_years=experience_years,
         education=education,
         income_shock=income_shock_previous_period,
         options=options,

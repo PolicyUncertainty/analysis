@@ -55,10 +55,10 @@ if exec_utility:
 # Job offer plots
 # ##########################################
 exec_job_offer = input("Execute job offer plots? (y/n) ") == "y"
-from export_results.figures.job_offer_plots import plot_job_separation
+from export_results.figures.job_offer_plots import plot_job_transitions
 
 if exec_job_offer:
-    plot_job_separation(path_dict, params)
+    plot_job_transitions(path_dict, params)
     plt.show()
     plt.close("all")
 

@@ -57,3 +57,4 @@ def plot_cons_scale(specs):
             axs[married_val].legend()
             axs[married_val].set_ylim([1, 2])
     axs[0].set_ylabel("Consumption scale")
+    fig.suptitle("Consumption scale by period")

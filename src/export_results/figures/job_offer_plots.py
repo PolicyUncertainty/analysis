@@ -4,7 +4,7 @@ from model_code.stochastic_processes.job_offers import job_offer_process_transit
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
-def plot_job_separation(path_dict, params):
+def plot_job_transitions(path_dict, params):
     """Plot job separation probabilities."""
     specs = generate_derived_and_data_derived_specs(path_dict)
 
@@ -46,6 +46,8 @@ def plot_job_separation(path_dict, params):
 
     ax1.set_title("Job destruction rates")
     ax2.set_title("Job offer rates at start params (job finding rate)")
+    ax1.set_xlabel("Period")
+    ax2.set_xlabel("Period")
 
     ax1.legend()
     ax2.legend()

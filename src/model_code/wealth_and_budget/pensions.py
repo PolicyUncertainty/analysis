@@ -37,20 +37,19 @@ def calc_total_pension_points(education, experience_years, options):
     retirement is already in the experience.
 
     """
-    mean_wage_all = options["mean_wage"]
+    mean_wage_all = options["mean_hourly_ft_wage"][education]
     gamma_0 = options["gamma_0"][education]
     gamma_1_plus_1 = options["gamma_1"][education] + 1
     total_pens_points = (
         (jnp.exp(gamma_0) / gamma_1_plus_1)
         * ((experience_years + 1) ** gamma_1_plus_1 - 1)
     ) / mean_wage_all
-    breakpoint()
     return total_pens_points
 
 
 def calc_experience_for_total_pension_points(total_pension_points, education, options):
     """Calculate the experience for a given total pension points."""
-    mean_wage_all = options["mean_wage"]
+    mean_wage_all = options["mean_hourly_ft_wage"][education]
     gamma_0 = options["gamma_0"][education]
     gamma_1_plus_1 = options["gamma_1"][education] + 1
     return (

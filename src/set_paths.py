@@ -37,8 +37,10 @@ def create_path_dict(define_user=False, user=None):
         "est_results": analysis_path + "output/est_results/",
         "tables": analysis_path + "output/tables/",
         "specs": analysis_path + "src/spec.yaml",
-        "start_params": analysis_path + "src/estimation/start_params.yaml",
+        "start_params": analysis_path
+        + "src/estimation/struct_estimation/start_params/start_params.yaml",
         "est_params": analysis_path + "output/est_results/est_params.pkl",
+        "intermediate_est_data": analysis_path + "output/intermediate_data/estimation/",
         "plots": analysis_path + "output/plots/",
     }
     paths_dict["struct_est_sample"] = (

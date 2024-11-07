@@ -98,8 +98,9 @@ def read_and_derive_specs(spec_path):
 
     # Number of periods in model
     specs["n_periods"] = specs["end_age"] - specs["start_age"] + 1
-    # Number of education types
+    # Number of education types and choices from labels
     specs["n_education_types"] = len(specs["education_labels"])
+    specs["n_choices"] = len(specs["choice_labels"])
     # you can retire from min retirement age until max retirement age
     specs["n_policy_states"] = (
         int(((specs["max_SRA"] - specs["min_SRA"]) / specs["SRA_grid_size"]) + 1) + 1

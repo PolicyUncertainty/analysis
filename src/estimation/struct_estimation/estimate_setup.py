@@ -1,16 +1,17 @@
+import os
 import pickle
 import pickle as pkl
 import time
 
 import jax.numpy as jnp
-import matplotlib.pyplot as plt
 import numpy as np
 import optimagic as om
 import pandas as pd
-import statsmodels.api as sm
-import yaml
 from dcegm.likelihood import create_individual_likelihood_function_for_model
 from dcegm.wealth_correction import adjust_observed_wealth
+from estimation.struct_estimation.start_params.set_start_params import (
+    load_and_set_start_params,
+)
 from model_code.specify_model import specify_model
 from model_code.stochastic_processes.policy_states_belief import (
     expected_SRA_probs_estimation,
@@ -18,14 +19,13 @@ from model_code.stochastic_processes.policy_states_belief import (
 from model_code.stochastic_processes.policy_states_belief import (
     update_specs_exp_ret_age_trans_mat,
 )
-from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
 def estimate_model(path_dict, params_to_estimate_names, file_append, load_model):
-    start_params_all = yaml.safe_load(open(path_dict["start_params"], "rb"))
+    if not os.path.exists(path_dict["intermediate_est_data"]):
+        os.makedirs(path_dict["intermediate_est_data"])
 
-    job_sep_params = create_job_offer_params_from_start(path_dict)
-    start_params_all.update(job_sep_params)
+    start_params_all = load_and_set_start_params(path_dict)
 
     # Assign start params from before
     last_end = pkl.load(open(path_dict["est_results"] + "est_params.pkl", "rb"))
@@ -43,9 +43,10 @@ def estimate_model(path_dict, params_to_estimate_names, file_append, load_model)
 
     def individual_likelihood_print(params):
         start = time.time()
-        ll_value_individual = individual_likelihood(params)
-        end = time.time()
+        ll_value_individual, model_solution = individual_likelihood(params)
+
         ll_value = jnp.dot(weights, ll_value_individual)
+        end = time.time()
         print("Likelihood evaluation took, ", end - start)
         print("Params, ", params, " with ll value, ", ll_value)
         return ll_value
@@ -146,6 +147,7 @@ def create_ll_from_paths(start_params_all, path_dict, load_model):
         observed_choices=data_decision["choice"].values,
         unobserved_state_specs=unobserved_state_specs,
         params_all=start_params_all,
+        return_model_solution=True,
     )
     return individual_likelihood, data_decision["age_weights"].values
 
@@ -194,42 +196,3 @@ def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):
     states_dict["wealth"] = data_decision["adjusted_wealth"].values
 
     return data_decision, states_dict
-
-
-def create_job_offer_params_from_start(path_dict):
-    struct_est_sample = pd.read_pickle(path_dict["struct_est_sample"])
-
-    specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
-
-    # Filter for unemployed, because we only estimate job offer probs on them
-    df_unemployed = struct_est_sample[struct_est_sample["lagged_choice"] == 1]
-    # Create work start indicator
-    df_unemployed["work_start"] = df_unemployed["choice"].isin([2, 3]).astype(int)
-
-    # Filter for relevant columns
-    logit_df = df_unemployed[["period", "education", "work_start"]].copy()
-    logit_df["age"] = logit_df["period"] + specs["start_age"]
-
-    # logit_df["above_49"] = 0
-    # logit_df.loc[logit_df["age"] > 49, "above_49"] = 1
-
-    logit_df = logit_df[logit_df["age"] < 65]
-    logit_df["intercept"] = 1
-
-    logit_vars = [
-        "intercept",
-        "age",
-        "education",
-    ]
-
-    logit_model = sm.Logit(logit_df["work_start"], logit_df[logit_vars])
-    logit_fitted = logit_model.fit()
-
-    params = logit_fitted.params
-
-    job_offer_params = {
-        "job_finding_logit_const": params["intercept"],
-        "job_finding_logit_age": params["age"],
-        "job_finding_logit_high_educ": params["education"],
-    }
-    return job_offer_params

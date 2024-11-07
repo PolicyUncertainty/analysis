@@ -13,13 +13,19 @@ def plot_utility(params, specs):
     education = 1
     period = 35
 
-    choice_labels = ["Unemployed", "Working", "Retired"]
+    choice_labels = specs["choice_labels"]
     fig, ax = plt.subplots()
     for choice, choice_label in enumerate(choice_labels):
         utilities = np.zeros_like(consumption)
         for i, c in enumerate(consumption):
             utilities[i] = utility_func(
-                c, partner_state, education, period, choice, params, specs
+                consumption=c,
+                partner_state=partner_state,
+                education=education,
+                period=period,
+                choice=choice,
+                params=params,
+                options=specs,
             )
         ax.plot(
             utilities,

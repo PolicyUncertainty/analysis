@@ -7,6 +7,21 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
 
+kind_string = input("Execute [pre]- or [post]-estimation plots? (pre/post) ")
+
+if kind_string == "pre":
+    from estimation.struct_estimation.start_params.set_start_params import (
+        load_and_set_start_params,
+    )
+
+    params = load_and_set_start_params(path_dict)
+elif kind_string == "post":
+    params = pd.read_pickle(path_dict["est_params"])
+
+else:
+    raise ValueError("Either pre or post estimation plots.")
+
+
 # %%###################################
 # Family chracteristics
 ######################################
@@ -28,7 +43,6 @@ if exec_family:
 # ##########################################
 exec_utility = input("Execute utility plots? (y/n) ") == "y"
 if exec_utility:
-    params = pd.read_pickle(path_dict["est_results"] + "est_params.pkl")
     from export_results.figures.utility import plot_utility, plot_cons_scale
 
     plot_utility(params, specs)
@@ -44,7 +58,7 @@ exec_job_offer = input("Execute job offer plots? (y/n) ") == "y"
 from export_results.figures.job_offer_plots import plot_job_separation
 
 if exec_job_offer:
-    plot_job_separation(path_dict)
+    plot_job_separation(path_dict, params)
     plt.show()
     plt.close("all")
 

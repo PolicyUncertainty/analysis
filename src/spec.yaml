@@ -12,7 +12,6 @@ discount_factor: 0.97
 start_age: 30
 end_age: 85
 
-n_choices: 4 # 0: retired, 1: unemployed, 2: part-time, 3: full-time
 choice_labels: ["Retired", "Unemployed", "Part-time", "Full-time"]
 education_labels: ["Low Education", "High Education"]
 # Belief process parameters

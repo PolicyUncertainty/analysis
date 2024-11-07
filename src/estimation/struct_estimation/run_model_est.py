@@ -6,7 +6,7 @@ from specs.derive_specs import read_and_derive_specs
 paths_dict = create_path_dict(define_user=False)
 specs = read_and_derive_specs(paths_dict["specs"])
 
-from estimation.estimate_setup import estimate_model
+from estimation.struct_estimation.estimate_setup import estimate_model
 
 params_to_estimate_names = [
     # "mu",

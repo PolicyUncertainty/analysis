@@ -2,9 +2,8 @@ import pickle
 
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 from dcegm.likelihood import create_choice_prob_func_unobserved_states
-from estimation.estimate_setup import load_and_prep_data
+from estimation.struct_estimation.estimate_setup import load_and_prep_data
 from model_code.specify_model import specify_and_solve_model
 from model_code.stochastic_processes.policy_states_belief import (
     expected_SRA_probs_estimation,

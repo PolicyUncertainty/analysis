@@ -1,7 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import yaml
-from estimation.estimate_setup import create_job_offer_params_from_start
+from estimation.struct_estimation.estimate_setup import (
+    create_job_offer_params_from_start,
+)
 from model_code.stochastic_processes.job_offers import job_offer_process_transition
 from specs.derive_specs import generate_derived_and_data_derived_specs
 

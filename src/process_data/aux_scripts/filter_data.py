@@ -14,6 +14,14 @@ def filter_below_age(df, age):
     )
     return df
 
+def filter_above_age(df, age):
+    # filter
+    df = df[df["age"] <= age]
+    print(
+        str(len(df)) + " left after dropping people over " + str(age) + " years old."
+    )
+    return df
+
 
 def filter_by_sex(df, no_women):
     df.loc[:, "sex"] = df["sex"] - 1

@@ -56,4 +56,3 @@ plot_observed_model_fit_choice_probs(
     log_object["model_sol"],
     save_folder=paths_dict["intermediate_est_data"],
 )
-plt.show()

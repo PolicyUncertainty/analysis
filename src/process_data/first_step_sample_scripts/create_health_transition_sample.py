@@ -99,15 +99,21 @@ def create_health_transition_sample(paths, specs, load_data=False):
     ax.legend()
     plt.show()
 
-    # Calculate the relative frequency of good health for each education level and lagged health state combination
-    hgg_h = df[(df["education"] == 1) & (df["lagged_health_state"] == 1)].groupby("age")["health_state"].mean() # good health -> good health, high education
-    hgg_l = df[(df["education"] == 0) & (df["lagged_health_state"] == 1)].groupby("age")["health_state"].mean() # good health -> good health, low education
-    hbg_h = df[(df["education"] == 1) & (df["lagged_health_state"] == 0)].groupby("age")["health_state"].mean() # bad health -> good health, high education
-    hbg_l = df[(df["education"] == 0) & (df["lagged_health_state"] == 0)].groupby("age")["health_state"].mean() # bad health -> good health, low education
+    totals_age_l = df[df["education"] == 0].groupby("age")["health_state"].count()
+    totals_age_h = df[df["education"] == 1].groupby("age")["health_state"].count()
+
+
+
+    # Calculate the relative frequency of good health for each education level by lagged health states
+    hgg_h = df[(df["education"] == 1) & (df["lagged_health_state"] == 1)].groupby("age")["health_state"].sum() / totals_age_h # good health -> good health, high education
+    hgg_l = df[(df["education"] == 0) & (df["lagged_health_state"] == 1)].groupby("age")["health_state"].sum() / totals_age_l # good health -> good health, low education
+    hbg_h = df[(df["education"] == 1) & (df["lagged_health_state"] == 0)].groupby("age")["health_state"].sum() / totals_age_h # bad health -> good health, high education
+    hbg_l = df[(df["education"] == 0) & (df["lagged_health_state"] == 0)].groupby("age")["health_state"].sum() / totals_age_l # bad health -> good health, low education
+
 
     # Calculate complementary bad health shock probabilities 
     hgb_h = 1 - hgg_h                                                                                           # good health -> bad health, high education
-    hgb_l = 1 - hgg_l                                                                                           # good health -> bad health, low education                 
+    hgb_l = 1 - hgg_l                                                                                           # good health -> bad health, low education  
 
     # Get the symmetric moving average for each education level for hbg_l, hbg_h, hgb_l, hgb_h across age groups
     hbg_h_m = hbg_h.rolling(windowsize, center=True).mean()
@@ -127,9 +133,9 @@ def create_health_transition_sample(paths, specs, load_data=False):
     axs[0].set_ylabel("Probability", fontsize=12)
     axs[0].set_xlabel("Age (years)", fontsize=12)
     axs[0].legend(loc="upper right")
-    axs[0].set_ylim(0, 0.9)
-    axs[0].set_yticks([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
-    axs[1].set_xticks([30, 40, 50, 60, 70, 80])
+    axs[0].set_ylim(0, 0.6)
+    axs[0].set_yticks([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
+    axs[0].set_xticks([30, 40, 50, 60, 70, 80])
     axs[0].grid(False)
 
     # Panel (b): Probability of bad health shock
@@ -140,9 +146,9 @@ def create_health_transition_sample(paths, specs, load_data=False):
     axs[1].set_title("Probability of Bad Health Shock (relative frequency)", fontsize=14)
     axs[1].set_xlabel("Age (years)", fontsize=12)
     axs[1].set_ylabel("Probability", fontsize=12)
-    axs[1].legend(loc="upper right")
-    axs[1].set_ylim(0, 0.2)
-    axs[1].set_yticks([0, 0.1, 0.2])
+    axs[1].legend(loc="lower right")
+    axs[1].set_ylim(0, 0.6)
+    axs[1].set_yticks([0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
     axs[1].set_xticks([30, 40, 50, 60, 70, 80])
     axs[1].grid(False)
 

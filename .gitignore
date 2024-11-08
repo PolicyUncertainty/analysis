@@ -15,6 +15,7 @@ probs_*.txt
 
 # Ignore intermediate data pickle files
 output/intermediate_data/*.pkl
+output/intermediate_data/estimation/
 
 # Ignore intermediate pcikle files
 contributions_base.pkl

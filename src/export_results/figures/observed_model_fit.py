@@ -36,6 +36,18 @@ def observed_model_fit(paths_dict):
 
     unobserved_state_specs = create_unobserved_state_specs(data_decision, model)
 
+    plot_observed_model_fit_choice_probs(
+        paths_dict,
+        specs,
+        data_decision,
+        states_dict,
+        model,
+        unobserved_state_specs,
+        params,
+        est_model,
+        save_fig=True,
+    )
+
 
 def plot_observed_model_fit_choice_probs(
     paths_dict,
@@ -96,7 +108,7 @@ def plot_observed_model_fit_choice_probs(
                 transparent=True,
                 dpi=300,
             )
-        fig.suptitle(f"Choice shares {specs['education_labels'][edu]}")
+        # fig.suptitle(f"Choice shares {specs['education_labels'][edu]}")
 
 
 def load_and_prep_data_for_model_fit(paths_dict, specs, params, model):

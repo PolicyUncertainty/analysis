@@ -1,10 +1,8 @@
 # Set paths of project
 from set_paths import create_path_dict
-from specs.derive_specs import read_and_derive_specs
 
 
 paths_dict = create_path_dict(define_user=False)
-specs = read_and_derive_specs(paths_dict["specs"])
 
 from estimation.struct_estimation.estimate_setup import estimate_model
 
@@ -27,7 +25,7 @@ estimation_results = estimate_model(
     paths_dict,
     params_to_estimate_names=params_to_estimate_names,
     file_append="new",
-    load_model=False,
+    load_model=True,
 )
 print(estimation_results)
 

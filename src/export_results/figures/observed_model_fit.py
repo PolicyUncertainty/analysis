@@ -3,6 +3,7 @@ import pickle
 import matplotlib.pyplot as plt
 import numpy as np
 from dcegm.likelihood import create_choice_prob_func_unobserved_states
+from estimation.struct_estimation.estimate_setup import create_unobserved_state_specs
 from estimation.struct_estimation.estimate_setup import load_and_prep_data
 from model_code.specify_model import specify_and_solve_model
 from model_code.stochastic_processes.policy_states_belief import (
@@ -29,38 +30,24 @@ def observed_model_fit(paths_dict):
         load_solution=True,
     )
 
-    data_decision, _ = load_and_prep_data(
-        paths_dict, params, model, drop_retirees=False
+    data_decision, states_dict = load_and_prep_data_for_model_fit(
+        paths_dict, specs, params, model
     )
-    data_decision["age"] = data_decision["period"] + specs["start_age"]
-    data_decision = data_decision[data_decision["age"] < 75]
-    states_dict = {
-        name: data_decision[name].values
-        for name in model["model_structure"]["discrete_states_names"]
-    }
-    states_dict["experience"] = data_decision["experience"].values
-    states_dict["wealth"] = data_decision["adjusted_wealth"].values
 
-    def weight_func(**kwargs):
-        # We need to weight the unobserved job offer state for each of its possible values
-        # The weight function is called with job offer new beeing the unobserved state
-        job_offer = kwargs["job_offer_new"]
-        return model["model_funcs"]["processed_exog_funcs"]["job_offer"](**kwargs)[
-            job_offer
-        ]
+    unobserved_state_specs = create_unobserved_state_specs(data_decision, model)
 
-    relevant_prev_period_state_choices_dict = {
-        "period": data_decision["period"].values - 1,
-        "education": data_decision["education"].values,
-    }
-    unobserved_state_specs = {
-        "observed_bool": data_decision["full_observed_state"].values,
-        "weight_func": weight_func,
-        "states": ["job_offer"],
-        "pre_period_states": relevant_prev_period_state_choices_dict,
-        "pre_period_choices": data_decision["lagged_choice"].values,
-    }
 
+def plot_observed_model_fit_choice_probs(
+    paths_dict,
+    specs,
+    data_decision,
+    states_dict,
+    model,
+    unobserved_state_specs,
+    params,
+    est_model,
+    save_fig=False,
+):
     for choice in range(specs["n_choices"]):
         choice_vals = np.ones_like(data_decision["choice"].values) * choice
         choice_probs_observations = choice_probs_for_choice_vals(
@@ -76,15 +63,9 @@ def observed_model_fit(paths_dict):
         choice_probs_observations = np.nan_to_num(choice_probs_observations, nan=0.0)
         data_decision[f"choice_{choice}"] = choice_probs_observations
 
-    file_append = ["low", "high"]
-    data_decision["married"] = (data_decision["partner_state"] > 0).astype(int)
-
-    # for partner_val, partner_label in enumerate(partner_labels):
+        # for partner_val, partner_label in enumerate(partner_labels):
     for edu in range(2):
-        data_subset = data_decision[
-            (data_decision["education"] == edu)
-            # & (data_decision["married"] == partner_val)
-        ]
+        data_subset = data_decision[(data_decision["education"] == edu)]
         choice_shares_obs = (
             data_subset.groupby(["age"])["choice"]
             .value_counts(normalize=True)
@@ -107,12 +88,30 @@ def observed_model_fit(paths_dict):
                 ax.legend(loc="upper left")
         # Fig title
         fig.tight_layout()
-        fig.savefig(
-            paths_dict["plots"] + f"observed_model_fit_{file_append[edu]}.png",
-            transparent=True,
-            dpi=300,
-        )
+
+        if save_fig:
+            file_append = ["low", "high"]
+            fig.savefig(
+                paths_dict["plots"] + f"observed_model_fit_{file_append[edu]}.png",
+                transparent=True,
+                dpi=300,
+            )
         fig.suptitle(f"Choice shares {specs['education_labels'][edu]}")
+
+
+def load_and_prep_data_for_model_fit(paths_dict, specs, params, model):
+    data_decision, _ = load_and_prep_data(
+        paths_dict, params, model, drop_retirees=False
+    )
+    data_decision["age"] = data_decision["period"] + specs["start_age"]
+    data_decision = data_decision[data_decision["age"] < 75]
+    states_dict = {
+        name: data_decision[name].values
+        for name in model["model_structure"]["discrete_states_names"]
+    }
+    states_dict["experience"] = data_decision["experience"].values
+    states_dict["wealth"] = data_decision["adjusted_wealth"].values
+    return data_decision, states_dict
 
 
 def choice_probs_for_choice_vals(

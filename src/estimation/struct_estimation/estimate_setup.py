@@ -27,13 +27,11 @@ def estimate_model(path_dict, params_to_estimate_names, file_append, load_model)
 
     start_params_all = load_and_set_start_params(path_dict)
 
-    # Assign start params from before
-    last_end = pkl.load(open(path_dict["est_results"] + "est_params.pkl", "rb"))
-
-    start_params_all.update(last_end)
+    # # Assign start params from before
+    # last_end = pkl.load(open(path_dict["est_results"] + "est_params.pkl", "rb"))
+    #
+    # start_params_all.update(last_end)
     start_params_all["bequest_scale"] = 1
-
-    start_params_all.update(last_end)
 
     individual_likelihood, weights = create_ll_from_paths(
         start_params_all, path_dict, load_model
@@ -44,8 +42,10 @@ def estimate_model(path_dict, params_to_estimate_names, file_append, load_model)
     def individual_likelihood_print(params):
         start = time.time()
         ll_value_individual, model_solution = individual_likelihood(params)
-
         ll_value = jnp.dot(weights, ll_value_individual)
+        save_iter_step(
+            model_solution, ll_value, params, path_dict["intermediate_est_data"]
+        )
         end = time.time()
         print("Likelihood evaluation took, ", end - start)
         print("Params, ", params, " with ll value, ", ll_value)
@@ -120,6 +120,22 @@ def create_ll_from_paths(start_params_all, path_dict, load_model):
         path_dict, start_params_all, model, drop_retirees=True
     )
 
+    # Create specs for unobserved states
+    unobserved_state_specs = create_unobserved_state_specs(data_decision, model)
+
+    # Create likelihood function
+    individual_likelihood = create_individual_likelihood_function_for_model(
+        model=model,
+        observed_states=states_dict,
+        observed_choices=data_decision["choice"].values,
+        unobserved_state_specs=unobserved_state_specs,
+        params_all=start_params_all,
+        return_model_solution=True,
+    )
+    return individual_likelihood, data_decision["age_weights"].values
+
+
+def create_unobserved_state_specs(data_decision, model):
     def weight_func(**kwargs):
         # We need to weight the unobserved job offer state for each of its possible values
         # The weight function is called with job offer new beeing the unobserved state
@@ -139,17 +155,7 @@ def create_ll_from_paths(start_params_all, path_dict, load_model):
         "pre_period_states": relevant_prev_period_state_choices_dict,
         "pre_period_choices": data_decision["lagged_choice"].values,
     }
-
-    # Create likelihood function
-    individual_likelihood = create_individual_likelihood_function_for_model(
-        model=model,
-        observed_states=states_dict,
-        observed_choices=data_decision["choice"].values,
-        unobserved_state_specs=unobserved_state_specs,
-        params_all=start_params_all,
-        return_model_solution=True,
-    )
-    return individual_likelihood, data_decision["age_weights"].values
+    return unobserved_state_specs
 
 
 def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):
@@ -196,3 +202,8 @@ def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):
     states_dict["wealth"] = data_decision["adjusted_wealth"].values
 
     return data_decision, states_dict
+
+
+def save_iter_step(model_sol, ll_value, params, logging_folder):
+    saving_object = {"model_sol": model_sol, "ll_value": ll_value, "params": params}
+    pkl.dump(saving_object, open(logging_folder + "solving_log.pkl", "wb"))

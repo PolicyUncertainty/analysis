@@ -14,7 +14,7 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 def plot_incomes(path_dict):
     specs = generate_derived_and_data_derived_specs(path_dict)
 
-    exp_levels = np.arange(0, specs["max_experience"] + 1)
+    exp_levels = np.arange(0, 50)
 
     yearly_unemployment = specs["unemployment_benefits"] * 12
     unemployment_benefits = np.ones_like(exp_levels) * yearly_unemployment
@@ -88,7 +88,6 @@ def plot_incomes(path_dict):
                 yearly_unemployment,
             )
 
-        breakpoint()
         ax.plot(
             exp_levels,
             after_ssc_pt_wages,

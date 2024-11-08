@@ -54,6 +54,6 @@ plot_observed_model_fit_choice_probs(
     unobserved_state_specs,
     start_params_all,
     log_object["model_sol"],
-    save_fig=False,
+    save_folder=paths_dict["intermediate_est_data"],
 )
 plt.show()

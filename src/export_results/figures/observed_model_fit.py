@@ -45,7 +45,7 @@ def observed_model_fit(paths_dict):
         unobserved_state_specs,
         params,
         est_model,
-        save_fig=True,
+        save_folder=paths_dict["plots"],
     )
 
 
@@ -58,7 +58,7 @@ def plot_observed_model_fit_choice_probs(
     unobserved_state_specs,
     params,
     est_model,
-    save_fig=False,
+    save_folder,
 ):
     for choice in range(specs["n_choices"]):
         choice_vals = np.ones_like(data_decision["choice"].values) * choice
@@ -101,13 +101,12 @@ def plot_observed_model_fit_choice_probs(
         # Fig title
         fig.tight_layout()
 
-        if save_fig:
-            file_append = ["low", "high"]
-            fig.savefig(
-                paths_dict["plots"] + f"observed_model_fit_{file_append[edu]}.png",
-                transparent=True,
-                dpi=300,
-            )
+        file_append = ["low", "high"]
+        fig.savefig(
+            save_folder + f"observed_model_fit_{file_append[edu]}.png",
+            transparent=True,
+            dpi=300,
+        )
         # fig.suptitle(f"Choice shares {specs['education_labels'][edu]}")
 
 

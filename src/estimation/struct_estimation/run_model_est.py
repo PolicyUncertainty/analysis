@@ -15,7 +15,7 @@ params_to_estimate_names = [
     "dis_util_unemployed_high",
     "dis_util_unemployed_low",
     # "bequest_scale",
-    # "lambda",
+    "lambda",
     "job_finding_logit_const",
     "job_finding_logit_age",
     "job_finding_logit_high_educ",

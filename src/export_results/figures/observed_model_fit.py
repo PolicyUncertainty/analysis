@@ -1,5 +1,3 @@
-import pickle
-
 import matplotlib.pyplot as plt
 import numpy as np
 from dcegm.likelihood import create_choice_prob_func_unobserved_states
@@ -12,22 +10,17 @@ from model_code.stochastic_processes.policy_states_belief import (
 from model_code.stochastic_processes.policy_states_belief import (
     update_specs_exp_ret_age_trans_mat,
 )
-from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
-def observed_model_fit(paths_dict):
-    params = pickle.load(open(paths_dict["est_results"] + "est_params.pkl", "rb"))
-
-    specs = generate_derived_and_data_derived_specs(paths_dict)
-
+def observed_model_fit(paths_dict, specs, params):
     est_model, model, params = specify_and_solve_model(
         path_dict=paths_dict,
         params=params,
         update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
         policy_state_trans_func=expected_SRA_probs_estimation,
-        file_append="subj",
+        file_append="start",
         load_model=True,
-        load_solution=True,
+        load_solution=False,
     )
 
     data_decision, states_dict = load_and_prep_data_for_model_fit(

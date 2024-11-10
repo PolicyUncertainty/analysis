@@ -1,6 +1,7 @@
 # %% Set paths of project
+import pickle
+
 import matplotlib.pyplot as plt
-import pandas as pd
 from set_paths import create_path_dict
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
@@ -16,8 +17,7 @@ if kind_string == "pre":
 
     params = load_and_set_start_params(path_dict)
 elif kind_string == "post":
-    params = pd.read_pickle(path_dict["est_params"])
-
+    params = pickle.load(open(path_dict["est_params"], "rb"))
 else:
     raise ValueError("Either pre or post estimation plots.")
 

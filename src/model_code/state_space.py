@@ -1,5 +1,4 @@
 import jax.lax
-import jax.numpy as jnp
 import numpy as np
 from model_code.wealth_and_budget.pensions import (
     calc_experience_for_total_pension_points,

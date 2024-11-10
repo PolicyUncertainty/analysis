@@ -77,7 +77,7 @@ def estimate_model(path_dict, params_to_estimate_names, file_append, load_model)
         "dis_util_unemployed_high": 5,
         "dis_util_unemployed_low": 5,
         "bequest_scale": 5,
-        "lambda": 1,
+        "lambda": 0.5,
         "job_finding_logit_const": 5,
         "job_finding_logit_age": 0.5,
         "job_finding_logit_high_educ": 5,

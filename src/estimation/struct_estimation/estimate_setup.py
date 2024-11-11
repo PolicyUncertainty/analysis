@@ -19,6 +19,7 @@ from model_code.stochastic_processes.policy_states_belief import (
 from model_code.stochastic_processes.policy_states_belief import (
     update_specs_exp_ret_age_trans_mat,
 )
+from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
 def estimate_model(path_dict, params_to_estimate_names, file_append, load_model):
@@ -38,9 +39,30 @@ def estimate_model(path_dict, params_to_estimate_names, file_append, load_model)
     )
 
     start_params = {name: start_params_all[name] for name in params_to_estimate_names}
+    specs = generate_derived_and_data_derived_specs(path_dict)
+    pt_ratio_low = specs["av_annual_hours_pt"][0] / specs["av_annual_hours_ft"][0]
+    pt_ratio_high = specs["av_annual_hours_pt"][1] / specs["av_annual_hours_ft"][1]
 
     def individual_likelihood_print(params):
         start = time.time()
+        params["dis_util_unemployed_low"] = params["dis_util_not_retired_low"]
+        params["dis_util_pt_work_low"] = (
+            params["dis_util_not_retired_low"]
+            + pt_ratio_low * params["dis_util_working_low"]
+        )
+        params["dis_util_ft_work_low"] = (
+            params["dis_util_not_retired_low"] + params["dis_util_working_low"]
+        )
+
+        params["dis_util_unemployed_high"] = params["dis_util_not_retired_high"]
+        params["dis_util_pt_work_high"] = (
+            params["dis_util_not_retired_high"]
+            + pt_ratio_high * params["dis_util_working_high"]
+        )
+        params["dis_util_ft_work_high"] = (
+            params["dis_util_not_retired_high"] + params["dis_util_working_high"]
+        )
+
         ll_value_individual, model_solution = individual_likelihood(params)
         ll_value = jnp.dot(weights, ll_value_individual)
         save_iter_step(
@@ -55,12 +77,10 @@ def estimate_model(path_dict, params_to_estimate_names, file_append, load_model)
     # not estimated. They will selected afterwards.
     lower_bounds_all = {
         "mu": 1e-12,
-        "dis_util_ft_work_high": 1e-12,
-        "dis_util_ft_work_low": 1e-12,
-        "dis_util_pt_work_high": 1e-12,
-        "dis_util_pt_work_low": 1e-12,
-        "dis_util_unemployed_high": 1e-12,
-        "dis_util_unemployed_low": 1e-12,
+        "dis_util_not_retired_low": 1e-12,
+        "dis_util_working_low": 1e-12,
+        "dis_util_not_retired_high": 1e-12,
+        "dis_util_working_high": 1e-12,
         "bequest_scale": 1e-12,
         "lambda": 1e-12,
         "job_finding_logit_const": -5,
@@ -70,12 +90,10 @@ def estimate_model(path_dict, params_to_estimate_names, file_append, load_model)
     lower_bounds = {name: lower_bounds_all[name] for name in params_to_estimate_names}
     upper_bounds_all = {
         "mu": 2,
-        "dis_util_ft_work_high": 5,
-        "dis_util_ft_work_low": 5,
-        "dis_util_pt_work_high": 5,
-        "dis_util_pt_work_low": 5,
-        "dis_util_unemployed_high": 5,
-        "dis_util_unemployed_low": 5,
+        "dis_util_not_retired_low": 5,
+        "dis_util_working_low": 5,
+        "dis_util_not_retired_high": 5,
+        "dis_util_working_high": 5,
         "bequest_scale": 5,
         "lambda": 0.5,
         "job_finding_logit_const": 5,

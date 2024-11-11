@@ -82,6 +82,7 @@ def create_structural_est_sample(paths, specs, load_data=False):
         "experience": "int8",
         "wealth": "float32",
         "education": "int8",
+        "children": "int8",
         "full_observed_state": "bool",
     }
     df = df[list(type_dict.keys())]
@@ -148,6 +149,13 @@ def load_and_merge_soep_core(soep_c38_path):
         convert_categoricals=False,
     )
     merged_data = pd.merge(merged_data, hl_data, on=["hid", "syear"], how="left")
+    pequiv_data = pd.read_stata(
+        # d11107: number of children in household
+        f"{soep_c38_path}/pequiv.dta",
+        columns=["pid", "syear", "d11107"],
+    )
+    merged_data = pd.merge(merged_data, pequiv_data, on=["pid", "syear"], how="inner")
+    merged_data.rename(columns={"d11107": "children"}, inplace=True)
 
     merged_data["age"] = merged_data["syear"] - merged_data["gebjahr"]
     merged_data.set_index(["pid", "syear"], inplace=True)

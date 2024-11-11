@@ -79,7 +79,7 @@ if input_str == "f" or input_str == "i":
         calibrate_uninformed_hazard_rate,
     )
 
-    calibrate_uninformed_hazard_rate(paths_dict, specs, load_data=False)
+    calibrate_uninformed_hazard_rate(paths_dict, specs)
 
 if input_str == "m":
     from estimation.estimate_setup import estimate_model

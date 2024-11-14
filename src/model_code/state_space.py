@@ -98,6 +98,7 @@ def calc_experience_years_for_pension_adjustment(
     SRA_at_retirement = options["min_SRA"] + policy_state * options["SRA_grid_size"]
     # deduction (bonus) factor for early (late) retirement
     ERP = options["early_retirement_penalty"]
+    ERP_uninformed = options["uninformed_early_retirement_penalty"]
     pension_deduction = (SRA_at_retirement - actual_retirement_age) * ERP
     pension_factor = 1 - pension_deduction
     reduced_pension_points = pension_factor * total_pension_points

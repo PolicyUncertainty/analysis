@@ -22,6 +22,7 @@ def specify_model(
     policy_state_trans_func,
     params,
     load_model=False,
+    model_type = "solution",
 ):
     """Generate model and options dictionaries."""
     # Generate model_specs
@@ -48,6 +49,7 @@ def specify_model(
 
     # Experience grid
     experience_grid = jnp.linspace(0, 1, specs["n_experience_grid_points"])
+
 
     options = {
         "state_space": {
@@ -79,6 +81,19 @@ def specify_model(
         "model_params": specs,
     }
 
+    if model_type == "solution":
+        options["state_space"]["endogenous_states"]["informed"] = np.arange(2, dtype=int)#
+        model_path = path_dict["intermediate_data"] + "model_spec_solution.pkl"
+    elif model_type == "simulation":
+        options["state_space"]["exogenous_states"]["informed"] = {
+            "transition": informed_transition,
+            "states": np.arange(2, dtype=int),
+        }
+        model_path = path_dict["intermediate_data"] + "model_spec_simulation.pkl"
+    else :
+        raise ValueError("model_type must be either 'solution' or 'simulation'")
+
+
     if load_model:
         model = load_and_setup_model(
             options=options,
@@ -86,7 +101,7 @@ def specify_model(
             utility_functions=create_utility_functions(),
             utility_functions_final_period=create_final_period_utility_functions(),
             budget_constraint=budget_constraint,
-            path=path_dict["intermediate_data"] + "model.pkl",
+            path=model_path,
         )
 
     else:
@@ -96,7 +111,7 @@ def specify_model(
             utility_functions=create_utility_functions(),
             utility_functions_final_period=create_final_period_utility_functions(),
             budget_constraint=budget_constraint,
-            path=path_dict["intermediate_data"] + "model.pkl",
+            path=model_path,
         )
 
     print("Model specified.")

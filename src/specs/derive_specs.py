@@ -48,7 +48,7 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
         np.loadtxt(path_dict["est_results"] + "job_sep_probs.csv", delimiter=",")
     )
 
-    # Assign population averages
+    # Assign population averages for annual hours and mean wage
     pop_averages = pd.read_csv(
         path_dict["est_results"] + "population_averages_working.csv"
     ).iloc[0]
@@ -65,6 +65,10 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
         ]
     )
     specs["mean_wage"] = pop_averages["annual_mean_wage"]
+
+    # read informed state transition parameters
+    informed_hazard_rate = pd.read_pickle(path_dict["est_results"] + "uninformed_hazard_rate.pkl")
+    uninformed_early_retirement_penalty = pd.read_pickle(path_dict["est_results"] + "uninformed_average_belief.pkl")
     return specs
 
 
@@ -109,5 +113,4 @@ def read_and_derive_specs(spec_path):
         specs["max_SRA"] + specs["SRA_grid_size"],
         specs["SRA_grid_size"],
     )
-
     return specs

@@ -25,11 +25,10 @@ def calibrate_uninformed_hazard_rate(paths, options):
         calibrated_params = fit_moments(moments, weights, initial_guess)
         params[edu] = calibrated_params
         uninformed_beliefs[edu] = [avg_belief_uninformed]
-    breakpoint()
     # store and plot results
     params.to_pickle(out_file_path_rates)
     uninformed_beliefs.to_pickle(out_file_path_belief)
-    plot_predicted_vs_actual(moments, params)
+    plot_predicted_vs_actual(df, params)
     return calibrated_params, avg_belief_uninformed
 
 def open_dataset(paths):
@@ -105,10 +104,15 @@ def predicted_shares_by_age(predicted_hazard_rate, observed_ages):
     relevant_shares = pd.Series(informed_shares).loc[observed_ages].values
     return relevant_shares
 
-def plot_predicted_vs_actual(moments, params):
-    predicted_informed_shares = predicted_shares_by_age(hazard_rate(params, moments.index), moments.index)
-    predicted_informed_shares = pd.Series(predicted_informed_shares, index=moments.index)
-    plt.plot(moments, label="Actual")
-    plt.plot(predicted_informed_shares, label="Predicted")
+def plot_predicted_vs_actual(df, params):
+    for edu in df["education"].unique():
+        df_restricted = df[df["education"] == edu]
+        moments, weights = generate_moments(df_restricted)
+        predicted_informed_shares = predicted_shares_by_age(hazard_rate(params[edu], moments.index), moments.index)
+        predicted_informed_shares = pd.Series(predicted_informed_shares, index=moments.index)
+        plt.plot(moments, label="Actual_edu" + str(edu.astype(int)), marker="o", linestyle="None", markersize=4)
+        plt.plot(predicted_informed_shares, label="Predicted_edu" + str(edu.astype(int)))
+    plt.xlabel("Age")
+    plt.ylabel("Share Informed")
     plt.legend()
     plt.show()

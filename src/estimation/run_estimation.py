@@ -68,7 +68,6 @@ if input_str == "f" or input_str == "t":
         estimate_partner_transitions,
         estimate_nb_children,
     )
-
     estimate_partner_transitions(paths_dict, specs)
     estimate_nb_children(paths_dict, specs)
 

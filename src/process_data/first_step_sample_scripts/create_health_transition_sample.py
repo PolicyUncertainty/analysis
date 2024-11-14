@@ -30,7 +30,7 @@ def create_health_transition_sample(paths, specs, load_data=False):
     df = load_and_merge_soep_core(paths["soep_c38"])
 
     # Pre-Filter estimation years
-    df = filter_years(df, specs["start_year"] - 11, specs["end_year"] + 11)
+    df = filter_years(df, specs["start_year"] - 11, specs["end_year"] + 3)
 
     # Pre-Filter age and sex
     df = filter_below_age(df, specs["start_age"] - 11)
@@ -53,16 +53,7 @@ def create_health_transition_sample(paths, specs, load_data=False):
     # Define the window size for the moving average
     windowsize = 5
 
-    # Compute symmetric moving average for mean health state by age for each education level (fancy means)
-    health_h = df[df["education"] == 1].groupby("age")["health_state"].mean().rolling(windowsize, center=True).mean()
-    health_l = df[df["education"] == 0].groupby("age")["health_state"].mean().rolling(windowsize, center=True).mean()
 
-    # Aggregate the data to compute mean health state for each age and education level
-    mean_df = (
-        df.groupby(["age", "education"])["health_state"]
-        .mean()
-        .reset_index()
-    )
 
 
     # Define the Epanechnikov kernel function
@@ -111,6 +102,7 @@ def create_health_transition_sample(paths, specs, load_data=False):
     # Filter age and sex
     df = filter_below_age(df, specs["start_age"])
     df = filter_above_age(df, specs["end_age"])
+
     df = filter_by_sex(df, no_women=False)
 
 
@@ -121,6 +113,18 @@ def create_health_transition_sample(paths, specs, load_data=False):
     colors = {0: "#D72638", 1: "#1E90FF"}  # Red: #D72638, Blue: #1E90FF
 
     # Plot mean values for each education level as scatter points only
+
+    # Aggregate the data to compute mean health state for each age and education level
+    mean_df = (
+        df.groupby(["age", "education"])["health_state"]
+        .mean()
+        .reset_index()
+    )
+
+    # Compute symmetric moving average for mean health state by age for each education level (fancy means)
+    health_h = df[df["education"] == 1].groupby("age")["health_state"].mean().rolling(windowsize, center=True).mean()
+    health_l = df[df["education"] == 0].groupby("age")["health_state"].mean().rolling(windowsize, center=True).mean()
+
     for edu in [0, 1]:
         edu_df = mean_df[mean_df["education"] == edu]
         txt = "Low" if edu == 0 else "High"
@@ -153,7 +157,7 @@ def create_health_transition_sample(paths, specs, load_data=False):
     axs[0].scatter(ages, hbg_l, color=colors[1], alpha=0.65, label="Low education")
     axs[0].plot(ages, hbg_h, color=colors[0], label="High education (smoothed)")
     axs[0].scatter(ages, hbg_h, color=colors[0], alpha=0.65, label="High education")
-    axs[0].set_title("Probability of Good Health Shock (kernel-smoothed)", fontsize=14)
+    axs[0].set_title(f"Probability of Good Health Shock (kernel-smoothed), bw={bandwidth}", fontsize=14)
     axs[0].set_ylabel("Probability", fontsize=12)
     axs[0].set_xlabel("Age (years)", fontsize=12)
     axs[0].legend(loc="upper right")
@@ -167,10 +171,10 @@ def create_health_transition_sample(paths, specs, load_data=False):
     axs[1].scatter(ages, hgb_l, color=colors[1], alpha=0.65, label="Low education")
     axs[1].plot(ages, hgb_h, color=colors[0], label="High education (smoothed)")
     axs[1].scatter(ages, hgb_h, color=colors[0], alpha=0.65, label="High education")
-    axs[1].set_title("Probability of Bad Health Shock (kernel-smoothed)", fontsize=14)
+    axs[1].set_title(f"Probability of Bad Health Shock (kernel-smoothed), bw={bandwidth}", fontsize=14)
     axs[1].set_xlabel("Age (years)", fontsize=12)
     axs[1].set_ylabel("Probability", fontsize=12)
-    axs[1].legend(loc="lower right")
+    axs[1].legend(loc="upper right")
     axs[1].set_ylim(0, 0.6)
     axs[1].set_yticks(np.arange(0, 0.7, 0.1))
     axs[1].set_xticks(np.arange(30, 90, 10))
@@ -229,7 +233,7 @@ def load_and_merge_soep_core(soep_c38_path):
     print(str(len(merged_data)) + " observations in SOEP C38 core.")
     return merged_data
 
-def create_health_and_lagged_state(df, specs):
+def create_health_and_lagged_states(df, specs):
     # The following code is dependent on span dataframe being called first.
     # In particular the lagged partner state must be after span dataframe and create partner state.
     # We should rewrite this

@@ -9,4 +9,4 @@ bequest_scale: 1.3
 # Job separation params are set internally driven by data
 
 # Taste shock scale
-lambda: 0.1
+lambda: 1.0

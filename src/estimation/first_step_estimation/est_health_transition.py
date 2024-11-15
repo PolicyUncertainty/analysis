@@ -34,7 +34,7 @@ def estimate_health_transitions(paths_dict, specs):
 
     # Parameters
     bandwidth = specs["health_smoothing_bandwidth"]
-    ages = np.arange(specs["start_age"] + 1, specs["end_age"] + 1)
+    ages = np.arange(specs["start_age"] + 1, specs["end_age"] + 2)
 
     # Calculate the smoothed probabilities for each education level and health transition
     def calculate_smoothed_probabilities(education, lagged_health_state):
@@ -75,7 +75,7 @@ def estimate_health_transitions(paths_dict, specs):
                 key = f"{prob_key}_{'h' if education == 1 else 'l'}"
                 rows.append({
                     "education": education,
-                    "age": ages - 1,
+                    "period": ages - 1 - specs["start_age"],
                     "health_state": health_state,
                     "lead_health_state": lead_health_state,
                     "transition_prob": transition_probabilities[key]

@@ -1,8 +1,7 @@
 import pickle as pkl
 
 import matplotlib.pyplot as plt
-from estimation.struct_estimation.estimate_setup import create_unobserved_state_specs
-from estimation.struct_estimation.start_params.set_start_params import (
+from estimation.struct_estimation.start_params_and_bounds.set_start_params import (
     load_and_set_start_params,
 )
 from export_results.figures.observed_model_fit import load_and_prep_data_for_model_fit
@@ -16,6 +15,7 @@ from model_code.stochastic_processes.policy_states_belief import (
 from model_code.stochastic_processes.policy_states_belief import (
     update_specs_exp_ret_age_trans_mat,
 )
+from model_code.unobserved_state_weighting import create_unobserved_state_specs
 from set_paths import create_path_dict
 from specs.derive_specs import generate_derived_and_data_derived_specs
 

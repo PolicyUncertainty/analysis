@@ -7,9 +7,10 @@ import jax.numpy as jnp
 import numpy as np
 import optimagic as om
 import pandas as pd
+import yaml
 from dcegm.likelihood import create_individual_likelihood_function_for_model
 from dcegm.wealth_correction import adjust_observed_wealth
-from estimation.struct_estimation.start_params.set_start_params import (
+from estimation.struct_estimation.start_params_and_bounds.set_start_params import (
     load_and_set_start_params,
 )
 from model_code.specify_model import specify_model
@@ -19,93 +20,43 @@ from model_code.stochastic_processes.policy_states_belief import (
 from model_code.stochastic_processes.policy_states_belief import (
     update_specs_exp_ret_age_trans_mat,
 )
+from model_code.unobserved_state_weighting import create_unobserved_state_specs
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
 def estimate_model(path_dict, params_to_estimate_names, file_append, load_model):
-    if not os.path.exists(path_dict["intermediate_est_data"]):
-        os.makedirs(path_dict["intermediate_est_data"])
-
+    # Load start params and bounds
     start_params_all = load_and_set_start_params(path_dict)
-
     # # Assign start params from before
     # last_end = pkl.load(open(path_dict["est_results"] + "est_params.pkl", "rb"))
     #
     # start_params_all.update(last_end)
     start_params_all["bequest_scale"] = 1
-
-    individual_likelihood, weights = create_ll_from_paths(
-        start_params_all, path_dict, load_model
-    )
-
     start_params = {name: start_params_all[name] for name in params_to_estimate_names}
-    specs = generate_derived_and_data_derived_specs(path_dict)
-    pt_ratio_low = specs["av_annual_hours_pt"][0] / specs["av_annual_hours_ft"][0]
-    pt_ratio_high = specs["av_annual_hours_pt"][1] / specs["av_annual_hours_ft"][1]
 
-    def individual_likelihood_print(params):
-        start = time.time()
-        params["dis_util_unemployed_low"] = params["dis_util_not_retired_low"]
-        params["dis_util_pt_work_low"] = (
-            params["dis_util_not_retired_low"]
-            + pt_ratio_low * params["dis_util_working_low"]
-        )
-        params["dis_util_ft_work_low"] = (
-            params["dis_util_not_retired_low"] + params["dis_util_working_low"]
-        )
-
-        params["dis_util_unemployed_high"] = params["dis_util_not_retired_high"]
-        params["dis_util_pt_work_high"] = (
-            params["dis_util_not_retired_high"]
-            + pt_ratio_high * params["dis_util_working_high"]
-        )
-        params["dis_util_ft_work_high"] = (
-            params["dis_util_not_retired_high"] + params["dis_util_working_high"]
-        )
-
-        ll_value_individual, model_solution = individual_likelihood(params)
-        ll_value = jnp.dot(weights, ll_value_individual)
-        save_iter_step(
-            model_solution, ll_value, params, path_dict["intermediate_est_data"]
-        )
-        end = time.time()
-        print("Likelihood evaluation took, ", end - start)
-        print("Params, ", params, " with ll value, ", ll_value)
-        return ll_value
-
-    # Define for all parameters the bounds. We do not need to do that for those
-    # not estimated. They will selected afterwards.
-    lower_bounds_all = {
-        "mu": 1e-12,
-        "dis_util_not_retired_low": 1e-12,
-        "dis_util_working_low": 1e-12,
-        "dis_util_not_retired_high": 1e-12,
-        "dis_util_working_high": 1e-12,
-        "bequest_scale": 1e-12,
-        "lambda": 1e-12,
-        "job_finding_logit_const": -5,
-        "job_finding_logit_age": -0.5,
-        "job_finding_logit_high_educ": -5,
-    }
+    lower_bounds_all = yaml.safe_load(
+        open(path_dict["start_params_and_bounds"] + "lower_bounds.yaml", "rb")
+    )
     lower_bounds = {name: lower_bounds_all[name] for name in params_to_estimate_names}
-    upper_bounds_all = {
-        "mu": 2,
-        "dis_util_not_retired_low": 5,
-        "dis_util_working_low": 5,
-        "dis_util_not_retired_high": 5,
-        "dis_util_working_high": 5,
-        "bequest_scale": 5,
-        "lambda": 0.5,
-        "job_finding_logit_const": 5,
-        "job_finding_logit_age": 0.5,
-        "job_finding_logit_high_educ": 5,
-    }
 
+    upper_bounds_all = yaml.safe_load(
+        open(path_dict["start_params_and_bounds"] + "upper_bounds.yaml", "rb")
+    )
     upper_bounds = {name: upper_bounds_all[name] for name in params_to_estimate_names}
 
     bounds = om.Bounds(lower=lower_bounds, upper=upper_bounds)
+
+    # Initialize estimation class
+    est_class = est_class_from_paths(
+        path_dict=path_dict,
+        start_params_all=start_params_all,
+        slope_disutil_method=False,
+        file_append=file_append,
+        load_model=load_model,
+    )
+
     result = om.minimize(
-        fun=individual_likelihood_print,
+        fun=est_class.crit_func,
         params=start_params,
         bounds=bounds,
         algorithm="scipy_lbfgsb",
@@ -124,56 +75,113 @@ def estimate_model(path_dict, params_to_estimate_names, file_append, load_model)
     return result
 
 
-def create_ll_from_paths(start_params_all, path_dict, load_model):
-    model, params = specify_model(
-        path_dict=path_dict,
-        params=start_params_all,
-        update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
-        policy_state_trans_func=expected_SRA_probs_estimation,
-        load_model=load_model,
+class est_class_from_paths:
+    def __init__(
+        self,
+        path_dict,
+        start_params_all,
+        slope_disutil_method,
+        file_append,
+        load_model,
+    ):
+        self.iter_count = 0
+        self.slope_disutil_method = slope_disutil_method
+
+        intermediate_est_data = (
+            path_dict["intermediate_data"] + f"estimation_{file_append}/"
+        )
+        if not os.path.exists(intermediate_est_data):
+            os.makedirs(intermediate_est_data)
+
+        self.intermediate_est_data = intermediate_est_data
+
+        model, params = specify_model(
+            path_dict=path_dict,
+            params=start_params_all,
+            update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
+            policy_state_trans_func=expected_SRA_probs_estimation,
+            load_model=load_model,
+        )
+
+        # Load data
+        data_decision, states_dict = load_and_prep_data(
+            path_dict, start_params_all, model, drop_retirees=True
+        )
+
+        self.weights = data_decision["age_weights"].values
+
+        # Create specs for unobserved states
+        unobserved_state_specs = create_unobserved_state_specs(data_decision, model)
+
+        # Create likelihood function
+        individual_likelihood = create_individual_likelihood_function_for_model(
+            model=model,
+            observed_states=states_dict,
+            observed_choices=data_decision["choice"].values,
+            unobserved_state_specs=unobserved_state_specs,
+            params_all=start_params_all,
+            return_model_solution=True,
+        )
+        self.ll_func = individual_likelihood
+        specs = generate_derived_and_data_derived_specs(path_dict)
+        self.pt_ratio_low = (
+            specs["av_annual_hours_pt"][0] / specs["av_annual_hours_ft"][0]
+        )
+        self.pt_ratio_high = (
+            specs["av_annual_hours_pt"][1] / specs["av_annual_hours_ft"][1]
+        )
+
+    def crit_func(self, params):
+        start = time.time()
+        if self.slope_disutil_method:
+            params = update_according_to_slope_disutil(
+                params, self.pt_ratio_low, self.pt_ratio_high
+            )
+        ll_value_individual, model_solution = self.ll_func(params)
+        ll_value = jnp.dot(self.weights, ll_value_individual)
+        save_iter_step(
+            model_solution,
+            ll_value,
+            params,
+            self.intermediate_est_data,
+            self.iter_count,
+        )
+        end = time.time()
+        print("Likelihood evaluation took, ", end - start)
+        print("Params, ", params, " with ll value, ", ll_value)
+        return ll_value
+
+
+def update_according_to_slope_disutil(params, pt_ratio_low, pt_ratio_high):
+    """Use this function to entforce slope condition of disutility parameters."""
+    params["dis_util_unemployed_low"] = params["dis_util_not_retired_low"]
+    params["dis_util_pt_work_low"] = (
+        params["dis_util_not_retired_low"]
+        + pt_ratio_low * params["dis_util_working_low"]
+    )
+    params["dis_util_ft_work_low"] = (
+        params["dis_util_not_retired_low"] + params["dis_util_working_low"]
     )
 
-    # Load data
-    data_decision, states_dict = load_and_prep_data(
-        path_dict, start_params_all, model, drop_retirees=True
+    params["dis_util_unemployed_high"] = params["dis_util_not_retired_high"]
+    params["dis_util_pt_work_high"] = (
+        params["dis_util_not_retired_high"]
+        + pt_ratio_high * params["dis_util_working_high"]
     )
-
-    # Create specs for unobserved states
-    unobserved_state_specs = create_unobserved_state_specs(data_decision, model)
-
-    # Create likelihood function
-    individual_likelihood = create_individual_likelihood_function_for_model(
-        model=model,
-        observed_states=states_dict,
-        observed_choices=data_decision["choice"].values,
-        unobserved_state_specs=unobserved_state_specs,
-        params_all=start_params_all,
-        return_model_solution=True,
+    params["dis_util_ft_work_high"] = (
+        params["dis_util_not_retired_high"] + params["dis_util_working_high"]
     )
-    return individual_likelihood, data_decision["age_weights"].values
+    return params
 
 
-def create_unobserved_state_specs(data_decision, model):
-    def weight_func(**kwargs):
-        # We need to weight the unobserved job offer state for each of its possible values
-        # The weight function is called with job offer new beeing the unobserved state
-        job_offer = kwargs["job_offer_new"]
-        return model["model_funcs"]["processed_exog_funcs"]["job_offer"](**kwargs)[
-            job_offer
-        ]
-
-    relevant_prev_period_state_choices_dict = {
-        "period": data_decision["period"].values - 1,
-        "education": data_decision["education"].values,
-    }
-    unobserved_state_specs = {
-        "observed_bool": data_decision["full_observed_state"].values,
-        "weight_func": weight_func,
-        "states": ["job_offer"],
-        "pre_period_states": relevant_prev_period_state_choices_dict,
-        "pre_period_choices": data_decision["lagged_choice"].values,
-    }
-    return unobserved_state_specs
+def save_iter_step(model_sol, ll_value, params, logging_folder, iter_count):
+    alternate_save_count = iter_count % 2
+    saving_object = {"model_sol": model_sol, "ll_value": ll_value}
+    pkl.dump(
+        saving_object,
+        open(logging_folder + f"solving_log_{alternate_save_count}.pkl", "wb"),
+    )
+    pkl.dump(params, open(logging_folder + f"params_{alternate_save_count}.pkl", "wb"))
 
 
 def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):
@@ -220,8 +228,3 @@ def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):
     states_dict["wealth"] = data_decision["adjusted_wealth"].values
 
     return data_decision, states_dict
-
-
-def save_iter_step(model_sol, ll_value, params, logging_folder):
-    saving_object = {"model_sol": model_sol, "ll_value": ll_value, "params": params}
-    pkl.dump(saving_object, open(logging_folder + "solving_log.pkl", "wb"))

@@ -17,6 +17,9 @@ probs_*.txt
 output/intermediate_data/*.pkl
 output/intermediate_data/estimation/
 
+# Ignore estimation log files, but not the md files
+src/estimation/struct_estimation/log/
+
 # Ignore intermediate pcikle files
 contributions_base.pkl
 scores.pkl

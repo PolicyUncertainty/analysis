@@ -4,9 +4,15 @@ dis_util_not_retired_low: 1.0
 dis_util_working_low: 0.3
 dis_util_not_retired_high: 1.0
 dis_util_working_high: 0.3
+dis_util_ft_work_high: 1.3
+dis_util_ft_work_low: 1.3
+dis_util_pt_work_high: 1.3
+dis_util_pt_work_low: 1.3
+dis_util_unemployed_high: 1.0
+dis_util_unemployed_low: 1.0
 bequest_scale: 1.3
 
 # Job separation params are set internally driven by data
 
 # Taste shock scale
-lambda: 1.0
+lambda: 0.29

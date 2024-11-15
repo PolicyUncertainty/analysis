@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from dcegm.likelihood import create_choice_prob_func_unobserved_states
-from estimation.struct_estimation.estimate_setup import create_unobserved_state_specs
 from estimation.struct_estimation.estimate_setup import load_and_prep_data
 from model_code.specify_model import specify_and_solve_model
 from model_code.stochastic_processes.policy_states_belief import (
@@ -10,6 +9,7 @@ from model_code.stochastic_processes.policy_states_belief import (
 from model_code.stochastic_processes.policy_states_belief import (
     update_specs_exp_ret_age_trans_mat,
 )
+from model_code.unobserved_state_weighting import create_unobserved_state_specs
 
 
 def observed_model_fit(paths_dict, specs, params):

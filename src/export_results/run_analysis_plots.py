@@ -11,7 +11,7 @@ specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True
 kind_string = input("Execute [pre]- or [post]-estimation plots? (pre/post) ")
 
 if kind_string == "pre":
-    from estimation.struct_estimation.start_params.set_start_params import (
+    from estimation.struct_estimation.start_params_and_bounds.set_start_params import (
         load_and_set_start_params,
     )
 

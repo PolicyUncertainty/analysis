@@ -5,7 +5,9 @@ from statsmodels import api as sm
 
 
 def load_and_set_start_params(path_dict):
-    start_params_all = yaml.safe_load(open(path_dict["start_params"], "rb"))
+    start_params_all = yaml.safe_load(
+        open(path_dict["start_params_and_bounds"] + "start_params.yaml", "rb")
+    )
 
     job_sep_params = create_job_offer_params_from_start(path_dict)
     start_params_all.update(job_sep_params)

@@ -30,9 +30,10 @@ def estimate_model(
     # Load start params and bounds
     start_params_all = load_and_set_start_params(path_dict)
     # # Assign start params from before
-    # last_end = pkl.load(open(path_dict["est_results"] + "est_params.pkl", "rb"))
-    #
-    # start_params_all.update(last_end)
+    last_temp = pkl.load(
+        open(path_dict["intermediate_data"] + "temp_params_all_free.pkl", "rb")
+    )
+    start_params_all.update(last_temp)
     start_params_all["bequest_scale"] = 1
     start_params = {name: start_params_all[name] for name in params_to_estimate_names}
 
@@ -149,6 +150,7 @@ class est_class_from_paths:
             self.iter_count,
         )
         end = time.time()
+        self.iter_count += 1
         print("Likelihood evaluation took, ", end - start)
         print("Params, ", params, " with ll value, ", ll_value)
         return ll_value

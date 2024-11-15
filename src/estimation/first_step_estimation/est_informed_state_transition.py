@@ -8,8 +8,8 @@ from functools import partial
 def calibrate_uninformed_hazard_rate(paths, options):
     """ This functions calibrates the hazard rate of becoming informed for the uninformed individuals with method of (weighted) moments.
     The hazard rate is assumed to be constant but can be changed to be a function of age."""
-    out_file_path_rates = paths["intermediate_data"] + "uninformed_hazard_rate.pkl"
-    out_file_path_belief = paths["intermediate_data"] + "uninformed_average_belief.pkl"
+    out_file_path_rates = paths["est_results"] + "uninformed_hazard_rate.pkl"
+    out_file_path_belief = paths["est_results"] + "uninformed_average_belief.pkl"
 
     df = open_dataset(paths)
     df = restrict_dataset(df, options)
@@ -19,7 +19,7 @@ def calibrate_uninformed_hazard_rate(paths, options):
     # calibrate hazard rate for each education group
     for edu in df["education"].unique():
         df_restricted = df[df["education"] == edu]
-        avg_belief_uninformed = save_beliefs_of_uninformed(df_restricted, out_file_path_belief)
+        avg_belief_uninformed = beliefs_of_uninformed(df_restricted)
         moments, weights = generate_moments(df_restricted)
         initial_guess = [0.01]
         calibrated_params = fit_moments(moments, weights, initial_guess)
@@ -55,7 +55,7 @@ def classify_informed(df, options):
     df["informed"] = df["belief_pens_deduct"] <= informed_threshhold
     return df
 
-def save_beliefs_of_uninformed(df, out_file_path):
+def beliefs_of_uninformed(df):
     """ This function saves the average ERP belief of the uninformed individuals in the dataset."""
     df_u = df[df["informed"] == 0]
     weighted_belief_uninformed = (df_u['belief_pens_deduct'] * df_u['fweights']).sum() / df_u['fweights'].sum()

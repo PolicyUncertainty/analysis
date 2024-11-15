@@ -266,6 +266,7 @@ def test_retiree(
         policy_state=29,
         education=education,
         experience=exp_cont_last_period,
+        informed_state=0,
         options=specs_internal,
     )
     # Check that experience does not get updated or added any penalty
@@ -364,6 +365,7 @@ def test_fresh_retiree(
     exp,
     policy_state,
     paths_and_specs,
+    informed_state=0,
 ):
     path_dict, specs_internal = paths_and_specs
 
@@ -379,6 +381,7 @@ def test_fresh_retiree(
         policy_state=policy_state,
         education=education,
         experience=exp_cont_prev,
+        informed_state=0,
         options=specs_internal,
     )
 
@@ -396,9 +399,8 @@ def test_fresh_retiree(
     SRA_at_resolution = (
         specs_internal["min_SRA"] + policy_state * specs_internal["SRA_grid_size"]
     )
-    deduction_factor = (SRA_at_resolution - actual_retirement_age) * specs_internal[
-        "early_retirement_penalty"
-    ]
+    ERP = specs_internal["early_retirement_penalty"] * (1 - informed_state) + specs_internal["uninformed_early_retirement_penalty"][education].loc[0] * informed_state 
+    deduction_factor = (SRA_at_resolution - actual_retirement_age) * ERP
     pension_factor = 1 - deduction_factor
 
     mean_wage_all = specs_internal["mean_wage"]

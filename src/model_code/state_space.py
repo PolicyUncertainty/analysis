@@ -58,7 +58,7 @@ def apply_retirement_constraint_for_SRA(SRA, options):
 
 
 def get_next_period_experience(
-    period, lagged_choice, policy_state, education, experience, options
+    period, lagged_choice, policy_state, education, experience, informed_state, options
 ):
     """Update experience based on lagged choice and period."""
     max_experience_period = period + options["max_init_experience"]
@@ -74,7 +74,7 @@ def get_next_period_experience(
     degenerate_state_id = options["n_policy_states"] - 1
     fresh_retired = (degenerate_state_id != policy_state) & (lagged_choice == 0)
     experience_years_with_penalty = calc_experience_years_for_pension_adjustment(
-        period, exp_years_last_period, education, policy_state, options
+        period, exp_years_last_period, education, policy_state, informed_state, options
     )
     # Update if fresh retired
     exp_new_period = jax.lax.select(
@@ -84,7 +84,7 @@ def get_next_period_experience(
 
 
 def calc_experience_years_for_pension_adjustment(
-    period, experience_years, education, policy_state, options
+    period, experience_years, education, policy_state, informed_state, options
 ):
     """Calculate the reduced experience with early retirement penalty."""
     total_pension_points = calc_total_pension_points(
@@ -97,8 +97,9 @@ def calc_experience_years_for_pension_adjustment(
     # SRA at retirement
     SRA_at_retirement = options["min_SRA"] + policy_state * options["SRA_grid_size"]
     # deduction (bonus) factor for early (late) retirement
-    ERP = options["early_retirement_penalty"]
-    ERP_uninformed = options["uninformed_early_retirement_penalty"]
+    ERP_informed = options["early_retirement_penalty"]
+    ERP_uninformed = options["uninformed_early_retirement_penalty"][education].loc[0]
+    ERP = informed_state * ERP_informed + (1 - informed_state) * ERP_uninformed
     pension_deduction = (SRA_at_retirement - actual_retirement_age) * ERP
     pension_factor = 1 - pension_deduction
     reduced_pension_points = pension_factor * total_pension_points

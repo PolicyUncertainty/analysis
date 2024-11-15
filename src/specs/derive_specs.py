@@ -67,8 +67,8 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     specs["mean_wage"] = pop_averages["annual_mean_wage"]
 
     # read informed state transition parameters
-    informed_hazard_rate = pd.read_pickle(path_dict["est_results"] + "uninformed_hazard_rate.pkl")
-    uninformed_early_retirement_penalty = pd.read_pickle(path_dict["est_results"] + "uninformed_average_belief.pkl")
+    specs["informed_hazard_rate"] = pd.read_pickle(path_dict["est_results"] + "uninformed_hazard_rate.pkl")
+    specs["uninformed_early_retirement_penalty"] = pd.read_pickle(path_dict["est_results"] + "uninformed_average_belief.pkl")/100
     return specs
 
 

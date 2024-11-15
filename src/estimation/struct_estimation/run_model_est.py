@@ -8,12 +8,12 @@ from estimation.struct_estimation.estimate_setup import estimate_model
 
 params_to_estimate_names = [
     "mu",
-    "dis_util_ft_work_high",
-    "dis_util_ft_work_low",
-    "dis_util_pt_work_high",
-    "dis_util_pt_work_low",
     "dis_util_unemployed_high",
+    "dis_util_pt_work_high",
+    "dis_util_ft_work_high",
     "dis_util_unemployed_low",
+    "dis_util_ft_work_low",
+    "dis_util_pt_work_low",
     # "dis_util_not_retired_low",
     # "dis_util_working_low",
     # "dis_util_not_retired_high",

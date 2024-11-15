@@ -88,7 +88,7 @@ def create_partner_and_lagged_state(df, specs):
     # The following code is dependent on span dataframe being called first.
     # In particular the lagged partner state must be after span dataframe and create partner state.
     # We should rewrite this
-    df = span_dataframe(df, specs)
+    df = span_dataframe(df, specs["start_year"]+1, specs["end_year"]+1)
 
     df = create_partner_state(df)
     df["lagged_partner_state"] = df.groupby(["pid"])["partner_state"].shift()

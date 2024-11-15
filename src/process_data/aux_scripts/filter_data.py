@@ -1,7 +1,7 @@
 def filter_years(df, start_year, end_year):
     df = df.loc[(slice(None), range(start_year, end_year + 1)), :]
     print(
-        str(len(df)) + " left after dropping people outside of estimation years (+-1)."
+        str(len(df)) + f" left after dropping people outside of estimation years {start_year} - {end_year}."
     )
     return df
 

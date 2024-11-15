@@ -7,6 +7,21 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
 
+
+# %%###################################
+# Health chracteristics
+######################################
+exec_health = input("Exectue Health characteristics? (y/n) ") == "y"
+if exec_health:
+    from export_results.figures.expected_health import (
+        plot_healthy_unhealthy,
+    )
+
+    plot_healthy_unhealthy(path_dict, specs)
+    plt.show()
+    plt.close("all")
+
+
 # %%###################################
 # Family chracteristics
 ######################################

@@ -11,11 +11,12 @@ input_str = input(
     "\n   - [p]artner wage"
     "\n   - [j]ob separation"
     "\n   - family [t]ransition"
+    "\n   - [h]ealth transition"
     "\n\n 2 Estimate [m]odel."
     "\n\n Input: "
 )
 # Set define user only to true if estimate SRA process as we need raw soep data there
-define_user = True if input_str in ["f", "s"] else False
+define_user = True if input_str in ["f", "s", "h"] else False
 
 paths_dict = create_path_dict(define_user=define_user)
 specs = read_and_derive_specs(paths_dict["specs"])
@@ -70,6 +71,14 @@ if input_str == "f" or input_str == "t":
 
     estimate_partner_transitions(paths_dict, specs)
     estimate_nb_children(paths_dict, specs)
+
+if input_str == "f" or input_str == "h":
+    # Estimate health transitions
+    from estimation.first_step_estimation.est_health_transition import (
+        estimate_health_transitions,
+    )
+
+    estimate_health_transitions(paths_dict, specs)
 
 if input_str == "m":
     from estimation.estimate_setup import estimate_model

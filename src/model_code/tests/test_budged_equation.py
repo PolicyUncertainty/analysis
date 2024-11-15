@@ -401,7 +401,7 @@ def test_fresh_retiree(
     )
     ERP = specs_internal["early_retirement_penalty"] * informed_state + specs_internal[
         "uninformed_early_retirement_penalty"
-    ][education].loc[0] * (1 - informed_state)
+    ][education] * (1 - informed_state)
     deduction_factor = (SRA_at_resolution - actual_retirement_age) * ERP
     pension_factor = 1 - deduction_factor
 

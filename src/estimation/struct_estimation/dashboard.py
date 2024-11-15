@@ -20,6 +20,11 @@ from set_paths import create_path_dict
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 paths_dict = create_path_dict(define_user=False)
+
+file_append = "all_free"
+folder = f"log/estimation_{file_append}/"
+# folder = paths_dict["intermediate_data"] + f"estimation_{file_append}/"
+
 specs = generate_derived_and_data_derived_specs(paths_dict)
 start_params_all = load_and_set_start_params(paths_dict)
 start_params_all["bequest_scale"] = 1
@@ -38,9 +43,7 @@ data_decision, states_dict = load_and_prep_data_for_model_fit(
 )
 
 unobserved_state_specs = create_unobserved_state_specs(data_decision, model)
-log_object = pkl.load(
-    open(paths_dict["intermediate_est_data"] + "solving_log.pkl", "rb")
-)
+log_object = pkl.load(open(folder + "solving_log.pkl", "rb"))
 print(log_object["params"])
 print(log_object["ll_value"])
 
@@ -54,5 +57,5 @@ plot_observed_model_fit_choice_probs(
     unobserved_state_specs,
     start_params_all,
     log_object["model_sol"],
-    save_folder=paths_dict["intermediate_est_data"],
+    save_folder=folder,
 )

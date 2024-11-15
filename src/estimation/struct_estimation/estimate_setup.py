@@ -24,7 +24,9 @@ from model_code.unobserved_state_weighting import create_unobserved_state_specs
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
-def estimate_model(path_dict, params_to_estimate_names, file_append, load_model):
+def estimate_model(
+    path_dict, params_to_estimate_names, file_append, slope_disutil_method, load_model
+):
     # Load start params and bounds
     start_params_all = load_and_set_start_params(path_dict)
     # # Assign start params from before
@@ -50,7 +52,7 @@ def estimate_model(path_dict, params_to_estimate_names, file_append, load_model)
     est_class = est_class_from_paths(
         path_dict=path_dict,
         start_params_all=start_params_all,
-        slope_disutil_method=False,
+        slope_disutil_method=slope_disutil_method,
         file_append=file_append,
         load_model=load_model,
     )

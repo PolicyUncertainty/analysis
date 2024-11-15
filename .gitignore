@@ -15,6 +15,7 @@ probs_*.txt
 
 # Ignore intermediate data pickle files
 output/intermediate_data/*.pkl
+!output/intermediate_data/temp_params_*.pkl
 output/intermediate_data/estimation/
 
 # Ignore estimation log files, but not the md files

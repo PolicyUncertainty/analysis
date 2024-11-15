@@ -399,7 +399,9 @@ def test_fresh_retiree(
     SRA_at_resolution = (
         specs_internal["min_SRA"] + policy_state * specs_internal["SRA_grid_size"]
     )
-    ERP = specs_internal["early_retirement_penalty"] * (1 - informed_state) + specs_internal["uninformed_early_retirement_penalty"][education].loc[0] * informed_state 
+    ERP = specs_internal["early_retirement_penalty"] * informed_state + specs_internal[
+        "uninformed_early_retirement_penalty"
+    ][education].loc[0] * (1 - informed_state)
     deduction_factor = (SRA_at_resolution - actual_retirement_age) * ERP
     pension_factor = 1 - deduction_factor
 

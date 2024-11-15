@@ -101,6 +101,9 @@ def read_in_partner_transition_specs(paths_dict, specs):
 
     return jnp.asarray(male_trans_probs), n_partner_states
 
+
 def informed_state_transition_specs(paths, specs):
-    informed_params = pd.read_pickle(paths["est_results"] + "uninformed_hazard_rate.pkl")
+    informed_params = pd.read_pickle(
+        paths["est_results"] + "uninformed_hazard_rate.pkl"
+    )
     return informed_params

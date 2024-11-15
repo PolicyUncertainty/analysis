@@ -73,6 +73,8 @@ def get_next_period_experience(
     # If retired, then we update experience according to the deduction function
     degenerate_state_id = options["n_policy_states"] - 1
     fresh_retired = (degenerate_state_id != policy_state) & (lagged_choice == 0)
+
+    # Calculate experience with early retirement penalty
     experience_years_with_penalty = calc_experience_years_for_pension_adjustment(
         period, exp_years_last_period, education, policy_state, informed_state, options
     )
@@ -98,7 +100,7 @@ def calc_experience_years_for_pension_adjustment(
     SRA_at_retirement = options["min_SRA"] + policy_state * options["SRA_grid_size"]
     # deduction (bonus) factor for early (late) retirement
     ERP_informed = options["early_retirement_penalty"]
-    ERP_uninformed = options["uninformed_early_retirement_penalty"][education].loc[0]
+    ERP_uninformed = options["uninformed_early_retirement_penalty"][education]
     ERP = informed_state * ERP_informed + (1 - informed_state) * ERP_uninformed
     pension_deduction = (SRA_at_retirement - actual_retirement_age) * ERP
     pension_factor = 1 - pension_deduction

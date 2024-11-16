@@ -49,7 +49,7 @@ def create_health_transition_sample(paths, specs, load_data=False):
     
 
     df = df[
-        ["age", "education", "health_state", "lagged_health_state"]
+        ["age", "education", "health_state", "lead_health_state"]
     ]
 
 

@@ -15,9 +15,6 @@ def load_transition_data(paths_dict):
 def estimate_health_transitions(paths_dict, specs):
     """Estimate the health state transition matrix."""
     
-    import numpy as np
-    import pandas as pd
-
     # Load the data
     transition_data = load_transition_data(paths_dict)
 
@@ -26,23 +23,23 @@ def estimate_health_transitions(paths_dict, specs):
         u = distance / bandwidth
         return 0.75 * (1 - u**2) * (np.abs(u) <= 1)
 
-    # Function to calculate the weighted mean using the Epanechnikov kernel
+    # Function to calculate the weighted mean using the Epanechnikov kernel (uses lead_health_state)
     def kernel_weighted_mean(df, target_age, bandwidth):
         age_distances = np.abs(df['age'] - target_age)
         weights = epanechnikov_kernel(age_distances, bandwidth)
-        return np.sum(weights * df['health_state']) / np.sum(weights)
+        return np.sum(weights * df['lead_health_state']) / np.sum(weights)
 
     # Parameters
     bandwidth = specs["health_smoothing_bandwidth"]
-    ages = np.arange(specs["start_age"] + 1, specs["end_age"] + 2)
+    ages = np.arange(specs["start_age"], specs["end_age"] + 1)
 
-    # Calculate the smoothed probabilities for each education level and health transition
-    def calculate_smoothed_probabilities(education, lagged_health_state):
+    # Calculate the smoothed probabilities for each education level and health transition to transition to the lead_health_state
+    def calculate_smoothed_probabilities(education, health_state):
         smoothed_values = [
             kernel_weighted_mean(
                 transition_data[
                     (transition_data['education'] == education) & 
-                    (transition_data['lagged_health_state'] == lagged_health_state)
+                    (transition_data['health_state'] == health_state)
                 ],
                 age,
                 bandwidth
@@ -53,10 +50,10 @@ def estimate_health_transitions(paths_dict, specs):
 
     # Compute transition probabilities
     transition_probabilities = {
-        "hgg_h": calculate_smoothed_probabilities(education=1, lagged_health_state=1),
-        "hgg_l": calculate_smoothed_probabilities(education=0, lagged_health_state=1),
-        "hbg_h": calculate_smoothed_probabilities(education=1, lagged_health_state=0),
-        "hbg_l": calculate_smoothed_probabilities(education=0, lagged_health_state=0),
+        "hgg_h": calculate_smoothed_probabilities(education=1, health_state=1),
+        "hgg_l": calculate_smoothed_probabilities(education=0, health_state=1),
+        "hbg_h": calculate_smoothed_probabilities(education=1, health_state=0),
+        "hbg_l": calculate_smoothed_probabilities(education=0, health_state=0),
     }
 
     # Complementary probabilities
@@ -75,7 +72,7 @@ def estimate_health_transitions(paths_dict, specs):
                 key = f"{prob_key}_{'h' if education == 1 else 'l'}"
                 rows.append({
                     "education": education,
-                    "period": ages - 1 - specs["start_age"],
+                    "period": ages - specs["start_age"],
                     "health_state": health_state,
                     "lead_health_state": lead_health_state,
                     "transition_prob": transition_probabilities[key]

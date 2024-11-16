@@ -39,20 +39,27 @@ def clean_health_create_lagged_state(data):
     """
 
     # replace health_state with 1 if both previous and next health_state are 1
-    data["lagged_health_state"] = data.groupby(["pid"])["health_state"].shift(1)
-    data["health_state_next"] = data.groupby(["pid"])["health_state"].shift(-1)
-    data.loc[
-        (data["health_state"] == 0) & 
-        (data["lagged_health_state"] == 1) & 
-        (data["health_state_next"] == 1),
+    data["lag_health_state"] = data.groupby(["pid"])["health_state"].shift(1)
+    data["lead_health_state"] = data.groupby(["pid"])["health_state"].shift(-1)
+
+    # one year bad health in between two years of good health is still considered good health
+    data.loc[ 
+        (data["lag_health_state"] == 1) & 
+        (data["lead_health_state"] == 1),
         "health_state"
     ] = 1
-    
-    # drop unnecessary columns
-    data.drop(["health_state_next"], axis=1, inplace=True)
 
-    data = data[data["lagged_health_state"].notna()]
+    # update lead_health_state
+    data["lead_health_state"] = data.groupby(["pid"])["health_state"].shift(-1)
+
+    # drop people with missing lead health data
+    data = data[data["lead_health_state"].notna()]
     data = data[data["health_state"].notna()] # need to do this again here because spanning the dataframe creates new missing values
+
+    # drop no longer needed columns
+    data.drop(["lag_health_state"], axis=1, inplace=True)
+
+    
     print(str(len(data)) + " observations left after dropping people with missing lagged health data.")
 
     return data

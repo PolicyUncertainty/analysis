@@ -31,7 +31,7 @@ def estimate_model(
     start_params_all = load_and_set_start_params(path_dict)
     # # Assign start params from before
     last_temp = pkl.load(
-        open(path_dict["intermediate_data"] + "temp_params_all_free.pkl", "rb")
+        open(path_dict["intermediate_data"] + "estimation_cet_par/params_0.pkl", "rb")
     )
     start_params_all.update(last_temp)
     start_params_all["bequest_scale"] = 1

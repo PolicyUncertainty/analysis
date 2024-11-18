@@ -152,7 +152,7 @@ class est_class_from_paths:
         end = time.time()
         self.iter_count += 1
         print("Likelihood evaluation took, ", end - start)
-        print("Params, ", pd.DataFrame(params), " with ll value, ", ll_value)
+        print("Params, ", pd.Series(params), " with ll value, ", ll_value)
         return ll_value
 
 

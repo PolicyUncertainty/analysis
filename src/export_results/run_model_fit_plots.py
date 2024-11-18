@@ -17,29 +17,10 @@ if kind_string == "pre":
     )
 
     params = load_and_set_start_params(path_dict)
-    pt_ratio_low = specs["av_annual_hours_pt"][0] / specs["av_annual_hours_ft"][0]
-    pt_ratio_high = specs["av_annual_hours_pt"][1] / specs["av_annual_hours_ft"][1]
-    params["dis_util_unemployed_low"] = params["dis_util_not_retired_low"]
-    params["dis_util_pt_work_low"] = (
-        params["dis_util_not_retired_low"]
-        + pt_ratio_low * params["dis_util_working_low"]
-    )
-    params["dis_util_ft_work_low"] = (
-        params["dis_util_not_retired_low"] + params["dis_util_working_low"]
-    )
-
-    params["dis_util_unemployed_high"] = params["dis_util_not_retired_high"]
-    params["dis_util_pt_work_high"] = (
-        params["dis_util_not_retired_high"]
-        + pt_ratio_high * params["dis_util_working_high"]
-    )
-    params["dis_util_ft_work_high"] = (
-        params["dis_util_not_retired_high"] + params["dis_util_working_high"]
-    )
-
 elif kind_string == "post":
-    params = pickle.load(open(path_dict["est_params"], "rb"))
-
+    params = pickle.load(
+        open(path_dict["est_results"] + "est_params_cet_par.pkl", "rb")
+    )
 else:
     raise ValueError("Either pre or post estimation plots.")
 

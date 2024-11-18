@@ -43,11 +43,12 @@ data_decision, states_dict = load_and_prep_data_for_model_fit(
 )
 
 unobserved_state_specs = create_unobserved_state_specs(data_decision, model)
-log_object = pkl.load(open(folder + "solving_log.pkl", "rb"))
-print(log_object["params"])
+log_object = pkl.load(open(folder + "solving_log_0.pkl", "rb"))
+params = pkl.load(open(folder + "params_0.pkl", "rb"))
+print(params)
 print(log_object["ll_value"])
 
-start_params_all.update(log_object["params"])
+start_params_all.update(params)
 plot_observed_model_fit_choice_probs(
     paths_dict,
     specs,

@@ -2,8 +2,31 @@ We track here methods using the intercept mehtod, where each choice has their ow
 
 Name: all_free
 Status: Not converged
-LL-value: 13159.197212630084
+LL-value: 12972.379168196196
 
-Params:
+mu                             1.040965
+dis_util_unemployed_high       3.053345
+dis_util_pt_work_high          4.572254
+dis_util_ft_work_high          0.981758
+dis_util_unemployed_low        2.212031
+dis_util_ft_work_low           1.006660
+dis_util_pt_work_low           5.000000
+lambda                         1.431806
+job_finding_logit_const       -0.061381
+job_finding_logit_age         -0.019903
+job_finding_logit_high_educ    0.548088
 
-{'mu': 0.9933953027762896, 'dis_util_ft_work_high': 0.7275882761173593, 'dis_util_ft_work_low': 0.8173087437966161, 'dis_util_pt_work_high': 3.7106169531014452, 'dis_util_pt_work_low': 3.8693727359097343, 'dis_util_unemployed_high': 1.5928486160869397, 'dis_util_unemployed_low': 1.6777842281587936, 'lambda': 1.2477118877780689, 'job_finding_logit_const': -0.6367734449289922, 'job_finding_logit_age': -0.0075946209399991894, 'job_finding_logit_high_educ': 0.04978115597412722}
+
+Name: ce_par (mu=0.8, lambda=0.29)
+Status: converged
+LL-value: 17815.74493779643
+
+dis_util_unemployed_high       0.563271
+dis_util_pt_work_high          0.957691
+dis_util_ft_work_high          0.812776
+dis_util_unemployed_low        0.472345
+dis_util_ft_work_low           0.820030
+dis_util_pt_work_low           1.078573
+job_finding_logit_const        0.681307
+job_finding_logit_age         -0.017918
+job_finding_logit_high_educ    0.595060

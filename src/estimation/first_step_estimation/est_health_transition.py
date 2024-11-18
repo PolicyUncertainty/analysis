@@ -1,22 +1,17 @@
 # Description: This file estimates the parameters of the health transition matrix using the SOEP panel data.
 # For each education level and age, we estimate P(health_state_(t+1)=a| health_state_t=b, education=c, age_t) non-parametrically.
-
 import numpy as np
 import pandas as pd
 from specs.derive_specs import read_and_derive_specs
 
-def load_transition_data(paths_dict):
-    """Prepare the data for the transition estimation."""
-    transition_data = pd.read_pickle(
-        paths_dict["intermediate_data"] + "health_transition_estimation_sample.pkl"
-    )
-    return transition_data
 
 def estimate_health_transitions(paths_dict, specs):
     """Estimate the health state transition matrix."""
-    
+
     # Load the data
-    transition_data = load_transition_data(paths_dict)
+    transition_data = pd.read_pickle(
+        paths_dict["intermediate_data"] + "health_transition_estimation_sample.pkl"
+    )
 
     # Define the Epanechnikov kernel function
     def epanechnikov_kernel(distance, bandwidth):
@@ -25,9 +20,9 @@ def estimate_health_transitions(paths_dict, specs):
 
     # Function to calculate the weighted mean using the Epanechnikov kernel (uses lead_health_state)
     def kernel_weighted_mean(df, target_age, bandwidth):
-        age_distances = np.abs(df['age'] - target_age)
+        age_distances = np.abs(df["age"] - target_age)
         weights = epanechnikov_kernel(age_distances, bandwidth)
-        return np.sum(weights * df['lead_health_state']) / np.sum(weights)
+        return np.sum(weights * df["lead_health_state"]) / np.sum(weights)
 
     # Parameters
     bandwidth = specs["health_smoothing_bandwidth"]
@@ -38,11 +33,11 @@ def estimate_health_transitions(paths_dict, specs):
         smoothed_values = [
             kernel_weighted_mean(
                 transition_data[
-                    (transition_data['education'] == education) & 
-                    (transition_data['health_state'] == health_state)
+                    (transition_data["education"] == education)
+                    & (transition_data["health_state"] == health_state)
                 ],
                 age,
-                bandwidth
+                bandwidth,
             )
             for age in ages
         ]
@@ -57,26 +52,32 @@ def estimate_health_transitions(paths_dict, specs):
     }
 
     # Complementary probabilities
-    transition_probabilities.update({
-        "hgb_h": 1 - transition_probabilities["hgg_h"],
-        "hgb_l": 1 - transition_probabilities["hgg_l"],
-        "hbb_h": 1 - transition_probabilities["hbg_h"],
-        "hbb_l": 1 - transition_probabilities["hbg_l"],
-    })
+    transition_probabilities.update(
+        {
+            "hgb_h": 1 - transition_probabilities["hgg_h"],
+            "hgb_l": 1 - transition_probabilities["hgg_l"],
+            "hbb_h": 1 - transition_probabilities["hbg_h"],
+            "hbb_l": 1 - transition_probabilities["hbg_l"],
+        }
+    )
 
     # Construct the health transition matrix
     rows = []
     for education in [1, 0]:
         for health_state in [1, 0]:
-            for lead_health_state, prob_key in zip([1, 0], ["hgg", "hgb"] if health_state else ["hbg", "hbb"]):
+            for lead_health_state, prob_key in zip(
+                [1, 0], ["hgg", "hgb"] if health_state else ["hbg", "hbb"]
+            ):
                 key = f"{prob_key}_{'h' if education == 1 else 'l'}"
-                rows.append({
-                    "education": education,
-                    "period": ages - specs["start_age"],
-                    "health_state": health_state,
-                    "lead_health_state": lead_health_state,
-                    "transition_prob": transition_probabilities[key]
-                })
+                rows.append(
+                    {
+                        "education": education,
+                        "period": ages - specs["start_age"],
+                        "health_state": health_state,
+                        "lead_health_state": lead_health_state,
+                        "transition_prob": transition_probabilities[key],
+                    }
+                )
 
     health_transition_matrix = pd.concat(
         [pd.DataFrame(row) for row in rows], ignore_index=True

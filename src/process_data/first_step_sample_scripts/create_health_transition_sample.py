@@ -1,17 +1,16 @@
 # %%
 import os
 
-import pandas as pd
 import numpy as np
-from process_data.aux_scripts.filter_data import filter_below_age
+import pandas as pd
 from process_data.aux_scripts.filter_data import filter_above_age
-from process_data.aux_scripts.filter_data import filter_years
+from process_data.aux_scripts.filter_data import filter_below_age
 from process_data.aux_scripts.filter_data import filter_by_sex
-from process_data.soep_vars.education import create_education_type
-from process_data.soep_vars.health import create_health_var
-from process_data.soep_vars.health import clean_health_create_lagged_state
+from process_data.aux_scripts.filter_data import filter_years
 from process_data.aux_scripts.lagged_and_lead_vars import span_dataframe
-
+from process_data.soep_vars.education import create_education_type
+from process_data.soep_vars.health import clean_health_create_lagged_state
+from process_data.soep_vars.health import create_health_var
 
 
 # %%
@@ -29,10 +28,8 @@ def create_health_transition_sample(paths, specs, load_data=False):
 
     df = load_and_merge_soep_core(paths["soep_c38"])
 
-    
-
     # Pre-Filter estimation years
-    df = filter_years(df, specs["start_year"] - specs["health_smoothing_bandwidth"], specs["end_year"] + specs["health_smoothing_bandwidth"])
+    df = filter_years(df, specs["start_year"] - 1, specs["end_year"] + 1)
 
     # Pre-Filter age and sex
     df = filter_below_age(df, specs["start_age"] - specs["health_smoothing_bandwidth"])
@@ -44,21 +41,16 @@ def create_health_transition_sample(paths, specs, load_data=False):
 
     # create health states
     df = create_health_var(df)
-    df = span_dataframe(df, specs["start_year"]+specs["health_smoothing_bandwidth"], specs["end_year"]+specs["health_smoothing_bandwidth"])
+    df = span_dataframe(df, specs["start_year"] - 1, specs["end_year"] + 1)
     df = clean_health_create_lagged_state(df)
-    
 
-    df = df[
-        ["age", "education", "health_state", "lead_health_state"]
-    ]
-
+    df = df[["age", "education", "health_state", "lead_health_state"]]
 
     print(
         str(len(df))
         + " observations in the final health transition sample.  \n ----------------"
     )
-    
-    
+
     df.to_pickle(out_file_path)
     return df
 
@@ -84,7 +76,7 @@ def load_and_merge_soep_core(soep_c38_path):
     )
     pequiv_data = pd.read_stata(
         # m11126: Self-Rated Health Status
-        # m11124: Disability Status of Individual 
+        # m11124: Disability Status of Individual
         f"{soep_c38_path}/pequiv.dta",
         columns=["pid", "syear", "m11126", "m11124"],
         convert_categoricals=False,
@@ -97,6 +89,3 @@ def load_and_merge_soep_core(soep_c38_path):
     merged_data.set_index(["pid", "syear"], inplace=True)
     print(str(len(merged_data)) + " observations in SOEP C38 core.")
     return merged_data
-
-
-

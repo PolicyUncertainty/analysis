@@ -10,10 +10,10 @@ input_str = input(
     "\n   - [p]artner wage"
     "\n   - [j]ob separation"
     "\n   - family [t]ransition"
-    "\n\n Input: "
+    "\n   - [i]nformed state transition"
 )
 # Set define user only to true if estimate SRA process as we need raw soep data there
-define_user = True if input_str == "s" else False
+define_user = True if input_str in ["s", "i"] else False
 
 paths_dict = create_path_dict(define_user=define_user)
 specs = read_and_derive_specs(paths_dict["specs"])
@@ -46,7 +46,6 @@ if input_str == "p":
     # Estimate partner wage parameters for men and women
     from estimation.first_step_estimation.est_partner_wage_equation import (
         estimate_partner_wage_parameters,
-        calculate_partner_hours,
     )
 
     estimate_partner_wage_parameters(paths_dict, specs, est_men=True)
@@ -69,5 +68,13 @@ if input_str == "t":
     estimate_partner_transitions(paths_dict, specs)
     estimate_nb_children(paths_dict, specs)
 
+
+if input_str == "i":
+    # Estimate informed state transition
+    from estimation.first_step_estimation.est_informed_state_transition import (
+        calibrate_uninformed_hazard_rate,
+    )
+
+    calibrate_uninformed_hazard_rate(paths_dict, specs)
 
 # %%

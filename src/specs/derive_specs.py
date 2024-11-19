@@ -32,6 +32,22 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
         np.loadtxt(path_dict["est_results"] + "job_sep_probs.csv", delimiter=",")
     )
 
+    # read informed state transition parameters
+    df_uninformed_penalties = pd.read_pickle(
+        path_dict["est_results"] + "uninformed_average_belief.pkl"
+    )
+    df_informed_hazard_rate = pd.read_pickle(
+        path_dict["est_results"] + "uninformed_hazard_rate.pkl"
+    )
+
+    informed_hazard_rate = np.zeros(specs["n_education_types"], dtype=float)
+    uninformed_penalties = np.zeros(specs["n_education_types"], dtype=float)
+    for edu in range(specs["n_education_types"]):
+        uninformed_penalties[edu] = df_uninformed_penalties.loc[0, edu] / 100
+        informed_hazard_rate[edu] = df_informed_hazard_rate.loc[0, edu]
+    specs["uninformed_early_retirement_penalty"] = jnp.asarray(uninformed_penalties)
+    specs["informed_hazard_rate"] = jnp.asarray(informed_hazard_rate)
+
     return specs
 
 
@@ -77,5 +93,4 @@ def read_and_derive_specs(spec_path):
         specs["max_SRA"] + specs["SRA_grid_size"],
         specs["SRA_grid_size"],
     )
-
     return specs

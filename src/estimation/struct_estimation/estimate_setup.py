@@ -190,7 +190,6 @@ def save_iter_step(model_sol, ll_value, params, logging_folder, iter_count):
 
 def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):
     specs = generate_derived_and_data_derived_specs(path_dict)
-
     # Load data
     data_decision = pd.read_pickle(path_dict["struct_est_sample"])
     # We need to filter observations in period 0 because of job offer weighting

@@ -4,6 +4,7 @@ import pandas as pd
 import yaml
 from specs.family_specs import predict_children_by_state
 from specs.family_specs import read_in_partner_transition_specs
+from specs.health_specs import read_in_health_transition_specs
 from specs.income_specs import add_income_specs
 
 
@@ -23,6 +24,12 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
         specs["n_partner_states"],
     ) = read_in_partner_transition_specs(path_dict, specs)
 
+    # Read in health transition matrix
+    (
+        specs["health_trans_mat"],
+        specs["n_health_states"],
+    ) = read_in_health_transition_specs(path_dict, specs)
+
     # Set initial experience
     specs["max_init_experience"], specs["max_experience"] = create_max_experience(
         path_dict, specs, load_precomputed
@@ -31,6 +38,22 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     specs["job_sep_probs"] = jnp.asarray(
         np.loadtxt(path_dict["est_results"] + "job_sep_probs.csv", delimiter=",")
     )
+
+    # read informed state transition parameters
+    df_uninformed_penalties = pd.read_pickle(
+        path_dict["est_results"] + "uninformed_average_belief.pkl"
+    )
+    df_informed_hazard_rate = pd.read_pickle(
+        path_dict["est_results"] + "uninformed_hazard_rate.pkl"
+    )
+
+    informed_hazard_rate = np.zeros(specs["n_education_types"], dtype=float)
+    uninformed_penalties = np.zeros(specs["n_education_types"], dtype=float)
+    for edu in range(specs["n_education_types"]):
+        uninformed_penalties[edu] = df_uninformed_penalties.loc[0, edu] / 100
+        informed_hazard_rate[edu] = df_informed_hazard_rate.loc[0, edu]
+    specs["uninformed_early_retirement_penalty"] = jnp.asarray(uninformed_penalties)
+    specs["informed_hazard_rate"] = jnp.asarray(informed_hazard_rate)
 
     return specs
 
@@ -77,5 +100,4 @@ def read_and_derive_specs(spec_path):
         specs["max_SRA"] + specs["SRA_grid_size"],
         specs["SRA_grid_size"],
     )
-
     return specs

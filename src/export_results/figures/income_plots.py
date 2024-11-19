@@ -16,7 +16,7 @@ def plot_incomes(path_dict):
 
     exp_levels = np.arange(0, 50)
 
-    annual_unemployment = specs["monthly_unemployment_benefits"] * 12
+    annual_unemployment = specs["annual_unemployment_benefits"]
     unemployment_benefits = np.ones_like(exp_levels) * annual_unemployment
 
     labels = ["Low Education", "High Education"]
@@ -25,7 +25,6 @@ def plot_incomes(path_dict):
     # Now loop over education to generate specific net and gross wages and pensions
     for edu in range(specs["n_education_types"]):
         ax = axes[edu]
-        ax.set_ylim([0, 100])
 
         ax.plot(
             exp_levels,
@@ -167,7 +166,9 @@ def plot_total_income(specs):
                         options=specs,
                     )
                 axs[edu_val, married_val].plot(
-                    exp_levels, total_income, label=f"{work_label}"
+                    exp_levels,
+                    total_income * specs["wealth_unit"],
+                    label=f"{work_label}",
                 )
             axs[edu_val, married_val].set_title(f"{edu_label} and {married_label}")
             axs[edu_val, married_val].set_xlabel("Period equals experience")

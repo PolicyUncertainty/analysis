@@ -10,8 +10,8 @@ def job_offer_process_transition(params, options, education, period, choice):
 
     """
 
-    unemployment_choice = choice == 0
-    labor_choice = choice == 1
+    unemployment_choice = choice == 1
+    labor_choice = choice >= 2
 
     # Probability of job destruction
     job_sep_prob = options["job_sep_probs"][education, period]

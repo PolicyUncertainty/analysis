@@ -8,18 +8,24 @@ from model_code.utility.utility_functions import utility_func
 
 
 def plot_utility(params, specs):
-    consumption = np.linspace(0.5, 4, 100)
+    consumption = np.linspace(1, 100, 100)
     partner_state = np.array(1)
     education = 1
     period = 35
 
-    choice_labels = ["Unemployed", "Working", "Retired"]
+    choice_labels = specs["choice_labels"]
     fig, ax = plt.subplots()
     for choice, choice_label in enumerate(choice_labels):
         utilities = np.zeros_like(consumption)
         for i, c in enumerate(consumption):
             utilities[i] = utility_func(
-                c, partner_state, education, period, choice, params, specs
+                consumption=c,
+                partner_state=partner_state,
+                education=education,
+                period=period,
+                choice=choice,
+                params=params,
+                options=specs,
             )
         ax.plot(
             utilities,
@@ -51,3 +57,4 @@ def plot_cons_scale(specs):
             axs[married_val].legend()
             axs[married_val].set_ylim([1, 2])
     axs[0].set_ylabel("Consumption scale")
+    fig.suptitle("Consumption scale by period")

@@ -24,25 +24,25 @@ string_in = input(
 # %%
 # Create relevant datasets.
 # --------------------------------------------------------------------------------------
-from process_data.sample_creation_scripts.create_structural_est_sample import (
+from process_data.structural_sample_scripts.create_structural_est_sample import (
     create_structural_est_sample,
 )
-from process_data.sample_creation_scripts.create_wage_est_sample import (
+from process_data.first_step_sample_scripts.create_wage_est_sample import (
     create_wage_est_sample,
 )
-from process_data.sample_creation_scripts.create_partner_wage_est_sample import (
+from process_data.first_step_sample_scripts.create_partner_wage_est_sample import (
     create_partner_wage_est_sample,
 )
-from process_data.sample_creation_scripts.create_job_sep_sample import (
+from process_data.first_step_sample_scripts.create_job_sep_sample import (
     create_job_sep_sample,
 )
-from process_data.sample_creation_scripts.create_partner_transition_sample import (
+from process_data.first_step_sample_scripts.create_partner_transition_sample import (
     create_partner_transition_sample,
 )
 
 
 if string_in == "a" or string_in == "s":
-    create_structural_est_sample(paths_dict, options=specs, load_data=False)
+    create_structural_est_sample(paths_dict, specs=specs, load_data=False)
 
 if string_in == "a" or string_in == "w":
     create_wage_est_sample(paths_dict, specs=specs, load_data=False)

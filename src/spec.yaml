@@ -12,7 +12,7 @@ discount_factor: 0.97
 start_age: 30
 end_age: 85
 
-n_choices: 3  # choices: 0 = unemployment, , 1 = work, 2 = retire
+choice_labels: ["Retired", "Unemployed", "Part-time", "Full-time"]
 education_labels: ["Low Education", "High Education"]
 # Belief process parameters
 SRA_grid_size: 0.25
@@ -21,7 +21,9 @@ max_SRA: 72
 ret_years_before_SRA: 4
 min_ret_age: 63
 max_ret_age: 72
-exp_cap: 44 # maximum of exp accumulated
+# Assume that part time gives half a year of experience
+exp_increase_part_time: 0.5
+
 # Parameters of the policy environment
 unemployment_benefits: 0.35
 unemployment_benefits_housing: 0.3
@@ -42,7 +44,7 @@ end_year: 2017  # end year of estimation sample
 # Wage process estimation (uses same start and end year)
 wage_trunc_low_perc: 0.01  # lower truncation of wage distribution
 wage_trunc_high_perc: 0.99  # upper truncation of wage distribution
-wealth_unit: 1000  # unit of wealth in data
+wealth_unit: 10000  # unit of wealth in data
 ###############################################
 # Belief process estimation
 # Limits for truncation of the normal distribution

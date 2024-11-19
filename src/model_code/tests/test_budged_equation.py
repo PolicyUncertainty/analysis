@@ -15,7 +15,6 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
 SAVINGS_GRID = np.linspace(10, 100, 3)
-INTEREST_RATE_GRID = np.linspace(0.01, 0.1, 2)
 PARTNER_STATES = np.array([0, 1, 2], dtype=int)
 PERIOD_GRID = np.arange(0, 40, 10, dtype=int)
 OLD_AGE_PERIOD_GRID = np.arange(33, 43, 1, dtype=int)
@@ -30,14 +29,13 @@ def paths_and_specs():
 
 
 @pytest.mark.parametrize(
-    "period, partner_state, education, savings, interest_rate",
+    "period, partner_state, education, savings",
     list(
         product(
             PERIOD_GRID,
             PARTNER_STATES,
             EDUCATION_GRID,
             SAVINGS_GRID,
-            INTEREST_RATE_GRID,
         )
     ),
 )
@@ -46,14 +44,13 @@ def test_budget_unemployed(
     partner_state,
     education,
     savings,
-    interest_rate,
     paths_and_specs,
 ):
     path_dict, specs = paths_and_specs
 
     specs_internal = copy.deepcopy(specs)
 
-    params = {"interest_rate": interest_rate}
+    params = {"interest_rate": specs_internal["interest_rate"]}
 
     max_init_exp_period = period + specs_internal["max_init_experience"]
     exp_cont = 2 / max_init_exp_period
@@ -62,7 +59,7 @@ def test_budget_unemployed(
         period=period,
         partner_state=partner_state,
         education=education,
-        lagged_choice=0,
+        lagged_choice=1,
         experience=exp_cont,
         savings_end_of_previous_period=savings,
         income_shock_previous_period=0,
@@ -105,37 +102,40 @@ def test_budget_unemployed(
     else:
         income = net_partner_plus_child_benefits
 
-    np.testing.assert_almost_equal(wealth, savings * (1 + interest_rate) + income)
+    np.testing.assert_almost_equal(
+        wealth, savings * (1 + params["interest_rate"]) + income
+    )
 
 
 GAMMA_GRID = np.linspace(0.1, 0.9, 3)
 EXP_GRID = np.linspace(10, 30, 3, dtype=int)
 INCOME_SHOCK_GRID = np.linspace(-0.5, 0.5, 2)
+WORKER_CHOICES = [2, 3]
 
 
 @pytest.mark.parametrize(
-    "period, partner_state ,education, gamma, income_shock, experience, interest_rate, savings",
+    "working_choice, period, partner_state ,education, gamma, income_shock, experience, savings",
     list(
         product(
+            WORKER_CHOICES,
             PERIOD_GRID,
             PARTNER_STATES,
             EDUCATION_GRID,
             GAMMA_GRID,
             INCOME_SHOCK_GRID,
             EXP_GRID,
-            INTEREST_RATE_GRID,
             SAVINGS_GRID,
         )
     ),
 )
 def test_budget_worker(
+    working_choice,
     period,
     partner_state,
     education,
     gamma,
     income_shock,
     experience,
-    interest_rate,
     savings,
     paths_and_specs,
 ):
@@ -146,7 +146,7 @@ def test_budget_worker(
     specs_internal["gamma_0"] = gamma_array
     specs_internal["gamma_1"] = gamma_array
 
-    params = {"interest_rate": interest_rate}
+    params = {"interest_rate": specs_internal["interest_rate"]}
     max_init_exp_period = period + specs_internal["max_init_experience"]
     exp_cont = experience / max_init_exp_period
 
@@ -154,14 +154,14 @@ def test_budget_worker(
         period=period,
         partner_state=partner_state,
         education=education,
-        lagged_choice=1,
+        lagged_choice=working_choice,
         experience=exp_cont,
         savings_end_of_previous_period=savings,
         income_shock_previous_period=income_shock,
         params=params,
         options=specs_internal,
     )
-    labor_income = (
+    hourly_wage = (
         np.exp(
             gamma_array[education]
             + gamma_array[education] * np.log(experience + 1)
@@ -169,10 +169,21 @@ def test_budget_worker(
         )
         / specs_internal["wealth_unit"]
     )
-    if labor_income < specs_internal["min_wage"]:
-        labor_income = specs_internal["min_wage"]
+    if working_choice == 2:
+        labor_income_year = (
+            hourly_wage * specs_internal["av_annual_hours_pt"][education]
+        )
+        min_wage_year = specs_internal["yearly_min_wage_pt"][education]
+    else:
+        labor_income_year = (
+            hourly_wage * specs_internal["av_annual_hours_ft"][education]
+        )
+        min_wage_year = specs_internal["yearly_min_wage_ft"]
 
-    labor_income_year = labor_income * 12
+    # Check against min wage
+    if labor_income_year < min_wage_year:
+        labor_income_year = min_wage_year
+
     income_scaled = labor_income_year * specs_internal["wealth_unit"]
     sscs_worker = calc_health_ltc_contr(income_scaled) + calc_pension_unempl_contr(
         income_scaled
@@ -193,7 +204,7 @@ def test_budget_worker(
         total_net_income = income_after_ssc - tax_total + child_benefits
         checked_income = np.maximum(total_net_income, unemployment_benefits)
         np.testing.assert_almost_equal(
-            wealth, savings * (1 + interest_rate) + checked_income
+            wealth, savings * (1 + specs_internal["interest_rate"]) + checked_income
         )
     else:
         if partner_state == 1:
@@ -221,7 +232,7 @@ def test_budget_worker(
 
         checked_income = np.maximum(total_net_income, unemployment_benefits)
         np.testing.assert_almost_equal(
-            wealth, savings * (1 + interest_rate) + checked_income
+            wealth, savings * (1 + specs_internal["interest_rate"]) + checked_income
         )
 
 
@@ -231,13 +242,12 @@ RET_AGE_GRID = np.linspace(0, 2, 3, dtype=int)
 
 
 @pytest.mark.parametrize(
-    "period, partner_state ,education, interest_rate, savings, exp",
+    "period, partner_state ,education, savings, exp",
     list(
         product(
             OLD_AGE_PERIOD_GRID,
             PARTNER_STATES,
             EDUCATION_GRID,
-            INTEREST_RATE_GRID,
             SAVINGS_GRID,
             EXP_GRID,
         )
@@ -247,29 +257,39 @@ def test_retiree(
     period,
     partner_state,
     education,
-    interest_rate,
     savings,
     exp,
     paths_and_specs,
 ):
     path_dict, specs_internal = paths_and_specs
 
-    params = {"interest_rate": interest_rate}
+    params = {"interest_rate": specs_internal["interest_rate"]}
     max_init_exp_period = period + specs_internal["max_init_experience"]
-    exp_cont = exp / max_init_exp_period
+    exp_cont_last_period = exp / (max_init_exp_period - 1)
+
+    exp_cont = get_next_period_experience(
+        period=period,
+        lagged_choice=0,
+        policy_state=29,
+        education=education,
+        experience=exp_cont_last_period,
+        options=specs_internal,
+    )
+    # Check that experience does not get updated or added any penalty
+    np.testing.assert_allclose(exp_cont * max_init_exp_period, exp)
 
     wealth = budget_constraint(
         period=period,
         partner_state=partner_state,
         education=education,
-        lagged_choice=2,
+        lagged_choice=0,
         experience=exp_cont,
         savings_end_of_previous_period=savings,
         income_shock_previous_period=0,
         params=params,
         options=specs_internal,
     )
-    mean_wage_all = specs_internal["mean_wage"]
+    mean_wage_all = specs_internal["mean_hourly_ft_wage"][education]
     gamma_0 = specs_internal["gamma_0"][education]
     gamma_1_plus_1 = specs_internal["gamma_1"][education] + 1
     total_pens_points = (
@@ -296,7 +316,7 @@ def test_retiree(
         total_net_income = income_after_ssc - tax_total + child_benefits
         checked_income = np.maximum(total_net_income, unemployment_benefits)
         np.testing.assert_almost_equal(
-            wealth, savings * (1 + interest_rate) + checked_income
+            wealth, savings * (1 + specs_internal["interest_rate"]) + checked_income
         )
     else:
         if partner_state == 1:
@@ -324,18 +344,17 @@ def test_retiree(
 
         checked_income = np.maximum(total_net_income, unemployment_benefits)
         np.testing.assert_almost_equal(
-            wealth, savings * (1 + interest_rate) + checked_income
+            wealth, savings * (1 + specs_internal["interest_rate"]) + checked_income
         )
 
 
 @pytest.mark.parametrize(
-    "period, partner_state ,education, interest_rate, savings, exp, policy_state",
+    "period, partner_state ,education, savings, exp, policy_state",
     list(
         product(
             OLD_AGE_PERIOD_GRID,
             PARTNER_STATES,
             EDUCATION_GRID,
-            INTEREST_RATE_GRID,
             SAVINGS_GRID,
             EXP_GRID,
             POLICY_STATE_GRID,
@@ -346,7 +365,6 @@ def test_fresh_retiree(
     period,
     partner_state,
     education,
-    interest_rate,
     savings,
     exp,
     policy_state,
@@ -356,13 +374,13 @@ def test_fresh_retiree(
 
     actual_retirement_age = specs_internal["start_age"] + period - 1
 
-    params = {"interest_rate": interest_rate}
+    params = {"interest_rate": specs_internal["interest_rate"]}
     max_init_exp_prev_period = period + specs_internal["max_init_experience"] - 1
     exp_cont_prev = exp / max_init_exp_prev_period
 
     exp_cont = get_next_period_experience(
         period=period,
-        lagged_choice=2,
+        lagged_choice=0,
         policy_state=policy_state,
         education=education,
         experience=exp_cont_prev,
@@ -373,7 +391,7 @@ def test_fresh_retiree(
         period=period,
         partner_state=partner_state,
         education=education,
-        lagged_choice=2,
+        lagged_choice=0,
         experience=exp_cont,
         savings_end_of_previous_period=savings,
         income_shock_previous_period=0,
@@ -388,7 +406,7 @@ def test_fresh_retiree(
     ]
     pension_factor = 1 - deduction_factor
 
-    mean_wage_all = specs_internal["mean_wage"]
+    mean_wage_all = specs_internal["mean_hourly_ft_wage"][education]
     gamma_0 = specs_internal["gamma_0"][education]
     gamma_1_plus_1 = specs_internal["gamma_1"][education] + 1
     total_pens_points = (
@@ -416,7 +434,7 @@ def test_fresh_retiree(
         total_net_income = income_after_ssc - tax_total + child_benefits
         checked_income = np.maximum(total_net_income, unemployment_benefits)
         np.testing.assert_almost_equal(
-            wealth, savings * (1 + interest_rate) + checked_income
+            wealth, savings * (1 + specs_internal["interest_rate"]) + checked_income
         )
     else:
         if partner_state == 1:
@@ -444,5 +462,5 @@ def test_fresh_retiree(
 
         checked_income = np.maximum(total_net_income, unemployment_benefits)
         np.testing.assert_almost_equal(
-            wealth, savings * (1 + interest_rate) + checked_income
+            wealth, savings * (1 + specs_internal["interest_rate"]) + checked_income
         )

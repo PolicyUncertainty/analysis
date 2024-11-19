@@ -6,7 +6,7 @@ import pytest
 LOAD_SAVED_DATA = True
 
 # from process_data.derive_datasets import gather_decision_data
-from process_data.sample_creation_scripts.create_structural_est_sample import (
+from process_data.structural_sample_scripts.create_structural_est_sample import (
     create_structural_est_sample,
 )
 from set_paths import create_path_dict
@@ -27,6 +27,7 @@ def test_decision_data_no_missing_values(load_data=True):
 
     dec_dat = create_structural_est_sample(
         paths_dict,
+        specs=None,
         load_data=load_data,
     )
     assert dec_dat["choice"].isna().sum() == 0
@@ -46,10 +47,11 @@ def test_decision_data_no_ret_before_min_ret_age(load_data=LOAD_SAVED_DATA):
 
     dec_dat = create_structural_est_sample(
         paths_dict,
+        specs=None,
         load_data=load_data,
     )
     assert (
-        dec_dat.loc[dec_dat["choice"] == 2, "period"].min() + options["start_age"]
+        dec_dat.loc[dec_dat["choice"] == 0, "period"].min() + options["start_age"]
         >= options["min_ret_age"]
     )
 
@@ -62,6 +64,7 @@ def test_decision_data_no_work_after_max_ret_age(load_data=LOAD_SAVED_DATA):
 
     dec_dat = create_structural_est_sample(
         paths_dict,
+        specs=None,
         load_data=load_data,
     )
     assert (
@@ -69,7 +72,11 @@ def test_decision_data_no_work_after_max_ret_age(load_data=LOAD_SAVED_DATA):
         < options["max_ret_age"]
     )
     assert (
-        dec_dat.loc[dec_dat["choice"] == 0, "period"].max() + options["start_age"]
+        dec_dat.loc[dec_dat["choice"] == 2, "period"].max() + options["start_age"]
+        < options["max_ret_age"]
+    )
+    assert (
+        dec_dat.loc[dec_dat["choice"] == 3, "period"].max() + options["start_age"]
         < options["max_ret_age"]
     )
     assert (
@@ -78,7 +85,12 @@ def test_decision_data_no_work_after_max_ret_age(load_data=LOAD_SAVED_DATA):
         <= options["max_ret_age"]
     )
     assert (
-        dec_dat.loc[dec_dat["lagged_choice"] == 0, "period"].max()
+        dec_dat.loc[dec_dat["lagged_choice"] == 2, "period"].max()
+        + options["start_age"]
+        <= options["max_ret_age"]
+    )
+    assert (
+        dec_dat.loc[dec_dat["lagged_choice"] == 2, "period"].max()
         + options["start_age"]
         <= options["max_ret_age"]
     )
@@ -91,6 +103,7 @@ def test_decision_data_retirement_is_absorbing(load_data=LOAD_SAVED_DATA):
 
     dec_dat = create_structural_est_sample(
         paths_dict,
+        specs=None,
         load_data=load_data,
     )
-    assert dec_dat.loc[dec_dat["lagged_choice"] == 2, "choice"].unique() == 2
+    assert dec_dat.loc[dec_dat["lagged_choice"] == 0, "choice"].unique() == 0

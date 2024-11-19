@@ -3,7 +3,7 @@ import pickle
 import matplotlib.pyplot as plt
 import pandas as pd
 import yaml
-from estimation.estimate_setup import load_and_prep_data
+from estimation.struct_estimation.estimate_setup import load_and_prep_data
 from model_code.specify_model import specify_and_solve_model
 from model_code.stochastic_processes.policy_states_belief import (
     expected_SRA_probs_estimation,

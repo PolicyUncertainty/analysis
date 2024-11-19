@@ -74,14 +74,22 @@ def test_utility_func(
 ):
     params = {
         "mu": mu,
-        "dis_util_work_high": dis_util_work + 1,
-        "dis_util_work_low": dis_util_work,
+        "dis_util_pt_work_high": dis_util_work + 1,
+        "dis_util_pt_work_low": dis_util_work,
+        "dis_util_ft_work_high": dis_util_work + 1,
+        "dis_util_ft_work_low": dis_util_work,
         "dis_util_unemployed_high": dis_util_unemployed + 1,
         "dis_util_unemployed_low": dis_util_unemployed,
     }
     options = paths_and_specs[1]
     cons_scale = consumption_scale(partner_state, education, period, options)
     cons_utility = (consumption / cons_scale) ** (1 - mu) / (1 - mu)
+
+    # Read out disutil params
+    edu_str = "high" * education + "low" * (1 - education)
+    disutil_unemployment = np.exp(-params[f"dis_util_unemployed_{edu_str}"])
+    dis_util_pt_work = np.exp(-params[f"dis_util_pt_work_{edu_str}"])
+    dis_util_ft_work = np.exp(-params[f"dis_util_ft_work_{edu_str}"])
 
     np.testing.assert_almost_equal(
         utility_func(
@@ -93,8 +101,7 @@ def test_utility_func(
             params=params,
             options=options,
         ),
-        cons_utility
-        * (disutility_work(choice=1, education=education, params=params) ** (1 - mu)),
+        cons_utility * disutil_unemployment ** (1 - mu),
     )
 
     np.testing.assert_almost_equal(
@@ -103,13 +110,28 @@ def test_utility_func(
             partner_state=partner_state,
             education=education,
             period=period,
-            choice=0,
+            choice=2,
             params=params,
             options=options,
         ),
-        cons_utility
-        * (disutility_work(choice=0, education=education, params=params) ** (1 - mu)),
+        cons_utility * dis_util_pt_work ** (1 - mu),
     )
+
+    np.testing.assert_almost_equal(
+        utility_func(
+            consumption=consumption,
+            partner_state=partner_state,
+            education=education,
+            period=period,
+            choice=3,
+            params=params,
+            options=options,
+        ),
+        cons_utility * dis_util_ft_work ** (1 - mu),
+    )
+
+
+# """
 
 
 # """
@@ -142,11 +164,14 @@ def test_marginal_utility(
     options = paths_and_specs[1]
     params = {
         "mu": mu,
-        "dis_util_work_high": dis_util_work + 1,
-        "dis_util_work_low": dis_util_work,
+        "dis_util_pt_work_high": dis_util_work + 1,
+        "dis_util_pt_work_low": dis_util_work,
+        "dis_util_ft_work_high": dis_util_work + 1,
+        "dis_util_ft_work_low": dis_util_work,
         "dis_util_unemployed_high": dis_util_unemployed + 1,
         "dis_util_unemployed_low": dis_util_unemployed,
     }
+
     random_choice = np.random.choice(np.array([0, 1, 2]))
     marg_util_jax = jax.jacfwd(utility_func, argnums=0)(
         consumption, partner_state, education, period, random_choice, params, options
@@ -183,11 +208,14 @@ def test_inv_marginal_utility(
 ):
     params = {
         "mu": mu,
-        "dis_util_work_high": dis_util_work + 1,
-        "dis_util_work_low": dis_util_work,
+        "dis_util_pt_work_high": dis_util_work + 1,
+        "dis_util_pt_work_low": dis_util_work,
+        "dis_util_ft_work_high": dis_util_work + 1,
+        "dis_util_ft_work_low": dis_util_work,
         "dis_util_unemployed_high": dis_util_unemployed + 1,
         "dis_util_unemployed_low": dis_util_unemployed,
     }
+
     options = paths_and_specs[1]
     random_choice = np.random.choice(np.array([0, 1, 2]))
     marg_util = marg_utility(

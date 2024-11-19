@@ -2,33 +2,17 @@ import jax.numpy as jnp
 import numpy as np
 import pandas as pd
 import yaml
-from specs.family_specs import calculate_partner_incomes
 from specs.family_specs import predict_children_by_state
 from specs.family_specs import read_in_partner_transition_specs
-from specs.income_specs import get_pension_vars
-from specs.income_specs import process_wage_params
+from specs.income_specs import add_income_specs
 
 
 def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     """This function reads in specs and adds derived and data estimated specs."""
     specs = read_and_derive_specs(path_dict["specs"])
 
-    # wages
-    (
-        specs["gamma_0"],
-        specs["gamma_1"],
-        specs["income_shock_scale"],
-    ) = process_wage_params(path_dict, specs)
-
-    # pensions
-    specs["ppv"], specs["mean_wage"] = get_pension_vars(specs, path_dict)
-
-    # partner income
-    specs["partner_wage"], specs["partner_pension"] = calculate_partner_incomes(
-        path_dict, specs
-    )
-    # specs["partner_hours"] = calculate_partner_hours(path_dict, specs)
-    # specs["partner_pension"] = calculate_partner_pension(path_dict)
+    # Add income specs
+    specs = add_income_specs(specs, path_dict)
 
     # family transitions
     specs["children_by_state"] = predict_children_by_state(path_dict, specs)
@@ -47,6 +31,7 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     specs["job_sep_probs"] = jnp.asarray(
         np.loadtxt(path_dict["est_results"] + "job_sep_probs.csv", delimiter=",")
     )
+
     return specs
 
 
@@ -80,8 +65,9 @@ def read_and_derive_specs(spec_path):
 
     # Number of periods in model
     specs["n_periods"] = specs["end_age"] - specs["start_age"] + 1
-    # Number of education types
+    # Number of education types and choices from labels
     specs["n_education_types"] = len(specs["education_labels"])
+    specs["n_choices"] = len(specs["choice_labels"])
     # you can retire from min retirement age until max retirement age
     specs["n_policy_states"] = (
         int(((specs["max_SRA"] - specs["min_SRA"]) / specs["SRA_grid_size"]) + 1) + 1

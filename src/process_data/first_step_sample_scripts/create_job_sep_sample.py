@@ -44,7 +44,7 @@ def create_job_sep_sample(paths, specs, load_data=False):
     df = create_education_type(df)
 
     # Now restrict sample to all who worked last period or did loose their job
-    df = df[(df["lagged_choice"] == 1) | (df["plb0282_h"] == 1)]
+    df = df[(df["lagged_choice"] >= 2) | (df["plb0282_h"] == 1)]
 
     # Create age at which one got fired and rename job separation column
     df["age_fired"] = df["age"] - 1

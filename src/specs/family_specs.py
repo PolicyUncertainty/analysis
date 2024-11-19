@@ -3,32 +3,6 @@ import pandas as pd
 from jax import numpy as jnp
 
 
-def calculate_partner_incomes(path_dict, specs):
-    """Calculate income of working aged partner."""
-    periods = np.arange(0, specs["n_periods"], dtype=int)
-    n_edu_types = len(specs["education_labels"])
-
-    # Only do this for men now
-    partner_wage_params_men = pd.read_csv(
-        path_dict["est_results"] + "partner_wage_eq_params_men.csv", index_col=0
-    )
-    # partner_wage_params_women = pd.read_csv(
-    #     path_dict["est_results"] + "partner_wage_eq_params_women.csv"
-    # )
-    partner_wages = np.zeros((n_edu_types, specs["n_periods"]))
-    for edu_val, edu_label in enumerate(specs["education_labels"]):
-        for period in periods:
-            partner_wages[edu_val, period] = (
-                partner_wage_params_men.loc[edu_label, "constant"]
-                + partner_wage_params_men.loc[edu_label, "period"] * period
-                + partner_wage_params_men.loc[edu_label, "period_sq"] * period**2
-            ) / specs["wealth_unit"]
-
-    # Wealth hack
-    partner_pension = partner_wages.mean(axis=1) * 0.48
-    return jnp.asarray(partner_wages), jnp.asarray(partner_pension)
-
-
 def predict_children_by_state(path_dict, specs):
     """Predicts the number of children in the household for each individual conditional
     on state.

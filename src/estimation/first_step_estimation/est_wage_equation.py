@@ -104,12 +104,12 @@ def calc_additional_wage_params(df, year_fixed_effects, specs, paths_dict):
                 edu_label
             ][year]
 
-    df["yearly_hours"] = df["monthly_hours"] * 12
+    df["annual_hours"] = df["monthly_hours"] * 12
 
-    df["annual_wage_deflated"] = np.exp(df["ln_wage_deflated"]) * df["yearly_hours"]
+    df["annual_wage_deflated"] = np.exp(df["ln_wage_deflated"]) * df["annual_hours"]
     pop_avg_annual_wage = df["annual_wage_deflated"].mean()
 
-    avg_hours_by_edu_choice = df.groupby(["education", "choice"])["yearly_hours"].mean()
+    avg_hours_by_edu_choice = df.groupby(["education", "choice"])["annual_hours"].mean()
 
     choice_mapping = {"pt_work": 2, "ft_work": 3}
 

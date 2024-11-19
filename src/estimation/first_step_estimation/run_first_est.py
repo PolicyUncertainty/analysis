@@ -5,23 +5,20 @@ from specs.derive_specs import read_and_derive_specs
 
 input_str = input(
     "\n\n Which of the following steps do you want to estimate? Please type the corresponding letter. "
-    "\n\n 1 First step ('f' for all in this category):"
     "\n   - [s]ra process"
     "\n   - [w]age"
     "\n   - [p]artner wage"
     "\n   - [j]ob separation"
     "\n   - family [t]ransition"
     "\n   - [i]nformed state transition"
-    "\n\n 2 Estimate [m]odel."
-    "\n\n Input: "
 )
-# Set define user only to true if estimate SRA process or informed state transition as we need raw soep data there
-define_user = True if input_str in ["f", "s", "i"] else False
+# Set define user only to true if estimate SRA process as we need raw soep data there
+define_user = True if input_str in ["s", "i"] else False
 
 paths_dict = create_path_dict(define_user=define_user)
 specs = read_and_derive_specs(paths_dict["specs"])
 
-if input_str == "f" or input_str == "s":
+if input_str == "s":
     # Estimate parameters of SRA truncated normal distributions
     from estimation.first_step_estimation.est_SRA_expectations import (
         estimate_truncated_normal,
@@ -36,7 +33,7 @@ if input_str == "f" or input_str == "s":
 
     est_SRA_params(paths_dict)
 
-if input_str == "f" or input_str == "w":
+if input_str == "w":
     # Estimate wage parameters
     # Average wage parameters are estimated to compute education-specific pensions
     from estimation.first_step_estimation.est_wage_equation import (
@@ -45,24 +42,23 @@ if input_str == "f" or input_str == "w":
 
     estimate_wage_parameters(paths_dict, specs)
 
-if input_str == "f" or input_str == "p":
+if input_str == "p":
     # Estimate partner wage parameters for men and women
     from estimation.first_step_estimation.est_partner_wage_equation import (
         estimate_partner_wage_parameters,
-        calculate_partner_hours,
     )
 
     estimate_partner_wage_parameters(paths_dict, specs, est_men=True)
     estimate_partner_wage_parameters(paths_dict, specs, est_men=False)
     # calculate_partner_hours(paths_dict)
 
-if input_str == "f" or input_str == "j":
+if input_str == "j":
     # Estimate job separation
     from estimation.first_step_estimation.est_job_sep import est_job_sep
 
     est_job_sep(paths_dict, specs, load_data=True)
 
-if input_str == "f" or input_str == "t":
+if input_str == "t":
     # Estimate partner transitions
     from estimation.first_step_estimation.est_family_transitions import (
         estimate_partner_transitions,
@@ -73,37 +69,12 @@ if input_str == "f" or input_str == "t":
     estimate_nb_children(paths_dict, specs)
 
 
-if input_str == "f" or input_str == "i":
+if input_str == "i":
     # Estimate informed state transition
     from estimation.first_step_estimation.est_informed_state_transition import (
         calibrate_uninformed_hazard_rate,
     )
 
     calibrate_uninformed_hazard_rate(paths_dict, specs)
-
-if input_str == "m":
-    from estimation.estimate_setup import estimate_model
-
-    params_to_estimate_names = [
-        # "mu",
-        "dis_util_work_high",
-        "dis_util_work_low",
-        "dis_util_unemployed_high",
-        "dis_util_unemployed_low",
-        # "bequest_scale",
-        # "lambda",
-        "job_finding_logit_const",
-        "job_finding_logit_age",
-        "job_finding_logit_high_educ",
-    ]
-
-    estimation_results = estimate_model(
-        paths_dict,
-        params_to_estimate_names=params_to_estimate_names,
-        file_append="new",
-        load_model=True,
-    )
-    print(estimation_results)
-
 
 # %%

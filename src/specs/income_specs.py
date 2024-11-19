@@ -11,14 +11,49 @@ def add_income_specs(specs, path_dict):
         specs["income_shock_scale"],
     ) = process_wage_params(path_dict, specs)
 
+    # unemployment benefits
+    (
+        specs["annual_unemployment_benefits"],
+        specs["annual_unemployment_benefits_housing"],
+        specs["annual_child_unemployment_benefits"],
+    ) = calc_annual_unemployment_benefits(specs)
+
+    specs["annual_child_benefits"] = specs["monthly_child_benefits"] * 12
+
     # pensions
-    specs["ppv"] = get_pension_point_value(specs)
+    specs["annual_pension_point_value"] = calc_annual_pension_point_value(specs)
 
     # partner income
-    specs["partner_wage"], specs["partner_pension"] = calculate_partner_incomes(
-        path_dict, specs
+    (
+        specs["annual_partner_wage"],
+        specs["annual_partner_pension"],
+    ) = calculate_partner_incomes(path_dict, specs)
+
+    specs = add_population_averages(specs, path_dict)
+
+    # Add minimum wage
+    specs["annual_min_wage_pt"], specs["annual_min_wage_ft"] = add_pt_and_ft_min_wage(
+        specs
+    )
+    return specs
+
+
+def calc_annual_unemployment_benefits(specs):
+    annual_unemployment_benefits = specs["monthly_unemployment_benefits"] * 12
+    annual_unemployment_benefits_housing = (
+        specs["monthly_unemployment_benefits_housing"] * 12
+    )
+    annual_child_unemployment_benefits = (
+        specs["monthly_child_unemployment_benefits"] * 12
+    )
+    return (
+        annual_unemployment_benefits,
+        annual_unemployment_benefits_housing,
+        annual_child_unemployment_benefits,
     )
 
+
+def add_population_averages(specs, path_dict):
     # Assign population averages
     pop_averages = pd.read_csv(
         path_dict["est_results"] + "population_averages_working.csv"
@@ -38,34 +73,29 @@ def add_income_specs(specs, path_dict):
 
     mean_wage_edu = pop_averages["annual_mean_wage"] / specs["av_annual_hours_ft"]
     specs["mean_hourly_ft_wage"] = mean_wage_edu
-
-    # Add minimum wage
-    specs = add_pt_and_ft_min_wage(specs)
     return specs
 
 
 def add_pt_and_ft_min_wage(specs):
-    yearly_min_wage_pt = np.zeros(specs["n_education_types"])
+    annual_min_wage_pt = np.zeros(specs["n_education_types"])
 
     for edu in range(specs["n_education_types"]):
         hours_ratio = (
             specs["av_annual_hours_pt"][edu] / specs["av_annual_hours_ft"][edu]
         )
-        yearly_min_wage_pt[edu] = specs["min_wage"] * hours_ratio * 12
+        annual_min_wage_pt[edu] = specs["monthly_min_wage"] * hours_ratio * 12
 
-    specs["yearly_min_wage_pt"] = jnp.asarray(yearly_min_wage_pt)
-    specs["yearly_min_wage_ft"] = specs["min_wage"] * 12
-    return specs
+    return jnp.asarray(annual_min_wage_pt), specs["monthly_min_wage"] * 12
 
 
-def get_pension_point_value(specs):
+def calc_annual_pension_point_value(specs):
     # Generate average pension point value weighted by east and west
     # pensions
     pension_point_value = (
-        0.75 * specs["pension_point_value_west_2010"]
-        + 0.25 * specs["pension_point_value_east_2010"]
-    ) / specs["wealth_unit"]
-    return pension_point_value
+        0.75 * specs["monthly_pension_point_value_west_2010"]
+        + 0.25 * specs["monthly_pension_point_value_east_2010"]
+    )
+    return pension_point_value * 12
 
 
 def process_wage_params(path_dict, specs):
@@ -100,8 +130,10 @@ def calculate_partner_incomes(path_dict, specs):
                 partner_wage_params_men.loc[edu_label, "constant"]
                 + partner_wage_params_men.loc[edu_label, "period"] * period
                 + partner_wage_params_men.loc[edu_label, "period_sq"] * period**2
-            ) / specs["wealth_unit"]
+            )
+    # annual partner wage
+    partner_wages *= 12
 
     # Wealth hack
-    partner_pension = partner_wages.mean(axis=1) * 0.48
-    return jnp.asarray(partner_wages), jnp.asarray(partner_pension)
+    annual_partner_pension = partner_wages.mean(axis=1) * 0.48 * 12
+    return jnp.asarray(partner_wages), jnp.asarray(annual_partner_pension)

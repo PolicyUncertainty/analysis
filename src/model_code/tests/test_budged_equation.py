@@ -66,6 +66,8 @@ def test_budget_unemployed(
         params=params,
         options=specs_internal,
     )
+
+    savings_scaled = savings * specs_internal["wealth_unit"]
     has_partner = int(partner_state > 0)
     nb_children = specs["children_by_state"][0, education, has_partner, period]
     income_partner = calc_partner_income_after_ssc(
@@ -73,23 +75,22 @@ def test_budget_unemployed(
     )
     split_factor = 1 + has_partner
     tax_partner = (
-        calc_inc_tax_for_single_income(income_partner / split_factor, specs_internal)
-        * split_factor
+        calc_inc_tax_for_single_income(income_partner / split_factor) * split_factor
     )
     net_partner = income_partner - tax_partner
     net_partner_plus_child_benefits = (
-        net_partner + nb_children * specs_internal["child_benefit"] * 12
+        net_partner + nb_children * specs_internal["annual_child_benefits"]
     )
 
-    if savings < specs_internal["unemployment_wealth_thresh"]:
+    if savings_scaled < specs_internal["unemployment_wealth_thresh"]:
         unemployment_benefits = (1 + has_partner) * specs_internal[
-            "unemployment_benefits"
+            "annual_unemployment_benefits"
         ]
         unemployment_benefits_children = (
-            specs_internal["child_unemployment_benefits"] * nb_children
+            specs_internal["annual_child_unemployment_benefits"] * nb_children
         )
         unemployment_benefits_housing = specs_internal[
-            "unemployment_benefits_housing"
+            "annual_unemployment_benefits_housing"
         ] * (1 + 0.5 * has_partner)
         unemployment_benefits_total = (
             unemployment_benefits
@@ -97,13 +98,15 @@ def test_budget_unemployed(
             + unemployment_benefits_housing
         )
         income = np.maximum(
-            unemployment_benefits_total * 12, net_partner_plus_child_benefits
+            unemployment_benefits_total, net_partner_plus_child_benefits
         )
     else:
         income = net_partner_plus_child_benefits
 
     np.testing.assert_almost_equal(
-        wealth, savings * (1 + params["interest_rate"]) + income
+        wealth,
+        (savings_scaled * (1 + params["interest_rate"]) + income)
+        / specs_internal["wealth_unit"],
     )
 
 
@@ -161,78 +164,76 @@ def test_budget_worker(
         params=params,
         options=specs_internal,
     )
-    hourly_wage = (
-        np.exp(
-            gamma_array[education]
-            + gamma_array[education] * np.log(experience + 1)
-            + income_shock
-        )
-        / specs_internal["wealth_unit"]
+
+    savings_scaled = savings * specs_internal["wealth_unit"]
+    hourly_wage = np.exp(
+        gamma_array[education]
+        + gamma_array[education] * np.log(experience + 1)
+        + income_shock
     )
     if working_choice == 2:
         labor_income_year = (
             hourly_wage * specs_internal["av_annual_hours_pt"][education]
         )
-        min_wage_year = specs_internal["yearly_min_wage_pt"][education]
+        min_wage_year = specs_internal["annual_min_wage_pt"][education]
     else:
         labor_income_year = (
             hourly_wage * specs_internal["av_annual_hours_ft"][education]
         )
-        min_wage_year = specs_internal["yearly_min_wage_ft"]
+        min_wage_year = specs_internal["annual_min_wage_ft"]
 
     # Check against min wage
     if labor_income_year < min_wage_year:
         labor_income_year = min_wage_year
 
-    income_scaled = labor_income_year * specs_internal["wealth_unit"]
+    income_scaled = labor_income_year
     sscs_worker = calc_health_ltc_contr(income_scaled) + calc_pension_unempl_contr(
         income_scaled
     )
-    income_after_ssc = labor_income_year - sscs_worker / specs_internal["wealth_unit"]
+    income_after_ssc = labor_income_year - sscs_worker
 
     has_partner_int = (partner_state > 0).astype(int)
     unemployment_benefits = calc_unemployment_benefits(
-        savings, education, has_partner_int, period, specs_internal
+        savings_scaled, education, has_partner_int, period, specs_internal
     )
 
     nb_children = specs_internal["children_by_state"][
         0, education, partner_state, period
     ]
-    child_benefits = nb_children * specs_internal["child_benefit"] * 12
+    child_benefits = nb_children * specs_internal["monthly_child_benefits"] * 12
     if partner_state == 0:
-        tax_total = calc_inc_tax_for_single_income(income_after_ssc, specs_internal)
+        tax_total = calc_inc_tax_for_single_income(income_after_ssc)
         total_net_income = income_after_ssc - tax_total + child_benefits
         checked_income = np.maximum(total_net_income, unemployment_benefits)
         np.testing.assert_almost_equal(
-            wealth, savings * (1 + specs_internal["interest_rate"]) + checked_income
+            wealth,
+            (savings_scaled * (1 + specs_internal["interest_rate"]) + checked_income)
+            / specs_internal["wealth_unit"],
         )
     else:
         if partner_state == 1:
-            partner_income_year = specs_internal["partner_wage"][education, period] * 12
+            partner_income_year = specs_internal["annual_partner_wage"][
+                education, period
+            ]
 
-            partner_income_scaled = partner_income_year * specs_internal["wealth_unit"]
             sscs_partner = calc_health_ltc_contr(
-                partner_income_scaled
-            ) + calc_pension_unempl_contr(partner_income_scaled)
+                partner_income_year
+            ) + calc_pension_unempl_contr(partner_income_year)
         else:
-            partner_income_year = specs_internal["partner_pension"][education] * 12
-            partner_income_scaled = partner_income_year * specs_internal["wealth_unit"]
-            sscs_partner = calc_health_ltc_contr(partner_income_scaled)
+            partner_income_year = specs_internal["annual_partner_pension"][education]
+            sscs_partner = calc_health_ltc_contr(partner_income_year)
 
-        income_partner = (
-            partner_income_year - sscs_partner / specs_internal["wealth_unit"]
-        )
+        income_partner = partner_income_year - sscs_partner
         total_income_after_ssc = income_after_ssc + income_partner
 
-        tax_toal = (
-            calc_inc_tax_for_single_income(total_income_after_ssc / 2, specs_internal)
-            * 2
-        )
+        tax_toal = calc_inc_tax_for_single_income(total_income_after_ssc / 2) * 2
         total_net_income = total_income_after_ssc + child_benefits - tax_toal
 
         checked_income = np.maximum(total_net_income, unemployment_benefits)
         np.testing.assert_almost_equal(
-            wealth, savings * (1 + specs_internal["interest_rate"]) + checked_income
+            wealth,
+            (savings_scaled * (1 + specs_internal["interest_rate"]) + checked_income)
+            / specs_internal["wealth_unit"],
         )
 
 
@@ -289,62 +290,62 @@ def test_retiree(
         params=params,
         options=specs_internal,
     )
+
+    savings_scaled = savings * specs_internal["wealth_unit"]
+
     mean_wage_all = specs_internal["mean_hourly_ft_wage"][education]
     gamma_0 = specs_internal["gamma_0"][education]
     gamma_1_plus_1 = specs_internal["gamma_1"][education] + 1
     total_pens_points = (
         (np.exp(gamma_0) / gamma_1_plus_1) * ((exp + 1) ** gamma_1_plus_1 - 1)
     ) / mean_wage_all
-    pension_year = specs_internal["ppv"] * total_pens_points * 12
-    pension_scaled = pension_year * specs_internal["wealth_unit"]
-    income_after_ssc = (
-        pension_year
-        - calc_health_ltc_contr(pension_scaled) / specs_internal["wealth_unit"]
-    )
+    pension_year = specs_internal["annual_pension_point_value"] * total_pens_points
+    income_after_ssc = pension_year - calc_health_ltc_contr(pension_year)
 
     has_partner_int = (partner_state > 0).astype(int)
     unemployment_benefits = calc_unemployment_benefits(
-        savings, education, has_partner_int, period, specs_internal
+        savings_scaled, education, has_partner_int, period, specs_internal
     )
 
     nb_children = specs_internal["children_by_state"][
         0, education, partner_state, period
     ]
-    child_benefits = nb_children * specs_internal["child_benefit"] * 12
+    child_benefits = nb_children * specs_internal["monthly_child_benefits"] * 12
     if partner_state == 0:
-        tax_total = calc_inc_tax_for_single_income(income_after_ssc, specs_internal)
+        tax_total = calc_inc_tax_for_single_income(income_after_ssc)
         total_net_income = income_after_ssc - tax_total + child_benefits
         checked_income = np.maximum(total_net_income, unemployment_benefits)
+        scaled_wealth = (
+            savings_scaled * (1 + specs_internal["interest_rate"]) + checked_income
+        )
         np.testing.assert_almost_equal(
-            wealth, savings * (1 + specs_internal["interest_rate"]) + checked_income
+            wealth, scaled_wealth / specs_internal["wealth_unit"]
         )
     else:
         if partner_state == 1:
-            partner_income_year = specs_internal["partner_wage"][education, period] * 12
+            partner_income_year = specs_internal["annual_partner_wage"][
+                education, period
+            ]
 
-            partner_income_scaled = partner_income_year * specs_internal["wealth_unit"]
             sscs_partner = calc_health_ltc_contr(
-                partner_income_scaled
-            ) + calc_pension_unempl_contr(partner_income_scaled)
+                partner_income_year
+            ) + calc_pension_unempl_contr(partner_income_year)
         else:
-            partner_income_year = specs_internal["partner_pension"][education] * 12
-            partner_income_scaled = partner_income_year * specs_internal["wealth_unit"]
-            sscs_partner = calc_health_ltc_contr(partner_income_scaled)
+            partner_income_year = specs_internal["annual_partner_pension"][education]
+            sscs_partner = calc_health_ltc_contr(partner_income_year)
 
-        income_partner = (
-            partner_income_year - sscs_partner / specs_internal["wealth_unit"]
-        )
+        income_partner = partner_income_year - sscs_partner
         total_income_after_ssc = income_after_ssc + income_partner
 
-        tax_toal = (
-            calc_inc_tax_for_single_income(total_income_after_ssc / 2, specs_internal)
-            * 2
-        )
+        tax_toal = calc_inc_tax_for_single_income(total_income_after_ssc / 2) * 2
         total_net_income = total_income_after_ssc + child_benefits - tax_toal
 
         checked_income = np.maximum(total_net_income, unemployment_benefits)
+        scaled_wealth = (
+            savings_scaled * (1 + specs_internal["interest_rate"]) + checked_income
+        )
         np.testing.assert_almost_equal(
-            wealth, savings * (1 + specs_internal["interest_rate"]) + checked_income
+            wealth, scaled_wealth / specs_internal["wealth_unit"]
         )
 
 
@@ -398,6 +399,8 @@ def test_fresh_retiree(
         params=params,
         options=specs_internal,
     )
+
+    savings_scaled = savings * specs_internal["wealth_unit"]
     SRA_at_resolution = (
         specs_internal["min_SRA"] + policy_state * specs_internal["SRA_grid_size"]
     )
@@ -413,54 +416,56 @@ def test_fresh_retiree(
         (np.exp(gamma_0) / gamma_1_plus_1) * ((exp + 1) ** gamma_1_plus_1 - 1)
     ) / mean_wage_all
 
-    pension_year = specs_internal["ppv"] * total_pens_points * pension_factor * 12
-    pension_scaled = pension_year * specs_internal["wealth_unit"]
-    income_after_ssc = (
-        pension_year
-        - calc_health_ltc_contr(pension_scaled) / specs_internal["wealth_unit"]
+    pension_year = (
+        specs_internal["annual_pension_point_value"]
+        * total_pens_points
+        * pension_factor
     )
+    income_after_ssc = pension_year - calc_health_ltc_contr(pension_year)
 
     has_partner_int = (partner_state > 0).astype(int)
     unemployment_benefits = calc_unemployment_benefits(
-        savings, education, has_partner_int, period, specs_internal
+        savings_scaled, education, has_partner_int, period, specs_internal
     )
 
     nb_children = specs_internal["children_by_state"][
         0, education, partner_state, period
     ]
-    child_benefits = nb_children * specs_internal["child_benefit"] * 12
+    child_benefits = nb_children * specs_internal["annual_child_benefits"]
     if partner_state == 0:
-        tax_total = calc_inc_tax_for_single_income(income_after_ssc, specs_internal)
+        tax_total = calc_inc_tax_for_single_income(income_after_ssc)
         total_net_income = income_after_ssc - tax_total + child_benefits
         checked_income = np.maximum(total_net_income, unemployment_benefits)
+        scaled_wealth = (
+            savings_scaled * (1 + specs_internal["interest_rate"]) + checked_income
+        )
         np.testing.assert_almost_equal(
-            wealth, savings * (1 + specs_internal["interest_rate"]) + checked_income
+            wealth, scaled_wealth / specs_internal["wealth_unit"]
         )
     else:
         if partner_state == 1:
-            partner_income_year = specs_internal["partner_wage"][education, period] * 12
+            partner_income_year = specs_internal["annual_partner_wage"][
+                education, period
+            ]
 
-            partner_income_scaled = partner_income_year * specs_internal["wealth_unit"]
             sscs_partner = calc_health_ltc_contr(
-                partner_income_scaled
-            ) + calc_pension_unempl_contr(partner_income_scaled)
+                partner_income_year
+            ) + calc_pension_unempl_contr(partner_income_year)
         else:
-            partner_income_year = specs_internal["partner_pension"][education] * 12
-            partner_income_scaled = partner_income_year * specs_internal["wealth_unit"]
-            sscs_partner = calc_health_ltc_contr(partner_income_scaled)
+            partner_income_year = specs_internal["annual_partner_pension"][education]
 
-        income_partner = (
-            partner_income_year - sscs_partner / specs_internal["wealth_unit"]
-        )
+            sscs_partner = calc_health_ltc_contr(partner_income_year)
+
+        income_partner = partner_income_year - sscs_partner
         total_income_after_ssc = income_after_ssc + income_partner
 
-        tax_toal = (
-            calc_inc_tax_for_single_income(total_income_after_ssc / 2, specs_internal)
-            * 2
-        )
+        tax_toal = calc_inc_tax_for_single_income(total_income_after_ssc / 2) * 2
         total_net_income = total_income_after_ssc + child_benefits - tax_toal
 
         checked_income = np.maximum(total_net_income, unemployment_benefits)
+        scaled_wealth = (
+            savings_scaled * (1 + specs_internal["interest_rate"]) + checked_income
+        )
         np.testing.assert_almost_equal(
-            wealth, savings * (1 + specs_internal["interest_rate"]) + checked_income
+            wealth, scaled_wealth / specs_internal["wealth_unit"]
         )

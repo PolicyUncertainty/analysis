@@ -2,34 +2,18 @@ import jax.numpy as jnp
 import numpy as np
 import pandas as pd
 import yaml
-from specs.family_specs import calculate_partner_incomes
 from specs.family_specs import predict_children_by_state
 from specs.family_specs import read_in_partner_transition_specs
-from specs.income_specs import get_pension_point_value
-from specs.income_specs import process_wage_params
 from specs.health_specs import read_in_health_transition_specs
+from specs.income_specs import add_income_specs
 
 
 def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     """This function reads in specs and adds derived and data estimated specs."""
     specs = read_and_derive_specs(path_dict["specs"])
 
-    # wages
-    (
-        specs["gamma_0"],
-        specs["gamma_1"],
-        specs["income_shock_scale"],
-    ) = process_wage_params(path_dict, specs)
-
-    # pensions
-    specs["ppv"] = get_pension_point_value(specs)
-
-    # partner income
-    specs["partner_wage"], specs["partner_pension"] = calculate_partner_incomes(
-        path_dict, specs
-    )
-    # specs["partner_hours"] = calculate_partner_hours(path_dict, specs)
-    # specs["partner_pension"] = calculate_partner_pension(path_dict)
+    # Add income specs
+    specs = add_income_specs(specs, path_dict)
 
     # family transitions
     specs["children_by_state"] = predict_children_by_state(path_dict, specs)
@@ -55,23 +39,22 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
         np.loadtxt(path_dict["est_results"] + "job_sep_probs.csv", delimiter=",")
     )
 
-    # Assign population averages
-    pop_averages = pd.read_csv(
-        path_dict["est_results"] + "population_averages_working.csv"
-    ).iloc[0]
-    specs["av_annual_hours_ft"] = jnp.array(
-        [
-            pop_averages["annual_hours_low_ft_work"],
-            pop_averages["annual_hours_high_ft_work"],
-        ]
+    # read informed state transition parameters
+    df_uninformed_penalties = pd.read_pickle(
+        path_dict["est_results"] + "uninformed_average_belief.pkl"
     )
-    specs["av_annual_hours_pt"] = jnp.array(
-        [
-            pop_averages["annual_hours_low_pt_work"],
-            pop_averages["annual_hours_high_pt_work"],
-        ]
+    df_informed_hazard_rate = pd.read_pickle(
+        path_dict["est_results"] + "uninformed_hazard_rate.pkl"
     )
-    specs["mean_wage"] = pop_averages["annual_mean_wage"]
+
+    informed_hazard_rate = np.zeros(specs["n_education_types"], dtype=float)
+    uninformed_penalties = np.zeros(specs["n_education_types"], dtype=float)
+    for edu in range(specs["n_education_types"]):
+        uninformed_penalties[edu] = df_uninformed_penalties.loc[0, edu] / 100
+        informed_hazard_rate[edu] = df_informed_hazard_rate.loc[0, edu]
+    specs["uninformed_early_retirement_penalty"] = jnp.asarray(uninformed_penalties)
+    specs["informed_hazard_rate"] = jnp.asarray(informed_hazard_rate)
+
     return specs
 
 
@@ -105,8 +88,9 @@ def read_and_derive_specs(spec_path):
 
     # Number of periods in model
     specs["n_periods"] = specs["end_age"] - specs["start_age"] + 1
-    # Number of education types
+    # Number of education types and choices from labels
     specs["n_education_types"] = len(specs["education_labels"])
+    specs["n_choices"] = len(specs["choice_labels"])
     # you can retire from min retirement age until max retirement age
     specs["n_policy_states"] = (
         int(((specs["max_SRA"] - specs["min_SRA"]) / specs["SRA_grid_size"]) + 1) + 1
@@ -116,5 +100,4 @@ def read_and_derive_specs(spec_path):
         specs["max_SRA"] + specs["SRA_grid_size"],
         specs["SRA_grid_size"],
     )
-
     return specs

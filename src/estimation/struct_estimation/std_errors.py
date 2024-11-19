@@ -1,9 +1,8 @@
 import pickle
 
-import estimagic as sm
 import jax
 import numpy as np
-from estimation.estimate_setup import create_ll_from_paths
+from estimation.struct_estimation.estimate_setup import create_ll_from_paths
 from jax.flatten_util import ravel_pytree
 
 # Import jax and set jax to work with 64bit
@@ -68,5 +67,3 @@ pickle.dump(
     unravel_func(std_errors),
     open(path_dict["est_results"] + "std_errors_all.pkl", "wb"),
 )
-# array([0.00717759, 0.00455941, 0.02647084, 0.01402793, 0.26843421,
-#        0.08585728, 0.00139075, 0.04709085])

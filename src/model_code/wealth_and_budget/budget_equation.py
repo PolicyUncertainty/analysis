@@ -18,6 +18,7 @@ def budget_constraint(
     params,
     options,
 ):
+    savings_scaled = savings_end_of_previous_period * options["wealth_unit"]
     # Recalculate experience
     max_exp_period = period + options["max_init_experience"]
     experience_years = max_exp_period * experience
@@ -37,7 +38,7 @@ def budget_constraint(
 
     # Income lagged choice 1
     unemployment_benefits = calc_unemployment_benefits(
-        savings=savings_end_of_previous_period,
+        savings=savings_scaled,
         education=education,
         has_partner_int=has_partner_int,
         period=period,
@@ -47,7 +48,7 @@ def budget_constraint(
     # Income lagged choice 2
     labor_income_after_ssc = calc_labor_income_after_ssc(
         lagged_choice=lagged_choice,
-        experience=experience_years,
+        experience_years=experience_years,
         education=education,
         income_shock=income_shock_previous_period,
         options=options,
@@ -79,8 +80,6 @@ def budget_constraint(
 
     total_income = jnp.maximum(total_net_income + child_benefits, unemployment_benefits)
     # calculate beginning of period wealth M_t
-    wealth = (
-        1 + params["interest_rate"]
-    ) * savings_end_of_previous_period + total_income
+    wealth = (1 + params["interest_rate"]) * savings_scaled + total_income
 
-    return wealth
+    return wealth / options["wealth_unit"]

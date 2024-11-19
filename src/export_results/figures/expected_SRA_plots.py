@@ -11,7 +11,7 @@ def plot_markov_process(paths_dict):
 
     specs = update_specs_exp_ret_age_trans_mat(specs, paths_dict)
 
-    belief_trans_mat = specs["beliefs_trans_mat"]
+    belief_trans_mat = specs["policy_states_trans_mat"][:-1, :-1]
 
     # Assuming belief_trans_mat is a 2D numpy array
 

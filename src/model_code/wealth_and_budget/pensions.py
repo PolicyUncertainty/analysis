@@ -13,9 +13,7 @@ def calc_pensions_after_ssc(
         education=education,
         options=options,
     )
-    retirement_income = calc_after_ssc_income_pensioneer(
-        retirement_income_gross, options
-    )
+    retirement_income = calc_after_ssc_income_pensioneer(retirement_income_gross)
     return retirement_income
 
 
@@ -26,7 +24,9 @@ def calc_gross_pension_income(experience_years, education, options):
     total_pension_points = calc_total_pension_points(
         education=education, experience_years=experience_years, options=options
     )
-    retirement_income_gross = options["ppv"] * total_pension_points * 12
+    retirement_income_gross = (
+        options["annual_pension_point_value"] * total_pension_points
+    )
     return retirement_income_gross
 
 
@@ -37,7 +37,7 @@ def calc_total_pension_points(education, experience_years, options):
     retirement is already in the experience.
 
     """
-    mean_wage_all = options["mean_wage"]
+    mean_wage_all = options["mean_hourly_ft_wage"][education]
     gamma_0 = options["gamma_0"][education]
     gamma_1_plus_1 = options["gamma_1"][education] + 1
     total_pens_points = (
@@ -49,7 +49,7 @@ def calc_total_pension_points(education, experience_years, options):
 
 def calc_experience_for_total_pension_points(total_pension_points, education, options):
     """Calculate the experience for a given total pension points."""
-    mean_wage_all = options["mean_wage"]
+    mean_wage_all = options["mean_hourly_ft_wage"][education]
     gamma_0 = options["gamma_0"][education]
     gamma_1_plus_1 = options["gamma_1"][education] + 1
     return (

@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from export_results.figures.color_map import JET_COLOR_MAP
 from model_code.wealth_and_budget.budget_equation import budget_constraint
 from model_code.wealth_and_budget.pensions import calc_gross_pension_income
 from model_code.wealth_and_budget.pensions import calc_pensions_after_ssc
@@ -13,10 +14,10 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 def plot_incomes(path_dict):
     specs = generate_derived_and_data_derived_specs(path_dict)
 
-    exp_levels = np.arange(0, specs["max_experience"] + 1)
+    exp_levels = np.arange(0, 50)
 
-    yearly_unemployment = specs["unemployment_benefits"] * 12
-    unemployment_benefits = np.ones_like(exp_levels) * yearly_unemployment
+    annual_unemployment = specs["annual_unemployment_benefits"]
+    unemployment_benefits = np.ones_like(exp_levels) * annual_unemployment
 
     labels = ["Low Education", "High Education"]
     fig, axes = plt.subplots(1, 2, figsize=(10, 5))
@@ -24,32 +25,109 @@ def plot_incomes(path_dict):
     # Now loop over education to generate specific net and gross wages and pensions
     for edu in range(specs["n_education_types"]):
         ax = axes[edu]
-        ax.set_ylim([0, 100])
 
-        ax.plot(exp_levels, unemployment_benefits, label="Unemployment benefits")
+        ax.plot(
+            exp_levels,
+            unemployment_benefits,
+            label="Unemployment benefits",
+            color=JET_COLOR_MAP[0],
+        )
 
-        # Initialize empty containers
-        gross_wages = np.zeros_like(exp_levels, dtype=float)
-        net_wages = np.zeros_like(exp_levels, dtype=float)
+        # Initialize empty containers, part and full time wages and pensions
+        gross_pt_wages = np.zeros_like(exp_levels, dtype=float)
+        after_ssc_pt_wages = np.zeros_like(exp_levels, dtype=float)
+
+        gross_ft_wages = np.zeros_like(exp_levels, dtype=float)
+        after_ssc_ft_wages = np.zeros_like(exp_levels, dtype=float)
 
         net_pensions = np.zeros_like(exp_levels, dtype=float)
         gross_pensions = np.zeros_like(exp_levels, dtype=float)
         for i, exp in enumerate(exp_levels):
-            gross_wages[i] = calculate_gross_labor_income(exp, edu, 0, specs)
-            net_wages[i] = calc_labor_income_after_ssc(exp, edu, 0, specs)
+            gross_pt_wages[i] = calculate_gross_labor_income(
+                lagged_choice=2,
+                experience_years=exp,
+                education=edu,
+                income_shock=0,
+                options=specs,
+            )
+            after_ssc_pt_wages[i] = calc_labor_income_after_ssc(
+                lagged_choice=2,
+                experience_years=exp,
+                education=edu,
+                income_shock=0,
+                options=specs,
+            )
+
+            gross_ft_wages[i] = calculate_gross_labor_income(
+                lagged_choice=3,
+                experience_years=exp,
+                education=edu,
+                income_shock=0,
+                options=specs,
+            )
+            after_ssc_ft_wages[i] = calc_labor_income_after_ssc(
+                lagged_choice=3,
+                experience_years=exp,
+                education=edu,
+                income_shock=0,
+                options=specs,
+            )
 
             gross_pensions[i] = np.maximum(
-                calc_gross_pension_income(exp, edu, 0, 2, specs), yearly_unemployment
+                calc_gross_pension_income(
+                    experience_years=exp, education=edu, options=specs
+                ),
+                annual_unemployment,
             )
 
             net_pensions[i] = np.maximum(
-                calc_pensions_after_ssc(exp, edu, 0, 2, specs), yearly_unemployment
+                calc_pensions_after_ssc(
+                    experience_years=exp, education=edu, options=specs
+                ),
+                annual_unemployment,
             )
 
-        ax.plot(exp_levels, net_wages, label="Average after ssc wage")
-        ax.plot(exp_levels, gross_wages, label="Average gross wage", ls="--")
-        ax.plot(exp_levels, net_pensions, label="Average after ssc pension")
-        ax.plot(exp_levels, gross_pensions, label="Average gross pension", ls="--")
+        ax.plot(
+            exp_levels,
+            after_ssc_pt_wages,
+            label="Average after ssc pt wage",
+            color=JET_COLOR_MAP[1],
+        )
+        ax.plot(
+            exp_levels,
+            gross_pt_wages,
+            label="Average gross pt wage",
+            ls="--",
+            color=JET_COLOR_MAP[1],
+        )
+
+        ax.plot(
+            exp_levels,
+            after_ssc_ft_wages,
+            label="Average after ssc ft wage",
+            color=JET_COLOR_MAP[2],
+        )
+        ax.plot(
+            exp_levels,
+            gross_ft_wages,
+            label="Average gross ft wage",
+            ls="--",
+            color=JET_COLOR_MAP[2],
+        )
+
+        ax.plot(
+            exp_levels,
+            net_pensions,
+            label="Average after ssc pension",
+            color=JET_COLOR_MAP[3],
+        )
+        ax.plot(
+            exp_levels,
+            gross_pensions,
+            label="Average gross pension",
+            ls="--",
+            color=JET_COLOR_MAP[3],
+        )
 
         ax.legend(loc="upper left")
         ax.set_xlabel("Experience")
@@ -65,13 +143,14 @@ def plot_total_income(specs):
     params = {"interest_rate": 0.0}
     exp_levels = np.arange(0, specs["max_experience"] + 1)
     marriage_labels = ["Single", "Partnered"]
-    worklife_chocie_labels = ["Unemployed", "Worker"]
+    worklife_chocie_labels = ["Unemployed", "Part-time", "Full-time"]
     edu_labels = specs["education_labels"]
 
-    fig, axs = plt.subplots(ncols=2)
+    fig, axs = plt.subplots(ncols=2, nrows=2, figsize=(10, 10))
     for married_val, married_label in enumerate(marriage_labels):
         for edu_val, edu_label in enumerate(edu_labels):
-            for work_val, work_label in enumerate(worklife_chocie_labels):
+            for choice, work_label in enumerate(worklife_chocie_labels):
+                work_val = choice + 1
                 total_income = np.zeros_like(exp_levels, dtype=float)
                 for i, exp in enumerate(exp_levels):
                     exp_share = exp / (exp + specs["max_init_experience"])
@@ -86,13 +165,15 @@ def plot_total_income(specs):
                         params=params,
                         options=specs,
                     )
-                axs[married_val].plot(
-                    exp_levels, total_income, label=f"{edu_label} {work_label}"
+                axs[edu_val, married_val].plot(
+                    exp_levels,
+                    total_income * specs["wealth_unit"],
+                    label=f"{work_label}",
                 )
-        axs[married_val].set_title(married_label)
-        axs[married_val].set_xlabel("Period equals experience")
-        axs[married_val].set_ylim([0, 80])
-        axs[married_val].legend()
+            axs[edu_val, married_val].set_title(f"{edu_label} and {married_label}")
+            axs[edu_val, married_val].set_xlabel("Period equals experience")
+            # axs[edu_val, married_val].set_ylim([0, 80])
+            axs[edu_val, married_val].legend()
 
     fig.suptitle("Total income")
 
@@ -106,7 +187,7 @@ def plot_partner_wage(paths_dict, specs):
     start_age = specs["start_age"]
 
     wage_data = df.groupby(["sex", "education", "age"])["wage_p"].mean()
-    partner_wage_est = specs["partner_wage"] * specs["wealth_unit"] * 12
+    partner_wage_est = specs["annual_partner_wage"]
 
     fig, ax = plt.subplots()
     # Only plot until 70
@@ -172,7 +253,7 @@ def plot_child_benefits(specs):
 #         net_pensions[i] = calc_pensions(exp, edu, 0, 2, specs)
 #
 #     unemployment_benefits = (
-#         np.ones_like(exp_levels) * specs["unemployment_benefits"] * 12
+#         np.ones_like(exp_levels) * specs["monthly_unemployment_benefits"] * 12
 #     )
 #
 #     fig, ax = plt.subplots()

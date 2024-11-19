@@ -6,15 +6,14 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --time=02:00:00
-#SBATCH --mem=15GB
+#SBATCH --mem=20GB
+#SBATCH --partition=scavenger
+#SBATCH --gres=gpu:a5000:1
 #SBATCH --qos=standard
 
-module add Anaconda3/2022.05
+module add Python/3.12.3-GCCcore-13.3.0
 module add CUDA/12.0.0
 
-module add Python/3.12.3-GCCcore-13.3.0
 source ~/virts/bin/activate
 
-conda activate policy_uncertainty
-
-python run_estimation.py
+python run_model_est.py

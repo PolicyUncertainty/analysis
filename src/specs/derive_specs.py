@@ -4,6 +4,7 @@ import pandas as pd
 import yaml
 from specs.family_specs import predict_children_by_state
 from specs.family_specs import read_in_partner_transition_specs
+from specs.health_specs import read_in_health_transition_specs
 from specs.income_specs import add_income_specs
 
 
@@ -22,6 +23,12 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
         specs["partner_trans_mat"],
         specs["n_partner_states"],
     ) = read_in_partner_transition_specs(path_dict, specs)
+
+    # Read in health transition matrix
+    (
+        specs["health_trans_mat"],
+        specs["n_health_states"],
+    ) = read_in_health_transition_specs(path_dict, specs)
 
     # Set initial experience
     specs["max_init_experience"], specs["max_experience"] = create_max_experience(

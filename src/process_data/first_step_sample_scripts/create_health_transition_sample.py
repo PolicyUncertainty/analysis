@@ -1,22 +1,25 @@
 # %%
 import os
 
+import numpy as np
 import pandas as pd
+from process_data.aux_scripts.filter_data import filter_above_age
 from process_data.aux_scripts.filter_data import filter_below_age
 from process_data.aux_scripts.filter_data import filter_by_sex
 from process_data.aux_scripts.filter_data import filter_years
 from process_data.aux_scripts.lagged_and_lead_vars import span_dataframe
 from process_data.soep_vars.education import create_education_type
-from process_data.soep_vars.partner_code import create_partner_state
+from process_data.soep_vars.health import clean_health_create_lagged_state
+from process_data.soep_vars.health import create_health_var
 
 
 # %%
-def create_partner_transition_sample(paths, specs, load_data=False):
+def create_health_transition_sample(paths, specs, load_data=False):
     if not os.path.exists(paths["intermediate_data"]):
         os.makedirs(paths["intermediate_data"])
 
     out_file_path = (
-        paths["intermediate_data"] + "partner_transition_estimation_sample.pkl"
+        paths["intermediate_data"] + "health_transition_estimation_sample.pkl"
     )
 
     if load_data:
@@ -25,26 +28,29 @@ def create_partner_transition_sample(paths, specs, load_data=False):
 
     df = load_and_merge_soep_core(paths["soep_c38"])
 
-    df = create_education_type(df)
+    # Pre-Filter estimation years
+    df = filter_years(df, specs["start_year"] - 1, specs["end_year"] + 1)
 
-    # Filter estimation years
-    df = filter_years(df, specs["start_year"], specs["end_year"])
-
-    # In this function also merging is called
-    df = create_partner_and_lagged_state(df, specs)
-
-    # Filter age and sex
-    df = filter_below_age(df, specs["start_age"])
+    # Pre-Filter age and sex
+    df = filter_below_age(df, specs["start_age"] - specs["health_smoothing_bandwidth"])
+    df = filter_above_age(df, specs["end_age"] + specs["health_smoothing_bandwidth"])
     df = filter_by_sex(df, no_women=False)
 
-    df = df[
-        ["age", "sex", "education", "partner_state", "lagged_partner_state", "children"]
-    ]
+    # Create education type
+    df = create_education_type(df)
+
+    # create health states
+    df = create_health_var(df)
+    df = span_dataframe(df, specs["start_year"] - 1, specs["end_year"] + 1)
+    df = clean_health_create_lagged_state(df)
+
+    df = df[["age", "education", "health_state", "lead_health_state"]]
 
     print(
         str(len(df))
-        + " observations in the final partner transition sample.  \n ----------------"
+        + " observations in the final health transition sample.  \n ----------------"
     )
+
     df.to_pickle(out_file_path)
     return df
 
@@ -69,33 +75,17 @@ def load_and_merge_soep_core(soep_c38_path):
         convert_categoricals=False,
     )
     pequiv_data = pd.read_stata(
-        # d11107: number of children in household
+        # m11126: Self-Rated Health Status
+        # m11124: Disability Status of Individual
         f"{soep_c38_path}/pequiv.dta",
-        columns=["pid", "syear", "d11107"],
+        columns=["pid", "syear", "m11126", "m11124"],
+        convert_categoricals=False,
     )
     merged_data = pd.merge(
         pgen_data, ppathl_data, on=["pid", "hid", "syear"], how="inner"
     )
     merged_data = pd.merge(merged_data, pequiv_data, on=["pid", "syear"], how="inner")
-    merged_data.rename(columns={"d11107": "children"}, inplace=True)
     merged_data["age"] = merged_data["syear"] - merged_data["gebjahr"]
     merged_data.set_index(["pid", "syear"], inplace=True)
     print(str(len(merged_data)) + " observations in SOEP C38 core.")
     return merged_data
-
-
-def create_partner_and_lagged_state(df, specs):
-    # The following code is dependent on span dataframe being called first.
-    # In particular the lagged partner state must be after span dataframe and create partner state.
-    # We should rewrite this
-    df = span_dataframe(df, specs["start_year"]+1, specs["end_year"]+1)
-
-    df = create_partner_state(df)
-    df["lagged_partner_state"] = df.groupby(["pid"])["partner_state"].shift()
-    df = df[df["lagged_partner_state"].notna()]
-    df = df[df["partner_state"].notna()]
-    print(
-        str(len(df))
-        + " observations after dropping people with a partner whose choice is not observed."
-    )
-    return df

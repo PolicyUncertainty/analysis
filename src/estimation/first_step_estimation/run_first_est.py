@@ -10,6 +10,7 @@ input_str = input(
     "\n   - [p]artner wage"
     "\n   - [j]ob separation"
     "\n   - family [t]ransition"
+    "\n   - [h]ealth transition"
     "\n   - [i]nformed state transition"
 )
 # Set define user only to true if estimate SRA process as we need raw soep data there
@@ -67,6 +68,14 @@ if input_str == "t":
 
     estimate_partner_transitions(paths_dict, specs)
     estimate_nb_children(paths_dict, specs)
+
+if input_str == "h":
+    # Estimate health transitions
+    from estimation.first_step_estimation.est_health_transition import (
+        estimate_health_transitions,
+    )
+
+    estimate_health_transitions(paths_dict, specs)
 
 
 if input_str == "i":

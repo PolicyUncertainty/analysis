@@ -8,7 +8,7 @@ from model_code.utility.utility_functions import utility_func
 
 
 def plot_utility(params, specs):
-    consumption = np.linspace(0.01, 1, 100)
+    consumption = np.linspace(5_000, 100_000, 1000) / specs["wealth_unit"]
     partner_state = np.array(1)
     education = 1
     period = 35

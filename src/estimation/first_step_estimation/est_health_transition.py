@@ -1,7 +1,6 @@
-# Description: This file estimates the parameters of the health transition matrix using the SOEP panel data.
-# For each education level and age, we estimate P(health_state_(t+1)=a| health_state_t=b, education=c, age_t) non-parametrically.
 import numpy as np
 import pandas as pd
+from scipy.stats import norm  # Import norm from scipy.stats for the Gaussian kernel
 from specs.derive_specs import read_and_derive_specs
 
 
@@ -18,14 +17,32 @@ def estimate_health_transitions(paths_dict, specs):
         u = distance / bandwidth
         return 0.75 * (1 - u**2) * (np.abs(u) <= 1)
 
-    # Function to calculate the weighted mean using the Epanechnikov kernel (uses lead_health_state)
-    def kernel_weighted_mean(df, target_age, bandwidth):
-        age_distances = np.abs(df["age"] - target_age)
-        weights = epanechnikov_kernel(age_distances, bandwidth)
-        return np.sum(weights * df["lead_health_state"]) / np.sum(weights)
+    # Define the Gaussian kernel function
+    def gaussian_kernel(distance, bandwidth):
+        # Scale the distance by the bandwidth and use the Gaussian pdf
+        return norm.pdf(distance / bandwidth)
+
+    # Function to calculate the weighted mean using a specified kernel
+    def kernel_weighted_mean(df, target_age, bandwidth, kernel_type):
+        age_distances = np.abs(df['age'] - target_age)
+        if kernel_type == 'epanechnikov':
+            weights = epanechnikov_kernel(age_distances, bandwidth)
+        elif kernel_type == 'gaussian':
+            weights = gaussian_kernel(age_distances, bandwidth)
+        else:
+            raise ValueError("Invalid kernel type. Use 'epanechnikov' or 'gaussian'.")
+        
+        return np.sum(weights * df['lead_health_state']) / np.sum(weights)
 
     # Parameters
+    kernel_type = specs.get("health_kernel_type", "epanechnikov")  # Default to Epanechnikov
     bandwidth = specs["health_smoothing_bandwidth"]
+    
+    # Adjust bandwidth for Gaussian kernel to ensure the desired probability mass
+    if kernel_type == "gaussian":
+        # Compute the bandwidth such that the Gaussian CDF from -infinity to -5 is approximately 1%
+        bandwidth = bandwidth / norm.ppf(0.99)
+
     ages = np.arange(specs["start_age"], specs["end_age"] + 1)
 
     # Calculate the smoothed probabilities for each education level and health transition to transition to the lead_health_state
@@ -38,6 +55,7 @@ def estimate_health_transitions(paths_dict, specs):
                 ],
                 age,
                 bandwidth,
+                kernel_type
             )
             for age in ages
         ]

@@ -61,6 +61,7 @@ max_birth_year: 2000
 # Health process estimation parameters
 # smoothing bandwidth for weighted moving average (half of age range used to smooth)
 health_smoothing_bandwidth: 5
+health_kernel_type: "gaussian" # type of kernel used for smoothing
 
 
 ###############################################################################

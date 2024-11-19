@@ -13,7 +13,7 @@ def calc_labor_income_after_ssc(
         income_shock=income_shock,
         options=options,
     )
-    labor_income_after_ssc = calc_after_ssc_income_worker(gross_labor_income, options)
+    labor_income_after_ssc = calc_after_ssc_income_worker(gross_labor_income)
     return labor_income_after_ssc
 
 
@@ -47,7 +47,5 @@ def calculate_gross_labor_income(
     yearly_min_wage_ft = options["yearly_min_wage_ft"]
     yearly_min_wage = yearly_min_wage_pt * pt_work + yearly_min_wage_ft * ft_work
 
-    labor_income_min_checked = jnp.maximum(
-        labour_income / options["wealth_unit"], yearly_min_wage
-    )
+    labor_income_min_checked = jnp.maximum(labour_income, yearly_min_wage)
     return labor_income_min_checked

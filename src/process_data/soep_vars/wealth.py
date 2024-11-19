@@ -48,7 +48,7 @@ def gather_wealth_data(soep_c38_path, merged_data, options):
 
     # rename to "wealth" and change unit to 1000s of euros
     wealth_data_full.rename(columns={"w011ha": "wealth"}, inplace=True)
-    wealth_data_full["wealth"] = wealth_data_full["wealth"] / options["wealth_unit"]
+    wealth_data_full["wealth"] = wealth_data_full["wealth"]
 
     merged_data = merged_data.merge(wealth_data_full, on=["hid", "syear"], how="left")
 

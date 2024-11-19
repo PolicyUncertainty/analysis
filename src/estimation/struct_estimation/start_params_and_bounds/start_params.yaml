@@ -1,5 +1,5 @@
 # Utility parameters
-mu: 0.8
+mu: 1.5
 dis_util_not_retired_low: 1.0
 dis_util_working_low: 0.3
 dis_util_not_retired_high: 1.0

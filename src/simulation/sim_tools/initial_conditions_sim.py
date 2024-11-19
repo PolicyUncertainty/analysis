@@ -36,8 +36,8 @@ def generate_start_states(path_dict, params, model, n_agents, seed):
 
     model_params = model["options"]["model_params"]
     min_unemployment_benefits = (
-        model_params["unemployment_benefits"]
-        + model_params["unemployment_benefits_housing"]
+        model_params["monthly_unemployment_benefits"]
+        + model_params["monthly_unemployment_benefits_housing"]
     ) * 12
     wealth_agents = np.empty(n_agents, np.float64)
     for edu in edu_shares.index:

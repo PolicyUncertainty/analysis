@@ -13,9 +13,7 @@ def calc_pensions_after_ssc(
         education=education,
         options=options,
     )
-    retirement_income = calc_after_ssc_income_pensioneer(
-        retirement_income_gross, options
-    )
+    retirement_income = calc_after_ssc_income_pensioneer(retirement_income_gross)
     return retirement_income
 
 
@@ -26,7 +24,9 @@ def calc_gross_pension_income(experience_years, education, options):
     total_pension_points = calc_total_pension_points(
         education=education, experience_years=experience_years, options=options
     )
-    retirement_income_gross = options["ppv"] * total_pension_points * 12
+    retirement_income_gross = (
+        options["yearly_pension_point_value"] * total_pension_points * 12
+    )
     return retirement_income_gross
 
 

@@ -11,16 +11,16 @@ def calc_unemployment_benefits(savings, education, has_partner_int, period, opti
     # Unemployment benefits for children living in the household
     nb_children = options["children_by_state"][0, education, has_partner_int, period]
     unemployment_benefits_children = (
-        nb_children * options["yearly_child_unemployment_benefits"]
+        nb_children * options["annual_child_unemployment_benefits"]
     )
 
     # Unemployment benefits for adults living in the household
     unemployment_benefits_adults = (1 + has_partner_int) * options[
-        "yearly_unemployment_benefits"
+        "annual_unemployment_benefits"
     ]
     # For housing, second adult gets only half
     unemployment_benefits_housing = (1 + 0.5 * has_partner_int) * options[
-        "yearly_unemployment_benefits_housing"
+        "annual_unemployment_benefits_housing"
     ]
 
     # Total unemployment benefits

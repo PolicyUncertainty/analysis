@@ -16,8 +16,8 @@ def plot_incomes(path_dict):
 
     exp_levels = np.arange(0, 50)
 
-    yearly_unemployment = specs["monthly_unemployment_benefits"] * 12
-    unemployment_benefits = np.ones_like(exp_levels) * yearly_unemployment
+    annual_unemployment = specs["monthly_unemployment_benefits"] * 12
+    unemployment_benefits = np.ones_like(exp_levels) * annual_unemployment
 
     labels = ["Low Education", "High Education"]
     fig, axes = plt.subplots(1, 2, figsize=(10, 5))
@@ -78,14 +78,14 @@ def plot_incomes(path_dict):
                 calc_gross_pension_income(
                     experience_years=exp, education=edu, options=specs
                 ),
-                yearly_unemployment,
+                annual_unemployment,
             )
 
             net_pensions[i] = np.maximum(
                 calc_pensions_after_ssc(
                     experience_years=exp, education=edu, options=specs
                 ),
-                yearly_unemployment,
+                annual_unemployment,
             )
 
         ax.plot(
@@ -186,7 +186,7 @@ def plot_partner_wage(paths_dict, specs):
     start_age = specs["start_age"]
 
     wage_data = df.groupby(["sex", "education", "age"])["wage_p"].mean()
-    partner_wage_est = specs["yearly_partner_wage"]
+    partner_wage_est = specs["annual_partner_wage"]
 
     fig, ax = plt.subplots()
     # Only plot until 70

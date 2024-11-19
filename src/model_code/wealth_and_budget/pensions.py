@@ -25,7 +25,7 @@ def calc_gross_pension_income(experience_years, education, options):
         education=education, experience_years=experience_years, options=options
     )
     retirement_income_gross = (
-        options["yearly_pension_point_value"] * total_pension_points * 12
+        options["annual_pension_point_value"] * total_pension_points
     )
     return retirement_income_gross
 

@@ -16,8 +16,8 @@ def plot_incomes(path_dict):
 
     exp_levels = np.arange(0, 50)
 
-    yearly_unemployment = specs["unemployment_benefits"] * 12
-    unemployment_benefits = np.ones_like(exp_levels) * yearly_unemployment
+    annual_unemployment = specs["annual_unemployment_benefits"]
+    unemployment_benefits = np.ones_like(exp_levels) * annual_unemployment
 
     labels = ["Low Education", "High Education"]
     fig, axes = plt.subplots(1, 2, figsize=(10, 5))
@@ -25,7 +25,6 @@ def plot_incomes(path_dict):
     # Now loop over education to generate specific net and gross wages and pensions
     for edu in range(specs["n_education_types"]):
         ax = axes[edu]
-        ax.set_ylim([0, 100])
 
         ax.plot(
             exp_levels,
@@ -78,14 +77,14 @@ def plot_incomes(path_dict):
                 calc_gross_pension_income(
                     experience_years=exp, education=edu, options=specs
                 ),
-                yearly_unemployment,
+                annual_unemployment,
             )
 
             net_pensions[i] = np.maximum(
                 calc_pensions_after_ssc(
                     experience_years=exp, education=edu, options=specs
                 ),
-                yearly_unemployment,
+                annual_unemployment,
             )
 
         ax.plot(
@@ -167,11 +166,13 @@ def plot_total_income(specs):
                         options=specs,
                     )
                 axs[edu_val, married_val].plot(
-                    exp_levels, total_income, label=f"{work_label}"
+                    exp_levels,
+                    total_income * specs["wealth_unit"],
+                    label=f"{work_label}",
                 )
             axs[edu_val, married_val].set_title(f"{edu_label} and {married_label}")
             axs[edu_val, married_val].set_xlabel("Period equals experience")
-            axs[edu_val, married_val].set_ylim([0, 80])
+            # axs[edu_val, married_val].set_ylim([0, 80])
             axs[edu_val, married_val].legend()
 
     fig.suptitle("Total income")
@@ -186,7 +187,7 @@ def plot_partner_wage(paths_dict, specs):
     start_age = specs["start_age"]
 
     wage_data = df.groupby(["sex", "education", "age"])["wage_p"].mean()
-    partner_wage_est = specs["partner_wage"] * specs["wealth_unit"] * 12
+    partner_wage_est = specs["annual_partner_wage"]
 
     fig, ax = plt.subplots()
     # Only plot until 70
@@ -252,7 +253,7 @@ def plot_child_benefits(specs):
 #         net_pensions[i] = calc_pensions(exp, edu, 0, 2, specs)
 #
 #     unemployment_benefits = (
-#         np.ones_like(exp_levels) * specs["unemployment_benefits"] * 12
+#         np.ones_like(exp_levels) * specs["monthly_unemployment_benefits"] * 12
 #     )
 #
 #     fig, ax = plt.subplots()

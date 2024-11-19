@@ -24,16 +24,19 @@ max_ret_age: 72
 # Assume that part time gives half a year of experience
 exp_increase_part_time: 0.5
 
-# Parameters of the policy environment
-unemployment_benefits: 0.35
-unemployment_benefits_housing: 0.3
-unemployment_wealth_thresh: 10.5
-child_unemployment_benefits: 0.25
-child_benefit: 0.184
-min_wage: 1.36
+# Parameters of the policy environment:
+# Start with unemployment benefits
+monthly_unemployment_benefits: 350
+monthly_unemployment_benefits_housing: 300
+monthly_child_unemployment_benefits: 250
+# Wealth threshold, above which unemployment benefits are not paid
+unemployment_wealth_thresh: 10_500
+# Now additional parameters for working and retirement
+monthly_child_benefits: 184
+monthly_min_wage: 1360
 early_retirement_penalty: 0.036
-pension_point_value_west_2010: 27.20
-pension_point_value_east_2010: 24.13
+monthly_pension_point_value_west_2010: 27.20
+monthly_pension_point_value_east_2010: 24.13
 
 ###############################################################################
 # Data preparation
@@ -44,7 +47,7 @@ end_year: 2017  # end year of estimation sample
 # Wage process estimation (uses same start and end year)
 wage_trunc_low_perc: 0.01  # lower truncation of wage distribution
 wage_trunc_high_perc: 0.99  # upper truncation of wage distribution
-wealth_unit: 10000  # unit of wealth in data
+wealth_unit: 1_000  # unit of wealth in data
 ###############################################
 # Belief process estimation
 # Limits for truncation of the normal distribution

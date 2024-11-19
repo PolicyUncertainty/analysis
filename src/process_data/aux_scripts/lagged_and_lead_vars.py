@@ -3,8 +3,8 @@ import pandas as pd
 
 
 def span_dataframe(df, start_year, end_year):
-    """This function spans the DataFrame over the whole observation period from start_year to end_year, to
-    create lagged and lead variables."""
+    """This function spans the DataFrame over the whole observation period from
+    start_year to end_year, to create lagged and lead variables."""
     # Create full index with all possible combinations of pid and syear. Otherwise if
     # we just shift the data, people having missing years in their observations get
     # assigned variables from multi years back.
@@ -28,7 +28,9 @@ def create_lagged_and_lead_variables(merged_data, specs):
     """This function creates the lagged choice variable and drops missing lagged
     choices."""
 
-    full_container = span_dataframe(merged_data, specs)
+    full_container = span_dataframe(
+        merged_data, specs["start_year"] - 1, specs["end_year"] + 1
+    )
 
     full_container["lagged_choice"] = full_container.groupby(["pid"])["choice"].shift()
     full_container["job_sep_this_year"] = full_container.groupby(["pid"])[

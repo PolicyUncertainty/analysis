@@ -8,7 +8,7 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
 
-kind_string = input("Execute [pre]- or [post]-estimation plots? (pre/post) ")
+kind_string = input("Execute [pre]- or [post]-estimation plots? (pre/post)\n")
 
 if kind_string == "pre":
     from estimation.struct_estimation.start_params_and_bounds.set_start_params import (

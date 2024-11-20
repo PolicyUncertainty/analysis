@@ -21,9 +21,7 @@ def plot_healthy_unhealthy(paths_dict, specs):
     df = pd.read_pickle(paths_dict["intermediate_data"] + "health_transition_estimation_sample.pkl")
 
     # Calculate the smoothed shares for healthy individuals
-    edu_shares_healthy = df.groupby(["education", "age"])["health_state"].mean().rolling(
-        window=specs["health_smoothing_bandwidth"], center=True
-    ).mean().loc[slice(None), slice(start_age, end_age)]
+    edu_shares_healthy = df.groupby(["education", "age"])["health_state"].mean().loc[slice(None), slice(start_age, end_age)]
 
     # Initialize the distribution
     initial_dist = np.zeros(specs["n_health_states"])

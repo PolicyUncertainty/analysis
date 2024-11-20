@@ -36,6 +36,7 @@ model, start_params_all = specify_model(
     policy_state_trans_func=expected_SRA_probs_estimation,
     params=start_params_all,
     load_model=True,
+    model_type="solution",
 )
 
 data_decision, states_dict = load_and_prep_data_for_model_fit(

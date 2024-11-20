@@ -141,6 +141,7 @@ def specify_and_solve_model(
         policy_state_trans_func=policy_state_trans_func,
         params=params,
         load_model=load_model,
+        model_type="solution",
     )
 
     solution_file = path_dict["intermediate_data"] + (

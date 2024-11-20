@@ -31,10 +31,10 @@ def estimate_model(
     start_params_all = load_and_set_start_params(path_dict)
     # # Assign start params from before
     last_temp = pkl.load(
-        open(path_dict["intermediate_data"] + "estimation_cet_par/params_0.pkl", "rb")
+        open(path_dict["est_results"] + "est_params_cet_par.pkl", "rb")
     )
     start_params_all.update(last_temp)
-    start_params_all["bequest_scale"] = 1
+
     start_params = {name: start_params_all[name] for name in params_to_estimate_names}
 
     lower_bounds_all = yaml.safe_load(
@@ -104,6 +104,7 @@ class est_class_from_paths:
             update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
             policy_state_trans_func=expected_SRA_probs_estimation,
             load_model=load_model,
+            model_type="solution",
         )
 
         # Load data
@@ -192,7 +193,7 @@ def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):
     specs = generate_derived_and_data_derived_specs(path_dict)
     # Load data
     data_decision = pd.read_pickle(path_dict["struct_est_sample"])
-    # We need to filter observations in period 0 because of job offer weighting
+    # We need to filter observations in period 0 because of job offer weighting from last period
     data_decision = data_decision[data_decision["period"] > 0]
     # Also already retired individuals hold no identification
     if drop_retirees:

@@ -12,6 +12,7 @@ from process_data.soep_vars.job_hire_and_fire import generate_job_separation_var
 from process_data.soep_vars.partner_code import create_partner_state
 from process_data.soep_vars.wealth import add_wealth
 from process_data.soep_vars.work_choices import create_choice_variable
+from process_data.structural_sample_scripts.informed_state import create_informed_state
 from process_data.structural_sample_scripts.model_restrictions import (
     enforce_model_choice_restriction,
 )
@@ -64,6 +65,9 @@ def create_structural_est_sample(paths, specs, load_data=False):
     # additional restrictions based on model setup
     df = enforce_model_choice_restriction(df, specs)
 
+    # Create informed state
+    df = create_informed_state(df)
+
     # Construct job offer state
     was_fired_last_period = df["job_sep_this_year"] == 1
     df = determine_observed_job_offers(
@@ -75,6 +79,7 @@ def create_structural_est_sample(paths, specs, load_data=False):
         "period": "int8",
         "choice": "int8",
         "lagged_choice": "int8",
+        "informed": "int8",
         "policy_state": "int8",
         "policy_state_value": "float32",
         "partner_state": "int8",

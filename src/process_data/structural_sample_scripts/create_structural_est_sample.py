@@ -88,7 +88,6 @@ def create_structural_est_sample(paths, specs, load_data=False):
         "wealth": "float32",
         "education": "int8",
         "children": "int8",
-        "full_observed_state": "bool",
     }
     df = df[list(type_dict.keys())]
     df = df.astype(type_dict)

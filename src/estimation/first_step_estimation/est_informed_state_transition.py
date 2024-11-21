@@ -50,7 +50,8 @@ def calibrate_uninformed_hazard_rate(paths, specs):
         edu_moments[edu_label] = observed_informed_shares
 
         # Predict shares
-        ages_to_predict = observed_informed_shares.index.values
+        initial_age = df_restricted["age"].min()
+        ages_to_predict = np.arange(initial_age, specs["max_ret_age"] + 1)
         predicted_shares[edu_label] = predicted_shares_by_age(
             params[edu_label].values, ages_to_predict
         )
@@ -110,7 +111,8 @@ def fit_moments(moments, weights):
     params_guess = np.array([0.1, 0.01])
     partial_obj = partial(objective_function, moments=moments, weights=weights)
     result = minimize(fun=partial_obj, x0=params_guess, method="BFGS")
-    return result.x
+    params = pd.Series(index=["initial_informed_share", "hazard_rate"], data=result.x)
+    return params
 
 
 def objective_function(params, moments, weights):
@@ -122,23 +124,26 @@ def objective_function(params, moments, weights):
 
 
 def predicted_shares_by_age(params, ages_to_predict):
+    age_span = np.arange(ages_to_predict.min(), ages_to_predict.max() + 1)
     # The next line could be more complicated with age specific hazard rates
     # For now we use constant
     hazard_rate = params[1]
-    predicted_hazard_rate = hazard_rate * np.ones_like(ages_to_predict, dtype=float)
+    predicted_hazard_rate = hazard_rate * np.ones_like(age_span, dtype=float)
 
-    informed_shares = np.zeros_like(ages_to_predict, dtype=float)
+    informed_shares = np.zeros_like(age_span, dtype=float)
     initial_informed_share = params[0]
     informed_shares[0] = initial_informed_share
     uninformed_shares = 1 - informed_shares
 
-    for period in range(1, len(ages_to_predict)):
+    for period in range(1, len(age_span)):
         uninformed_shares[period] = uninformed_shares[period - 1] * (
             1 - predicted_hazard_rate[period - 1]
         )
         informed_shares[period] = 1 - uninformed_shares[period]
 
-    relevant_shares = pd.Series(index=ages_to_predict, data=informed_shares)
+    relevant_shares = pd.Series(index=age_span, data=informed_shares).loc[
+        ages_to_predict
+    ]
     return relevant_shares
 
 

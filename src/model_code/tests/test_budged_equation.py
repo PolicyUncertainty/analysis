@@ -274,7 +274,7 @@ def test_retiree(
         policy_state=29,
         education=education,
         experience=exp_cont_last_period,
-        informed_state=0,
+        informed=0,
         options=specs_internal,
     )
     # Check that experience does not get updated or added any penalty
@@ -371,8 +371,8 @@ def test_fresh_retiree(
     exp,
     policy_state,
     paths_and_specs,
-    informed_state=0,
 ):
+    informed_state = 0
     path_dict, specs_internal = paths_and_specs
 
     actual_retirement_age = specs_internal["start_age"] + period - 1
@@ -387,7 +387,7 @@ def test_fresh_retiree(
         policy_state=policy_state,
         education=education,
         experience=exp_cont_prev,
-        informed_state=0,
+        informed=0,
         options=specs_internal,
     )
 

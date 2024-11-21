@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import norm  # Import norm from scipy.stats for the Gaussian kernel
 from specs.derive_specs import read_and_derive_specs
+import statsmodels.formula.api as smf
 
 
 def estimate_health_transitions(paths_dict, specs):
@@ -100,6 +101,56 @@ def estimate_health_transitions(paths_dict, specs):
     health_transition_matrix = pd.concat(
         [pd.DataFrame(row) for row in rows], ignore_index=True
     )
+
+    # Save the results to a CSV file
+    out_file_path = paths_dict["est_results"] + "health_transition_matrix.csv"
+    health_transition_matrix.to_csv(out_file_path, index=False)
+
+    return health_transition_matrix
+
+def estimate_health_transitions_parametric(paths_dict, specs):
+    """Estimate the health state transition with logit regression model"""
+    # Load the data
+    transition_data = pd.read_pickle(
+        paths_dict["intermediate_data"] + "health_transition_estimation_sample.pkl"
+    )
+    # Parameters
+    ages = np.arange(specs["start_age"], specs["end_age"] + 1)
+
+    # Compute transition probabilities
+    health_transition_matrix = pd.DataFrame()
+    for education in [1, 0]:
+        for health_state in [1, 0]:
+                # Filter the data
+                data = transition_data[
+                    (transition_data["education"] == education)
+                    & (transition_data["health_state"] == health_state)
+                ]
+
+                # Fit the logit model
+                y_var = "lead_health_state"
+                x_vars = ["age"]
+                formula = y_var + " ~ " + " + ".join(x_vars)
+                model = smf.logit(formula=formula, data=data)
+                result = model.fit()
+
+                # Compute the transition probabilities
+                transition_probabilities = result.predict(pd.DataFrame({"age": ages}))
+
+                health_transition_matrix = pd.concat(
+                    [
+                        health_transition_matrix,
+                        pd.DataFrame(
+                            {
+                                "education": education,
+                                "period": ages - specs["start_age"],
+                                "health_state": health_state,
+                                "prob_transition_to_healthy": transition_probabilities,
+                            }
+                        ),
+                    ],
+                    ignore_index=True,
+                )
 
     # Save the results to a CSV file
     out_file_path = paths_dict["est_results"] + "health_transition_matrix.csv"

@@ -30,3 +30,8 @@ dis_util_pt_work_low           1.078573
 job_finding_logit_const        0.681307
 job_finding_logit_age         -0.017918
 job_finding_logit_high_educ    0.595060
+
+
+informed est:
+ll_0: 0.035441545519867175
+ll_1: 0.047253457147444375

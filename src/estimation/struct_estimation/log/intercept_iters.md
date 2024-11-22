@@ -30,3 +30,17 @@ dis_util_pt_work_low           1.078573
 job_finding_logit_const        0.681307
 job_finding_logit_age         -0.017918
 job_finding_logit_high_educ    0.595060
+
+Name: norm (mu=1.5, lambda=1)
+Status: converged
+LL-value: 13832.510143143812
+
+dis_util_unemployed_high       3.557353
+dis_util_pt_work_high          4.810713
+dis_util_ft_work_high          1.507102
+dis_util_unemployed_low        2.492110
+dis_util_ft_work_low           1.300713
+dis_util_pt_work_low           4.531901
+job_finding_logit_const        0.680472
+job_finding_logit_age         -0.040074
+job_finding_logit_high_educ    0.534381

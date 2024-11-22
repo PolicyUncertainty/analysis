@@ -28,7 +28,7 @@ params_to_estimate_names = [
 estimation_results = estimate_model(
     paths_dict,
     params_to_estimate_names=params_to_estimate_names,
-    file_append="all_free",
+    file_append="cet_par",
     slope_disutil_method=False,
     load_model=True,
 )

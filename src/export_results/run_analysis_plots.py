@@ -25,7 +25,7 @@ else:
 # %%###################################
 # Health chracteristics
 ######################################
-exec_health = input("Exectue Health characteristics? (y/n) ") == "y"
+exec_health = input("Execute Health characteristics? (y/n) ") == "y"
 if exec_health:
     from export_results.figures.expected_health import (
         plot_healthy_unhealthy,

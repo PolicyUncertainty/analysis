@@ -121,36 +121,57 @@ def estimate_health_transitions_parametric(paths_dict, specs):
     health_transition_matrix = pd.DataFrame()
     for education in [1, 0]:
         for health_state in [1, 0]:
-                # Filter the data
-                data = transition_data[
-                    (transition_data["education"] == education)
-                    & (transition_data["health_state"] == health_state)
-                ]
+                for lead_health_state in [1, 0]:
+                    if lead_health_state == 1:
+                        # Filter the data
+                        data = transition_data[
+                            (transition_data["education"] == education)
+                            & (transition_data["health_state"] == health_state)
+                        ]
 
-                # Fit the logit model
-                y_var = "lead_health_state"
-                x_vars = ["age"]
-                formula = y_var + " ~ " + " + ".join(x_vars)
-                model = smf.logit(formula=formula, data=data)
-                result = model.fit()
+                        # Fit the logit model
+                        y_var = "lead_health_state"
+                        x_vars = ["age"]
+                        formula = y_var + " ~ " + " + ".join(x_vars)
+                        model = smf.logit(formula=formula, data=data)
+                        result = model.fit()
 
-                # Compute the transition probabilities
-                transition_probabilities = result.predict(pd.DataFrame({"age": ages}))
+                        # Compute the transition probabilities
+                        transition_probabilities = result.predict(pd.DataFrame({"age": ages}))
 
-                health_transition_matrix = pd.concat(
-                    [
-                        health_transition_matrix,
-                        pd.DataFrame(
-                            {
-                                "education": education,
-                                "period": ages - specs["start_age"],
-                                "health_state": health_state,
-                                "prob_transition_to_healthy": transition_probabilities,
-                            }
-                        ),
-                    ],
-                    ignore_index=True,
-                )
+                        health_transition_matrix = pd.concat(
+                            [
+                                health_transition_matrix,
+                                pd.DataFrame(
+                                    {
+                                        "education": education,
+                                        "period": ages - specs["start_age"],
+                                        "health_state": health_state,
+                                        "lead_health_state": lead_health_state,
+                                        "transition_prob": transition_probabilities,
+                                    }
+                                ),
+                            ],
+                            ignore_index=True,
+                        )
+                    # for transition to unhealthy, we simply take the complement of the transition to healthy
+                    else: 
+                        health_transition_matrix = pd.concat(
+                            [
+                                health_transition_matrix,
+                                pd.DataFrame(
+                                    {
+                                        "education": education,
+                                        "period": ages - specs["start_age"],
+                                        "health_state": health_state,
+                                        "lead_health_state": lead_health_state,
+                                        "transition_prob": 1 - transition_probabilities,
+                                    }
+                                ),
+                            ],
+                            ignore_index=True,
+                        )    
+
 
     # Save the results to a CSV file
     out_file_path = paths_dict["est_results"] + "health_transition_matrix.csv"

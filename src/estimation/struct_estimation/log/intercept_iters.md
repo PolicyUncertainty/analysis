@@ -17,7 +17,7 @@ job_finding_logit_age         -0.019903
 job_finding_logit_high_educ    0.548088
 
 
-Name: ce_par (mu=0.8, lambda=0.29)
+Name: ce_par_old (mu=0.8, lambda=0.29)
 Status: converged
 LL-value: 17815.74493779643
 

@@ -58,6 +58,15 @@ def simulate_scenario(
         load_model=True,
     )
 
+    model_sim, params = specify_model(
+        path_dict=path_dict,
+        params=params,
+        update_spec_for_policy_state=update_spec_for_policy_state,
+        policy_state_trans_func=policy_state_func_scenario,
+        load_model=True,
+        model_type="simulation",
+    )
+
     options = model["options"]
 
     initial_states, wealth_agents = generate_start_states(
@@ -66,7 +75,7 @@ def simulate_scenario(
 
     sim_dict = simulate_all_periods(
         states_initial=initial_states,
-        resources_initial=wealth_agents,
+        wealth_initial=wealth_agents,
         n_periods=options["model_params"]["n_periods"],
         params=params,
         seed=seed,
@@ -74,6 +83,7 @@ def simulate_scenario(
         value_solved=expected_model["value"],
         policy_solved=expected_model["policy"],
         model=model,
+        model_sim=model_sim,
     )
     df = create_simulation_df(sim_dict)
     df["age"] = (

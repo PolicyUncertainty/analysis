@@ -19,7 +19,7 @@ def create_health_var(data):
 
     """
 
-    data = data[data["m11126"] >= 0] 
+    data = data[data["m11126"] >= 0]
     print(str(len(data)) + " observations left after dropping people with missing health data.")
     
     data = data[data["m11124"] >= 0] 

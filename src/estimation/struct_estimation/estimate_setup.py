@@ -25,15 +25,18 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
 def estimate_model(
-    path_dict, params_to_estimate_names, file_append, slope_disutil_method, load_model
+    path_dict,
+    params_to_estimate_names,
+    file_append,
+    slope_disutil_method,
+    load_model,
+    last_estimate=None,
 ):
     # Load start params and bounds
     start_params_all = load_and_set_start_params(path_dict)
-    # # Assign start params from before
-    last_temp = pkl.load(
-        open(path_dict["est_results"] + "est_params_cet_par.pkl", "rb")
-    )
-    start_params_all.update(last_temp)
+
+    if last_estimate is not None:
+        start_params_all.update(last_estimate)
 
     start_params = {name: start_params_all[name] for name in params_to_estimate_names}
 

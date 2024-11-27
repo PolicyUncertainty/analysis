@@ -19,7 +19,7 @@ if kind_string == "pre":
     params = load_and_set_start_params(path_dict)
 elif kind_string == "post":
     params = pickle.load(
-        open(path_dict["est_results"] + "est_params_cet_par.pkl", "rb")
+        open(path_dict["est_results"] + "est_params_no_weights.pkl", "rb")
     )
 else:
     raise ValueError("Either pre or post estimation plots.")

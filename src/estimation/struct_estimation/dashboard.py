@@ -21,7 +21,7 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 
 paths_dict = create_path_dict(define_user=False)
 
-file_append = "all_free"
+file_append = "no_weights"
 folder = f"log/estimation_{file_append}/"
 # folder = paths_dict["intermediate_data"] + f"estimation_{file_append}/"
 
@@ -44,20 +44,20 @@ data_decision, states_dict = load_and_prep_data_for_model_fit(
 )
 
 unobserved_state_specs = create_unobserved_state_specs(data_decision, model)
-log_object = pkl.load(open(folder + "solving_log_0.pkl", "rb"))
-params = pkl.load(open(folder + "params_0.pkl", "rb"))
+# log_object = pkl.load(open(folder + "solving_log_0.pkl", "rb"))
+params = pkl.load(open(folder + "params_1.pkl", "rb"))
 print(params)
-print(log_object["ll_value"])
-
-start_params_all.update(params)
-plot_observed_model_fit_choice_probs(
-    paths_dict,
-    specs,
-    data_decision,
-    states_dict,
-    model,
-    unobserved_state_specs,
-    start_params_all,
-    log_object["model_sol"],
-    save_folder=folder,
-)
+# print(log_object["ll_value"])
+#
+# start_params_all.update(params)
+# plot_observed_model_fit_choice_probs(
+#     paths_dict,
+#     specs,
+#     data_decision,
+#     states_dict,
+#     model,
+#     unobserved_state_specs,
+#     start_params_all,
+#     log_object["model_sol"],
+#     save_folder=folder,
+# )

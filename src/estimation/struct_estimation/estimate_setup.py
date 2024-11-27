@@ -115,7 +115,7 @@ class est_class_from_paths:
             path_dict, start_params_all, model, drop_retirees=True
         )
 
-        self.weights = data_decision["age_weights"].values
+        self.weights = np.ones_like(data_decision["age_weights"].values)
 
         # Create specs for unobserved states
         unobserved_state_specs = create_unobserved_state_specs(data_decision, model)

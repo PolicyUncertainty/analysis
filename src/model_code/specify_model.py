@@ -87,7 +87,7 @@ def specify_model(
         options["state_space"]["endogenous_states"]["informed"] = informed_states
         model_path = path_dict["intermediate_data"] + "model_spec_solution.pkl"
     elif model_type == "simulation":
-        options["state_space"]["exogenous_states"]["informed"] = {
+        options["state_space"]["exogenous_processes"]["informed"] = {
             "transition": informed_transition,
             "states": informed_states,
         }

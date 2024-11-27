@@ -19,6 +19,7 @@ def add_informed_process_specs(specs, path_dict):
 
     informed_hazard_rate = np.zeros(n_edu_types, dtype=float)
     uninformed_penalties = np.zeros(n_edu_types, dtype=float)
+    initial_shares = np.zeros(n_edu_types, dtype=float)
 
     # Get working ages and also number of working ages
     working_ages = np.arange(specs["start_age"], specs["max_ret_age"] + 1)
@@ -31,9 +32,13 @@ def add_informed_process_specs(specs, path_dict):
         informed_hazard_rate[edu_val] = df_informed_hazard_rate.loc[
             "hazard_rate", edu_label
         ]
+        initial_shares[edu_val] = df_informed_hazard_rate.loc[
+            "initial_informed_share", edu_label
+        ]
         informed_shares[:, edu_val] = df_predicted_shares.loc[working_ages, edu_label]
 
     specs["uninformed_early_retirement_penalty"] = jnp.asarray(uninformed_penalties)
     specs["informed_hazard_rate"] = jnp.asarray(informed_hazard_rate)
+    specs["initial_informed_shares"] = jnp.asarray(initial_shares)
     specs["informed_shares"] = jnp.asarray(informed_shares)
     return specs

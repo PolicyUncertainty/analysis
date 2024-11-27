@@ -3,6 +3,10 @@
 from set_paths import create_path_dict
 
 path_dict = create_path_dict()
+
+from specs.derive_specs import generate_derived_and_data_derived_specs
+
+specs = generate_derived_and_data_derived_specs(path_dict)
 # Import jax and set jax to work with 64bit
 import jax
 
@@ -27,7 +31,7 @@ from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 # Set specifications
 n_agents = 10000
 seeed = 123
-params = pickle.load(open(path_dict["est_results"] + "est_params.pkl", "rb"))
+params = pickle.load(open(path_dict["est_results"] + "est_params_no_weights.pkl", "rb"))
 
 # %%
 ###################################################################
@@ -43,8 +47,9 @@ data_sim = solve_and_simulate_scenario(
     simulate_update_specs_func=update_specs_for_step_function_scale_1,
     simulate_policy_trans_func=realized_policy_step_function,
     solution_exists=True,
-    file_append_sol="subj",
-    model_exists=True,
+    file_append_sol="no_weights",
+    sol_model_exists=True,
+    sim_model_exists=True,
 )
 data_sim.to_pickle(path_dict["intermediate_data"] + "sim_data/data_subj_scale_1.pkl")
 del data_sim
@@ -57,7 +62,7 @@ data_sim = solve_and_simulate_scenario(
     simulate_policy_trans_func=realized_policy_step_function,
     solution_exists=False,
     file_append_sol="scale_1",
-    model_exists=True,
+    sol_model_exists=True,
 )
 data_sim.to_pickle(path_dict["intermediate_data"] + "sim_data/data_real_scale_1.pkl")
 del data_sim
@@ -75,7 +80,7 @@ data_sim = solve_and_simulate_scenario(
     simulate_policy_trans_func=realized_policy_step_function,
     solution_exists=True,
     file_append_sol="subj",
-    model_exists=True,
+    sol_model_exists=True,
 )
 data_sim.to_pickle(path_dict["intermediate_data"] + "sim_data/data_no_increase.pkl")
 del data_sim
@@ -90,7 +95,7 @@ data_sim = solve_and_simulate_scenario(
     simulate_policy_trans_func=realized_policy_step_function,
     solution_exists=True,
     file_append_sol="subj",
-    model_exists=True,
+    sol_model_exists=True,
 )
 data_sim.to_pickle(path_dict["intermediate_data"] + "sim_data/data_incr_005.pkl")
 del data_sim
@@ -105,7 +110,7 @@ data_sim = solve_and_simulate_scenario(
     simulate_policy_trans_func=realized_policy_step_function,
     solution_exists=True,
     file_append_sol="subj",
-    model_exists=True,
+    sol_model_exists=True,
 )
 data_sim.to_pickle(path_dict["intermediate_data"] + "sim_data/data_incr_01.pkl")
 del data_sim

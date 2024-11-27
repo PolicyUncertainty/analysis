@@ -15,15 +15,16 @@ def solve_and_simulate_scenario(
     simulate_policy_trans_func,
     solution_exists,
     file_append_sol,
-    model_exists,
+    sol_model_exists=True,
+    sim_model_exists=True,
 ):
-    model_solution_est, model, params = specify_and_solve_model(
+    solution_est, model, params = specify_and_solve_model(
         path_dict=path_dict,
         params=params,
         update_spec_for_policy_state=solve_update_specs_func,
         policy_state_trans_func=solve_policy_trans_func,
         file_append=file_append_sol,
-        load_model=model_exists,
+        load_model=sol_model_exists,
         load_solution=solution_exists,
     )
     model_params = model["options"]["model_params"]
@@ -35,7 +36,12 @@ def solve_and_simulate_scenario(
         seed=model_params["seed"],
         update_spec_for_policy_state=simulate_update_specs_func,
         policy_state_func_scenario=simulate_policy_trans_func,
-        expected_model=model_solution_est,
+        solution=solution_est,
+        model_of_solution=model,
+        sim_model_exists=sim_model_exists,
+    )
+    data_sim["exp_years"] = data_sim["experience"] * (
+        model_params["max_init_experience"] + data_sim.index.get_level_values("period")
     )
     return data_sim
 
@@ -47,30 +53,23 @@ def simulate_scenario(
     params,
     update_spec_for_policy_state,
     policy_state_func_scenario,
-    expected_model,
+    solution,
+    model_of_solution,
+    sim_model_exists,
 ):
-    # Generate dcegm model for project specs
-    model, params = specify_model(
-        path_dict=path_dict,
-        params=params,
-        update_spec_for_policy_state=update_spec_for_policy_state,
-        policy_state_trans_func=policy_state_func_scenario,
-        load_model=True,
-    )
-
     model_sim, params = specify_model(
         path_dict=path_dict,
         params=params,
         update_spec_for_policy_state=update_spec_for_policy_state,
         policy_state_trans_func=policy_state_func_scenario,
-        load_model=True,
+        load_model=sim_model_exists,
         model_type="simulation",
     )
 
-    options = model["options"]
+    options = model_of_solution["options"]
 
     initial_states, wealth_agents = generate_start_states(
-        path_dict, params, model, n_agents, seed
+        path_dict, params, model_of_solution, n_agents, seed
     )
 
     sim_dict = simulate_all_periods(
@@ -79,10 +78,10 @@ def simulate_scenario(
         n_periods=options["model_params"]["n_periods"],
         params=params,
         seed=seed,
-        endog_grid_solved=expected_model["endog_grid"],
-        value_solved=expected_model["value"],
-        policy_solved=expected_model["policy"],
-        model=model,
+        endog_grid_solved=solution["endog_grid"],
+        value_solved=solution["value"],
+        policy_solved=solution["policy"],
+        model=model_of_solution,
         model_sim=model_sim,
     )
     df = create_simulation_df(sim_dict)

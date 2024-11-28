@@ -30,6 +30,7 @@ dependencies:
   - pip:
       - jax
       - jaxlib
+      - optimagic
 
       # Local installation of dcegm and package itself
       - -e .

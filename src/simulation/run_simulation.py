@@ -1,5 +1,6 @@
 # %%
 # Set paths of project
+import pandas as pd
 from set_paths import create_path_dict
 
 path_dict = create_path_dict()
@@ -38,7 +39,8 @@ params = pickle.load(open(path_dict["est_results"] + "est_params_no_weights.pkl"
 # Uncertainty counterfactual
 ###################################################################
 update_specs_for_step_function_scale_1 = create_update_function_for_scale(path_dict, 1)
-# # Create estimated model
+
+# Create estimated model
 data_sim = solve_and_simulate_scenario(
     path_dict=path_dict,
     params=params,
@@ -46,10 +48,10 @@ data_sim = solve_and_simulate_scenario(
     solve_policy_trans_func=expected_SRA_probs_estimation,
     simulate_update_specs_func=update_specs_for_step_function_scale_1,
     simulate_policy_trans_func=realized_policy_step_function,
-    solution_exists=True,
+    solution_exists=False,
     file_append_sol="no_weights",
-    sol_model_exists=True,
-    sim_model_exists=True,
+    sol_model_exists=False,
+    sim_model_exists=False,
 )
 data_sim.to_pickle(path_dict["intermediate_data"] + "sim_data/data_subj_scale_1.pkl")
 del data_sim

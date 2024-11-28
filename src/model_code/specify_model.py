@@ -87,6 +87,7 @@ def specify_model(
         },
         "model_params": specs,
     }
+    breakpoint()
     informed_states = np.arange(2, dtype=int)
     if model_type == "solution":
         options["state_space"]["endogenous_states"]["informed"] = informed_states

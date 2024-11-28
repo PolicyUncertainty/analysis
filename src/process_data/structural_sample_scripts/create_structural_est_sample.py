@@ -94,7 +94,6 @@ def create_structural_est_sample(paths, specs, load_data=False):
     df = df.astype(type_dict)
 
     print_data_description(df)
-    breakpoint()
     # Anonymize and save data
     df.reset_index(drop=True, inplace=True)
     df.to_pickle(out_file_path)
@@ -184,7 +183,8 @@ def print_data_description(df):
     print(str(len(df)) + " left in final estimation sample.")
     print("---------------------------")
     print(
-        "Breakdown by choice:\n" + str(n_retirees) + " retirees [0] \n"
+        "Breakdown by choice:\n" 
+        + str(n_retirees) + " retirees [0] \n"
         "--"
         + str(n_fresh_retirees)
         + " thereof fresh retirees [0, lagged =!= 0] \n"

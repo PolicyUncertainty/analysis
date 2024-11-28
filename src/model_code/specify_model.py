@@ -10,6 +10,7 @@ from model_code.state_space import sparsity_condition
 from model_code.stochastic_processes.informed_state_transition import (
     informed_transition,
 )
+from model_code.stochastic_processes.health_transition import health_transition
 from model_code.stochastic_processes.job_offers import job_offer_process_transition
 from model_code.stochastic_processes.partner_transitions import partner_transition
 from model_code.utility.bequest_utility import create_final_period_utility_functions
@@ -74,6 +75,10 @@ def specify_model(
                     "transition": partner_transition,
                     "states": np.arange(specs["n_partner_states"], dtype=int),
                 },
+                "health": {
+                    "transition": health_transition,
+                    "states": np.arange(specs["n_health_states"], dtype=int),
+                }
             },
             "continuous_states": {
                 "wealth": savings_grid,

@@ -17,6 +17,7 @@ string_in = input(
     \n- wage [p]artner
     \n- [j]ob separation
     \n- partner [t]ransition
+    \n- [h]ealth transition
     \n\n Please write the corresponding letter:"""
 )
 
@@ -39,6 +40,9 @@ from process_data.first_step_sample_scripts.create_job_sep_sample import (
 from process_data.first_step_sample_scripts.create_partner_transition_sample import (
     create_partner_transition_sample,
 )
+from process_data.first_step_sample_scripts.create_health_transition_sample import (
+    create_health_transition_sample,
+)
 
 
 if string_in == "a" or string_in == "s":
@@ -55,4 +59,7 @@ if string_in == "a" or string_in == "j":
 
 if string_in == "a" or string_in == "t":
     create_partner_transition_sample(paths_dict, specs=specs, load_data=False)
+    
+if string_in == "a" or string_in == "h":
+    create_health_transition_sample(paths_dict, specs=specs, load_data=False)
 # %%

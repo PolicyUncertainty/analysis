@@ -7,6 +7,8 @@ from scipy.stats import pareto
 
 
 def generate_start_states(path_dict, params, model, n_agents, seed):
+    specs = model["options"]["model_params"]
+
     observed_data = pd.read_pickle(
         path_dict["intermediate_data"] + "structural_estimation_sample.pkl"
     )
@@ -25,7 +27,7 @@ def generate_start_states(path_dict, params, model, n_agents, seed):
         name: start_period_data[name].values
         for name in model["model_structure"]["discrete_states_names"]
     }
-    states_dict["wealth"] = start_period_data["wealth"].values
+    states_dict["wealth"] = start_period_data["wealth"].values / specs["wealth_unit"]
     states_dict["experience"] = start_period_data["experience"].values
 
     start_period_data.loc[:, "adjusted_wealth"] = adjust_observed_wealth(
@@ -34,16 +36,11 @@ def generate_start_states(path_dict, params, model, n_agents, seed):
         model=model,
     )
 
-    model_params = model["options"]["model_params"]
-    min_unemployment_benefits = (
-        model_params["monthly_unemployment_benefits"]
-        + model_params["monthly_unemployment_benefits_housing"]
-    ) * 12
     wealth_agents = np.empty(n_agents, np.float64)
+    informed_agents = np.zeros(n_agents, np.uint8)
     for edu in edu_shares.index:
         n_agents_edu = n_agents_edu_types.loc[edu]
         start_period_data_edu = start_period_data[start_period_data["education"] == edu]
-        wealth_edu = start_period_data_edu["adjusted_wealth"].values
 
         # # From now use uniform from 30 to 70th quantile
         wealth_agents[edu_agents == edu] = np.random.uniform(
@@ -51,6 +48,14 @@ def generate_start_states(path_dict, params, model, n_agents, seed):
             start_period_data_edu["adjusted_wealth"].quantile(0.7),
             n_agents_edu,
         )
+
+        # Generate edu specific informed shares
+        informed_share_edu = specs["initial_informed_shares"][edu]
+        # Draw informed states according to inital distribution
+        dist = np.array([1 - informed_share_edu, informed_share_edu])
+        informed_draws_edu = np.random.choice(2, n_agents_edu, p=dist)
+        informed_agents[edu_agents == edu] = informed_draws_edu
+
         # if edu == 1:
         #     # Filter out high outliers for high
         #     wealth_edu = wealth_edu[wealth_edu < np.quantile(wealth_edu, 0.85)]
@@ -67,8 +72,9 @@ def generate_start_states(path_dict, params, model, n_agents, seed):
         # wealth_agents[edu_agents == edu] = pareto.rvs(shape_param, loc=loc_param, scale=fscale, size=n_agents_edu)
         # breakpoint()
 
+    max_init_experience = specs["max_init_experience"]
     # Generate experience
-    exp_agents = np.empty(n_agents, np.int16)
+    exp_agents = np.empty(n_agents, np.float64)
     for edu in edu_shares.index:
         n_agents_edu = n_agents_edu_types.loc[edu]
         start_period_data_edu = start_period_data[start_period_data["education"] == edu]
@@ -76,8 +82,9 @@ def generate_start_states(path_dict, params, model, n_agents, seed):
         exp_dist = start_period_data_edu["experience"].value_counts(normalize=True)
         grid_probs = pd.Series(index=np.arange(0, exp_max_edu + 1), data=0, dtype=float)
         grid_probs.update(exp_dist)
-        exp_agents[edu_agents == edu] = np.random.choice(
-            exp_max_edu + 1, size=n_agents_edu, p=grid_probs.values
+        exp_agents[edu_agents == edu] = (
+            np.random.choice(exp_max_edu + 1, size=n_agents_edu, p=grid_probs.values)
+            / max_init_experience
         )
 
     # Generate lagged choice. Assign everywhere 1 except where experience is 0
@@ -91,12 +98,13 @@ def generate_start_states(path_dict, params, model, n_agents, seed):
     partner_states = np.random.choice(3, n_agents, p=partner_probs)
 
     states = {
-        "period": jnp.zeros_like(exp_agents, dtype=jnp.int64),
-        "experience": jnp.array(exp_agents, dtype=jnp.int64),
-        "education": jnp.array(edu_agents, dtype=jnp.int64),
-        "lagged_choice": jnp.array(lagged_choice, dtype=jnp.int64),
-        "policy_state": jnp.zeros_like(exp_agents, dtype=jnp.int64) + 8,
-        "job_offer": jnp.ones_like(exp_agents, dtype=jnp.int64),
-        "partner_state": jnp.array(partner_states, dtype=jnp.int64),
+        "period": jnp.zeros_like(exp_agents, dtype=jnp.uint8),
+        "experience": jnp.array(exp_agents, dtype=jnp.float64),
+        "education": jnp.array(edu_agents, dtype=jnp.uint8),
+        "informed": jnp.array(informed_agents, dtype=jnp.uint8),
+        "lagged_choice": jnp.array(lagged_choice, dtype=jnp.uint8),
+        "policy_state": jnp.zeros_like(exp_agents, dtype=jnp.uint8) + 8,
+        "job_offer": jnp.ones_like(exp_agents, dtype=jnp.uint8),
+        "partner_state": jnp.array(partner_states, dtype=jnp.uint8),
     }
     return states, wealth_agents

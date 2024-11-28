@@ -8,7 +8,7 @@ def create_path_dict(define_user=False, user=None):
     jax.config.update("jax_enable_x64", True)
     if define_user:
         if user is None:
-            user = input("Enter user name ([b]runo/ [m]ax): ")
+            user = input("Enter user name ([b]runo / [m]ax / [g]regor): ")
         else:
             pass
 
@@ -16,6 +16,8 @@ def create_path_dict(define_user=False, user=None):
             data_path = "C:/Users/bruno/papers/soep/"
         elif user == "m":
             data_path = "/home/maxbl/Uni/pol_uncertainty/data/"
+        elif user == "g":
+            data_path = "/Users/gregorschuler/GitProjects/soep/"
         else:
             raise ValueError(
                 "Please specify valid USER in " "MASTER_prepare_structural_model.py."

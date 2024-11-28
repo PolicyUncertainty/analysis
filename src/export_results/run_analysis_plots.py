@@ -23,6 +23,23 @@ else:
 
 
 # %%###################################
+# Health chracteristics
+######################################
+exec_health = input("Exectue Health characteristics? (y/n) ") == "y"
+if exec_health:
+    from export_results.figures.expected_health import (
+        plot_healthy_unhealthy,
+        plot_health_transition_prob,
+    )
+
+    plot_healthy_unhealthy(path_dict, specs)
+    plt.show()
+    plot_health_transition_prob(specs)
+    plt.show()
+    plt.close("all")
+
+
+# %%###################################
 # Family chracteristics
 ######################################
 exec_family = input("Exectue family characteristics? (y/n) ") == "y"

@@ -1,8 +1,18 @@
+import jax
 import jax.numpy as jnp
 import numpy as np
 
 
-def realized_policy_step_function(policy_state, period, choice, options):
+def realized_policy_step_function(policy_state, period, lagged_choice, choice, options):
+    """This function yields the probability distribution of the next period's policy
+    state in the simulation. We employ a step function to follow the expected policy
+    state path.
+
+    If the person is already retired, the next policy state has to be the degenerate
+    state.
+
+    """
+
     # Check if the current period is a policy step period
     step_period = jnp.isin(period, options["policy_step_periods"])
     # Check if retirement is choosen
@@ -14,6 +24,15 @@ def realized_policy_step_function(policy_state, period, choice, options):
     id_next_period = step_period * (policy_state + 1) + (1 - step_period) * policy_state
     id_next_period = (
         retirement_bool * policy_state + (1 - retirement_bool) * id_next_period
+    )
+
+    # If the individual is already retired, the policy state moves to (or stays in)
+    # the degenrate state
+    already_retirement_bool = lagged_choice == 0
+    degenerate_state_id = jnp.array(options["n_policy_states"] - 1, dtype=jnp.uint8)
+
+    id_next_period = jax.lax.select(
+        already_retirement_bool, degenerate_state_id, id_next_period
     )
 
     # Now generate vector

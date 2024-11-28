@@ -6,7 +6,7 @@ import pandas as pd
 from scipy.optimize import minimize
 
 
-def calibrate_uninformed_hazard_rate(paths, options):
+def calibrate_uninformed_hazard_rate(paths, specs):
     """This functions calibrates the hazard rate of becoming informed for the uninformed
     individuals with method of (weighted) moments.
 
@@ -14,31 +14,59 @@ def calibrate_uninformed_hazard_rate(paths, options):
     age.
 
     """
-    out_file_path_rates = paths["est_results"] + "uninformed_hazard_rate.pkl"
-    out_file_path_belief = paths["est_results"] + "uninformed_average_belief.pkl"
 
-    df = open_dataset(paths)
-    df = restrict_dataset(df, options)
-    df = classify_informed(df, options)
-    params = pd.DataFrame(columns=df["education"].unique())
-    uninformed_beliefs = pd.DataFrame(columns=df["education"].unique())
+    out_file_path_rates = paths["est_results"] + "uninformed_hazard_rate.csv"
+    out_file_shares = paths["est_results"] + "predicted_shares.csv"
+    out_file_path_belief = paths["est_results"] + "uninformed_average_belief.csv"
+
+    df = open_and_filter_dataset(paths, specs)
+
+    # Classify informed individuals
+    df["informed"] = df["belief_pens_deduct"] <= specs["informed_threshhold"]
+    params = pd.DataFrame(columns=specs["education_labels"])
+    uninformed_beliefs = pd.DataFrame(
+        index=["erp_uninformed_belief"], columns=specs["education_labels"]
+    )
+    predicted_shares = pd.DataFrame(columns=specs["education_labels"])
+    edu_moments = pd.DataFrame(columns=specs["education_labels"])
+
     # calibrate hazard rate for each education group
-    for edu in df["education"].unique():
-        df_restricted = df[df["education"] == edu]
+    for edu_val, edu_label in enumerate(specs["education_labels"]):
+        df_restricted = df[df["education"] == edu_val]
+
+        # First estimate the average erp belief of the uninformed individuals
         avg_belief_uninformed = beliefs_of_uninformed(df_restricted)
-        moments, weights = generate_moments(df_restricted)
-        initial_guess = [0.01]
-        calibrated_params = fit_moments(moments, weights, initial_guess)
-        params[edu] = calibrated_params
-        uninformed_beliefs[edu] = [avg_belief_uninformed]
+        uninformed_beliefs.loc[
+            "erp_uninformed_belief", edu_label
+        ] = avg_belief_uninformed
+
+        # Then estimate the initial share and hazard rate
+        observed_informed_shares, weights = generate_observed_informed_shares(
+            df_restricted
+        )
+        params[edu_label] = fit_moments(
+            moments=observed_informed_shares, weights=weights
+        )
+        # Save moments for plotting
+        edu_moments[edu_label] = observed_informed_shares
+
+        # Predict shares
+        initial_age = df_restricted["age"].min()
+        ages_to_predict = np.arange(initial_age, specs["max_ret_age"] + 1)
+        predicted_shares[edu_label] = predicted_shares_by_age(
+            params[edu_label].values, ages_to_predict
+        )
+
     # store and plot results
-    params.to_pickle(out_file_path_rates)
-    uninformed_beliefs.to_pickle(out_file_path_belief)
-    plot_predicted_vs_actual(df, params)
-    return calibrated_params, avg_belief_uninformed
+    params.to_csv(out_file_path_rates)
+    uninformed_beliefs.to_csv(out_file_path_belief)
+    predicted_shares.to_csv(out_file_shares)
+    plot_predicted_vs_actual(
+        predicted_shares=predicted_shares, observed_shares=edu_moments, specs=specs
+    )
 
 
-def open_dataset(paths):
+def open_and_filter_dataset(paths, specs):
     soep_is = paths["soep_is"]
     relevant_cols = [
         "belief_pens_deduct",
@@ -53,18 +81,6 @@ def open_dataset(paths):
     return df
 
 
-def restrict_dataset(df, options):
-    df = df[df["belief_pens_deduct"] >= 0]
-    df = df[df["age"] <= options["max_ret_age"]]
-    return df
-
-
-def classify_informed(df, options):
-    informed_threshhold = options["informed_threshhold"]
-    df["informed"] = df["belief_pens_deduct"] <= informed_threshhold
-    return df
-
-
 def beliefs_of_uninformed(df):
     """This function saves the average ERP belief of the uninformed individuals in the
     dataset."""
@@ -75,7 +91,7 @@ def beliefs_of_uninformed(df):
     return weighted_belief_uninformed
 
 
-def generate_moments(df):
+def generate_observed_informed_shares(df):
     sum_fweights = df.groupby("age")["fweights"].sum()
     informed_sum_fweights = pd.Series(index=sum_fweights.index, data=0, dtype=float)
     informed_sum_fweights.update(
@@ -86,65 +102,56 @@ def generate_moments(df):
     return informed_by_age, weights
 
 
-def fit_moments(moments, weights, initial_guess):
+def fit_moments(moments, weights):
+    params_guess = np.array([0.1, 0.01])
     partial_obj = partial(objective_function, moments=moments, weights=weights)
-    # breakpoint()
-    result = minimize(fun=partial_obj, x0=initial_guess, tol=1e-16)
-    params = result.x
-    return pd.Series(params)
+    result = minimize(fun=partial_obj, x0=params_guess, method="BFGS")
+    params = pd.Series(index=["initial_informed_share", "hazard_rate"], data=result.x)
+    return params
 
 
 def objective_function(params, moments, weights):
-    observed_ages = moments.index
-    predicted_hazard_rate = hazard_rate(params, observed_ages)
-    predicted_shares = predicted_shares_by_age(predicted_hazard_rate, observed_ages)
+    observed_ages = moments.index.values
+    predicted_shares = predicted_shares_by_age(
+        params=params, ages_to_predict=observed_ages
+    )
     return (((predicted_shares - moments) ** 2) * weights).sum()
 
 
-def hazard_rate(params, observed_ages):
-    # this can be changed to be a function of age
-    max_age = int(observed_ages.max()) + 1
-    ages = np.arange(max_age)
-    # hazard_rate = params[0] + ages * params[1]
-    hazard_rate = params[0] * np.ones(max_age)
-    return hazard_rate
+def predicted_shares_by_age(params, ages_to_predict):
+    age_span = np.arange(ages_to_predict.min(), ages_to_predict.max() + 1)
+    # The next line could be more complicated with age specific hazard rates
+    # For now we use constant
+    hazard_rate = params[1]
+    predicted_hazard_rate = hazard_rate * np.ones_like(age_span, dtype=float)
 
+    informed_shares = np.zeros_like(age_span, dtype=float)
+    initial_informed_share = params[0]
+    informed_shares[0] = initial_informed_share
+    uninformed_shares = 1 - informed_shares
 
-def predicted_shares_by_age(predicted_hazard_rate, observed_ages):
-    # assumption: at age 0, no one is informed
-    stay_uninformed_rate = 1 - predicted_hazard_rate
-    max_age = int(observed_ages.max()) + 1
-    uninformed_shares = np.ones(max_age)
-    informed_shares = np.zeros(max_age)
-    for age in range(1, max_age):
-        uninformed_shares[age] = uninformed_shares[age - 1] * stay_uninformed_rate[age]
-        informed_shares[age] = 1 - uninformed_shares[age]
+    for period in range(1, len(age_span)):
+        uninformed_shares[period] = uninformed_shares[period - 1] * (
+            1 - predicted_hazard_rate[period - 1]
+        )
+        informed_shares[period] = 1 - uninformed_shares[period]
 
-    observed_ages = observed_ages.astype(int)
-    relevant_shares = pd.Series(informed_shares).loc[observed_ages].values
+    relevant_shares = pd.Series(index=age_span, data=informed_shares).loc[
+        ages_to_predict
+    ]
     return relevant_shares
 
 
-def plot_predicted_vs_actual(df, params):
-    for edu in df["education"].unique():
-        df_restricted = df[df["education"] == edu]
-        moments, weights = generate_moments(df_restricted)
-        predicted_informed_shares = predicted_shares_by_age(
-            hazard_rate(params[edu], moments.index), moments.index
-        )
-        predicted_informed_shares = pd.Series(
-            predicted_informed_shares, index=moments.index
-        )
+def plot_predicted_vs_actual(predicted_shares, observed_shares, specs):
+    for edu_val, edu_label in enumerate(specs["education_labels"]):
         plt.plot(
-            moments,
-            label="Actual_edu" + str(edu.astype(int)),
+            observed_shares[edu_label],
+            label="Actual_edu" + edu_label,
             marker="o",
             linestyle="None",
             markersize=4,
         )
-        plt.plot(
-            predicted_informed_shares, label="Predicted_edu" + str(edu.astype(int))
-        )
+        plt.plot(predicted_shares[edu_label], label="Predicted education" + edu_label)
     plt.xlabel("Age")
     plt.ylabel("Share Informed")
     plt.legend()

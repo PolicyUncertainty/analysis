@@ -73,11 +73,12 @@ if input_str == "t":
 if input_str == "h":
     # Estimate health transitions
     from estimation.first_step_estimation.est_health_transition import (
-        estimate_health_transitions, estimate_health_transitions_parametric
+        estimate_health_transitions,
+        estimate_health_transitions_parametric,
     )
 
-    #estimate_health_transitions(paths_dict, specs)
-    estimate_health_transitions_parametric(paths_dict, specs)
+    estimate_health_transitions(paths_dict, specs)
+    # estimate_health_transitions_parametric(paths_dict, specs)
 
 if input_str == "i":
     # Estimate informed state transition

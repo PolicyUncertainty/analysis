@@ -132,8 +132,8 @@ def calculate_partner_incomes(path_dict, specs):
                 + partner_wage_params_men.loc[edu_label, "period_sq"] * period**2
             )
     # annual partner wage
-    partner_wages *= 12
+    annual_partner_wages = partner_wages * 12
 
     # Wealth hack
-    annual_partner_pension = partner_wages.mean(axis=1) * 0.48 * 12
-    return jnp.asarray(partner_wages), jnp.asarray(annual_partner_pension)
+    annual_partner_pension = annual_partner_wages.mean(axis=1) * 0.48
+    return jnp.asarray(annual_partner_wages), jnp.asarray(annual_partner_pension)

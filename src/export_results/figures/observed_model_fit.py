@@ -18,7 +18,7 @@ def observed_model_fit(paths_dict, specs, params):
         params=params,
         update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
         policy_state_trans_func=expected_SRA_probs_estimation,
-        file_append="start",
+        file_append="no_weights",
         load_model=True,
         load_solution=True,
     )
@@ -62,7 +62,6 @@ def plot_observed_model_fit_choice_probs(
             unobserved_state_specs,
             params,
             est_model,
-            weight_full_states=False,
         )
 
         choice_probs_observations = np.nan_to_num(choice_probs_observations, nan=0.0)
@@ -125,14 +124,12 @@ def choice_probs_for_choice_vals(
     unobserved_state_specs,
     params,
     est_model,
-    weight_full_states,
 ):
     choice_prob_func = create_choice_prob_func_unobserved_states(
         model=model,
         observed_states=states_dict,
         observed_choices=choice_vals,
         unobserved_state_specs=unobserved_state_specs,
-        weight_full_states=weight_full_states,
     )
 
     choice_probs_observations = choice_prob_func(

@@ -7,12 +7,13 @@ from process_data.aux_scripts.lagged_and_lead_vars import (
 )
 from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.experience import create_experience_variable
+from process_data.soep_vars.health import create_health_var
 from process_data.soep_vars.job_hire_and_fire import determine_observed_job_offers
 from process_data.soep_vars.job_hire_and_fire import generate_job_separation_var
 from process_data.soep_vars.partner_code import create_partner_state
 from process_data.soep_vars.wealth import add_wealth
 from process_data.soep_vars.work_choices import create_choice_variable
-from process_data.soep_vars.health import create_health_var
+from process_data.structural_sample_scripts.informed_state import create_informed_state
 from process_data.structural_sample_scripts.model_restrictions import (
     enforce_model_choice_restriction,
 )
@@ -68,6 +69,9 @@ def create_structural_est_sample(paths, specs, load_data=False):
     # additional restrictions based on model setup
     df = enforce_model_choice_restriction(df, specs)
 
+    # Create informed state
+    df = create_informed_state(df)
+
     # Construct job offer state
     was_fired_last_period = df["job_sep_this_year"] == 1
     df = determine_observed_job_offers(
@@ -79,6 +83,7 @@ def create_structural_est_sample(paths, specs, load_data=False):
         "period": "int8",
         "choice": "int8",
         "lagged_choice": "int8",
+        "informed": "int8",
         "policy_state": "int8",
         "policy_state_value": "float32",
         "partner_state": "int8",
@@ -88,7 +93,6 @@ def create_structural_est_sample(paths, specs, load_data=False):
         "education": "int8",
         "children": "int8",
         "health_state": "int8",
-        "full_observed_state": "bool",
     }
     df = df[list(type_dict.keys())]
     df = df.astype(type_dict)
@@ -183,8 +187,7 @@ def print_data_description(df):
     print(str(len(df)) + " left in final estimation sample.")
     print("---------------------------")
     print(
-        "Breakdown by choice:\n" 
-        + str(n_retirees) + " retirees [0] \n"
+        "Breakdown by choice:\n" + str(n_retirees) + " retirees [0] \n"
         "--"
         + str(n_fresh_retirees)
         + " thereof fresh retirees [0, lagged =!= 0] \n"

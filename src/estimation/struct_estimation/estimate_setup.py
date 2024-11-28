@@ -25,7 +25,12 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
 def estimate_model(
-    path_dict, params_to_estimate_names, file_append, slope_disutil_method, load_model
+    path_dict,
+    params_to_estimate_names,
+    file_append,
+    slope_disutil_method,
+    load_model,
+    last_estimate=None,
 ):
     # Load start params and bounds
     start_params_all = load_and_set_start_params(path_dict)
@@ -34,7 +39,7 @@ def estimate_model(
     #    open(path_dict["intermediate_data"] + "estimation_cet_par/params_0.pkl", "rb")
     # )
     # start_params_all.update(last_temp)
-    start_params_all["bequest_scale"] = 1
+
     start_params = {name: start_params_all[name] for name in params_to_estimate_names}
 
     lower_bounds_all = yaml.safe_load(
@@ -104,6 +109,7 @@ class est_class_from_paths:
             update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
             policy_state_trans_func=expected_SRA_probs_estimation,
             load_model=load_model,
+            model_type="solution",
         )
 
         # Load data
@@ -111,7 +117,7 @@ class est_class_from_paths:
             path_dict, start_params_all, model, drop_retirees=True
         )
 
-        self.weights = data_decision["age_weights"].values
+        self.weights = np.ones_like(data_decision["age_weights"].values)
 
         # Create specs for unobserved states
         unobserved_state_specs = create_unobserved_state_specs(data_decision, model)
@@ -192,7 +198,7 @@ def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):
     specs = generate_derived_and_data_derived_specs(path_dict)
     # Load data
     data_decision = pd.read_pickle(path_dict["struct_est_sample"])
-    # We need to filter observations in period 0 because of job offer weighting
+    # We need to filter observations in period 0 because of job offer weighting from last period
     data_decision = data_decision[data_decision["period"] > 0]
     # Also already retired individuals hold no identification
     if drop_retirees:

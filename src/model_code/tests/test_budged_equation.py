@@ -274,7 +274,7 @@ def test_retiree(
         policy_state=29,
         education=education,
         experience=exp_cont_last_period,
-        informed_state=0,
+        informed=0,
         options=specs_internal,
     )
     # Check that experience does not get updated or added any penalty
@@ -350,8 +350,11 @@ def test_retiree(
         )
 
 
+INFORMED_GRID = np.array([0, 1], dtype=int)
+
+
 @pytest.mark.parametrize(
-    "period, partner_state ,education, savings, exp, policy_state",
+    "period, partner_state ,education, savings, exp, policy_state, informed",
     list(
         product(
             OLD_AGE_PERIOD_GRID,
@@ -360,6 +363,7 @@ def test_retiree(
             SAVINGS_GRID,
             EXP_GRID,
             POLICY_STATE_GRID,
+            INFORMED_GRID,
         )
     ),
 )
@@ -370,6 +374,7 @@ def test_fresh_retiree(
     savings,
     exp,
     policy_state,
+    informed,
     paths_and_specs,
     informed_state=0,
 ):
@@ -387,7 +392,7 @@ def test_fresh_retiree(
         policy_state=policy_state,
         education=education,
         experience=exp_cont_prev,
-        informed_state=0,
+        informed=informed,
         options=specs_internal,
     )
 
@@ -407,11 +412,17 @@ def test_fresh_retiree(
     SRA_at_resolution = (
         specs_internal["min_SRA"] + policy_state * specs_internal["SRA_grid_size"]
     )
-    ERP = specs_internal["early_retirement_penalty"] * informed_state + specs_internal[
-        "uninformed_early_retirement_penalty"
-    ][education] * (1 - informed_state)
-    deduction_factor = (SRA_at_resolution - actual_retirement_age) * ERP
-    pension_factor = 1 - deduction_factor
+    retirement_age_difference = SRA_at_resolution - actual_retirement_age
+
+    if retirement_age_difference > 0:
+        if informed == 1:
+            ERP = specs_internal["early_retirement_penalty"]
+        else:
+            ERP = specs_internal["uninformed_early_retirement_penalty"][education]
+        pension_factor = 1 - retirement_age_difference * ERP
+    else:
+        late_retirement_bonus = specs_internal["late_retirement_bonus"]
+        pension_factor = 1 + np.abs(retirement_age_difference) * late_retirement_bonus
 
     mean_wage_all = specs_internal["mean_hourly_ft_wage"][education]
     gamma_0 = specs_internal["gamma_0"][education]

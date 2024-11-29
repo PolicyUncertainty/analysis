@@ -24,18 +24,7 @@ def create_survival_transition_sample(paths, specs, load_data=False):
         data = pd.read_pickle(out_file_path)
         return data
 
-    df = load_and_merge_soep_core(paths["soep_c38"], specs)
-
-    # Pre-Filter estimation years
-    df = filter_years(df, 1992, 2016)
-
-    # Pre-Filter age and sex
-    df = filter_below_age(df, 16)
-    df = filter_above_age(df, 100)
-    df = filter_by_sex(df, no_women=False)
-
-    # Create education type
-    df = create_education_type(df)
+    df = load_and_merge_datasets(paths["soep_c38"], specs)
 
     df = df[["age", "event_death", "education", "sex"]]
 
@@ -60,7 +49,6 @@ def create_survival_transition_sample(paths, specs, load_data=False):
             gamma_ = params["gamma_"]
             X = Xs["lambda_"]
             lambda_ = np.exp(np.dot(X, beta_))
-            survival = gamma_ * (1 - np.exp(-lambda_ * t))
             return (lambda_ * (np.exp(gamma_ * t) - 1)) / gamma_
 
         def _hazard(self, params, t, Xs):
@@ -136,32 +124,67 @@ def create_survival_transition_sample(paths, specs, load_data=False):
     return df
 
 
-def load_and_merge_soep_core(soep_c38_path, specs):
+def load_and_merge_datasets(soep_c38_path, specs):
+    annual_survey_data = load_and_process_soep_yearly_survey_data(soep_c38_path, specs)
+    life_spell_data = load_and_process_life_spell_data(soep_c38_path, specs)
+
+    return pd.merge(
+        annual_survey_data, life_spell_data, on=["pid", "syear"], how="inner"
+    )
+
+
+def load_and_process_soep_yearly_survey_data(soep_c38_path, specs):
+    """Load the annual data from the SOEP C38 dataset and process it."""
     # Load SOEP core data
     pgen_data = pd.read_stata(
         f"{soep_c38_path}/pgen.dta",
         columns=[
             "syear",
             "pid",
-            "hid",
-            "pgemplst",
             "pgpsbil",
-            "pgstib",
         ],
         convert_categoricals=False,
     )
     ppathl_data = pd.read_stata(
         f"{soep_c38_path}/ppathl.dta",
-        columns=["syear", "pid", "hid", "sex", "parid", "gebjahr"],
+        columns=["syear", "pid", "sex", "gebjahr"],
         convert_categoricals=False,
     )
-    pequiv_data = pd.read_stata(
-        # m11126: Self-Rated Health Status
-        # m11124: Disability Status of Individual
-        f"{soep_c38_path}/pequiv.dta",
-        columns=["pid", "syear", "m11126", "m11124"],
-        convert_categoricals=False,
+    merged_data = pd.merge(pgen_data, ppathl_data, on=["pid", "syear"], how="inner")
+
+    merged_data.set_index(["pid", "syear"], inplace=True)
+
+    # ToDo: This has to go to the specs
+    start_year_mortality = 1992
+    end_year_mortality = 2016
+    # Pre-Filter estimation years
+    df = filter_years(merged_data, start_year_mortality, end_year_mortality)
+    df = filter_by_sex(df, no_women=False)
+    # Create education type
+    df = create_education_type(df)
+
+    full_df = pd.DataFrame(
+        index=pd.MultiIndex.from_product(
+            [df.index.get_level_values("pid").unique(), range(1992, 2017)],
+            names=["pid", "syear"],
+        ),
+        columns=["sex", "education", "gebjahr"],
     )
+    full_df.update(df)
+    full_df["education"] = full_df.groupby("pid")["education"].transform("max")
+    full_df["sex"] = full_df.groupby("pid")["sex"].transform("max")
+    full_df["gebjahr"] = full_df.groupby("pid")["gebjahr"].transform("max")
+    full_df["age"] = full_df.index.get_level_values("syear") - full_df["gebjahr"]
+    full_df.drop("gebjahr", axis=1, inplace=True)
+
+    # Pre-Filter age and sex
+    full_df = filter_below_age(full_df, 16)
+    full_df = filter_above_age(full_df, 100)
+
+    return full_df
+
+
+def load_and_process_life_spell_data(soep_c38_path, specs):
     lifespell_data = pd.read_stata(
         f"{soep_c38_path}/lifespell.dta",
         convert_categoricals=False,
@@ -214,16 +237,4 @@ def load_and_merge_soep_core(soep_c38_path, specs):
     # Final index and df
     final_index = not_death_idx.union(first_death_idx)
     lifespell_data_long = lifespell_data_long.loc[final_index]
-
-    # merge all data
-    merged_data = pd.merge(
-        pgen_data, ppathl_data, on=["pid", "hid", "syear"], how="inner"
-    )
-    merged_data = pd.merge(merged_data, pequiv_data, on=["pid", "syear"], how="inner")
-    merged_data = pd.merge(
-        merged_data, lifespell_data_long, on=["pid", "syear"], how="inner"
-    )
-    merged_data["age"] = merged_data["syear"] - merged_data["gebjahr"]
-    merged_data.set_index(["pid", "syear"], inplace=True)
-    print(str(len(merged_data)) + " observations in SOEP C38 core.")
-    return merged_data
+    return lifespell_data_long

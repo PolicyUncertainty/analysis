@@ -1,8 +1,8 @@
 # %%
 import os
 
-import numpy as np
 import pandas as pd
+from autograd import numpy as np
 from process_data.aux_scripts.filter_data import filter_above_age
 from process_data.aux_scripts.filter_data import filter_below_age
 from process_data.aux_scripts.filter_data import filter_by_sex
@@ -27,7 +27,7 @@ def create_survival_transition_sample(paths, specs, load_data=False):
     df = load_and_merge_soep_core(paths["soep_c38"], specs)
 
     # Pre-Filter estimation years
-    df = filter_years(df, 1992, 2015)
+    df = filter_years(df, 1992, 2016)
 
     # Pre-Filter age and sex
     df = filter_below_age(df, 16)
@@ -37,19 +37,6 @@ def create_survival_transition_sample(paths, specs, load_data=False):
     # Create education type
     df = create_education_type(df)
 
-    # only keep the last (last = first dead one) observation for dead participant
-    def filter_rows(group):
-        if (group["event_death"] == 1).any():
-            # Find the year of the first death_event == 1
-            first_death_year = group[group["event_death"] == 1].index[0][1]
-            # Filter out rows with syear greater than the first death year
-            return group.loc[group.index.get_level_values("syear") <= first_death_year]
-        # else:
-        #     # If only death_event == 0, keep only the last observation
-        #     last_syear_idx = group.index[-1]
-        #     return group.loc[[last_syear_idx]]
-
-    df = df.groupby(level="pid", group_keys=False).apply(filter_rows)
     df = df[["age", "event_death", "education", "sex"]]
 
     # add age another time to the dataframe and call it duration

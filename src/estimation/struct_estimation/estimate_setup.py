@@ -111,6 +111,7 @@ class est_class_from_paths:
             load_model=load_model,
             model_type="solution",
         )
+        breakpoint()
 
         # Load data
         data_decision, states_dict = load_and_prep_data(

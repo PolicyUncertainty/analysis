@@ -162,24 +162,24 @@ class est_class_from_paths:
         return ll_value
 
 
-def update_according_to_slope_disutil(params, pt_ratio_low, pt_ratio_high):
+def update_according_to_slope_disutil(params, pt_ratio_bad, pt_ratio_good):
     """Use this function to entforce slope condition of disutility parameters."""
-    params["dis_util_unemployed_low"] = params["dis_util_not_retired_low"]
-    params["dis_util_pt_work_low"] = (
-        params["dis_util_not_retired_low"]
-        + pt_ratio_low * params["dis_util_working_low"]
+    params["dis_util_unemployed_bad"] = params["dis_util_not_retired_low"]
+    params["dis_util_pt_work_bad"] = (
+        params["dis_util_not_retired_bad"]
+        + pt_ratio_bad * params["dis_util_working_bad"]
     )
-    params["dis_util_ft_work_low"] = (
-        params["dis_util_not_retired_low"] + params["dis_util_working_low"]
+    params["dis_util_ft_work_bad"] = (
+        params["dis_util_not_retired_bad"] + params["dis_util_working_bad"]
     )
 
-    params["dis_util_unemployed_high"] = params["dis_util_not_retired_high"]
-    params["dis_util_pt_work_high"] = (
-        params["dis_util_not_retired_high"]
-        + pt_ratio_high * params["dis_util_working_high"]
+    params["dis_util_unemployed_good"] = params["dis_util_not_retired_good"]
+    params["dis_util_pt_work_good"] = (
+        params["dis_util_not_retired_good"]
+        + pt_ratio_good * params["dis_util_working_good"]
     )
-    params["dis_util_ft_work_high"] = (
-        params["dis_util_not_retired_high"] + params["dis_util_working_high"]
+    params["dis_util_ft_work_good"] = (
+        params["dis_util_not_retired_good"] + params["dis_util_working_good"]
     )
     return params
 

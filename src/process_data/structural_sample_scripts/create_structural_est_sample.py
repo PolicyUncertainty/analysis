@@ -159,16 +159,17 @@ def load_and_merge_soep_core(soep_c38_path):
     merged_data = pd.merge(merged_data, hl_data, on=["hid", "syear"], how="left")
     pequiv_data = pd.read_stata(
         # d11107: number of children in household
+        # d11101: age of individual
         # m11126: Self-Rated Health Status
         # m11124: Disability Status of Individual
         f"{soep_c38_path}/pequiv.dta",
-        columns=["pid", "syear", "d11107", "m11126", "m11124"],
+        columns=["pid", "syear", "d11107", "d11101", "m11126", "m11124"],
         convert_categoricals=False,
     )
     merged_data = pd.merge(merged_data, pequiv_data, on=["pid", "syear"], how="inner")
     merged_data.rename(columns={"d11107": "children"}, inplace=True)
 
-    merged_data["age"] = merged_data["syear"] - merged_data["gebjahr"]
+    merged_data["age"] = merged_data["d11101"].astype(int)
     merged_data.set_index(["pid", "syear"], inplace=True)
     print(str(len(merged_data)) + " observations in SOEP C38 core.")
     return merged_data

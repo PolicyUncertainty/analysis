@@ -22,10 +22,19 @@ else:
     raise ValueError("Either pre or post estimation plots.")
 
 
+
+# %% ########################################
+# Retirement timing relative to SRA
+show_retirement_timing = input("Show retirement timing plots? (y/n)") == "y"
+from export_results.figures.retirement_timing import plot_retirement_timing_data
+if show_retirement_timing:
+    plot_retirement_timing_data(path_dict, params, specs)
+    plt.show()
+
 # %%###################################
 # Health chracteristics
 ######################################
-exec_health = input("Execute Health characteristics? (y/n) ") == "y"
+exec_health = input("Show health transition plots? (y/n) ") == "y"
 if exec_health:
     from export_results.figures.expected_health import (
         plot_healthy_unhealthy,
@@ -42,7 +51,7 @@ if exec_health:
 # %%###################################
 # Family chracteristics
 ######################################
-exec_family = input("Exectue family characteristics? (y/n) ") == "y"
+exec_family = input("Show family transition plots? (y/n) ") == "y"
 if exec_family:
     from export_results.figures.family_params import (
         plot_children,
@@ -58,7 +67,7 @@ if exec_family:
 # %% ########################################
 # # Utility plots
 # ##########################################
-exec_utility = input("Execute utility plots? (y/n) ") == "y"
+exec_utility = input("Show utility plots? (y/n) ") == "y"
 if exec_utility:
     from export_results.figures.utility import plot_utility, plot_cons_scale
 
@@ -71,7 +80,7 @@ if exec_utility:
 # %% ########################################
 # Job offer plots
 # ##########################################
-exec_job_offer = input("Execute job offer plots? (y/n) ") == "y"
+exec_job_offer = input("Show job offer plots? (y/n) ") == "y"
 from export_results.figures.job_offer_plots import plot_job_transitions
 
 if exec_job_offer:
@@ -83,7 +92,7 @@ if exec_job_offer:
 # %% ########################################
 # # Budget plots
 # ##########################################
-exec_budget = input("Execute budget plots? (y/n)") == "y"
+exec_budget = input("Show budget plots? (y/n)") == "y"
 from export_results.figures.income_plots import (
     plot_incomes,
     plot_total_income,
@@ -103,7 +112,7 @@ if exec_budget:
 # %% ########################################
 # # SRA plots
 # ##########################################
-show_SRA = input("Execute SRA plots? (y/n)") == "y"
+show_SRA = input("Show SRA plots? (y/n)") == "y"
 from export_results.figures.expected_SRA_plots import plot_markov_process
 
 if show_SRA:
@@ -127,3 +136,4 @@ if show_SRA:
 # plt.show()
 # plt.close("all")
 # %%
+

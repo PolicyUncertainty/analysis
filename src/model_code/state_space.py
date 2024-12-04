@@ -36,39 +36,39 @@ def sparsity_condition(
     elif (age > max_ret_age) & (lagged_choice != 0):
         return False
 
-    elif (age < max_ret_age) and (lagged_choice == 0):
-        # If job offer is equal to 0, the state is valid,
-        # for every other job offer, the state is proxied to
-        # the state where job_offer is 0
-        if job_offer == 0:
-            return True
-        else:
-            state_proxy = {
-                "period": period,
-                "lagged_choice": lagged_choice,
-                "education": education,
-                "informed": informed,
-                "partner_state": partner_state,
-                "job_offer": 0,
-                "policy_state": policy_state,
-            }
-            return state_proxy
-    elif age > (max_ret_age + 1):
-        # If age is larger than max_ret_age + 2, we can also degenerate the policy state to
-        # the last policy state (degenerate state) n_policy_states - 1
-        if (job_offer == 0) & (policy_state == (options["n_policy_states"] - 1)):
-            return True
-        else:
-            state_proxy = {
-                "period": period,
-                "lagged_choice": lagged_choice,
-                "education": education,
-                "informed": informed,
-                "partner_state": partner_state,
-                "job_offer": 0,
-                "policy_state": options["n_policy_states"] - 1,
-            }
-            return state_proxy
+    # elif (age < max_ret_age) and (lagged_choice == 0):
+    #     # If job offer is equal to 0, the state is valid,
+    #     # for every other job offer, the state is proxied to
+    #     # the state where job_offer is 0
+    #     if job_offer == 0:
+    #         return True
+    #     else:
+    #         state_proxy = {
+    #             "period": period,
+    #             "lagged_choice": lagged_choice,
+    #             "education": education,
+    #             "informed": informed,
+    #             "partner_state": partner_state,
+    #             "job_offer": 0,
+    #             "policy_state": policy_state,
+    #         }
+    #         return state_proxy
+    # elif age > (max_ret_age + 1):
+    #     # If age is larger than max_ret_age + 2, we can also degenerate the policy state to
+    #     # the last policy state (degenerate state) n_policy_states - 1
+    #     if (job_offer == 0) & (policy_state == (options["n_policy_states"] - 1)):
+    #         return True
+    #     else:
+    #         state_proxy = {
+    #             "period": period,
+    #             "lagged_choice": lagged_choice,
+    #             "education": education,
+    #             "informed": informed,
+    #             "partner_state": partner_state,
+    #             "job_offer": 0,
+    #             "policy_state": options["n_policy_states"] - 1,
+    #         }
+    #         return state_proxy
     else:
         return True
 

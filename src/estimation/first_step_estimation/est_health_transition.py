@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import statsmodels.formula.api as smf
 from scipy.stats import norm  # Import norm from scipy.stats for the Gaussian kernel
 from specs.derive_specs import read_and_derive_specs
 
@@ -24,20 +25,22 @@ def estimate_health_transitions(paths_dict, specs):
 
     # Function to calculate the weighted mean using a specified kernel
     def kernel_weighted_mean(df, target_age, bandwidth, kernel_type):
-        age_distances = np.abs(df['age'] - target_age)
-        if kernel_type == 'epanechnikov':
+        age_distances = np.abs(df["age"] - target_age)
+        if kernel_type == "epanechnikov":
             weights = epanechnikov_kernel(age_distances, bandwidth)
-        elif kernel_type == 'gaussian':
+        elif kernel_type == "gaussian":
             weights = gaussian_kernel(age_distances, bandwidth)
         else:
             raise ValueError("Invalid kernel type. Use 'epanechnikov' or 'gaussian'.")
-        
-        return np.sum(weights * df['lead_health_state']) / np.sum(weights)
+
+        return np.sum(weights * df["lead_health_state"]) / np.sum(weights)
 
     # Parameters
-    kernel_type = specs.get("health_kernel_type", "epanechnikov")  # Default to Epanechnikov
+    kernel_type = specs.get(
+        "health_kernel_type", "epanechnikov"
+    )  # Default to Epanechnikov
     bandwidth = specs["health_smoothing_bandwidth"]
-    
+
     # Adjust bandwidth for Gaussian kernel to ensure the desired probability mass
     if kernel_type == "gaussian":
         # Compute the bandwidth such that the Gaussian CDF from -infinity to -5 is approximately 1%
@@ -55,7 +58,7 @@ def estimate_health_transitions(paths_dict, specs):
                 ],
                 age,
                 bandwidth,
-                kernel_type
+                kernel_type,
             )
             for age in ages
         ]
@@ -100,6 +103,79 @@ def estimate_health_transitions(paths_dict, specs):
     health_transition_matrix = pd.concat(
         [pd.DataFrame(row) for row in rows], ignore_index=True
     )
+
+    # Save the results to a CSV file
+    out_file_path = paths_dict["est_results"] + "health_transition_matrix.csv"
+    health_transition_matrix.to_csv(out_file_path, index=False)
+
+    return health_transition_matrix
+
+
+def estimate_health_transitions_parametric(paths_dict, specs):
+    """Estimate the health state transition with logit regression model."""
+    # Load the data
+    transition_data = pd.read_pickle(
+        paths_dict["intermediate_data"] + "health_transition_estimation_sample.pkl"
+    )
+    # Parameters
+    ages = np.arange(specs["start_age"], specs["end_age"] + 1)
+
+    # Compute transition probabilities
+    health_transition_matrix = pd.DataFrame()
+    for education in [1, 0]:
+        for health_state in [1, 0]:
+            for lead_health_state in [1, 0]:
+                if lead_health_state == 1:
+                    # Filter the data
+                    data = transition_data[
+                        (transition_data["education"] == education)
+                        & (transition_data["health_state"] == health_state)
+                    ]
+
+                    # Fit the logit model
+                    y_var = "lead_health_state"
+                    x_vars = ["age"]
+                    formula = y_var + " ~ " + " + ".join(x_vars)
+                    model = smf.logit(formula=formula, data=data)
+                    result = model.fit()
+
+                    # Compute the transition probabilities
+                    transition_probabilities = result.predict(
+                        pd.DataFrame({"age": ages})
+                    )
+
+                    health_transition_matrix = pd.concat(
+                        [
+                            health_transition_matrix,
+                            pd.DataFrame(
+                                {
+                                    "education": education,
+                                    "period": ages - specs["start_age"],
+                                    "health_state": health_state,
+                                    "lead_health_state": lead_health_state,
+                                    "transition_prob": transition_probabilities,
+                                }
+                            ),
+                        ],
+                        ignore_index=True,
+                    )
+                # for transition to unhealthy, we simply take the complement of the transition to healthy
+                else:
+                    health_transition_matrix = pd.concat(
+                        [
+                            health_transition_matrix,
+                            pd.DataFrame(
+                                {
+                                    "education": education,
+                                    "period": ages - specs["start_age"],
+                                    "health_state": health_state,
+                                    "lead_health_state": lead_health_state,
+                                    "transition_prob": 1 - transition_probabilities,
+                                }
+                            ),
+                        ],
+                        ignore_index=True,
+                    )
 
     # Save the results to a CSV file
     out_file_path = paths_dict["est_results"] + "health_transition_matrix.csv"

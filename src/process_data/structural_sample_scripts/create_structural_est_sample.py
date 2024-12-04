@@ -7,6 +7,7 @@ from process_data.aux_scripts.lagged_and_lead_vars import (
 )
 from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.experience import create_experience_variable
+from process_data.soep_vars.health import create_health_var
 from process_data.soep_vars.job_hire_and_fire import determine_observed_job_offers
 from process_data.soep_vars.job_hire_and_fire import generate_job_separation_var
 from process_data.soep_vars.partner_code import create_partner_state
@@ -62,6 +63,9 @@ def create_structural_est_sample(paths, specs, load_data=False):
     # education
     df = create_education_type(df)
 
+    # health
+    df = create_health_var(df)
+
     # additional restrictions based on model setup
     df = enforce_model_choice_restriction(df, specs)
 
@@ -88,12 +92,12 @@ def create_structural_est_sample(paths, specs, load_data=False):
         "wealth": "float32",
         "education": "int8",
         "children": "int8",
+        "health_state": "int8",
     }
     df = df[list(type_dict.keys())]
     df = df.astype(type_dict)
 
     print_data_description(df)
-
     # Anonymize and save data
     df.reset_index(drop=True, inplace=True)
     df.to_pickle(out_file_path)
@@ -155,13 +159,17 @@ def load_and_merge_soep_core(soep_c38_path):
     merged_data = pd.merge(merged_data, hl_data, on=["hid", "syear"], how="left")
     pequiv_data = pd.read_stata(
         # d11107: number of children in household
+        # d11101: age of individual
+        # m11126: Self-Rated Health Status
+        # m11124: Disability Status of Individual
         f"{soep_c38_path}/pequiv.dta",
-        columns=["pid", "syear", "d11107"],
+        columns=["pid", "syear", "d11107", "d11101", "m11126", "m11124"],
+        convert_categoricals=False,
     )
     merged_data = pd.merge(merged_data, pequiv_data, on=["pid", "syear"], how="inner")
     merged_data.rename(columns={"d11107": "children"}, inplace=True)
 
-    merged_data["age"] = merged_data["syear"] - merged_data["gebjahr"]
+    merged_data["age"] = merged_data["d11101"].astype(int)
     merged_data.set_index(["pid", "syear"], inplace=True)
     print(str(len(merged_data)) + " observations in SOEP C38 core.")
     return merged_data

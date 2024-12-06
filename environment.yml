@@ -18,6 +18,7 @@ dependencies:
   - linearmodels
   - statsmodels
   - lifelines
+  - optimagic
 
   # Misc
   - black

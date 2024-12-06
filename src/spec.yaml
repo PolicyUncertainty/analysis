@@ -66,7 +66,10 @@ max_birth_year: 2000
 # smoothing bandwidth for weighted moving average (half of age range used to smooth)
 health_smoothing_bandwidth: 10
 health_kernel_type: "epanechnikov" # "gaussian" # type of kernel used for smoothing
-
+###############################################
+# Mortality process estimation parameters
+start_year_mortality: 1992
+end_year_mortality: 2016
 
 ###############################################################################
 # Simulation parameters

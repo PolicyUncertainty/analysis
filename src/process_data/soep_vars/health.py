@@ -32,7 +32,7 @@ def create_health_var(data):
 
     return data
 
-def clean_health_create_lagged_state(data):
+def clean_health_create_states(data):
     """
     This function creates a lagged health state variable in the soep-PEQUIV dataset.
     The function replaces the health_state variable with 1 if both the previous and next health_state are 1.
@@ -51,15 +51,16 @@ def clean_health_create_lagged_state(data):
 
     # update lead_health_state
     data["lead_health_state"] = data.groupby(["pid"])["health_state"].shift(-1)
+    # update lag_health_state
+    data["lag_health_state"] = data.groupby(["pid"])["health_state"].shift(1)
 
     # drop people with missing lead health data
-    data = data[data["lead_health_state"].notna()]
-    data = data[data["health_state"].notna()] # need to do this again here because spanning the dataframe creates new missing values
-
-    # drop no longer needed columns
-    data.drop(["lag_health_state"], axis=1, inplace=True)
-
-    
-    print(str(len(data)) + " observations left after dropping people with missing lagged health data.")
+    # print(str(len(data)) + " observations after spanning the dataframe before dropping people with missing health data.")
+    # data = data[data["lead_health_state"].notna()] # need to do this here because spanning the dataframe creates new missing values
+    # print(str(len(data)) + " observations left after dropping people with missing lead health data.")
+    # data = data[data["lag_health_state"].notna()] # need to do this here because spanning the dataframe creates new missing values
+    # print(str(len(data)) + " observations left after dropping people with missing lagged health data.")
+    # data = data[data["health_state"].notna()] # need to do this again here because spanning the dataframe creates new missing values
+    # print(str(len(data)) + " observations left after dropping people with missing health data.")
 
     return data

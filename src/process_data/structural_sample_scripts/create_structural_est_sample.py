@@ -11,7 +11,7 @@ from process_data.soep_vars.health import create_health_var
 from process_data.soep_vars.job_hire_and_fire import determine_observed_job_offers
 from process_data.soep_vars.job_hire_and_fire import generate_job_separation_var
 from process_data.soep_vars.partner_code import create_partner_state
-from process_data.soep_vars.wealth import add_wealth
+from process_data.soep_vars.wealth import add_wealth_interpolate_and_deflate
 from process_data.soep_vars.work_choices import create_choice_variable
 from process_data.structural_sample_scripts.informed_state import create_informed_state
 from process_data.structural_sample_scripts.model_restrictions import (
@@ -33,40 +33,23 @@ def create_structural_est_sample(paths, specs, load_data=False):
     # Load and merge data state data from SOEP core (all but wealth)
     df = load_and_merge_soep_core(soep_c38_path=paths["soep_c38"])
 
-    # Create partner state(Merges also partners)
     df = create_partner_state(df, filter_missing=True)
-
-    # (labor) choice
     df = create_choice_variable(df)
 
     # filter data. Leave additional years in for lagging and leading. For now no women
     df = filter_data(df, specs, no_women=True)
 
-    # Job separation
     df = generate_job_separation_var(df)
-
-    # lagged choice
     df = create_lagged_and_lead_variables(df, specs)
-
-    # Add wealth data
-    df = add_wealth(df, paths, specs)
-
-    # Create period
+    df = add_wealth_interpolate_and_deflate(df, paths, specs)
     df["period"] = df["age"] - specs["start_age"]
-
-    # policy_state
     df = create_policy_state(df, specs)
-
-    # experience
     df = create_experience_variable(df)
-
-    # education
     df = create_education_type(df)
-
-    # health
     df = create_health_var(df)
 
-    # additional restrictions based on model setup
+
+    # enforce choice restrictions based on model setup
     df = enforce_model_choice_restriction(df, specs)
 
     # Create informed state
@@ -98,11 +81,9 @@ def create_structural_est_sample(paths, specs, load_data=False):
     df = df.astype(type_dict)
 
     print_data_description(df)
+
     # Anonymize and save data
     df.reset_index(drop=True, inplace=True)
-    df.to_pickle(out_file_path)
-
-    # save data
     df.to_pickle(out_file_path)
 
     return df
@@ -150,7 +131,7 @@ def load_and_merge_soep_core(soep_c38_path):
         merged_data, pl_data, on=["pid", "hid", "syear"], how="inner"
     )
 
-    # Now get household level data
+    # get household level data
     hl_data = pd.read_stata(
         f"{soep_c38_path}/hl.dta",
         columns=["hid", "syear", "hlc0043"],

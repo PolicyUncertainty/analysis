@@ -18,8 +18,9 @@ def sparsity_condition(
     period,
     lagged_choice,
     informed,
-    job_offer,
+    health,
     partner_state,
+    job_offer,
     policy_state,
     education,
     options,
@@ -35,7 +36,6 @@ def sparsity_condition(
     # After the maximum retirement age, you must be retired
     elif (age > max_ret_age) & (lagged_choice != 0):
         return False
-
     elif (age < max_ret_age) and (lagged_choice == 0):
         # If job offer is equal to 0, the state is valid,
         # for every other job offer, the state is proxied to
@@ -47,6 +47,7 @@ def sparsity_condition(
                 "period": period,
                 "lagged_choice": lagged_choice,
                 "education": education,
+                "health": health,
                 "informed": informed,
                 "partner_state": partner_state,
                 "job_offer": 0,
@@ -63,6 +64,7 @@ def sparsity_condition(
                 "period": period,
                 "lagged_choice": lagged_choice,
                 "education": education,
+                "health": health,
                 "informed": informed,
                 "partner_state": partner_state,
                 "job_offer": 0,

@@ -31,6 +31,7 @@ def estimate_model(
     slope_disutil_method,
     load_model,
     last_estimate=None,
+    save_results=True,
 ):
     # Load start params and bounds
     start_params_all = load_and_set_start_params(path_dict)
@@ -59,6 +60,7 @@ def estimate_model(
         slope_disutil_method=slope_disutil_method,
         file_append=file_append,
         load_model=load_model,
+        save_results=save_results,
     )
 
     result = om.minimize(
@@ -89,9 +91,11 @@ class est_class_from_paths:
         slope_disutil_method,
         file_append,
         load_model,
+        save_results=True,
     ):
         self.iter_count = 0
         self.slope_disutil_method = slope_disutil_method
+        self.save_results = save_results
 
         intermediate_est_data = (
             path_dict["intermediate_data"] + f"estimation_{file_append}/"
@@ -146,13 +150,14 @@ class est_class_from_paths:
             )
         ll_value_individual, model_solution = self.ll_func(params)
         ll_value = jnp.dot(self.weights, ll_value_individual)
-        save_iter_step(
-            model_solution,
-            ll_value,
-            params,
-            self.intermediate_est_data,
-            self.iter_count,
-        )
+        if self.save_results:
+            save_iter_step(
+                model_solution,
+                ll_value,
+                params,
+                self.intermediate_est_data,
+                self.iter_count,
+            )
         end = time.time()
         self.iter_count += 1
         print("Likelihood evaluation took, ", end - start)

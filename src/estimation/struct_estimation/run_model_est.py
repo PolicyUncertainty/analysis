@@ -35,8 +35,8 @@ pop_list = [
 last_estimate = pkl.load(
     open(paths_dict["est_results"] + "est_params_cet_par.pkl", "rb")
 )
-for pop in pop_list:
-    last_estimate.pop(pop)
+# for pop in pop_list:
+#     last_estimate.pop(pop)
 print("Restart estimation at: ", pd.Series(last_estimate))
 
 estimation_results = estimate_model(
@@ -46,6 +46,7 @@ estimation_results = estimate_model(
     slope_disutil_method=False,
     load_model=False,
     last_estimate=last_estimate,
+    save_results=False,
 )
 print(estimation_results)
 

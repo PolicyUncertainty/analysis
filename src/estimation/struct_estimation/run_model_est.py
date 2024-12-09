@@ -46,6 +46,7 @@ estimation_results = estimate_model(
     slope_disutil_method=False,
     load_model=False,
     last_estimate=last_estimate,
+    save_results=False,
 )
 print(estimation_results)
 

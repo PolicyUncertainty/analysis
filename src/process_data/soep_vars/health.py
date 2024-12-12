@@ -20,10 +20,10 @@ def create_health_var(data):
     """
 
     data = data[data["m11126"] >= 0] 
-    print(str(len(data)) + " observations left after dropping people with missing health data.")
+    print(str(len(data)) + " observations left after dropping observations with missing health data.")
     
     data = data[data["m11124"] >= 0] 
-    print(str(len(data)) + " observations left after dropping people with missing disability data.")
+    print(str(len(data)) + " observations left after dropping observations with missing disability data.")
 
    
     # create health state = 0 if bad health, 1 if good health

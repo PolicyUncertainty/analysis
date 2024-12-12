@@ -1,7 +1,5 @@
 # %%
 import os
-import estimagic as em
-import optimagic as om
 import pandas as pd
 import numpy as np
 from process_data.aux_scripts.filter_data import filter_above_age
@@ -29,85 +27,68 @@ def create_survival_transition_sample(paths, specs, load_data=False):
 
     df = load_and_merge_datasets(paths["soep_c38"], specs)
 
-    # filter age and estmation years
+    # filter age and estimation years
     df = filter_below_age(df, 16)
     df = filter_above_age(df, 110)
     df = filter_years(df, specs["start_year_mortality"], specs["end_year_mortality"])
-    # only use male data
-    df = filter_by_sex(df, no_women=True)
+ 
 
-
-   
-
-    """"
-    sort pid syear
-	* --- fill gaps:
-		forval y=1/22 {
-			dis `y'
-			forval x=1/20 {
-				by pid: replace health = health[_n+`x'] if mi(health[_n]) & !mi(health[_n+`x']) & !mi(health[_n-1]) & health[_n-1]==health[_n+`x'] 
-			}
-		}	
-	
-	tab health_orig health, mis
-	
-	tab health event, mis
-	tab health_orig event, mis
-		
-	* --- expand post-observed
-		sort pid syear
-		by pid: replace health = health[_n-1] if !mi(health[_n-1]) & mi(health[_n]) // & health[_n-1]==1	
-    """
-
-    # Stata code, IF: 
-    # The current value of health is missing (mi(health[_n])).
+    # Fill health states
+    # IF: The current value of health is missing (mi(health[_n])).
     # The value x observations ahead (health[_n+x']) is not missing (!mi(health[_n+x'])). AND
     # The value immediately before the current observation (health[_n-1]) is not missing (!mi(health[_n-1])). AND
-    # The values immediately before the current observation (health[_n-1]) and x observations ahead (health[_n+x']) are equal (health[_n-1] == health[_n+x']). AND
-    # THEN:  the missing value of health at the current position (_n) is replaced by the value of health[_n+x']`. AND
-
-    # # Sort the DataFrame by pid and syear
-    # df = df.sort_index()
-
-    # its = 0
-    # # Loop over each individual (pid)
-    # for pid, group in df.groupby(level=0):
-    #     its += 1
-    #     print(its)
-    #     # Extract the individual's data as a series
-    #     health = group["health_state"].copy()
-    #     # Fill gaps for the individual
-    #     for x in range(1, 5):  # Check up to 20 steps ahead
-    #         for i in range(len(health)):
-    #             # Apply the filling logic
-    #             if pd.isna(health.iloc[i]) and i + x < len(health):
-    #                 if not pd.isna(health.iloc[i - 1]) and not pd.isna(health.iloc[i + x]):
-    #                     if health.iloc[i - 1] == health.iloc[i + x]:
-    #                         health.iloc[i] = health.iloc[i + x]
-        
-    #     # Assign the updated series back to the original DataFrame
-    #     df.loc[(pid, slice(None)), "health_state"] = health
+    # The values immediately before the current observation (health[_n-1]) and x observations ahead (health[_n+x']) are equal (health[_n-1] == health[_n+x']). 
+    # THEN: the missing value of health at the current position (_n) is replaced by the value of health[_n+x']`.
 
 
+    # fill gaps were first and last known health state are identical with that value
+    def fill_health_gaps(group):
+        # Forward-fill and backward-fill
+        ffilled = group['health_state'].ffill()
+        bfilled = group['health_state'].bfill()
+        # Create a mask where forward-fill and backward-fill agree
+        agreeing_mask = ffilled == bfilled
+        # Fill only where the mask is True
+        group['health_state'] = group['health_state'].where(~group['health_state'].isna() | ~agreeing_mask, ffilled)
+        return group
 
+    # Fill health gaps 
+    df = df.sort_index()
+    df = df.groupby("pid").apply(fill_health_gaps) 
+    df.index = df.index.droplevel(1) # remove extra pid index level -> index = (pid, syear) instead of (pid, pid, syear)
 
     print("Obs. after filling health gaps:", len(df))
+
+    # print number of death events for the entire sample with and without missing health data
+    print("Death events in the sample: ", df["event_death"].sum())
+    print("Death events in the sample without missing health data: ", df[df["health_state"].notna()]["event_death"].sum())
+    print("Number of observations in the sample with health 1 in the death year:", len(df[(df["event_death"] == 1) & (df["health_state"] == 1)]))
+    print("Number of observations in the sample with health 0 in the death year:", len(df[(df["event_death"] == 1) & (df["health_state"] == 0)]))
+
+    
+    # for deaths, set the health state to the last known health state
+    df["last_known_health_state"] = df.groupby("pid")["health_state"].transform("last")
+    df.loc[(df["event_death"] == 1) & (df["health_state"].isna()), "health_state"] = df.loc[(df["event_death"] == 1) & (df["health_state"].isna()), "last_known_health_state"]
+    print("Setting health state to last known health state for deaths.")
+
+    # print number of death events for the entire sample with and without missing health data
+    print("Death events in the sample: ", df["event_death"].sum())
+    print("Death events in the sample without missing health data: ", df[df["health_state"].notna()]["event_death"].sum())
+    print("Number of observations in the sample with health 1 in the death year:", len(df[(df["event_death"] == 1) & (df["health_state"] == 1)]))
+    print("Number of observations in the sample with health 0 in the death year:", len(df[(df["event_death"] == 1) & (df["health_state"] == 0)]))
+
     # drop if the health state is missing
     df = df[(df["health_state"].notna())]
     print("Obs. after dropping missing health data:", len(df))
 
 
-    # make the index columns
+    # for every pid find first year in the sample observations and set the begin age and health state
     df = df.reset_index()
-
-    # for every pid find first year in the sample observations
     df["begin_age"] = df.groupby("pid")["age"].transform("min")
     indx = df.groupby("pid")["syear"].idxmin()
     df["begin_health_state"] = 0
     df.loc[indx, "begin_health_state"] = df.loc[indx, "health_state"]
     df["begin_health_state"] = df.groupby("pid")["begin_health_state"].transform("max")
-
-    # make the pid and syear the index again
     df = df.set_index(["pid", "syear"])
 
 
@@ -137,174 +118,6 @@ def create_survival_transition_sample(paths, specs, load_data=False):
 
     # Average time spent in the sample for each individual
     print("Average time spent in the sample for each individual:", round(df.groupby("pid").size().mean(), 2))
-
-
-
-    # start estimation
-
-    def hazard_function(age, edu, health, params):
-        cons = params.loc["intercept", "value"]
-        age_coef = params.loc["age", "value"]
-        edu_coef = params.loc["education", "value"]
-        health_coef = params.loc["health_state", "value"]
-
-        lambda_ = np.exp(cons + edu_coef*edu + health_coef*health)
-        age_contrib = np.exp(age_coef * age)
-
-        return lambda_ * age_contrib
-
-    
-    def survival_function(age, edu, health, params):
-        """
-        exp(-(integral of the hazard function as a function of age from 0 to age)) 
-        """
-    
-        cons = params.loc["intercept", "value"]
-        age_coef = params.loc["age", "value"]
-        # age_coef = 0.087
-        edu_coef = params.loc["education", "value"]
-        health_coef = params.loc["health_state", "value"]
-
-        lambda_ = np.exp(cons + edu_coef*edu + health_coef*health)
-        age_contrib = np.exp(age_coef * age) - 1
-
-        # print lambda and the first and last age_contrib as well as the - lambda_ / age_coef * age_contrib for the first and last age and the exp of that
-        print("lambda:", lambda_)
-        print("age_contrib first:", age_contrib[0])
-        print("age_contrib last:", age_contrib[-1])
-        print("- lambda_ / age_coef * age_contrib first:", - lambda_ / age_coef * age_contrib[0])
-        print("- lambda_ / age_coef * age_contrib last:", - lambda_ / age_coef * age_contrib[-1])
-        print("exp(- lambda_ / age_coef * age_contrib) first:", np.exp(- lambda_ / age_coef * age_contrib[0]))
-        print("exp(- lambda_ / age_coef * age_contrib) last:", np.exp(- lambda_ / age_coef * age_contrib[-1]))
-
-        return np.exp(- lambda_ / age_coef * age_contrib)
-
-
-    def density_function(age, edu, health, params):
-        """
-        d[-S(age)]/d(age) = - dS(age)/d(age) 
-        """
-        cons = params.loc["intercept", "value"]
-        age_coef = params.loc["age", "value"]
-        edu_coef = params.loc["education", "value"]
-        health_coef = params.loc["health_state", "value"]
-
-        lambda_ = np.exp(cons + edu_coef*edu + health_coef*health)
-        age_contrib = np.exp(age_coef*age) - 1
-
-        return lambda_ * np.exp(age_coef*age - ((lambda_ * age_contrib) / age_coef))
-
-    def log_density_function(age, edu, health, params):
-
-        cons = params.loc["intercept", "value"]
-        age_coef = params.loc["age", "value"]
-        edu_coef = params.loc["education", "value"]
-        health_coef = params.loc["health_state", "value"]
-
-
-        lambda_ = np.exp(cons + edu_coef*edu + health_coef*health)
-        log_lambda_ = cons + edu_coef*edu + health_coef*health
-        age_contrib = np.exp(age_coef*age) - 1
-
-        return log_lambda_ + age_coef*age - ((lambda_ * age_contrib) / age_coef)
-
-    def log_survival_function(age, edu, health, params):
-        cons = params.loc["intercept", "value"]
-        age_coef = params.loc["age", "value"]
-        edu_coef = params.loc["education", "value"]
-        health_coef = params.loc["health_state", "value"]
-
-        lambda_ = np.exp(cons + edu_coef*edu + health_coef*health)
-        age_contrib = np.exp(age_coef*age) - 1
-
-        return - (lambda_ * age_contrib) / age_coef
-
-    global Iteration 
-    Iteration = 0
-
-    def loglike(params, data):
-
-        begin_age = data["begin_age"]
-        begin_health_state = data["begin_health_state"]
-        age = data["age"]
-        edu = data["education"]
-        health = data["health_state"]
-        event = data["event_death"]
-        death = data["event_death"].astype(bool)
-        
-        # initialize contributions as an array of zeros
-        contributions = np.zeros_like(age)
-
-        # calculate contributions
-        contributions[death] = log_density_function(age[death], edu[death], health[death], params)
-        contributions[~death] = log_survival_function(age[~death], edu[~death], health[~death], params)
-        contributions -= log_survival_function(begin_age, edu, begin_health_state, params)
-
-        # print the death and not death contributions
-        print("Iteration:", globals()['Iteration'])
-        print("Death contributions:", contributions[death].sum())
-        print("Not death contributions:", contributions[~death].sum())
-        print("Total contributions:", contributions.sum())
-        
-        globals()['Iteration'] += 1
-        if globals()['Iteration'] % 100 == 0:
-            print(params)
-        
-        
-
-        return {"contributions": contributions, "value": contributions.sum()}
-
-    start_params = pd.DataFrame(
-        data=[[0.087, 1e-8, 1], [0.0,  -np.inf, np.inf], [0.0,  -np.inf, np.inf], [0.0, -np.inf, np.inf]],
-        columns=["value", "lower_bound", "upper_bound"],
-        index=["age", "education", "health_state", "intercept"],
-    )
-
-    res = em.estimate_ml(
-        loglike=loglike,
-        params=start_params,
-        optimize_options={"algorithm": "scipy_lbfgsb"},
-        loglike_kwargs={"data": df},
-    )
-
-    print(res.summary())
-
-    from matplotlib import pyplot as plt
-
-
-
-    fig, ax = plt.subplots(figsize=(8, 8))  # Square figure
-    age = np.linspace(16, 110, 110 - 16 + 1)
-    colors = {0: "#1E90FF", 1: "#D72638"}  # Blue for male, red for female
-
-    for edu in df["education"].unique():
-        for health in df["health_state"].unique():
-            edu_label = specs["education_labels"][int(edu)]
-            health_label = "Bad Health" if health == 0 else "Good Health"
-            linestyle = "--" if int(edu) == 0 else "-"
-            ax.plot(
-                age,
-                survival_function(age, int(edu), health, res.params),
-                label=f"{edu_label}, {health_label}",
-                color=colors[health],
-                linestyle=linestyle,
-            )
-
-    # Adjusting axes and ticks
-    ax.set_title("Survival function for different educational levels and sexes")
-    ax.set_xlabel("Age")
-    ax.set_ylabel("Survival probability")
-    ax.set_xlim(16, 110)
-    ax.set_ylim(0, 1)
-    ax.set_xticks(np.arange(20, 101, 10))
-    ax.set_yticks(np.arange(0, 1.1, 0.1))
-
-    # Adding legend and showing plot
-    ax.legend()
-    plt.grid(True, which="both", linestyle="--", linewidth=0.5, alpha=0.7)
-    plt.show()
-
-    breakpoint()
 
     print(
         str(len(df))

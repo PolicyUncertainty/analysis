@@ -11,6 +11,7 @@ input_str = input(
     "\n   - [j]ob separation"
     "\n   - family [t]ransition"
     "\n   - [h]ealth transition"
+    "\n   - [m]ortality estimation"
     "\n   - [i]nformed state transition"
     "\n"
 )
@@ -78,6 +79,11 @@ if input_str == "h":
 
     estimate_health_transitions(paths_dict, specs)
 
+if input_str == "m":
+    # Estimate mortality
+    from estimation.first_step_estimation.est_mortality import estimate_mortality
+
+    estimate_mortality(paths_dict, specs)
 
 if input_str == "i":
     # Estimate informed state transition

@@ -116,6 +116,8 @@ class est_class_from_paths:
             model_type="solution",
         )
 
+        breakpoint()
+
         # Load data
         data_decision, states_dict = load_and_prep_data(
             path_dict, start_params_all, model, drop_retirees=True

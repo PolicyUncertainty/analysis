@@ -26,10 +26,7 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     ) = read_in_partner_transition_specs(path_dict, specs)
 
     # Read in health transition matrix
-    (
-        specs["health_trans_mat"],
-        specs["n_health_states"],
-    ) = read_in_health_transition_specs(path_dict, specs)
+    (specs["health_trans_mat"],) = read_in_health_transition_specs(path_dict, specs)
 
     # Set initial experience
     specs["max_init_experience"], specs["max_experience"] = create_max_experience(
@@ -54,6 +51,7 @@ def read_and_derive_specs(spec_path):
     # Number of education types and choices from labels
     specs["n_education_types"] = len(specs["education_labels"])
     specs["n_choices"] = len(specs["choice_labels"])
+    specs["n_health_states"] = len(specs["health_labels"])
     # you can retire from min retirement age until max retirement age
     specs["n_policy_states"] = (
         int(((specs["max_SRA"] - specs["min_SRA"]) / specs["SRA_grid_size"]) + 1) + 1

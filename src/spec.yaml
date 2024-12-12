@@ -14,7 +14,7 @@ end_age: 85
 
 choice_labels: ["Retired", "Unemployed", "Part-time", "Full-time"]
 education_labels: ["Low Education", "High Education"]
-health_labels: ["Bad Health", "Good Health"]
+health_labels: ["Bad Health", "Good Health", "Death"]
 # Belief process parameters
 SRA_grid_size: 0.25
 min_SRA: 65

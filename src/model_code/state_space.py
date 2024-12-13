@@ -37,8 +37,8 @@ def sparsity_condition(
     # You cannot retire before the earliest retirement age
     if (age <= min_ret_age_state_space) & (lagged_choice == 0):
         return False
-    # After the maximum retirement age, you must be retired
-    elif (age > max_ret_age) & (lagged_choice != 0):
+    # After the maximum retirement age, you must be retired. ToDo: Write a better error message if last health is not there.
+    elif (age > max_ret_age) & (lagged_choice != 0) & (health != 2):
         return False
     else:
         # Now turn to the states, where it is decided by the value of an exogenous
@@ -49,6 +49,7 @@ def sparsity_condition(
             # die upon retirement for which we need informed and policy state
             state_proxy = {
                 "period": last_period,
+                "lagged_choice": lagged_choice,
                 "education": education,
                 "health": health,
                 "informed": informed,

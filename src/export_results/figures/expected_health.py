@@ -30,8 +30,11 @@ def plot_healthy_unhealthy(paths_dict, specs):
         .loc[slice(None), slice(start_age, end_age)]
     )
 
+    alive_health_states = np.where(np.array(specs["health_labels"]) != "Death")[0]
+    n_alive_health_states = len(alive_health_states)
+
     # Initialize the distribution
-    initial_dist = np.zeros(specs["n_health_states"])
+    initial_dist = np.zeros(n_alive_health_states)
 
     # Create the plot
     fig, ax = plt.subplots(figsize=(12, 8))

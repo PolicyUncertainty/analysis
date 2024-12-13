@@ -26,7 +26,7 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     ) = read_in_partner_transition_specs(path_dict, specs)
 
     # Read in health transition matrix
-    (specs["health_trans_mat"],) = read_in_health_transition_specs(path_dict, specs)
+    specs["health_trans_mat"] = read_in_health_transition_specs(path_dict, specs)
 
     # Set initial experience
     specs["max_init_experience"], specs["max_experience"] = create_max_experience(

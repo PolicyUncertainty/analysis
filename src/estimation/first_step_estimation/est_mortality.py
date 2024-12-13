@@ -14,6 +14,8 @@ def estimate_mortality(paths_dict, specs):
     #     paths_dict["intermediate_data"] + "mortality_transition_estimation_sample.pkl"
     # )
 
+    # the data set should be here: https://www.dropbox.com/scl/fi/4eklnw1ob3jbfdotkz7p1/data_mort_estim.dta?rlkey=hubwcv816qcaze8hqcfbzp1tp&dl=0
+
     df = pd.read_stata("/Users/gregorschuler/GitProjects/analysis/src/estimation/first_step_estimation/data_mort_estim.dta", convert_categoricals=False)
     df.set_index(["pid", "syear"], inplace=True)
 

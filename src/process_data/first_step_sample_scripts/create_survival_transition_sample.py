@@ -108,9 +108,12 @@ def load_and_process_soep_yearly_survey_data(soep_c38_path, specs):
     df = filter_by_sex(merged_data, no_women=False) # keep male and female obs.
     df = create_education_type(merged_data) # create education type
 
+    min_syear = df.index.get_level_values("syear").min()
+    max_syear = df.index.get_level_values("syear").max()
+
     full_df = pd.DataFrame(
         index=pd.MultiIndex.from_product(
-            [df.index.get_level_values("pid").unique(), range(1992, 2017)],
+            [df.index.get_level_values("pid").unique(), range(int(min_syear), int(max_syear))],
             names=["pid", "syear"],
         ),
         columns=["sex", "education", "gebjahr"],
@@ -167,6 +170,9 @@ def load_and_process_life_spell_data(soep_c38_path, specs):
     # Final index and df
     final_index = not_death_idx.union(first_death_idx)
     lifespell_data_long = lifespell_data_long.loc[final_index]
+
+    breakpoint()
+
     return lifespell_data_long
 
 

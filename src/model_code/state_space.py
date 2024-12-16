@@ -37,7 +37,7 @@ def sparsity_condition(
     # You cannot retire before the earliest retirement age
     if (age <= min_ret_age_state_space) & (lagged_choice == 0):
         return False
-    # After the maximum retirement age, you must be retired. ToDo: Write a better error message if last health is not there.
+    # After the maximum retirement age, you must be retired.
     elif (age > max_ret_age) & (lagged_choice != 0) & (health != 2):
         return False
     else:

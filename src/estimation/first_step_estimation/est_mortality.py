@@ -9,41 +9,41 @@ from specs.derive_specs import read_and_derive_specs
 def estimate_mortality(paths_dict, specs):
     """Estimate the mortality matrix."""
 
-    # # Load the data
-    # df = pd.read_pickle(
-    #     paths_dict["intermediate_data"] + "mortality_transition_estimation_sample.pkl"
-    # )
+    # Load the data
+    df = pd.read_pickle(
+        paths_dict["intermediate_data"] + "mortality_transition_estimation_sample.pkl"
+    )
 
     # the data set should be here: https://www.dropbox.com/scl/fi/4eklnw1ob3jbfdotkz7p1/data_mort_estim.dta?rlkey=hubwcv816qcaze8hqcfbzp1tp&dl=0
 
-    df = pd.read_stata("/Users/gregorschuler/GitProjects/analysis/src/estimation/first_step_estimation/data_mort_estim.dta", convert_categoricals=False)
-    df.set_index(["pid", "syear"], inplace=True)
+    # df = pd.read_stata("/Users/gregorschuler/GitProjects/analysis/src/estimation/first_step_estimation/data_mort_estim.dta", convert_categoricals=False)
+    # df.set_index(["pid", "syear"], inplace=True)
 
-    #  rename columns event -> event_death
-    df.rename(columns={"event": "event_death"}, inplace=True)
-    df.rename(columns={"educ_final": "education"}, inplace=True)
-    df.rename(columns={"health": "health_state"}, inplace=True)
-    df["sex"] = 0 # only males in the sample
+    # #  rename columns event -> event_death
+    # df.rename(columns={"event": "event_death"}, inplace=True)
+    # df.rename(columns={"educ_final": "education"}, inplace=True)
+    # df.rename(columns={"health": "health_state"}, inplace=True)
+    # df["sex"] = 0 # only males in the sample
 
-    # print number of observations
-    print(str(len(df)) + " observations in the mortality estimation dataset.")
+    # # print number of observations
+    # print(str(len(df)) + " observations in the mortality estimation dataset.")
 
-    # drop if the health state is missing
-    df = df[(df["health_state"].notna())]
-    print("Obs. after dropping missing health data:", len(df))
+    # # drop if the health state is missing
+    # df = df[(df["health_state"].notna())]
+    # print("Obs. after dropping missing health data:", len(df))
 
-    # drop if the education is missing
-    df = df[(df["education"].notna())]
-    print("Obs. after dropping missing education data:", len(df))
+    # # drop if the education is missing
+    # df = df[(df["education"].notna())]
+    # print("Obs. after dropping missing education data:", len(df))
 
 
-    df = df.reset_index()
-    df["begin_age"] = df.groupby("pid")["age"].transform("min")
-    indx = df.groupby("pid")["syear"].idxmin()
-    df["begin_health_state"] = 0
-    df.loc[indx, "begin_health_state"] = df.loc[indx, "health_state"]
-    df["begin_health_state"] = df.groupby("pid")["begin_health_state"].transform("max")
-    df = df.set_index(["pid", "syear"])
+    # df = df.reset_index()
+    # df["begin_age"] = df.groupby("pid")["age"].transform("min")
+    # indx = df.groupby("pid")["syear"].idxmin()
+    # df["begin_health_state"] = 0
+    # df.loc[indx, "begin_health_state"] = df.loc[indx, "health_state"]
+    # df["begin_health_state"] = df.groupby("pid")["begin_health_state"].transform("max")
+    # df = df.set_index(["pid", "syear"])
 
 
     df = df[["age", "begin_age", "event_death", "education", "sex", "health_state", "begin_health_state"]]
@@ -78,7 +78,6 @@ def estimate_mortality(paths_dict, specs):
         + " observations in the final survival transition sample.  \n ----------------"
     )
 
-    breakpoint()
 
     # Define parameters for subplots
     sexes = ["male", "female"]

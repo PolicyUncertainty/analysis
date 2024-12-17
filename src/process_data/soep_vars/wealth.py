@@ -46,7 +46,7 @@ def interpolate_wealth(wealth_data):
     wealth_data_full = pd.merge(
         all_combinations, wealth_data, on=["hid", "syear"], how="left"
     )
-
+    
     # Set 'hid' and 'syear' as the index
     wealth_data_full.set_index(["hid", "syear"], inplace=True)
     wealth_data_full.sort_index(inplace=True)
@@ -64,10 +64,7 @@ def interpolate_and_extrapolate_wealth(wealth_data, options):
         lambda group: group.interpolate(method="linear")
     )
     # extrapolate until the first and last observation
-    print(len(wealth_data_full))
-    breakpoint()
-    wealth_data_full["wealth"] = wealth_data_full.groupby("hid").apply(extrapolate_wealth)
-    print(len(wealth_data_full))
+    wealth_data_full["wealth"] = wealth_data_full.groupby("hid").apply(extrapolate_wealth)["wealth"]
     return wealth_data_full
 
 def extrapolate_wealth(household):
@@ -97,11 +94,13 @@ def extrapolate_wealth(household):
             missing_end = wealth.index[wealth.index > x[1]]
             wealth.loc[missing_end] = y.iloc[1] + slope * (missing_end - x[1])
     
-    household.set_index(["hid", "syear"], inplace=True)
-    return wealth
+    household['wealth'] = wealth
+    household.set_index("syear", inplace=True)
+    # household.set_index(["hid", "syear"], inplace=True)
+    return household
 
 def span_full_wealth_panel(wealth_data, options):
-    """Creates additional rows for each household for each year between start_year and end_year."""
+    """Creates additional rows for each household for each year between start_year and end_year. Every household without any wealth data is dropped."""
     start_year = options["start_year"]
     end_year = options["end_year"]
     wealth_data.set_index(["hid", "syear"], inplace=True)
@@ -115,6 +114,7 @@ def span_full_wealth_panel(wealth_data, options):
         all_combinations, wealth_data, on=["hid", "syear"], how="left"
     )
     wealth_data_full.set_index(["hid", "syear"], inplace=True)
+    wealth_data_full = wealth_data_full.groupby(level="hid").filter(lambda x: x["wealth"].notna().any())
     return wealth_data_full
 
 def deflate_wealth(df, path_dict):

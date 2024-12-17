@@ -20,15 +20,20 @@ from process_data.structural_sample_scripts.model_restrictions import (
 from process_data.structural_sample_scripts.policy_state import create_policy_state
 
 
-def create_structural_est_sample(paths, specs, load_data=False):
+def create_structural_est_sample(paths, specs, load_data=False, debug=False):
     if not os.path.exists(paths["intermediate_data"]):
         os.makedirs(paths["intermediate_data"])
 
     out_file_path = paths["intermediate_data"] + "structural_estimation_sample.pkl"
 
     if load_data:
-        data = pd.read_pickle(out_file_path)
-        return data
+        df = pd.read_pickle(out_file_path)
+        if debug:
+            print("Debug mode active. Executing only subset of the code")
+            # paste functions to be tested individually here
+            df = add_wealth_interpolate_and_deflate(df, paths, specs)
+        else:
+            return df
 
     # Load and merge data state data from SOEP core (all but wealth)
     df = load_and_merge_soep_core(soep_c38_path=paths["soep_c38"])

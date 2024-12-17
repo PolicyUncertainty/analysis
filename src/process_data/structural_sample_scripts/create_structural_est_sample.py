@@ -11,7 +11,7 @@ from process_data.soep_vars.health import create_health_var
 from process_data.soep_vars.job_hire_and_fire import determine_observed_job_offers
 from process_data.soep_vars.job_hire_and_fire import generate_job_separation_var
 from process_data.soep_vars.partner_code import create_partner_state
-from process_data.soep_vars.wealth import add_wealth_impute_with_panel_reg
+from process_data.soep_vars.wealth import add_wealth_interpolate_and_deflate
 from process_data.soep_vars.work_choices import create_choice_variable
 from process_data.structural_sample_scripts.informed_state import create_informed_state
 from process_data.structural_sample_scripts.model_restrictions import (
@@ -41,7 +41,7 @@ def create_structural_est_sample(paths, specs, load_data=False):
 
     df = generate_job_separation_var(df)
     df = create_lagged_and_lead_variables(df, specs)
-    df = add_wealth_impute_with_panel_reg(df, paths, specs)
+    df = add_wealth_interpolate_and_deflate(df, paths, specs)
     df["period"] = df["age"] - specs["start_age"]
     df = create_policy_state(df, specs)
     df = create_experience_variable(df)

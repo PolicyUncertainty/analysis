@@ -61,7 +61,6 @@ def specify_model(
             "choices": choices,
             "endogenous_states": {
                 "education": np.arange(specs["n_education_types"], dtype=int),
-                "sparsity_condition": sparsity_condition,
             },
             "exogenous_processes": {
                 "policy_state": {

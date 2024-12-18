@@ -20,7 +20,6 @@ def sparsity_condition(
     informed,
     health,
     partner_state,
-    job_offer,
     policy_state,
     education,
     options,

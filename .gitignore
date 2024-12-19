@@ -13,6 +13,9 @@ policy_expect_data.pkl
 data*.pkl
 probs_*.txt
 
+# Maxis survival probability model
+data_mort_estim.dta
+
 # Ignore intermediate data pickle files
 output/intermediate_data/*.pkl
 !output/intermediate_data/temp_params_*.pkl

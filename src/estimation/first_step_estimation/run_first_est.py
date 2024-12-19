@@ -11,7 +11,9 @@ input_str = input(
     "\n   - [j]ob separation"
     "\n   - family [t]ransition"
     "\n   - [h]ealth transition"
+    "\n   - [m]ortality estimation"
     "\n   - [i]nformed state transition"
+    "\n"
 )
 # Set define user only to true if estimate SRA process as we need raw soep data there
 define_user = True if input_str in ["s", "i"] else False
@@ -73,9 +75,14 @@ if input_str == "h":
     # Estimate health transitions
     from estimation.first_step_estimation.est_health_transition import (
         estimate_health_transitions,
+        estimate_health_transitions_parametric,
     )
 
     estimate_health_transitions(paths_dict, specs)
+
+if input_str == "m":
+    # Estimate mortality
+    from estimation.first_step_estimation.est_mortality import estimate_mortality
 
 
 if input_str == "i":

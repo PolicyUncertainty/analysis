@@ -83,19 +83,21 @@ if exec_job_offer:
 # %% ########################################
 # # Budget plots
 # ##########################################
-exec_budget = input("Execute budget plots? (y/n)") == "y"
+exec_budget = input("Execute budget plots? (y/n) ") == "y"
 from export_results.figures.income_plots import (
     plot_incomes,
     plot_total_income,
     plot_partner_wage,
     plot_child_benefits,
 )
+from export_results.figures.wealth_plots import plot_budget_of_unemployed
 
 if exec_budget:
     plot_incomes(path_dict)
     plot_partner_wage(path_dict, specs)
     plot_total_income(specs)
     plot_child_benefits(specs)
+    plot_budget_of_unemployed(specs)
     plt.show()
     plt.close("all")
 

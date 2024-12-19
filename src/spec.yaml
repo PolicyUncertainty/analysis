@@ -74,7 +74,7 @@ health_kernel_type: "epanechnikov" # "gaussian" # type of kernel used for smooth
 # Mortality process estimation parameters
 start_year_mortality: 1992
 start_age_mortality: 16
-end_year_mortality: 2020 # end year of lifespells in soep38 
+end_year_mortality: 2020 # end year of lifespells in soep38
 end_age_mortality: 110
 
 

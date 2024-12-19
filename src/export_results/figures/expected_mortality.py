@@ -1,11 +1,10 @@
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt 
-
 
 
 def plot_mortality(paths_dict, specs):
-    """plot mortality characteristics"""
+    """Plot mortality characteristics."""
 
     # Load the data
     df = pd.read_pickle(
@@ -25,23 +24,27 @@ def plot_mortality(paths_dict, specs):
             for education in [0, 1]:
                 # Create a unique key for the combination
                 key = f"sex{sex}_health{health}_edu{education}"
-                
+
                 # Filter the data for the current combination
                 filtered_data = estimated_mortality.loc[
-                    (estimated_mortality["sex"] == sex) & 
-                    (estimated_mortality["health"] == health) & 
-                    (estimated_mortality["education"] == education), 
-                    ["death_prob", "age"]
+                    (estimated_mortality["sex"] == sex)
+                    & (estimated_mortality["health"] == health)
+                    & (estimated_mortality["education"] == education),
+                    ["death_prob", "age"],
                 ]
-                
+
                 # Sort by age
                 filtered_data = filtered_data.sort_values(by="age")
-                
+
                 # Calculate survival probabilities
                 filtered_data["survival_prob_year"] = 1 - filtered_data["death_prob"]
-                filtered_data["survival_prob"] = filtered_data["survival_prob_year"].cumprod()
-                filtered_data["survival_prob"] = filtered_data["survival_prob"].shift(1).fillna(1)
-                
+                filtered_data["survival_prob"] = filtered_data[
+                    "survival_prob_year"
+                ].cumprod()
+                filtered_data["survival_prob"] = (
+                    filtered_data["survival_prob"].shift(1).fillna(1)
+                )
+
                 # Store the result in the dictionary
                 survival_data[key] = filtered_data
 
@@ -54,11 +57,12 @@ def plot_mortality(paths_dict, specs):
     # Add labels and legend
     plt.xlabel("Age")
     plt.ylabel("Survival Probability")
-    plt.title("Survival Probability by Age for Different Combinations of Sex, Health, and Education")
+    plt.title(
+        "Survival Probability by Age for Different Combinations of Sex, Health, and Education"
+    )
     plt.legend()
     plt.grid(True)
     plt.show()
-
 
     # Define parameters for subplots
     sexes = ["male", "female"]
@@ -77,7 +81,10 @@ def plot_mortality(paths_dict, specs):
 
         # Calculate plain share of deaths by age
         age_death_share = (
-            filtered_df.groupby("age")["event_death"].mean().reindex(np.arange(16, 111)).fillna(0)
+            filtered_df.groupby("age")["event_death"]
+            .mean()
+            .reindex(np.arange(16, 111))
+            .fillna(0)
         )
 
         # Plot plain share
@@ -93,10 +100,14 @@ def plot_mortality(paths_dict, specs):
         for edu in [0, 1]:
             for health in [0, 1]:
                 subgroup = filtered_df[
-                    (filtered_df["education"] == edu) & (filtered_df["health_state"] == health)
+                    (filtered_df["education"] == edu)
+                    & (filtered_df["health_state"] == health)
                 ]
                 subgroup_death_share = (
-                    subgroup.groupby("age")["event_death"].mean().reindex(np.arange(16, 111)).fillna(0)
+                    subgroup.groupby("age")["event_death"]
+                    .mean()
+                    .reindex(np.arange(16, 111))
+                    .fillna(0)
                 )
 
                 edu_label = f"Education {edu}"
@@ -142,8 +153,13 @@ def plot_mortality(paths_dict, specs):
         age_range = np.arange(16, 111)
         bar_data = {
             (edu, health): filtered_df[
-                (filtered_df["education"] == edu) & (filtered_df["health_state"] == health)
-            ].groupby("age")["event_death"].sum().reindex(age_range).fillna(0)
+                (filtered_df["education"] == edu)
+                & (filtered_df["health_state"] == health)
+            ]
+            .groupby("age")["event_death"]
+            .sum()
+            .reindex(age_range)
+            .fillna(0)
             for edu in [0, 1]
             for health in [0, 1]
         }
@@ -159,7 +175,7 @@ def plot_mortality(paths_dict, specs):
                 bottom=bottom,
                 label=f"{edu_label}, {health_label}",
                 color=colors[health],
-                alpha=0.7*(1 if edu == 0 else 0.5),
+                alpha=0.7 * (1 if edu == 0 else 0.5),
             )
             bottom += values
 
@@ -180,7 +196,10 @@ def plot_mortality(paths_dict, specs):
 
     # Set up the figure for share of deaths
     fig, axes = plt.subplots(1, 2, figsize=(12, 6))  # 1x2 subplots for male and female
-    fig.suptitle("Share of Deaths by Age and Subgroups as Percentage of Total Deaths", fontsize=11)
+    fig.suptitle(
+        "Share of Deaths by Age and Subgroups as Percentage of Total Deaths",
+        fontsize=11,
+    )
 
     for i, sex in enumerate(sexes):
         ax = axes[i]
@@ -189,9 +208,9 @@ def plot_mortality(paths_dict, specs):
         filtered_df = df[df["sex"] == (0 if sex == "male" else 1)]
 
         # Calculate plain share of deaths by age
-        age_death_share = (
-            filtered_df.groupby("age")["event_death"].count().reindex(np.arange(16, 111)).fillna(0)/len(df[df["event_death"] == 1])
-        )
+        age_death_share = filtered_df.groupby("age")["event_death"].count().reindex(
+            np.arange(16, 111)
+        ).fillna(0) / len(df[df["event_death"] == 1])
 
         # Plot plain share
         ax.plot(
@@ -206,10 +225,13 @@ def plot_mortality(paths_dict, specs):
         for edu in [0, 1]:
             for health in [0, 1]:
                 subgroup = filtered_df[
-                    (filtered_df["education"] == edu) & (filtered_df["health_state"] == health)
+                    (filtered_df["education"] == edu)
+                    & (filtered_df["health_state"] == health)
                 ]
-                subgroup_death_share = (
-                    subgroup.groupby("age")["event_death"].count().reindex(np.arange(16, 111)).fillna(0)/len(df[df["event_death"] == 1])
+                subgroup_death_share = subgroup.groupby("age")[
+                    "event_death"
+                ].count().reindex(np.arange(16, 111)).fillna(0) / len(
+                    df[df["event_death"] == 1]
                 )
 
                 edu_label = f"Education {edu}"
@@ -240,5 +262,3 @@ def plot_mortality(paths_dict, specs):
     # Adjust layout
     plt.tight_layout(rect=[0, 0, 1, 0.96])  # Leave space for the main title
     plt.show()
-
-

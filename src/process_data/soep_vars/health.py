@@ -39,10 +39,13 @@ def create_health_var(data):
 
     return data
 
+
 def clean_health_create_states(data):
-    """
-    This function creates a lagged health state variable in the soep-PEQUIV dataset.
-    The function replaces the health_state variable with 1 if both the previous and next health_state are 1.
+    """This function creates a lagged health state variable in the soep-PEQUIV dataset.
+
+    The function replaces the health_state variable with 1 if both the previous and next
+    health_state are 1.
+
     """
 
     # replace health_state with 1 if both previous and next health_state are 1

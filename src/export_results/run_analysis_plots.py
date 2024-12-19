@@ -22,11 +22,11 @@ else:
     raise ValueError("Either pre or post estimation plots.")
 
 
-
 # %% ########################################
 # Retirement timing relative to SRA
 show_retirement_timing = input("Show retirement timing plots? (y/n)") == "y"
 from export_results.figures.retirement_timing import plot_retirement_timing_data
+
 if show_retirement_timing:
     plot_retirement_timing_data(path_dict, params, specs)
     plt.show()
@@ -46,7 +46,7 @@ if exec_health:
     plot_health_transition_prob(specs)
     plt.show()
     plt.close("all")
-    
+
 # %%###################################
 # Mortality characteristics
 ######################################
@@ -147,4 +147,3 @@ if show_SRA:
 # plt.show()
 # plt.close("all")
 # %%
-

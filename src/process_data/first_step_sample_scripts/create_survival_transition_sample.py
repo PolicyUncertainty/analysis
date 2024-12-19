@@ -19,6 +19,7 @@ def create_survival_transition_sample(paths, specs, load_data=False):
     if not os.path.exists(paths["intermediate_data"]):
         os.makedirs(paths["intermediate_data"])
 
+    # cleaned sample
     out_file_path = (
         paths["intermediate_data"] + "mortality_transition_estimation_sample.pkl"
     )
@@ -33,18 +34,21 @@ def create_survival_transition_sample(paths, specs, load_data=False):
     df = filter_below_age(df, 16)
     df = filter_above_age(df, 110)
 
-    # create columns for the beginning age and health state
-    df = create_begin_age_and_health_state(df)
+    # filter years
+    df = filter_years(df, specs["start_year_mortality"], specs["end_year_mortality"])
+
+    # create columns for the start age and health state
+    df = create_start_age_and_health_state(df)
 
     df = df[
         [
             "age",
-            "begin_age",
+            "start_age",
             "event_death",
             "education",
             "sex",
             "health_state",
-            "begin_health_state",
+            "start_health_state",
         ]
     ]
 
@@ -72,6 +76,41 @@ def create_survival_transition_sample(paths, specs, load_data=False):
     )
 
     df.to_pickle(out_file_path)
+
+    # duplicate the sample - Kroll and Lampert (2009)
+    out_file_path_dupli = (
+        paths["intermediate_data"] + "mortality_transition_estimation_sample_duplicated.pkl"
+    )
+    
+    # df1 = original sample, df2 = duplicated sample with "unknown" health and education
+    df1 = df.copy().reset_index()
+    df2 = df.copy().reset_index()
+    df2["education"] = np.nan
+    df2["health_state"] = np.nan
+    df2["start_health_state"] = np.nan
+    df1["true_sample"] = 1
+    df2["true_sample"] = 0
+    dupli_df = pd.concat([df1, df2])
+    dupli_df.set_index(["pid", "syear", "true_sample"], inplace=True)
+    dupli_df.sort_index(inplace=True)
+    # interaction indicators for health and education 
+    dupli_df["health1_edu1"] = (dupli_df["health_state"] == 1) & (dupli_df["education"] == 1)
+    dupli_df["health1_edu0"] = (dupli_df["health_state"] == 1) & (dupli_df["education"] == 0)
+    dupli_df["health0_edu1"] = (dupli_df["health_state"] == 0) & (dupli_df["education"] == 1)
+    dupli_df["health0_edu0"] = (dupli_df["health_state"] == 0) & (dupli_df["education"] == 0)
+    # interaction indicators for start health and education
+    dupli_df["start_health1_edu1"] = (dupli_df["start_health_state"] == 1) & (dupli_df["education"] == 1)
+    dupli_df["start_health1_edu0"] = (dupli_df["start_health_state"] == 1) & (dupli_df["education"] == 0)
+    dupli_df["start_health0_edu1"] = (dupli_df["start_health_state"] == 0) & (dupli_df["education"] == 1)
+    dupli_df["start_health0_edu0"] = (dupli_df["start_health_state"] == 0) & (dupli_df["education"] == 0)
+
+    # convert to df to floats for computation
+    dupli_df = dupli_df.astype(float)
+
+    # save the duplicated sample
+    dupli_df.to_pickle(out_file_path_dupli)
+
+    # return the true sample
     return df
 
 
@@ -79,19 +118,17 @@ def load_and_merge_datasets(soep_c38_path, specs):
     time_invariant_data = load_and_process_soep_yearly_survey_data(soep_c38_path, specs)
     life_spell_data = load_and_process_life_spell_data(soep_c38_path, specs)
     health_data = load_and_process_soep_health(soep_c38_path, specs)
+
+    # merge time invariant data onto the life spell data
     df = pd.merge(life_spell_data, time_invariant_data, on="pid", how="left")
-
-    df["age"] = df["syear"] - df["gebjahr"]
-    df = filter_below_age(df, 16)
-    df = filter_above_age(df, 110)
-
+    # combine the life spell data with the health data (keep intersection)
     df = pd.merge(df, health_data, on=["pid", "syear"], how="inner")
+
+    # set index and age
+    df["age"] = df["syear"] - df["gebjahr"]
     df = df.set_index(["pid", "syear"])
-    # Make stacked bar plot, stacking health state and education groups across age
-    df.groupby(["age", "education", "health_state"])[
-        "event_death"
-    ].sum().unstack().unstack().plot(kind="bar", stacked=True)
-    breakpoint()
+    
+
     return df
 
 
@@ -113,12 +150,15 @@ def load_and_process_soep_yearly_survey_data(soep_c38_path, specs):
         convert_categoricals=False,
     )
     merged_data = pd.merge(pgen_data, ppathl_data, on=["pid", "syear"], how="inner")
-
     merged_data.set_index(["pid", "syear"], inplace=True)
 
-    df = filter_by_sex(merged_data, no_women=False)  # keep male and female obs.
-    df = create_education_type(df)  # create education type
-    # keep only the first observation for each individual
+    # keep male and female obs. and transform to 0/1 = male/female
+    df = filter_by_sex(merged_data, no_women=False)  
+    # create education type variable
+    df = create_education_type(df) 
+
+    # keep only the one observation for each individual
+    # with the highest education level + invariant variables
     df = df.groupby("pid")[["sex", "education", "gebjahr"]].max()
     return df
 
@@ -162,9 +202,6 @@ def load_and_process_life_spell_data(soep_c38_path, specs):
     final_index = not_death_idx.union(first_death_idx)
     lifespell_data_long = lifespell_data_long.loc[final_index]
 
-    # lifespell_data_long["gebjahr_lfsp"] = lifespell_data_long.groupby("pid")["syear"].transform("min")
-    # lifespell_data_long["age"] = lifespell_data_long["syear"] - lifespell_data_long["gebjahr_lfsp"]
-    # breakpoint()
     return lifespell_data_long
 
 
@@ -179,11 +216,13 @@ def load_and_process_soep_health(soep_c38_path, specs):
     pequiv_data.set_index(["pid", "syear"], inplace=True)
     pequiv_data.sort_index(inplace=True)
 
-    # create health states
-    # min_syear = pequiv_data.index.get_level_values("syear").min()
-    # max_syear = pequiv_data.index.get_level_values("syear").max()
-    min_syear = 1992
-    max_syear = 2016
+    # create health states for the survey years of interest
+
+    # min and max survey years for health states 
+    min_syear = specs['start_year_mortality']
+    max_syear = specs['end_year_mortality']
+
+    # create health state variable and span the dataframe
     pequiv_data = create_health_var(pequiv_data)
     pequiv_data = span_dataframe(pequiv_data, min_syear, max_syear)
     pequiv_data = clean_health_create_states(pequiv_data)
@@ -222,12 +261,12 @@ def fill_health_gaps_vectorized(df):
 
 
 # for every pid find the first observation year in the sample observations and save its age and health state
-def create_begin_age_and_health_state(df):
+def create_start_age_and_health_state(df):
     df = df.reset_index()
-    df["begin_age"] = df.groupby("pid")["age"].transform("min")
+    df["start_age"] = df.groupby("pid")["age"].transform("min")
     indx = df.groupby("pid")["syear"].idxmin()
-    df["begin_health_state"] = np.nan
-    df.loc[indx, "begin_health_state"] = df.loc[indx, "health_state"]
-    df["begin_health_state"] = df.groupby("pid")["begin_health_state"].transform("max")
+    df["start_health_state"] = np.nan
+    df.loc[indx, "start_health_state"] = df.loc[indx, "health_state"]
+    df["start_health_state"] = df.groupby("pid")["start_health_state"].transform("max")
     df = df.set_index(["pid", "syear"])
     return df

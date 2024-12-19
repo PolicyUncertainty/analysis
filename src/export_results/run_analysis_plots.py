@@ -23,9 +23,9 @@ else:
 
 
 # %%###################################
-# Health chracteristics
+# Health characteristics
 ######################################
-exec_health = input("Exectue Health characteristics? (y/n) ") == "y"
+exec_health = input("Execute Health characteristics? (y/n) ") == "y"
 if exec_health:
     from export_results.figures.expected_health import (
         plot_healthy_unhealthy,
@@ -37,12 +37,23 @@ if exec_health:
     plot_health_transition_prob(specs)
     plt.show()
     plt.close("all")
+    
+# %%###################################
+# Mortality characteristics
+######################################
+exec_mortality = input("Execute Mortality characteristics? (y/n) ") == "y"
+if exec_mortality:
+    from export_results.figures.expected_mortality import (
+        plot_mortality,
+    )
 
+    plot_mortality(path_dict, specs)
+    plt.close("all")
 
 # %%###################################
-# Family chracteristics
+# Family characteristics
 ######################################
-exec_family = input("Exectue family characteristics? (y/n) ") == "y"
+exec_family = input("Execute family characteristics? (y/n) ") == "y"
 if exec_family:
     from export_results.figures.family_params import (
         plot_children,

@@ -182,10 +182,24 @@ def test_marginal_utility(
 
     random_choice = np.random.choice(np.array([0, 1, 2]))
     marg_util_jax = jax.jacfwd(utility_func, argnums=0)(
-        consumption, partner_state, education, health, period, random_choice, params, options
+        consumption,
+        partner_state,
+        education,
+        health,
+        period,
+        random_choice,
+        params,
+        options,
     )
     marg_util_model = marg_utility(
-        consumption, partner_state, education, health, period, random_choice, params, options
+        consumption,
+        partner_state,
+        education,
+        health,
+        period,
+        random_choice,
+        params,
+        options,
     )
     np.testing.assert_almost_equal(marg_util_jax, marg_util_model)
 
@@ -229,11 +243,25 @@ def test_inv_marginal_utility(
     options = paths_and_specs[1]
     random_choice = np.random.choice(np.array([0, 1, 2]))
     marg_util = marg_utility(
-        consumption, partner_state, education, health, period, random_choice, params, options
+        consumption,
+        partner_state,
+        education,
+        health,
+        period,
+        random_choice,
+        params,
+        options,
     )
     np.testing.assert_almost_equal(
         inverse_marginal(
-            marg_util, partner_state, education, health, period, random_choice, params, options
+            marg_util,
+            partner_state,
+            education,
+            health,
+            period,
+            random_choice,
+            params,
+            options,
         ),
         consumption,
     )

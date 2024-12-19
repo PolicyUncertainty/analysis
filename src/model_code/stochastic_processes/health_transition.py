@@ -1,5 +1,6 @@
 import jax.numpy as jnp
 
+
 def health_transition(health_state, education, period, options):
     age = period + options["start_age"]
     trans_mat = options["health_trans_mat"]

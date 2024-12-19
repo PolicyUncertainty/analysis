@@ -22,17 +22,17 @@ else:
     raise ValueError("Either pre or post estimation plots.")
 
 
-
 # %% ########################################
 # Retirement timing relative to SRA
 show_retirement_timing = input("Show retirement timing plots? (y/n)") == "y"
 from export_results.figures.retirement_timing import plot_retirement_timing_data
+
 if show_retirement_timing:
     plot_retirement_timing_data(path_dict, params, specs)
     plt.show()
 
 # %%###################################
-# Health chracteristics
+# Health characteristics
 ######################################
 exec_health = input("Show health transition plots? (y/n) ") == "y"
 if exec_health:
@@ -47,11 +47,22 @@ if exec_health:
     plt.show()
     plt.close("all")
 
+# %%###################################
+# Mortality characteristics
+######################################
+exec_mortality = input("Execute Mortality characteristics? (y/n) ") == "y"
+if exec_mortality:
+    from export_results.figures.expected_mortality import (
+        plot_mortality,
+    )
+
+    plot_mortality(path_dict, specs)
+    plt.close("all")
 
 # %%###################################
-# Family chracteristics
+# Family characteristics
 ######################################
-exec_family = input("Show family transition plots? (y/n) ") == "y"
+exec_family = input("Execute family characteristics? (y/n) ") == "y"
 if exec_family:
     from export_results.figures.family_params import (
         plot_children,
@@ -136,4 +147,3 @@ if show_SRA:
 # plt.show()
 # plt.close("all")
 # %%
-

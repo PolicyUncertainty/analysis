@@ -67,12 +67,12 @@ def estimate_mortality(paths_dict, specs):
         # Define start parameters
         start_params = pd.DataFrame(
             data=[
-                [0.112323, 1e-8, np.inf],
-                [0.0, -np.inf, np.inf],
-                [0.0, -np.inf, np.inf],
-                [0.0, -np.inf, np.inf],
-                [0.0, -np.inf, np.inf],
-                [0.0, -np.inf, np.inf],
+                [0.10, 1e-8, np.inf],
+                [-0.77, -np.inf, np.inf],
+                [-0.30, -np.inf, np.inf],
+                [0.01, -np.inf, np.inf],
+                [0.36, -np.inf, np.inf],
+                [-13.21, -np.inf, np.inf],
             ],
             columns=["value", "lower_bound", "upper_bound"],
             index=[
@@ -103,9 +103,11 @@ def estimate_mortality(paths_dict, specs):
             ] *= np.exp(res.params.loc[param, "value"])
 
         print(res.summary())
-
         print(res.optimize_result)
+        # pkl the results for plotting
+        res.summary().to_pickle(paths_dict["est_results"] + f"est_params_mortality_{sex}.pkl")
 
+    
     # export the estimated mortality table and the original life table as csv
 
     # restrict the age range
@@ -161,7 +163,7 @@ def hazard_function(
 
 
 def survival_function(
-    age, health1_edu1, health1_edu0, health0_edu1, health0_edu0, params, set_age=False
+    age, health1_edu1, health1_edu0, health0_edu1, health0_edu0, params
 ):
     """Exp(-(integral of the hazard function as a function of age from 0 to age))"""
     cons = params.loc["intercept", "value"]
@@ -315,3 +317,4 @@ def loglike(params, data):
         print(params)
 
     return {"contributions": contributions, "value": contributions.sum()}
+

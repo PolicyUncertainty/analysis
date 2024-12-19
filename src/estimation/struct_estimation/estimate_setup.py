@@ -25,16 +25,22 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
 def estimate_model(
-    path_dict, params_to_estimate_names, file_append, slope_disutil_method, load_model
+    path_dict,
+    params_to_estimate_names,
+    file_append,
+    slope_disutil_method,
+    load_model,
+    last_estimate=None,
+    save_results=True,
 ):
     # Load start params and bounds
     start_params_all = load_and_set_start_params(path_dict)
     # # Assign start params from before
-    last_temp = pkl.load(
-        open(path_dict["intermediate_data"] + "estimation_cet_par/params_0.pkl", "rb")
-    )
-    start_params_all.update(last_temp)
-    start_params_all["bequest_scale"] = 1
+    # last_temp = pkl.load(
+    #    open(path_dict["intermediate_data"] + "estimation_cet_par/params_0.pkl", "rb")
+    # )
+    # start_params_all.update(last_temp)
+
     start_params = {name: start_params_all[name] for name in params_to_estimate_names}
 
     lower_bounds_all = yaml.safe_load(
@@ -56,6 +62,7 @@ def estimate_model(
         slope_disutil_method=slope_disutil_method,
         file_append=file_append,
         load_model=load_model,
+        save_results=save_results,
     )
 
     result = om.minimize(
@@ -86,9 +93,11 @@ class est_class_from_paths:
         slope_disutil_method,
         file_append,
         load_model,
+        save_results=True,
     ):
         self.iter_count = 0
         self.slope_disutil_method = slope_disutil_method
+        self.save_results = save_results
 
         intermediate_est_data = (
             path_dict["intermediate_data"] + f"estimation_{file_append}/"
@@ -104,6 +113,7 @@ class est_class_from_paths:
             update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
             policy_state_trans_func=expected_SRA_probs_estimation,
             load_model=load_model,
+            model_type="solution",
         )
 
         # Load data
@@ -111,7 +121,7 @@ class est_class_from_paths:
             path_dict, start_params_all, model, drop_retirees=True
         )
 
-        self.weights = data_decision["age_weights"].values
+        self.weights = np.ones_like(data_decision["age_weights"].values)
 
         # Create specs for unobserved states
         unobserved_state_specs = create_unobserved_state_specs(data_decision, model)
@@ -142,13 +152,14 @@ class est_class_from_paths:
             )
         ll_value_individual, model_solution = self.ll_func(params)
         ll_value = jnp.dot(self.weights, ll_value_individual)
-        save_iter_step(
-            model_solution,
-            ll_value,
-            params,
-            self.intermediate_est_data,
-            self.iter_count,
-        )
+        if self.save_results:
+            save_iter_step(
+                model_solution,
+                ll_value,
+                params,
+                self.intermediate_est_data,
+                self.iter_count,
+            )
         end = time.time()
         self.iter_count += 1
         print("Likelihood evaluation took, ", end - start)
@@ -156,24 +167,24 @@ class est_class_from_paths:
         return ll_value
 
 
-def update_according_to_slope_disutil(params, pt_ratio_low, pt_ratio_high):
+def update_according_to_slope_disutil(params, pt_ratio_bad, pt_ratio_good):
     """Use this function to entforce slope condition of disutility parameters."""
-    params["dis_util_unemployed_low"] = params["dis_util_not_retired_low"]
-    params["dis_util_pt_work_low"] = (
-        params["dis_util_not_retired_low"]
-        + pt_ratio_low * params["dis_util_working_low"]
+    params["dis_util_unemployed_bad"] = params["dis_util_not_retired_low"]
+    params["dis_util_pt_work_bad"] = (
+        params["dis_util_not_retired_bad"]
+        + pt_ratio_bad * params["dis_util_working_bad"]
     )
-    params["dis_util_ft_work_low"] = (
-        params["dis_util_not_retired_low"] + params["dis_util_working_low"]
+    params["dis_util_ft_work_bad"] = (
+        params["dis_util_not_retired_bad"] + params["dis_util_working_bad"]
     )
 
-    params["dis_util_unemployed_high"] = params["dis_util_not_retired_high"]
-    params["dis_util_pt_work_high"] = (
-        params["dis_util_not_retired_high"]
-        + pt_ratio_high * params["dis_util_working_high"]
+    params["dis_util_unemployed_good"] = params["dis_util_not_retired_good"]
+    params["dis_util_pt_work_good"] = (
+        params["dis_util_not_retired_good"]
+        + pt_ratio_good * params["dis_util_working_good"]
     )
-    params["dis_util_ft_work_high"] = (
-        params["dis_util_not_retired_high"] + params["dis_util_working_high"]
+    params["dis_util_ft_work_good"] = (
+        params["dis_util_not_retired_good"] + params["dis_util_working_good"]
     )
     return params
 
@@ -192,7 +203,7 @@ def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):
     specs = generate_derived_and_data_derived_specs(path_dict)
     # Load data
     data_decision = pd.read_pickle(path_dict["struct_est_sample"])
-    # We need to filter observations in period 0 because of job offer weighting
+    # We need to filter observations in period 0 because of job offer weighting from last period
     data_decision = data_decision[data_decision["period"] > 0]
     # Also already retired individuals hold no identification
     if drop_retirees:

@@ -24,6 +24,7 @@ BEQUEST_SCALE = np.linspace(1, 4, 2)
 PARTNER_STATE_GRIRD = np.array([0, 1, 2], dtype=int)
 NB_CHILDREN_GRID = np.arange(0, 2, 0.5, dtype=int)
 EDUCATION_GRID = np.array([0, 1], dtype=int)
+HEALTH_GRID = np.array([0, 1], dtype=int)
 PERIOD_GRID = np.arange(0, 15, 5, dtype=int)
 
 
@@ -49,12 +50,13 @@ def test_consumption_cale(partner_state, education, period, paths_and_specs):
 
 # """
 @pytest.mark.parametrize(
-    "consumption, partner_state, education, period, dis_util_work, dis_util_unemployed, mu",
+    "consumption, partner_state, education, health, period, dis_util_work, dis_util_unemployed, mu",
     list(
         product(
             CONSUMPTION_GRID,
             PARTNER_STATE_GRIRD,
             EDUCATION_GRID,
+            HEALTH_GRID,
             PERIOD_GRID,
             DISUTIL_WORK_GRID,
             DISUTIL_UNEMPLOYED_GRID,
@@ -66,6 +68,7 @@ def test_utility_func(
     consumption,
     partner_state,
     education,
+    health,
     period,
     dis_util_work,
     dis_util_unemployed,
@@ -74,28 +77,29 @@ def test_utility_func(
 ):
     params = {
         "mu": mu,
-        "dis_util_pt_work_high": dis_util_work + 1,
-        "dis_util_pt_work_low": dis_util_work,
-        "dis_util_ft_work_high": dis_util_work + 1,
-        "dis_util_ft_work_low": dis_util_work,
-        "dis_util_unemployed_high": dis_util_unemployed + 1,
-        "dis_util_unemployed_low": dis_util_unemployed,
+        "dis_util_pt_work_good": dis_util_work + 1,
+        "dis_util_pt_work_bad": dis_util_work,
+        "dis_util_ft_work_good": dis_util_work + 1,
+        "dis_util_ft_work_bad": dis_util_work,
+        "dis_util_unemployed_good": dis_util_unemployed + 1,
+        "dis_util_unemployed_bad": dis_util_unemployed,
     }
     options = paths_and_specs[1]
     cons_scale = consumption_scale(partner_state, education, period, options)
     cons_utility = (consumption / cons_scale) ** (1 - mu) / (1 - mu)
 
     # Read out disutil params
-    edu_str = "high" * education + "low" * (1 - education)
-    disutil_unemployment = np.exp(-params[f"dis_util_unemployed_{edu_str}"])
-    dis_util_pt_work = np.exp(-params[f"dis_util_pt_work_{edu_str}"])
-    dis_util_ft_work = np.exp(-params[f"dis_util_ft_work_{edu_str}"])
+    health_str = "good" * health + "bad" * (1 - health)
+    disutil_unemployment = np.exp(-params[f"dis_util_unemployed_{health_str}"])
+    dis_util_pt_work = np.exp(-params[f"dis_util_pt_work_{health_str}"])
+    dis_util_ft_work = np.exp(-params[f"dis_util_ft_work_{health_str}"])
 
     np.testing.assert_almost_equal(
         utility_func(
             consumption=consumption,
             partner_state=partner_state,
             education=education,
+            health=health,
             period=period,
             choice=1,
             params=params,
@@ -109,6 +113,7 @@ def test_utility_func(
             consumption=consumption,
             partner_state=partner_state,
             education=education,
+            health=health,
             period=period,
             choice=2,
             params=params,
@@ -122,6 +127,7 @@ def test_utility_func(
             consumption=consumption,
             partner_state=partner_state,
             education=education,
+            health=health,
             period=period,
             choice=3,
             params=params,
@@ -138,12 +144,13 @@ def test_utility_func(
 
 
 @pytest.mark.parametrize(
-    "consumption, partner_state, education, period, dis_util_work, dis_util_unemployed, mu",
+    "consumption, partner_state, education, health, period, dis_util_work, dis_util_unemployed, mu",
     list(
         product(
             CONSUMPTION_GRID,
             PARTNER_STATE_GRIRD,
             EDUCATION_GRID,
+            HEALTH_GRID,
             PERIOD_GRID,
             DISUTIL_WORK_GRID,
             DISUTIL_UNEMPLOYED_GRID,
@@ -155,6 +162,7 @@ def test_marginal_utility(
     consumption,
     partner_state,
     education,
+    health,
     period,
     dis_util_work,
     dis_util_unemployed,
@@ -164,31 +172,32 @@ def test_marginal_utility(
     options = paths_and_specs[1]
     params = {
         "mu": mu,
-        "dis_util_pt_work_high": dis_util_work + 1,
-        "dis_util_pt_work_low": dis_util_work,
-        "dis_util_ft_work_high": dis_util_work + 1,
-        "dis_util_ft_work_low": dis_util_work,
-        "dis_util_unemployed_high": dis_util_unemployed + 1,
-        "dis_util_unemployed_low": dis_util_unemployed,
+        "dis_util_pt_work_good": dis_util_work + 1,
+        "dis_util_pt_work_bad": dis_util_work,
+        "dis_util_ft_work_good": dis_util_work + 1,
+        "dis_util_ft_work_bad": dis_util_work,
+        "dis_util_unemployed_good": dis_util_unemployed + 1,
+        "dis_util_unemployed_bad": dis_util_unemployed,
     }
 
     random_choice = np.random.choice(np.array([0, 1, 2]))
     marg_util_jax = jax.jacfwd(utility_func, argnums=0)(
-        consumption, partner_state, education, period, random_choice, params, options
+        consumption, partner_state, education, health, period, random_choice, params, options
     )
     marg_util_model = marg_utility(
-        consumption, partner_state, education, period, random_choice, params, options
+        consumption, partner_state, education, health, period, random_choice, params, options
     )
     np.testing.assert_almost_equal(marg_util_jax, marg_util_model)
 
 
 @pytest.mark.parametrize(
-    "consumption, partner_state, education, period, dis_util_work, dis_util_unemployed, mu",
+    "consumption, partner_state, education, health, period, dis_util_work, dis_util_unemployed, mu",
     list(
         product(
             CONSUMPTION_GRID,
             PARTNER_STATE_GRIRD,
             EDUCATION_GRID,
+            HEALTH_GRID,
             PERIOD_GRID,
             DISUTIL_WORK_GRID,
             DISUTIL_UNEMPLOYED_GRID,
@@ -200,6 +209,7 @@ def test_inv_marginal_utility(
     consumption,
     partner_state,
     education,
+    health,
     period,
     dis_util_work,
     dis_util_unemployed,
@@ -208,22 +218,22 @@ def test_inv_marginal_utility(
 ):
     params = {
         "mu": mu,
-        "dis_util_pt_work_high": dis_util_work + 1,
-        "dis_util_pt_work_low": dis_util_work,
-        "dis_util_ft_work_high": dis_util_work + 1,
-        "dis_util_ft_work_low": dis_util_work,
-        "dis_util_unemployed_high": dis_util_unemployed + 1,
-        "dis_util_unemployed_low": dis_util_unemployed,
+        "dis_util_pt_work_good": dis_util_work + 1,
+        "dis_util_pt_work_bad": dis_util_work,
+        "dis_util_ft_work_good": dis_util_work + 1,
+        "dis_util_ft_work_bad": dis_util_work,
+        "dis_util_unemployed_good": dis_util_unemployed + 1,
+        "dis_util_unemployed_bad": dis_util_unemployed,
     }
 
     options = paths_and_specs[1]
     random_choice = np.random.choice(np.array([0, 1, 2]))
     marg_util = marg_utility(
-        consumption, partner_state, education, period, random_choice, params, options
+        consumption, partner_state, education, health, period, random_choice, params, options
     )
     np.testing.assert_almost_equal(
         inverse_marginal(
-            marg_util, partner_state, education, period, random_choice, params, options
+            marg_util, partner_state, education, health, period, random_choice, params, options
         ),
         consumption,
     )

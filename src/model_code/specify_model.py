@@ -7,6 +7,7 @@ from dcegm.pre_processing.setup_model import setup_and_save_model
 from dcegm.solve import get_solve_func_for_model
 from model_code.state_space import create_state_space_functions
 from model_code.state_space import sparsity_condition
+from model_code.stochastic_processes.health_transition import health_transition
 from model_code.stochastic_processes.informed_state_transition import (
     informed_transition,
 )
@@ -55,11 +56,11 @@ def specify_model(
 
     options = {
         "state_space": {
+            # "min_period_batch_segments": [33, 44],
             "n_periods": n_periods,
             "choices": choices,
             "endogenous_states": {
                 "education": np.arange(specs["n_education_types"], dtype=int),
-                "sparsity_condition": sparsity_condition,
             },
             "exogenous_processes": {
                 "policy_state": {
@@ -74,6 +75,10 @@ def specify_model(
                     "transition": partner_transition,
                     "states": np.arange(specs["n_partner_states"], dtype=int),
                 },
+                "health": {
+                    "transition": health_transition,
+                    "states": np.arange(specs["n_health_states"], dtype=int),
+                },
             },
             "continuous_states": {
                 "wealth": savings_grid,
@@ -87,7 +92,7 @@ def specify_model(
         options["state_space"]["endogenous_states"]["informed"] = informed_states
         model_path = path_dict["intermediate_data"] + "model_spec_solution.pkl"
     elif model_type == "simulation":
-        options["state_space"]["exogenous_states"]["informed"] = {
+        options["state_space"]["exogenous_processes"]["informed"] = {
             "transition": informed_transition,
             "states": informed_states,
         }
@@ -141,6 +146,7 @@ def specify_and_solve_model(
         policy_state_trans_func=policy_state_trans_func,
         params=params,
         load_model=load_model,
+        model_type="solution",
     )
 
     solution_file = path_dict["intermediate_data"] + (

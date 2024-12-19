@@ -1,4 +1,5 @@
-import jax.lax
+import jax
+import jax.numpy as jnp
 import numpy as np
 from model_code.wealth_and_budget.pensions import (
     calc_experience_for_total_pension_points,
@@ -8,25 +9,99 @@ from model_code.wealth_and_budget.pensions import calc_total_pension_points
 
 def create_state_space_functions():
     return {
-        "get_state_specific_choice_set": state_specific_choice_set,
-        "update_continuous_state": get_next_period_experience,
+        "state_specific_choice_set": state_specific_choice_set,
+        "next_period_experience": get_next_period_experience,
+        "sparsity_condition": sparsity_condition,
     }
 
 
-def sparsity_condition(period, lagged_choice, options):
+def sparsity_condition(
+    period,
+    lagged_choice,
+    informed,
+    health,
+    partner_state,
+    policy_state,
+    education,
+    options,
+):
     start_age = options["start_age"]
     max_ret_age = options["max_ret_age"]
     min_ret_age_state_space = options["min_ret_age"]
+    # Generate last period, because only here are death states
+    last_period = options["n_periods"] - 1
+    # Degenerated policy state
+    degenerate_policy_state = options["n_policy_states"] - 1
 
     age = start_age + period
     # You cannot retire before the earliest retirement age
     if (age <= min_ret_age_state_space) & (lagged_choice == 0):
         return False
-    # After the maximum retirement age, you must be retired
-    elif (age > max_ret_age) & (lagged_choice != 0):
+    # After the maximum retirement age, you must be retired.
+    elif (age > max_ret_age) & (lagged_choice != 0) & (health != 2):
         return False
     else:
-        return True
+        # Now turn to the states, where it is decided by the value of an exogenous
+        # state if it is valid or not. For invalid states we provide a proxy child state
+        if health == 2:
+            # Lead all states with death to last period death states
+            # with job offer 0 (not relevant for bequest). You could be in principle
+            # die upon retirement for which we need informed and policy state
+            state_proxy = {
+                "period": last_period,
+                "lagged_choice": lagged_choice,
+                "education": education,
+                "health": health,
+                "informed": informed,
+                "partner_state": partner_state,
+                "job_offer": 0,
+                "policy_state": policy_state,
+            }
+            return state_proxy
+        elif (age <= max_ret_age + 1) and (lagged_choice == 0):
+            # If retirement is already chosen we proxy all states to job offer 0.
+            # Until age max_ret_age + 1 the individual could also be freshly retired
+            # so we check if the policy state is degenerated. If so, we proxy to
+            # informed states only
+            if policy_state == degenerate_policy_state:
+                state_proxy = {
+                    "period": period,
+                    "lagged_choice": lagged_choice,
+                    "education": education,
+                    "health": health,
+                    "informed": informed,
+                    "partner_state": partner_state,
+                    "job_offer": 0,
+                    "policy_state": policy_state,
+                }
+            else:
+                state_proxy = {
+                    "period": period,
+                    "lagged_choice": lagged_choice,
+                    "education": education,
+                    "health": health,
+                    "informed": informed,
+                    "partner_state": partner_state,
+                    "job_offer": 0,
+                    "policy_state": policy_state,
+                }
+            return state_proxy
+        elif age > max_ret_age + 1:
+            # If age is larger than max_ret_age + 1, the individual can only be longer retired.
+            # We can degenerate the policy state to and also only keep informed.
+            state_proxy = {
+                "period": period,
+                "lagged_choice": lagged_choice,
+                "education": education,
+                "health": health,
+                "informed": 1,
+                "partner_state": partner_state,
+                "job_offer": 0,
+                "policy_state": options["n_policy_states"] - 1,
+            }
+            return state_proxy
+        else:
+            return True
 
 
 def state_specific_choice_set(period, lagged_choice, policy_state, job_offer, options):
@@ -57,7 +132,7 @@ def apply_retirement_constraint_for_SRA(SRA, options):
 
 
 def get_next_period_experience(
-    period, lagged_choice, policy_state, education, experience, informed_state, options
+    period, lagged_choice, policy_state, education, experience, informed, options
 ):
     """Update experience based on lagged choice and period."""
     max_experience_period = period + options["max_init_experience"]
@@ -75,7 +150,7 @@ def get_next_period_experience(
 
     # Calculate experience with early retirement penalty
     experience_years_with_penalty = calc_experience_years_for_pension_adjustment(
-        period, exp_years_last_period, education, policy_state, informed_state, options
+        period, exp_years_last_period, education, policy_state, informed, options
     )
     # Update if fresh retired
     exp_new_period = jax.lax.select(
@@ -85,7 +160,7 @@ def get_next_period_experience(
 
 
 def calc_experience_years_for_pension_adjustment(
-    period, experience_years, education, policy_state, informed_state, options
+    period, experience_years, education, policy_state, informed, options
 ):
     """Calculate the reduced experience with early retirement penalty."""
     total_pension_points = calc_total_pension_points(
@@ -95,17 +170,34 @@ def calc_experience_years_for_pension_adjustment(
     )
     # retirement age is last periods age
     actual_retirement_age = options["start_age"] + period - 1
-    # SRA at retirement
+    # SRA at retirement, difference to actual retirement age and boolean for early retirement
     SRA_at_retirement = options["min_SRA"] + policy_state * options["SRA_grid_size"]
-    # deduction (bonus) factor for early (late) retirement
-    ERP_informed = options["early_retirement_penalty"]
-    ERP_uninformed = options["uninformed_early_retirement_penalty"][education]
-    ERP = informed_state * ERP_informed + (1 - informed_state) * ERP_uninformed
-    pension_deduction = (SRA_at_retirement - actual_retirement_age) * ERP
-    pension_factor = 1 - pension_deduction
-    reduced_pension_points = pension_factor * total_pension_points
+    retirement_age_difference = jnp.abs(SRA_at_retirement - actual_retirement_age)
+    early_retired_bool = actual_retirement_age < SRA_at_retirement
 
+    # deduction factor for early  retirement
+    early_retirement_penalty_informed = options["early_retirement_penalty"]
+    early_retirement_penalty_uninformed = options[
+        "uninformed_early_retirement_penalty"
+    ][education]
+    early_retirement_penalty = (
+        informed * early_retirement_penalty_informed
+        + (1 - informed) * early_retirement_penalty_uninformed
+    )
+    early_retirement_penalty = 1 - early_retirement_penalty * retirement_age_difference
+
+    # Total bonus for late retirement
+    late_retirement_bonus = 1 + (
+        options["late_retirement_bonus"] * retirement_age_difference
+    )
+
+    # Select bonus or penalty depending on age difference
+    pension_factor = jax.lax.select(
+        early_retired_bool, early_retirement_penalty, late_retirement_bonus
+    )
+
+    adjusted_pension_points = pension_factor * total_pension_points
     reduced_experience_years = calc_experience_for_total_pension_points(
-        reduced_pension_points, education, options
+        adjusted_pension_points, education, options
     )
     return reduced_experience_years

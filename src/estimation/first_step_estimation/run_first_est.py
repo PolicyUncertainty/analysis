@@ -75,6 +75,7 @@ if input_str == "h":
     # Estimate health transitions
     from estimation.first_step_estimation.est_health_transition import (
         estimate_health_transitions,
+        estimate_health_transitions_parametric,
     )
 
     estimate_health_transitions(paths_dict, specs)
@@ -83,7 +84,6 @@ if input_str == "m":
     # Estimate mortality
     from estimation.first_step_estimation.est_mortality import estimate_mortality
 
-    estimate_mortality(paths_dict, specs)
 
 if input_str == "i":
     # Estimate informed state transition

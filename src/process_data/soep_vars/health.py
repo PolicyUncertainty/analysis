@@ -1,11 +1,11 @@
 import numpy as np
 
-def create_health_var(data):
 
+def create_health_var(data):
     """This function creates the health variables in the soep-PEQUIV dataset.
 
     - m11126: Self-Rated Health Status
-    - m11124: Disability Status of Individual 
+    - m11124: Disability Status of Individual
 
     The function replaces the following values in the health variables:
     - [-1] keine Angabe
@@ -15,20 +15,27 @@ def create_health_var(data):
     with np.nan and converts the variables to float.
 
     The function uses a two category split of the population, encoding 1 if an
-    individual has good health and 0 if an individual has bad health. 
+    individual has good health and 0 if an individual has bad health.
 
     """
 
-    data = data[data["m11126"] >= 0] 
-    print(str(len(data)) + " observations left after dropping observations with missing health data.")
-    
-    data = data[data["m11124"] >= 0] 
-    print(str(len(data)) + " observations left after dropping observations with missing disability data.")
+    data = data[data["m11126"] >= 0]
+    print(
+        str(len(data))
+        + " observations left after dropping people with missing health data."
+    )
 
-   
+    data = data[data["m11124"] >= 0]
+    print(
+        str(len(data))
+        + " observations left after dropping people with missing disability data."
+    )
+
     # create health state = 0 if bad health, 1 if good health
     data["health_state"] = 0
-    data.loc[data["m11126"].isin([1, 2, 3]) & data["m11124"].isin([0]), "health_state"] = 1
+    data.loc[
+        data["m11126"].isin([1, 2, 3]) & data["m11124"].isin([0]), "health_state"
+    ] = 1
 
     return data
 
@@ -43,10 +50,9 @@ def clean_health_create_states(data):
     data["lead_health_state"] = data.groupby(["pid"])["health_state"].shift(-1)
 
     # one year bad health in between two years of good health is still considered good health
-    data.loc[ 
-        (data["lag_health_state"] == 1) & 
-        (data["lead_health_state"] == 1),
-        "health_state"
+    data.loc[
+        (data["lag_health_state"] == 1) & (data["lead_health_state"] == 1),
+        "health_state",
     ] = 1
 
     # update lead_health_state

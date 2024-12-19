@@ -31,10 +31,8 @@ def create_survival_transition_sample(paths, specs, load_data=False):
     df = load_and_merge_datasets(paths["soep_c38"], specs)
 
     # filter age and estimation years
-    df = filter_below_age(df, 16)
-    df = filter_above_age(df, 110)
-
-    # filter years
+    df = filter_below_age(df, specs["start_age_mortality"])
+    df = filter_above_age(df, specs["end_age_mortality"])
     df = filter_years(df, specs["start_year_mortality"], specs["end_year_mortality"])
 
     # create columns for the start age and health state
@@ -82,32 +80,34 @@ def create_survival_transition_sample(paths, specs, load_data=False):
         paths["intermediate_data"] + "mortality_transition_estimation_sample_duplicated.pkl"
     )
     
-    # df1 = original sample, df2 = duplicated sample with "unknown" health and education
+    # Create original and duplicated samples
     df1 = df.copy().reset_index()
     df2 = df.copy().reset_index()
+
+    # Modify df2 with unknown values
     df2["education"] = np.nan
     df2["health_state"] = np.nan
     df2["start_health_state"] = np.nan
+
+    # Add true_sample indicators
     df1["true_sample"] = 1
     df2["true_sample"] = 0
+
+    # Concatenate the two samples
     dupli_df = pd.concat([df1, df2])
     dupli_df.set_index(["pid", "syear", "true_sample"], inplace=True)
     dupli_df.sort_index(inplace=True)
-    # interaction indicators for health and education 
-    dupli_df["health1_edu1"] = (dupli_df["health_state"] == 1) & (dupli_df["education"] == 1)
-    dupli_df["health1_edu0"] = (dupli_df["health_state"] == 1) & (dupli_df["education"] == 0)
-    dupli_df["health0_edu1"] = (dupli_df["health_state"] == 0) & (dupli_df["education"] == 1)
-    dupli_df["health0_edu0"] = (dupli_df["health_state"] == 0) & (dupli_df["education"] == 0)
-    # interaction indicators for start health and education
-    dupli_df["start_health1_edu1"] = (dupli_df["start_health_state"] == 1) & (dupli_df["education"] == 1)
-    dupli_df["start_health1_edu0"] = (dupli_df["start_health_state"] == 1) & (dupli_df["education"] == 0)
-    dupli_df["start_health0_edu1"] = (dupli_df["start_health_state"] == 0) & (dupli_df["education"] == 1)
-    dupli_df["start_health0_edu0"] = (dupli_df["start_health_state"] == 0) & (dupli_df["education"] == 0)
 
-    # convert to df to floats for computation
+    # Create interaction indicators for health and education
+    dupli_df = create_interaction_columns(dupli_df, ("health_state", "health"), ("education", "edu"))
+
+    # Create interaction indicators for start health and education
+    dupli_df = create_interaction_columns(dupli_df, ("start_health_state", "start_health"), ("education", "edu"))
+
+    # Convert DataFrame to floats for computation
     dupli_df = dupli_df.astype(float)
 
-    # save the duplicated sample
+    # Save the duplicated sample
     dupli_df.to_pickle(out_file_path_dupli)
 
     # return the true sample
@@ -127,7 +127,6 @@ def load_and_merge_datasets(soep_c38_path, specs):
     # set index and age
     df["age"] = df["syear"] - df["gebjahr"]
     df = df.set_index(["pid", "syear"])
-    
 
     return df
 
@@ -216,19 +215,16 @@ def load_and_process_soep_health(soep_c38_path, specs):
     pequiv_data.set_index(["pid", "syear"], inplace=True)
     pequiv_data.sort_index(inplace=True)
 
-    # create health states for the survey years of interest
 
-    # min and max survey years for health states 
-    min_syear = specs['start_year_mortality']
-    max_syear = specs['end_year_mortality']
 
     # create health state variable and span the dataframe
     pequiv_data = create_health_var(pequiv_data)
-    pequiv_data = span_dataframe(pequiv_data, min_syear, max_syear)
+    pequiv_data = span_dataframe(pequiv_data, specs['start_year_mortality'], specs['end_year_mortality'])
     pequiv_data = clean_health_create_states(pequiv_data)
-
     # Fill health gaps
     pequiv_data = fill_health_gaps_vectorized(pequiv_data)
+    # forward fill health state for every individual
+    pequiv_data["health_state"] = pequiv_data.groupby("pid")["health_state"].ffill() # TO DO: this makes the fill gaps function obsolete and is a very strong assumption
 
     # # for deaths, set the health state to the last known health state
     # pequiv_data["last_known_health_state"] = pequiv_data.groupby("pid")["health_state"].transform("last")
@@ -239,18 +235,22 @@ def load_and_process_soep_health(soep_c38_path, specs):
     #     "last_known_health_state",
     # ]
 
-    # forward fill health state for every individual
-    # TO DO: this makes the fill gaps function obsolete and is a very strong assumption
-    pequiv_data["health_state"] = pequiv_data.groupby("pid")["health_state"].ffill()
-
     # drop individuals without any health state information
     pequiv_data = pequiv_data[(pequiv_data["health_state"].notna())]
 
     return pequiv_data
 
 
-# fill gaps were first and last known health state are identical with that value
 def fill_health_gaps_vectorized(df):
+    """
+    Fill gaps where the first and last known health state are identical.
+
+    Parameters:
+        df (DataFrame): The DataFrame containing the "health_state" column.
+
+    Returns:
+        DataFrame: The modified DataFrame with filled health state gaps.
+    """
     ffilled = df.groupby("pid")["health_state"].ffill()
     bfilled = df.groupby("pid")["health_state"].bfill()
     agreeing_mask = ffilled == bfilled
@@ -259,9 +259,16 @@ def fill_health_gaps_vectorized(df):
     )
     return df
 
-
-# for every pid find the first observation year in the sample observations and save its age and health state
 def create_start_age_and_health_state(df):
+    """
+    Determine the starting age and health state for each "pid".
+
+    Parameters:
+        df (DataFrame): The DataFrame containing "pid", "age", and "syear" columns.
+
+    Returns:
+        DataFrame: The modified DataFrame with "start_age" and "start_health_state" columns.
+    """
     df = df.reset_index()
     df["start_age"] = df.groupby("pid")["age"].transform("min")
     indx = df.groupby("pid")["syear"].idxmin()
@@ -269,4 +276,25 @@ def create_start_age_and_health_state(df):
     df.loc[indx, "start_health_state"] = df.loc[indx, "health_state"]
     df["start_health_state"] = df.groupby("pid")["start_health_state"].transform("max")
     df = df.set_index(["pid", "syear"])
+    return df
+
+
+def create_interaction_columns(df, col1_info, col2_info):
+    """
+    Create interaction indicator columns based on two 0-1-columns in the DataFrame.
+
+    Parameters:
+        df (DataFrame): The DataFrame to modify.
+        col1_info (tuple): A tuple containing the column name and prefix for the first column (e.g., ("col1", "prefix1")).
+        col2_info (tuple): A tuple containing the column name and prefix for the second column (e.g., ("col2", "prefix2")).
+
+    Returns:
+        DataFrame: The modified DataFrame with new interaction columns.
+    """
+    column1, prefix1 = col1_info
+    column2, prefix2 = col2_info
+    combinations = [(1, 1), (1, 0), (0, 1), (0, 0)]
+    for val1, val2 in combinations:
+        col_name = f"{prefix1}{val1}_{prefix2}{val2}"
+        df[col_name] = (df[column1] == val1) & (df[column2] == val2)
     return df

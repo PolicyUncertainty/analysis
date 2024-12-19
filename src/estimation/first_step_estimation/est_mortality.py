@@ -29,13 +29,11 @@ def estimate_mortality(paths_dict, specs):
         for combo in combinations
     ])
     mortality_df.reset_index(drop=True, inplace=True)
+    
 
     # keep a copy of the original data for plotting
-    lifetable = mortality_df[['age', 'sex', 'death_prob']]
-    lifetable.drop_duplicates(inplace=True)
-
-
-
+    lifetable_df = mortality_df[['age', 'sex', 'death_prob']]
+    lifetable_df.drop_duplicates(inplace=True)
 
 
     # Load the data for estimation of hazard ratios for different health and education levels
@@ -65,7 +63,7 @@ def estimate_mortality(paths_dict, specs):
 
             # Define start parameters
             start_params = pd.DataFrame(
-                data=[[0.112323, 1e-8, np.inf], [-0.948614, -np.inf, np.inf], [-0.305523, -np.inf, np.inf], [0.025618, -np.inf, np.inf], [0.346421, -np.inf, np.inf], [-13.407902, -np.inf, np.inf]],
+                data=[[0.112323, 1e-8, np.inf], [0.0, -np.inf, np.inf], [0.0, -np.inf, np.inf], [0.0, -np.inf, np.inf], [0.0, -np.inf, np.inf], [0.0, -np.inf, np.inf]],
                 columns=["value", "lower_bound", "upper_bound"],
                 index=["age", "health1_edu1", "health1_edu0", "health0_edu1", "health0_edu0", "intercept"],
             )
@@ -91,9 +89,25 @@ def estimate_mortality(paths_dict, specs):
 
             print(res.optimize_result)
 
-    # export the estimated mortality table as a csv file
+    # export the estimated mortality table and the original life table as csv
+
+    # restrict the age range
+    lifetable_df = lifetable_df[(lifetable_df["age"] >= specs["start_age_mortality"]) & (lifetable_df["age"] <= specs["end_age_mortality"])]
+    mortality_df = mortality_df[(mortality_df["age"] >= specs["start_age_mortality"]) & (mortality_df["age"] <= specs["end_age_mortality"])]
+    # convert age to period
+    lifetable_df["period"] = lifetable_df["age"] - specs["start_age_mortality"]
+    mortality_df["period"] = mortality_df["age"] - specs["start_age_mortality"]
+    # order columns
+    mortality_df = mortality_df[["period", "sex", "health", "education", "death_prob"]]
+    lifetable_df = lifetable_df[["period", "sex", "death_prob"]]
+    # save to csv
     mortality_df.to_csv(
         paths_dict["est_results"] + "mortality_transition_matrix.csv",
+        sep=",",
+        index=False,
+    )
+    lifetable_df.to_csv(
+        paths_dict["est_results"] + "lifetable.csv",
         sep=",",
         index=False,
     )

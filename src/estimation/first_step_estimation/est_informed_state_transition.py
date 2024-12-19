@@ -14,6 +14,7 @@ def calibrate_uninformed_hazard_rate(paths, specs):
     age.
 
     """
+
     out_file_path_rates = paths["est_results"] + "uninformed_hazard_rate.csv"
     out_file_shares = paths["est_results"] + "predicted_shares.csv"
     out_file_path_belief = paths["est_results"] + "uninformed_average_belief.csv"
@@ -77,12 +78,6 @@ def open_and_filter_dataset(paths, specs):
 
     # recode education
     df["education"] = df["education"].replace({1: 0, 2: 0, 3: 1})
-    # Age as int
-    df["age"] = df["age"].astype(int)
-
-    # Restrict dataset to relevant age range and filter invalid beliefs
-    df = df[df["belief_pens_deduct"] >= 0]
-    df = df[df["age"] <= specs["max_ret_age"]]
     return df
 
 

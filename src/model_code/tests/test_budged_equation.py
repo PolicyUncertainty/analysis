@@ -376,6 +376,7 @@ def test_fresh_retiree(
     policy_state,
     informed,
     paths_and_specs,
+    informed_state=0,
 ):
     path_dict, specs_internal = paths_and_specs
 

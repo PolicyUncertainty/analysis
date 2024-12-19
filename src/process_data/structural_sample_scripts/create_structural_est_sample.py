@@ -7,10 +7,11 @@ from process_data.aux_scripts.lagged_and_lead_vars import (
 )
 from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.experience import create_experience_variable
+from process_data.soep_vars.health import create_health_var
 from process_data.soep_vars.job_hire_and_fire import determine_observed_job_offers
 from process_data.soep_vars.job_hire_and_fire import generate_job_separation_var
 from process_data.soep_vars.partner_code import create_partner_state
-from process_data.soep_vars.wealth import add_wealth
+from process_data.soep_vars.wealth import add_wealth_interpolate_and_deflate
 from process_data.soep_vars.work_choices import create_choice_variable
 from process_data.structural_sample_scripts.informed_state import create_informed_state
 from process_data.structural_sample_scripts.model_restrictions import (
@@ -19,50 +20,40 @@ from process_data.structural_sample_scripts.model_restrictions import (
 from process_data.structural_sample_scripts.policy_state import create_policy_state
 
 
-def create_structural_est_sample(paths, specs, load_data=False):
+def create_structural_est_sample(paths, specs, load_data=False, debug=False):
     if not os.path.exists(paths["intermediate_data"]):
         os.makedirs(paths["intermediate_data"])
 
     out_file_path = paths["intermediate_data"] + "structural_estimation_sample.pkl"
 
     if load_data:
-        data = pd.read_pickle(out_file_path)
-        return data
+        df = pd.read_pickle(out_file_path)
+        if debug:
+            print("Debug mode active. Executing only subset of the code")
+            # paste functions to be tested individually here
+            df = add_wealth_interpolate_and_deflate(df, paths, specs)
+        else:
+            return df
 
     # Load and merge data state data from SOEP core (all but wealth)
     df = load_and_merge_soep_core(soep_c38_path=paths["soep_c38"])
 
-    # Create partner state(Merges also partners)
     df = create_partner_state(df, filter_missing=True)
-
-    # (labor) choice
     df = create_choice_variable(df)
 
     # filter data. Leave additional years in for lagging and leading. For now no women
     df = filter_data(df, specs, no_women=True)
 
-    # Job separation
     df = generate_job_separation_var(df)
-
-    # lagged choice
     df = create_lagged_and_lead_variables(df, specs)
-
-    # Add wealth data
-    df = add_wealth(df, paths, specs)
-
-    # Create period
+    df = add_wealth_interpolate_and_deflate(df, paths, specs)
     df["period"] = df["age"] - specs["start_age"]
-
-    # policy_state
     df = create_policy_state(df, specs)
-
-    # experience
     df = create_experience_variable(df)
-
-    # education
     df = create_education_type(df)
+    df = create_health_var(df)
 
-    # additional restrictions based on model setup
+    # enforce choice restrictions based on model setup
     df = enforce_model_choice_restriction(df, specs)
 
     # Create informed state
@@ -88,6 +79,7 @@ def create_structural_est_sample(paths, specs, load_data=False):
         "wealth": "float32",
         "education": "int8",
         "children": "int8",
+        "health_state": "int8",
     }
     df = df[list(type_dict.keys())]
     df = df.astype(type_dict)
@@ -96,9 +88,6 @@ def create_structural_est_sample(paths, specs, load_data=False):
 
     # Anonymize and save data
     df.reset_index(drop=True, inplace=True)
-    df.to_pickle(out_file_path)
-
-    # save data
     df.to_pickle(out_file_path)
 
     return df
@@ -146,7 +135,7 @@ def load_and_merge_soep_core(soep_c38_path):
         merged_data, pl_data, on=["pid", "hid", "syear"], how="inner"
     )
 
-    # Now get household level data
+    # get household level data
     hl_data = pd.read_stata(
         f"{soep_c38_path}/hl.dta",
         columns=["hid", "syear", "hlc0043"],
@@ -155,13 +144,17 @@ def load_and_merge_soep_core(soep_c38_path):
     merged_data = pd.merge(merged_data, hl_data, on=["hid", "syear"], how="left")
     pequiv_data = pd.read_stata(
         # d11107: number of children in household
+        # d11101: age of individual
+        # m11126: Self-Rated Health Status
+        # m11124: Disability Status of Individual
         f"{soep_c38_path}/pequiv.dta",
-        columns=["pid", "syear", "d11107"],
+        columns=["pid", "syear", "d11107", "d11101", "m11126", "m11124"],
+        convert_categoricals=False,
     )
     merged_data = pd.merge(merged_data, pequiv_data, on=["pid", "syear"], how="inner")
     merged_data.rename(columns={"d11107": "children"}, inplace=True)
 
-    merged_data["age"] = merged_data["syear"] - merged_data["gebjahr"]
+    merged_data["age"] = merged_data["d11101"].astype(int)
     merged_data.set_index(["pid", "syear"], inplace=True)
     print(str(len(merged_data)) + " observations in SOEP C38 core.")
     return merged_data

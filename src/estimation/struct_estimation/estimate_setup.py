@@ -35,9 +35,11 @@ def estimate_model(
 ):
     # Load start params and bounds
     start_params_all = load_and_set_start_params(path_dict)
-
-    if last_estimate is not None:
-        start_params_all.update(last_estimate)
+    # # Assign start params from before
+    # last_temp = pkl.load(
+    #    open(path_dict["intermediate_data"] + "estimation_cet_par/params_0.pkl", "rb")
+    # )
+    # start_params_all.update(last_temp)
 
     start_params = {name: start_params_all[name] for name in params_to_estimate_names}
 
@@ -165,24 +167,24 @@ class est_class_from_paths:
         return ll_value
 
 
-def update_according_to_slope_disutil(params, pt_ratio_low, pt_ratio_high):
+def update_according_to_slope_disutil(params, pt_ratio_bad, pt_ratio_good):
     """Use this function to entforce slope condition of disutility parameters."""
-    params["dis_util_unemployed_low"] = params["dis_util_not_retired_low"]
-    params["dis_util_pt_work_low"] = (
-        params["dis_util_not_retired_low"]
-        + pt_ratio_low * params["dis_util_working_low"]
+    params["dis_util_unemployed_bad"] = params["dis_util_not_retired_low"]
+    params["dis_util_pt_work_bad"] = (
+        params["dis_util_not_retired_bad"]
+        + pt_ratio_bad * params["dis_util_working_bad"]
     )
-    params["dis_util_ft_work_low"] = (
-        params["dis_util_not_retired_low"] + params["dis_util_working_low"]
+    params["dis_util_ft_work_bad"] = (
+        params["dis_util_not_retired_bad"] + params["dis_util_working_bad"]
     )
 
-    params["dis_util_unemployed_high"] = params["dis_util_not_retired_high"]
-    params["dis_util_pt_work_high"] = (
-        params["dis_util_not_retired_high"]
-        + pt_ratio_high * params["dis_util_working_high"]
+    params["dis_util_unemployed_good"] = params["dis_util_not_retired_good"]
+    params["dis_util_pt_work_good"] = (
+        params["dis_util_not_retired_good"]
+        + pt_ratio_good * params["dis_util_working_good"]
     )
-    params["dis_util_ft_work_high"] = (
-        params["dis_util_not_retired_high"] + params["dis_util_working_high"]
+    params["dis_util_ft_work_good"] = (
+        params["dis_util_not_retired_good"] + params["dis_util_working_good"]
     )
     return params
 

@@ -19,7 +19,7 @@ def informed_transition(choice, education, informed, options):
     prob_informed = jax.lax.select(uninformed, hazard_rate_edu, 1.0)
     prob_vector = jnp.array([1 - prob_informed, prob_informed])
 
-    # If retirement is choosen the transition vector is ([0, 1]) as they transfer with
+    # If retirement is chosen the transition vector is ([0, 1]) as they transfer with
     # certainty to the informed state
     retirement_bool = choice == 0
     certaint_transition = jnp.array([0, 1], dtype=prob_vector.dtype)

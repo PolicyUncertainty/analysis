@@ -7,6 +7,7 @@ from dcegm.pre_processing.setup_model import setup_and_save_model
 from dcegm.solve import get_solve_func_for_model
 from model_code.state_space import create_state_space_functions
 from model_code.state_space import sparsity_condition
+from model_code.stochastic_processes.health_transition import health_transition
 from model_code.stochastic_processes.informed_state_transition import (
     informed_transition,
 )
@@ -55,12 +56,11 @@ def specify_model(
 
     options = {
         "state_space": {
-            "min_period_batch_segments": [33, 44],
+            # "min_period_batch_segments": [33, 44],
             "n_periods": n_periods,
             "choices": choices,
             "endogenous_states": {
                 "education": np.arange(specs["n_education_types"], dtype=int),
-                "sparsity_condition": sparsity_condition,
             },
             "exogenous_processes": {
                 "policy_state": {
@@ -74,6 +74,10 @@ def specify_model(
                 "partner_state": {
                     "transition": partner_transition,
                     "states": np.arange(specs["n_partner_states"], dtype=int),
+                },
+                "health": {
+                    "transition": health_transition,
+                    "states": np.arange(specs["n_health_states"], dtype=int),
                 },
             },
             "continuous_states": {

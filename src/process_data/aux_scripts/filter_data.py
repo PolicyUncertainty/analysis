@@ -1,7 +1,8 @@
 def filter_years(df, start_year, end_year):
     df = df.loc[(slice(None), range(start_year, end_year + 1)), :]
     print(
-        str(len(df)) + f" left after dropping people outside of estimation years {start_year} - {end_year}."
+        str(len(df))
+        + f" left after dropping people outside of estimation years {start_year} - {end_year}."
     )
     return df
 
@@ -14,12 +15,11 @@ def filter_below_age(df, age):
     )
     return df
 
+
 def filter_above_age(df, age):
     # filter
     df = df[df["age"] <= age]
-    print(
-        str(len(df)) + " left after dropping people over " + str(age) + " years old."
-    )
+    print(str(len(df)) + " left after dropping people over " + str(age) + " years old.")
     return df
 
 

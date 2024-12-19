@@ -17,6 +17,8 @@ dependencies:
   - pandas
   - linearmodels
   - statsmodels
+  - lifelines
+  - optimagic
 
   # Misc
   - black

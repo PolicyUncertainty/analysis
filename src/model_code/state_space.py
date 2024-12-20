@@ -9,8 +9,9 @@ from model_code.wealth_and_budget.pensions import calc_total_pension_points
 
 def create_state_space_functions():
     return {
-        "get_state_specific_choice_set": state_specific_choice_set,
-        "update_continuous_state": get_next_period_experience,
+        "state_specific_choice_set": state_specific_choice_set,
+        "next_period_experience": get_next_period_experience,
+        "sparsity_condition": sparsity_condition,
     }
 
 
@@ -18,7 +19,7 @@ def sparsity_condition(
     period,
     lagged_choice,
     informed,
-    job_offer,
+    health,
     partner_state,
     policy_state,
     education,
@@ -27,50 +28,80 @@ def sparsity_condition(
     start_age = options["start_age"]
     max_ret_age = options["max_ret_age"]
     min_ret_age_state_space = options["min_ret_age"]
+    # Generate last period, because only here are death states
+    last_period = options["n_periods"] - 1
+    # Degenerated policy state
+    degenerate_policy_state = options["n_policy_states"] - 1
 
     age = start_age + period
     # You cannot retire before the earliest retirement age
     if (age <= min_ret_age_state_space) & (lagged_choice == 0):
         return False
-    # After the maximum retirement age, you must be retired
-    elif (age > max_ret_age) & (lagged_choice != 0):
+    # After the maximum retirement age, you must be retired.
+    elif (age > max_ret_age) & (lagged_choice != 0) & (health != 2):
         return False
-
-    elif (age < max_ret_age) and (lagged_choice == 0):
-        # If job offer is equal to 0, the state is valid,
-        # for every other job offer, the state is proxied to
-        # the state where job_offer is 0
-        if job_offer == 0:
-            return True
-        else:
+    else:
+        # Now turn to the states, where it is decided by the value of an exogenous
+        # state if it is valid or not. For invalid states we provide a proxy child state
+        if health == 2:
+            # Lead all states with death to last period death states
+            # with job offer 0 (not relevant for bequest). You could be in principle
+            # die upon retirement for which we need informed and policy state
             state_proxy = {
-                "period": period,
+                "period": last_period,
                 "lagged_choice": lagged_choice,
                 "education": education,
+                "health": health,
                 "informed": informed,
                 "partner_state": partner_state,
                 "job_offer": 0,
                 "policy_state": policy_state,
             }
             return state_proxy
-    elif age > (max_ret_age + 1):
-        # If age is larger than max_ret_age + 2, we can also degenerate the policy state to
-        # the last policy state (degenerate state) n_policy_states - 1
-        if (job_offer == 0) & (policy_state == (options["n_policy_states"] - 1)):
-            return True
-        else:
+        elif (age <= max_ret_age + 1) and (lagged_choice == 0):
+            # If retirement is already chosen we proxy all states to job offer 0.
+            # Until age max_ret_age + 1 the individual could also be freshly retired
+            # so we check if the policy state is degenerated. If so, we proxy to
+            # informed states only
+            if policy_state == degenerate_policy_state:
+                state_proxy = {
+                    "period": period,
+                    "lagged_choice": lagged_choice,
+                    "education": education,
+                    "health": health,
+                    "informed": informed,
+                    "partner_state": partner_state,
+                    "job_offer": 0,
+                    "policy_state": policy_state,
+                }
+            else:
+                state_proxy = {
+                    "period": period,
+                    "lagged_choice": lagged_choice,
+                    "education": education,
+                    "health": health,
+                    "informed": informed,
+                    "partner_state": partner_state,
+                    "job_offer": 0,
+                    "policy_state": policy_state,
+                }
+            return state_proxy
+        elif age > max_ret_age + 1:
+            # If age is larger than max_ret_age + 1, the individual can only be longer retired.
+            # We can degenerate the policy state to and also only keep informed.
             state_proxy = {
                 "period": period,
                 "lagged_choice": lagged_choice,
                 "education": education,
-                "informed": informed,
+                "health": health,
+                "informed": 1,
                 "partner_state": partner_state,
                 "job_offer": 0,
                 "policy_state": options["n_policy_states"] - 1,
             }
             return state_proxy
-    else:
-        return True
+        else:
+            return True
 
 
 def state_specific_choice_set(period, lagged_choice, policy_state, job_offer, options):

@@ -9,7 +9,7 @@ from process_data.aux_scripts.filter_data import filter_by_sex
 from process_data.aux_scripts.filter_data import filter_years
 from process_data.aux_scripts.lagged_and_lead_vars import span_dataframe
 from process_data.soep_vars.education import create_education_type
-from process_data.soep_vars.health import clean_health_create_lagged_state
+from process_data.soep_vars.health import clean_health_create_states
 from process_data.soep_vars.health import create_health_var
 
 
@@ -42,7 +42,7 @@ def create_health_transition_sample(paths, specs, load_data=False):
     # create health states
     df = create_health_var(df)
     df = span_dataframe(df, specs["start_year"] - 1, specs["end_year"] + 1)
-    df = clean_health_create_lagged_state(df)
+    df = clean_health_create_states(df)
 
     df = df[["age", "education", "health_state", "lead_health_state"]]
 

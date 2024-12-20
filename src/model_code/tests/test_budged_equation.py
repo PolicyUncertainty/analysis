@@ -14,7 +14,7 @@ from set_paths import create_path_dict
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
-SAVINGS_GRID = np.linspace(10, 100, 3)
+SAVINGS_GRID_UNEMPLOYED = np.linspace(10, 25, 5)
 PARTNER_STATES = np.array([0, 1, 2], dtype=int)
 PERIOD_GRID = np.arange(0, 40, 10, dtype=int)
 OLD_AGE_PERIOD_GRID = np.arange(33, 43, 1, dtype=int)
@@ -35,7 +35,7 @@ def paths_and_specs():
             PERIOD_GRID,
             PARTNER_STATES,
             EDUCATION_GRID,
-            SAVINGS_GRID,
+            SAVINGS_GRID_UNEMPLOYED,
         )
     ),
 )
@@ -82,23 +82,34 @@ def test_budget_unemployed(
         net_partner + nb_children * specs_internal["annual_child_benefits"]
     )
 
-    if savings_scaled < specs_internal["unemployment_wealth_thresh"]:
-        unemployment_benefits = (1 + has_partner) * specs_internal[
-            "annual_unemployment_benefits"
-        ]
-        unemployment_benefits_children = (
-            specs_internal["annual_child_unemployment_benefits"] * nb_children
-        )
-        unemployment_benefits_housing = specs_internal[
-            "annual_unemployment_benefits_housing"
-        ] * (1 + 0.5 * has_partner)
-        unemployment_benefits_total = (
-            unemployment_benefits
-            + unemployment_benefits_children
-            + unemployment_benefits_housing
-        )
+    unemployment_benefits = (1 + has_partner) * specs_internal[
+        "annual_unemployment_benefits"
+    ]
+    unemployment_benefits_children = (
+        specs_internal["annual_child_unemployment_benefits"] * nb_children
+    )
+    unemployment_benefits_housing = specs_internal[
+        "annual_unemployment_benefits_housing"
+    ] * (1 + 0.5 * has_partner)
+    potential_unemployment_benefits = (
+        unemployment_benefits
+        + unemployment_benefits_children
+        + unemployment_benefits_housing
+    )
+
+    means_test = savings_scaled < specs_internal["unemployment_wealth_thresh"]
+    reduced_means_test_threshold = (
+        specs_internal["unemployment_wealth_thresh"] + potential_unemployment_benefits
+    )
+    reduced_benefits_means_test = savings_scaled < reduced_means_test_threshold
+    if means_test:
         income = np.maximum(
-            unemployment_benefits_total, net_partner_plus_child_benefits
+            potential_unemployment_benefits, net_partner_plus_child_benefits
+        )
+    elif ~means_test & reduced_benefits_means_test:
+        reduced_unemployment_benefits = reduced_means_test_threshold - savings_scaled
+        income = np.maximum(
+            reduced_unemployment_benefits, net_partner_plus_child_benefits
         )
     else:
         income = net_partner_plus_child_benefits
@@ -110,6 +121,7 @@ def test_budget_unemployed(
     )
 
 
+SAVINGS_GRID = np.linspace(8, 25, 3)
 GAMMA_GRID = np.linspace(0.1, 0.9, 3)
 EXP_GRID = np.linspace(10, 30, 3, dtype=int)
 INCOME_SHOCK_GRID = np.linspace(-0.5, 0.5, 2)

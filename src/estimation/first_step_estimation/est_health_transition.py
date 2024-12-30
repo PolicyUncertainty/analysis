@@ -33,7 +33,7 @@ def estimate_health_transitions(paths_dict, specs):
         else:
             raise ValueError("Invalid kernel type. Use 'epanechnikov' or 'gaussian'.")
 
-        return np.sum(weights * df["lead_health_state"]) / np.sum(weights)
+        return np.sum(weights * df["lead_health"]) / np.sum(weights)
 
     # Parameters
     kernel_type = specs.get(
@@ -48,13 +48,13 @@ def estimate_health_transitions(paths_dict, specs):
 
     ages = np.arange(specs["start_age"], specs["end_age"] + 1)
 
-    # Calculate the smoothed probabilities for each education level and health transition to transition to the lead_health_state
-    def calculate_smoothed_probabilities(education, health_state):
+    # Calculate the smoothed probabilities for each education level and health transition to transition to the lead_health
+    def calculate_smoothed_probabilities(education, health):
         smoothed_values = [
             kernel_weighted_mean(
                 transition_data[
                     (transition_data["education"] == education)
-                    & (transition_data["health_state"] == health_state)
+                    & (transition_data["health"] == health)
                 ],
                 age,
                 bandwidth,
@@ -66,10 +66,10 @@ def estimate_health_transitions(paths_dict, specs):
 
     # Compute transition probabilities
     transition_probabilities = {
-        "hgg_h": calculate_smoothed_probabilities(education=1, health_state=1),
-        "hgg_l": calculate_smoothed_probabilities(education=0, health_state=1),
-        "hbg_h": calculate_smoothed_probabilities(education=1, health_state=0),
-        "hbg_l": calculate_smoothed_probabilities(education=0, health_state=0),
+        "hgg_h": calculate_smoothed_probabilities(education=1, health=1),
+        "hgg_l": calculate_smoothed_probabilities(education=0, health=1),
+        "hbg_h": calculate_smoothed_probabilities(education=1, health=0),
+        "hbg_l": calculate_smoothed_probabilities(education=0, health=0),
     }
 
     # Complementary probabilities
@@ -85,17 +85,17 @@ def estimate_health_transitions(paths_dict, specs):
     # Construct the health transition matrix
     rows = []
     for education in [1, 0]:
-        for health_state in [1, 0]:
-            for lead_health_state, prob_key in zip(
-                [1, 0], ["hgg", "hgb"] if health_state else ["hbg", "hbb"]
+        for health in [1, 0]:
+            for lead_health, prob_key in zip(
+                [1, 0], ["hgg", "hgb"] if health else ["hbg", "hbb"]
             ):
                 key = f"{prob_key}_{'h' if education == 1 else 'l'}"
                 rows.append(
                     {
                         "education": education,
                         "period": ages - specs["start_age"],
-                        "health_state": health_state,
-                        "lead_health_state": lead_health_state,
+                        "health": health,
+                        "lead_health": lead_health,
                         "transition_prob": transition_probabilities[key],
                     }
                 )
@@ -123,17 +123,17 @@ def estimate_health_transitions_parametric(paths_dict, specs):
     # Compute transition probabilities
     health_transition_matrix = pd.DataFrame()
     for education in [1, 0]:
-        for health_state in [1, 0]:
-            for lead_health_state in [1, 0]:
-                if lead_health_state == 1:
+        for health in [1, 0]:
+            for lead_health in [1, 0]:
+                if lead_health == 1:
                     # Filter the data
                     data = transition_data[
                         (transition_data["education"] == education)
-                        & (transition_data["health_state"] == health_state)
+                        & (transition_data["health"] == health)
                     ]
 
                     # Fit the logit model
-                    y_var = "lead_health_state"
+                    y_var = "lead_health"
                     x_vars = ["age"]
                     formula = y_var + " ~ " + " + ".join(x_vars)
                     model = smf.logit(formula=formula, data=data)
@@ -151,8 +151,8 @@ def estimate_health_transitions_parametric(paths_dict, specs):
                                 {
                                     "education": education,
                                     "period": ages - specs["start_age"],
-                                    "health_state": health_state,
-                                    "lead_health_state": lead_health_state,
+                                    "health": health,
+                                    "lead_health": lead_health,
                                     "transition_prob": transition_probabilities,
                                 }
                             ),
@@ -168,8 +168,8 @@ def estimate_health_transitions_parametric(paths_dict, specs):
                                 {
                                     "education": education,
                                     "period": ages - specs["start_age"],
-                                    "health_state": health_state,
-                                    "lead_health_state": lead_health_state,
+                                    "health": health,
+                                    "lead_health": lead_health,
                                     "transition_prob": 1 - transition_probabilities,
                                 }
                             ),

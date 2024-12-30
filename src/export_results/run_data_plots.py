@@ -26,7 +26,7 @@ if show_state:
     state_vars = [
         "mean experience",
         "mean wealth",
-        "mean health_state",
+        "mean health",
         "median wealth",
     ]
     plot_state_by_age_and_type(path_dict, state_vars=state_vars)

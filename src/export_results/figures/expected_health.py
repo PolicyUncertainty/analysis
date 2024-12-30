@@ -25,12 +25,12 @@ def plot_healthy_unhealthy(paths_dict, specs):
 
     # Calculate the smoothed shares for healthy individuals
     edu_shares_healthy = (
-        df.groupby(["education", "age"])["health_state"]
+        df.groupby(["education", "age"])["health"]
         .mean()
         .loc[slice(None), slice(start_age, end_age)]
     )
 
-    alive_health_states = np.where(np.array(specs["health_labels"]) != "Death")[0]
+    alive_healths = np.where(np.array(specs["health_labels"]) != "Death")[0]
     n_alive_health_states = len(alive_health_states)
 
     # Initialize the distribution

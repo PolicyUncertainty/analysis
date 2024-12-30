@@ -30,16 +30,14 @@ def plot_healthy_unhealthy(paths_dict, specs):
         .loc[slice(None), slice(start_age, end_age)]
     )
 
-    alive_healths = np.where(np.array(specs["health_labels"]) != "Death")[0]
-    n_alive_health_states = len(alive_health_states)
-
     # Initialize the distribution
-    initial_dist = np.zeros(n_alive_health_states)
+    initial_dist = np.zeros(specs["n_health_states"])
 
     # Create the plot
     fig, ax = plt.subplots(figsize=(12, 8))
     for edu, edu_label in enumerate(specs["education_labels"]):
         # Set the initial distribution for the Markov simulation
+        # and assume nobody is dead
         initial_dist[1] = edu_shares_healthy.loc[(edu, start_age)]
         initial_dist[0] = 1 - initial_dist[1]
 
@@ -47,7 +45,10 @@ def plot_healthy_unhealthy(paths_dict, specs):
         shares_over_time = markov_simulator(
             initial_dist, specs["health_trans_mat"][edu, :, :, :]
         )
-        health_prob_edu_est = shares_over_time[:, 1]
+        # Construct health probabilities if alive (Use death probs as column vector)
+        alive_share = 1 - shares_over_time[:, 2:]
+        alive_health_shares = shares_over_time[:, :2] / alive_share
+        health_prob_edu_est = alive_health_shares[:, 1]
         health_prob_edu_data = edu_shares_healthy.loc[(edu, slice(None))].values
 
         # Plot the estimates and the data

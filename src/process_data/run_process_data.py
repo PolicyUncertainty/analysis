@@ -50,7 +50,7 @@ from process_data.first_step_sample_scripts.create_survival_transition_sample im
 
 
 if string_in == "a" or string_in == "s":
-    create_structural_est_sample(paths_dict, specs=specs, load_data=False)
+    create_structural_est_sample(paths_dict, specs=specs, load_data=True)
 
 if string_in == "a" or string_in == "w":
     create_wage_est_sample(paths_dict, specs=specs, load_data=False)

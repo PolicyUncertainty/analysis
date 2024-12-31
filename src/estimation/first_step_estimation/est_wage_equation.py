@@ -29,6 +29,7 @@ def estimate_wage_parameters(paths_dict, specs):
     wage_data = wage_data.set_index(["pid", "syear"])
 
     edu_labels = specs["education_labels"] + ["all"]
+    sex_labels = specs["sex_labels"]
     model_params = ["constant", "ln_exp"]
     # Initialize empty container for coefficients
     wage_parameters = pd.DataFrame()

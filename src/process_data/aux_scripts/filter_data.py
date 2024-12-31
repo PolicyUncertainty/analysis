@@ -8,7 +8,6 @@ def filter_years(df, start_year, end_year):
 
 
 def filter_below_age(df, age):
-    # filter out young people, women, and years outside of estimation range
     df = df[df["age"] >= age]
     print(
         str(len(df)) + " left after dropping people under " + str(age) + " years old."
@@ -17,7 +16,6 @@ def filter_below_age(df, age):
 
 
 def filter_above_age(df, age):
-    # filter
     df = df[df["age"] <= age]
     print(str(len(df)) + " left after dropping people over " + str(age) + " years old.")
     return df

@@ -67,7 +67,9 @@ def plot_observed_model_fit_choice_probs(
         choice_probs_observations = np.nan_to_num(choice_probs_observations, nan=0.0)
         data_decision[f"choice_{choice}"] = choice_probs_observations
 
-        # for partner_val, partner_label in enumerate(partner_labels):
+    breakpoint()
+
+    # for partner_val, partner_label in enumerate(partner_labels):
     for edu in range(2):
         data_subset = data_decision[(data_decision["education"] == edu)]
         choice_shares_obs = (

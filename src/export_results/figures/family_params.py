@@ -36,10 +36,13 @@ def plot_children(paths_dict, specs):
             i += 1
             for edu, edu_label in enumerate(specs["education_labels"]):
                 nb_children_data_edu = nb_children_data.loc[
-                    (sex, edu, has_partner, slice(start_age, end_age))
-                ].values
+                    (sex, edu, has_partner, slice(None))
+                ]
+                nb_children_container = pd.Series(data=0, index=ages, dtype=float)
+                nb_children_container.update(nb_children_data_edu)
+
                 nb_children_est_edu = nb_children_est[sex, edu, has_partner, :]
-                ax.plot(ages, nb_children_data_edu, label=f"edu {edu}")
+                ax.plot(ages, nb_children_container, label=f"edu {edu}")
                 ax.plot(
                     ages, nb_children_est_edu, linestyle="--", label=f"edu {edu} est"
                 )
@@ -62,28 +65,31 @@ def plot_marriage_and_divorce(paths_dict, specs):
     grouped_shares = df.groupby(["sex", "education", "age"])[
         "partner_state"
     ].value_counts(normalize=True)
-    edu_shares_single = grouped_shares.loc[
-        (0, slice(None), slice(start_age, end_age), 0)
-    ]
+    single_shares = grouped_shares.loc[(0, slice(None), slice(None), 0)]
 
     ages = np.arange(start_age, end_age + 1)
     initial_dist = np.zeros(specs["n_partner_states"])
 
     fig, ax = plt.subplots(figsize=(12, 8))
     for edu, edu_label in enumerate(specs["education_labels"]):
-        initial_dist[0] = edu_shares_single.loc[(0, edu, start_age, 0)]
+        edu_shares_single = single_shares.loc[(edu, slice(None))]
+        initial_dist[0] = edu_shares_single.loc[start_age]
         initial_dist[1] = 1 - initial_dist[0]
         shares_over_time = markov_simulator(
             initial_dist, specs["partner_trans_mat"][edu, :, :, :]
         )
         marriage_prob_edu_est = 1 - shares_over_time[:, 0]
-        marriage_prob_edu_data = (
-            1 - edu_shares_single.loc[(0, edu, slice(None), 0)].values
-        )
+
+        # Use fifty percent as default if not available in the data. Just for plotting
+        married_shares_data_containier = pd.Series(data=0.5, index=ages, dtype=float)
+        married_shares_data_containier.update(1 - edu_shares_single)
 
         ax.plot(ages, marriage_prob_edu_est, label=f"edu {edu_label} est")
         ax.plot(
-            ages, marriage_prob_edu_data, linestyle="--", label=f"edu {edu_label} data"
+            ages,
+            married_shares_data_containier,
+            linestyle="--",
+            label=f"edu {edu_label} data",
         )
 
     ax.set_title("Marriage shares")

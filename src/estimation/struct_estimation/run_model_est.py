@@ -26,18 +26,13 @@ params_to_estimate_names = [
     "job_finding_logit_age",
     "job_finding_logit_high_educ",
 ]
-pop_list = [
-    "dis_util_not_retired_bad",
-    "dis_util_working_bad",
-    "dis_util_not_retired_good",
-    "dis_util_working_good",
-]
-last_estimate = pkl.load(
-    open(paths_dict["est_results"] + "est_params_cet_par.pkl", "rb")
-)
-# for pop in pop_list:
-#     last_estimate.pop(pop)
-print("Restart estimation at: ", pd.Series(last_estimate))
+#
+# last_estimate = pkl.load(
+#     open(paths_dict["est_results"] + "est_params_cet_par.pkl", "rb")
+# )
+# last_estimate["dis_util_ft_work_high"]
+# breakpoint()
+# print("Restart estimation at: ", pd.Series(last_estimate))
 
 estimation_results = estimate_model(
     paths_dict,
@@ -45,7 +40,7 @@ estimation_results = estimate_model(
     file_append="cet_par",
     slope_disutil_method=False,
     load_model=False,
-    last_estimate=last_estimate,
+    last_estimate=None,
     save_results=False,
 )
 print(estimation_results)

@@ -12,6 +12,7 @@ def add_wealth_interpolate_and_deflate(data, path_dict, options):
     wealth_data_full = interpolate_and_extrapolate_wealth(wealth_data, options)
     data = data.merge(wealth_data_full, on=["hid", "syear"], how="left")
     data = deflate_wealth(data, path_dict)
+    data.loc[data["wealth"] < 0, "wealth"] = 0
     data.set_index(["pid", "syear"], inplace=True)
     data = data[(data["wealth"].notna())]
     print(str(len(data)) + " left after dropping people with missing wealth.")

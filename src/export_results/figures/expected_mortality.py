@@ -8,14 +8,17 @@ def plot_mortality(paths_dict, specs):
 
     # Load the data
     df = pd.read_pickle(
-        paths_dict["intermediate_data"] + "mortality_transition_estimation_sample.pkl"
+        paths_dict["intermediate_data"] +
+        "mortality_transition_estimation_sample.pkl"
     )
-    df["period"] = df["age"] - specs["start_age_mortality"] 
+    df["period"] = df["age"] - specs["start_age_mortality"]
     estimated_mortality = pd.read_csv(
         paths_dict["est_results"] + "mortality_transition_matrix.csv"
     )
-    df_params_male = pd.read_pickle(paths_dict["est_results"] + "est_params_mortality_male.pkl")
-    df_params_female = pd.read_pickle(paths_dict["est_results"] + "est_params_mortality_female.pkl")
+    df_params_male = pd.read_pickle(
+        paths_dict["est_results"] + "est_params_mortality_male.pkl")
+    df_params_female = pd.read_pickle(
+        paths_dict["est_results"] + "est_params_mortality_female.pkl")
 
     combinations = [
         (1, 1, "health1_edu1"),
@@ -24,48 +27,13 @@ def plot_mortality(paths_dict, specs):
         (0, 0, "health0_edu0"),
     ]
 
-    # plot the estimated survival function without adjustment using life tables
-    for sex in ["male", "female"]:
-        res = df_params_male if sex == "male" else df_params_female
-        colors = {1: "#1E90FF", 0: "#D72638"} # blue, red
-        fig, ax = plt.subplots(figsize=(8, 6))
-        age = np.linspace(16, 110, 110 - 16 + 1)
-        for health, education, param in combinations:
-            edu_label = specs["education_labels"][education]
-            health_label = "Bad Health" if health == 0 else "Good Health"
-            linestyle = "--" if education == 0 else "-"
-            ax.plot(
-                age,
-                survival_function(
-                    age, health*education, health*(1-education), (1-health)*education, (1-health)*(1-education), res
-                ),
-                label=f"{edu_label}, {health_label}",
-                linestyle=linestyle,
-                color=colors[health],
-                alpha=(1 - 0.8*education),
-            )
-        ax.plot(
-            age,
-            survival_function(age, 0, 0, 0, 0, res),
-            label="Reference",
-            linestyle="-.",
-        )
-        ax.set_xlabel("Age")
-        ax.set_xlim(16, 110)
-        ax.set_ylabel("Survival Probability")
-        ax.set_ylim(0, 1)
-        ax.set_title(f"Estimated Survival Function for {sex.capitalize()}")
+    sexes = ["male", "female"]
+    colors = {1: "#1E90FF", 0: "#D72638"}  # blue and red
 
-        ax.legend()
-        ax.grid()
-        plt.show()
+    n_periods = specs["end_age_mortality"] - specs["start_age_mortality"] + 1
 
-
-
-    # Initialize an empty dictionary to store survival probabilities
-    survival_data = {}
-
-    # Iterate over all combinations of sex, education, and health (0 or 1)
+    # Create a dictionary to store the survival rates for each combination in each period
+    final_survival_est = {}
     for sex in [0, 1]:
         for health in [0, 1]:
             for education in [0, 1]:
@@ -84,7 +52,8 @@ def plot_mortality(paths_dict, specs):
                 filtered_data = filtered_data.sort_values(by="period")
 
                 # Calculate survival probabilities
-                filtered_data["survival_prob_year"] = 1 - filtered_data["death_prob"]
+                filtered_data["survival_prob_year"] = 1 - \
+                    filtered_data["death_prob"]
                 filtered_data["survival_prob"] = filtered_data[
                     "survival_prob_year"
                 ].cumprod()
@@ -93,50 +62,101 @@ def plot_mortality(paths_dict, specs):
                 )
 
                 # Store the result in the dictionary
-                survival_data[key] = filtered_data
+                final_survival_est[key] = filtered_data
 
-    # Plot all 8 lines
+    ############################################################################
+    # plot the estimated survival function without adjustment using life tables
+    ############################################################################
+    for sex in sexes:
+        res = df_params_male if sex == "male" else df_params_female
+        fig, ax = plt.subplots(figsize=(8, 6))
+        age = np.linspace(0, n_periods, 2*(n_periods + 1))
+
+        for health, education, param in combinations:
+            edu_label = specs["education_labels"][education]
+            health_label = "Bad Health" if health == 0 else "Good Health"
+            linestyle = "--" if education == 0 else "-"
+            ax.plot(
+                age,
+                survival_function(
+                    age, health*education, health *
+                    (1-education), (1-health) *
+                    education, (1-health)*(1-education), res
+                ),
+                label=f"{edu_label}, {health_label}",
+                linestyle=linestyle,
+                color=colors[health],
+                alpha=(1 - 0.8*education),
+            )
+        ax.plot(
+            age,
+            survival_function(age, 0, 0, 0, 0, res),
+            label="Reference",
+            linestyle="-.",
+        )
+        ax.set_xlabel(f"Period (Start Age ={specs['start_age_mortality']})")
+        ax.set_xlim(0, n_periods)
+        ax.set_ylabel("Survival Probability")
+        ax.set_ylim(0, 1)
+        ax.set_title(f"Estimated Survival Function for {sex.capitalize()}")
+
+        ax.legend()
+        ax.grid()
+        plt.show()
+
+    ######################################################################################################
+    # Plot the estimated survival function for different combinations (with adjustment using life tables)
+    ######################################################################################################
     plt.figure(figsize=(12, 8))
 
-    for key, data in survival_data.items():
-        plt.plot(data["period"], data["survival_prob"], label=key)
+    for key, data in final_survival_est.items():
+        # transform key to human readable format/label
+        label = key.replace("sex0", "Male ").replace("sex1", "Female ").replace("_health0", ", Bad Health").replace(
+            "_health1", ", Good Health").replace("_edu0", ", Low Education").replace("_edu1", ", High Education")
+        plt.plot(data["period"], data["survival_prob"], label=label)
 
     # Add labels and legend
-    plt.xlabel("Period")
+    plt.xlabel(f"Period (Start Age ={specs['start_age_mortality']})")
     plt.ylabel("Survival Probability")
+    plt.xlim(0, n_periods)
+    plt.ylim(0, 1)
     plt.title(
-        "Survival Probability by period for Different Combinations of Sex, Health, and Education"
+        "Final (Model) Estimated Survival Probability by Period for Different Combinations of Sex, Health, and Education"
     )
     plt.legend()
     plt.grid(True)
     plt.show()
 
-    # Define parameters for subplots
-    sexes = ["male", "female"]
-    colors = {0: "#1E90FF", 1: "#D72638"}  # Blue for male, red for female
+    ###################################################################################
+    # Plot the in-sample death probabilities for different combinations in each period
+    ###################################################################################
     # Set up the figure for share of deaths
-    fig, axes = plt.subplots(1, 2, figsize=(12, 6))  # 1x2 subplots for male and female
-    fig.suptitle("Share of Deaths by Period and Subgroups", fontsize=16)
-
+    # 1x2 subplots for male and female
+    fig, axes = plt.subplots(1, 2, figsize=(12, 6))
+    fig.suptitle(
+        "Sample Estimated Survival Probability by Period for Different Combinations of Sex, Health, and Education", fontsize=16)
     for i, sex in enumerate(sexes):
         ax = axes[i]
 
         # Filter data by sex
         filtered_df = df[df["sex"] == (0 if sex == "male" else 1)]
 
-        # Calculate plain share of deaths by period
+        # Calculate plain share of deaths by period and cumulate for survival probabilities
         period_death_share = (
             filtered_df.groupby("period")["event_death"]
             .mean()
-            .reindex(np.arange(16, 111))
+            .reindex(np.arange(0, n_periods))
             .fillna(0)
         )
+        alive = np.ones((1, n_periods))
+        for i in range(1, n_periods):
+            alive[0, i] = alive[0, i-1]*(1-period_death_share[i])
 
-        # Plot plain share
+        # also plot the cumulative survival probability
         ax.plot(
             period_death_share.index,
-            period_death_share.values,
-            label="Plain Share of Deaths",
+            alive[0, :],
+            label="Cumulative Survival Probability",
             color="black",
             linestyle="-",
         )
@@ -151,9 +171,12 @@ def plot_mortality(paths_dict, specs):
                 subgroup_death_share = (
                     subgroup.groupby("period")["event_death"]
                     .mean()
-                    .reindex(np.arange(16, 111))
+                    .reindex(np.arange(0, n_periods))
                     .fillna(0)
                 )
+                alive = np.ones((1, n_periods))
+                for i in range(1, n_periods):
+                    alive[0, i] = alive[0, i-1]*(1-subgroup_death_share[i])
 
                 edu_label = f"Education {edu}"
                 health_label = f"Health {health}"
@@ -161,7 +184,7 @@ def plot_mortality(paths_dict, specs):
 
                 ax.plot(
                     subgroup_death_share.index,
-                    subgroup_death_share.values,
+                    alive[0, :],
                     label=f"{edu_label}, {health_label}",
                     linestyle=linestyle,
                     color=colors[health],
@@ -169,11 +192,11 @@ def plot_mortality(paths_dict, specs):
 
         # Set title, labels, and limits
         ax.set_title(f"{sex.capitalize()}")
-        ax.set_xlabel("period")
+        ax.set_xlabel(f"Period (Start Age ={specs['start_age_mortality']})")
         ax.set_ylabel("Share of Deaths")
-        ax.set_xlim(16, 110)
+        ax.set_xlim(0, n_periods)
         ax.set_ylim(0, 1)
-        ax.set_xticks(np.arange(20, 101, 10))
+        ax.set_xticks(np.arange(0, n_periods+1, 10))
         ax.set_yticks(np.arange(0, 1.1, 0.1))
         ax.grid(True, which="both", linestyle="--", linewidth=0.5, alpha=0.7)
 
@@ -184,9 +207,13 @@ def plot_mortality(paths_dict, specs):
     plt.tight_layout(rect=[0, 0, 1, 0.96])  # Leave space for the main title
     plt.show()
 
+    ##########################################################################################
+    # Plot the in-sample deaths for different combinations in each period as stacked bar chart
+    ##########################################################################################
     # Set up the figure for stacked bar chart of total deaths
-    fig, axes = plt.subplots(1, 2, figsize=(12, 6))  # 1x2 subplots for male and female
-    fig.suptitle("Total Number of Deaths by period and Subgroups", fontsize=16)
+    # 1x2 subplots for male and female
+    fig, axes = plt.subplots(1, 2, figsize=(12, 6))
+    fig.suptitle("Total Number of Deaths by Period and Subgroups", fontsize=16)
 
     for i, sex in enumerate(sexes):
         ax = axes[i]
@@ -195,7 +222,7 @@ def plot_mortality(paths_dict, specs):
         filtered_df = df[df["sex"] == (0 if sex == "male" else 1)]
 
         # Calculate total deaths by subgroups (education and health state)
-        period_range = np.arange(16, 111)
+        period_range = np.arange(0, n_periods)
         bar_data = {
             (edu, health): filtered_df[
                 (filtered_df["education"] == edu)
@@ -226,10 +253,10 @@ def plot_mortality(paths_dict, specs):
 
         # Set title, labels, and limits
         ax.set_title(f"{sex.capitalize()}")
-        ax.set_xlabel("period")
+        ax.set_xlabel(f"Period (Start Age ={specs['start_age_mortality']})")
         ax.set_ylabel("Total Number of Deaths")
-        ax.set_xlim(16, 110)
-        ax.set_xticks(np.arange(20, 101, 10))
+        ax.set_xlim(0, n_periods)
+        ax.set_xticks(np.arange(0, n_periods+1, 10))
         ax.grid(True, which="both", linestyle="--", linewidth=0.5, alpha=0.7)
 
         # Add legend
@@ -240,9 +267,10 @@ def plot_mortality(paths_dict, specs):
     plt.show()
 
     # Set up the figure for share of deaths
-    fig, axes = plt.subplots(1, 2, figsize=(12, 6))  # 1x2 subplots for male and female
+    # 1x2 subplots for male and female
+    fig, axes = plt.subplots(1, 2, figsize=(12, 6))
     fig.suptitle(
-        "Share of Deaths by period and Subgroups as Percentperiod of Total Deaths",
+        "Share of Deaths by Period and Subgroups as Percentage of Total Deaths",
         fontsize=11,
     )
 
@@ -254,7 +282,7 @@ def plot_mortality(paths_dict, specs):
 
         # Calculate plain share of deaths by period
         period_death_share = filtered_df.groupby("period")["event_death"].count().reindex(
-            np.arange(16, 111)
+            np.arange(0, n_periods)
         ).fillna(0) / len(df[df["event_death"] == 1])
 
         # Plot plain share
@@ -275,7 +303,7 @@ def plot_mortality(paths_dict, specs):
                 ]
                 subgroup_death_share = subgroup.groupby("period")[
                     "event_death"
-                ].count().reindex(np.arange(16, 111)).fillna(0) / len(
+                ].count().reindex(np.arange(0, n_periods)).fillna(0) / len(
                     df[df["event_death"] == 1]
                 )
 
@@ -295,9 +323,9 @@ def plot_mortality(paths_dict, specs):
         ax.set_title(f"{sex.capitalize()}")
         ax.set_xlabel("period")
         ax.set_ylabel("Deaths / Total Deaths (%)")
-        ax.set_xlim(16, 110)
+        ax.set_xlim(0, n_periods)
         ax.set_ylim(0, 1)
-        ax.set_xticks(np.arange(20, 101, 10))
+        ax.set_xticks(np.arange(0, 91, 10))
         ax.set_yticks(np.arange(0, 2.9, 0.1))
         ax.grid(True, which="both", linestyle="--", linewidth=0.5, alpha=0.7)
 

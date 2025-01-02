@@ -6,21 +6,28 @@ import pandas as pd
 def plot_mortality(paths_dict, specs):
     """Plot mortality characteristics."""
 
-    # Load the data
+    ### Load the data
+
+    # Mortality estimation sample
     df = pd.read_pickle(
         paths_dict["intermediate_data"] +
         "mortality_transition_estimation_sample.pkl"
     )
     df["period"] = df["age"] - specs["start_age_mortality"]
+
+    # Estimated mortality transition matrix (life table adjusted probabilities of death)
     estimated_mortality = pd.read_csv(
         paths_dict["est_results"] + "mortality_transition_matrix.csv"
     )
+
+    # Estimated mortality parameters
     df_params_male = pd.read_pickle(
         paths_dict["est_results"] + "est_params_mortality_male.pkl")
     df_params_female = pd.read_pickle(
         paths_dict["est_results"] + "est_params_mortality_female.pkl")
 
-    combinations = [
+    # Define the combinations of health and education
+    health_education_combinations = [
         (1, 1, "health1_edu1"),
         (1, 0, "health1_edu0"),
         (0, 1, "health0_edu1"),
@@ -29,16 +36,15 @@ def plot_mortality(paths_dict, specs):
 
     sexes = ["male", "female"]
     colors = {1: "#1E90FF", 0: "#D72638"}  # blue and red
-
     n_periods = specs["end_age_mortality"] - specs["start_age_mortality"] + 1
 
-    # Create a dictionary to store the survival rates for each combination in each period
+    # Create a dictionary to store the survival rates for each combination in each period 
     final_survival_est = {}
     for sex in [0, 1]:
         for health in [0, 1]:
             for education in [0, 1]:
                 # Create a unique key for the combination
-                key = f"sex{sex}_health{health}_edu{education}"
+                key = ("Male" if sex == 0 else "Female") + ', ' + specs["education_labels"][education] + ', ' + specs["health_labels"][health]                
 
                 # Filter the data for the current combination
                 filtered_data = estimated_mortality.loc[
@@ -52,17 +58,19 @@ def plot_mortality(paths_dict, specs):
                 filtered_data = filtered_data.sort_values(by="period")
 
                 # Calculate survival probabilities
-                filtered_data["survival_prob_year"] = 1 - \
-                    filtered_data["death_prob"]
+                filtered_data["survival_prob_year"] = 1 - filtered_data["death_prob"]
                 filtered_data["survival_prob"] = filtered_data[
                     "survival_prob_year"
                 ].cumprod()
                 filtered_data["survival_prob"] = (
-                    filtered_data["survival_prob"].shift(1).fillna(1)
+                    filtered_data["survival_prob"].shift(1).fillna(1) # alive at start 
                 )
 
                 # Store the result in the dictionary
                 final_survival_est[key] = filtered_data
+
+
+
 
     ############################################################################
     # plot the estimated survival function without adjustment using life tables
@@ -72,22 +80,19 @@ def plot_mortality(paths_dict, specs):
         fig, ax = plt.subplots(figsize=(8, 6))
         age = np.linspace(0, n_periods, 2*(n_periods + 1))
 
-        for health, education, param in combinations:
+        for health, education, param in health_education_combinations:
             edu_label = specs["education_labels"][education]
-            health_label = "Bad Health" if health == 0 else "Good Health"
+            health_label = specs["health_labels"][health]
             linestyle = "--" if education == 0 else "-"
             ax.plot(
                 age,
-                survival_function(
-                    age, health*education, health *
-                    (1-education), (1-health) *
-                    education, (1-health)*(1-education), res
-                ),
+                survival_function(age, health*education, health *(1-education), (1-health) * education, (1-health)*(1-education), res),
                 label=f"{edu_label}, {health_label}",
                 linestyle=linestyle,
                 color=colors[health],
                 alpha=(1 - 0.8*education),
             )
+
         ax.plot(
             age,
             survival_function(age, 0, 0, 0, 0, res),
@@ -111,9 +116,7 @@ def plot_mortality(paths_dict, specs):
 
     for key, data in final_survival_est.items():
         # transform key to human readable format/label
-        label = key.replace("sex0", "Male ").replace("sex1", "Female ").replace("_health0", ", Bad Health").replace(
-            "_health1", ", Good Health").replace("_edu0", ", Low Education").replace("_edu1", ", High Education")
-        plt.plot(data["period"], data["survival_prob"], label=label)
+        plt.plot(data["period"], data["survival_prob"], label=key)
 
     # Add labels and legend
     plt.xlabel(f"Period (Start Age ={specs['start_age_mortality']})")

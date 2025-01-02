@@ -102,6 +102,9 @@ def estimate_mortality(paths_dict, specs):
         print(res.summary())
         print(res.optimize_result)
         res.summary().to_pickle(paths_dict["est_results"] + f"est_params_mortality_{sex}.pkl")
+        to_csv_summary = res.summary()
+        to_csv_summary["hazard_ratio"] = np.exp(res.params["value"])
+        to_csv_summary.to_csv(paths_dict["est_results"] + f"est_params_mortality_{sex}.csv")
 
     
     # export the estimated mortality table and the original life table as csv

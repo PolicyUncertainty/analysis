@@ -145,7 +145,7 @@ def plot_mortality(paths_dict, specs):
         ax.set_xlim(specs["start_age_mortality"], specs["life_table_max_age"] + 1)
         ax.set_ylabel("Survival Probability")
         ax.set_ylim(0, 1)
-        ax.set_title(f"Final (Model) Estimated Survival Probability by for {sex.capitalize()}")
+        ax.set_title(f"(Model) Estimated Survival Probability by for {sex.capitalize()} (with Adjustment)")
 
         ax.legend()
         ax.grid()
@@ -204,7 +204,7 @@ def plot_mortality(paths_dict, specs):
                 )
 
         # Set title, labels, and limits
-        ax.set_title(f"{sex.capitalize()} Data - Cumulated Share of Deaths by Age in Subgroups")
+        ax.set_title(f"{sex.capitalize()} Data - Cumulated Product of the Share of Deaths by Age in Subgroups")
         ax.set_xlabel(f"Age")
         ax.set_ylabel("Survival Probability")
         ax.set_xlim(specs["start_age_mortality"], specs["end_age_mortality"] + 1)

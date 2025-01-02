@@ -151,7 +151,15 @@ def specify_and_solve_model(
     solution_file = path_dict["intermediate_data"] + (
         f"solved_models/model_solution" f"_{file_append}.pkl"
     )
-    if load_solution:
+    if load_solution is None:
+        solution = {}
+        (
+            solution["value"],
+            solution["policy"],
+            solution["endog_grid"],
+        ) = get_solve_func_for_model(model)(params)
+        return solution, model, params
+    elif load_solution:
         solution = pickle.load(open(solution_file, "rb"))
         return solution, model, params
     else:

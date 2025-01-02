@@ -10,7 +10,7 @@ discount_factor: 0.97
 
 # economic model parameters
 start_age: 30
-end_age: 85
+end_age: 100
 
 choice_labels: ["Retired", "Unemployed", "Part-time", "Full-time"]
 education_labels: ["Low Education", "High Education"]

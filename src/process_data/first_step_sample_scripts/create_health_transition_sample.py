@@ -44,7 +44,7 @@ def create_health_transition_sample(paths, specs, load_data=False):
     df = span_dataframe(df, specs["start_year"] - 1, specs["end_year"] + 1)
     df = clean_health_create_states(df)
 
-    df = df[["age", "education", "health_state", "lead_health_state"]]
+    df = df[["age", "education", "health", "lead_health"]]
 
     print(
         str(len(df))

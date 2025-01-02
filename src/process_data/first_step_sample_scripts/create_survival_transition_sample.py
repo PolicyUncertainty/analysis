@@ -36,7 +36,7 @@ def create_survival_transition_sample(paths, specs, load_data=False):
     df = filter_years(df, specs["start_year_mortality"], specs["end_year_mortality"])
 
     # create columns for the start age and health state
-    df = create_start_age_and_health_state(df)
+    df = create_start_age_and_health(df)
 
     df = df[
         [
@@ -45,8 +45,8 @@ def create_survival_transition_sample(paths, specs, load_data=False):
             "event_death",
             "education",
             "sex",
-            "health_state",
-            "start_health_state",
+            "health",
+            "start_health",
         ]
     ]
 
@@ -57,8 +57,8 @@ def create_survival_transition_sample(paths, specs, load_data=False):
     print(
         "Death events in the sample: ",
         f"{len(df[df['event_death'] == 1])} (total) = "
-        f"{len(df[(df['event_death'] == 1) & (df['health_state'] == 1)])} (health 1) + "
-        f"{len(df[(df['event_death'] == 1) & (df['health_state'] == 0)])} (health 0)",
+        f"{len(df[(df['event_death'] == 1) & (df['health'] == 1)])} (health 1) + "
+        f"{len(df[(df['event_death'] == 1) & (df['health'] == 0)])} (health 0)",
     )
 
     print(
@@ -87,8 +87,8 @@ def create_survival_transition_sample(paths, specs, load_data=False):
 
     # Modify df2 with unknown values
     df2["education"] = np.nan
-    df2["health_state"] = np.nan
-    df2["start_health_state"] = np.nan
+    df2["health"] = np.nan
+    df2["start_health"] = np.nan
 
     # Add true_sample indicators
     df1["true_sample"] = 1
@@ -101,12 +101,12 @@ def create_survival_transition_sample(paths, specs, load_data=False):
 
     # Create interaction indicators for health and education
     dupli_df = create_interaction_columns(
-        dupli_df, ("health_state", "health"), ("education", "edu")
+        dupli_df, ("health", "health"), ("education", "edu")
     )
 
     # Create interaction indicators for start health and education
     dupli_df = create_interaction_columns(
-        dupli_df, ("start_health_state", "start_health"), ("education", "edu")
+        dupli_df, ("start_health", "start_health"), ("education", "edu")
     )
 
     # Convert DataFrame to floats for computation
@@ -229,21 +229,21 @@ def load_and_process_soep_health(soep_c38_path, specs):
     # Fill health gaps
     pequiv_data = fill_health_gaps_vectorized(pequiv_data)
     # forward fill health state for every individual
-    pequiv_data["health_state"] = pequiv_data.groupby("pid")[
-        "health_state"
+    pequiv_data["health"] = pequiv_data.groupby("pid")[
+        "health"
     ].ffill()  # TO DO: this makes the fill gaps function obsolete and is a very strong assumption
 
     # # for deaths, set the health state to the last known health state
-    # pequiv_data["last_known_health_state"] = pequiv_data.groupby("pid")["health_state"].transform("last")
+    # pequiv_data["last_known_health"] = pequiv_data.groupby("pid")["health"].transform("last")
     # pequiv_data.loc[
-    #     (pequiv_data["event_death"] == 1) & (pequiv_data["health_state"].isna()), "health_state"
+    #     (pequiv_data["event_death"] == 1) & (pequiv_data["health"].isna()), "health"
     # ] = pequiv_data.loc[
-    #     (pequiv_data["event_death"] == 1) & (pequiv_data["health_state"].isna()),
-    #     "last_known_health_state",
+    #     (pequiv_data["event_death"] == 1) & (pequiv_data["health"].isna()),
+    #     "last_known_health",
     # ]
 
     # drop individuals without any health state information
-    pequiv_data = pequiv_data[(pequiv_data["health_state"].notna())]
+    pequiv_data = pequiv_data[(pequiv_data["health"].notna())]
 
     return pequiv_data
 
@@ -252,37 +252,35 @@ def fill_health_gaps_vectorized(df):
     """Fill gaps where the first and last known health state are identical.
 
     Parameters:
-        df (DataFrame): The DataFrame containing the "health_state" column.
+        df (DataFrame): The DataFrame containing the "health" column.
 
     Returns:
         DataFrame: The modified DataFrame with filled health state gaps.
 
     """
-    ffilled = df.groupby("pid")["health_state"].ffill()
-    bfilled = df.groupby("pid")["health_state"].bfill()
+    ffilled = df.groupby("pid")["health"].ffill()
+    bfilled = df.groupby("pid")["health"].bfill()
     agreeing_mask = ffilled == bfilled
-    df["health_state"] = np.where(
-        df["health_state"].isna() & agreeing_mask, ffilled, df["health_state"]
-    )
+    df["health"] = np.where(df["health"].isna() & agreeing_mask, ffilled, df["health"])
     return df
 
 
-def create_start_age_and_health_state(df):
+def create_start_age_and_health(df):
     """Determine the starting age and health state for each "pid".
 
     Parameters:
         df (DataFrame): The DataFrame containing "pid", "age", and "syear" columns.
 
     Returns:
-        DataFrame: The modified DataFrame with "start_age" and "start_health_state" columns.
+        DataFrame: The modified DataFrame with "start_age" and "start_health" columns.
 
     """
     df = df.reset_index()
     df["start_age"] = df.groupby("pid")["age"].transform("min")
     indx = df.groupby("pid")["syear"].idxmin()
-    df["start_health_state"] = np.nan
-    df.loc[indx, "start_health_state"] = df.loc[indx, "health_state"]
-    df["start_health_state"] = df.groupby("pid")["start_health_state"].transform("max")
+    df["start_health"] = np.nan
+    df.loc[indx, "start_health"] = df.loc[indx, "health"]
+    df["start_health"] = df.groupby("pid")["start_health"].transform("max")
     df = df.set_index(["pid", "syear"])
     return df
 

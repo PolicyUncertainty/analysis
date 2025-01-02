@@ -36,10 +36,16 @@ def estimate_model(
     # Load start params and bounds
     start_params_all = load_and_set_start_params(path_dict)
     # # Assign start params from before
-    # last_temp = pkl.load(
-    #    open(path_dict["intermediate_data"] + "estimation_cet_par/params_0.pkl", "rb")
-    # )
-    # start_params_all.update(last_temp)
+    if last_estimate is not None:
+        for key in last_estimate.keys():
+            try:
+                print(
+                    f"Start params value of {key} was {start_params_all[key]} and is"
+                    f"replaced by {last_estimate[key]}"
+                )
+            except:
+                raise ValueError(f"Key {key} not found in start params.")
+            start_params_all[key] = last_estimate[key]
 
     start_params = {name: start_params_all[name] for name in params_to_estimate_names}
 

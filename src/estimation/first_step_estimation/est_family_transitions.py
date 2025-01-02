@@ -47,7 +47,7 @@ def estimate_nb_children(paths_dict, specs):
 
     df = df[df["age"] >= start_age]
 
-    # Filter out individuals below 63 for better estimation
+    # Filter out individuals below 60 for better estimation(we should set this in specs)
     df = df[df["age"] <= 60]
     df["period"] = df["age"] - start_age
     df["period_sq"] = df["period"] ** 2

@@ -21,17 +21,13 @@ def filter_above_age(df, age):
     return df
 
 
-def filter_by_sex(df, no_women):
+def recode_sex(df):
+    """Recode sex to 0(men) and 1(women), from SOEP definition 1(men) and 2(women)."""
     df.loc[:, "sex"] = df["sex"] - 1
-    if no_women:
-        df = df[(df["sex"] == 0)]
-        print(str(len(df)) + " left after dropping women.")
-    else:
-        df = df[(df["sex"] >= 0)]
     return df
 
 
-def filter_data(merged_data, specs, no_women=True, lag_and_lead_buffer_years=True):
+def filter_data(merged_data, specs, lag_and_lead_buffer_years=True):
     """This function filters the data according to the model setup.
 
     Specifically, it filters out young people, women (if no_women=True), and years
@@ -41,7 +37,7 @@ def filter_data(merged_data, specs, no_women=True, lag_and_lead_buffer_years=Tru
     """
     merged_data = filter_below_age(merged_data, specs["start_age"] - 1)
 
-    merged_data = filter_by_sex(merged_data, no_women=no_women)
+    merged_data = recode_sex(merged_data)
 
     if lag_and_lead_buffer_years:
         start_year = specs["start_year"] - 1

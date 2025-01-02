@@ -41,8 +41,8 @@ def create_structural_est_sample(paths, specs, load_data=False, debug=False):
     df = create_partner_state(df, filter_missing=True)
     df = create_choice_variable(df)
 
-    # filter data. Leave additional years in for lagging and leading. 
-    df = filter_data(df, specs, no_women=False)
+    # filter data. Leave additional years in for lagging and leading.
+    df = filter_data(df, specs)
 
     df = generate_job_separation_var(df)
     df = create_lagged_and_lead_variables(df, specs)

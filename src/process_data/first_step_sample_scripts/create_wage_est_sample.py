@@ -24,7 +24,7 @@ def create_wage_est_sample(paths, specs, load_data=False):
     df = load_and_merge_soep_core(paths["soep_c38"])
 
     # filter data (age, sex, estimation period)
-    df = filter_data(df, specs, no_women=False, lag_and_lead_buffer_years=False)
+    df = filter_data(df, specs, lag_and_lead_buffer_years=False)
 
     # create labor choice, keep only working (2: part-time, 3: full-time)
     df = create_choice_variable(df)

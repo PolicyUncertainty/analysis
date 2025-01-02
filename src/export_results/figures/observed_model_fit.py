@@ -20,7 +20,7 @@ def observed_model_fit(paths_dict, specs, params):
         policy_state_trans_func=expected_SRA_probs_estimation,
         file_append="cet_par",
         load_model=True,
-        load_solution=None,
+        load_solution=False,
     )
 
     data_decision, states_dict = load_and_prep_data_for_model_fit(
@@ -56,16 +56,18 @@ def plot_observed_model_fit_choice_probs(
     for choice in range(specs["n_choices"]):
         choice_vals = np.ones_like(data_decision["choice"].values) * choice
         choice_probs_observations = choice_probs_for_choice_vals(
-            choice_vals,
-            states_dict,
-            model,
-            unobserved_state_specs,
-            params,
-            est_model,
+            choice_vals=choice_vals,
+            states_dict=states_dict,
+            model=model,
+            unobserved_state_specs=unobserved_state_specs,
+            params=params,
+            est_model=est_model,
         )
 
         choice_probs_observations = np.nan_to_num(choice_probs_observations, nan=0.0)
         data_decision[f"choice_{choice}"] = choice_probs_observations
+
+    data_decision[["choice_0", "choice_1", "choice_2", "choice_3"]]
 
     breakpoint()
 

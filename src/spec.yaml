@@ -76,6 +76,7 @@ start_year_mortality: 1992
 start_age_mortality: 16
 end_year_mortality: 2020 # end year of lifespells in soep38
 end_age_mortality: 110
+life_table_max_age: 100
 
 
 

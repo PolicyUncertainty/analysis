@@ -1,5 +1,4 @@
 import itertools
-
 import estimagic as em
 import matplotlib.pyplot as plt
 import numpy as np
@@ -36,20 +35,18 @@ def estimate_mortality(paths_dict, specs):
     )
     mortality_df.reset_index(drop=True, inplace=True)
 
-    # keep a copy of the original data for plotting
+    # plain life table data
     lifetable_df = mortality_df[["age", "sex", "death_prob"]]
     lifetable_df.drop_duplicates(inplace=True)
 
-    # Load the data for estimation of hazard ratios for different health and education levels
+    # estimation sample - as in Kroll Lampert 2008 / Haan Schaller et al. 2024
     df = pd.read_pickle(
         paths_dict["intermediate_data"]
         + "mortality_transition_estimation_sample_duplicated.pkl"
     )
 
-    # Define parameters for subplots
     sexes = ["male", "female"]
-
-    combinations = [
+    combinations_health_education = [
         (1, 1, "health1_edu1"),
         (1, 0, "health1_edu0"),
         (0, 1, "health0_edu1"),
@@ -60,7 +57,6 @@ def estimate_mortality(paths_dict, specs):
         # Filter data by sex
         filtered_df = df[df["sex"] == (0 if sex == "male" else 1)]
 
-        # Placeholder for global Iteration variable (if required)
         global Iteration
         Iteration = 0
 
@@ -94,7 +90,7 @@ def estimate_mortality(paths_dict, specs):
         )
 
         # update mortality_df with the estimated parameters
-        for health, education, param in combinations:
+        for health, education, param in combinations_health_education:
             mortality_df.loc[
                 (mortality_df["sex"] == (0 if sex == "male" else 1))
                 & (mortality_df["health"] == health)
@@ -102,14 +98,13 @@ def estimate_mortality(paths_dict, specs):
                 "death_prob",
             ] *= np.exp(res.params.loc[param, "value"])
 
+        # save the results
         print(res.summary())
         print(res.optimize_result)
-        # pkl the results for plotting
         res.summary().to_pickle(paths_dict["est_results"] + f"est_params_mortality_{sex}.pkl")
 
     
     # export the estimated mortality table and the original life table as csv
-
     # restrict the age range
     lifetable_df = lifetable_df[
         (lifetable_df["age"] >= specs["start_age_mortality"])
@@ -119,12 +114,9 @@ def estimate_mortality(paths_dict, specs):
         (mortality_df["age"] >= specs["start_age_mortality"])
         & (mortality_df["age"] <= specs["end_age_mortality"])
     ]
-    # convert age to period
-    lifetable_df["period"] = lifetable_df["age"] - specs["start_age_mortality"]
-    mortality_df["period"] = mortality_df["age"] - specs["start_age_mortality"]
     # order columns
-    mortality_df = mortality_df[["period", "sex", "health", "education", "death_prob"]]
-    lifetable_df = lifetable_df[["period", "sex", "death_prob"]]
+    mortality_df = mortality_df[["age", "sex", "health", "education", "death_prob"]]
+    lifetable_df = lifetable_df[["age", "sex", "death_prob"]]
     # save to csv
     mortality_df.to_csv(
         paths_dict["est_results"] + "mortality_transition_matrix.csv",
@@ -137,184 +129,70 @@ def estimate_mortality(paths_dict, specs):
         index=False,
     )
 
-
-def hazard_function(
-    age, health1_edu1, health1_edu0, health0_edu1, health0_edu0, params
-):
-    """P(x<X<x+dx | X>x) / dx force of mortality aka hazard function aka instantaneous
-    rate of mortality at a certain age."""
-    cons = params.loc["intercept", "value"]
-    age_coef = params.loc["age", "value"]
-    health1_edu1_coef = params.loc["health1_edu1", "value"]
-    health1_edu0_coef = params.loc["health1_edu0", "value"]
-    health0_edu1_coef = params.loc["health0_edu1", "value"]
-    health0_edu0_coef = params.loc["health0_edu0", "value"]
-
-    lambda_ = np.exp(
-        cons
-        + health1_edu1_coef * health1_edu1
-        + health1_edu0_coef * health1_edu0
-        + health0_edu1_coef * health0_edu1
-        + health0_edu0_coef * health0_edu0
-    )
-    age_contrib = np.exp(age_coef * age)
-
-    return lambda_ * age_contrib
-
-
-def survival_function(
-    age, health1_edu1, health1_edu0, health0_edu1, health0_edu0, params
-):
-    """Exp(-(integral of the hazard function as a function of age from 0 to age))"""
-    cons = params.loc["intercept", "value"]
-    age_coef = params.loc["age", "value"]
-    health1_edu1_coef = params.loc["health1_edu1", "value"]
-    health1_edu0_coef = params.loc["health1_edu0", "value"]
-    health0_edu1_coef = params.loc["health0_edu1", "value"]
-    health0_edu0_coef = params.loc["health0_edu0", "value"]
-
-    lambda_ = np.exp(
-        cons
-        + health1_edu1_coef * health1_edu1
-        + health1_edu0_coef * health1_edu0
-        + health0_edu1_coef * health0_edu1
-        + health0_edu0_coef * health0_edu0
-    )
-    age_contrib = np.exp(age_coef * age) - 1
-
-    return np.exp(-lambda_ / age_coef * age_contrib)
-
-
-def density_function(
-    age, health1_edu1, health1_edu0, health0_edu1, health0_edu0, params
-):
+def log_density_function(age, health_factors, params):
     """
-    d[-S(age)]/d(age) = - dS(age)/d(age)
+    Calculate the log-density function: log of the density function. (log of d[-S(age)]/d(age) = log of - dS(age)/d(age))
     """
     cons = params.loc["intercept", "value"]
     age_coef = params.loc["age", "value"]
-    health1_edu1_coef = params.loc["health1_edu1", "value"]
-    health1_edu0_coef = params.loc["health1_edu0", "value"]
-    health0_edu1_coef = params.loc["health0_edu1", "value"]
-    health0_edu0_coef = params.loc["health0_edu0", "value"]
+    coefficients = params["value"]
 
+    # Compute lambda and log-lambda using health factors
     lambda_ = np.exp(
-        cons
-        + health1_edu1_coef * health1_edu1
-        + health1_edu0_coef * health1_edu0
-        + health0_edu1_coef * health0_edu1
-        + health0_edu0_coef * health0_edu0
+        cons + sum(coefficients[f"health{i}_edu{j}"] * factor for i, j, factor in zip([1, 1, 0, 0], [1, 0, 1, 0], health_factors))
     )
-    age_contrib = np.exp(age_coef * age) - 1
-
-    return lambda_ * np.exp(age_coef * age - ((lambda_ * age_contrib) / age_coef))
-
-
-def log_density_function(
-    age, health1_edu1, health1_edu0, health0_edu1, health0_edu0, params
-):
-    cons = params.loc["intercept", "value"]
-    age_coef = params.loc["age", "value"]
-    health1_edu1_coef = params.loc["health1_edu1", "value"]
-    health1_edu0_coef = params.loc["health1_edu0", "value"]
-    health0_edu1_coef = params.loc["health0_edu1", "value"]
-    health0_edu0_coef = params.loc["health0_edu0", "value"]
-
-    lambda_ = np.exp(
-        cons
-        + health1_edu1_coef * health1_edu1
-        + health1_edu0_coef * health1_edu0
-        + health0_edu1_coef * health0_edu1
-        + health0_edu0_coef * health0_edu0
-    )
-    log_lambda_ = (
-        cons
-        + health1_edu1_coef * health1_edu1
-        + health1_edu0_coef * health1_edu0
-        + health0_edu1_coef * health0_edu1
-        + health0_edu0_coef * health0_edu0
+    log_lambda_ = cons + sum(
+        coefficients[f"health{i}_edu{j}"] * factor for i, j, factor in zip([1, 1, 0, 0], [1, 0, 1, 0], health_factors)
     )
     age_contrib = np.exp(age_coef * age) - 1
 
     return log_lambda_ + age_coef * age - ((lambda_ * age_contrib) / age_coef)
 
-
-def log_survival_function(
-    age, health1_edu1, health1_edu0, health0_edu1, health0_edu0, params
-):
+def log_survival_function(age, health_factors, params):
+    """
+    Calculate the log-survival function.
+    """
     cons = params.loc["intercept", "value"]
     age_coef = params.loc["age", "value"]
-    health1_edu1_coef = params.loc["health1_edu1", "value"]
-    health1_edu0_coef = params.loc["health1_edu0", "value"]
-    health0_edu1_coef = params.loc["health0_edu1", "value"]
-    health0_edu0_coef = params.loc["health0_edu0", "value"]
+    coefficients = params["value"]
 
+    # Compute lambda using health factors
     lambda_ = np.exp(
-        cons
-        + health1_edu1_coef * health1_edu1
-        + health1_edu0_coef * health1_edu0
-        + health0_edu1_coef * health0_edu1
-        + health0_edu0_coef * health0_edu0
+        cons + sum(coefficients[f"health{i}_edu{j}"] * factor for i, j, factor in zip([1, 1, 0, 0], [1, 0, 1, 0], health_factors))
     )
     age_contrib = np.exp(age_coef * age) - 1
 
     return -(lambda_ * age_contrib) / age_coef
 
-
 def loglike(params, data):
+    """
+    Log-likelihood calculation.
+    """
     start_age = data["start_age"]
     age = data["age"]
     event = data["event_death"]
-    death = data["event_death"].astype(bool)
-    health1_edu1 = data["health1_edu1"]
-    health1_edu0 = data["health1_edu0"]
-    health0_edu1 = data["health0_edu1"]
-    health0_edu0 = data["health0_edu0"]
-    start_health0_edu0 = data["start_health0_edu0"]
-    start_health0_edu1 = data["start_health0_edu1"]
-    start_health1_edu0 = data["start_health1_edu0"]
-    start_health1_edu1 = data["start_health1_edu1"]
+    death = event.astype(bool)
 
-    # initialize contributions as an array of zeros
+    # Extract health factors
+    health_factors = [data[f"health{i}_edu{j}"] for i, j in zip([1, 1, 0, 0], [1, 0, 1, 0])]
+    start_health_factors = [data[f"start_health{i}_edu{j}"] for i, j in zip([1, 1, 0, 0], [1, 0, 1, 0])]
+
+    # Initialize contributions as an array of zeros
     contributions = np.zeros_like(age)
 
-    # calculate contributions
-    contributions[death] = log_density_function(
-        age[death],
-        health1_edu1[death],
-        health1_edu0[death],
-        health0_edu1[death],
-        health0_edu0[death],
-        params,
-    )
-    contributions[~death] = log_survival_function(
-        age[~death],
-        health1_edu1[~death],
-        health1_edu0[~death],
-        health0_edu1[~death],
-        health0_edu0[~death],
-        params,
-    )
-    contributions -= log_survival_function(
-        start_age,
-        start_health1_edu1,
-        start_health1_edu0,
-        start_health0_edu1,
-        start_health0_edu0,
-        params,
-    )
+    # Calculate contributions
+    contributions[death] = log_density_function(age[death], [f[death] for f in health_factors], params)
+    contributions[~death] = log_survival_function(age[~death], [f[~death] for f in health_factors], params)
+    contributions -= log_survival_function(start_age, [f for f in start_health_factors], params)
 
-    # print the death and not death contributions
-    print(
-        "Iteration:",
-        globals()["Iteration"],
-        "Total contributions:",
-        contributions.sum(),
-    )
-
+    # show progress every 20 iterations
     globals()["Iteration"] += 1
-    if globals()["Iteration"] % 200 == 0:
-        print(params)
-
+    if globals()["Iteration"] % 20 == 0:
+        print(
+            "Iteration:",
+            globals()["Iteration"],
+            "Total contributions:",
+            contributions.sum(),
+        )
     return {"contributions": contributions, "value": contributions.sum()}
 

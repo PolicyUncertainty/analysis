@@ -18,9 +18,9 @@ def observed_model_fit(paths_dict, specs, params):
         params=params,
         update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
         policy_state_trans_func=expected_SRA_probs_estimation,
-        file_append="no_weights",
+        file_append="cet_par",
         load_model=True,
-        load_solution=True,
+        load_solution=None,
     )
 
     data_decision, states_dict = load_and_prep_data_for_model_fit(

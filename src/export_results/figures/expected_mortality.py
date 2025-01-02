@@ -14,6 +14,9 @@ def plot_mortality(paths_dict, specs):
     estimated_mortality = pd.read_csv(
         paths_dict["est_results"] + "mortality_transition_matrix.csv"
     )
+    estimated_mortality["age"] = (
+        estimated_mortality["period"] + specs["start_age_mortality"]
+    )
 
     # Initialize an empty dictionary to store survival probabilities
     survival_data = {}
@@ -101,7 +104,7 @@ def plot_mortality(paths_dict, specs):
             for health in [0, 1]:
                 subgroup = filtered_df[
                     (filtered_df["education"] == edu)
-                    & (filtered_df["health_state"] == health)
+                    & (filtered_df["health"] == health)
                 ]
                 subgroup_death_share = (
                     subgroup.groupby("age")["event_death"]
@@ -153,8 +156,7 @@ def plot_mortality(paths_dict, specs):
         age_range = np.arange(16, 111)
         bar_data = {
             (edu, health): filtered_df[
-                (filtered_df["education"] == edu)
-                & (filtered_df["health_state"] == health)
+                (filtered_df["education"] == edu) & (filtered_df["health"] == health)
             ]
             .groupby("age")["event_death"]
             .sum()
@@ -226,7 +228,7 @@ def plot_mortality(paths_dict, specs):
             for health in [0, 1]:
                 subgroup = filtered_df[
                     (filtered_df["education"] == edu)
-                    & (filtered_df["health_state"] == health)
+                    & (filtered_df["health"] == health)
                 ]
                 subgroup_death_share = subgroup.groupby("age")[
                     "event_death"

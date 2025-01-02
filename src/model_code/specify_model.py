@@ -6,7 +6,6 @@ from dcegm.pre_processing.setup_model import load_and_setup_model
 from dcegm.pre_processing.setup_model import setup_and_save_model
 from dcegm.solve import get_solve_func_for_model
 from model_code.state_space import create_state_space_functions
-from model_code.state_space import sparsity_condition
 from model_code.stochastic_processes.health_transition import health_transition
 from model_code.stochastic_processes.informed_state_transition import (
     informed_transition,
@@ -56,7 +55,7 @@ def specify_model(
 
     options = {
         "state_space": {
-            # "min_period_batch_segments": [33, 44],
+            "min_period_batch_segments": [33, 44],
             "n_periods": n_periods,
             "choices": choices,
             "endogenous_states": {
@@ -152,7 +151,15 @@ def specify_and_solve_model(
     solution_file = path_dict["intermediate_data"] + (
         f"solved_models/model_solution" f"_{file_append}.pkl"
     )
-    if load_solution:
+    if load_solution is None:
+        solution = {}
+        (
+            solution["value"],
+            solution["policy"],
+            solution["endog_grid"],
+        ) = get_solve_func_for_model(model)(params)
+        return solution, model, params
+    elif load_solution:
         solution = pickle.load(open(solution_file, "rb"))
         return solution, model, params
     else:

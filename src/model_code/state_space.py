@@ -9,9 +9,9 @@ from model_code.wealth_and_budget.pensions import calc_total_pension_points
 
 def create_state_space_functions():
     return {
-        "state_specific_choice_set": state_specific_choice_set,
+        # "state_specific_choice_set": state_specific_choice_set,
         "next_period_experience": get_next_period_experience,
-        "sparsity_condition": sparsity_condition,
+        # "sparsity_condition": sparsity_condition,
     }
 
 

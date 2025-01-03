@@ -20,7 +20,7 @@ def observed_model_fit(paths_dict, specs, params):
         policy_state_trans_func=expected_SRA_probs_estimation,
         file_append="cet_par",
         load_model=True,
-        load_solution=False,
+        load_solution=True,
     )
 
     data_decision, states_dict = load_and_prep_data_for_model_fit(
@@ -67,8 +67,36 @@ def plot_observed_model_fit_choice_probs(
         choice_probs_observations = np.nan_to_num(choice_probs_observations, nan=0.0)
         data_decision[f"choice_{choice}"] = choice_probs_observations
 
-    data_decision[["choice_0", "choice_1", "choice_2", "choice_3"]]
+    from dcegm.interface import value_for_state_choice_vec
 
+    id = 18
+    choice = 0
+    state_choice_vec = {
+        "period": data_decision.loc[id, "period"],
+        "lagged_choice": data_decision.loc[id, "lagged_choice"],
+        "education": data_decision.loc[id, "education"],
+        "health": data_decision.loc[id, "health"],
+        "informed": 1,
+        "partner_state": data_decision.loc[id, "partner_state"],
+        "job_offer": 0,
+        "policy_state": 29,
+        "choice": choice,
+    }
+    second_continous = data_decision.loc[id, "experience"]
+    wealth_grid = np.arange(5, 100, 1, dtype=np.float64)
+    value_grid = np.empty_like(wealth_grid)
+    for idx_wealth, wealth in enumerate(wealth_grid):
+        value_grid[idx_wealth] = value_for_state_choice_vec(
+            state_choice_vec=state_choice_vec,
+            wealth=wealth,
+            model=model,
+            params=params,
+            endog_grid_solved=est_model["endog_grid"],
+            value_solved=est_model["value"],
+            second_continous=second_continous,
+        )
+    plt.plot(wealth_grid, value_grid)
+    plt.show()
     breakpoint()
 
     # for partner_val, partner_label in enumerate(partner_labels):

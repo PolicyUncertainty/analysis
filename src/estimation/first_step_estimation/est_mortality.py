@@ -44,8 +44,6 @@ def estimate_mortality(paths_dict, specs):
         paths_dict["intermediate_data"]
         + "mortality_transition_estimation_sample_duplicated.pkl"
     )
-
-    sexes = ["male", "female"]
     combinations_health_education = [
         (1, 1, "health1_edu1"),
         (1, 0, "health1_edu0"),
@@ -53,9 +51,9 @@ def estimate_mortality(paths_dict, specs):
         (0, 0, "health0_edu0"),
     ]
 
-    for i, sex in enumerate(sexes):
+    for i, sex in enumerate(specs["sexes"]):
         # Filter data by sex
-        filtered_df = df[df["sex"] == (0 if sex == "male" else 1)]
+        filtered_df = df[df["sex"] == (0 if sex == "Male" else 1)]
 
         global Iteration
         Iteration = 0
@@ -92,7 +90,7 @@ def estimate_mortality(paths_dict, specs):
         # update mortality_df with the estimated parameters
         for health, education, param in combinations_health_education:
             mortality_df.loc[
-                (mortality_df["sex"] == (0 if sex == "male" else 1))
+                (mortality_df["sex"] == (0 if sex == "Male" else 1))
                 & (mortality_df["health"] == health)
                 & (mortality_df["education"] == education),
                 "death_prob",
@@ -108,7 +106,6 @@ def estimate_mortality(paths_dict, specs):
 
     
     # export the estimated mortality table and the original life table as csv
-    # restrict the age range
     lifetable_df = lifetable_df[
         (lifetable_df["age"] >= specs["start_age_mortality"])
         & (lifetable_df["age"] <= specs["end_age_mortality"])
@@ -117,10 +114,24 @@ def estimate_mortality(paths_dict, specs):
         (mortality_df["age"] >= specs["start_age_mortality"])
         & (mortality_df["age"] <= specs["end_age_mortality"])
     ]
-    # order columns
     mortality_df = mortality_df[["age", "sex", "health", "education", "death_prob"]]
     lifetable_df = lifetable_df[["age", "sex", "death_prob"]]
-    # save to csv
+    mortality_df = mortality_df.astype(
+        {
+            "age": "int",
+            "sex": "int",
+            "health": "int",
+            "education": "int",
+            "death_prob": "float",
+        }
+    )
+    lifetable_df = lifetable_df.astype(
+        {
+            "age": "int",
+            "sex": "int",
+            "death_prob": "float",
+        }
+    )
     mortality_df.to_csv(
         paths_dict["est_results"] + "mortality_transition_matrix.csv",
         sep=",",

@@ -41,13 +41,13 @@ def read_in_partner_transition_specs(paths_dict, specs):
     n_periods = specs["n_periods"]
     n_partner_states = trans_probs.index.get_level_values("partner_state").nunique()
     n_edu_types = len(specs["education_labels"])
-    sexes = [0, 1]
+    n_sexes = 2
     age_bins = trans_probs.index.get_level_values("age_bin").unique()
 
     full_series_index = pd.MultiIndex.from_product(
         [
-            sexes,
             range(n_edu_types),
+            range(n_sexes),
             age_bins,
             range(n_partner_states),
             range(n_partner_states),
@@ -58,19 +58,20 @@ def read_in_partner_transition_specs(paths_dict, specs):
     full_series.update(trans_probs)
 
     # Transition probalities for partner
-    male_trans_probs = np.zeros(
-        (n_edu_types, n_periods, n_partner_states, n_partner_states), dtype=float
+    trans_probs = np.zeros(
+        (n_edu_types, n_sexes, n_periods, n_partner_states, n_partner_states), dtype=float
     )
 
     for edu in range(n_edu_types):
         for period in range(n_periods):
             for current_state in range(n_partner_states):
                 for next_state in range(n_partner_states):
-                    age = period + specs["start_age"]
-                    # Check if age is in between 30 and 40, 40 and 50, 50 and 60, 60 and 70
-                    age_bin = np.floor(age / 10) * 10
-                    male_trans_probs[
-                        edu, period, current_state, next_state
-                    ] = full_series.loc[(0, edu, age_bin, current_state, next_state)]
+                    for sex in range(n_sexes):
+                        age = period + specs["start_age"]
+                        # Check if age is in between 30 and 40, 40 and 50, 50 and 60, 60 and 70
+                        age_bin = np.floor(age / 10) * 10
+                        trans_probs[
+                            edu, sex, period, current_state, next_state
+                        ] = full_series.loc[(sex, edu, age_bin, current_state, next_state)]
 
-    return jnp.asarray(male_trans_probs), n_partner_states
+    return jnp.asarray(trans_probs), n_partner_states

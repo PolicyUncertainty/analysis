@@ -12,68 +12,29 @@ def estimate_wage_parameters(paths_dict, specs):
     Also estimate for all individuals.
 
     """
-    # Load and modify data.
-    wage_data = pd.read_pickle(
-        paths_dict["intermediate_data"] + "wage_estimation_sample.pkl"
-    )
+    # Specs and data
+    edu_labels = specs["education_labels"]
+    sex_labels = specs["sex_labels"]
+    regressors = ["constant", "ln_exp"]
+    coefficents = regressors + [param + "_ser" for param in regressors]
+    wage_data = load_and_prepare_wage_data(paths_dict)
 
-    # Hourly wage
-    wage_data["ln_wage"] = np.log(wage_data["hourly_wage"])
-
-    # Log exp and other explanatory variablesq
-    wage_data["ln_exp"] = np.log(wage_data["experience"] + 1)
-    wage_data["constant"] = np.ones(len(wage_data))
-
-    # prepare format
-    wage_data["year"] = wage_data["syear"].astype("category")
-    wage_data = wage_data.set_index(["pid", "syear"])
-
-    edu_labels = specs["education_labels"] + ["all"]
-    sex_labels = specs["sex_labels"] 
-    model_params = ["constant", "ln_exp"]
-    # Initialize empty container for coefficients
-    index = pd.MultiIndex.from_product([edu_labels, sex_labels, model_params + [param + "_ser" for param in model_params]], names=["education", "sex", "parameter"])    
-    wage_parameters = pd.DataFrame(index=index, columns=["value"])
-
-    # Initialize years for year fixed effects
+    # Initialize empty containers for coefficients
+    index = pd.MultiIndex.from_product([edu_labels, sex_labels, coefficents], names=["education", "sex", "parameter"])
+    index_all_types = pd.MultiIndex.from_product([["all"], ["all"], coefficents], names=["education", "sex", "parameter"])
+    index = index.append(index_all_types)    
+    wage_parameters = pd.DataFrame(index=index, columns=["value"]) 
     year_fixed_effects = {}
     years = list(range(specs["start_year"] + 1, specs["end_year"] + 1))
+
+    # Estimate wage equation for each type (sex x education)
+    year_fixed_effects["all", "all"] = {}
+    fit_panel_reg_model(wage_data, regressors, years, wage_parameters, year_fixed_effects, "all", "all")
     for edu_val, edu_label in enumerate(edu_labels):
         for sex_val, sex_label in enumerate(sex_labels):
+            wage_data_type = wage_data[(wage_data["education"] == edu_val) & (wage_data["sex"] == sex_val)]
             year_fixed_effects[edu_label, sex_label] = {}
-            if edu_label == "all":
-                wage_data_type = wage_data
-            else:
-                wage_data_type = wage_data[(wage_data["education"] == edu_val) & (wage_data["sex"] == sex_val)]
-
-            # estimate parametric regression, save parameters
-            model = PanelOLS(
-                dependent=wage_data_type["ln_wage"],
-                exog=wage_data_type[model_params + ["year"]],
-                entity_effects=True,
-            )
-            fitted_model = model.fit(
-                cov_type="clustered", cluster_entity=True, cluster_time=True
-            )
-
-            # Assign estimated parameters (column list corresponds to model params, so only these are assigned)
-            for param in model_params:
-                wage_parameters.loc[edu_label, sex_label, param] = fitted_model.params[param]
-                wage_parameters.loc[edu_label, sex_label, param + "_ser"] = fitted_model.std_errors[
-                    param
-                ]
-            for year in years:
-                year_fixed_effects[(edu_label, sex_label)][year] = fitted_model.params[f"year.{year}"]
-
-            # Get estimate for income shock std
-            (
-                wage_parameters.loc[edu_label, sex_label, "income_shock_std"],
-                wage_parameters.loc[edu_label, sex_label, "income_shock_std_ser"],
-            ) = est_shock_std(
-                residuals=fitted_model.resids,
-                n_obs=wage_data_type.shape[0],
-                n_params=fitted_model.params.shape[0],
-            )
+            wage_parameters, year_fixed_effects = fit_panel_reg_model(wage_data_type, regressors, years, wage_parameters, year_fixed_effects, edu_label, sex_label)
     # Save results
     wage_parameters.to_csv(paths_dict["est_results"] + "wage_eq_params.csv")
     wage_parameters.T.to_latex(
@@ -81,13 +42,55 @@ def estimate_wage_parameters(paths_dict, specs):
     )
     # After estimation print some summary statistics
     print_wage_equation(wage_parameters, edu_labels, sex_labels)
-
-    calc_additional_wage_params(wage_data, year_fixed_effects, specs, paths_dict)
+    calc_population_averages(wage_data, year_fixed_effects, specs, paths_dict)
 
     return wage_parameters
 
+def load_and_prepare_wage_data(paths_dict):
+    # Load wage data
+    wage_data = pd.read_pickle(paths_dict["intermediate_data"] + "wage_estimation_sample.pkl")
+    # Modify
+    wage_data["ln_wage"] = np.log(wage_data["hourly_wage"])
+    wage_data["ln_exp"] = np.log(wage_data["experience"] + 1)
+    wage_data["constant"] = np.ones(len(wage_data))
+    # Format & Index
+    wage_data["year"] = wage_data["syear"].astype("category")
+    wage_data = wage_data.set_index(["pid", "syear"])
+    return wage_data
 
-def calc_additional_wage_params(df, year_fixed_effects, specs, paths_dict):
+
+def fit_panel_reg_model(wage_data_type, regressors, years, wage_parameters, year_fixed_effects, edu_label, sex_label):
+    # estimate parametric regression, save parameters
+    model = PanelOLS(
+        dependent=wage_data_type["ln_wage"],
+        exog=wage_data_type[regressors + ["year"]],
+        entity_effects=True,
+    )
+    fitted_model = model.fit(
+        cov_type="clustered", cluster_entity=True, cluster_time=True
+    )
+
+    # Assign estimated parameters (column list corresponds to model params, so only these are assigned)
+    for param in regressors:
+        wage_parameters.loc[edu_label, sex_label, param] = fitted_model.params[param]
+        wage_parameters.loc[edu_label, sex_label, param + "_ser"] = fitted_model.std_errors[
+            param
+        ]
+    for year in years:
+        year_fixed_effects[(edu_label, sex_label)][year] = fitted_model.params[f"year.{year}"]
+
+    # Get estimate for income shock std
+    (
+        wage_parameters.loc[edu_label, sex_label, "income_shock_std"],
+        wage_parameters.loc[edu_label, sex_label, "income_shock_std_ser"],
+    ) = est_shock_std(
+        residuals=fitted_model.resids,
+        n_obs=wage_data_type.shape[0],
+        n_params=fitted_model.params.shape[0],
+    )
+    return wage_parameters, year_fixed_effects
+
+def calc_population_averages(df, year_fixed_effects, specs, paths_dict):
     """Save population average of annual wage (for pension calculation) and working
     hours by education (to compute annual wages).
 
@@ -98,7 +101,7 @@ def calc_additional_wage_params(df, year_fixed_effects, specs, paths_dict):
     edu_labels = specs["education_labels"]
     sex_labels = specs["sex_labels"]
 
-    # # Now use results to deflate wages to 2010 levels to calculate population statistics
+    # annual average wage (deflated by type-specific year fixed effects)
     df["ln_wage_deflated"] = df["ln_wage"].copy()
     for edu_val, edu_label in enumerate(edu_labels):
         for sex_val, sex_label in enumerate(sex_labels):
@@ -111,14 +114,19 @@ def calc_additional_wage_params(df, year_fixed_effects, specs, paths_dict):
                 ][year]
 
     df["annual_hours"] = df["monthly_hours"] * 12
-
     df["annual_wage_deflated"] = np.exp(df["ln_wage_deflated"]) * df["annual_hours"]
     pop_avg_annual_wage = df["annual_wage_deflated"].mean()
+    np.save(paths_dict["est_results"] + "pop_avg_annual_wage", pop_avg_annual_wage)
 
+    print(
+        "Population average for annual wage (deflated): "
+        + str(pop_avg_annual_wage)
+    )
+
+    # averageannual working hours by type
     avg_hours_by_type_choice = df.groupby(["education", "sex", "choice"])["annual_hours"].mean()
-
     avg_hours_by_type_choice.to_csv(
-        paths_dict["est_results"] + "population_averages_working.csv", index=True
+        paths_dict["est_results"] + "population_averages_working_hours.csv", index=True
     )
     print(
         "Population averages for working hours: \n"
@@ -160,6 +168,6 @@ def print_wage_equation(wage_parameters, edu_labels, sex_labels):
             )
             print(
                 "Income shock std: "
-                + str(wage_parameters.loc[edu_label, sex_label, "income_shock_std"])
+                + str(wage_parameters.loc[(edu_label, sex_label, "income_shock_std"), "value"])
             )
             print("--------------------")

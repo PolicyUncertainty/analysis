@@ -12,6 +12,7 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
 def plot_incomes(path_dict):
+    "Plots incomes of men. TODO: add women"
     specs = generate_derived_and_data_derived_specs(path_dict)
 
     exp_levels = np.arange(0, 50)
@@ -47,6 +48,7 @@ def plot_incomes(path_dict):
                 lagged_choice=2,
                 experience_years=exp,
                 education=edu,
+                sex = 0,
                 income_shock=0,
                 options=specs,
             )
@@ -54,6 +56,7 @@ def plot_incomes(path_dict):
                 lagged_choice=2,
                 experience_years=exp,
                 education=edu,
+                sex = 0,
                 income_shock=0,
                 options=specs,
             )
@@ -62,6 +65,7 @@ def plot_incomes(path_dict):
                 lagged_choice=3,
                 experience_years=exp,
                 education=edu,
+                sex = 0,
                 income_shock=0,
                 options=specs,
             )

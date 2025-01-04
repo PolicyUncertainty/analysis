@@ -8,7 +8,7 @@ def read_in_health_transition_specs(paths_dict, specs):
         paths_dict["est_results"] + "health_transition_matrix.csv",
         index_col=[0, 1, 2, 3],
     )["transition_prob"]
-
+    breakpoint()
     death_probs = pd.read_csv(
         paths_dict["est_results"] + "mortality_transition_matrix.csv",
         index_col=[0, 1, 2, 3],

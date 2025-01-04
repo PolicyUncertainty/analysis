@@ -3,13 +3,14 @@ from model_code.wealth_and_budget.tax_and_ssc import calc_after_ssc_income_worke
 
 
 def calc_labor_income_after_ssc(
-    lagged_choice, experience_years, education, income_shock, options
+    lagged_choice, experience_years, education, sex, income_shock, options
 ):
     # Gross labor income
     gross_labor_income = calculate_gross_labor_income(
         lagged_choice=lagged_choice,
         experience_years=experience_years,
         education=education,
+        sex = sex,
         income_shock=income_shock,
         options=options,
     )
@@ -18,7 +19,7 @@ def calc_labor_income_after_ssc(
 
 
 def calculate_gross_labor_income(
-    lagged_choice, experience_years, education, income_shock, options
+    lagged_choice, experience_years, education, sex, income_shock, options
 ):
     """Calculate the gross labor income.
 
@@ -26,8 +27,8 @@ def calculate_gross_labor_income(
     returns from options.
 
     """
-    gamma_0 = options["gamma_0"][education]
-    gamma_1 = options["gamma_1"][education]
+    gamma_0 = options["gamma_0"][education][sex]
+    gamma_1 = options["gamma_1"][education][sex]
     hourly_wage = jnp.exp(
         gamma_0 + gamma_1 * jnp.log(experience_years + 1) + income_shock
     )

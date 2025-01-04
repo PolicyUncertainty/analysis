@@ -9,7 +9,7 @@ input_str = input(
     "\n   - [w]age"
     "\n   - [p]artner wage"
     "\n   - [j]ob separation"
-    "\n   - family [t]ransition"
+    "\n   - [f]amily transition"
     "\n   - [h]ealth transition"
     "\n   - [m]ortality estimation"
     "\n   - [i]nformed state transition"
@@ -61,8 +61,8 @@ if input_str == "j":
 
     est_job_sep(paths_dict, specs, load_data=True)
 
-if input_str == "t":
-    # Estimate partner transitions
+if input_str == "f":
+    # Estimate family transitions
     from estimation.first_step_estimation.est_family_transitions import (
         estimate_partner_transitions,
         estimate_nb_children,

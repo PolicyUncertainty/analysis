@@ -55,7 +55,7 @@ def specify_model(
 
     options = {
         "state_space": {
-            # "min_period_batch_segments": [33, 44],
+            "min_period_batch_segments": [33, 44],
             "n_periods": n_periods,
             "choices": choices,
             "endogenous_states": {

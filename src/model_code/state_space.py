@@ -9,9 +9,9 @@ from model_code.wealth_and_budget.pensions import calc_total_pension_points
 
 def create_state_space_functions():
     return {
-        # "state_specific_choice_set": state_specific_choice_set,
+        "state_specific_choice_set": state_specific_choice_set,
         "next_period_experience": get_next_period_experience,
-        # "sparsity_condition": sparsity_condition,
+        "sparsity_condition": sparsity_condition,
     }
 
 
@@ -104,13 +104,18 @@ def sparsity_condition(
             return True
 
 
-def state_specific_choice_set(period, lagged_choice, policy_state, job_offer, options):
+def state_specific_choice_set(
+    period, lagged_choice, policy_state, job_offer, health, options
+):
     age = period + options["start_age"]
     SRA_pol_state = options["min_SRA"] + policy_state * options["SRA_grid_size"]
     min_ret_age_pol_state = apply_retirement_constraint_for_SRA(SRA_pol_state, options)
 
+    # If somebody is death, we assign a dummy choice set of [0]
+    if health == 2:
+        return np.array([0])
     # retirement is absorbing
-    if lagged_choice == 0:
+    elif lagged_choice == 0:
         return np.array([0])
     # Check if the person is not in the voluntary retirement range.
     elif age < min_ret_age_pol_state:

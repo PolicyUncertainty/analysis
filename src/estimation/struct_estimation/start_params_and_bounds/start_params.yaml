@@ -8,8 +8,7 @@ dis_util_ft_work_good: 1.3
 dis_util_ft_work_bad: 1.3
 dis_util_pt_work_good: 1.3
 dis_util_pt_work_bad: 1.3
-dis_util_unemployed_good: 1.0
-dis_util_unemployed_bad: 1.0
+dis_util_unemployed: 1.0
 bequest_scale: 1.0
 
 # Job separation params are set internally driven by data

@@ -143,19 +143,19 @@ class est_class_from_paths:
         )
         self.ll_func = individual_likelihood
         specs = generate_derived_and_data_derived_specs(path_dict)
-        self.pt_ratio_low = (
-            specs["av_annual_hours_pt"][0] / specs["av_annual_hours_ft"][0]
-        )
-        self.pt_ratio_high = (
-            specs["av_annual_hours_pt"][1] / specs["av_annual_hours_ft"][1]
-        )
+        # self.pt_ratio_low = (
+        #     specs["av_annual_hours_pt"][0] / specs["av_annual_hours_ft"][0]
+        # )
+        # self.pt_ratio_high = (
+        #     specs["av_annual_hours_pt"][1] / specs["av_annual_hours_ft"][1]
+        # )
 
     def crit_func(self, params):
         start = time.time()
-        if self.slope_disutil_method:
-            params = update_according_to_slope_disutil(
-                params, self.pt_ratio_low, self.pt_ratio_high
-            )
+        # if self.slope_disutil_method:
+        #     params = update_according_to_slope_disutil(
+        #         params, self.pt_ratio_low, self.pt_ratio_high
+        #     )
         ll_value_individual, model_solution = self.ll_func(params)
         ll_value = jnp.dot(self.weights, ll_value_individual)
         if self.save_results:
@@ -173,26 +173,26 @@ class est_class_from_paths:
         return ll_value
 
 
-def update_according_to_slope_disutil(params, pt_ratio_bad, pt_ratio_good):
-    """Use this function to entforce slope condition of disutility parameters."""
-    params["dis_util_unemployed_bad"] = params["dis_util_not_retired_low"]
-    params["dis_util_pt_work_bad"] = (
-        params["dis_util_not_retired_bad"]
-        + pt_ratio_bad * params["dis_util_working_bad"]
-    )
-    params["dis_util_ft_work_bad"] = (
-        params["dis_util_not_retired_bad"] + params["dis_util_working_bad"]
-    )
-
-    params["dis_util_unemployed_good"] = params["dis_util_not_retired_good"]
-    params["dis_util_pt_work_good"] = (
-        params["dis_util_not_retired_good"]
-        + pt_ratio_good * params["dis_util_working_good"]
-    )
-    params["dis_util_ft_work_good"] = (
-        params["dis_util_not_retired_good"] + params["dis_util_working_good"]
-    )
-    return params
+# def update_according_to_slope_disutil(params, pt_ratio_bad, pt_ratio_good):
+#     """Use this function to entforce slope condition of disutility parameters."""
+#     params["dis_util_unemployed_bad"] = params["dis_util_not_retired_low"]
+#     params["dis_util_pt_work_bad"] = (
+#         params["dis_util_not_retired_bad"]
+#         + pt_ratio_bad * params["dis_util_working_bad"]
+#     )
+#     params["dis_util_ft_work_bad"] = (
+#         params["dis_util_not_retired_bad"] + params["dis_util_working_bad"]
+#     )
+#
+#     params["dis_util_unemployed"] = params["dis_util_not_retired_good"]
+#     params["dis_util_pt_work_good"] = (
+#         params["dis_util_not_retired_good"]
+#         + pt_ratio_good * params["dis_util_working_good"]
+#     )
+#     params["dis_util_ft_work_good"] = (
+#         params["dis_util_not_retired_good"] + params["dis_util_working_good"]
+#     )
+#     return params
 
 
 def save_iter_step(model_sol, ll_value, params, logging_folder, iter_count):

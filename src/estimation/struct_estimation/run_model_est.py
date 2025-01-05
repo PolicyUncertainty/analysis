@@ -20,29 +20,26 @@ params_to_estimate_names = [
     # "dis_util_not_retired_good",
     # "dis_util_working_good",
     # "bequest_scale",
-    # "lambda",
+    "lambda",
     "job_finding_logit_const",
     "job_finding_logit_age",
     "job_finding_logit_high_educ",
 ]
 #
-last_estimate = pkl.load(
-    open(paths_dict["est_results"] + "est_params_cet_par.pkl", "rb")
-)
+# last_estimate = pkl.load(
+#     open(paths_dict["est_results"] + "est_params_cet_par.pkl", "rb")
+# )
 # last_estimate["dis_util_ft_work_high"]
 # breakpoint()
 # print("Restart estimation at: ", pd.Series(last_estimate))
-last_estimate["dis_util_unemployed"] = last_estimate["dis_util_unemployed_bad"]
-last_estimate.pop("dis_util_unemployed_bad")
-last_estimate.pop("dis_util_unemployed_good")
 
 estimation_results = estimate_model(
     paths_dict,
     params_to_estimate_names=params_to_estimate_names,
-    file_append="cet_par",
+    file_append="pete",
     slope_disutil_method=False,
     load_model=False,
-    last_estimate=last_estimate,
+    last_estimate=None,
     save_results=False,
 )
 print(estimation_results)

@@ -38,6 +38,8 @@ def estimate_model(
     # # Assign start params from before
     if last_estimate is not None:
         for key in last_estimate.keys():
+            if key in ["sigma", "interest_rate", "beta"]:
+                continue
             try:
                 print(
                     f"Start params value of {key} was {start_params_all[key]} and is"

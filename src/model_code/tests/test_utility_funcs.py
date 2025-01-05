@@ -89,7 +89,7 @@ def test_utility_func(
 
     # Read out disutil params
     health_str = "good" * health + "bad" * (1 - health)
-    disutil_unemployment = np.exp(-params[f"dis_util_unemployed_{health_str}"])
+    disutil_unemployment = np.exp(-params[f"dis_util_unemployed"])
     dis_util_pt_work = np.exp(-params[f"dis_util_pt_work_{health_str}"])
     dis_util_ft_work = np.exp(-params[f"dis_util_ft_work_{health_str}"])
 

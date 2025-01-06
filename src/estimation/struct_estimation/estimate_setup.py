@@ -159,7 +159,8 @@ class est_class_from_paths:
         #         params, self.pt_ratio_low, self.pt_ratio_high
         #     )
         ll_value_individual, model_solution = self.ll_func(params)
-        ll_value = jnp.dot(self.weights, ll_value_individual)
+        # ll_value = jnp.dot(self.weights, ll_value_individual) / self.weights.sum()
+        ll_value = jnp.sum(ll_value_individual) / len(ll_value_individual)
         if self.save_results:
             save_iter_step(
                 model_solution,

@@ -50,6 +50,7 @@ def read_and_derive_specs(spec_path):
     specs["n_periods"] = specs["end_age"] - specs["start_age"] + 1
     # Number of education types and choices from labels
     specs["n_education_types"] = len(specs["education_labels"])
+    specs["n_sexes"] = len(specs["sex_labels"])
     specs["n_choices"] = len(specs["choice_labels"])
     specs["n_health_states"] = len(specs["health_labels"])
     # you can retire from min retirement age until max retirement age

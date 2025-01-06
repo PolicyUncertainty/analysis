@@ -60,6 +60,7 @@ def specify_model(
             "choices": choices,
             "endogenous_states": {
                 "education": np.arange(specs["n_education_types"], dtype=int),
+                "sex": np.arange(specs["n_sexes"], dtype=int),
             },
             "exogenous_processes": {
                 "policy_state": {

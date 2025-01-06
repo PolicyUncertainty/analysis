@@ -55,35 +55,48 @@ def calc_annual_unemployment_benefits(specs):
 
 def add_population_averages(specs, path_dict):
     # Assign population averages
-    pop_averages = pd.read_csv(path_dict["est_results"] + "population_averages_working_hours.csv")
-    labor_choices = [2,3]
+    pop_averages = pd.read_csv(
+        path_dict["est_results"] + "population_averages_working_hours.csv"
+    )
+    labor_choices = [2, 3]
     edu_labels = specs["education_labels"]
     sex_labels = specs["sex_labels"]
-    avg_hours_by_type_choice = np.zeros((len(edu_labels), len(sex_labels), len(labor_choices)))
+    avg_hours_by_type_choice = np.zeros(
+        (len(edu_labels), len(sex_labels), len(labor_choices))
+    )
     for edu, edu_label in enumerate(edu_labels):
         for sex, sex_label in enumerate(sex_labels):
-            for choice, choice_nb in enumerate(labor_choices):
+            for choice, choice_number in enumerate(labor_choices):
                 edu_mask = pop_averages["education"] == edu
                 sex_mask = pop_averages["sex"] == sex
-                choice_mask = pop_averages["choice"] == choice_nb
+                choice_mask = pop_averages["choice"] == choice_number
                 pop_averages_mask = edu_mask & sex_mask & choice_mask
-                avg_hours_by_type_choice[edu][sex][choice] = pop_averages[pop_averages_mask]["annual_hours"].values[0]
-    specs["av_annual_hours_pt"] = avg_hours_by_type_choice[:][:][0]
-    specs["av_annual_hours_ft"] = avg_hours_by_type_choice[:][:][1]
+                avg_hours_by_type_choice[edu, sex, choice] = pop_averages[
+                    pop_averages_mask
+                ]["annual_hours"].values[0]
 
+    specs["av_annual_hours_pt"] = avg_hours_by_type_choice[:, :, 0]
+    specs["av_annual_hours_ft"] = avg_hours_by_type_choice[:, :, 1]
+
+    # Create auxiliary mean hourly full time wage for pension calculation (see appendix)
     mean_annual_wage = np.load(path_dict["est_results"] + "pop_avg_annual_wage.npy")
-    specs["mean_hourly_ft_wage"] = mean_annual_wage / avg_hours_by_type_choice[:][:][1]
+    specs["mean_hourly_ft_wage"] = mean_annual_wage / avg_hours_by_type_choice[:, :, 1]
     return specs
 
 
 def add_pt_and_ft_min_wage(specs):
-    """ Computes the annual minimum wage for part-time and full-time workers. Type-specific as hours are different between types. """
+    """Computes the annual minimum wage for part-time and full-time workers.
+
+    Type-specific as hours are different between types.
+
+    """
     annual_min_wage_pt = np.zeros((specs["n_education_types"], 2))
 
     for edu in range(specs["n_education_types"]):
         for sex in [0, 1]:
             hours_ratio = (
-                specs["av_annual_hours_pt"][edu][sex] / specs["av_annual_hours_ft"][edu][sex]
+                specs["av_annual_hours_pt"][edu][sex]
+                / specs["av_annual_hours_ft"][edu][sex]
             )
             annual_min_wage_pt[edu][sex] = specs["monthly_min_wage"] * hours_ratio * 12
 
@@ -108,18 +121,28 @@ def process_wage_params(path_dict, specs):
     edu_labels = specs["education_labels"]
     sex_labels = specs["sex_labels"]
     wage_params.reset_index(inplace=True)
-    
-    gamma_0 = np.array([len(edu_labels), len(sex_labels)])
-    gamma_1 = np.array([len(edu_labels), len(sex_labels)])
 
-    for edu in edu_labels:
-        for sex in sex_labels:
-            mask = (wage_params["education"] == edu) & (wage_params["sex"] == sex)
-            gamma_0 = wage_params[mask & (wage_params["parameter"] == "constant")]
-            gamma_1 = wage_params[mask & (wage_params["parameter"] == "ln_exp")]
-    mask = (wage_params["education"] == "all") & (wage_params["sex"] == "all") & (wage_params["parameter"] == "income_shock_std")
+    gamma_0 = np.zeros((len(edu_labels), len(sex_labels)))
+    gamma_1 = np.zeros((len(edu_labels), len(sex_labels)))
+
+    for edu_id, edu_label in enumerate(edu_labels):
+        for sex_id, sex in enumerate(sex_labels):
+            mask = (wage_params["education"] == edu_label) & (wage_params["sex"] == sex)
+            gamma_0[edu_id, sex_id] = wage_params.loc[
+                mask & (wage_params["parameter"] == "constant"), "value"
+            ]
+            gamma_1[edu_id, sex_id] = wage_params.loc[
+                mask & (wage_params["parameter"] == "ln_exp"), "value"
+            ]
+
+    mask = (
+        (wage_params["education"] == "all")
+        & (wage_params["sex"] == "all")
+        & (wage_params["parameter"] == "income_shock_std")
+    )
     income_shock_scale = wage_params[mask]["value"].values[0]
-    return gamma_0, gamma_1, income_shock_scale
+
+    return jnp.asarray(gamma_0), jnp.asarray(gamma_1), income_shock_scale
 
 
 def calculate_partner_incomes(path_dict, specs):

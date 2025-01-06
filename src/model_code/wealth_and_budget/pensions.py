@@ -30,14 +30,14 @@ def calc_gross_pension_income(experience_years, education, options):
     return retirement_income_gross
 
 
-def calc_total_pension_points(education, experience_years, options):
+def calc_total_pension_points(education, sex, experience_years, options):
     """Calculate the total pension point for the working live.
 
     We normalize by the mean wage of the whole population. The punishment for early
     retirement is already in the experience.
 
     """
-    mean_wage_all = options["mean_hourly_ft_wage"][education]
+    mean_wage_all = options["mean_hourly_ft_wage"][education, sex]
     gamma_0 = options["gamma_0"][education]
     gamma_1_plus_1 = options["gamma_1"][education] + 1
     total_pens_points = (

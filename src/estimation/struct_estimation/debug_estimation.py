@@ -62,6 +62,7 @@ est_class = est_class_from_paths(
     start_params_all=params,
     slope_disutil_method=False,
     file_append="subj",
+    use_weights=False,
     load_model=True,
     save_results=False,
 )

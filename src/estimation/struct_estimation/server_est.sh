@@ -5,10 +5,10 @@
 #SBATCH --mail-type=end
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=02:00:00
+#SBATCH --time=3:00:00
 #SBATCH --mem=20GB
 #SBATCH --partition=scavenger
-#SBATCH --gres=gpu:a5000:1
+#SBATCH --gres=gpu:h100:1
 #SBATCH --qos=standard
 
 module add Python/3.12.3-GCCcore-13.3.0

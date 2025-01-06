@@ -29,6 +29,7 @@ def test_choice_set_under_63(period, lagged_choice, job_offer):
         period=period,
         lagged_choice=lagged_choice,
         policy_state=policy_state,
+        health=1,
         job_offer=job_offer,
         options=options,
     )
@@ -61,6 +62,7 @@ def test_choice_set_over_63_under_72(period, lagged_choice, policy_state, job_of
         period=period,
         lagged_choice=lagged_choice,
         policy_state=policy_state,
+        health=1,
         job_offer=job_offer,
         options=options,
     )
@@ -106,6 +108,7 @@ def test_choice_set_over_72(period, lagged_choice, policy_state):
         period=period,
         lagged_choice=lagged_choice,
         policy_state=policy_state,
+        health=1,
         job_offer=0,
         options=options,
     )

@@ -7,8 +7,7 @@ dis_util_ft_work_good: 5
 dis_util_ft_work_bad: 5
 dis_util_pt_work_good: 5
 dis_util_pt_work_bad: 5
-dis_util_unemployed_good: 5
-dis_util_unemployed_bad: 5
+dis_util_unemployed: 5
 lambda: 2
 bequest_scale: 5
 job_finding_logit_const: 5

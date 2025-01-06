@@ -53,10 +53,6 @@ def disutility_work(choice, health, params):
         params["dis_util_pt_work_bad"] * (1 - health)
         + params["dis_util_pt_work_good"] * health
     )
-    dis_util_unemployed = (
-        params["dis_util_unemployed_bad"] * (1 - health)
-        + params["dis_util_unemployed_good"] * health
-    )
     # choice booleans
     is_unemployed = choice == 1
     is_working_part_time = choice == 2
@@ -64,7 +60,7 @@ def disutility_work(choice, health, params):
     # partner_retired = partner_state == 0
 
     exp_factor = (
-        dis_util_unemployed * is_unemployed
+        params["dis_util_unemployed"] * is_unemployed
         + dis_util_pt_work * is_working_part_time
         + dis_util_ft_work * is_working_full_time
         # + partner_retired * dis_util_only_partner_retired

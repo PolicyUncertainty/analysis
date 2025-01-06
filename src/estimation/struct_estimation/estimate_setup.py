@@ -30,6 +30,7 @@ def estimate_model(
     file_append,
     slope_disutil_method,
     load_model,
+    use_weights=True,
     last_estimate=None,
     save_results=True,
 ):
@@ -70,6 +71,7 @@ def estimate_model(
         slope_disutil_method=slope_disutil_method,
         file_append=file_append,
         load_model=load_model,
+        use_weights=use_weights,
         save_results=save_results,
     )
 
@@ -101,6 +103,7 @@ class est_class_from_paths:
         slope_disutil_method,
         file_append,
         load_model,
+        use_weights,
         save_results=True,
     ):
         self.iter_count = 0
@@ -129,7 +132,12 @@ class est_class_from_paths:
             path_dict, start_params_all, model, drop_retirees=True
         )
 
-        self.weights = np.ones_like(data_decision["age_weights"].values)
+        if use_weights:
+            self.weights = data_decision["age_weights"].values
+            self.weight_sum = np.sum(self.weights)
+        else:
+            self.weights = np.ones(data_decision.shape[0])
+            self.weight_sum = data_decision.shape[0]
 
         # Create specs for unobserved states
         unobserved_state_specs = create_unobserved_state_specs(data_decision, model)
@@ -159,8 +167,7 @@ class est_class_from_paths:
         #         params, self.pt_ratio_low, self.pt_ratio_high
         #     )
         ll_value_individual, model_solution = self.ll_func(params)
-        # ll_value = jnp.dot(self.weights, ll_value_individual) / self.weights.sum()
-        ll_value = jnp.sum(ll_value_individual) / len(ll_value_individual)
+        ll_value = jnp.dot(self.weights, ll_value_individual) / self.weight_sum
         if self.save_results:
             save_iter_step(
                 model_solution,

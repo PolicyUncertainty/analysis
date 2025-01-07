@@ -21,10 +21,6 @@ def create_job_sep_sample(paths, specs, load_data=False):
         data = pd.read_pickle(out_file_path)
         return data
 
-    # Export parameters from specs
-    start_age = specs["start_age"]
-    max_ret_age = specs["max_ret_age"]
-
     # Load and merge data state data from SOEP core
     df = load_and_merge_soep_core(paths["soep_c38"])
 
@@ -48,28 +44,22 @@ def create_job_sep_sample(paths, specs, load_data=False):
 
     # Create age at which one got fired and rename job separation column
     df["age_fired"] = df["age"] - 1
+    df.reset_index(inplace=True)
 
-    df.reset_index(drop=True, inplace=True)
+    # Relevant columns and datatype
+    columns = {
+        "age_fired": np.int32,
+        "education": np.uint8,
+        "sex": np.uint8,
+        "job_sep": np.uint8,
+    }
 
-    # Keep relevant columns
-    df = df[
-        [
-            "age_fired",
-            "education",
-            "job_sep",
-        ]
-    ]
-    df = df.astype(
-        {
-            "age_fired": np.int32,
-            "education": np.int32,
-            "job_sep": np.int32,
-        }
-    )
+    df = df[columns.keys()]
+    df = df.astype(columns)
     # Rename age fired to age
     df.rename(columns={"age_fired": "age"}, inplace=True)
     # Limit age range to start age and maximum retirement age
-    df = df[(df["age"] >= start_age) & (df["age"] <= max_ret_age)]
+    df = df[(df["age"] >= specs["start_age"]) & (df["age"] <= specs["max_ret_age"])]
     print(f"{len(df)} observations in job separation sample.")
 
     # save data

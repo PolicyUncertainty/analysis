@@ -1,3 +1,5 @@
+import pickle as pkl
+
 import jax.numpy as jnp
 import numpy as np
 import yaml
@@ -34,7 +36,7 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     )
 
     specs["job_sep_probs"] = jnp.asarray(
-        np.loadtxt(path_dict["est_results"] + "job_sep_probs.csv", delimiter=",")
+        pkl.load(open(path_dict["est_results"] + "job_sep_probs.pkl", "rb"))
     )
 
     # Add informed process specs
@@ -52,7 +54,16 @@ def read_and_derive_specs(spec_path):
     specs["n_education_types"] = len(specs["education_labels"])
     specs["n_sexes"] = len(specs["sex_labels"])
     specs["n_choices"] = len(specs["choice_labels"])
+
+    # For health states, get number and var values for alive states
     specs["n_health_states"] = len(specs["health_labels"])
+    specs["alive_health_vars"] = np.where(np.array(specs["health_labels"]) != "Death")[
+        0
+    ]
+    specs["death_health_var"] = np.where(np.array(specs["health_labels"]) == "Death")[
+        0
+    ][0]
+
     # you can retire from min retirement age until max retirement age
     specs["n_policy_states"] = (
         int(((specs["max_SRA"] - specs["min_SRA"]) / specs["SRA_grid_size"]) + 1) + 1

@@ -49,11 +49,13 @@ def calc_total_pension_points(education, sex, experience_years, options):
     return total_pens_points
 
 
-def calc_experience_for_total_pension_points(total_pension_points, education, options):
+def calc_experience_for_total_pension_points(
+    total_pension_points, sex, education, options
+):
     """Calculate the experience for a given total pension points."""
-    mean_wage_all = options["mean_hourly_ft_wage"][education]
-    gamma_0 = options["gamma_0"][education]
-    gamma_1_plus_1 = options["gamma_1"][education] + 1
+    mean_wage_all = options["mean_hourly_ft_wage"][sex, education]
+    gamma_0 = options["gamma_0"][sex, education]
+    gamma_1_plus_1 = options["gamma_1"][sex, education] + 1
     return (
         (total_pension_points * mean_wage_all * gamma_1_plus_1 / jnp.exp(gamma_0) + 1)
         ** (1 / gamma_1_plus_1)

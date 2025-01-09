@@ -55,7 +55,7 @@ def calc_job_finding_prob_women(params, education, period, options):
         params["job_finding_logit_const_women"]
         + params["job_finding_logit_age_women"] * age
         # + params["job_finding_logit_above_49"] * above_49
-        + params["job_finding_logit_high_women"] * high_edu
+        + params["job_finding_logit_high_educ_women"] * high_edu
     )
     prob = exp_value / (1 + exp_value)
     return prob

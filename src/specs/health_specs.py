@@ -31,25 +31,17 @@ def read_in_health_transition_specs(paths_dict, specs):
                 for next_state in alive_health_states:
                     trans_probs[
                         edu, period, current_state, next_state
-                    ] = trans_probs_df[
-                        (trans_probs_df.index.get_level_values("education") == edu)
-                        & (trans_probs_df.index.get_level_values("period") == period)
-                        & (trans_probs_df.index.get_level_values("health") == current_state)
-                        & (trans_probs_df.index.get_level_values("lead_health") == next_state)
-                    ].values[0]
-                death_prob = death_probs[
-                    (death_probs.index.get_level_values("age") == specs["start_age"] + period)
-                    & (death_probs.index.get_level_values("education") == edu)
-                    & (death_probs.index.get_level_values("health") == current_state)
-                    & (death_probs.index.get_level_values("sex") == 0) # only male for now PLS FIX @MAX
-                ].values[0]
-                # Death state. Condition health transitions on surviving and then assign death
-                # probability to death state
-                trans_probs[edu, period, current_state, :] *= 1 - death_prob
-                trans_probs[edu, period, current_state, death_health_state] = death_prob
+                    ] = trans_probs_df.loc[(edu, period, current_state, next_state)]
 
-    # Death as absorbing state. There are only zeros in the last row of the
-    # transition matrix and a 1 on the diagonal element
+                # Death state. For now dummy transition. Soon estimated death probs
+                trans_probs[edu, period, current_state, death_health_state] = 0.05
+
+                # Normalize probability row
+                trans_probs[edu, period, current_state, :] /= trans_probs[
+                    edu, period, current_state, :
+                ].sum()
+
+    # Death as absorbing state. There are only zeros in the last row of the transition matrix
     trans_probs[:, :, death_health_state, death_health_state] = 1
 
     return jnp.asarray(trans_probs)

@@ -101,12 +101,12 @@ def create_survival_transition_sample(paths, specs, load_data=False):
 
     # Create interaction indicators for health and education
     dupli_df = create_interaction_columns(
-        dupli_df, ("health", "health"), ("education", "edu")
+        dupli_df, ("health", "education"), specs
     )
 
     # Create interaction indicators for start health and education
     dupli_df = create_interaction_columns(
-        dupli_df, ("start_health", "start_health"), ("education", "edu")
+        dupli_df, ("start_health", "education"), specs
     )
 
     # Convert DataFrame to floats for computation
@@ -285,22 +285,28 @@ def create_start_age_and_health(df):
     return df
 
 
-def create_interaction_columns(df, col1_info, col2_info):
-    """Create interaction indicator columns based on two 0-1-columns in the DataFrame.
+def create_interaction_columns(df, columns, specs):
+    """Create interaction indicator columns based on two 0-1-columns in the DataFrame. Adds start_ prefix if necessary.
 
     Parameters:
         df (DataFrame): The DataFrame to modify.
-        col1_info (tuple): A tuple containing the column name and prefix for the first column (e.g., ("col1", "prefix1")).
-        col2_info (tuple): A tuple containing the column name and prefix for the second column (e.g., ("col2", "prefix2")).
-
+        columns (tuple): A tuple containing the two column names.
+        specs (dict): The specifications dictionary.
+         
     Returns:
         DataFrame: The modified DataFrame with new interaction columns.
 
     """
-    column1, prefix1 = col1_info
-    column2, prefix2 = col2_info
-    combinations = [(1, 1), (1, 0), (0, 1), (0, 0)]
-    for val1, val2 in combinations:
-        col_name = f"{prefix1}{val1}_{prefix2}{val2}"
-        df[col_name] = (df[column1] == val1) & (df[column2] == val2)
+    column1, column2 = columns
+
+    # get the labels for the columns (start variables get the same labels as the original variables)
+    col1_labels = specs[f"{column1}_labels".replace("start_", "")] 
+    col2_labels = specs[f"{column2}_labels".replace("start_", "")] 
+
+    for val1 in [0, 1]:
+        for val2 in [0, 1]:
+            col_name = f"{col1_labels[val1]}_{col2_labels[val2]}".replace(" ", "")
+            if "start_" in column1 or "start_" in column2:
+                col_name = f"start_{col_name}"
+            df[col_name] = (df[column1] == val1) & (df[column2] == val2)
     return df

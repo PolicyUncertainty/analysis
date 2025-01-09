@@ -64,6 +64,7 @@ def estimate_partner_transitions(paths_dict, specs, load_data):
 
                     ages = np.arange(start_age, end_age + 1)
                     predicted_probs = result.predict(exog=sm.add_constant(ages))
+
                     for age_idx, age in enumerate(ages):
                         for lead_partner_state, lead_partner_state_label in enumerate(
                             possible_partner_labels

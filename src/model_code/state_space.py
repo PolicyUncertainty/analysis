@@ -18,6 +18,7 @@ def create_state_space_functions():
 def sparsity_condition(
     period,
     lagged_choice,
+    sex,
     informed,
     health,
     partner_state,
@@ -34,6 +35,8 @@ def sparsity_condition(
     degenerate_policy_state = options["n_policy_states"] - 1
 
     age = start_age + period
+    if (sex == 0) & (lagged_choice == 2):
+        return False
     # You cannot retire before the earliest retirement age
     if (age <= min_ret_age_state_space) & (lagged_choice == 0):
         return False
@@ -105,7 +108,7 @@ def sparsity_condition(
 
 
 def state_specific_choice_set(
-    period, lagged_choice, policy_state, job_offer, health, options
+    period, lagged_choice, sex, policy_state, job_offer, health, options
 ):
     age = period + options["start_age"]
     SRA_pol_state = options["min_SRA"] + policy_state * options["SRA_grid_size"]
@@ -122,14 +125,20 @@ def state_specific_choice_set(
         if job_offer == 0:
             return np.array([1])
         else:
-            return np.array([1, 2, 3])
+            if sex == 0:
+                return np.array([1, 3])
+            else:
+                return np.array([1, 2, 3])
     elif age >= options["max_ret_age"]:
         return np.array([0])
     else:
         if job_offer == 0:
             return np.array([0, 1])
         else:
-            return np.array([0, 1, 2, 3])
+            if sex == 0:
+                return np.array([0, 1, 3])
+            else:
+                return np.array([0, 1, 2, 3])
 
 
 def apply_retirement_constraint_for_SRA(SRA, options):

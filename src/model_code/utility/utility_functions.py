@@ -43,7 +43,7 @@ def inverse_marginal(
     return consumption
 
 
-def disutility_work(choice, health, params):
+def disutility_work(choice, sex, health, params):
     # reading parameters
     dis_util_ft_work = (
         params["dis_util_ft_work_bad"] * (1 - health)

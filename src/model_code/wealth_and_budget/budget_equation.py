@@ -12,6 +12,7 @@ def budget_constraint(
     education,
     lagged_choice,  # d_{t-1}
     experience,
+    sex,
     partner_state,
     savings_end_of_previous_period,  # A_{t-1}
     income_shock_previous_period,  # epsilon_{t - 1}
@@ -25,7 +26,11 @@ def budget_constraint(
 
     # Calculate partner income
     partner_income_after_ssc = calc_partner_income_after_ssc(
-        partner_state=partner_state, options=options, education=education, period=period
+        partner_state=partner_state,
+        sex=sex,
+        options=options,
+        education=education,
+        period=period,
     )
     has_partner_int = (partner_state > 0).astype(int)
 
@@ -50,6 +55,7 @@ def budget_constraint(
         lagged_choice=lagged_choice,
         experience_years=experience_years,
         education=education,
+        sex=sex,
         income_shock=income_shock_previous_period,
         options=options,
     )

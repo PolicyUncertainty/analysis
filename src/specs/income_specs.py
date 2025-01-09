@@ -130,44 +130,59 @@ def process_wage_params(path_dict, specs):
             mask = (wage_params["education"] == edu_label) & (wage_params["sex"] == sex)
             gamma_0[edu_id, sex_id] = wage_params.loc[
                 mask & (wage_params["parameter"] == "constant"), "value"
-            ]
+            ].values[0]
             gamma_1[edu_id, sex_id] = wage_params.loc[
                 mask & (wage_params["parameter"] == "ln_exp"), "value"
-            ]
+            ].values[0]
 
     mask = (
         (wage_params["education"] == "all")
         & (wage_params["sex"] == "all")
         & (wage_params["parameter"] == "income_shock_std")
     )
-    income_shock_scale = wage_params[mask]["value"].values[0]
+    income_shock_scale = wage_params.loc[mask, "value"].values[0]
 
     return jnp.asarray(gamma_0), jnp.asarray(gamma_1), income_shock_scale
 
 
 def calculate_partner_incomes(path_dict, specs):
     """Calculate income of working aged partner."""
-    periods = np.arange(0, specs["n_periods"], dtype=int)
-    n_edu_types = len(specs["education_labels"])
+    periods = np.arange(0, specs["n_periods"], dtype=float)
+    # Limit periods to the one of max retirement age as we restricted our estimation sample
+    # until then. For the predictions after max retirement age we use the last max retirement period
+    not_predicted_periods = np.where(
+        periods > specs["max_ret_age"] - specs["start_age"]
+    )[0]
+    periods[not_predicted_periods] = specs["max_ret_age"] - specs["start_age"]
 
     # Only do this for men now
     partner_wage_params_men = pd.read_csv(
-        path_dict["est_results"] + "partner_wage_eq_params_men.csv", index_col=0
+        path_dict["est_results"] + "partner_wage_eq_params_men.csv"
     )
-    # partner_wage_params_women = pd.read_csv(
-    #     path_dict["est_results"] + "partner_wage_eq_params_women.csv"
-    # )
-    partner_wages = np.zeros((n_edu_types, specs["n_periods"]))
-    for edu_val, edu_label in enumerate(specs["education_labels"]):
-        for period in periods:
-            partner_wages[edu_val, period] = (
-                partner_wage_params_men.loc[edu_label, "constant"]
-                + partner_wage_params_men.loc[edu_label, "period"] * period
-                + partner_wage_params_men.loc[edu_label, "period_sq"] * period**2
+    partner_wage_params_women = pd.read_csv(
+        path_dict["est_results"] + "partner_wage_eq_params_women.csv"
+    )
+    partner_wages = np.zeros(
+        (specs["n_sexes"], specs["n_education_types"], specs["n_periods"]), dtype=float
+    )
+    for sex_var, sex_label in enumerate(specs["sex_labels"]):
+        if sex_label == "Men":
+            params = partner_wage_params_men
+        else:
+            params = partner_wage_params_women
+        for edu_var, edu_label in enumerate(specs["education_labels"]):
+            mask = params["education"] == edu_label
+            partner_wages[sex_var, edu_var, :] = (
+                params.loc[mask, "constant"].values[0]
+                + params.loc[mask, "period"].values[0] * periods
+                + params.loc[mask, "period_sq"].values[0] * periods**2
             )
     # annual partner wage
     annual_partner_wages = partner_wages * 12
 
-    # Wealth hack
-    annual_partner_pension = annual_partner_wages.mean(axis=1) * 0.48
+    # Quasi wealth hack
+    annual_partner_pension = (
+        annual_partner_wages[:, :, ~not_predicted_periods].mean(axis=2) * 0.48
+    )
+
     return jnp.asarray(annual_partner_wages), jnp.asarray(annual_partner_pension)

@@ -44,7 +44,7 @@ estimation_results = estimate_model(
     params_to_estimate_names=params_to_estimate_names,
     file_append="pete",
     slope_disutil_method=False,
-    load_model=False,
+    load_model=True,
     last_estimate=None,
     save_results=False,
 )

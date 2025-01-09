@@ -11,10 +11,8 @@ from estimation.struct_estimation.estimate_setup import estimate_model
 params_to_estimate_names = [
     # "mu",
     "disutil_unemployed_men",
-    "disutil_pt_work_good_men",
     "disutil_ft_work_good_men",
     "disutil_ft_work_bad_men",
-    "disutil_pt_work_bad_men",
     "disutil_unemployed_women",
     "disutil_pt_work_good_women",
     "disutil_ft_work_good_women",

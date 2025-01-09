@@ -34,6 +34,7 @@ def estimate_model(
     last_estimate=None,
     save_results=True,
 ):
+    generate_print_func(params_to_estimate_names)
     # Load start params and bounds
     start_params_all = load_and_set_start_params(path_dict)
     # # Assign start params from before
@@ -260,3 +261,57 @@ def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):
     states_dict["wealth"] = data_decision["adjusted_wealth"].values
 
     return data_decision, states_dict
+
+
+def generate_print_func(params_to_estimate_names):
+    men_params = get_gendered_params(params_to_estimate_names, "men")
+    women_params = get_gendered_params(params_to_estimate_names, "women")
+    neutral_params = [
+        param_name
+        for param_name in params_to_estimate_names
+        if param_name not in men_params["all"] + women_params["all"]
+    ]
+    men_params.pop("all")
+    women_params.pop("all")
+
+    def print_function(params):
+        print("Gender neutral parameters:")
+        for param_name in neutral_params:
+            print(f"{param_name}: {params[param_name]}")
+        print("\n")
+        print("Men model params are: \n")
+        for group_name in men_params.keys():
+            print(f"Group: {group_name}")
+            for param in men_params:
+                if "disutil" in param:
+                    print(
+                        f"{param}: {params[param]} and in probability: {np.exp(-params[param])}"
+                    )
+
+
+def get_gendered_params(params_to_estimate_names, append):
+    gender_params = [
+        param_name for param_name in params_to_estimate_names if append in param_name
+    ]
+
+    disutil_params = [
+        param_name for param_name in gender_params if "disutil_" in param_name
+    ]
+    disutil_params_pt_params = [
+        param_name for param_name in disutil_params if "pt_work" in param_name
+    ]
+    disutil_params_ft_params = [
+        param_name for param_name in disutil_params if "ft_work" in param_name
+    ]
+    job_finding_params = [
+        param_name for param_name in gender_params if "job_finding_" in param_name
+    ]
+
+    params = {
+        "all": gender_params,
+        "full-time": disutil_params_ft_params,
+        "part-time": disutil_params_pt_params,
+        "job-finding": job_finding_params,
+    }
+
+    return params

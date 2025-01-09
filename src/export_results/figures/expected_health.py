@@ -1,9 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-
-# Define more visually appealing red and blue colors
-colors = {0: "#D72638", 1: "#1E90FF"}  # Red: #D72638, Blue: #1E90FF
+from export_results.figures.color_map import JET_COLOR_MAP
 
 
 def plot_healthy_unhealthy(paths_dict, specs):
@@ -22,51 +20,67 @@ def plot_healthy_unhealthy(paths_dict, specs):
     df = pd.read_pickle(
         paths_dict["intermediate_data"] + "health_transition_estimation_sample.pkl"
     )
-    # breakpoint()
 
     # Calculate the smoothed shares for healthy individuals
-    edu_shares_healthy = (
-        df.groupby(["education", "age"])["health"]
+    edu_shares_data = (
+        df.groupby(["sex", "education", "age"])["health"]
         .mean()
-        .loc[slice(None), slice(start_age, end_age)]
+        .loc[slice(None), slice(None), slice(start_age, end_age + 1)]
     )
+    full_index = pd.MultiIndex.from_product(
+        [range(specs["n_sexes"]), range(specs["n_education_types"]), ages],
+        names=["sex", "education", "age"],
+    )
+    edu_shares_healthy = pd.DataFrame(index=full_index, columns=["health"], data=0.0)
+    edu_shares_healthy.update(edu_shares_data)
 
     # Initialize the distribution
     initial_dist = np.zeros(specs["n_health_states"])
 
     # Create the plot
     fig, ax = plt.subplots(figsize=(12, 8))
-    for edu, edu_label in enumerate(specs["education_labels"]):
-        # Set the initial distribution for the Markov simulation
-        # and assume nobody is dead
-        initial_dist[1] = edu_shares_healthy.loc[(edu, start_age)]
-        initial_dist[0] = 1 - initial_dist[1]
+    color_id = 0
+    for sex_var, sex_label in enumerate(specs["sex_labels"]):
+        for edu_var, edu_label in enumerate(specs["education_labels"]):
+            # Set the initial distribution for the Markov simulation
+            # and assume nobody is dead
+            initial_dist[1] = edu_shares_healthy.loc[(sex_var, edu_var, start_age)]
+            initial_dist[0] = 1 - initial_dist[1]
 
-        # Simulate the Markov process and get health probabilities
-        shares_over_time = markov_simulator(
-            initial_dist, specs["health_trans_mat"][edu, :, :, :]
-        )
-        # Construct health probabilities if alive (Use death probs as column vector)
-        alive_share = 1 - shares_over_time[:, 2:]
-        alive_health_shares = shares_over_time[:, :2] / alive_share
-        health_prob_edu_est = alive_health_shares[:, 1]
-        health_prob_edu_data = edu_shares_healthy.loc[(edu, slice(None))].values
+            # Simulate the Markov process and get health probabilities
+            shares_over_time = markov_simulator(
+                initial_dist, specs["health_trans_mat"][sex_var, edu_var, :, :, :]
+            )
+            # Construct health probabilities if alive (Use death probs as column vector)
+            alive_share = 1 - shares_over_time[:, 2:]
+            alive_health_shares = shares_over_time[:, :2] / alive_share
+            health_prob_edu_est = alive_health_shares[:, 1]
+            health_prob_edu_data = edu_shares_healthy.loc[
+                (sex_var, edu_var, slice(None))
+            ].values
 
-        # Plot the estimates and the data
-        ax.plot(
-            ages,
-            health_prob_edu_est,
-            color=colors[edu],
-            label=f"{edu_label} MC-Estimate",
-        )
-        ax.plot(
-            ages,
-            health_prob_edu_data,
-            linestyle="--",
-            color=colors[edu],
-            label=f"{edu_label} Data, RM w. BW={specs['health_smoothing_bandwidth']}",
-        )
-        ax.scatter(ages, health_prob_edu_data, color=colors[edu], alpha=0.5, s=8)
+            # Plot the estimates and the data
+            ax.plot(
+                ages,
+                health_prob_edu_est,
+                color=JET_COLOR_MAP[color_id],
+                label=f"{edu_label}; {sex_label} MC-Estimate",
+            )
+            ax.plot(
+                ages,
+                health_prob_edu_data,
+                linestyle="--",
+                color=JET_COLOR_MAP[color_id],
+                label=f"{edu_label}; {sex_label} Data, RM w. BW={specs['health_smoothing_bandwidth']}",
+            )
+            ax.scatter(
+                ages,
+                health_prob_edu_data,
+                color=JET_COLOR_MAP[color_id],
+                alpha=0.5,
+                s=8,
+            )
+            color_id += 1
 
     # Adjust the x-axis ticks and labels
     x_ticks = np.arange(start_age, end_age + 1, 10)
@@ -106,8 +120,6 @@ def markov_simulator(initial_dist, trans_probs):
 
 
 def plot_health_transition_prob(specs):
-    fig, axs = plt.subplots(2, 1, figsize=(10, 12), sharex=True)
-
     # Load the transition probabilities
     trans_probs = specs["health_trans_mat"]
 
@@ -122,90 +134,34 @@ def plot_health_transition_prob(specs):
 
     # Define the bandwidth for the kernel density estimation
     bandwidth = specs["health_smoothing_bandwidth"]
+    fig, axs = plt.subplots(2, 1, figsize=(10, 12), sharex=True)
 
-    # Panel (a): Probability of good health shock
-    axs[0].plot(
-        periods,
-        trans_probs[0, :, 0, 1],
-        color=colors[1],
-        label="Low education (smoothed)",
-    )
-    axs[0].scatter(
-        periods,
-        trans_probs[0, :, 0, 1],
-        color=colors[1],
-        alpha=0.65,
-        s=8,
-        label="Low education",
-    )
-    axs[0].plot(
-        periods,
-        trans_probs[1, :, 0, 1],
-        color=colors[0],
-        label="High education (smoothed)",
-    )
-    axs[0].scatter(
-        periods,
-        trans_probs[1, :, 0, 1],
-        color=colors[0],
-        alpha=0.65,
-        s=8,
-        label="High education",
-    )
-    axs[0].set_title(
-        f"Probability of Good Health Shock (kernel-smoothed), bw={bandwidth}",
-        fontsize=14,
-    )
-    axs[0].set_ylabel("Probability", fontsize=12)
-    axs[0].legend(loc="upper right")
-    axs[0].set_ylim(0, 0.4)
-    axs[0].set_yticks(
-        [i * 0.05 for i in range(9)]
-    )  # Y-axis ticks from 0 to 0.4 with steps of 0.05
-    axs[0].grid(False)
-
-    # Panel (b): Probability of bad health shock
-    axs[1].plot(
-        periods,
-        trans_probs[0, :, 1, 0],
-        color=colors[1],
-        label="Low education (smoothed)",
-    )
-    axs[1].scatter(
-        periods,
-        trans_probs[0, :, 1, 0],
-        color=colors[1],
-        alpha=0.65,
-        s=8,
-        label="Low education",
-    )
-    axs[1].plot(
-        periods,
-        trans_probs[1, :, 1, 0],
-        color=colors[0],
-        label="High education (smoothed)",
-    )
-    axs[1].scatter(
-        periods,
-        trans_probs[1, :, 1, 0],
-        color=colors[0],
-        alpha=0.65,
-        s=8,
-        label="High education",
-    )
-    axs[1].set_title(
-        f"Probability of Bad Health Shock (kernel-smoothed), bw={bandwidth}",
-        fontsize=14,
-    )
-    axs[1].set_xlabel("Age", fontsize=12)
-    axs[1].set_ylabel("Probability", fontsize=12)
-    axs[1].set_ylim(0, 0.4)
-    axs[1].set_yticks(
-        [i * 0.05 for i in range(9)]
-    )  # Y-axis ticks from 0 to 0.4 with steps of 0.05
-    axs[1].legend(loc="upper right")
-    axs[1].grid(False)
-
-    # Set the x-axis ticks and labels
-    axs[1].set_xticks(tick_positions)
-    axs[1].set_xticklabels(age_ticks)
+    for health_var in specs["alive_health_vars"]:
+        color_id = 0
+        ax = axs[health_var]
+        for sex_var, sex_label in enumerate(specs["sex_labels"]):
+            for edu_var, edu_label in enumerate(specs["education_labels"]):
+                health_var_to = 1 - health_var
+                ax.plot(
+                    periods,
+                    trans_probs[sex_var, edu_var, :, health_var, health_var_to],
+                    color=JET_COLOR_MAP[color_id],
+                    label=f"{sex_label}; {edu_label}",
+                )
+                # Shock is reverse from which is baseline health
+                label = specs["health_labels"][health_var_to]
+                ax.set_title(
+                    f"Probability of {label} Shock (kernel-smoothed), bw={bandwidth}",
+                    fontsize=14,
+                )
+                ax.set_ylabel("Probability", fontsize=12)
+                ax.legend(loc="upper right")
+                ax.set_ylim(0, 0.4)
+                ax.set_yticks(
+                    [i * 0.05 for i in range(9)]
+                )  # Y-axis ticks from 0 to 0.4 with steps of 0.05
+                # # Set the x-axis ticks and labels
+                ax.set_xticks(tick_positions)
+                ax.set_xticklabels(age_ticks)
+                ax.grid(False)
+                color_id += 1

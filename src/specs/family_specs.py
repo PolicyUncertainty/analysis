@@ -33,45 +33,48 @@ def predict_children_by_state(path_dict, specs):
 
 
 def read_in_partner_transition_specs(paths_dict, specs):
-    trans_probs = pd.read_csv(
+    est_probs_df = pd.read_csv(
         paths_dict["est_results"] + "partner_transition_matrix.csv",
-        index_col=[0, 1, 2, 3, 4],
-    )["proportion"]
+    )
 
     n_periods = specs["n_periods"]
-    n_partner_states = trans_probs.index.get_level_values("partner_state").nunique()
-    n_edu_types = len(specs["education_labels"])
-    n_sexes = 2
-    age_bins = trans_probs.index.get_level_values("age_bin").unique()
-
-    full_series_index = pd.MultiIndex.from_product(
-        [
-            range(n_edu_types),
-            range(n_sexes),
-            age_bins,
-            range(n_partner_states),
-            range(n_partner_states),
-        ],
-        names=trans_probs.index.names,
-    )
-    full_series = pd.Series(index=full_series_index, data=0.0, name=trans_probs.name)
-    full_series.update(trans_probs)
+    n_partner_states = specs["n_partner_states"]
+    n_edu_types = specs["n_education_types"]
+    n_sexes = specs["n_sexes"]
 
     # Transition probalities for partner
     trans_probs = np.zeros(
-        (n_edu_types, n_sexes, n_periods, n_partner_states, n_partner_states), dtype=float
+        (n_sexes, n_edu_types, n_periods, n_partner_states, n_partner_states),
+        dtype=float,
     )
 
-    for edu in range(n_edu_types):
-        for period in range(n_periods):
-            for current_state in range(n_partner_states):
-                for next_state in range(n_partner_states):
-                    for sex in range(n_sexes):
-                        age = period + specs["start_age"]
-                        # Check if age is in between 30 and 40, 40 and 50, 50 and 60, 60 and 70
-                        age_bin = np.floor(age / 10) * 10
+    for sex_var, sex_label in enumerate(specs["sex_labels"]):
+        for edu_var, edu_label in enumerate(specs["education_labels"]):
+            for period in range(n_periods):
+                for partner_state_var, partner_state_label in enumerate(
+                    specs["partner_labels"]
+                ):
+                    age = period + specs["start_age"]
+
+                    for lead_partner_state_var, lead_partner_state_label in enumerate(
+                        specs["partner_labels"]
+                    ):
+                        mask = (
+                            (est_probs_df["sex"] == sex_label)
+                            & (est_probs_df["education"] == edu_label)
+                            & (est_probs_df["age"] == age)
+                            & (est_probs_df["partner_state"] == partner_state_label)
+                            & (
+                                est_probs_df["lead_partner_state"]
+                                == lead_partner_state_label
+                            )
+                        )
                         trans_probs[
-                            edu, sex, period, current_state, next_state
-                        ] = full_series.loc[(sex, edu, age_bin, current_state, next_state)]
+                            sex_var,
+                            edu_var,
+                            period,
+                            partner_state_var,
+                            lead_partner_state_var,
+                        ] = est_probs_df.loc[mask, "probability"].values[0]
 
     return jnp.asarray(trans_probs), n_partner_states

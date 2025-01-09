@@ -46,7 +46,7 @@ if input_str == "w":
     estimate_wage_parameters(paths_dict, specs)
 
 if input_str == "p":
-    # Estimate partner wage parameters for men and women
+    # Estimate partner wage parameters for men and womenlead_partner_state
     from estimation.first_step_estimation.est_partner_wage_equation import (
         estimate_partner_wage_parameters,
     )
@@ -68,7 +68,7 @@ if input_str == "f":
         estimate_nb_children,
     )
 
-    estimate_partner_transitions(paths_dict, specs)
+    estimate_partner_transitions(paths_dict, specs, load_data=True)
     estimate_nb_children(paths_dict, specs)
 
 if input_str == "h":

@@ -7,6 +7,7 @@ disutil_ft_work_good_men: 1.0e-12
 disutil_ft_work_bad_men: 1.0e-12
 disutil_pt_work_good_men: 1.0e-12
 disutil_pt_work_bad_men: 1.0e-12
+disutil_unemployed_men: 1.0e-12
 disutil_ft_work_good_women: 1.0e-12
 disutil_ft_work_bad_women: 1.0e-12
 disutil_pt_work_good_women: 1.0e-12

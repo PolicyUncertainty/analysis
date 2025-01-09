@@ -78,12 +78,12 @@ def add_population_averages(specs, path_dict):
                 mask & (pop_averages["choice"] == 3), "annual_hours"
             ].values[0]
 
-    specs["av_annual_hours_pt"] = av_annual_hours_pt
-    specs["av_annual_hours_ft"] = av_annual_hours_ft
+    specs["av_annual_hours_pt"] = jnp.asarray(av_annual_hours_pt)
+    specs["av_annual_hours_ft"] = jnp.asarray(av_annual_hours_ft)
 
     # Create auxiliary mean hourly full time wage for pension calculation (see appendix)
     mean_annual_wage = np.load(path_dict["est_results"] + "pop_avg_annual_wage.npy")
-    specs["mean_hourly_ft_wage"] = mean_annual_wage / av_annual_hours_ft
+    specs["mean_hourly_ft_wage"] = jnp.asarray(mean_annual_wage / av_annual_hours_ft)
     return specs
 
 

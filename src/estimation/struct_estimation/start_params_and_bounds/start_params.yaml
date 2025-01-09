@@ -1,14 +1,21 @@
 # Utility parameters
 mu: 1.5
-#dis_util_not_retired_bad: 1.0
-#dis_util_working_bad: 0.3
-#dis_util_not_retired_good: 1.0
-#dis_util_working_good: 0.3
-dis_util_ft_work_good: 1.3
-dis_util_ft_work_bad: 1.3
-dis_util_pt_work_good: 1.3
-dis_util_pt_work_bad: 1.3
-dis_util_unemployed: 1.0
+#disutil_not_retired_bad: 1.0
+#disutil_working_bad: 0.3
+#disutil_not_retired_good: 1.0
+#disutil_working_good: 0.3
+disutil_ft_work_good_men: 1.3
+disutil_ft_work_bad_men: 1.3
+disutil_pt_work_good_men: 1.3
+disutil_pt_work_bad_men: 1.3
+disutil_unemployed_men: 1.0
+disutil_ft_work_good_women: 1.3
+disutil_ft_work_bad_women: 1.3
+disutil_pt_work_good_women: 1.3
+disutil_pt_work_bad_women: 1.3
+disutil_unemployed_women: 1.0
+disutil_children_pt_work: 0.2
+disutil_children_ft_work: 0.2
 bequest_scale: 1.0
 
 # Job separation params are set internally driven by data

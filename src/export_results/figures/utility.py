@@ -48,7 +48,7 @@ def plot_cons_scale(specs):
             cons_scale = np.zeros(n_periods)
             for period in range(n_periods):
                 cons_scale[period] = consumption_scale(
-                    np.array(married_val), edu_val, period, specs
+                    np.array(married_val), sex, edu_val, period, specs
                 )
             axs[married_val].plot(cons_scale, label=edu_label)
             axs[married_val].set_title(married_label)

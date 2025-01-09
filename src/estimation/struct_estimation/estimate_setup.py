@@ -185,22 +185,22 @@ class est_class_from_paths:
 
 # def update_according_to_slope_disutil(params, pt_ratio_bad, pt_ratio_good):
 #     """Use this function to entforce slope condition of disutility parameters."""
-#     params["dis_util_unemployed_bad"] = params["dis_util_not_retired_low"]
-#     params["dis_util_pt_work_bad"] = (
-#         params["dis_util_not_retired_bad"]
-#         + pt_ratio_bad * params["dis_util_working_bad"]
+#     params["disutil_unemployed_bad"] = params["disutil_not_retired_low"]
+#     params["disutil_pt_work_bad"] = (
+#         params["disutil_not_retired_bad"]
+#         + pt_ratio_bad * params["disutil_working_bad"]
 #     )
-#     params["dis_util_ft_work_bad"] = (
-#         params["dis_util_not_retired_bad"] + params["dis_util_working_bad"]
+#     params["disutil_ft_work_bad"] = (
+#         params["disutil_not_retired_bad"] + params["disutil_working_bad"]
 #     )
 #
-#     params["dis_util_unemployed"] = params["dis_util_not_retired_good"]
-#     params["dis_util_pt_work_good"] = (
-#         params["dis_util_not_retired_good"]
-#         + pt_ratio_good * params["dis_util_working_good"]
+#     params["disutil_unemployed"] = params["disutil_not_retired_good"]
+#     params["disutil_pt_work_good"] = (
+#         params["disutil_not_retired_good"]
+#         + pt_ratio_good * params["disutil_working_good"]
 #     )
-#     params["dis_util_ft_work_good"] = (
-#         params["dis_util_not_retired_good"] + params["dis_util_working_good"]
+#     params["disutil_ft_work_good"] = (
+#         params["disutil_not_retired_good"] + params["disutil_working_good"]
 #     )
 #     return params
 

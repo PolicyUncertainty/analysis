@@ -25,10 +25,10 @@ hessian_weights = np.sqrt(weights)[:, None]
 
 params_to_estimate_names = [
     # "mu",
-    "dis_util_work_high",
-    "dis_util_work_low",
-    "dis_util_unemployed_high",
-    "dis_util_unemployed_low",
+    "disutil_work_high",
+    "disutil_work_low",
+    "disutil_unemployed_high",
+    "disutil_unemployed_low",
     # "bequest_scale",
     # "lambda",
     "job_finding_logit_const",

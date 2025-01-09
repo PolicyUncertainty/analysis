@@ -10,7 +10,7 @@ def calc_labor_income_after_ssc(
         lagged_choice=lagged_choice,
         experience_years=experience_years,
         education=education,
-        sex = sex,
+        sex=sex,
         income_shock=income_shock,
         options=options,
     )
@@ -27,8 +27,8 @@ def calculate_gross_labor_income(
     returns from options.
 
     """
-    gamma_0 = options["gamma_0"][education][sex]
-    gamma_1 = options["gamma_1"][education][sex]
+    gamma_0 = options["gamma_0"][sex, education]
+    gamma_1 = options["gamma_1"][sex, education]
     hourly_wage = jnp.exp(
         gamma_0 + gamma_1 * jnp.log(experience_years + 1) + income_shock
     )

@@ -48,7 +48,7 @@ def plot_incomes(path_dict):
                 lagged_choice=2,
                 experience_years=exp,
                 education=edu,
-                sex = 0,
+                sex=0,
                 income_shock=0,
                 options=specs,
             )
@@ -56,7 +56,7 @@ def plot_incomes(path_dict):
                 lagged_choice=2,
                 experience_years=exp,
                 education=edu,
-                sex = 0,
+                sex=0,
                 income_shock=0,
                 options=specs,
             )
@@ -65,7 +65,7 @@ def plot_incomes(path_dict):
                 lagged_choice=3,
                 experience_years=exp,
                 education=edu,
-                sex = 0,
+                sex=0,
                 income_shock=0,
                 options=specs,
             )
@@ -79,14 +79,14 @@ def plot_incomes(path_dict):
 
             gross_pensions[i] = np.maximum(
                 calc_gross_pension_income(
-                    experience_years=exp, education=edu, options=specs
+                    experience_years=exp, sex=0, education=edu, options=specs
                 ),
                 annual_unemployment,
             )
 
             net_pensions[i] = np.maximum(
                 calc_pensions_after_ssc(
-                    experience_years=exp, education=edu, options=specs
+                    experience_years=exp, sex=0, education=edu, options=specs
                 ),
                 annual_unemployment,
             )

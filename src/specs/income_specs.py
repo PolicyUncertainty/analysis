@@ -58,29 +58,32 @@ def add_population_averages(specs, path_dict):
     pop_averages = pd.read_csv(
         path_dict["est_results"] + "population_averages_working_hours.csv"
     )
-    labor_choices = [2, 3]
-    edu_labels = specs["education_labels"]
-    sex_labels = specs["sex_labels"]
-    avg_hours_by_type_choice = np.zeros(
-        (len(edu_labels), len(sex_labels), len(labor_choices))
+    av_annual_hours_pt = np.zeros(
+        (specs["n_sexes"], specs["n_education_types"]), dtype=float
     )
-    for edu, edu_label in enumerate(edu_labels):
-        for sex, sex_label in enumerate(sex_labels):
-            for choice, choice_number in enumerate(labor_choices):
-                edu_mask = pop_averages["education"] == edu
-                sex_mask = pop_averages["sex"] == sex
-                choice_mask = pop_averages["choice"] == choice_number
-                pop_averages_mask = edu_mask & sex_mask & choice_mask
-                avg_hours_by_type_choice[edu, sex, choice] = pop_averages[
-                    pop_averages_mask
-                ]["annual_hours"].values[0]
+    av_annual_hours_ft = np.zeros(
+        (specs["n_sexes"], specs["n_education_types"]), dtype=float
+    )
 
-    specs["av_annual_hours_pt"] = avg_hours_by_type_choice[:, :, 0]
-    specs["av_annual_hours_ft"] = avg_hours_by_type_choice[:, :, 1]
+    for edu_var, edu_label in enumerate(specs["education_labels"]):
+        for sex_var, sex_label in enumerate(specs["sex_labels"]):
+            mask = (pop_averages["education"] == edu_var) & (
+                pop_averages["sex"] == sex_var
+            )
+            av_annual_hours_pt[sex_var, edu_var] = pop_averages.loc[
+                mask & (pop_averages["choice"] == 2), "annual_hours"
+            ]["annual_hours"].values[0]
+
+            av_annual_hours_ft[sex_var, edu_var] = pop_averages.loc[
+                mask & (pop_averages["choice"] == 3), "annual_hours"
+            ]["annual_hours"].values[0]
+
+    specs["av_annual_hours_pt"] = av_annual_hours_pt
+    specs["av_annual_hours_ft"] = av_annual_hours_ft
 
     # Create auxiliary mean hourly full time wage for pension calculation (see appendix)
     mean_annual_wage = np.load(path_dict["est_results"] + "pop_avg_annual_wage.npy")
-    specs["mean_hourly_ft_wage"] = mean_annual_wage / avg_hours_by_type_choice[:, :, 1]
+    specs["mean_hourly_ft_wage"] = mean_annual_wage / av_annual_hours_ft
     return specs
 
 
@@ -118,20 +121,19 @@ def process_wage_params(path_dict, specs):
     wage_params = pd.read_csv(
         path_dict["est_results"] + "wage_eq_params.csv", index_col=0
     )
-    edu_labels = specs["education_labels"]
-    sex_labels = specs["sex_labels"]
+
     wage_params.reset_index(inplace=True)
 
-    gamma_0 = np.zeros((len(edu_labels), len(sex_labels)))
-    gamma_1 = np.zeros((len(edu_labels), len(sex_labels)))
+    gamma_0 = np.zeros((specs["n_sexes"], specs["n_education_types"]), dtype=float)
+    gamma_1 = np.zeros((specs["n_sexes"], specs["n_education_types"]), dtype=float)
 
-    for edu_id, edu_label in enumerate(edu_labels):
-        for sex_id, sex in enumerate(sex_labels):
+    for edu_id, edu_label in enumerate(specs["education_labels"]):
+        for sex_id, sex in enumerate(specs["sex_labels"]):
             mask = (wage_params["education"] == edu_label) & (wage_params["sex"] == sex)
-            gamma_0[edu_id, sex_id] = wage_params.loc[
+            gamma_0[sex_id, edu_id] = wage_params.loc[
                 mask & (wage_params["parameter"] == "constant"), "value"
             ].values[0]
-            gamma_1[edu_id, sex_id] = wage_params.loc[
+            gamma_1[sex_id, edu_id] = wage_params.loc[
                 mask & (wage_params["parameter"] == "ln_exp"), "value"
             ].values[0]
 

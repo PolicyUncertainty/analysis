@@ -19,6 +19,7 @@ PARTNER_STATES = np.array([0, 1, 2], dtype=int)
 PERIOD_GRID = np.arange(0, 40, 10, dtype=int)
 OLD_AGE_PERIOD_GRID = np.arange(33, 43, 1, dtype=int)
 EDUCATION_GRID = [0, 1]
+SEX_GRID = [0, 1]
 
 
 @pytest.fixture(scope="module")
@@ -29,10 +30,11 @@ def paths_and_specs():
 
 
 @pytest.mark.parametrize(
-    "period, partner_state, education, savings",
+    "period, sex, partner_state, education, savings",
     list(
         product(
             PERIOD_GRID,
+            SEX_GRID,
             PARTNER_STATES,
             EDUCATION_GRID,
             SAVINGS_GRID_UNEMPLOYED,
@@ -41,6 +43,7 @@ def paths_and_specs():
 )
 def test_budget_unemployed(
     period,
+    sex,
     partner_state,
     education,
     savings,
@@ -59,6 +62,7 @@ def test_budget_unemployed(
         period=period,
         partner_state=partner_state,
         education=education,
+        sex=sex,
         lagged_choice=1,
         experience=exp_cont,
         savings_end_of_previous_period=savings,
@@ -71,7 +75,7 @@ def test_budget_unemployed(
     has_partner = int(partner_state > 0)
     nb_children = specs["children_by_state"][0, education, has_partner, period]
     income_partner = calc_partner_income_after_ssc(
-        partner_state, specs_internal, education, period
+        partner_state, sex, specs_internal, education, period
     )
     split_factor = 1 + has_partner
     tax_partner = (

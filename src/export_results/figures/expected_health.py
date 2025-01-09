@@ -22,6 +22,7 @@ def plot_healthy_unhealthy(paths_dict, specs):
     df = pd.read_pickle(
         paths_dict["intermediate_data"] + "health_transition_estimation_sample.pkl"
     )
+    # breakpoint()
 
     # Calculate the smoothed shares for healthy individuals
     edu_shares_healthy = (

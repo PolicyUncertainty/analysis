@@ -33,15 +33,18 @@ def read_in_health_transition_specs(paths_dict, specs):
                         edu, period, current_state, next_state
                     ] = trans_probs_df.loc[(edu, period, current_state, next_state)]
 
-                # Death state. For now dummy transition. Soon estimated death probs
-                trans_probs[edu, period, current_state, death_health_state] = 0.05
+                current_age = period + specs["start_age"]
+                period_mortality_est = current_age - specs["start_age_mortality"]
+                death_prob = death_probs.loc[
+                    (period_mortality_est, 0, current_state, edu)
+                ]
+                # Death state. Condition health transitions on surviving and then assign death
+                # probability to death state
+                trans_probs[edu, period, current_state, :] *= 1 - death_prob
+                trans_probs[edu, period, current_state, death_health_state] = death_prob
 
-                # Normalize probability row
-                trans_probs[edu, period, current_state, :] /= trans_probs[
-                    edu, period, current_state, :
-                ].sum()
-
-    # Death as absorbing state. There are only zeros in the last row of the transition matrix
+    # Death as absorbing state. There are only zeros in the last row of the
+    # transition matrix and a 1 on the diagonal element
     trans_probs[:, :, death_health_state, death_health_state] = 1
 
     return jnp.asarray(trans_probs)

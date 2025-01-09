@@ -173,7 +173,7 @@ def log_survival_function(data, params):
 
     return -(lambda_ * age_contrib) / age_coef
 
-def loglike(params, df, start_df) -> float:
+def loglike(params, df, start_df):
     """
     Log-likelihood calculation.
     params: pd.DataFrame

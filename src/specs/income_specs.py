@@ -72,11 +72,11 @@ def add_population_averages(specs, path_dict):
             )
             av_annual_hours_pt[sex_var, edu_var] = pop_averages.loc[
                 mask & (pop_averages["choice"] == 2), "annual_hours"
-            ]["annual_hours"].values[0]
+            ].values[0]
 
             av_annual_hours_ft[sex_var, edu_var] = pop_averages.loc[
                 mask & (pop_averages["choice"] == 3), "annual_hours"
-            ]["annual_hours"].values[0]
+            ].values[0]
 
     specs["av_annual_hours_pt"] = av_annual_hours_pt
     specs["av_annual_hours_ft"] = av_annual_hours_ft

@@ -42,7 +42,7 @@ def read_in_health_transition_specs(paths_dict, specs):
                             & (trans_probs_df["health"] == current_health_label)
                             & (trans_probs_df["lead_health"] == next_health_label),
                             "transition_prob",
-                        ].values
+                        ].values[0]
                         health_trans_mat[
                             sex_var,
                             edu_var,
@@ -60,7 +60,7 @@ def read_in_health_transition_specs(paths_dict, specs):
                         & (death_prob_df["health"] == current_health_var)
                         & (death_prob_df["education"] == edu_var),
                         "death_prob",
-                    ].values
+                    ].values[0]
                     # Death state. Condition health transitions on surviving and then assign death
                     # probability to death state
                     health_trans_mat[

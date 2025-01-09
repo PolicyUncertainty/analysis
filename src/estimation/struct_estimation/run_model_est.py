@@ -29,9 +29,9 @@ params_to_estimate_names = [
     "job_finding_logit_const_men",
     "job_finding_logit_age_men",
     "job_finding_logit_high_educ_men",
-    "job_finding_logit_const_men",
-    "job_finding_logit_age_men",
-    "job_finding_logit_high_educ_men",
+    "job_finding_logit_const_women",
+    "job_finding_logit_age_women",
+    "job_finding_logit_high_educ_women",
 ]
 #
 # last_estimate = pkl.load(open(paths_dict["est_results"] + "est_params_pete.pkl", "rb"))

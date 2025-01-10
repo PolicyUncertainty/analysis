@@ -89,9 +89,9 @@ def estimate_mortality(paths_dict, specs):
         )
 
         # update mortality_df with the estimated parameters
-        for health in specs["health_labels"]:
-            for education in specs["education_labels"]:
-                param = f"{specs['health_labels'][1]}_{specs['education_labels'][1]}".replace(' ', '')
+        for health_label, health in enumerate(specs["health_labels"]):
+            for education_label, education in enumerate(specs["education_labels"]):
+                param = f"{health_label}_{education_label}".replace(' ', '')
                 mortality_df.loc[
                     (mortality_df["sex"] == (0 if sex == "Male" else 1))
                     & (mortality_df["health"] == health)

@@ -86,17 +86,6 @@ def estimate_partner_transitions(paths_dict, specs, load_data):
     return result_df
 
 
-def prepare_transition_data(paths_dict, specs):
-    """Prepare the data for the transition estimation."""
-    # load
-    end_age = specs["end_age"]
-
-    # # modify
-    # transition_data = transition_data[transition_data["age"] <= end_age]
-    # transition_data["age_bin"] = np.floor(transition_data["age"] / 10) * 10
-    return transition_data
-
-
 def estimate_nb_children(paths_dict, specs):
     """Estimate the number of children in the household for each individual conditional
     on sex, education and age bin."""

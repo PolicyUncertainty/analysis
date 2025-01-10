@@ -20,7 +20,7 @@ def observed_model_fit(paths_dict, specs, params):
         policy_state_trans_func=expected_SRA_probs_estimation,
         file_append="pete",
         load_model=True,
-        load_solution=False,
+        load_solution=True,
     )
 
     data_decision, states_dict = load_and_prep_data_for_model_fit(
@@ -70,23 +70,25 @@ def plot_observed_model_fit_choice_probs(
 
     # for partner_val, partner_label in enumerate(partner_labels):
     for edu in range(2):
-        data_subset = data_decision[(data_decision["education"] == edu)]
-        choice_shares_obs = (
-            data_subset.groupby(["age"])["choice"]
-            .value_counts(normalize=True)
-            .unstack()
-        )
-
         fig, axes = plt.subplots(2, specs["n_choices"], figsize=(10, 5))
         for sex_var, sex_label in enumerate(specs["sex_labels"]):
-            choice_axes = axes[sex_var, :]
+            data_subset = data_decision[
+                (data_decision["education"] == edu) & (data_decision["sex"] == sex_var)
+            ]
+            choice_shares_obs = (
+                data_subset.groupby(["age"])["choice"]
+                .value_counts(normalize=True)
+                .unstack()
+            )
+
             labels = specs["choice_labels"]
-            for choice_axes, ax in enumerate(axes):
+            for choice in range(specs["n_choices"]):
+                ax = axes[sex_var, choice]
                 choice_shares_predicted = data_subset.groupby(["age"])[
                     f"choice_{choice}"
                 ].mean()
                 choice_shares_predicted.plot(ax=ax, label="Simulated")
-                if (sex_var != 0) and (choice != 2):
+                if not ((sex_var == 0 and (choice == 2))):
                     choice_shares_obs[choice].plot(ax=ax, label="Observed", ls="--")
                 ax.set_xlabel("Age")
                 ax.set_ylabel("Choice share")

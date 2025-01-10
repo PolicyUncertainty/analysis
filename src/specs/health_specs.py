@@ -52,10 +52,9 @@ def read_in_health_transition_specs(paths_dict, specs):
                         ] = trans_prob
 
                     current_age = period + specs["start_age"]
-                    period_mortality_est = current_age - specs["start_age_mortality"]
                     # This needs to become label based
                     death_prob = death_prob_df.loc[
-                        (death_prob_df["period"] == period_mortality_est)
+                        (death_prob_df["age"] == current_age)
                         & (death_prob_df["sex"] == sex_var)
                         & (death_prob_df["health"] == current_health_var)
                         & (death_prob_df["education"] == edu_var),

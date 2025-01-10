@@ -6,8 +6,8 @@ import numpy as np
 import pandas as pd
 from process_data.aux_scripts.filter_data import filter_above_age
 from process_data.aux_scripts.filter_data import filter_below_age
-from process_data.aux_scripts.filter_data import filter_by_sex
 from process_data.aux_scripts.filter_data import filter_years
+from process_data.aux_scripts.filter_data import recode_sex
 from process_data.aux_scripts.lagged_and_lead_vars import span_dataframe
 from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.health import clean_health_create_states
@@ -157,7 +157,7 @@ def load_and_process_soep_yearly_survey_data(soep_c38_path, specs):
     merged_data.set_index(["pid", "syear"], inplace=True)
 
     # keep male and female obs. and transform to 0/1 = male/female
-    df = filter_by_sex(merged_data, no_women=False)
+    df = recode_sex(merged_data)
     # create education type variable
     df = create_education_type(df)
 

@@ -10,26 +10,32 @@ from estimation.struct_estimation.estimate_setup import estimate_model
 
 params_to_estimate_names = [
     # "mu",
-    "dis_util_unemployed",
-    "dis_util_pt_work_good",
-    "dis_util_ft_work_good",
-    "dis_util_ft_work_bad",
-    "dis_util_pt_work_bad",
-    # "dis_util_not_retired_bad",
-    # "dis_util_working_bad",
-    # "dis_util_not_retired_good",
-    # "dis_util_working_good",
+    "disutil_unemployed_men",
+    "disutil_ft_work_good_men",
+    "disutil_ft_work_bad_men",
+    "disutil_unemployed_men",
+    "disutil_pt_work_good_women",
+    "disutil_ft_work_good_women",
+    "disutil_ft_work_bad_women",
+    "disutil_pt_work_bad_women",
+    "disutil_unemployed_women",
+    # "disutil_children_pt_work",
+    "disutil_children_ft_work",
+    # "disutil_not_retired_bad",
+    # "disutil_working_bad",
+    # "disutil_not_retired_good",
+    # "disutil_working_good",
     # "bequest_scale",
     "lambda",
-    "job_finding_logit_const",
-    "job_finding_logit_age",
-    "job_finding_logit_high_educ",
+    "job_finding_logit_const_men",
+    "job_finding_logit_age_men",
+    "job_finding_logit_high_educ_men",
+    "job_finding_logit_const_women",
+    "job_finding_logit_age_women",
+    "job_finding_logit_high_educ_women",
 ]
-#
+
 last_estimate = pkl.load(open(paths_dict["est_results"] + "est_params_pete.pkl", "rb"))
-# last_estimate["dis_util_ft_work_high"]
-# breakpoint()
-# print("Restart estimation at: ", pd.Series(last_estimate))
 
 estimation_results = estimate_model(
     paths_dict,

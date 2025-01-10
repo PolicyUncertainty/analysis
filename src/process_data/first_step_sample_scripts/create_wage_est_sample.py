@@ -24,7 +24,7 @@ def create_wage_est_sample(paths, specs, load_data=False):
     df = load_and_merge_soep_core(paths["soep_c38"])
 
     # filter data (age, sex, estimation period)
-    df = filter_data(df, specs, no_women=True, lag_and_lead_buffer_years=False)
+    df = filter_data(df, specs, lag_and_lead_buffer_years=False)
 
     # create labor choice, keep only working (2: part-time, 3: full-time)
     df = create_choice_variable(df)
@@ -41,7 +41,7 @@ def create_wage_est_sample(paths, specs, load_data=False):
     df = df[df["monthly_wage"] > 0]
     print(str(len(df)) + " observations after dropping invalid wage values.")
 
-    # Drop retirees (and in theory also unemployed) with wages
+    # Drop retirees with wages
     df = df[df["choice"].isin([2, 3])]
     print(str(len(df)) + " observations after dropping non-working individuals.")
 
@@ -67,11 +67,11 @@ def create_wage_est_sample(paths, specs, load_data=False):
         "monthly_hours": np.float64,
         "working_hours": np.float64,
         "education": np.int32,
+        "sex": np.int8,
     }
     # Keep relevant columns
     df = df[type_dict.keys()]
     df = df.astype(type_dict)
-
     # save data
     df.to_pickle(out_file_path)
 

@@ -9,7 +9,6 @@ policy_expect_data.pkl
 *.db*
 *.png
 *model*pkl
-*probs.pkl
 data*.pkl
 probs_*.txt
 

@@ -1,6 +1,4 @@
 import itertools
-
-import estimagic as em
 import matplotlib.pyplot as plt
 import numpy as np
 import optimagic as om
@@ -36,7 +34,7 @@ def estimate_mortality(paths_dict, specs):
     mortality_df.reset_index(drop=True, inplace=True)
 
     # plain life table data
-    lifetable_df = mortality_df[["age", "sex", "death_prob"]]
+    lifetable_df = mortality_df[["age", "sex", "death_prob"]].copy()
     lifetable_df.drop_duplicates(inplace=True)
 
     # estimation sample - as in Kroll Lampert 2008 / Haan Schaller et al. 2024
@@ -54,10 +52,10 @@ def estimate_mortality(paths_dict, specs):
     df["intercept"] = 1
     start_df["intercept"] = 1
 
-    for i, sex in enumerate(specs["sex_labels"]):
+    for sex, sex_label in enumerate(specs["sex_labels"]):
         # Filter data by sex
-        filtered_df = df[df["sex"] == (0 if sex == "Male" else 1)]
-        filtered_start_df = start_df[start_df["sex"] == (0 if sex == "Male" else 1)]
+        filtered_df = df[df["sex"] == sex]
+        filtered_start_df = start_df[start_df["sex"] == sex]
 
         global Iteration
         Iteration = 0
@@ -84,23 +82,22 @@ def estimate_mortality(paths_dict, specs):
         )
 
         # Estimate parameters
-        res = em.estimate_ml(
-            loglike=loglike,
+        res = om.maximize(
+            fun=loglike,
             params=initial_params,
-            optimize_options={"algorithm": "scipy_lbfgsb"},
-            loglike_kwargs={"df": filtered_df, "start_df": filtered_start_df},
+            algorithm="scipy_lbfgsb",
+            fun_kwargs={"data": filtered_df, "start_data": filtered_start_df},
         )
 
+        # terminal log the results
+        print(res)
+        print(res.params)
+
         # save the results
-        print(res.summary())
-        print(res.optimize_result)
-        res.summary().to_pickle(
-            paths_dict["est_results"] + f"est_params_mortality_{sex}.pkl"
-        )
-        to_csv_summary = res.summary()
-        to_csv_summary["hazard_ratio"] = np.exp(res.params["value"])
+        to_csv_summary = res.params.copy()
+        to_csv_summary["hazard_ratio"] = np.exp(to_csv_summary["value"])
         to_csv_summary.to_csv(
-            paths_dict["est_results"] + f"est_params_mortality_{sex}.csv"
+            paths_dict["est_results"] + f"est_params_mortality_{sex_label.lower()}.csv"
         )
 
         # update mortality_df with the estimated parameters
@@ -110,7 +107,7 @@ def estimate_mortality(paths_dict, specs):
             for education, education_label in enumerate(specs["education_labels"]):
                 param = f"{health_label} {education_label}"
                 mortality_df.loc[
-                    (mortality_df["sex"] == (0 if sex == "Male" else 1))
+                    (mortality_df["sex"] == sex)
                     & (mortality_df["health"] == health)
                     & (mortality_df["education"] == education),
                     "death_prob",
@@ -182,7 +179,7 @@ def log_survival_function(data, params):
     return -(lambda_ * age_contrib) / age_coef
 
 
-def loglike(params, df, start_df):
+def loglike(params, data, start_data):
     """Log-likelihood calculation.
 
     params: pd.DataFrame
@@ -194,14 +191,12 @@ def loglike(params, df, start_df):
 
     """
 
-    event = df["death event"]
+    event = data["death event"]
     death = event.astype(bool)
 
-    contributions = np.zeros_like(event)
-    contributions[death] = log_density_function(df[death], params)
-    contributions[~death] = log_survival_function(df[~death], params)
-    contributions -= log_survival_function(start_df, params)
-    sum_contributions = contributions.sum()
+    
+    loglike = log_density_function(data[death], params).sum() + log_survival_function(data[~death], params).sum() - log_survival_function(start_data, params).sum()
+    
 
     # show progress every 20 iterations
     globals()["Iteration"] += 1
@@ -210,7 +205,7 @@ def loglike(params, df, start_df):
             "Iteration:",
             globals()["Iteration"],
             "Total contributions:",
-            sum_contributions,
+            loglike,
         )
 
-    return {"contributions": contributions, "value": sum_contributions}
+    return loglike

@@ -18,12 +18,14 @@ def plot_mortality(paths_dict, specs):
     )
 
     # Estimated mortality parameters
-    df_params_male = pd.read_pickle(
-        paths_dict["est_results"] + "est_params_mortality_male.pkl"
+    df_params_male = pd.read_csv(
+        paths_dict["est_results"] + "est_params_mortality_men.csv"
     )
-    df_params_female = pd.read_pickle(
-        paths_dict["est_results"] + "est_params_mortality_female.pkl"
+    df_params_male.set_index("Unnamed: 0", inplace=True)
+    df_params_female = pd.read_csv(
+        paths_dict["est_results"] + "est_params_mortality_women.csv"
     )
+    df_params_female.set_index("Unnamed: 0", inplace=True)
 
     n_edu_types = len(specs["education_labels"])
     n_ages = specs["end_age_mortality"] - specs["start_age_mortality"] + 1
@@ -365,7 +367,7 @@ def survival_function(age, health_factors, params):
     # Compute lambda using health factors
     lambda_ = np.exp(
         intercept
-        + sum(coefficients[key] * value for key, value in health_factors.items())
+        + sum(coefficients[key] * value for key, value in health_factors.items() if key != "intercept")
     )
 
     # Compute age contribution

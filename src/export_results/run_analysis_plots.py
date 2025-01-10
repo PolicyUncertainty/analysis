@@ -52,7 +52,7 @@ if exec_health:
 ######################################
 exec_mortality = input("Execute Mortality characteristics? (y/n) ") == "y"
 if exec_mortality:
-    from export_results.figures.expected_mortality import (
+    from export_results.figures.plot_mortality import (
         plot_mortality,
     )
 

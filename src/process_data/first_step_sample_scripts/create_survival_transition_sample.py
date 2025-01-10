@@ -41,12 +41,12 @@ def create_survival_transition_sample(paths, specs, load_data=False):
     df = df[
         [
             "age",
-            "start_age",
-            "event_death",
+            "start age",
+            "death event",
             "education",
             "sex",
             "health",
-            "start_health",
+            "start health",
         ]
     ]
 
@@ -56,9 +56,9 @@ def create_survival_transition_sample(paths, specs, load_data=False):
     # sum the death events for the entire sample
     print(
         "Death events in the sample: ",
-        f"{len(df[df['event_death'] == 1])} (total) = "
-        f"{len(df[(df['event_death'] == 1) & (df['health'] == 1)])} (health 1) + "
-        f"{len(df[(df['event_death'] == 1) & (df['health'] == 0)])} (health 0)",
+        f"{len(df[df['death event'] == 1])} (total) = "
+        f"{len(df[(df['death event'] == 1) & (df['health'] == 1)])} (health 1) + "
+        f"{len(df[(df['death event'] == 1) & (df['health'] == 0)])} (health 0)",
     )
 
     print(
@@ -106,7 +106,7 @@ def create_survival_transition_sample(paths, specs, load_data=False):
 
     # Create interaction indicators for start health and education
     dupli_df = create_interaction_columns(
-        dupli_df, ("start_health", "education"), specs
+        dupli_df, ("start health", "education"), specs
     )
 
     # Convert DataFrame to floats for computation
@@ -190,14 +190,14 @@ def load_and_process_life_spell_data(soep_c38_path, specs):
     columns_to_keep = ["pid", "syear", "spelltyp", "spellnr"]
     lifespell_data_long = lifespell_data_long[columns_to_keep]
     # --- Generate death event variable --- lifespell data
-    lifespell_data_long["event_death"] = (lifespell_data_long["spelltyp"] == 4).astype(
+    lifespell_data_long["death event"] = (lifespell_data_long["spelltyp"] == 4).astype(
         "int"
     )
 
     # Split into dataframes of death and not death
-    not_death_idx = lifespell_data_long[lifespell_data_long["event_death"] == 0].index
+    not_death_idx = lifespell_data_long[lifespell_data_long["death event"] == 0].index
     first_death_idx = (
-        lifespell_data_long[lifespell_data_long["event_death"] == 1]
+        lifespell_data_long[lifespell_data_long["death event"] == 1]
         .groupby("pid")["syear"]
         .idxmin()
     )
@@ -236,9 +236,9 @@ def load_and_process_soep_health(soep_c38_path, specs):
     # # for deaths, set the health state to the last known health state
     # pequiv_data["last_known_health"] = pequiv_data.groupby("pid")["health"].transform("last")
     # pequiv_data.loc[
-    #     (pequiv_data["event_death"] == 1) & (pequiv_data["health"].isna()), "health"
+    #     (pequiv_data["death event"] == 1) & (pequiv_data["health"].isna()), "health"
     # ] = pequiv_data.loc[
-    #     (pequiv_data["event_death"] == 1) & (pequiv_data["health"].isna()),
+    #     (pequiv_data["death event"] == 1) & (pequiv_data["health"].isna()),
     #     "last_known_health",
     # ]
 
@@ -276,11 +276,11 @@ def create_start_age_and_health(df):
 
     """
     df = df.reset_index()
-    df["start_age"] = df.groupby("pid")["age"].transform("min")
+    df["start age"] = df.groupby("pid")["age"].transform("min")
     indx = df.groupby("pid")["syear"].idxmin()
-    df["start_health"] = np.nan
-    df.loc[indx, "start_health"] = df.loc[indx, "health"]
-    df["start_health"] = df.groupby("pid")["start_health"].transform("max")
+    df["start health"] = np.nan
+    df.loc[indx, "start health"] = df.loc[indx, "health"]
+    df["start health"] = df.groupby("pid")["start health"].transform("max")
     df = df.set_index(["pid", "syear"])
     return df
 
@@ -300,13 +300,13 @@ def create_interaction_columns(df, columns, specs):
     column1, column2 = columns
 
     # get the labels for the columns (start variables get the same labels as the original variables)
-    col1_labels = specs[f"{column1}_labels".replace("start_", "")] 
-    col2_labels = specs[f"{column2}_labels".replace("start_", "")] 
+    col1_labels = specs[f"{column1}_labels".replace("start ", "")] 
+    col2_labels = specs[f"{column2}_labels".replace("start ", "")] 
 
     for val1 in [0, 1]:
         for val2 in [0, 1]:
-            col_name = f"{col1_labels[val1]}_{col2_labels[val2]}".replace(" ", "")
-            if "start_" in column1 or "start_" in column2:
-                col_name = f"start_{col_name}"
+            col_name = f"{col1_labels[val1]} {col2_labels[val2]}"
+            if "start" in column1 or "start" in column2:
+                col_name = f"start {col_name}"
             df[col_name] = (df[column1] == val1) & (df[column2] == val2)
     return df

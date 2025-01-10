@@ -38,14 +38,11 @@ def estimate_mortality(paths_dict, specs):
     df = pd.read_pickle(
         paths_dict["intermediate_data"]
         + "mortality_transition_estimation_sample_duplicated.pkl"
-    )
-
+    )    
     # df initial values i.e. first observations (+ sex column) 
-    start_df = df[[col for col in df.columns if col.startswith("start_")] + ['sex']].copy()
-    str_cols = start_df.columns.str.replace("start_", "")
+    start_df = df[[col for col in df.columns if col.startswith("start")] + ['sex']].copy()
+    str_cols = start_df.columns.str.replace("start ", "")
     start_df.columns = str_cols
-
-
     # add a intercept column to the df and start_df
     df["intercept"] = 1
     start_df["intercept"] = 1
@@ -62,21 +59,21 @@ def estimate_mortality(paths_dict, specs):
         # Define start parameters
         initial_params = pd.DataFrame(
             data=[
-                [-13.21, -np.inf, np.inf],
-                [0.10, 1e-8, np.inf],
-                [-0.77, -np.inf, np.inf],
-                [-0.30, -np.inf, np.inf],
-                [0.01, -np.inf, np.inf],
-                [0.36, -np.inf, np.inf],
+                [0.0, -np.inf, np.inf],
+                [0.1, 1e-8   , np.inf], # age coefficient is positive
+                [0.0, -np.inf, np.inf],
+                [0.0, -np.inf, np.inf],
+                [0.0, -np.inf, np.inf],
+                [0.0, -np.inf, np.inf],
             ],
             columns=["value", "lower_bound", "upper_bound"],
             index=[
                 "intercept",
                 "age",
-                f"{specs['health_labels'][1]}_{specs['education_labels'][1]}".replace(' ', ''), # good health, high education
-                f"{specs['health_labels'][1]}_{specs['education_labels'][0]}".replace(' ', ''), # good health, low education
-                f"{specs['health_labels'][0]}_{specs['education_labels'][1]}".replace(' ', ''), # bad health, high education
-                f"{specs['health_labels'][0]}_{specs['education_labels'][0]}".replace(' ', ''), # bad health, low education
+                f"{specs['health_labels'][1]} {specs['education_labels'][1]}", # good health, high education
+                f"{specs['health_labels'][1]} {specs['education_labels'][0]}", # good health, low education
+                f"{specs['health_labels'][0]} {specs['education_labels'][1]}", # bad health, high education
+                f"{specs['health_labels'][0]} {specs['education_labels'][0]}", # bad health, low education
             ],
         )
 
@@ -88,17 +85,6 @@ def estimate_mortality(paths_dict, specs):
             loglike_kwargs={"df": filtered_df, "start_df": filtered_start_df},
         )
 
-        # update mortality_df with the estimated parameters
-        for health_label, health in enumerate(specs["health_labels"]):
-            for education_label, education in enumerate(specs["education_labels"]):
-                param = f"{health_label}_{education_label}".replace(' ', '')
-                mortality_df.loc[
-                    (mortality_df["sex"] == (0 if sex == "Male" else 1))
-                    & (mortality_df["health"] == health)
-                    & (mortality_df["education"] == education),
-                    "death_prob",
-                ] *= np.exp(res.params.loc[param, "value"])
-
         # save the results
         print(res.summary())
         print(res.optimize_result)
@@ -107,7 +93,18 @@ def estimate_mortality(paths_dict, specs):
         to_csv_summary["hazard_ratio"] = np.exp(res.params["value"])
         to_csv_summary.to_csv(paths_dict["est_results"] + f"est_params_mortality_{sex}.csv")
 
-    
+
+    # update mortality_df with the estimated parameters
+        for health, health_label in enumerate(specs["health_labels"][:-1]): # exclude the last health label (death)
+            for education, education_label in enumerate(specs["education_labels"]):
+                param = f"{health_label} {education_label}"
+                mortality_df.loc[
+                    (mortality_df["sex"] == (0 if sex == "Male" else 1))
+                    & (mortality_df["health"] == health)
+                    & (mortality_df["education"] == education),
+                    "death_prob",
+                ] *= np.exp(res.params.loc[param, "value"])
+
     # export the estimated mortality table and the original life table as csv
     lifetable_df = lifetable_df[
         (lifetable_df["age"] >= specs["start_age_mortality"])
@@ -153,8 +150,6 @@ def log_density_function(data, params):
     age_coef = params.loc["age", "value"]
     age_contrib = np.exp(age_coef * data["age"]) - 1
 
-    # breakpoint()
-
     log_lambda_ = sum([params.loc[x, "value"] * data[x] for x in params.index if x != "age"])
     lambda_ = np.exp(log_lambda_)
     
@@ -167,11 +162,10 @@ def log_survival_function(data, params):
     age_coef = params.loc["age", "value"]
     age_contrib = np.exp(age_coef * data["age"]) - 1
 
-    # breakpoint()
-
     lambda_ = np.exp(sum([params.loc[x, "value"] * data[x] for x in params.index if x != "age"]))
 
     return -(lambda_ * age_contrib) / age_coef
+
 
 def loglike(params, df, start_df):
     """
@@ -184,14 +178,15 @@ def loglike(params, df, start_df):
         List with the parameter names. (includes the intercept at index 0)
     """
 
-    event = df["event_death"]
+    event = df["death event"]
     death = event.astype(bool)
 
-    contributions = np.zeros_like(event)
-    
+    contributions          = np.zeros_like(event)
     contributions[death]   = log_density_function(df[death], params)
     contributions[~death]  = log_survival_function(df[~death], params)
     contributions         -= log_survival_function(start_df, params)
+    sum_contributions      = contributions.sum()
+
     # show progress every 20 iterations
     globals()["Iteration"] += 1
     if globals()["Iteration"] % 20 == 0:
@@ -199,7 +194,7 @@ def loglike(params, df, start_df):
             "Iteration:",
             globals()["Iteration"],
             "Total contributions:",
-            contributions.sum(),
+            sum_contributions,
         )
     
-    return {"contributions": contributions, "value": contributions.sum()}
+    return {"contributions": contributions, "value": sum_contributions}

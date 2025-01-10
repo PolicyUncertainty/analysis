@@ -14,11 +14,12 @@ from set_paths import create_path_dict
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
-SAVINGS_GRID_UNEMPLOYED = np.linspace(10, 25, 5)
+SAVINGS_GRID_UNEMPLOYED = np.linspace(10, 25, 3)
 PARTNER_STATES = np.array([0, 1, 2], dtype=int)
-PERIOD_GRID = np.arange(0, 40, 10, dtype=int)
-OLD_AGE_PERIOD_GRID = np.arange(33, 43, 1, dtype=int)
+PERIOD_GRID = np.arange(0, 65, 15, dtype=int)
+OLD_AGE_PERIOD_GRID = np.arange(33, 43, 3, dtype=int)
 EDUCATION_GRID = [0, 1]
+SEX_GRID = [0, 1]
 
 
 @pytest.fixture(scope="module")
@@ -29,10 +30,11 @@ def paths_and_specs():
 
 
 @pytest.mark.parametrize(
-    "period, partner_state, education, savings",
+    "period, sex, partner_state, education, savings",
     list(
         product(
             PERIOD_GRID,
+            SEX_GRID,
             PARTNER_STATES,
             EDUCATION_GRID,
             SAVINGS_GRID_UNEMPLOYED,
@@ -41,6 +43,7 @@ def paths_and_specs():
 )
 def test_budget_unemployed(
     period,
+    sex,
     partner_state,
     education,
     savings,
@@ -59,6 +62,7 @@ def test_budget_unemployed(
         period=period,
         partner_state=partner_state,
         education=education,
+        sex=sex,
         lagged_choice=1,
         experience=exp_cont,
         savings_end_of_previous_period=savings,
@@ -69,9 +73,13 @@ def test_budget_unemployed(
 
     savings_scaled = savings * specs_internal["wealth_unit"]
     has_partner = int(partner_state > 0)
-    nb_children = specs["children_by_state"][0, education, has_partner, period]
+    nb_children = specs["children_by_state"][sex, education, has_partner, period]
     income_partner = calc_partner_income_after_ssc(
-        partner_state, specs_internal, education, period
+        partner_state=partner_state,
+        sex=sex,
+        options=specs_internal,
+        education=education,
+        period=period,
     )
     split_factor = 1 + has_partner
     tax_partner = (
@@ -129,10 +137,11 @@ WORKER_CHOICES = [2, 3]
 
 
 @pytest.mark.parametrize(
-    "working_choice, period, partner_state ,education, gamma, income_shock, experience, savings",
+    "working_choice, sex, period, partner_state ,education, gamma, income_shock, experience, savings",
     list(
         product(
             WORKER_CHOICES,
+            SEX_GRID,
             PERIOD_GRID,
             PARTNER_STATES,
             EDUCATION_GRID,
@@ -145,6 +154,7 @@ WORKER_CHOICES = [2, 3]
 )
 def test_budget_worker(
     working_choice,
+    sex,
     period,
     partner_state,
     education,
@@ -157,7 +167,7 @@ def test_budget_worker(
     path_dict, specs = paths_and_specs
 
     specs_internal = copy.deepcopy(specs)
-    gamma_array = np.array([gamma, gamma - 0.01])
+    gamma_array = np.array([[gamma, gamma - 0.01], [gamma / 2, gamma / 2 - 0.01]])
     specs_internal["gamma_0"] = gamma_array
     specs_internal["gamma_1"] = gamma_array
 
@@ -170,6 +180,7 @@ def test_budget_worker(
         partner_state=partner_state,
         education=education,
         lagged_choice=working_choice,
+        sex=sex,
         experience=exp_cont,
         savings_end_of_previous_period=savings,
         income_shock_previous_period=income_shock,
@@ -179,18 +190,18 @@ def test_budget_worker(
 
     savings_scaled = savings * specs_internal["wealth_unit"]
     hourly_wage = np.exp(
-        gamma_array[education]
-        + gamma_array[education] * np.log(experience + 1)
+        gamma_array[sex, education]
+        + gamma_array[sex, education] * np.log(experience + 1)
         + income_shock
     )
     if working_choice == 2:
         labor_income_year = (
-            hourly_wage * specs_internal["av_annual_hours_pt"][education]
+            hourly_wage * specs_internal["av_annual_hours_pt"][sex, education]
         )
-        min_wage_year = specs_internal["annual_min_wage_pt"][education]
+        min_wage_year = specs_internal["annual_min_wage_pt"][sex, education]
     else:
         labor_income_year = (
-            hourly_wage * specs_internal["av_annual_hours_ft"][education]
+            hourly_wage * specs_internal["av_annual_hours_ft"][sex, education]
         )
         min_wage_year = specs_internal["annual_min_wage_ft"]
 
@@ -206,11 +217,16 @@ def test_budget_worker(
 
     has_partner_int = (partner_state > 0).astype(int)
     unemployment_benefits = calc_unemployment_benefits(
-        savings_scaled, education, has_partner_int, period, specs_internal
+        savings=savings_scaled,
+        education=education,
+        sex=sex,
+        has_partner_int=has_partner_int,
+        period=period,
+        options=specs_internal,
     )
 
     nb_children = specs_internal["children_by_state"][
-        0, education, partner_state, period
+        sex, education, partner_state, period
     ]
     child_benefits = nb_children * specs_internal["monthly_child_benefits"] * 12
     if partner_state == 0:
@@ -225,14 +241,16 @@ def test_budget_worker(
     else:
         if partner_state == 1:
             partner_income_year = specs_internal["annual_partner_wage"][
-                education, period
+                sex, education, period
             ]
 
             sscs_partner = calc_health_ltc_contr(
                 partner_income_year
             ) + calc_pension_unempl_contr(partner_income_year)
         else:
-            partner_income_year = specs_internal["annual_partner_pension"][education]
+            partner_income_year = specs_internal["annual_partner_pension"][
+                sex, education
+            ]
             sscs_partner = calc_health_ltc_contr(partner_income_year)
 
         income_partner = partner_income_year - sscs_partner
@@ -255,10 +273,11 @@ RET_AGE_GRID = np.linspace(0, 2, 3, dtype=int)
 
 
 @pytest.mark.parametrize(
-    "period, partner_state ,education, savings, exp",
+    "period, sex, partner_state ,education, savings, exp",
     list(
         product(
             OLD_AGE_PERIOD_GRID,
+            SEX_GRID,
             PARTNER_STATES,
             EDUCATION_GRID,
             SAVINGS_GRID,
@@ -268,6 +287,7 @@ RET_AGE_GRID = np.linspace(0, 2, 3, dtype=int)
 )
 def test_retiree(
     period,
+    sex,
     partner_state,
     education,
     savings,
@@ -284,6 +304,7 @@ def test_retiree(
         period=period,
         lagged_choice=0,
         policy_state=29,
+        sex=sex,
         education=education,
         experience=exp_cont_last_period,
         informed=0,
@@ -297,6 +318,7 @@ def test_retiree(
         partner_state=partner_state,
         education=education,
         lagged_choice=0,
+        sex=sex,
         experience=exp_cont,
         savings_end_of_previous_period=savings,
         income_shock_previous_period=0,
@@ -306,9 +328,9 @@ def test_retiree(
 
     savings_scaled = savings * specs_internal["wealth_unit"]
 
-    mean_wage_all = specs_internal["mean_hourly_ft_wage"][education]
-    gamma_0 = specs_internal["gamma_0"][education]
-    gamma_1_plus_1 = specs_internal["gamma_1"][education] + 1
+    mean_wage_all = specs_internal["mean_hourly_ft_wage"][sex, education]
+    gamma_0 = specs_internal["gamma_0"][sex, education]
+    gamma_1_plus_1 = specs_internal["gamma_1"][sex, education] + 1
     total_pens_points = (
         (np.exp(gamma_0) / gamma_1_plus_1) * ((exp + 1) ** gamma_1_plus_1 - 1)
     ) / mean_wage_all
@@ -317,11 +339,16 @@ def test_retiree(
 
     has_partner_int = (partner_state > 0).astype(int)
     unemployment_benefits = calc_unemployment_benefits(
-        savings_scaled, education, has_partner_int, period, specs_internal
+        savings=savings_scaled,
+        education=education,
+        sex=sex,
+        has_partner_int=has_partner_int,
+        period=period,
+        options=specs_internal,
     )
 
     nb_children = specs_internal["children_by_state"][
-        0, education, partner_state, period
+        sex, education, partner_state, period
     ]
     child_benefits = nb_children * specs_internal["monthly_child_benefits"] * 12
     if partner_state == 0:
@@ -337,14 +364,16 @@ def test_retiree(
     else:
         if partner_state == 1:
             partner_income_year = specs_internal["annual_partner_wage"][
-                education, period
+                sex, education, period
             ]
 
             sscs_partner = calc_health_ltc_contr(
                 partner_income_year
             ) + calc_pension_unempl_contr(partner_income_year)
         else:
-            partner_income_year = specs_internal["annual_partner_pension"][education]
+            partner_income_year = specs_internal["annual_partner_pension"][
+                sex, education
+            ]
             sscs_partner = calc_health_ltc_contr(partner_income_year)
 
         income_partner = partner_income_year - sscs_partner
@@ -366,10 +395,11 @@ INFORMED_GRID = np.array([0, 1], dtype=int)
 
 
 @pytest.mark.parametrize(
-    "period, partner_state ,education, savings, exp, policy_state, informed",
+    "period, sex, partner_state ,education, savings, exp, policy_state, informed",
     list(
         product(
             OLD_AGE_PERIOD_GRID,
+            SEX_GRID,
             PARTNER_STATES,
             EDUCATION_GRID,
             SAVINGS_GRID,
@@ -381,6 +411,7 @@ INFORMED_GRID = np.array([0, 1], dtype=int)
 )
 def test_fresh_retiree(
     period,
+    sex,
     partner_state,
     education,
     savings,
@@ -388,7 +419,6 @@ def test_fresh_retiree(
     policy_state,
     informed,
     paths_and_specs,
-    informed_state=0,
 ):
     path_dict, specs_internal = paths_and_specs
 
@@ -402,6 +432,7 @@ def test_fresh_retiree(
         period=period,
         lagged_choice=0,
         policy_state=policy_state,
+        sex=sex,
         education=education,
         experience=exp_cont_prev,
         informed=informed,
@@ -413,6 +444,7 @@ def test_fresh_retiree(
         partner_state=partner_state,
         education=education,
         lagged_choice=0,
+        sex=sex,
         experience=exp_cont,
         savings_end_of_previous_period=savings,
         income_shock_previous_period=0,
@@ -436,9 +468,9 @@ def test_fresh_retiree(
         late_retirement_bonus = specs_internal["late_retirement_bonus"]
         pension_factor = 1 + np.abs(retirement_age_difference) * late_retirement_bonus
 
-    mean_wage_all = specs_internal["mean_hourly_ft_wage"][education]
-    gamma_0 = specs_internal["gamma_0"][education]
-    gamma_1_plus_1 = specs_internal["gamma_1"][education] + 1
+    mean_wage_all = specs_internal["mean_hourly_ft_wage"][sex, education]
+    gamma_0 = specs_internal["gamma_0"][sex, education]
+    gamma_1_plus_1 = specs_internal["gamma_1"][sex, education] + 1
     total_pens_points = (
         (np.exp(gamma_0) / gamma_1_plus_1) * ((exp + 1) ** gamma_1_plus_1 - 1)
     ) / mean_wage_all
@@ -452,11 +484,16 @@ def test_fresh_retiree(
 
     has_partner_int = (partner_state > 0).astype(int)
     unemployment_benefits = calc_unemployment_benefits(
-        savings_scaled, education, has_partner_int, period, specs_internal
+        savings=savings_scaled,
+        education=education,
+        sex=sex,
+        has_partner_int=has_partner_int,
+        period=period,
+        options=specs_internal,
     )
 
     nb_children = specs_internal["children_by_state"][
-        0, education, partner_state, period
+        sex, education, partner_state, period
     ]
     child_benefits = nb_children * specs_internal["annual_child_benefits"]
     if partner_state == 0:
@@ -472,14 +509,16 @@ def test_fresh_retiree(
     else:
         if partner_state == 1:
             partner_income_year = specs_internal["annual_partner_wage"][
-                education, period
+                sex, education, period
             ]
 
             sscs_partner = calc_health_ltc_contr(
                 partner_income_year
             ) + calc_pension_unempl_contr(partner_income_year)
         else:
-            partner_income_year = specs_internal["annual_partner_pension"][education]
+            partner_income_year = specs_internal["annual_partner_pension"][
+                sex, education
+            ]
 
             sscs_partner = calc_health_ltc_contr(partner_income_year)
 

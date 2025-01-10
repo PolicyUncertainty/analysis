@@ -12,6 +12,7 @@ def budget_constraint(
     education,
     lagged_choice,  # d_{t-1}
     experience,
+    sex,
     partner_state,
     savings_end_of_previous_period,  # A_{t-1}
     income_shock_previous_period,  # epsilon_{t - 1}
@@ -25,21 +26,28 @@ def budget_constraint(
 
     # Calculate partner income
     partner_income_after_ssc = calc_partner_income_after_ssc(
-        partner_state=partner_state, options=options, education=education, period=period
+        partner_state=partner_state,
+        sex=sex,
+        options=options,
+        education=education,
+        period=period,
     )
-    has_partner_int = (partner_state > 0).astype(int)
 
     # Income from lagged choice 0
     retirement_income_after_ssc = calc_pensions_after_ssc(
         experience_years=experience_years,
+        sex=sex,
         education=education,
         options=options,
     )
+
+    has_partner_int = (partner_state > 0).astype(int)
 
     # Income lagged choice 1
     unemployment_benefits = calc_unemployment_benefits(
         savings=savings_scaled,
         education=education,
+        sex=sex,
         has_partner_int=has_partner_int,
         period=period,
         options=options,
@@ -50,12 +58,13 @@ def budget_constraint(
         lagged_choice=lagged_choice,
         experience_years=experience_years,
         education=education,
+        sex=sex,
         income_shock=income_shock_previous_period,
         options=options,
     )
 
     # Select relevant income
-    # bools of last period decision: income is payed in following period!
+    # bools of last period decision: income is paid in following period!
     was_worker = lagged_choice >= 2
     was_retired = lagged_choice == 0
 
@@ -73,6 +82,7 @@ def budget_constraint(
     )
     child_benefits = calc_child_benefits(
         education=education,
+        sex=sex,
         has_partner_int=has_partner_int,
         period=period,
         options=options,

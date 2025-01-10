@@ -65,35 +65,39 @@ def plot_marriage_and_divorce(paths_dict, specs):
     grouped_shares = df.groupby(["sex", "education", "age"])[
         "partner_state"
     ].value_counts(normalize=True)
-    single_shares = grouped_shares.loc[(0, slice(None), slice(None), 0)]
+    single_shares = grouped_shares.loc[(slice(None), slice(None), slice(None), 0)]
 
     ages = np.arange(start_age, end_age + 1)
     initial_dist = np.zeros(specs["n_partner_states"])
 
-    fig, ax = plt.subplots(figsize=(12, 8))
-    for edu, edu_label in enumerate(specs["education_labels"]):
-        edu_shares_single = single_shares.loc[(edu, slice(None))]
-        initial_dist[0] = edu_shares_single.loc[start_age]
-        initial_dist[1] = 1 - initial_dist[0]
-        shares_over_time = markov_simulator(
-            initial_dist, specs["partner_trans_mat"][edu, :, :, :]
-        )
-        marriage_prob_edu_est = 1 - shares_over_time[:, 0]
+    fig, axs = plt.subplots(nrows=2, figsize=(12, 8))
+    for sex_var, sex_label in enumerate(specs["sex_labels"]):
+        ax = axs[sex_var]
+        for edu, edu_label in enumerate(specs["education_labels"]):
+            edu_shares_single = single_shares.loc[(sex_var, edu, slice(None))]
+            initial_dist[0] = edu_shares_single.loc[start_age]
+            initial_dist[1] = 1 - initial_dist[0]
+            shares_over_time = markov_simulator(
+                initial_dist, specs["partner_trans_mat"][sex_var, edu, :, :, :]
+            )
+            marriage_prob_edu_est = 1 - shares_over_time[:, 0]
 
-        # Use fifty percent as default if not available in the data. Just for plotting
-        married_shares_data_containier = pd.Series(data=0.5, index=ages, dtype=float)
-        married_shares_data_containier.update(1 - edu_shares_single)
+            # Use fifty percent as default if not available in the data. Just for plotting
+            married_shares_data_containier = pd.Series(
+                data=0.5, index=ages, dtype=float
+            )
+            married_shares_data_containier.update(1 - edu_shares_single)
 
-        ax.plot(ages, marriage_prob_edu_est, label=f"edu {edu_label} est")
-        ax.plot(
-            ages,
-            married_shares_data_containier,
-            linestyle="--",
-            label=f"edu {edu_label} data",
-        )
+            ax.plot(ages, marriage_prob_edu_est, label=f"edu {edu_label} est")
+            ax.plot(
+                ages,
+                married_shares_data_containier,
+                linestyle="--",
+                label=f"edu {edu_label} data",
+            )
 
-    ax.set_title("Marriage shares")
-    ax.legend()
+        ax.set_title(f"Marriage shares {sex_label}")
+        ax.legend()
 
 
 def markov_simulator(initial_dist, trans_probs):

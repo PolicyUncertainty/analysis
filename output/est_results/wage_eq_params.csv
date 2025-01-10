@@ -1,4 +1,31 @@
-,constant,constant_ser,ln_exp,ln_exp_ser,income_shock_std,income_shock_std_ser
-Low Education,2.037395320219296,0.08439560373004895,0.2178725021836758,0.029101019078543806,0.15115778335162872,0.00018573090049858593
-High Education,2.3259512865119114,0.09915303900712107,0.30561546319182514,0.038491235869275636,0.14342052330643226,0.00024800472258628114
-all,2.060029955878318,0.06685779714081998,0.26743067390329645,0.02407332496509924,0.1488221643934109,0.0001492626783579117
+education,sex,parameter,value
+Low Education,Men,constant,2.037395320219296
+Low Education,Men,ln_exp,0.2178725021836758
+Low Education,Men,constant_ser,0.08439560373004895
+Low Education,Men,ln_exp_ser,0.029101019078543806
+Low Education,Women,constant,2.0305767981188843
+Low Education,Women,ln_exp,0.16437944074122565
+Low Education,Women,constant_ser,0.08624629070308912
+Low Education,Women,ln_exp_ser,0.034694816228085915
+High Education,Men,constant,2.3259512865119114
+High Education,Men,ln_exp,0.30561546319182514
+High Education,Men,constant_ser,0.09915303900712107
+High Education,Men,ln_exp_ser,0.038491235869275636
+High Education,Women,constant,2.307637107065678
+High Education,Women,ln_exp,0.235095879713317
+High Education,Women,constant_ser,0.06628502443329776
+High Education,Women,ln_exp_ser,0.029665884408425096
+all,all,constant,2.100373395551284
+all,all,ln_exp,0.22667698270234474
+all,all,constant_ser,0.04458933426786419
+all,all,ln_exp_ser,0.01727674149950555
+all,all,income_shock_std,0.16661097311788609
+all,all,income_shock_std_ser,0.00013269548313667683
+Low Education,Men,income_shock_std,0.15115778335162872
+Low Education,Men,income_shock_std_ser,0.00018573090049858593
+Low Education,Women,income_shock_std,0.18900590715075302
+Low Education,Women,income_shock_std_ser,0.00029791609353183236
+High Education,Men,income_shock_std,0.14342052330643226
+High Education,Men,income_shock_std_ser,0.00024800472258628114
+High Education,Women,income_shock_std,0.16984439552036054
+High Education,Women,income_shock_std_ser,0.00033630808341753135

@@ -18,6 +18,7 @@ def create_state_space_functions():
 def sparsity_condition(
     period,
     lagged_choice,
+    sex,
     informed,
     health,
     partner_state,
@@ -34,6 +35,8 @@ def sparsity_condition(
     degenerate_policy_state = options["n_policy_states"] - 1
 
     age = start_age + period
+    if (sex == 0) & (lagged_choice == 2):
+        return False
     # You cannot retire before the earliest retirement age
     if (age <= min_ret_age_state_space) & (lagged_choice == 0):
         return False
@@ -53,6 +56,7 @@ def sparsity_condition(
                 "education": education,
                 "health": health,
                 "informed": informed,
+                "sex": sex,
                 "partner_state": partner_state,
                 "job_offer": 0,
                 "policy_state": policy_state,
@@ -70,6 +74,7 @@ def sparsity_condition(
                     "education": education,
                     "health": health,
                     "informed": informed,
+                    "sex": sex,
                     "partner_state": partner_state,
                     "job_offer": 0,
                     "policy_state": policy_state,
@@ -82,6 +87,7 @@ def sparsity_condition(
                     "health": health,
                     "informed": informed,
                     "partner_state": partner_state,
+                    "sex": sex,
                     "job_offer": 0,
                     "policy_state": policy_state,
                 }
@@ -95,6 +101,7 @@ def sparsity_condition(
                 "education": education,
                 "health": health,
                 "informed": 1,
+                "sex": sex,
                 "partner_state": partner_state,
                 "job_offer": 0,
                 "policy_state": options["n_policy_states"] - 1,
@@ -105,7 +112,7 @@ def sparsity_condition(
 
 
 def state_specific_choice_set(
-    period, lagged_choice, policy_state, job_offer, health, options
+    period, lagged_choice, sex, policy_state, job_offer, health, options
 ):
     age = period + options["start_age"]
     SRA_pol_state = options["min_SRA"] + policy_state * options["SRA_grid_size"]
@@ -122,14 +129,20 @@ def state_specific_choice_set(
         if job_offer == 0:
             return np.array([1])
         else:
-            return np.array([1, 2, 3])
+            if sex == 0:
+                return np.array([1, 3])
+            else:
+                return np.array([1, 2, 3])
     elif age >= options["max_ret_age"]:
         return np.array([0])
     else:
         if job_offer == 0:
             return np.array([0, 1])
         else:
-            return np.array([0, 1, 2, 3])
+            if sex == 0:
+                return np.array([0, 1, 3])
+            else:
+                return np.array([0, 1, 2, 3])
 
 
 def apply_retirement_constraint_for_SRA(SRA, options):
@@ -137,7 +150,7 @@ def apply_retirement_constraint_for_SRA(SRA, options):
 
 
 def get_next_period_experience(
-    period, lagged_choice, policy_state, education, experience, informed, options
+    period, lagged_choice, policy_state, sex, education, experience, informed, options
 ):
     """Update experience based on lagged choice and period."""
     max_experience_period = period + options["max_init_experience"]
@@ -155,7 +168,13 @@ def get_next_period_experience(
 
     # Calculate experience with early retirement penalty
     experience_years_with_penalty = calc_experience_years_for_pension_adjustment(
-        period, exp_years_last_period, education, policy_state, informed, options
+        period=period,
+        experience_years=exp_years_last_period,
+        sex=sex,
+        education=education,
+        policy_state=policy_state,
+        informed=informed,
+        options=options,
     )
     # Update if fresh retired
     exp_new_period = jax.lax.select(
@@ -165,12 +184,13 @@ def get_next_period_experience(
 
 
 def calc_experience_years_for_pension_adjustment(
-    period, experience_years, education, policy_state, informed, options
+    period, sex, experience_years, education, policy_state, informed, options
 ):
     """Calculate the reduced experience with early retirement penalty."""
     total_pension_points = calc_total_pension_points(
         education=education,
         experience_years=experience_years,
+        sex=sex,
         options=options,
     )
     # retirement age is last periods age
@@ -203,6 +223,9 @@ def calc_experience_years_for_pension_adjustment(
 
     adjusted_pension_points = pension_factor * total_pension_points
     reduced_experience_years = calc_experience_for_total_pension_points(
-        adjusted_pension_points, education, options
+        total_pension_points=adjusted_pension_points,
+        sex=sex,
+        education=education,
+        options=options,
     )
     return reduced_experience_years

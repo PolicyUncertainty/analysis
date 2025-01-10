@@ -3,8 +3,8 @@ import os
 
 import pandas as pd
 from process_data.aux_scripts.filter_data import filter_below_age
-from process_data.aux_scripts.filter_data import filter_by_sex
 from process_data.aux_scripts.filter_data import filter_years
+from process_data.aux_scripts.filter_data import recode_sex
 from process_data.aux_scripts.lagged_and_lead_vars import span_dataframe
 from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.partner_code import create_partner_state
@@ -35,10 +35,10 @@ def create_partner_transition_sample(paths, specs, load_data=False):
 
     # Filter age and sex
     df = filter_below_age(df, specs["start_age"])
-    df = filter_by_sex(df, no_women=False)
+    df = recode_sex(df)
 
     df = df[
-        ["age", "sex", "education", "partner_state", "lagged_partner_state", "children"]
+        ["age", "sex", "education", "partner_state", "lead_partner_state", "children"]
     ]
 
     print(
@@ -88,11 +88,11 @@ def create_partner_and_lagged_state(df, specs):
     # The following code is dependent on span dataframe being called first.
     # In particular the lagged partner state must be after span dataframe and create partner state.
     # We should rewrite this
-    df = span_dataframe(df, specs["start_year"] + 1, specs["end_year"] + 1)
+    df = span_dataframe(df, specs["start_year"], specs["end_year"])
 
     df = create_partner_state(df)
-    df["lagged_partner_state"] = df.groupby(["pid"])["partner_state"].shift()
-    df = df[df["lagged_partner_state"].notna()]
+    df["lead_partner_state"] = df.groupby(["pid"])["partner_state"].shift(-1)
+    df = df[df["lead_partner_state"].notna()]
     df = df[df["partner_state"].notna()]
     print(
         str(len(df))

@@ -78,6 +78,13 @@ def open_and_filter_dataset(paths, specs):
 
     # recode education
     df["education"] = df["education"].replace({1: 0, 2: 0, 3: 1})
+
+    # Age as int
+    df["age"] = df["age"].astype(int)
+    # Restrict dataset to relevant age range and filter invalid beliefs
+    df = df[df["belief_pens_deduct"] >= 0]
+    df = df[df["age"] <= specs["max_ret_age"]]
+
     return df
 
 

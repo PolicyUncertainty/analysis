@@ -64,6 +64,11 @@ def create_structural_est_sample(paths, specs, load_data=False, debug=False):
     df = determine_observed_job_offers(
         df, working_choices=[2, 3], was_fired_last_period=was_fired_last_period
     )
+    # Filter out part-time men
+    mask = df["sex"] == 0
+    df = df[~(mask & (df["choice"] == 2))]
+    df = df[~(mask & (df["lagged_choice"] == 2))]
+
     # Keep relevant columns (i.e. state variables) and set their minimal datatype
     type_dict = {
         "period": "int8",

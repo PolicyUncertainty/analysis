@@ -18,9 +18,9 @@ def observed_model_fit(paths_dict, specs, params):
         params=params,
         update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
         policy_state_trans_func=expected_SRA_probs_estimation,
-        file_append="cet_par",
+        file_append="pete",
         load_model=True,
-        load_solution=True,
+        load_solution=False,
     )
 
     data_decision, states_dict = load_and_prep_data_for_model_fit(
@@ -77,20 +77,23 @@ def plot_observed_model_fit_choice_probs(
             .unstack()
         )
 
-        fig, axes = plt.subplots(1, specs["n_choices"], figsize=(10, 5))
-        labels = specs["choice_labels"]
-        for choice, ax in enumerate(axes):
-            choice_shares_predicted = data_subset.groupby(["age"])[
-                f"choice_{choice}"
-            ].mean()
-            choice_shares_predicted.plot(ax=ax, label="Simulated")
-            choice_shares_obs[choice].plot(ax=ax, label="Observed", ls="--")
-            ax.set_xlabel("Age")
-            ax.set_ylabel("Choice share")
-            ax.set_title(f"{labels[choice]}")
-            ax.set_ylim([-0.05, 1.05])
-            if choice == 0:
-                ax.legend(loc="upper left")
+        fig, axes = plt.subplots(2, specs["n_choices"], figsize=(10, 5))
+        for sex_var, sex_label in enumerate(specs["sex_labels"]):
+            choice_axes = axes[sex_var, :]
+            labels = specs["choice_labels"]
+            for choice_axes, ax in enumerate(axes):
+                choice_shares_predicted = data_subset.groupby(["age"])[
+                    f"choice_{choice}"
+                ].mean()
+                choice_shares_predicted.plot(ax=ax, label="Simulated")
+                if (sex_var != 0) and (choice != 2):
+                    choice_shares_obs[choice].plot(ax=ax, label="Observed", ls="--")
+                ax.set_xlabel("Age")
+                ax.set_ylabel("Choice share")
+                ax.set_title(f"{labels[choice]}")
+                ax.set_ylim([-0.05, 1.05])
+                if choice == 0:
+                    ax.legend(loc="upper left")
         # Fig title
         fig.tight_layout()
 

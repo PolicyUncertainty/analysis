@@ -37,7 +37,9 @@ def estimate_model(
     print_function = generate_print_func(params_to_estimate_names)
     # Load start params and bounds
     start_params_all = load_and_set_start_params(path_dict)
+
     print_function(start_params_all)
+
     # # Assign start params from before
     if last_estimate is not None:
         for key in last_estimate.keys():
@@ -135,7 +137,6 @@ class est_class_from_paths:
             load_model=load_model,
             model_type="solution",
         )
-
         # Load data
         data_decision, states_dict = load_and_prep_data(
             path_dict, start_params_all, model, drop_retirees=True
@@ -281,7 +282,7 @@ def generate_print_func(params_to_estimate_names):
         women_params["full-time"].append("disutil_children_ft_work")
     if "disutil_children_pt_work" in params_to_estimate_names:
         women_params["all"].append("disutil_children_pt_work")
-        women_params["full-time"].append("disutil_children_pt_work")
+        women_params["part-time"].append("disutil_children_pt_work")
     neutral_params = [
         param_name
         for param_name in params_to_estimate_names
@@ -335,7 +336,7 @@ def get_gendered_params(params_to_estimate_names, append):
     job_finding_params = [
         param_name for param_name in gender_params if "job_finding_" in param_name
     ]
-
+    disutil_params_ft_params += [f"disutil_unemployed{append}"]
     params = {
         "all": gender_params,
         "full-time": disutil_params_ft_params,

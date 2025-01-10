@@ -1,3 +1,4 @@
+import jax
 import jax.numpy as jnp
 
 
@@ -10,73 +11,141 @@ def create_utility_functions():
 
 
 def utility_func(
-    consumption, partner_state, education, health, period, choice, params, options
+    consumption, sex, partner_state, education, health, period, choice, params, options
 ):
     """Calculate the choice specific cobb-douglas utility, i.e. u =
     ((c*eta/consumption_scale)^(1-mu))/(1-mu) ."""
     # gather params
     mu = params["mu"]
-    eta = disutility_work(choice, health, params)
-    cons_scale = consumption_scale(partner_state, education, period, options)
+    eta = disutility_work(
+        period=period,
+        choice=choice,
+        sex=sex,
+        education=education,
+        partner_state=partner_state,
+        health=health,
+        params=params,
+        options=options,
+    )
+    cons_scale = consumption_scale(
+        partner_state=partner_state,
+        sex=sex,
+        education=education,
+        period=period,
+        options=options,
+    )
     # compute utility
     utility = (consumption * eta / cons_scale) ** (1 - mu) / (1 - mu)
     return utility
 
 
 def marg_utility(
-    consumption, partner_state, education, health, period, choice, params, options
+    consumption, partner_state, sex, education, health, period, choice, params, options
 ):
-    cons_scale = consumption_scale(partner_state, education, period, options)
+    cons_scale = consumption_scale(
+        partner_state=partner_state,
+        sex=sex,
+        education=education,
+        period=period,
+        options=options,
+    )
     mu = params["mu"]
-    eta = disutility_work(choice, health, params)
+    eta = disutility_work(
+        period=period,
+        choice=choice,
+        sex=sex,
+        education=education,
+        partner_state=partner_state,
+        health=health,
+        params=params,
+        options=options,
+    )
     marg_util = ((eta / cons_scale) ** (1 - mu)) * (consumption ** (-mu))
     return marg_util
 
 
 def inverse_marginal(
-    marginal_utility, partner_state, education, health, period, choice, params, options
+    marginal_utility,
+    partner_state,
+    education,
+    sex,
+    health,
+    period,
+    choice,
+    params,
+    options,
 ):
-    cons_scale = consumption_scale(partner_state, education, period, options)
+    cons_scale = consumption_scale(
+        partner_state=partner_state,
+        sex=sex,
+        education=education,
+        period=period,
+        options=options,
+    )
     mu = params["mu"]
-    eta = disutility_work(choice, health, params)
+    eta = disutility_work(
+        period=period,
+        choice=choice,
+        sex=sex,
+        education=education,
+        partner_state=partner_state,
+        health=health,
+        params=params,
+        options=options,
+    )
     consumption = marginal_utility ** (-1 / mu) * (eta / cons_scale) ** ((1 - mu) / mu)
     return consumption
 
 
-def disutility_work(choice, health, params):
-    # reading parameters
-    dis_util_ft_work = (
-        params["dis_util_ft_work_bad"] * (1 - health)
-        + params["dis_util_ft_work_good"] * health
-    )
-    dis_util_pt_work = (
-        params["dis_util_pt_work_bad"] * (1 - health)
-        + params["dis_util_pt_work_good"] * health
-    )
-    dis_util_unemployed = (
-        params["dis_util_unemployed_bad"] * (1 - health)
-        + params["dis_util_unemployed_good"] * health
-    )
+def disutility_work(
+    period, choice, sex, education, partner_state, health, params, options
+):
     # choice booleans
     is_unemployed = choice == 1
     is_working_part_time = choice == 2
     is_working_full_time = choice == 3
     # partner_retired = partner_state == 0
 
-    exp_factor = (
-        dis_util_unemployed * is_unemployed
-        + dis_util_pt_work * is_working_part_time
-        + dis_util_ft_work * is_working_full_time
-        # + partner_retired * dis_util_only_partner_retired
+    # reading parameters
+    disutil_ft_work_men = (
+        params["disutil_ft_work_bad_men"] * (1 - health)
+        + params["disutil_ft_work_good_men"] * health
+    )
+    exp_factor_men = (
+        params["disutil_unemployed_men"] * is_unemployed
+        # + disutil_pt_work * is_working_part_time
+        + disutil_ft_work_men * is_working_full_time
+        # + partner_retired * disutil_only_partner_retired
     )
 
+    disutil_ft_work_women = (
+        params["disutil_ft_work_bad_women"] * (1 - health)
+        + params["disutil_ft_work_good_women"] * health
+    )
+    disutil_pt_work_women = (
+        params["disutil_pt_work_bad_women"] * (1 - health)
+        + params["disutil_pt_work_good_women"] * health
+    )
+    has_partner_int = (partner_state > 0).astype(int)
+    nb_children = options["children_by_state"][sex, education, has_partner_int, period]
+    disutil_children_pt = params["disutil_children_pt_work"] * nb_children
+    disutil_children_ft = params["disutil_children_ft_work"] * nb_children
+
+    exp_factor_women = (
+        params["disutil_unemployed_women"] * is_unemployed
+        + (disutil_pt_work_women + disutil_children_pt) * is_working_part_time
+        + (disutil_ft_work_women + disutil_children_ft) * is_working_full_time
+    )
+
+    # Select exponential factor by sex
+    exp_factor = jax.lax.select(sex == 0, exp_factor_men, exp_factor_women)
     # compute eta
     disutility = jnp.exp(-exp_factor)
     return disutility
 
 
-def consumption_scale(partner_state, education, period, options):
+def consumption_scale(partner_state, sex, education, period, options):
     has_partner = (partner_state > 0).astype(int)
-    nb_children = options["children_by_state"][0, education, has_partner, period]
+    nb_children = options["children_by_state"][sex, education, has_partner, period]
     hh_size = 1 + has_partner + nb_children
     return jnp.sqrt(hh_size)

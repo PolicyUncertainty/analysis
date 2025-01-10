@@ -48,8 +48,8 @@ def estimate_partner_wage_parameters(paths_dict, specs, est_men):
         # wage_data_edu.groupby("age")["wage_pred"].mean().plot()
         # wage_data_edu.groupby("age")["wage_p"].mean().plot()
         # import matplotlib.pyplot as plt
+        #
         # plt.show()
-        # breakpoint()
 
     append = "men" if est_men else "women"
     out_file_path = paths_dict["est_results"] + f"partner_wage_eq_params_{append}.csv"

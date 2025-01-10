@@ -1,4 +1,5 @@
 import itertools
+
 import estimagic as em
 import matplotlib.pyplot as plt
 import numpy as np
@@ -22,10 +23,14 @@ def estimate_mortality(paths_dict, specs):
                 "health": combo[0],
                 "education": combo[1],
                 "sex": combo[2],
-                "death_prob": row["death_prob_male"] if combo[2] == 0 else row["death_prob_female"],  # male (0) or female (1) death prob
+                "death_prob": row["death_prob_male"]
+                if combo[2] == 0
+                else row["death_prob_female"],  # male (0) or female (1) death prob
             }
             for _, row in lifetable_df.iterrows()
-            for combo in list(itertools.product([0, 1], repeat=3))  # (health, education, sex)
+            for combo in list(
+                itertools.product([0, 1], repeat=3)
+            )  # (health, education, sex)
         ]
     )
     mortality_df.reset_index(drop=True, inplace=True)
@@ -38,17 +43,18 @@ def estimate_mortality(paths_dict, specs):
     df = pd.read_pickle(
         paths_dict["intermediate_data"]
         + "mortality_transition_estimation_sample_duplicated.pkl"
-    )    
-    # df initial values i.e. first observations (+ sex column) 
-    start_df = df[[col for col in df.columns if col.startswith("start")] + ['sex']].copy()
+    )
+    # df initial values i.e. first observations (+ sex column)
+    start_df = df[
+        [col for col in df.columns if col.startswith("start")] + ["sex"]
+    ].copy()
     str_cols = start_df.columns.str.replace("start ", "")
     start_df.columns = str_cols
     # add a intercept column to the df and start_df
     df["intercept"] = 1
     start_df["intercept"] = 1
 
-
-    for i, sex in enumerate(specs["sexes"]):
+    for i, sex in enumerate(specs["sex_labels"]):
         # Filter data by sex
         filtered_df = df[df["sex"] == (0 if sex == "Male" else 1)]
         filtered_start_df = start_df[start_df["sex"] == (0 if sex == "Male" else 1)]
@@ -60,7 +66,7 @@ def estimate_mortality(paths_dict, specs):
         initial_params = pd.DataFrame(
             data=[
                 [0.0, -np.inf, np.inf],
-                [0.1, 1e-8   , np.inf], # age coefficient is positive
+                [0.1, 1e-8, np.inf],  # age coefficient is positive
                 [0.0, -np.inf, np.inf],
                 [0.0, -np.inf, np.inf],
                 [0.0, -np.inf, np.inf],
@@ -70,10 +76,10 @@ def estimate_mortality(paths_dict, specs):
             index=[
                 "intercept",
                 "age",
-                f"{specs['health_labels'][1]} {specs['education_labels'][1]}", # good health, high education
-                f"{specs['health_labels'][1]} {specs['education_labels'][0]}", # good health, low education
-                f"{specs['health_labels'][0]} {specs['education_labels'][1]}", # bad health, high education
-                f"{specs['health_labels'][0]} {specs['education_labels'][0]}", # bad health, low education
+                f"{specs['health_labels'][1]} {specs['education_labels'][1]}",  # good health, high education
+                f"{specs['health_labels'][1]} {specs['education_labels'][0]}",  # good health, low education
+                f"{specs['health_labels'][0]} {specs['education_labels'][1]}",  # bad health, high education
+                f"{specs['health_labels'][0]} {specs['education_labels'][0]}",  # bad health, low education
             ],
         )
 
@@ -88,14 +94,19 @@ def estimate_mortality(paths_dict, specs):
         # save the results
         print(res.summary())
         print(res.optimize_result)
-        res.summary().to_pickle(paths_dict["est_results"] + f"est_params_mortality_{sex}.pkl")
+        res.summary().to_pickle(
+            paths_dict["est_results"] + f"est_params_mortality_{sex}.pkl"
+        )
         to_csv_summary = res.summary()
         to_csv_summary["hazard_ratio"] = np.exp(res.params["value"])
-        to_csv_summary.to_csv(paths_dict["est_results"] + f"est_params_mortality_{sex}.csv")
+        to_csv_summary.to_csv(
+            paths_dict["est_results"] + f"est_params_mortality_{sex}.csv"
+        )
 
-
-    # update mortality_df with the estimated parameters
-        for health, health_label in enumerate(specs["health_labels"][:-1]): # exclude the last health label (death)
+        # update mortality_df with the estimated parameters
+        for health, health_label in enumerate(
+            specs["health_labels"][:-1]
+        ):  # exclude the last health label (death)
             for education, education_label in enumerate(specs["education_labels"]):
                 param = f"{health_label} {education_label}"
                 mortality_df.loc[
@@ -143,6 +154,7 @@ def estimate_mortality(paths_dict, specs):
         index=False,
     )
 
+
 def log_density_function(data, params):
     """
     Calculate the log-density function: log of the density function. (log of d[-S(age)]/d(age) = log of - dS(age)/d(age))
@@ -150,42 +162,46 @@ def log_density_function(data, params):
     age_coef = params.loc["age", "value"]
     age_contrib = np.exp(age_coef * data["age"]) - 1
 
-    log_lambda_ = sum([params.loc[x, "value"] * data[x] for x in params.index if x != "age"])
+    log_lambda_ = sum(
+        [params.loc[x, "value"] * data[x] for x in params.index if x != "age"]
+    )
     lambda_ = np.exp(log_lambda_)
-    
+
     return log_lambda_ + age_coef * data["age"] - ((lambda_ * age_contrib) / age_coef)
 
+
 def log_survival_function(data, params):
-    """
-    Calculate the log-survival function.
-    """
+    """Calculate the log-survival function."""
     age_coef = params.loc["age", "value"]
     age_contrib = np.exp(age_coef * data["age"]) - 1
 
-    lambda_ = np.exp(sum([params.loc[x, "value"] * data[x] for x in params.index if x != "age"]))
+    lambda_ = np.exp(
+        sum([params.loc[x, "value"] * data[x] for x in params.index if x != "age"])
+    )
 
     return -(lambda_ * age_contrib) / age_coef
 
 
 def loglike(params, df, start_df):
-    """
-    Log-likelihood calculation.
+    """Log-likelihood calculation.
+
     params: pd.DataFrame
         DataFrame with the parameters.
     df: pd.DataFrame
         DataFrame with the data.
     param_names: list
         List with the parameter names. (includes the intercept at index 0)
+
     """
 
     event = df["death event"]
     death = event.astype(bool)
 
-    contributions          = np.zeros_like(event)
-    contributions[death]   = log_density_function(df[death], params)
-    contributions[~death]  = log_survival_function(df[~death], params)
-    contributions         -= log_survival_function(start_df, params)
-    sum_contributions      = contributions.sum()
+    contributions = np.zeros_like(event)
+    contributions[death] = log_density_function(df[death], params)
+    contributions[~death] = log_survival_function(df[~death], params)
+    contributions -= log_survival_function(start_df, params)
+    sum_contributions = contributions.sum()
 
     # show progress every 20 iterations
     globals()["Iteration"] += 1
@@ -196,5 +212,5 @@ def loglike(params, df, start_df):
             "Total contributions:",
             sum_contributions,
         )
-    
+
     return {"contributions": contributions, "value": sum_contributions}

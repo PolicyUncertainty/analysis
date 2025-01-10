@@ -1,17 +1,17 @@
 import numpy as np
 import pandas as pd
 import statsmodels.formula.api as smf
+from process_data.first_step_sample_scripts.create_health_transition_sample import (
+    create_health_transition_sample,
+)
 from scipy.stats import norm  # Import norm from scipy.stats for the Gaussian kernel
-from specs.derive_specs import read_and_derive_specs
 
 
 def estimate_health_transitions(paths_dict, specs):
     """Estimate the health state transition matrix."""
 
     # Load the data
-    transition_data = pd.read_pickle(
-        paths_dict["intermediate_data"] + "health_transition_estimation_sample.pkl"
-    )
+    transition_data = create_health_transition_sample(paths_dict, specs, load_data=True)
 
     # Define the Epanechnikov kernel function
     def epanechnikov_kernel(distance, bandwidth):
@@ -114,71 +114,82 @@ def estimate_health_transitions(paths_dict, specs):
 def estimate_health_transitions_parametric(paths_dict, specs):
     """Estimate the health state transition with logit regression model."""
     # Load the data
-    transition_data = pd.read_pickle(
-        paths_dict["intermediate_data"] + "health_transition_estimation_sample.pkl"
-    )
+    transition_data = create_health_transition_sample(paths_dict, specs, load_data=True)
+
     # Parameters
     ages = np.arange(specs["start_age"], specs["end_age"] + 1)
 
+    alive_health_vars = specs["alive_health_vars"]
+    alive_health_labels = [specs["health_labels"][i] for i in alive_health_vars]
+
+    index = pd.MultiIndex.from_product(
+        [
+            specs["sex_labels"],
+            specs["education_labels"],
+            ages - specs["start_age"],
+            alive_health_labels,
+            alive_health_labels,
+        ],
+        names=["sex", "education", "period", "health", "lead_health"],
+    )
+
     # Compute transition probabilities
-    health_transition_matrix = pd.DataFrame()
-    for education in [1, 0]:
-        for health in [1, 0]:
-            for lead_health in [1, 0]:
-                if lead_health == 1:
-                    # Filter the data
-                    data = transition_data[
-                        (transition_data["education"] == education)
-                        & (transition_data["health"] == health)
-                    ]
+    health_transition_matrix = pd.DataFrame(
+        index=index, data=None, columns=["transition_prob"]
+    )
+    for sex_var, sex_label in enumerate(specs["sex_labels"]):
+        for edu_var, edu_label in enumerate(specs["education_labels"]):
+            for alive_health_var in alive_health_vars:
+                alive_health_label = specs["health_labels"][alive_health_var]
+                # Filter the data
+                data = transition_data[
+                    (transition_data["sex"] == sex_var)
+                    & (transition_data["education"] == edu_var)
+                    & (transition_data["health"] == alive_health_var)
+                ]
 
-                    # Fit the logit model
-                    y_var = "lead_health"
-                    x_vars = ["age"]
-                    formula = y_var + " ~ " + " + ".join(x_vars)
-                    model = smf.logit(formula=formula, data=data)
-                    result = model.fit()
+                # Fit the logit model
+                y_var = "lead_health"
+                x_vars = ["age"]
+                formula = y_var + " ~ " + " + ".join(x_vars)
+                model = smf.logit(formula=formula, data=data)
+                result = model.fit()
 
-                    # Compute the transition probabilities
-                    transition_probabilities = result.predict(
-                        pd.DataFrame({"age": ages})
-                    )
+                # Compute the transition probabilities
+                transition_probabilities = result.predict(
+                    pd.DataFrame({"age": ages})
+                ).values
 
-                    health_transition_matrix = pd.concat(
-                        [
-                            health_transition_matrix,
-                            pd.DataFrame(
-                                {
-                                    "education": education,
-                                    "period": ages - specs["start_age"],
-                                    "health": health,
-                                    "lead_health": lead_health,
-                                    "transition_prob": transition_probabilities,
-                                }
-                            ),
-                        ],
-                        ignore_index=True,
-                    )
+                healthy_label = specs["health_labels"][1]
+                # For transition to healthy, we take the transition probabilities
+                health_transition_matrix.loc[
+                    (
+                        sex_label,
+                        edu_label,
+                        slice(None),
+                        alive_health_label,
+                        healthy_label,
+                    ),
+                    "transition_prob",
+                ] = transition_probabilities
+
+                unhealthy_label = specs["health_labels"][0]
                 # for transition to unhealthy, we simply take the complement of the transition to healthy
-                else:
-                    health_transition_matrix = pd.concat(
-                        [
-                            health_transition_matrix,
-                            pd.DataFrame(
-                                {
-                                    "education": education,
-                                    "period": ages - specs["start_age"],
-                                    "health": health,
-                                    "lead_health": lead_health,
-                                    "transition_prob": 1 - transition_probabilities,
-                                }
-                            ),
-                        ],
-                        ignore_index=True,
-                    )
+                health_transition_matrix.loc[
+                    (
+                        sex_label,
+                        edu_label,
+                        slice(None),
+                        alive_health_label,
+                        unhealthy_label,
+                    ),
+                    "transition_prob",
+                ] = (
+                    1 - transition_probabilities
+                )
 
     # Save the results to a CSV file
     out_file_path = paths_dict["est_results"] + "health_transition_matrix.csv"
-    health_transition_matrix.to_csv(out_file_path, index=False)
+    health_transition_matrix.to_csv(out_file_path)
 
     return health_transition_matrix

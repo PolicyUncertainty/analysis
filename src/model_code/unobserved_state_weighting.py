@@ -33,6 +33,7 @@ def create_unobserved_state_specs(data_decision, model):
     relevant_prev_period_state_choices_dict = {
         "period": data_decision["period"].values - 1,
         "education": data_decision["education"].values,
+        "sex": data_decision["sex"].values,
     }
     unobserved_state_specs = {
         "observed_bools_states": {

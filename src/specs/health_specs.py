@@ -6,45 +6,72 @@ from jax import numpy as jnp
 def read_in_health_transition_specs(paths_dict, specs):
     trans_probs_df = pd.read_csv(
         paths_dict["est_results"] + "health_transition_matrix.csv",
-        index_col=[0, 1, 2, 3],
-    )["transition_prob"]
-
-    death_probs = pd.read_csv(
-        paths_dict["est_results"] + "mortality_transition_matrix.csv",
-        index_col=[0, 1, 2, 3],
-    )["death_prob"]
-    n_periods = specs["n_periods"]
-    n_health_states = specs["n_health_states"]
-    n_edu_types = len(specs["education_labels"])
-
-    alive_health_states = np.where(np.array(specs["health_labels"]) != "Death")[0]
-    death_health_state = np.where(np.array(specs["health_labels"]) == "Death")[0][0]
-
-    # Transition probalities for health
-    trans_probs = np.zeros(
-        (n_edu_types, n_periods, n_health_states, n_health_states), dtype=float
     )
 
-    for edu in range(n_edu_types):
-        for period in range(n_periods):
-            for current_state in alive_health_states:
-                for next_state in alive_health_states:
-                    trans_probs[
-                        edu, period, current_state, next_state
-                    ] = trans_probs_df.loc[(edu, period, current_state, next_state)]
+    death_prob_df = pd.read_csv(
+        paths_dict["est_results"] + "mortality_transition_matrix.csv",
+    )
 
-                current_age = period + specs["start_age"]
-                period_mortality_est = current_age - specs["start_age_mortality"]
-                death_prob = death_probs.loc[
-                    (period_mortality_est, 0, current_state, edu)
-                ]
-                # Death state. Condition health transitions on surviving and then assign death
-                # probability to death state
-                trans_probs[edu, period, current_state, :] *= 1 - death_prob
-                trans_probs[edu, period, current_state, death_health_state] = death_prob
+    alive_health_vars = specs["alive_health_vars"]
+    death_health_var = specs["death_health_var"]
+
+    # Transition probalities for health
+    health_trans_mat = np.zeros(
+        (
+            specs["n_sexes"],
+            specs["n_education_types"],
+            specs["n_periods"],
+            specs["n_health_states"],
+            specs["n_health_states"],
+        ),
+        dtype=float,
+    )
+    for sex_var, sex_label in enumerate(specs["sex_labels"]):
+        for edu_var, edu_label in enumerate(specs["education_labels"]):
+            for period in range(specs["n_periods"]):
+                for current_health_var in alive_health_vars:
+                    for lead_health_var in alive_health_vars:
+                        current_health_label = specs["health_labels"][
+                            current_health_var
+                        ]
+                        next_health_label = specs["health_labels"][lead_health_var]
+                        trans_prob = trans_probs_df.loc[
+                            (trans_probs_df["sex"] == sex_label)
+                            & (trans_probs_df["education"] == edu_label)
+                            & (trans_probs_df["period"] == period)
+                            & (trans_probs_df["health"] == current_health_label)
+                            & (trans_probs_df["lead_health"] == next_health_label),
+                            "transition_prob",
+                        ].values[0]
+                        health_trans_mat[
+                            sex_var,
+                            edu_var,
+                            period,
+                            current_health_var,
+                            lead_health_var,
+                        ] = trans_prob
+
+                    current_age = period + specs["start_age"]
+                    period_mortality_est = current_age - specs["start_age_mortality"]
+                    # This needs to become label based
+                    death_prob = death_prob_df.loc[
+                        (death_prob_df["period"] == period_mortality_est)
+                        & (death_prob_df["sex"] == sex_var)
+                        & (death_prob_df["health"] == current_health_var)
+                        & (death_prob_df["education"] == edu_var),
+                        "death_prob",
+                    ].values[0]
+                    # Death state. Condition health transitions on surviving and then assign death
+                    # probability to death state
+                    health_trans_mat[
+                        sex_var, edu_var, period, current_health_var, :
+                    ] *= (1 - death_prob)
+                    health_trans_mat[
+                        sex_var, edu_var, period, current_health_var, death_health_var
+                    ] = death_prob
 
     # Death as absorbing state. There are only zeros in the last row of the
     # transition matrix and a 1 on the diagonal element
-    trans_probs[:, :, death_health_state, death_health_state] = 1
+    health_trans_mat[:, :, :, death_health_var, death_health_var] = 1
 
-    return jnp.asarray(trans_probs)
+    return jnp.asarray(health_trans_mat)

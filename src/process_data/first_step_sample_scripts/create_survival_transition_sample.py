@@ -6,8 +6,8 @@ import numpy as np
 import pandas as pd
 from process_data.aux_scripts.filter_data import filter_above_age
 from process_data.aux_scripts.filter_data import filter_below_age
-from process_data.aux_scripts.filter_data import filter_by_sex
 from process_data.aux_scripts.filter_data import filter_years
+from process_data.aux_scripts.filter_data import recode_sex
 from process_data.aux_scripts.lagged_and_lead_vars import span_dataframe
 from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.health import clean_health_create_states
@@ -100,9 +100,7 @@ def create_survival_transition_sample(paths, specs, load_data=False):
     dupli_df.sort_index(inplace=True)
 
     # Create interaction indicators for health and education
-    dupli_df = create_interaction_columns(
-        dupli_df, ("health", "education"), specs
-    )
+    dupli_df = create_interaction_columns(dupli_df, ("health", "education"), specs)
 
     # Create interaction indicators for start health and education
     dupli_df = create_interaction_columns(
@@ -157,7 +155,7 @@ def load_and_process_soep_yearly_survey_data(soep_c38_path, specs):
     merged_data.set_index(["pid", "syear"], inplace=True)
 
     # keep male and female obs. and transform to 0/1 = male/female
-    df = filter_by_sex(merged_data, no_women=False)
+    df = recode_sex(merged_data)
     # create education type variable
     df = create_education_type(df)
 
@@ -286,13 +284,14 @@ def create_start_age_and_health(df):
 
 
 def create_interaction_columns(df, columns, specs):
-    """Create interaction indicator columns based on two 0-1-columns in the DataFrame. Adds start_ prefix if necessary.
+    """Create interaction indicator columns based on two 0-1-columns in the DataFrame.
+    Adds start_ prefix if necessary.
 
     Parameters:
         df (DataFrame): The DataFrame to modify.
         columns (tuple): A tuple containing the two column names.
         specs (dict): The specifications dictionary.
-         
+
     Returns:
         DataFrame: The modified DataFrame with new interaction columns.
 
@@ -300,8 +299,8 @@ def create_interaction_columns(df, columns, specs):
     column1, column2 = columns
 
     # get the labels for the columns (start variables get the same labels as the original variables)
-    col1_labels = specs[f"{column1}_labels".replace("start ", "")] 
-    col2_labels = specs[f"{column2}_labels".replace("start ", "")] 
+    col1_labels = specs[f"{column1}_labels".replace("start ", "")]
+    col2_labels = specs[f"{column2}_labels".replace("start ", "")]
 
     for val1 in [0, 1]:
         for val2 in [0, 1]:

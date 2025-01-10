@@ -30,14 +30,21 @@ def estimate_model(
     file_append,
     slope_disutil_method,
     load_model,
+    use_weights=True,
     last_estimate=None,
     save_results=True,
 ):
+    print_function = generate_print_func(params_to_estimate_names)
     # Load start params and bounds
     start_params_all = load_and_set_start_params(path_dict)
+
+    print_function(last_estimate)
+
     # # Assign start params from before
     if last_estimate is not None:
         for key in last_estimate.keys():
+            if key in ["sigma", "interest_rate", "beta"]:
+                continue
             try:
                 print(
                     f"Start params value of {key} was {start_params_all[key]} and is"
@@ -66,8 +73,10 @@ def estimate_model(
         path_dict=path_dict,
         start_params_all=start_params_all,
         slope_disutil_method=slope_disutil_method,
+        print_function=print_function,
         file_append=file_append,
         load_model=load_model,
+        use_weights=use_weights,
         save_results=save_results,
     )
 
@@ -99,11 +108,18 @@ class est_class_from_paths:
         slope_disutil_method,
         file_append,
         load_model,
+        use_weights,
+        print_function=None,
         save_results=True,
     ):
         self.iter_count = 0
         self.slope_disutil_method = slope_disutil_method
         self.save_results = save_results
+
+        if print_function is None:
+            self.print_function = lambda params: print("Params, ", pd.Series(params))
+        else:
+            self.print_function = print_function
 
         intermediate_est_data = (
             path_dict["intermediate_data"] + f"estimation_{file_append}/"
@@ -121,13 +137,17 @@ class est_class_from_paths:
             load_model=load_model,
             model_type="solution",
         )
-
         # Load data
         data_decision, states_dict = load_and_prep_data(
             path_dict, start_params_all, model, drop_retirees=True
         )
 
-        self.weights = np.ones_like(data_decision["age_weights"].values)
+        if use_weights:
+            self.weights = data_decision["age_weights"].values
+            self.weight_sum = np.sum(self.weights)
+        else:
+            self.weights = np.ones(data_decision.shape[0])
+            self.weight_sum = data_decision.shape[0]
 
         # Create specs for unobserved states
         unobserved_state_specs = create_unobserved_state_specs(data_decision, model)
@@ -143,21 +163,21 @@ class est_class_from_paths:
         )
         self.ll_func = individual_likelihood
         specs = generate_derived_and_data_derived_specs(path_dict)
-        self.pt_ratio_low = (
-            specs["av_annual_hours_pt"][0] / specs["av_annual_hours_ft"][0]
-        )
-        self.pt_ratio_high = (
-            specs["av_annual_hours_pt"][1] / specs["av_annual_hours_ft"][1]
-        )
+        # self.pt_ratio_low = (
+        #     specs["av_annual_hours_pt"][0] / specs["av_annual_hours_ft"][0]
+        # )
+        # self.pt_ratio_high = (
+        #     specs["av_annual_hours_pt"][1] / specs["av_annual_hours_ft"][1]
+        # )
 
     def crit_func(self, params):
         start = time.time()
-        if self.slope_disutil_method:
-            params = update_according_to_slope_disutil(
-                params, self.pt_ratio_low, self.pt_ratio_high
-            )
+        # if self.slope_disutil_method:
+        #     params = update_according_to_slope_disutil(
+        #         params, self.pt_ratio_low, self.pt_ratio_high
+        #     )
         ll_value_individual, model_solution = self.ll_func(params)
-        ll_value = jnp.dot(self.weights, ll_value_individual)
+        ll_value = jnp.dot(self.weights, ll_value_individual) / self.weight_sum
         if self.save_results:
             save_iter_step(
                 model_solution,
@@ -168,31 +188,33 @@ class est_class_from_paths:
             )
         end = time.time()
         self.iter_count += 1
+        self.print_function(params)
+        print("Likelihood value: ", ll_value)
         print("Likelihood evaluation took, ", end - start)
-        print("Params, ", pd.Series(params), " with ll value, ", ll_value)
+
         return ll_value
 
 
-def update_according_to_slope_disutil(params, pt_ratio_bad, pt_ratio_good):
-    """Use this function to entforce slope condition of disutility parameters."""
-    params["dis_util_unemployed_bad"] = params["dis_util_not_retired_low"]
-    params["dis_util_pt_work_bad"] = (
-        params["dis_util_not_retired_bad"]
-        + pt_ratio_bad * params["dis_util_working_bad"]
-    )
-    params["dis_util_ft_work_bad"] = (
-        params["dis_util_not_retired_bad"] + params["dis_util_working_bad"]
-    )
-
-    params["dis_util_unemployed_good"] = params["dis_util_not_retired_good"]
-    params["dis_util_pt_work_good"] = (
-        params["dis_util_not_retired_good"]
-        + pt_ratio_good * params["dis_util_working_good"]
-    )
-    params["dis_util_ft_work_good"] = (
-        params["dis_util_not_retired_good"] + params["dis_util_working_good"]
-    )
-    return params
+# def update_according_to_slope_disutil(params, pt_ratio_bad, pt_ratio_good):
+#     """Use this function to entforce slope condition of disutility parameters."""
+#     params["disutil_unemployed_bad"] = params["disutil_not_retired_low"]
+#     params["disutil_pt_work_bad"] = (
+#         params["disutil_not_retired_bad"]
+#         + pt_ratio_bad * params["disutil_working_bad"]
+#     )
+#     params["disutil_ft_work_bad"] = (
+#         params["disutil_not_retired_bad"] + params["disutil_working_bad"]
+#     )
+#
+#     params["disutil_unemployed"] = params["disutil_not_retired_good"]
+#     params["disutil_pt_work_good"] = (
+#         params["disutil_not_retired_good"]
+#         + pt_ratio_good * params["disutil_working_good"]
+#     )
+#     params["disutil_ft_work_good"] = (
+#         params["disutil_not_retired_good"] + params["disutil_working_good"]
+#     )
+#     return params
 
 
 def save_iter_step(model_sol, ll_value, params, logging_folder, iter_count):
@@ -250,3 +272,76 @@ def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):
     states_dict["wealth"] = data_decision["adjusted_wealth"].values
 
     return data_decision, states_dict
+
+
+def generate_print_func(params_to_estimate_names):
+    men_params = get_gendered_params(params_to_estimate_names, "_men")
+    women_params = get_gendered_params(params_to_estimate_names, "_women")
+    if "disutil_children_ft_work" in params_to_estimate_names:
+        women_params["all"].append("disutil_children_ft_work")
+        women_params["full-time"].append("disutil_children_ft_work")
+    if "disutil_children_pt_work" in params_to_estimate_names:
+        women_params["all"].append("disutil_children_pt_work")
+        women_params["part-time"].append("disutil_children_pt_work")
+    neutral_params = [
+        param_name
+        for param_name in params_to_estimate_names
+        if param_name not in men_params["all"] + women_params["all"]
+    ]
+    men_params.pop("all")
+    women_params.pop("all")
+
+    def print_function(params):
+        print("Gender neutral parameters:")
+        for param_name in neutral_params:
+            print(f"{param_name}: {params[param_name]}")
+        print("\nMen model params are:")
+        for group_name in men_params.keys():
+            print(f"Group: {group_name}")
+            for param in men_params[group_name]:
+                if "disutil" in param:
+                    print(
+                        f"{param}: {params[param]} and in probability: {np.exp(-params[param])}"
+                    )
+                elif "job_finding" in param:
+                    print(f"{param}: {params[param]}")
+        print("\nParameters of the women model are:")
+        for group_name in women_params.keys():
+            print(f"Group: {group_name}")
+            for param in women_params[group_name]:
+                if "disutil" in param:
+                    print(
+                        f"{param}: {params[param]} and in probability: {np.exp(-params[param])}"
+                    )
+                elif "job_finding" in param:
+                    print(f"{param}: {params[param]}")
+
+    return print_function
+
+
+def get_gendered_params(params_to_estimate_names, append):
+    gender_params = [
+        param_name for param_name in params_to_estimate_names if append in param_name
+    ]
+
+    disutil_params = [
+        param_name for param_name in gender_params if "disutil_" in param_name
+    ]
+    disutil_params_pt_params = [
+        param_name for param_name in disutil_params if "pt_work" in param_name
+    ]
+    disutil_params_ft_params = [
+        param_name for param_name in disutil_params if "ft_work" in param_name
+    ]
+    job_finding_params = [
+        param_name for param_name in gender_params if "job_finding_" in param_name
+    ]
+    disutil_params_ft_params += [f"disutil_unemployed{append}"]
+    params = {
+        "all": gender_params,
+        "full-time": disutil_params_ft_params,
+        "part-time": disutil_params_pt_params,
+        "job-finding": job_finding_params,
+    }
+
+    return params

@@ -15,7 +15,8 @@ end_age: 100
 choice_labels: ["Retired", "Unemployed", "Part-time", "Full-time"]
 education_labels: ["Low Education", "High Education"]
 health_labels: ["Bad Health", "Good Health", "Death"]
-sexes: ["Male", "Female"]
+sex_labels: ["Men","Women"]
+partner_labels: ["Single","Working Partner", "Retired Partner"]
 # Belief process parameters
 SRA_grid_size: 0.25
 min_SRA: 65
@@ -32,7 +33,7 @@ exp_increase_part_time: 0.5
 monthly_unemployment_benefits: 350
 monthly_unemployment_benefits_housing: 300
 monthly_child_unemployment_benefits: 250
-# Wealth threshold, above which unemployment benefits are not paid
+# Wealth threshold (for unemployment benefits)
 unemployment_wealth_thresh: 10_500
 # Now additional parameters for working and retirement
 monthly_child_benefits: 184

@@ -27,7 +27,7 @@ def create_job_offer_params_from_start(path_dict):
     )
 
     # Filter for relevant columns
-    logit_df = df_unemployed[["period", "education", "work_start"]].copy()
+    logit_df = df_unemployed[["sex", "period", "education", "work_start"]].copy()
     logit_df["age"] = logit_df["period"] + specs["start_age"]
 
     # logit_df["above_49"] = 0
@@ -42,14 +42,21 @@ def create_job_offer_params_from_start(path_dict):
         "education",
     ]
 
-    logit_model = sm.Logit(logit_df["work_start"], logit_df[logit_vars])
-    logit_fitted = logit_model.fit()
+    job_offer_params = {}
+    for sex_var, sex_append in enumerate(["men", "women"]):
+        logit_df_gender = logit_df[logit_df["sex"] == sex_var]
+        logit_model = sm.Logit(
+            logit_df_gender["work_start"], logit_df_gender[logit_vars]
+        )
+        logit_fitted = logit_model.fit()
 
-    params = logit_fitted.params
+        params = logit_fitted.params
 
-    job_offer_params = {
-        "job_finding_logit_const": params["intercept"],
-        "job_finding_logit_age": params["age"],
-        "job_finding_logit_high_educ": params["education"],
-    }
+        gender_params = {
+            f"job_finding_logit_const_{sex_append}": params["intercept"],
+            f"job_finding_logit_age_{sex_append}": params["age"],
+            f"job_finding_logit_high_educ_{sex_append}": params["education"],
+        }
+        job_offer_params = {**job_offer_params, **gender_params}
+
     return job_offer_params

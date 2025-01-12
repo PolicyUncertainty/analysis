@@ -20,7 +20,8 @@ params_to_estimate_names = [
     "disutil_pt_work_bad_women",
     "disutil_unemployed_women",
     # "disutil_children_pt_work",
-    "disutil_children_ft_work",
+    "disutil_children_ft_work_low",
+    "disutil_children_ft_work_high",
     # "disutil_not_retired_bad",
     # "disutil_working_bad",
     # "disutil_not_retired_good",
@@ -36,13 +37,20 @@ params_to_estimate_names = [
 ]
 
 last_estimate = pkl.load(open(paths_dict["est_results"] + "est_params_pete.pkl", "rb"))
+last_estimate["disutil_children_ft_work_low"] = last_estimate[
+    "disutil_children_ft_work"
+]
+last_estimate["disutil_children_ft_work_high"] = last_estimate[
+    "disutil_children_ft_work"
+]
+last_estimate.pop("disutil_children_ft_work")
 
 estimation_results = estimate_model(
     paths_dict,
     params_to_estimate_names=params_to_estimate_names,
     file_append="pete",
     slope_disutil_method=False,
-    load_model=True,
+    load_model=False,
     last_estimate=last_estimate,
     save_results=False,
 )

@@ -154,22 +154,24 @@ def plot_total_income(specs):
     params = {"interest_rate": 0.0}
     exp_levels = np.arange(0, specs["max_experience"] + 1)
     marriage_labels = ["Single", "Partnered"]
-    worklife_chocie_labels = ["Unemployed", "Part-time", "Full-time"]
     edu_labels = specs["education_labels"]
 
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
         fig, axs = plt.subplots(ncols=2, nrows=2, figsize=(10, 10))
         for married_val, married_label in enumerate(marriage_labels):
             for edu_val, edu_label in enumerate(edu_labels):
-                for choice, work_label in enumerate(worklife_chocie_labels):
-                    work_val = choice + 1
+                for choice, work_label in enumerate(specs["choice_labels"]):
                     total_income = np.zeros_like(exp_levels, dtype=float)
                     for i, exp in enumerate(exp_levels):
                         exp_share = exp / (exp + specs["max_init_experience"])
+                        if work_label == "Retired":
+                            period = 45
+                        else:
+                            period = exp
                         total_income[i] = budget_constraint(
-                            period=exp,
+                            period=period,
                             education=edu_val,
-                            lagged_choice=work_val,
+                            lagged_choice=choice,
                             experience=exp_share,
                             sex=sex_var,
                             partner_state=np.array(married_val),

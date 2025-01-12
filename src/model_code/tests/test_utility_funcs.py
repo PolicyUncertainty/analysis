@@ -95,8 +95,8 @@ def test_utility_func(
         "disutil_ft_work_good_women": disutil_work + 1,
         "disutil_ft_work_bad_women": disutil_work,
         "disutil_unemployed_women": disutil_unemployed,
-        "disutil_children_pt_work": 0.1,
-        "disutil_children_ft_work": 0.1,
+        "disutil_children_ft_work_low": 0.1,
+        "disutil_children_ft_work_high": 0.1,
     }
     options = paths_and_specs[1]
     cons_scale = consumption_scale(
@@ -124,8 +124,12 @@ def test_utility_func(
         nb_children = options["children_by_state"][
             sex, education, has_partner_int, period
         ]
-        exp_factor_ft_work += params["disutil_children_ft_work"] * nb_children
-        exp_factor_pt_work += params["disutil_children_pt_work"] * nb_children
+        exp_factor_ft_work += (
+            params["disutil_children_ft_work_high"] * nb_children * education
+        )
+        exp_factor_ft_work += (
+            params["disutil_children_ft_work_low"] * nb_children * (1 - education)
+        )
 
     disutil_pt_work = np.exp(-exp_factor_pt_work)
     disutil_ft_work = np.exp(-exp_factor_ft_work)
@@ -217,8 +221,8 @@ def test_marginal_utility(
         "disutil_ft_work_good_women": disutil_work + 1,
         "disutil_ft_work_bad_women": disutil_work,
         "disutil_unemployed_women": disutil_unemployed,
-        "disutil_children_pt_work": 0.1,
-        "disutil_children_ft_work": 0.1,
+        "disutil_children_ft_work_low": 0.1,
+        "disutil_children_ft_work_high": 0.1,
     }
 
     random_choice = np.random.choice(np.array([0, 1, 2]))
@@ -287,8 +291,8 @@ def test_inv_marginal_utility(
         "disutil_ft_work_good_women": disutil_work + 1,
         "disutil_ft_work_bad_women": disutil_work,
         "disutil_unemployed_women": disutil_unemployed,
-        "disutil_children_pt_work": 0.1,
-        "disutil_children_ft_work": 0.1,
+        "disutil_children_ft_work_low": 0.1,
+        "disutil_children_ft_work_high": 0.1,
     }
 
     options = paths_and_specs[1]

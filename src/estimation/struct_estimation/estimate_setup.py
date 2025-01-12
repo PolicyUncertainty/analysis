@@ -287,12 +287,11 @@ def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):
 def generate_print_func(params_to_estimate_names):
     men_params = get_gendered_params(params_to_estimate_names, "_men")
     women_params = get_gendered_params(params_to_estimate_names, "_women")
-    if "disutil_children_ft_work" in params_to_estimate_names:
-        women_params["all"].append("disutil_children_ft_work")
-        women_params["full-time"].append("disutil_children_ft_work")
-    if "disutil_children_pt_work" in params_to_estimate_names:
-        women_params["all"].append("disutil_children_pt_work")
-        women_params["part-time"].append("disutil_children_pt_work")
+
+    for param in ["disutil_children_ft_work_low", "disutil_children_ft_work_high"]:
+        if param in params_to_estimate_names:
+            women_params["all"] += [param]
+            women_params["full-time"] += [param]
     neutral_params = [
         param_name
         for param_name in params_to_estimate_names

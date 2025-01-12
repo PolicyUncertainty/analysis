@@ -105,13 +105,9 @@ from export_results.figures.wealth_plots import plot_budget_of_unemployed
 
 if exec_budget:
     plot_incomes(path_dict)
-    plt.show()
     plot_partner_wage(path_dict, specs)
-    plt.show()
     plot_total_income(specs)
-    plt.show()
     plot_child_benefits(specs)
-    plt.show()
     plot_budget_of_unemployed(specs)
     plt.show()
     plt.close("all")

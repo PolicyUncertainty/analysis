@@ -20,123 +20,130 @@ def plot_incomes(path_dict):
     annual_unemployment = specs["annual_unemployment_benefits"]
     unemployment_benefits = np.ones_like(exp_levels) * annual_unemployment
 
-    labels = ["Low Education", "High Education"]
-    fig, axes = plt.subplots(1, 2, figsize=(10, 5))
+    fig, axes = plt.subplots(2, 2, figsize=(10, 5))
 
-    # Now loop over education to generate specific net and gross wages and pensions
-    for edu in range(specs["n_education_types"]):
-        ax = axes[edu]
+    for sex_var, sex_label in enumerate(specs["sex_labels"]):
+        # Now loop over education to generate specific net and gross wages and pensions
+        for edu_var, edu_label in enumerate(specs["education_labels"]):
+            ax = axes[sex_var, edu_var]
 
-        ax.plot(
-            exp_levels,
-            unemployment_benefits,
-            label="Unemployment benefits",
-            color=JET_COLOR_MAP[0],
-        )
-
-        # Initialize empty containers, part and full time wages and pensions
-        gross_pt_wages = np.zeros_like(exp_levels, dtype=float)
-        after_ssc_pt_wages = np.zeros_like(exp_levels, dtype=float)
-
-        gross_ft_wages = np.zeros_like(exp_levels, dtype=float)
-        after_ssc_ft_wages = np.zeros_like(exp_levels, dtype=float)
-
-        net_pensions = np.zeros_like(exp_levels, dtype=float)
-        gross_pensions = np.zeros_like(exp_levels, dtype=float)
-        for i, exp in enumerate(exp_levels):
-            gross_pt_wages[i] = calculate_gross_labor_income(
-                lagged_choice=2,
-                experience_years=exp,
-                education=edu,
-                sex=0,
-                income_shock=0,
-                options=specs,
-            )
-            after_ssc_pt_wages[i] = calc_labor_income_after_ssc(
-                lagged_choice=2,
-                experience_years=exp,
-                education=edu,
-                sex=0,
-                income_shock=0,
-                options=specs,
+            ax.plot(
+                exp_levels,
+                unemployment_benefits,
+                label="Unemployment benefits",
+                color=JET_COLOR_MAP[0],
             )
 
-            gross_ft_wages[i] = calculate_gross_labor_income(
-                lagged_choice=3,
-                experience_years=exp,
-                education=edu,
-                sex=0,
-                income_shock=0,
-                options=specs,
+            # Initialize empty containers, part and full time wages and pensions
+            gross_pt_wages = np.zeros_like(exp_levels, dtype=float)
+            after_ssc_pt_wages = np.zeros_like(exp_levels, dtype=float)
+
+            gross_ft_wages = np.zeros_like(exp_levels, dtype=float)
+            after_ssc_ft_wages = np.zeros_like(exp_levels, dtype=float)
+
+            net_pensions = np.zeros_like(exp_levels, dtype=float)
+            gross_pensions = np.zeros_like(exp_levels, dtype=float)
+            for i, exp in enumerate(exp_levels):
+                gross_pt_wages[i] = calculate_gross_labor_income(
+                    lagged_choice=2,
+                    experience_years=exp,
+                    education=edu_var,
+                    sex=sex_var,
+                    income_shock=0,
+                    options=specs,
+                )
+                after_ssc_pt_wages[i] = calc_labor_income_after_ssc(
+                    lagged_choice=2,
+                    experience_years=exp,
+                    education=edu_var,
+                    sex=sex_var,
+                    income_shock=0,
+                    options=specs,
+                )
+
+                gross_ft_wages[i] = calculate_gross_labor_income(
+                    lagged_choice=3,
+                    experience_years=exp,
+                    education=edu_var,
+                    sex=sex_var,
+                    income_shock=0,
+                    options=specs,
+                )
+                after_ssc_ft_wages[i] = calc_labor_income_after_ssc(
+                    lagged_choice=3,
+                    experience_years=exp,
+                    education=edu_var,
+                    sex=sex_var,
+                    income_shock=0,
+                    options=specs,
+                )
+
+                gross_pensions[i] = np.maximum(
+                    calc_gross_pension_income(
+                        experience_years=exp,
+                        education=edu_var,
+                        sex=sex_var,
+                        options=specs,
+                    ),
+                    annual_unemployment,
+                )
+
+                net_pensions[i] = np.maximum(
+                    calc_pensions_after_ssc(
+                        experience_years=exp,
+                        education=edu_var,
+                        sex=sex_var,
+                        options=specs,
+                    ),
+                    annual_unemployment,
+                )
+
+            ax.plot(
+                exp_levels,
+                after_ssc_pt_wages,
+                label="Average after ssc pt wage",
+                color=JET_COLOR_MAP[1],
             )
-            after_ssc_ft_wages[i] = calc_labor_income_after_ssc(
-                lagged_choice=3,
-                experience_years=exp,
-                education=edu,
-                income_shock=0,
-                options=specs,
+            ax.plot(
+                exp_levels,
+                gross_pt_wages,
+                label="Average gross pt wage",
+                ls="--",
+                color=JET_COLOR_MAP[1],
             )
 
-            gross_pensions[i] = np.maximum(
-                calc_gross_pension_income(
-                    experience_years=exp, sex=0, education=edu, options=specs
-                ),
-                annual_unemployment,
+            ax.plot(
+                exp_levels,
+                after_ssc_ft_wages,
+                label="Average after ssc ft wage",
+                color=JET_COLOR_MAP[2],
+            )
+            ax.plot(
+                exp_levels,
+                gross_ft_wages,
+                label="Average gross ft wage",
+                ls="--",
+                color=JET_COLOR_MAP[2],
             )
 
-            net_pensions[i] = np.maximum(
-                calc_pensions_after_ssc(
-                    experience_years=exp, sex=0, education=edu, options=specs
-                ),
-                annual_unemployment,
+            ax.plot(
+                exp_levels,
+                net_pensions,
+                label="Average after ssc pension",
+                color=JET_COLOR_MAP[3],
+            )
+            ax.plot(
+                exp_levels,
+                gross_pensions,
+                label="Average gross pension",
+                ls="--",
+                color=JET_COLOR_MAP[3],
             )
 
-        ax.plot(
-            exp_levels,
-            after_ssc_pt_wages,
-            label="Average after ssc pt wage",
-            color=JET_COLOR_MAP[1],
-        )
-        ax.plot(
-            exp_levels,
-            gross_pt_wages,
-            label="Average gross pt wage",
-            ls="--",
-            color=JET_COLOR_MAP[1],
-        )
-
-        ax.plot(
-            exp_levels,
-            after_ssc_ft_wages,
-            label="Average after ssc ft wage",
-            color=JET_COLOR_MAP[2],
-        )
-        ax.plot(
-            exp_levels,
-            gross_ft_wages,
-            label="Average gross ft wage",
-            ls="--",
-            color=JET_COLOR_MAP[2],
-        )
-
-        ax.plot(
-            exp_levels,
-            net_pensions,
-            label="Average after ssc pension",
-            color=JET_COLOR_MAP[3],
-        )
-        ax.plot(
-            exp_levels,
-            gross_pensions,
-            label="Average gross pension",
-            ls="--",
-            color=JET_COLOR_MAP[3],
-        )
-
-        ax.legend(loc="upper left")
-        ax.set_xlabel("Experience")
-        ax.set_ylabel("Average income")
-        ax.set_title(f"{labels[edu]}")
+            ax.legend(loc="upper left")
+            ax.set_xlabel("Experience")
+            ax.set_ylabel("Average income")
+            ax.set_title(f"{labels[edu]}")
 
     fig.suptitle("After sssc income")
     fig.tight_layout()

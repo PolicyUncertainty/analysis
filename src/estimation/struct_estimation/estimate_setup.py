@@ -336,12 +336,22 @@ def get_gendered_params(params_to_estimate_names, append):
     job_finding_params = [
         param_name for param_name in gender_params if "job_finding_" in param_name
     ]
-    disutil_params_ft_params += [f"disutil_unemployed{append}"]
-    params = {
-        "all": gender_params,
-        "full-time": disutil_params_ft_params,
-        "part-time": disutil_params_pt_params,
-        "job-finding": job_finding_params,
-    }
 
+    # We do it this weird way for printing order
+    params = {}
+    if f"disutil_unemployed{append}" in disutil_params:
+        params["unemployed"] = [f"disutil_unemployed{append}"]
+
+    if len(disutil_params_ft_params) > 0:
+        params["full-time"] = disutil_params_ft_params
+
+    if len(disutil_params_pt_params) > 0:
+        params["part-time"] = disutil_params_pt_params
+
+    if len(job_finding_params) > 0:
+        params["job_finding"] = job_finding_params
+
+    # We drop these directly afterwards
+    if len(gender_params) > 0:
+        params["all"] = gender_params
     return params

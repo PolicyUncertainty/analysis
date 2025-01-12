@@ -12,6 +12,7 @@ from model_code.stochastic_processes.informed_state_transition import (
 )
 from model_code.stochastic_processes.job_offers import job_offer_process_transition
 from model_code.stochastic_processes.partner_transitions import partner_transition
+from model_code.taste_shocks import shock_function_dict
 from model_code.utility.bequest_utility import create_final_period_utility_functions
 from model_code.utility.utility_functions import create_utility_functions
 from model_code.wealth_and_budget.budget_equation import budget_constraint
@@ -107,6 +108,7 @@ def specify_model(
             utility_functions=create_utility_functions(),
             utility_functions_final_period=create_final_period_utility_functions(),
             budget_constraint=budget_constraint,
+            shock_functions=shock_function_dict(),
             path=model_path,
         )
 
@@ -117,6 +119,7 @@ def specify_model(
             utility_functions=create_utility_functions(),
             utility_functions_final_period=create_final_period_utility_functions(),
             budget_constraint=budget_constraint,
+            shock_functions=shock_function_dict(),
             path=model_path,
         )
 

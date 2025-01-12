@@ -300,9 +300,18 @@ def generate_print_func(params_to_estimate_names):
     men_params.pop("all")
     women_params.pop("all")
 
+    taste_shock_params = [
+        param_name
+        for param_name in params_to_estimate_names
+        if "taste_shock" in param_name
+    ]
+
     def print_function(params):
         print("Gender neutral parameters:")
         for param_name in neutral_params:
+            print(f"{param_name}: {params[param_name]}")
+        print("\nTaste shock parameters:")
+        for param_name in taste_shock_params:
             print(f"{param_name}: {params[param_name]}")
         print("\nMen model params are:")
         for group_name in men_params.keys():

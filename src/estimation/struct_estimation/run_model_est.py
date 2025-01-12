@@ -13,7 +13,6 @@ params_to_estimate_names = [
     "disutil_unemployed_men",
     "disutil_ft_work_good_men",
     "disutil_ft_work_bad_men",
-    "disutil_unemployed_men",
     "disutil_pt_work_good_women",
     "disutil_ft_work_good_women",
     "disutil_ft_work_bad_women",
@@ -27,7 +26,8 @@ params_to_estimate_names = [
     # "disutil_not_retired_good",
     # "disutil_working_good",
     # "bequest_scale",
-    "lambda",
+    "taste_shock_scale_men",
+    "taste_shock_scale_women",
     "job_finding_logit_const_men",
     "job_finding_logit_age_men",
     "job_finding_logit_high_educ_men",
@@ -37,20 +37,19 @@ params_to_estimate_names = [
 ]
 
 last_estimate = pkl.load(open(paths_dict["est_results"] + "est_params_pete.pkl", "rb"))
-last_estimate["disutil_children_ft_work_low"] = last_estimate[
-    "disutil_children_ft_work"
-]
-last_estimate["disutil_children_ft_work_high"] = last_estimate[
-    "disutil_children_ft_work"
-]
-last_estimate.pop("disutil_children_ft_work")
+last_estimate["taste_shock_scale_men"] = 0.3
+last_estimate["taste_shock_scale_women"] = last_estimate["lambda"]
+del last_estimate["lambda"]
+del last_estimate["disutil_unemployed_men"]
+del last_estimate["disutil_ft_work_good_men"]
+del last_estimate["disutil_ft_work_bad_men"]
 
 estimation_results = estimate_model(
     paths_dict,
     params_to_estimate_names=params_to_estimate_names,
-    file_append="pete",
+    file_append="taste",
     slope_disutil_method=False,
-    load_model=True,
+    load_model=False,
     last_estimate=last_estimate,
     save_results=False,
 )

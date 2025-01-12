@@ -13,6 +13,7 @@ from dcegm.wealth_correction import adjust_observed_wealth
 from estimation.struct_estimation.start_params_and_bounds.set_start_params import (
     load_and_set_start_params,
 )
+from estimation.struct_estimation.std_errors import calc_and_save_standard_errors
 from model_code.specify_model import specify_model
 from model_code.stochastic_processes.policy_states_belief import (
     expected_SRA_probs_estimation,
@@ -92,12 +93,21 @@ def estimate_model(
         result, open(path_dict["est_results"] + f"em_result_{file_append}.pkl", "wb")
     )
     start_params_all.update(result.params)
+
     pickle.dump(
         start_params_all,
         open(path_dict["est_results"] + f"est_params_{file_append}.pkl", "wb"),
     )
 
-    return result
+    calc_and_save_standard_errors(
+        path_dict=path_dict,
+        ll_func=est_class.ll_func,
+        final_params_all=start_params_all,
+        final_params_est=result.params,
+        params_to_estimate_names=params_to_estimate_names,
+        weights=est_class.weights,
+        file_append=file_append,
+    )
 
 
 class est_class_from_paths:

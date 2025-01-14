@@ -287,19 +287,19 @@ def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):
 
 def generate_print_func(params_to_estimate_names):
     men_params = get_gendered_params(params_to_estimate_names, "_men")
-    women_params = get_gendered_params(params_to_estimate_names, "_women")
+    # women_params = get_gendered_params(params_to_estimate_names, "_women")
 
-    for param in ["disutil_children_ft_work_low", "disutil_children_ft_work_high"]:
-        if param in params_to_estimate_names:
-            women_params["all"] += [param]
-            women_params["full-time"] += [param]
+    # for param in ["disutil_children_ft_work_low", "disutil_children_ft_work_high"]:
+    #     if param in params_to_estimate_names:
+    #         women_params["all"] += [param]
+    #         women_params["full-time"] += [param]
     neutral_params = [
         param_name
         for param_name in params_to_estimate_names
-        if param_name not in men_params["all"] + women_params["all"]
+        if param_name not in men_params["all"]
     ]
     men_params.pop("all")
-    women_params.pop("all")
+    # women_params.pop("all")
 
     taste_shock_params = [
         param_name

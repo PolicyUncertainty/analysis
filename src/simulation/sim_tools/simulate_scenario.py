@@ -98,9 +98,6 @@ def simulate_scenario(
     df["total_income"] = (
         df.groupby("agent")["wealth_at_beginning"].shift(-1) - df["savings"]
     )
-    df["total_income"] = (
-        df.groupby("agent")["wealth_at_beginning"].shift(-1) - df["savings"]
-    )
     df["savings_dec"] = df["total_income"] - df["consumption"]
     df["age"] = (
         df.index.get_level_values("period") + options["model_params"]["start_age"]

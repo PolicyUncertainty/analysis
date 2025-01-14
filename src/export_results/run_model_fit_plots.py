@@ -22,43 +22,29 @@ elif kind_string == "post":
 else:
     raise ValueError("Either pre or post estimation plots.")
 
-show_any_plots = input("Show any plots? (y/n): ") == "y"
+which_plot = input("Which plot to show? ([a]ll/[f]it]/[s]im): ")
+
 
 # %%##########################################
 # # Model fit plots
 # ##########################################
-if show_any_plots:
-    show_model_fit_plots = input("Show model fit plots? (y/n): ") == "y"
-else:
-    show_model_fit_plots = False
-from export_results.figures.observed_model_fit import observed_model_fit
 
-observed_model_fit(path_dict, specs, params)
-if show_model_fit_plots:
+if which_plot in ["a", "f"]:
+    from export_results.figures.observed_model_fit import observed_model_fit
+
+    observed_model_fit(path_dict, specs, params)
     plt.show()
 plt.close("all")
 
 ##########################################
 # Model fit plots simulated
 ##########################################
-if show_any_plots:
-    show_sim_plots = input("Show simulated model fit plots? (y/n): ") == "y"
-else:
-    show_sim_plots = False
 
-from export_results.figures.simulated_model_fit import (
-    plot_average_wealth,
-    # plot_choice_shares,
-    # plot_choice_shares_single,
-    # illustrate_simulated_data,
-)
+if which_plot in ["a", "s"]:
+    from export_results.figures.simulated_model_fit import plot_average_wealth
 
-plot_average_wealth(path_dict)
-# plot_choice_shares(path_dict)
-# plot_choice_shares_single(path_dict)
-# illustrate_simulated_data(path_dict)
-if show_sim_plots:
+    plot_average_wealth(path_dict)
     plt.show()
-plt.close("all")
+
 
 # %%

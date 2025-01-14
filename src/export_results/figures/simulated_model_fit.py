@@ -1,10 +1,11 @@
 import pickle
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import yaml
 from estimation.struct_estimation.estimate_setup import load_and_prep_data
-from model_code.specify_model import specify_and_solve_model
+from model_code.specify_model import specify_model
 from model_code.stochastic_processes.policy_states_belief import (
     expected_SRA_probs_estimation,
 )
@@ -19,36 +20,52 @@ def plot_average_wealth(paths):
     ).reset_index()
     specs = yaml.safe_load(open(paths["specs"]))
 
-    params = pickle.load(open(paths["est_results"] + "est_params.pkl", "rb"))
-    est_model, model, params = specify_and_solve_model(
+    params = pickle.load(open(paths["est_results"] + "est_params_pete.pkl", "rb"))
+    # Generate model_specs
+    model, params = specify_model(
         path_dict=paths,
-        params=params,
         update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
         policy_state_trans_func=expected_SRA_probs_estimation,
-        file_append="subj",
+        params=params,
         load_model=True,
-        load_solution=True,
+        model_type="solution",
     )
     data_decision, _ = load_and_prep_data(paths, params, model, drop_retirees=False)
     data_decision["age"] = data_decision["period"] + specs["start_age"]
 
     data_sim["age"] = data_sim["period"] + specs["start_age"]
 
-    average_wealth_sim = data_sim.groupby("age")["wealth_at_beginning"].median()
-    average_wealth_obs = data_decision.groupby("age")["adjusted_wealth"].median()
-    ages = data_sim["age"].unique()
-    n_ages = len(ages)
+    for sex in range(2):
+        for edu in range(2):
+            mask_sim = (data_sim["sex"] == sex) & (data_sim["education"] == edu)
+            data_sim_sex = data_sim[mask_sim]
+            mask_obs = (data_decision["sex"] == sex) & (
+                data_decision["education"] == edu
+            )
+            data_decision_sex = data_decision[mask_obs]
+            average_wealth_sim = data_sim_sex.groupby("age")["total_income"].median()
+            average_wealth_obs = data_decision_sex.groupby("age")[
+                "adjusted_wealth"
+            ].median()
 
-    fig, ax = plt.subplots()
-    ax.plot(ages, average_wealth_sim, label="Median simulated wealth by age")
-    ax.plot(
-        ages,
-        average_wealth_obs[:n_ages],
-        label="Median observed wealth by age",
-        ls="--",
-    )
-    ax.legend()
-    fig.savefig(paths["plots"] + "average_wealth.png", transparent=True, dpi=300)
+            ages = np.arange(specs["start_age"], specs["end_age"] + 1)
+            average_wealth_obs_container = pd.DataFrame(
+                index=ages, columns=["adjusted_wealth"], data=0, dtype=float
+            )
+            average_wealth_obs_container.update(average_wealth_obs)
+
+            fig, ax = plt.subplots()
+            ax.plot(ages, average_wealth_sim, label="Median simulated wealth by age")
+            # ax.plot(
+            #     ages,
+            #     average_wealth_obs_container,
+            #     label="Median observed wealth by age",
+            #     ls="--",
+            # )
+            ax.legend()
+            fig.savefig(
+                paths["plots"] + "average_wealth.png", transparent=True, dpi=300
+            )
 
 
 def plot_choice_shares_single(paths):

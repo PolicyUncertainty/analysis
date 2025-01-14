@@ -108,7 +108,7 @@ def specify_model(
             utility_functions=create_utility_functions(),
             utility_functions_final_period=create_final_period_utility_functions(),
             budget_constraint=budget_constraint,
-            shock_functions=shock_function_dict(),
+            # shock_functions=shock_function_dict(),
             path=model_path,
         )
 
@@ -119,7 +119,7 @@ def specify_model(
             utility_functions=create_utility_functions(),
             utility_functions_final_period=create_final_period_utility_functions(),
             budget_constraint=budget_constraint,
-            shock_functions=shock_function_dict(),
+            # shock_functions=shock_function_dict(),
             path=model_path,
         )
 

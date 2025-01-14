@@ -39,7 +39,7 @@ def estimate_model(
     # Load start params and bounds
     start_params_all = load_and_set_start_params(path_dict)
 
-    # print_function(last_estimate)
+    print_function(last_estimate)
 
     # # Assign start params from before
     if last_estimate is not None:
@@ -310,9 +310,9 @@ def generate_print_func(params_to_estimate_names):
         print("Gender neutral parameters:")
         for param_name in neutral_params:
             print(f"{param_name}: {params[param_name]}")
-        print("\nTaste shock parameters:")
-        for param_name in taste_shock_params:
-            print(f"{param_name}: {params[param_name]}")
+        # print("\nTaste shock parameters:")
+        # for param_name in taste_shock_params:
+        #     print(f"{param_name}: {params[param_name]}")
         print("\nMen model params are:")
         for group_name in men_params.keys():
             print(f"Group: {group_name}")

@@ -26,8 +26,9 @@ params_to_estimate_names = [
     # "disutil_not_retired_good",
     # "disutil_working_good",
     # "bequest_scale",
-    "taste_shock_scale_men",
-    "taste_shock_scale_women",
+    # "taste_shock_scale_men",
+    # "taste_shock_scale_women",
+    "lambda",
     "job_finding_logit_const_men",
     "job_finding_logit_age_men",
     "job_finding_logit_high_educ_men",
@@ -37,17 +38,17 @@ params_to_estimate_names = [
 ]
 
 last_estimate = pkl.load(open(paths_dict["est_results"] + "est_params_pete.pkl", "rb"))
-last_estimate["taste_shock_scale_men"] = 0.3
-last_estimate["taste_shock_scale_women"] = last_estimate["lambda"]
-del last_estimate["lambda"]
-del last_estimate["disutil_unemployed_men"]
-del last_estimate["disutil_ft_work_good_men"]
-del last_estimate["disutil_ft_work_bad_men"]
+# last_estimate["taste_shock_scale_men"] = 0.3
+# last_estimate["taste_shock_scale_women"] = last_estimate["lambda"]
+# del last_estimate["lambda"]
+# del last_estimate["disutil_unemployed_men"]
+# del last_estimate["disutil_ft_work_good_men"]
+# del last_estimate["disutil_ft_work_bad_men"]
 
 estimation_results = estimate_model(
     paths_dict,
     params_to_estimate_names=params_to_estimate_names,
-    file_append="taste",
+    file_append="pete",
     slope_disutil_method=False,
     load_model=True,
     last_estimate=last_estimate,

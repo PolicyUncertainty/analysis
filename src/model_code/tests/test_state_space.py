@@ -95,20 +95,11 @@ def test_choice_set_over_63_under_72(
             # old enough to retire. Check if job is offered
             if job_offer == 1:
                 if sex == 0:
-                    if SRA <= age:
-                        assert (choice_set == [0, 3]).all()
-                    else:
-                        assert (choice_set == [0, 1, 3]).all()
+                    assert (choice_set == [0, 1, 3]).all()
                 else:
-                    if SRA <= age:
-                        assert (choice_set == [0, 2, 3]).all()
-                    else:
-                        assert (choice_set == [0, 1, 2, 3]).all()
+                    assert (choice_set == [0, 1, 2, 3]).all()
             else:
-                if SRA <= age:
-                    assert (choice_set == [0]).all()
-                else:
-                    assert (choice_set == [0, 1]).all()
+                assert (choice_set == [0, 1]).all()
 
 
 PERIOD_GRID = np.linspace(47, 55, 1)

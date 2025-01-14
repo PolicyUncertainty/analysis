@@ -37,20 +37,20 @@ params_to_estimate_names = [
     # "job_finding_logit_high_educ_women",
 ]
 
-last_estimate = pkl.load(open(paths_dict["est_results"] + "est_params_pete.pkl", "rb"))
-pop_list = [
-    "job_finding_logit_const_men",
-    "job_finding_logit_age_men",
-    "job_finding_logit_high_educ_men",
-    "job_finding_logit_const_women",
-    "job_finding_logit_age_women",
-    "job_finding_logit_high_educ_women",
-]
-for pop in pop_list:
-    last_estimate.pop(pop)
-
-last_estimate.pop("disutil_unemployed_men")
-last_estimate.pop("disutil_unemployed_women")
+# last_estimate = pkl.load(open(paths_dict["est_results"] + "est_params_pete.pkl", "rb"))
+# pop_list = [
+#     "job_finding_logit_const_men",
+#     "job_finding_logit_age_men",
+#     "job_finding_logit_high_educ_men",
+#     "job_finding_logit_const_women",
+#     "job_finding_logit_age_women",
+#     "job_finding_logit_high_educ_women",
+# ]
+# for pop in pop_list:
+#     last_estimate.pop(pop)
+#
+# last_estimate.pop("disutil_unemployed_men")
+# last_estimate.pop("disutil_unemployed_women")
 
 
 estimation_results = estimate_model(
@@ -59,7 +59,7 @@ estimation_results = estimate_model(
     file_append="pete",
     slope_disutil_method=False,
     load_model=True,
-    last_estimate=last_estimate,
+    last_estimate=None,
     save_results=False,
 )
 print(estimation_results)

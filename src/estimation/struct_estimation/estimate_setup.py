@@ -324,16 +324,16 @@ def generate_print_func(params_to_estimate_names):
                     )
                 elif "job_finding" in param:
                     print(f"{param}: {params[param]}")
-        print("\nParameters of the women model are:")
-        for group_name in women_params.keys():
-            print(f"Group: {group_name}")
-            for param in women_params[group_name]:
-                if "disutil" in param:
-                    print(
-                        f"{param}: {params[param]} and in probability: {np.exp(-params[param])}"
-                    )
-                elif "job_finding" in param:
-                    print(f"{param}: {params[param]}")
+        # print("\nParameters of the women model are:")
+        # for group_name in women_params.keys():
+        #     print(f"Group: {group_name}")
+        #     for param in women_params[group_name]:
+        #         if "disutil" in param:
+        #             print(
+        #                 f"{param}: {params[param]} and in probability: {np.exp(-params[param])}"
+        #             )
+        #         elif "job_finding" in param:
+        #             print(f"{param}: {params[param]}")
 
     return print_function
 

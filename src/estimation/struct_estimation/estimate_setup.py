@@ -241,6 +241,7 @@ def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):
     specs = generate_derived_and_data_derived_specs(path_dict)
     # Load data
     data_decision = pd.read_pickle(path_dict["struct_est_sample"])
+    data_decision = data_decision[data_decision["sex"] == 0]
     # We need to filter observations in period 0 because of job offer weighting from last period
     data_decision = data_decision[data_decision["period"] > 0]
     # Also already retired individuals hold no identification

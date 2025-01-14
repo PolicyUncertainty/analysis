@@ -12,6 +12,7 @@ from model_code.stochastic_processes.policy_states_belief import (
 from model_code.stochastic_processes.policy_states_belief import (
     update_specs_exp_ret_age_trans_mat,
 )
+from specs.derive_specs import read_and_derive_specs
 
 
 def plot_average_wealth(paths):
@@ -43,29 +44,46 @@ def plot_average_wealth(paths):
                 data_decision["education"] == edu
             )
             data_decision_sex = data_decision[mask_obs]
-            average_wealth_sim = data_sim_sex.groupby("age")["total_income"].median()
+
+            # average_wealth_sim = data_sim_sex.groupby("age")["wealth_at_beginning"].median()
+            # average_wealth_obs = data_decision_sex.groupby("age")[
+            #     "adjusted_wealth"
+            # ].median()
+            average_wealth_sim = data_sim_sex.groupby("age")["choice"].value_counts(
+                normalize=True
+            )
             average_wealth_obs = data_decision_sex.groupby("age")[
-                "adjusted_wealth"
-            ].median()
-
+                "choice"
+            ].value_counts(normalize=True)
             ages = np.arange(specs["start_age"], specs["end_age"] + 1)
-            average_wealth_obs_container = pd.DataFrame(
-                index=ages, columns=["adjusted_wealth"], data=0, dtype=float
-            )
-            average_wealth_obs_container.update(average_wealth_obs)
 
-            fig, ax = plt.subplots()
-            ax.plot(ages, average_wealth_sim, label="Median simulated wealth by age")
-            # ax.plot(
-            #     ages,
-            #     average_wealth_obs_container,
-            #     label="Median observed wealth by age",
-            #     ls="--",
-            # )
-            ax.legend()
-            fig.savefig(
-                paths["plots"] + "average_wealth.png", transparent=True, dpi=300
-            )
+            if sex == 0:
+                choice_range = [0, 1, 3]
+            else:
+                choice_range = [0, 1, 2, 3]
+            for choice in choice_range:
+                average_wealth_obs_container = pd.Series(
+                    index=ages, name="proportion", data=0, dtype=float
+                )
+                average_wealth_obs_container.update(
+                    average_wealth_obs.loc[(slice(None), choice)]
+                )
+
+                fig, ax = plt.subplots()
+                # ax.plot(ages, average_wealth_sim, label=f"Median simulated wealth by age")
+                ax.plot(
+                    average_wealth_sim.loc[(slice(None), choice)], label=f"{choice}"
+                )
+                ax.plot(
+                    # ages,
+                    average_wealth_obs_container,
+                    label="Median observed wealth by age",
+                    ls="--",
+                )
+                ax.legend()
+                fig.savefig(
+                    paths["plots"] + "average_wealth.png", transparent=True, dpi=300
+                )
 
 
 def plot_choice_shares_single(paths):
@@ -81,20 +99,33 @@ def plot_choice_shares_single(paths):
     data_decision["age"] = data_decision["period"] + specs["start_age"]
     data_sim["age"] = data_sim["period"] + specs["start_age"]
 
-    choice_shares_sim = (
-        data_sim.groupby(["age"])["choice"].value_counts(normalize=True).unstack()
-    )
-    choice_shares_obs = (
-        data_decision.groupby(["age"])["choice"].value_counts(normalize=True).unstack()
-    )
+    for sex in range(2):
+        data_sim_restr = data_sim[data_sim["sex"] == sex]
+        data_decision_restr = data_decision[data_decision["sex"] == sex]
 
-    fig, axes = plt.subplots(1, 3)
-    for choice, ax in enumerate(axes):
-        choice_shares_sim[choice].plot(ax=ax, label="Simulated")
-        choice_shares_obs[choice].plot(ax=ax, label="Observed", ls="--")
-        ax.set_title(f"Choice {choice}")
-        ax.set_ylim([0, 1])
-        ax.legend()
+        choice_shares_sim = (
+            data_sim_restr.groupby(["age"])["choice"]
+            .value_counts(normalize=True)
+            .unstack()
+        )
+        choice_shares_obs = (
+            data_decision_restr.groupby(["age"])["choice"]
+            .value_counts(normalize=True)
+            .unstack()
+        )
+
+        if sex == 0:
+            choice_range = [0, 1, 3]
+        else:
+            choice_range = [0, 1, 2, 3]
+        fig, axes = plt.subplots(1, len(choice_range))
+        for i, choice in enumerate(choice_range):
+            ax = axes[i]
+            choice_shares_sim[choice].plot(ax=ax, label=f"Simulated")
+            choice_shares_obs[choice].plot(ax=ax, label="Observed", ls="--")
+            ax.set_title(f"Choice {specs}")
+            ax.set_ylim([0, 1])
+            ax.legend()
 
 
 def plot_choice_shares(paths):
@@ -117,6 +148,39 @@ def plot_choice_shares(paths):
     data_decision.groupby(["age"])["choice"].value_counts(
         normalize=True
     ).unstack().plot(title="Observed choice shares by age", kind="bar", stacked=True)
+
+
+def plot_states(paths, specs):
+    data_sim = pd.read_pickle(
+        paths["intermediate_data"] + "sim_data/data_subj_scale_1.pkl"
+    ).reset_index()
+    data_decision = pd.read_pickle(
+        paths["intermediate_data"] + "structural_estimation_sample.pkl"
+    )
+
+    data_decision["age"] = data_decision["period"] + specs["start_age"]
+    data_sim["age"] = data_sim["period"] + specs["start_age"]
+
+    params = pickle.load(open(paths["est_results"] + "est_params_pete.pkl", "rb"))
+    # Generate model_specs
+    model, params = specify_model(
+        path_dict=paths,
+        update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
+        policy_state_trans_func=expected_SRA_probs_estimation,
+        params=params,
+        load_model=True,
+        model_type="solution",
+    )
+    discrete_state_names = model["model_structure"]["discrete_states_names"]
+
+    for state_name in discrete_state_names:
+        data_decision.groupby(["age"])[state_name].value_counts(
+            normalize=True
+        ).unstack().plot()
+        data_sim.groupby(["age"])[state_name].value_counts(
+            normalize=True
+        ).unstack().plot()
+        plt.show()
 
 
 def illustrate_simulated_data(paths):

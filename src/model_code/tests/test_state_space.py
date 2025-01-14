@@ -46,7 +46,7 @@ def test_choice_set_under_63(period, sex, lagged_choice, job_offer):
         assert (choice_set == [1]).all()
 
 
-PERIOD_GRID = np.linspace(10, 30, 3)
+PERIOD_GRID = np.linspace(25, 42, 3)
 FULL_CHOICE_SET = np.array([0, 1, 2, 3])
 POLICY_GRID = np.linspace(0, 9, 1)
 JOB_OFFER_GRID = np.array([0, 1], dtype=int)
@@ -95,11 +95,20 @@ def test_choice_set_over_63_under_72(
             # old enough to retire. Check if job is offered
             if job_offer == 1:
                 if sex == 0:
-                    assert (choice_set == [0, 1, 3]).all()
+                    if SRA <= age:
+                        assert (choice_set == [0, 3]).all()
+                    else:
+                        assert (choice_set == [0, 1, 3]).all()
                 else:
-                    assert (choice_set == [0, 1, 2, 3]).all()
+                    if SRA <= age:
+                        assert (choice_set == [0, 2, 3]).all()
+                    else:
+                        assert (choice_set == [0, 1, 2, 3]).all()
             else:
-                assert (choice_set == [0, 1]).all()
+                if SRA <= age:
+                    assert (choice_set == [0]).all()
+                else:
+                    assert (choice_set == [0, 1]).all()
 
 
 PERIOD_GRID = np.linspace(47, 55, 1)

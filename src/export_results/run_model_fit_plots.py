@@ -41,10 +41,18 @@ plt.close("all")
 ##########################################
 
 if which_plot in ["a", "s"]:
-    from export_results.figures.simulated_model_fit import plot_average_wealth
+    from export_results.figures.simulated_model_fit import (
+        plot_states,
+        plot_average_wealth,
+        plot_choice_shares_single,
+    )
 
-    plot_average_wealth(path_dict)
+    plot_states(path_dict, specs)
+    plot_choice_shares_single(path_dict)
     plt.show()
+    #
+    # plot_average_wealth(path_dict)
+    # plt.show()
 
 
 # %%

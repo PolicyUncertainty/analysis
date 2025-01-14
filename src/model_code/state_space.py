@@ -137,12 +137,21 @@ def state_specific_choice_set(
         return np.array([0])
     else:
         if job_offer == 0:
-            return np.array([0, 1])
-        else:
-            if sex == 0:
-                return np.array([0, 1, 3])
+            if age >= SRA_pol_state:
+                return np.array([0])
             else:
-                return np.array([0, 1, 2, 3])
+                return np.array([0, 1])
+        else:
+            if age >= SRA_pol_state:
+                if sex == 0:
+                    return np.array([0, 3])
+                else:
+                    return np.array([0, 2, 3])
+            else:
+                if sex == 0:
+                    return np.array([0, 1, 3])
+                else:
+                    return np.array([0, 1, 2, 3])
 
 
 def apply_retirement_constraint_for_SRA(SRA, options):

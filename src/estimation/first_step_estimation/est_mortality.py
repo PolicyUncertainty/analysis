@@ -57,29 +57,16 @@ def estimate_mortality(paths_dict, specs):
         filtered_df = df[df["sex"] == sex]
         filtered_start_df = start_df[start_df["sex"] == sex]
 
-        global Iteration
-        Iteration = 0
-
-        # Define start parameters
-        initial_params = pd.DataFrame(
-            data=[
-                [0.0, -np.inf, np.inf],
-                [0.1, 1e-8, np.inf],  # age coefficient is positive
-                [0.0, -np.inf, np.inf],
-                [0.0, -np.inf, np.inf],
-                [0.0, -np.inf, np.inf],
-                [0.0, -np.inf, np.inf],
-            ],
-            columns=["value", "lower_bound", "upper_bound"],
-            index=[
-                "intercept",
-                "age",
-                f"{specs['health_labels'][1]} {specs['education_labels'][1]}",  # good health, high education
-                f"{specs['health_labels'][1]} {specs['education_labels'][0]}",  # good health, low education
-                f"{specs['health_labels'][0]} {specs['education_labels'][1]}",  # bad health, high education
-                f"{specs['health_labels'][0]} {specs['education_labels'][0]}",  # bad health, low education
-            ],
-        )
+        # Initial parameters
+        initial_params_data = {
+            "intercept": {"value": -13, "lower_bound": -np.inf, "upper_bound": np.inf, "soft_lower_bound": -15.0, "soft_upper_bound": 15.0},
+            "age": {"value": 0.1, "lower_bound": 1e-8, "upper_bound": np.inf, "soft_lower_bound": 0.0001, "soft_upper_bound": 1.0},
+            f"{specs['health_labels'][1]} {specs['education_labels'][1]}": {"value": -0.4, "lower_bound": -np.inf, "upper_bound": np.inf, "soft_lower_bound": -2.5, "soft_upper_bound": 2.5},
+            f"{specs['health_labels'][1]} {specs['education_labels'][0]}": {"value": -0.3, "lower_bound": -np.inf, "upper_bound": np.inf, "soft_lower_bound": -2.5, "soft_upper_bound": 2.5},
+            f"{specs['health_labels'][0]} {specs['education_labels'][1]}": {"value": 0.0, "lower_bound": -np.inf, "upper_bound": np.inf, "soft_lower_bound": -2.5, "soft_upper_bound": 2.5},
+            f"{specs['health_labels'][0]} {specs['education_labels'][0]}": {"value": 0.2, "lower_bound": -np.inf, "upper_bound": np.inf, "soft_lower_bound": -2.5, "soft_upper_bound": 2.5},
+        }
+        initial_params = pd.DataFrame.from_dict(initial_params_data, orient="index")
 
         # Estimate parameters
         res = om.maximize(
@@ -87,6 +74,8 @@ def estimate_mortality(paths_dict, specs):
             params=initial_params,
             algorithm="scipy_lbfgsb",
             fun_kwargs={"data": filtered_df, "start_data": filtered_start_df},
+            numdiff_options=om.NumdiffOptions(n_cores=4),
+            multistart=om.MultistartOptions(n_samples=100, seed=0, n_cores=4),
         )
 
         # terminal log the results
@@ -184,28 +173,15 @@ def loglike(params, data, start_data):
 
     params: pd.DataFrame
         DataFrame with the parameters.
-    df: pd.DataFrame
+    data: pd.DataFrame
         DataFrame with the data.
-    param_names: list
-        List with the parameter names. (includes the intercept at index 0)
+    data: pd.DataFrame
+        DataFrame with the start data.
+        
 
     """
 
     event = data["death event"]
     death = event.astype(bool)
 
-    
-    loglike = log_density_function(data[death], params).sum() + log_survival_function(data[~death], params).sum() - log_survival_function(start_data, params).sum()
-    
-
-    # show progress every 20 iterations
-    globals()["Iteration"] += 1
-    if globals()["Iteration"] % 20 == 0:
-        print(
-            "Iteration:",
-            globals()["Iteration"],
-            "Total contributions:",
-            loglike,
-        )
-
-    return loglike
+    return log_density_function(data[death], params).sum() + log_survival_function(data[~death], params).sum() - log_survival_function(start_data, params).sum()

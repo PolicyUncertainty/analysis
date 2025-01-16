@@ -35,10 +35,13 @@ def generate_start_states(path_dict, params, model, n_agents, seed):
     sex_agents = np.array([], np.uint8)
     education_agents = np.array([], np.uint8)
     for sex_var in range(specs["n_sexes"]):
-        if sex_var == 0:
-            n_agents_sex = n_agents - n_agents // 2
+        if specs["n_sexes"] > 1:
+            if sex_var == 0:
+                n_agents_sex = n_agents - n_agents // 2
+            else:
+                n_agents_sex = n_agents // 2
         else:
-            n_agents_sex = n_agents // 2
+            n_agents_sex = n_agents
 
         sex_vars = np.ones(n_agents_sex, np.uint8) * sex_var
         sex_agents = np.append(sex_agents, sex_vars)

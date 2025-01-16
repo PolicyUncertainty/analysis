@@ -51,11 +51,10 @@ data_sim = solve_and_simulate_scenario(
     simulate_policy_trans_func=realized_policy_step_function,
     solution_exists=True,
     file_append_sol="pete",
-    sol_model_exists=False,
-    sim_model_exists=False,
+    sol_model_exists=True,
+    sim_model_exists=True,
 )
 data_sim.to_pickle(path_dict["intermediate_data"] + "sim_data/data_subj_scale_1.pkl")
-breakpoint()
 
 del data_sim
 data_sim = solve_and_simulate_scenario(

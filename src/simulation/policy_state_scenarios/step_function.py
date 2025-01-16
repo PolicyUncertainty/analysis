@@ -15,6 +15,7 @@ def realized_policy_step_function(policy_state, period, lagged_choice, choice, o
 
     # Check if the current period is a policy step period
     step_period = jnp.isin(period, options["policy_step_periods"])
+
     # Check if retirement is choosen
     retirement_bool = choice == 0
     # If retirement is choosen the transition vector is a zero vector with a one at the
@@ -22,14 +23,17 @@ def realized_policy_step_function(policy_state, period, lagged_choice, choice, o
     # vector has probability 1 of increase in policy state. Retirement superseeds the
     # step period
     id_next_period = step_period * (policy_state + 1) + (1 - step_period) * policy_state
+
     id_next_period = (
         retirement_bool * policy_state + (1 - retirement_bool) * id_next_period
     )
 
     # If the individual is already retired, the policy state moves to (or stays in)
     # the degenrate state
-    already_retirement_bool = lagged_choice == 0
     degenerate_state_id = jnp.array(options["n_policy_states"] - 1, dtype=jnp.uint8)
+    already_retirement_bool = (lagged_choice == 0) | (
+        policy_state == degenerate_state_id
+    )
 
     id_next_period = jax.lax.select(
         already_retirement_bool, degenerate_state_id, id_next_period
@@ -49,12 +53,12 @@ def create_update_function_for_scale(path_dict, scale):
 
 def create_update_function_for_slope(slope):
     def update_specs_for_step_function_with_slope(specs, path_dict):
-        return update_specs_step_function_with_scale(specs, slope)
+        return update_specs_step_function_with_slope(specs, slope)
 
     return update_specs_for_step_function_with_slope
 
 
-def update_specs_step_function_with_scale(specs, slope):
+def update_specs_step_function_with_slope(specs, slope):
     # Generate policy state steps for individuals who start in 0. First calculate the
     # per year expected increase in policy state
     life_span = specs["end_age"] - specs["start_age"] + 1

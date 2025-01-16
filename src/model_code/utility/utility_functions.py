@@ -1,5 +1,6 @@
 import jax
 import jax.numpy as jnp
+from model_code.utility.bequest_utility import utility_final_consume_all
 
 
 def create_utility_functions():
@@ -8,6 +9,35 @@ def create_utility_functions():
         "inverse_marginal_utility": inverse_marginal,
         "marginal_utility": marg_utility,
     }
+
+
+def create_utility_functions_sim():
+    return {
+        "utility": utility_func_sim,
+    }
+
+
+def utility_func_sim(
+    consumption, sex, partner_state, education, health, period, choice, params, options
+):
+    utility_alive = utility_func(
+        consumption=consumption,
+        sex=sex,
+        partner_state=partner_state,
+        education=education,
+        health=health,
+        period=period,
+        choice=choice,
+        params=params,
+        options=options,
+    )
+    utility_death = utility_final_consume_all(
+        wealth=consumption,
+        params=params,
+    )
+    death_bool = health == 2
+    utility = jax.lax.select(death_bool, utility_death, utility_alive)
+    return utility
 
 
 def utility_func(

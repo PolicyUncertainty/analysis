@@ -47,8 +47,8 @@ if which_plot in ["a", "s"]:
         plot_choice_shares_single,
     )
 
-    plot_states(path_dict, specs)
-    plot_choice_shares_single(path_dict)
+    # plot_states(path_dict, specs)
+    plot_choice_shares_single(path_dict, specs)
     plt.show()
     #
     # plot_average_wealth(path_dict)

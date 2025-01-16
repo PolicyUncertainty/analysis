@@ -19,7 +19,7 @@ def plot_average_wealth(paths):
     data_sim = pd.read_pickle(
         paths["intermediate_data"] + "sim_data/data_subj_scale_1.pkl"
     ).reset_index()
-    specs = yaml.safe_load(open(paths["specs"]))
+    specs = read_and_derive_specs(paths)
 
     params = pickle.load(open(paths["est_results"] + "est_params_pete.pkl", "rb"))
     # Generate model_specs
@@ -86,20 +86,19 @@ def plot_average_wealth(paths):
                 )
 
 
-def plot_choice_shares_single(paths):
+def plot_choice_shares_single(paths, specs):
     data_sim = pd.read_pickle(
         paths["intermediate_data"] + "sim_data/data_subj_scale_1.pkl"
     ).reset_index()
     data_decision = pd.read_pickle(
         paths["intermediate_data"] + "structural_estimation_sample.pkl"
     )
-
-    specs = yaml.safe_load(open(paths["specs"]))
+    data_decision = data_decision[data_decision["sex"] == 0]
 
     data_decision["age"] = data_decision["period"] + specs["start_age"]
     data_sim["age"] = data_sim["period"] + specs["start_age"]
 
-    for sex in range(2):
+    for sex in range(specs["n_sexes"]):
         data_sim_restr = data_sim[data_sim["sex"] == sex]
         data_decision_restr = data_decision[data_decision["sex"] == sex]
 

@@ -59,7 +59,7 @@ estimation_results = estimate_model(
     file_append="pete",
     slope_disutil_method=False,
     load_model=True,
-    last_estimate=None,
+    last_estimate=last_estimate,
     save_results=False,
 )
 print(estimation_results)

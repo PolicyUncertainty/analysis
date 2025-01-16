@@ -6,7 +6,7 @@ paths_dict = create_path_dict()
 
 import jax
 import pickle as pkl
-
+import numpy as np
 from estimation.struct_estimation.start_params_and_bounds.set_start_params import (
     load_and_set_start_params,
 )
@@ -16,6 +16,9 @@ jax.config.update("jax_enable_x64", True)
 from set_paths import create_path_dict
 
 path_dict = create_path_dict()
+from specs.derive_specs import generate_derived_and_data_derived_specs
+
+specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
 
 # %%
 # params = pkl.load(open(path_dict["est_params"], "rb"))
@@ -30,13 +33,18 @@ from model_code.stochastic_processes.policy_states_belief import (
 )
 from model_code.specify_model import specify_model
 
-# # Generate model_specs
+# Generate model_specs
 model, params = specify_model(
     path_dict=paths_dict,
     update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
     policy_state_trans_func=expected_SRA_probs_estimation,
     params=params,
     load_model=True,
+)
+from estimation.struct_estimation.estimate_setup import load_and_prep_data
+
+data_decision, states_dict = load_and_prep_data(
+    path_dict, params, model, drop_retirees=True
 )
 
 from model_code.specify_model import specify_and_solve_model
@@ -50,8 +58,6 @@ from model_code.specify_model import specify_and_solve_model
 #     load_model=True,
 #     load_solution=False,
 # )
-
-
 from estimation.struct_estimation.estimate_setup import (
     load_and_prep_data,
     est_class_from_paths,
@@ -67,15 +73,32 @@ est_class = est_class_from_paths(
     save_results=False,
 )
 
-
-data_decision, states_dict = load_and_prep_data(
-    path_dict, params, model, drop_retirees=True
-)
-
 ll_value_individual, model_solution = est_class.ll_func(params)
 
-breakpoint()
 data_decision["ll_contribution"] = -ll_value_individual
+
+from model_code.unobserved_state_weighting import create_unobserved_state_specs
+
+unobserved_state_specs = create_unobserved_state_specs(data_decision, model)
+
+from export_results.figures.observed_model_fit import choice_probs_for_choice_vals
+
+for choice in range(specs["n_choices"]):
+    choice_vals = np.ones_like(data_decision["choice"].values) * choice
+
+    choice_probs_observations = choice_probs_for_choice_vals(
+        choice_vals=choice_vals,
+        states_dict=states_dict,
+        model=model,
+        unobserved_state_specs=unobserved_state_specs,
+        params=params,
+        est_model=model_solution,
+    )
+
+    choice_probs_observations = np.nan_to_num(choice_probs_observations, nan=0.0)
+    data_decision[f"choice_{choice}"] = choice_probs_observations
+
+breakpoint()
 
 
 # df_full = data_decision[data_decision["full_observed_state"]]

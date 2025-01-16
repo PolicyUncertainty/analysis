@@ -147,6 +147,7 @@ class est_class_from_paths:
             load_model=load_model,
             model_type="solution",
         )
+
         # Load data
         data_decision, states_dict = load_and_prep_data(
             path_dict, start_params_all, model, drop_retirees=True

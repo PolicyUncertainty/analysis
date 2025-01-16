@@ -13,77 +13,37 @@ from statsmodels.discrete.discrete_model import MNLogit
 
 def estimate_partner_transitions(paths_dict, specs, load_data):
     """Estimate the partner state transition matrix."""
-    df_trans = create_partner_transition_sample(paths_dict, specs, load_data=load_data)
-    df_trans = df_trans[df_trans["age"] <= 90]
-    df_trans["age_sq"] = df_trans["age"] ** 2
-
-    ages = np.arange(specs["start_age"], specs["end_age"] + 1)
-
-    result_index = pd.MultiIndex.from_product(
-        [
-            specs["sex_labels"],
-            specs["education_labels"],
-            ages,
-            specs["partner_labels"],
-            specs["partner_labels"],
-        ],
-        names=["sex", "education", "age", "partner_state", "lead_partner_state"],
+    transition_data = create_partner_transition_sample(
+        paths_dict, specs, load_data=load_data
     )
 
-    result_df = pd.DataFrame(index=result_index, columns=["probability"], data=0.0)
+    # modify
+    transition_data = transition_data[transition_data["age"] <= specs["end_age"]]
+    transition_data["age_bin"] = np.floor(transition_data["age"] / 10) * 10
 
-    split_age = 45
-    for model_num in range(2):
-        if model_num == 0:
-            df_model = df_trans[df_trans["age"] < split_age]
-            df_model = df_model[df_model["lead_partner_state"] < 2]
-            df_model = df_model[df_model["partner_state"] < 2]
-            start_age = specs["start_age"]
-            end_age = split_age - 1
-            possible_partner_labels = specs["partner_labels"][:2]
-        else:
-            df_model = df_trans[df_trans["age"] >= split_age]
-            start_age = split_age
-            end_age = specs["end_age"]
-            possible_partner_labels = specs["partner_labels"]
+    cov_list = ["sex", "education", "age_bin", "partner_state"]
 
-        for partner_state, partner_state_label in enumerate(possible_partner_labels):
-            for sex_var, sex_label in enumerate(specs["sex_labels"]):
-                for edu_var, edu_label in enumerate(specs["education_labels"]):
-                    mask = (
-                        (df_model["sex"] == sex_var)
-                        & (df_model["education"] == edu_var)
-                        & (df_model["partner_state"] == partner_state)
-                    )
-                    df_restr = df_model[mask]
-                    model = MNLogit(
-                        endog=df_restr["lead_partner_state"],
-                        exog=sm.add_constant(df_restr[["age"]]),
-                    )
-                    result = model.fit()
+    trans_mat_df = transition_data.groupby(cov_list)["lead_partner_state"].value_counts(
+        normalize=True
+    )
 
-                    ages = np.arange(start_age, end_age + 1)
-                    predicted_probs = result.predict(exog=sm.add_constant(ages))
-
-                    for age_idx, age in enumerate(ages):
-                        for lead_partner_state, lead_partner_state_label in enumerate(
-                            possible_partner_labels
-                        ):
-                            result_df.loc[
-                                (
-                                    sex_label,
-                                    edu_label,
-                                    age,
-                                    partner_state_label,
-                                    lead_partner_state_label,
-                                ),
-                                "probability",
-                            ] = predicted_probs[age_idx, lead_partner_state]
+    full_index = pd.MultiIndex.from_product(
+        [
+            range(specs["n_sexes"]),
+            range(specs["n_education_types"]),
+            transition_data["age_bin"].unique().tolist(),
+            range(specs["n_partner_states"]),
+            range(specs["n_partner_states"]),
+        ],
+        names=cov_list + ["lead_partner_state"],
+    )
+    full_df = pd.Series(index=full_index, data=0.0, name="proportion")
+    full_df.update(trans_mat_df)
 
     out_file_path = paths_dict["est_results"] + "partner_transition_matrix.csv"
-    result_df.to_csv(out_file_path)
+    full_df.to_csv(out_file_path)
 
-    return result_df
+    return trans_mat_df
 
 
 def estimate_nb_children(paths_dict, specs):

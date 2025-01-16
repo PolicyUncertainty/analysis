@@ -63,7 +63,7 @@ est_class = est_class_from_paths(
     slope_disutil_method=False,
     file_append="subj",
     use_weights=False,
-    load_model=True,
+    load_model=False,
     save_results=False,
 )
 
@@ -74,7 +74,7 @@ data_decision, states_dict = load_and_prep_data(
 
 ll_value_individual, model_solution = est_class.ll_func(params)
 
-# breakpoint()
+breakpoint()
 data_decision["ll_contribution"] = -ll_value_individual
 
 

@@ -33,19 +33,23 @@ from model_code.stochastic_processes.policy_states_belief import (
 )
 from model_code.specify_model import specify_model
 
+load_model = input("Load model? (y/n): ") == "y"
+
 # Generate model_specs
 model, params = specify_model(
     path_dict=paths_dict,
     update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
     policy_state_trans_func=expected_SRA_probs_estimation,
     params=params,
-    load_model=True,
+    load_model=load_model,
 )
 from estimation.struct_estimation.estimate_setup import load_and_prep_data
 
 data_decision, states_dict = load_and_prep_data(
-    path_dict, params, model, drop_retirees=True
+    path_dict, params, model, drop_retirees=False
 )
+
+data_decision = data_decision[data_decision["age"] <= specs["max_ret_age"]]
 
 from model_code.specify_model import specify_and_solve_model
 
@@ -69,7 +73,7 @@ est_class = est_class_from_paths(
     slope_disutil_method=False,
     file_append="subj",
     use_weights=False,
-    load_model=False,
+    load_model=load_model,
     save_results=False,
 )
 
@@ -97,8 +101,6 @@ for choice in range(specs["n_choices"]):
 
     choice_probs_observations = np.nan_to_num(choice_probs_observations, nan=0.0)
     data_decision[f"choice_{choice}"] = choice_probs_observations
-
-breakpoint()
 
 
 # df_full = data_decision[data_decision["full_observed_state"]]

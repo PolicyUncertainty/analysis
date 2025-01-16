@@ -19,7 +19,7 @@ def observed_model_fit(paths_dict, specs, params):
         update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
         policy_state_trans_func=expected_SRA_probs_estimation,
         file_append="pete",
-        load_model=True,
+        load_model=False,
         load_solution=True,
     )
 

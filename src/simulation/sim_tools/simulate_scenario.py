@@ -88,6 +88,10 @@ def simulate_scenario(
     df["age"] = (
         df.index.get_level_values("period") + options["model_params"]["start_age"]
     )
+    # Create lagged health state for each agent and period
+    df["health_lag"] = df.groupby("agent")["health"].shift(1)
+    # Filter out individuals for which health state and health lag is 2
+    df = df[(df["health"] != 2) & (df["health_lag"] != 2)]
 
     df["wealth_at_beginning"] = df["savings"] + df["consumption"]
     # Create income var by shifting period of 1 of individuals and then substract

@@ -1,7 +1,7 @@
-,value,lower_bound,upper_bound,hazard_ratio
-intercept,-14.315114442901633,-inf,inf,6.067709632336792e-07
-age,0.11745572199933171,1e-08,inf,1.1246318323922468
-Good Health High Education,-0.37084539525348176,-inf,inf,0.6901506338748169
-Good Health Low Education,-0.34562272615977213,-inf,inf,0.707779463417944
-Bad Health High Education,0.04575531795961576,-inf,inf,1.0468182419948804
-Bad Health Low Education,0.24965429608361958,-inf,inf,1.2835816007913274
+,value,lower_bound,upper_bound,soft_lower_bound,soft_upper_bound,hazard_ratio
+intercept,-14.31870174075787,-inf,inf,-15.0,15.0,6.045981945722844e-07
+age,0.11750014957812853,1e-08,inf,0.0001,1.0,1.124681798171519
+Good Health High Education,-0.3377115867835644,-inf,inf,-2.5,2.5,0.7134010125106343
+Good Health Low Education,-0.3451604117608736,-inf,inf,-2.5,2.5,0.7081067557052658
+Bad Health High Education,0.02041339923988026,-inf,inf,-2.5,2.5,1.020623177672921
+Bad Health Low Education,0.24996223403584208,-inf,inf,-2.5,2.5,1.2839769251455477

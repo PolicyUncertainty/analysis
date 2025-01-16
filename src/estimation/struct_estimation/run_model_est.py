@@ -37,7 +37,7 @@ params_to_estimate_names = [
     # "job_finding_logit_high_educ_women",
 ]
 
-last_estimate = pkl.load(open(paths_dict["est_results"] + "est_params_pete.pkl", "rb"))
+# last_estimate = pkl.load(open(paths_dict["est_results"] + "est_params_pete.pkl", "rb"))
 # pop_list = [
 #     "job_finding_logit_const_men",
 #     "job_finding_logit_age_men",
@@ -59,7 +59,7 @@ estimation_results = estimate_model(
     file_append="pete",
     slope_disutil_method=False,
     load_model=True,
-    last_estimate=last_estimate,
+    last_estimate=False,
     save_results=False,
 )
 print(estimation_results)

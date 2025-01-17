@@ -5,10 +5,10 @@ def create_unobserved_state_specs(data_decision, model):
     def weight_func(**kwargs):
         # We need to weight the unobserved job offer state for each of its possible values
         # The weight function is called with job offer new beeing the unobserved state
-        job_offer = kwargs["job_offer_new"]
+        job_offer_new = kwargs["job_offer_new"]
         job_offer_weight = model["model_funcs"]["processed_exog_funcs"]["job_offer"](
             **kwargs
-        )[job_offer]
+        )[job_offer_new]
 
         # For the informed state we use the share of this period. The period in the kwargs is the one from
         # before (see assignment below).

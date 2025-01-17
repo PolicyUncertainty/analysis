@@ -20,7 +20,7 @@ def observed_model_fit(paths_dict, specs, params):
         policy_state_trans_func=expected_SRA_probs_estimation,
         file_append="pete",
         load_model=True,
-        load_solution=False,
+        load_solution=True,
     )
 
     data_decision, states_dict = load_and_prep_data_for_model_fit(

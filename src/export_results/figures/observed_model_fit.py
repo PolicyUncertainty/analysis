@@ -20,7 +20,7 @@ def observed_model_fit(paths_dict, specs, params):
         policy_state_trans_func=expected_SRA_probs_estimation,
         file_append="pete",
         load_model=True,
-        load_solution=True,
+        load_solution=False,
     )
 
     data_decision, states_dict = load_and_prep_data_for_model_fit(
@@ -63,6 +63,7 @@ def plot_observed_model_fit_choice_probs(
             unobserved_state_specs=unobserved_state_specs,
             params=params,
             est_model=est_model,
+            use_probability_of_observed_states=False,
         )
 
         choice_probs_observations = np.nan_to_num(choice_probs_observations, nan=0.0)
@@ -130,12 +131,14 @@ def choice_probs_for_choice_vals(
     unobserved_state_specs,
     params,
     est_model,
+    use_probability_of_observed_states=False,
 ):
     choice_prob_func = create_choice_prob_func_unobserved_states(
         model=model,
         observed_states=states_dict,
         observed_choices=choice_vals,
         unobserved_state_specs=unobserved_state_specs,
+        use_probability_of_observed_states=False,
     )
     choice_probs_observations = choice_prob_func(
         value_in=est_model["value"],

@@ -17,7 +17,6 @@ if kind_string == "pre":
     )
 
     params = load_and_set_start_params(path_dict)
-    params["job_finding_logit_const_men"] *= 2
 elif kind_string == "post":
     params = pickle.load(open(path_dict["est_results"] + "est_params_pete.pkl", "rb"))
 else:

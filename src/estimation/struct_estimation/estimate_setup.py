@@ -110,6 +110,7 @@ def estimate_model(
         weights=est_class.weights,
         file_append=file_append,
     )
+    return result
 
 
 class est_class_from_paths:

@@ -36,7 +36,7 @@ def plot_average_wealth(paths):
 
     data_sim["age"] = data_sim["period"] + specs["start_age"]
 
-    for sex in range(2):
+    for sex in range(1):
         for edu in range(2):
             mask_sim = (data_sim["sex"] == sex) & (data_sim["education"] == edu)
             data_sim_sex = data_sim[mask_sim]
@@ -45,16 +45,18 @@ def plot_average_wealth(paths):
             )
             data_decision_sex = data_decision[mask_obs]
 
-            # average_wealth_sim = data_sim_sex.groupby("age")["wealth_at_beginning"].median()
-            # average_wealth_obs = data_decision_sex.groupby("age")[
-            #     "adjusted_wealth"
-            # ].median()
-            average_wealth_sim = data_sim_sex.groupby("age")["choice"].value_counts(
-                normalize=True
-            )
+            average_wealth_sim = data_sim_sex.groupby("age")[
+                "wealth_at_beginning"
+            ].median()
             average_wealth_obs = data_decision_sex.groupby("age")[
-                "choice"
-            ].value_counts(normalize=True)
+                "adjusted_wealth"
+            ].median()
+            # average_wealth_sim = data_sim_sex.groupby("age")["choice"].value_counts(
+            #     normalize=True
+            # )
+            # average_wealth_obs = data_decision_sex.groupby("age")[
+            #     "choice"
+            # ].value_counts(normalize=True)
             ages = np.arange(specs["start_age"], specs["end_age"] + 1)
 
             if sex == 0:

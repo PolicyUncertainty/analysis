@@ -39,8 +39,6 @@ def estimate_model(
     # Load start params and bounds
     start_params_all = load_and_set_start_params(path_dict)
 
-    start_params_all["job_finding_logit_const_men"] *= 2
-
     # print_function(last_estimate)
 
     # # Assign start params from before

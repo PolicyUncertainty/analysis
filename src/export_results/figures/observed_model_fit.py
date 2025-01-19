@@ -19,8 +19,8 @@ def observed_model_fit(paths_dict, specs, params):
         update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
         policy_state_trans_func=expected_SRA_probs_estimation,
         file_append="start",
-        load_model=False,
-        load_solution=False,
+        load_model=True,
+        load_solution=True,
     )
 
     data_decision, states_dict = load_and_prep_data_for_model_fit(
@@ -68,6 +68,16 @@ def plot_observed_model_fit_choice_probs(
 
         choice_probs_observations = np.nan_to_num(choice_probs_observations, nan=0.0)
         data_decision[f"choice_{choice}"] = choice_probs_observations
+
+    data_decision["choice_likelihood"] = choice_probs_for_choice_vals(
+        choice_vals=data_decision["choice"].values,
+        states_dict=states_dict,
+        model=model,
+        unobserved_state_specs=unobserved_state_specs,
+        params=params,
+        est_model=est_model,
+        use_probability_of_observed_states=True,
+    )
 
     # for partner_val, partner_label in enumerate(partner_labels):
     for edu in range(2):
@@ -139,7 +149,7 @@ def choice_probs_for_choice_vals(
         observed_states=states_dict,
         observed_choices=choice_vals,
         unobserved_state_specs=unobserved_state_specs,
-        use_probability_of_observed_states=False,
+        use_probability_of_observed_states=use_probability_of_observed_states,
     )
     choice_probs_observations = choice_prob_func(
         value_in=est_model["value"],

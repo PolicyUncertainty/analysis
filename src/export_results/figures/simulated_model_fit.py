@@ -15,11 +15,10 @@ from model_code.stochastic_processes.policy_states_belief import (
 from specs.derive_specs import read_and_derive_specs
 
 
-def plot_average_wealth(paths):
+def plot_average_wealth(paths, specs):
     data_sim = pd.read_pickle(
         paths["intermediate_data"] + "sim_data/data_subj_scale_1.pkl"
     ).reset_index()
-    specs = read_and_derive_specs(paths)
 
     params = pickle.load(open(paths["est_results"] + "est_params_pete.pkl", "rb"))
     # Generate model_specs
@@ -31,6 +30,7 @@ def plot_average_wealth(paths):
         load_model=True,
         model_type="solution",
     )
+
     data_decision, _ = load_and_prep_data(paths, params, model, drop_retirees=False)
     data_decision["age"] = data_decision["period"] + specs["start_age"]
 

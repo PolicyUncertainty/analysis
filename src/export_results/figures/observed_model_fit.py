@@ -69,7 +69,6 @@ def plot_observed_model_fit_choice_probs(
         choice_probs_observations = np.nan_to_num(choice_probs_observations, nan=0.0)
         data_decision[f"choice_{choice}"] = choice_probs_observations
 
-    breakpoint()
     # for partner_val, partner_label in enumerate(partner_labels):
     for edu in range(2):
         fig, axes = plt.subplots(2, specs["n_choices"], figsize=(10, 5))
@@ -108,6 +107,7 @@ def plot_observed_model_fit_choice_probs(
             dpi=300,
         )
         # fig.suptitle(f"Choice shares {specs['education_labels'][edu]}")
+    breakpoint()
 
 
 def load_and_prep_data_for_model_fit(paths_dict, specs, params, model):

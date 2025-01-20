@@ -25,7 +25,7 @@ params_to_estimate_names = [
     # "disutil_working_bad",
     # "disutil_not_retired_good",
     # "disutil_working_good",
-    # "bequest_scale",
+    "bequest_scale",
     # "taste_shock_scale_men",
     # "taste_shock_scale_women",
     "lambda",

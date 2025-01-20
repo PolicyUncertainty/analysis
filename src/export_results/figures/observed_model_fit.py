@@ -21,7 +21,7 @@ def observed_model_fit(paths_dict, specs, params):
         policy_state_trans_func=expected_SRA_probs_estimation,
         file_append="pete",
         load_model=True,
-        load_solution=True,
+        load_solution=False,
     )
 
     data_decision, states_dict = load_and_prep_data_for_model_fit(
@@ -69,21 +69,6 @@ def plot_observed_model_fit_choice_probs(
 
         choice_probs_observations = np.nan_to_num(choice_probs_observations, nan=0.0)
         data_decision[f"choice_{choice}"] = choice_probs_observations
-
-    from simulation.sim_tools.add_vars_to_sim import calc_choice_probs_for_df
-    import pandas as pd
-
-    df_interest = (
-        data_decision[data_decision.index == 550].reset_index(drop=True).copy()
-    )
-    df_interest = pd.concat([df_interest] * 2, ignore_index=True)
-    df_interest.loc[0, "job_offer"] = 0
-    df_interest.loc[1, "job_offer"] = 1
-    df_res = calc_choice_probs_for_df(
-        df_interest, model, params, est_model, "adjusted_wealth", None
-    )
-
-    breakpoint()
 
     # for partner_val, partner_label in enumerate(partner_labels):
     for edu in range(2):

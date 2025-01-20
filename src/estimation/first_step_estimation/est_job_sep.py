@@ -13,6 +13,15 @@ def est_job_sep(paths_dict, specs, load_data=False):
     level."""
     # Get estimation sample and create age squared
     df_job = create_job_sep_sample(paths_dict, specs, load_data)
+
+    # Estimate job separation probabilities
+    job_sep_probs, job_sep_params = est_job_for_sample(df_job, specs)
+    # Save results
+    job_sep_params.to_csv(paths_dict["est_results"] + "job_sep_params.csv")
+    pkl.dump(job_sep_probs, open(paths_dict["est_results"] + "job_sep_probs.pkl", "wb"))
+
+
+def est_job_for_sample(df_job, specs):
     df_job["age_sq"] = df_job["age"] ** 2
 
     index = pd.MultiIndex.from_product(
@@ -52,6 +61,4 @@ def est_job_sep(paths_dict, specs, load_data=False):
             )
             job_sep_probs[sex_var, edu_var, :] = job_sep_probs_group
 
-    # Save results
-    job_sep_params.to_csv(paths_dict["est_results"] + "job_sep_params.csv")
-    pkl.dump(job_sep_probs, open(paths_dict["est_results"] + "job_sep_probs.pkl", "wb"))
+    return job_sep_probs, job_sep_params

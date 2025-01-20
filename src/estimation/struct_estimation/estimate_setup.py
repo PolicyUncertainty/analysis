@@ -40,6 +40,7 @@ def estimate_model(
     start_params_all = load_and_set_start_params(path_dict)
 
     # print_function(last_estimate)
+    # breakpoint()
 
     # # Assign start params from before
     if last_estimate is not None:

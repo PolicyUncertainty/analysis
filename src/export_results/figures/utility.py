@@ -21,6 +21,8 @@ def plot_utility(params, specs):
             utilities[i] = utility_func(
                 consumption=c,
                 partner_state=partner_state,
+                sex=0,
+                health=1,
                 education=education,
                 period=period,
                 choice=choice,
@@ -48,7 +50,7 @@ def plot_cons_scale(specs):
             cons_scale = np.zeros(n_periods)
             for period in range(n_periods):
                 cons_scale[period] = consumption_scale(
-                    np.array(married_val), sex, edu_val, period, specs
+                    np.array(married_val), 0, edu_val, period, specs
                 )
             axs[married_val].plot(cons_scale, label=edu_label)
             axs[married_val].set_title(married_label)

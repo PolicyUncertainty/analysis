@@ -21,8 +21,8 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
 
 # %%
-# params = pkl.load(open(path_dict["est_params"], "rb"))
-params = load_and_set_start_params(path_dict)
+params = pkl.load(open(path_dict["est_params"], "rb"))
+# params = load_and_set_start_params(path_dict)
 
 
 from model_code.stochastic_processes.policy_states_belief import (
@@ -31,76 +31,77 @@ from model_code.stochastic_processes.policy_states_belief import (
 from model_code.stochastic_processes.policy_states_belief import (
     update_specs_exp_ret_age_trans_mat,
 )
-from model_code.specify_model import specify_model
 
-load_model = input("Load model? (y/n): ") == "y"
+# from model_code.specify_model import specify_model
+#
+# load_model = input("Load model? (y/n): ") == "y"
+#
+# # Generate model_specs
+# model, params = specify_model(
+#     path_dict=paths_dict,
+#     update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
+#     policy_state_trans_func=expected_SRA_probs_estimation,
+#     params=params,
+#     load_model=load_model,
+# )
+from model_code.specify_model import specify_and_solve_model
 
-# Generate model_specs
-model, params = specify_model(
+solution, model, params = specify_and_solve_model(
     path_dict=paths_dict,
+    file_append="pete",
+    params=params,
     update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
     policy_state_trans_func=expected_SRA_probs_estimation,
-    params=params,
-    load_model=load_model,
+    load_model=True,
+    load_solution=True,
 )
 from estimation.struct_estimation.estimate_setup import load_and_prep_data
 
 data_decision, states_dict = load_and_prep_data(
-    path_dict, params, model, drop_retirees=False
+    path_dict, params, model, drop_retirees=True
 )
 
 data_decision = data_decision[data_decision["age"] <= specs["max_ret_age"]]
 
-from model_code.specify_model import specify_and_solve_model
-
-# solution, model, params = specify_and_solve_model(
-#     path_dict=paths_dict,
-#     file_append="subj",
-#     params=params,
-#     update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
-#     policy_state_trans_func=expected_SRA_probs_estimation,
-#     load_model=True,
-#     load_solution=False,
+# from estimation.struct_estimation.estimate_setup import (
+#     load_and_prep_data,
+#     est_class_from_paths,
 # )
-from estimation.struct_estimation.estimate_setup import (
-    load_and_prep_data,
-    est_class_from_paths,
-)
-
-est_class = est_class_from_paths(
-    path_dict=path_dict,
-    start_params_all=params,
-    slope_disutil_method=False,
-    file_append="subj",
-    use_weights=False,
-    load_model=load_model,
-    save_results=False,
-)
-
-ll_value_individual, model_solution = est_class.ll_func(params)
-
-data_decision["ll_contribution"] = -ll_value_individual
-
-from model_code.unobserved_state_weighting import create_unobserved_state_specs
-
-unobserved_state_specs = create_unobserved_state_specs(data_decision, model)
-
-from export_results.figures.observed_model_fit import choice_probs_for_choice_vals
-
-for choice in range(specs["n_choices"]):
-    choice_vals = np.ones_like(data_decision["choice"].values) * choice
-
-    choice_probs_observations = choice_probs_for_choice_vals(
-        choice_vals=choice_vals,
-        states_dict=states_dict,
-        model=model,
-        unobserved_state_specs=unobserved_state_specs,
-        params=params,
-        est_model=model_solution,
-    )
-
-    choice_probs_observations = np.nan_to_num(choice_probs_observations, nan=0.0)
-    data_decision[f"choice_{choice}"] = choice_probs_observations
+#
+# est_class = est_class_from_paths(
+#     path_dict=path_dict,
+#     start_params_all=params,
+#     slope_disutil_method=False,
+#     file_append="subj",
+#     use_weights=False,
+#     load_model=load_model,
+#     save_results=False,
+# )
+#
+# ll_value_individual, model_solution = est_class.ll_func(params)
+#
+# data_decision["ll_contribution"] = -ll_value_individual
+#
+# from model_code.unobserved_state_weighting import create_unobserved_state_specs
+#
+# unobserved_state_specs = create_unobserved_state_specs(data_decision, model)
+#
+# from export_results.figures.observed_model_fit import choice_probs_for_choice_vals
+#
+# for choice in range(specs["n_choices"]):
+#     choice_vals = np.ones_like(data_decision["choice"].values) * choice
+#
+#     choice_probs_observations = choice_probs_for_choice_vals(
+#         choice_vals=choice_vals,
+#         states_dict=states_dict,
+#         model=model,
+#         unobserved_state_specs=unobserved_state_specs,
+#         params=params,
+#         est_model=model_solution,
+#     )
+#
+#     choice_probs_observations = np.nan_to_num(choice_probs_observations, nan=0.0)
+#     data_decision[f"choice_{choice}"] = choice_probs_observations
 
 
 # df_full = data_decision[data_decision["full_observed_state"]]
@@ -109,50 +110,86 @@ for choice in range(specs["n_choices"]):
 # from model_code.utility_functions import utility_func
 # breakpoint()
 
-# from dcegm.interface import get_state_choice_index_per_state
-# from dcegm.interpolation.interp1d import interp_value_on_wealth
-#
-# def plot_value(value_solved, endog_grid_solved, var_name, var_grid, state_dict, model, choices):
-#
-#     fig, ax = plt.subplots()
-#     for choice in choices:
-#         state_choice_dict = {**state_dict, "choice": choice}
-#         value_all = np.zeros_like(var_grid)
-#         for var_id, var in enumerate(var_grid):
-#             if "wealth" in state_dict:
-#                 wealth = state_dict["wealth"]
-#                 state_dict[var_name] = var
-#             elif var_name == "wealth":
-#                 wealth = var
-#             else:
-#                 raise ValueError("Wealth not in state_dict or var_name")
-#
-#             state_choice_indexes = get_state_choice_index_per_state(
-#                 states=state_dict,
-#                 map_state_choice_to_index=model["model_structure"]["map_state_choice_to_index"],
-#                 discrete_states_names=model["model_structure"]["discrete_states_names"],
-#             )
-#             value_state = jnp.take(
-#                 value_solved, state_choice_indexes, axis=0, mode="fill", fill_value=jnp.nan
-#             )
-#             endog_grid_state = jnp.take(endog_grid_solved, state_choice_indexes, axis=0)
-#
-#             value_all[var_id] = interp_value_on_wealth(
-#                 wealth=wealth,
-#                 endog_grid=endog_grid_state[choice, :],
-#                 value=value_state[choice, :],
-#                 compute_utility=model["model_funcs"]["compute_utility"],
-#                 state_choice_vec=state_choice_dict,
-#                 params=params,
-#             )
-#
-#         ax.plot(var_grid, value_all, label=f"Choice {choice}")
-#     ax.legend()
-#     plt.show()
-#
-# exp_grid = np.arange(0, 45, 1)
-# discrete_state_to_plot = {"period": 30, "lagged_choice": 1, "policy_state": 1, "job_offer": 1, "wealth": 50, "education": 0}
-# plot_value(solution["value"], solution["endog_grid"], "experience", exp_grid, discrete_state_to_plot, model, [0, 1])
-# breakpoint()
-#
-#
+from dcegm.interface import (
+    value_for_state_choice_vec,
+    policy_and_value_for_state_choice_vec,
+)
+import matplotlib.pyplot as plt
+
+
+def plot_value(
+    value_solved,
+    endog_grid_solved,
+    policy_solved,
+    var_name,
+    var_grid,
+    state_dict,
+    model,
+    choices,
+):
+    fig, ax = plt.subplots(ncols=2)
+    for choice in choices:
+        state_choice_dict = {**state_dict, "choice": choice}
+        value_all = np.zeros_like(var_grid, dtype=float)
+        consumption = np.zeros_like(var_grid, dtype=float)
+        for var_id, var in enumerate(var_grid):
+            if var_name == "wealth":
+                wealth = var
+                second_cont = state_dict["experience"]
+            elif var_name == "experience":
+                second_cont = var
+                wealth = state_dict["wealth"]
+            else:
+                raise ValueError("Wealth not in state_dict or var_name")
+
+            policy, value = policy_and_value_for_state_choice_vec(
+                endog_grid_solved,
+                value_solved,
+                policy_solved,
+                params,
+                model,
+                state_choice_dict,
+                wealth,
+                second_continous=second_cont,
+            )
+            value_all[var_id] = value
+            consumption[var_id] = policy
+
+        ax[0].plot(var_grid, value_all, label=f"Choice {choice}")
+        ax[1].plot(var_grid, consumption, label=f"Choice {choice}")
+    ax[0].legend()
+    ax[0].set_title("Value")
+    ax[0].set_xlabel(var_name)
+    ax[1].legend()
+    ax[1].set_title("Consumption")
+    ax[1].set_xlabel(var_name)
+    plt.show()
+
+
+import jax.numpy as jnp
+
+exp_grid = np.arange(7.5, 1_000, 50, dtype=float)
+discrete_state_to_plot = {
+    "period": 34,
+    "lagged_choice": 3,
+    "policy_state": 1,
+    "job_offer": 0,
+    "education": 0,
+    "health": 1,
+    "sex": 0,
+    "informed": 1,
+    "partner_state": jnp.array(0),
+    "experience": 0.88,
+    # "wealth": 250,
+}
+plot_value(
+    solution["value"],
+    solution["endog_grid"],
+    solution["policy"],
+    "wealth",
+    exp_grid,
+    discrete_state_to_plot,
+    model,
+    [0, 1],
+)
+breakpoint()

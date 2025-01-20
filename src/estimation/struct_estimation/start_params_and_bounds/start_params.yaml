@@ -17,7 +17,7 @@ disutil_unemployed_women: 1.0
 disutil_children_pt_work: 0.2
 disutil_children_ft_work_low: 0.2
 disutil_children_ft_work_high: 0.2
-bequest_scale: 1.0
+bequest_scale: 2.0
 
 # Job separation params are set internally driven by data
 

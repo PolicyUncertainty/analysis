@@ -65,7 +65,14 @@ def utility_func(
         options=options,
     )
     # compute utility
-    utility = (consumption * eta / cons_scale) ** (1 - mu) / (1 - mu)
+    scaled_consumption = consumption * eta / cons_scale
+    utility_mu_not_one = (scaled_consumption ** (1 - mu) - 1) / (1 - mu)
+
+    utility = jax.lax.select(
+        jnp.allclose(mu, 1),
+        jnp.log(consumption * eta / cons_scale),
+        utility_mu_not_one,
+    )
     return utility
 
 
@@ -90,7 +97,14 @@ def marg_utility(
         params=params,
         options=options,
     )
-    marg_util = ((eta / cons_scale) ** (1 - mu)) * (consumption ** (-mu))
+    marg_util_mu_not_one = ((eta / cons_scale) ** (1 - mu)) * (consumption ** (-mu))
+
+    marg_util = jax.lax.select(
+        jnp.allclose(mu, 1),
+        1 / consumption,
+        marg_util_mu_not_one,
+    )
+
     return marg_util
 
 
@@ -123,7 +137,12 @@ def inverse_marginal(
         params=params,
         options=options,
     )
-    consumption = marginal_utility ** (-1 / mu) * (eta / cons_scale) ** ((1 - mu) / mu)
+    consumption_mu_not_one = marginal_utility ** (-1 / mu) * (eta / cons_scale) ** (
+        (1 - mu) / mu
+    )
+    consumption = jax.lax.select(
+        jnp.allclose(mu, 1), 1 / marginal_utility, consumption_mu_not_one
+    )
     return consumption
 
 

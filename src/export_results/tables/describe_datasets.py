@@ -23,38 +23,41 @@ from process_data.first_step_sample_scripts.create_survival_transition_sample im
     create_survival_transition_sample,
 )
 
+def create_table_describing_datasets(paths_dict, specs):
+    df_struct, df_beliefs = import_main_datasets(paths_dict, specs)
+    main_datasets = {
+        "Structural Estimation Data": df_struct,
+        "Policy Belief Data": df_beliefs
+    }
+    df_description = describe_datasets(main_datasets, specs)
+    return df_description
+
+def import_main_datasets(paths_dict, specs):
+    df_struct = create_structural_est_sample(paths_dict, specs=specs, load_data=True)
+    df_struct["age"] = df_struct["period"] + specs["start_age"]
+
+    df_beliefs = pd.read_stata(paths_dict["soep_is"])
+    df_beliefs["education"] = df_beliefs["education"].replace({1: 0, 2: 0, 3: 1})
+    df_beliefs["sex"] = df_beliefs["sex"].astype(str)
+    df_beliefs["sex"] = df_beliefs["sex"].replace({"Männlich":0, "Weiblich":1}).astype(int)   
+    df_beliefs = df_beliefs[(df_beliefs["belief_pens_deduct"] >= 0) | (df_beliefs["pol_unc_stat_ret_age_67"] >= 0)]
+    return df_struct, df_beliefs
 
 
-paths_dict = create_path_dict(define_user=True)
-specs = read_and_derive_specs(paths_dict["specs"])
 
-# import and modify datasets
-df_struct = create_structural_est_sample(paths_dict, specs=specs, load_data=True)
-df_struct["age"] = df_struct["period"] + specs["start_age"]
+def describe_datasets(datasets, specs):
+    rows = ["Years", "Nb. of Observations", "Age Range", "Median Age", "Female Share", "Highschool Degree Share"]
 
-df_beliefs = pd.read_stata(paths_dict["soep_is"])
-df_beliefs["education"] = df_beliefs["education"].replace({1: 0, 2: 0, 3: 1})
-df_beliefs["sex"] = df_beliefs["sex"].astype(str)
-df_beliefs["sex"] = df_beliefs["sex"].replace({"Männlich":0, "Weiblich":1}).astype(int)   
-
-
-
-# create descriptive df
-datasets = {
-    "Structural Estimation Data": df_struct,
-    "Policy Belief Data": df_beliefs
-}
-
-def describe_datasets(datasets):
     df_description = pd.DataFrame({
-    "": ["Years", "Nb. of Observations", "Age Range", "Median Age", "Female Share", "Highschool Degree Share"],
-    "Structural Estimation Data": ["", "", "", "", "", ""],
-    "Policy Belief Data": ["", "", "", "", "", ""]
-})  
-    # Populate the "Years" column. Note: For df_beliefs , "years" is 2022, otherwise it is 2010-2022
+        "": rows,
+        **{name: [""] * len(rows) for name in datasets.keys()}
+    })
+    # Populate the "Years" column. Note: For df_beliefs , "years" is 2022, otherwise it is between start year and end year.
+    start_year = specs["start_year"]
+    end_year = specs["end_year"]
     for name, df in datasets.items():
         if name == "Structural Estimation Data":
-            df_description.loc[df_description[""] == "Years", name] = "2010-2022"
+            df_description.loc[df_description[""] == "Years", name] = f"{start_year}-{end_year}"
         else:
             df_description.loc[df_description[""] == "Years", name] = "2022"
     
@@ -65,10 +68,8 @@ def describe_datasets(datasets):
         df_description.loc[df_description[""] == "Female Share", name] = (df['sex'] == 1).mean()
         df_description.loc[df_description[""] == "Highschool Degree Share", name] = (df['education'] == 1).mean()
 
-    print(df_description)
     return df_description
 
-describe_datasets(datasets)
 
 
 

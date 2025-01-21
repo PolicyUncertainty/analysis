@@ -33,11 +33,11 @@ def create_lagged_and_lead_variables(merged_data, specs):
     )
 
     full_container["lagged_choice"] = full_container.groupby(["pid"])["choice"].shift()
-    full_container["job_sep_this_year"] = full_container.groupby(["pid"])[
-        "job_sep"
-    ].shift(-1)
+    # full_container["job_sep_this_year"] = full_container.groupby(["pid"])[
+    #     "job_sep"
+    # ].shift(-1)
     merged_data = full_container[full_container["lagged_choice"].notna()]
-    merged_data = merged_data[merged_data["job_sep_this_year"].notna()]
+    # merged_data = merged_data[merged_data["job_sep_this_year"].notna()]
 
     # We now have observations with a valid lagged or lead variable but not with
     # actual valid state variables. Delete those by looking at the choice variable.

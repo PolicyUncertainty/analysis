@@ -41,5 +41,10 @@ def calc_and_save_standard_errors(
 
     pickle.dump(
         std_errors,
+        open(path_dict["est_results"] + f"std_errors_{file_append}_raw.pkl", "wb"),
+    )
+
+    pickle.dump(
+        unravel_func(std_errors),
         open(path_dict["est_results"] + f"std_errors_{file_append}.pkl", "wb"),
     )

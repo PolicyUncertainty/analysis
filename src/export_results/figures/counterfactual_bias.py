@@ -2,13 +2,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from export_results.tools import create_step_function_values
-from simulation.policy_state_scenarios.step_function import (
+from model_code.policy_processes.step_function import (
     update_specs_for_step_function_scale_05,
 )
-from simulation.policy_state_scenarios.step_function import (
+from model_code.policy_processes.step_function import (
     update_specs_for_step_function_scale_1,
 )
-from simulation.policy_state_scenarios.step_function import (
+from model_code.policy_processes.step_function import (
     update_specs_for_step_function_scale_2,
 )
 from specs.derive_specs import generate_derived_and_data_derived_specs

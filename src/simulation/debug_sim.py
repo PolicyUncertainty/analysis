@@ -18,10 +18,10 @@ path_dict = create_path_dict()
 # %%
 params = pkl.load(open(path_dict["est_params"], "rb"))
 from model_code.specify_model import specify_and_solve_model
-from model_code.stochastic_processes.policy_states_belief import (
+from model_code.policy_processes.policy_states_belief import (
     expected_SRA_probs_estimation,
 )
-from model_code.stochastic_processes.policy_states_belief import (
+from model_code.policy_processes.policy_states_belief import (
     update_specs_exp_ret_age_trans_mat,
 )
 

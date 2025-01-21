@@ -1,4 +1,5 @@
 # Set data paths according to user.
+import os
 from pathlib import Path
 
 import jax
@@ -48,3 +49,20 @@ def create_path_dict(define_user=False, user=None):
         paths_dict["intermediate_data"] + "structural_estimation_sample.pkl"
     )
     return paths_dict
+
+
+def get_model_resutls_path(paths_dict, model_name):
+    model_folder = paths_dict["intermediate_data"] + "model_" + model_name
+    if not os.path.exists(model_folder):
+        os.makedirs(model_folder)
+    folder_dict = {
+        "model_results": model_folder,
+    }
+
+    for folder in ["solution", "simulation"]:
+        folder_name = model_folder + "/" + folder
+        if not os.path.exists(folder_name):
+            os.makedirs(folder_name)
+        folder_dict[folder] = folder_name + "/"
+
+    return folder_dict

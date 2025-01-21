@@ -1,12 +1,12 @@
 import jax.numpy as jnp
 import pytest
-from set_paths import create_path_dict
-from simulation.policy_state_scenarios.step_function import (
-    create_update_function_for_scale,
+from model_code.policy_processes.step_function import (
+    create_update_function_subj_alpha,
 )
-from simulation.policy_state_scenarios.step_function import (
+from model_code.policy_processes.step_function import (
     realized_policy_step_function,
 )
+from set_paths import create_path_dict
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
@@ -20,7 +20,7 @@ def paths_and_specs():
 def test_step_function(paths_and_specs):
     path_dict, specs = paths_and_specs
 
-    update_func = create_update_function_for_scale(path_dict, 1.0)
+    update_func = create_update_function_subj_alpha(path_dict, 1.0)
 
     specs = update_func(
         specs=specs,

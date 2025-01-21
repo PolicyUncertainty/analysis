@@ -45,12 +45,6 @@ def realized_policy_step_function(policy_state, period, lagged_choice, choice, o
     return trans_vector
 
 
-def create_update_function_for_scale(path_dict, scale):
-    # Load the estimates
-    alpha_hat = np.loadtxt(path_dict["est_results"] + "exp_val_params.txt") * scale
-    return create_update_function_for_slope(alpha_hat)
-
-
 def create_update_function_for_slope(slope):
     def update_specs_for_step_function_with_slope(specs, path_dict):
         return update_specs_step_function_with_slope(specs, slope)

@@ -19,7 +19,6 @@ if kind_string == "pre":
     params = load_and_set_start_params(path_dict)
 elif kind_string == "post":
     params = pickle.load(open(path_dict["est_params"], "rb"))
-    paras["mu"] = 1.5
 else:
     raise ValueError("Either pre or post estimation plots.")
 
@@ -50,7 +49,7 @@ if which_plot in ["a", "s"]:
 
     # plot_states(path_dict, specs)
     plot_choice_shares_single(path_dict, specs, params)
-    # plot_average_wealth(path_dict, specs, params)
+    plot_average_wealth(path_dict, specs, params)
     plt.show()
 
 

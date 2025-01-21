@@ -1,48 +1,68 @@
+import pandas as pd
 from dcegm.simulation.sim_utils import create_simulation_df
 from dcegm.simulation.simulate import simulate_all_periods
+from model_code.policy_processes.select_policy_belief import (
+    select_expectation_functions_and_model_sol_names,
+)
 from model_code.specify_model import specify_and_solve_model
 from model_code.specify_model import specify_model
+from set_paths import get_model_resutls_path
 from simulation.sim_tools.initial_conditions_sim import generate_start_states
 
 
 def solve_and_simulate_scenario(
     path_dict,
     params,
-    solve_update_specs_func,
-    solve_policy_trans_func,
-    simulate_update_specs_func,
-    simulate_policy_trans_func,
+    policy_exp_params,
+    sim_alpha,
+    model_name,
+    df_exists,
     solution_exists,
-    file_append_sol,
     sol_model_exists=True,
     sim_model_exists=True,
 ):
     solution_est, model, params = specify_and_solve_model(
         path_dict=path_dict,
         params=params,
-        update_spec_for_policy_state=solve_update_specs_func,
-        policy_state_trans_func=solve_policy_trans_func,
-        file_append=file_append_sol,
+        file_append=model_name,
+        policy_exp_params=policy_exp_params,
         load_model=sol_model_exists,
         load_solution=solution_exists,
     )
-    model_params = model["options"]["model_params"]
 
-    data_sim = simulate_scenario(
-        path_dict=path_dict,
-        params=params,
-        n_agents=model_params["n_agents"],
-        seed=model_params["seed"],
-        update_spec_for_policy_state=simulate_update_specs_func,
-        policy_state_func_scenario=simulate_policy_trans_func,
-        solution=solution_est,
-        model_of_solution=model,
-        sim_model_exists=sim_model_exists,
+    model_params = model["options"]["model_params"]
+    (
+        update_funcs,
+        transition_funcs,
+        model_sol_names,
+    ) = select_expectation_functions_and_model_sol_names(
+        path_dict, exp_params_sol=policy_exp_params, sim_alpha=sim_alpha
     )
-    data_sim["exp_years"] = data_sim["experience"] * (
-        model_params["max_init_experience"] + data_sim.index.get_level_values("period")
-    )
-    return data_sim
+
+    solve_folder = get_model_resutls_path(path_dict, model_name)
+
+    df_file = solve_folder["simulation"] + model_sol_names["simulation"]
+
+    if df_exists:
+        data_sim = pd.read_pickle(solve_folder["simulation"] + "data_sim.pkl")
+        return data_sim
+    else:
+        data_sim = simulate_scenario(
+            path_dict=path_dict,
+            params=params,
+            n_agents=model_params["n_agents"],
+            seed=model_params["seed"],
+            update_spec_for_policy_state=update_funcs["simulation"],
+            policy_state_func_scenario=transition_funcs["simulation"],
+            solution=solution_est,
+            model_of_solution=model,
+            sim_model_exists=sim_model_exists,
+        )
+        if df_exists is None:
+            return data_sim
+        else:
+            data_sim.to_pickle(df_file)
+            return data_sim
 
 
 def simulate_scenario(
@@ -104,5 +124,9 @@ def simulate_scenario(
     df["savings_dec"] = df["total_income"] - df["consumption"]
     df["age"] = (
         df.index.get_level_values("period") + options["model_params"]["start_age"]
+    )
+    df["exp_years"] = df["experience"] * (
+        options["model_params"]["max_init_experience"]
+        + df.index.get_level_values("period")
     )
     return df

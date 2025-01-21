@@ -5,14 +5,13 @@ import numpy as np
 import pandas as pd
 import yaml
 from estimation.struct_estimation.estimate_setup import load_and_prep_data
-from model_code.specify_model import specify_model
-from model_code.stochastic_processes.policy_states_belief import (
+from model_code.policy_processes.policy_states_belief import (
     expected_SRA_probs_estimation,
 )
-from model_code.stochastic_processes.policy_states_belief import (
+from model_code.policy_processes.policy_states_belief import (
     update_specs_exp_ret_age_trans_mat,
 )
-from specs.derive_specs import read_and_derive_specs
+from model_code.specify_model import specify_model
 
 
 def plot_average_wealth(paths, specs, params):

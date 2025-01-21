@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from model_code.stochastic_processes.policy_states_belief import (
+from model_code.policy_processes.policy_states_belief import (
     update_specs_exp_ret_age_trans_mat,
 )
 from specs.derive_specs import generate_derived_and_data_derived_specs

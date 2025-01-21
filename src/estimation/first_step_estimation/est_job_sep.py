@@ -50,6 +50,7 @@ def est_job_for_sample(df_job, specs):
                 exog=sm.add_constant(df_job_edu[["age", "age_sq"]]),
             )
             results = model.fit()
+
             # Save params
             job_sep_params.loc[(sex_label, edu_label), :] = results.params
             # Calculate job sep for each age

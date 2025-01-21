@@ -175,7 +175,7 @@ class est_class_from_paths:
             return_model_solution=True,
         )
         self.ll_func = individual_likelihood
-        specs = generate_derived_and_data_derived_specs(path_dict)
+        # specs = generate_derived_and_data_derived_specs(path_dict)
         # self.pt_ratio_low = (
         #     specs["av_annual_hours_pt"][0] / specs["av_annual_hours_ft"][0]
         # )

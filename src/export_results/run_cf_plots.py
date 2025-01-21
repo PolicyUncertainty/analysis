@@ -21,9 +21,10 @@ from export_results.figures.counterfactual_no_unc import (
 
 # trajectory_plot(path_dict)
 plot_average_savings(path_dict)
-plot_full_time(path_dict)
-if show_cf_1_plots & show_any_plots:
-    plt.show()
+plt.show()
+# plot_full_time(path_dict)
+# if show_cf_1_plots & show_any_plots:
+#     plt.show()
 
 plt.close("all")
 

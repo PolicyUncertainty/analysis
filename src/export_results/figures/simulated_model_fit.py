@@ -15,12 +15,11 @@ from model_code.stochastic_processes.policy_states_belief import (
 from specs.derive_specs import read_and_derive_specs
 
 
-def plot_average_wealth(paths, specs):
+def plot_average_wealth(paths, specs, params):
     data_sim = pd.read_pickle(
         paths["intermediate_data"] + "sim_data/data_subj_scale_1.pkl"
     ).reset_index()
 
-    params = pickle.load(open(paths["est_results"] + "est_params_pete.pkl", "rb"))
     # Generate model_specs
     model, params = specify_model(
         path_dict=paths,
@@ -39,53 +38,33 @@ def plot_average_wealth(paths, specs):
     for sex in range(1):
         for edu in range(2):
             mask_sim = (data_sim["sex"] == sex) & (data_sim["education"] == edu)
-            data_sim_sex = data_sim[mask_sim]
+            data_sim_edu = data_sim[mask_sim]
             mask_obs = (data_decision["sex"] == sex) & (
                 data_decision["education"] == edu
             )
-            data_decision_sex = data_decision[mask_obs]
+            data_decision_edu = data_decision[mask_obs]
 
-            average_wealth_sim = data_sim_sex.groupby("age")[
-                "wealth_at_beginning"
-            ].median()
-            average_wealth_obs = data_decision_sex.groupby("age")[
-                "adjusted_wealth"
-            ].median()
-            # average_wealth_sim = data_sim_sex.groupby("age")["choice"].value_counts(
-            #     normalize=True
-            # )
-            # average_wealth_obs = data_decision_sex.groupby("age")[
-            #     "choice"
-            # ].value_counts(normalize=True)
-            ages = np.arange(specs["start_age"], specs["end_age"] + 1)
+            ages = np.arange(specs["start_age"] + 1, 90)
+            average_wealth_sim = (
+                data_sim_edu.groupby("age")["wealth_at_beginning"].median().loc[ages]
+            )
+            average_wealth_obs = (
+                data_decision_edu.groupby("age")["adjusted_wealth"].median().loc[ages]
+            )
 
-            if sex == 0:
-                choice_range = [0, 1, 3]
-            else:
-                choice_range = [0, 1, 2, 3]
-            for choice in choice_range:
-                average_wealth_obs_container = pd.Series(
-                    index=ages, name="proportion", data=0, dtype=float
-                )
-                average_wealth_obs_container.update(
-                    average_wealth_obs.loc[(slice(None), choice)]
-                )
+            fig, ax = plt.subplots()
 
-                fig, ax = plt.subplots()
-                # ax.plot(ages, average_wealth_sim, label=f"Median simulated wealth by age")
-                ax.plot(
-                    average_wealth_sim.loc[(slice(None), choice)], label=f"{choice}"
-                )
-                ax.plot(
-                    # ages,
-                    average_wealth_obs_container,
-                    label="Median observed wealth by age",
-                    ls="--",
-                )
-                ax.legend()
-                fig.savefig(
-                    paths["plots"] + "average_wealth.png", transparent=True, dpi=300
-                )
+            ax.plot(ages, average_wealth_sim, label=f"Simulated")
+            ax.plot(
+                ages,
+                average_wealth_obs,
+                label="Median observed wealth by age",
+                ls="--",
+            )
+            ax.legend()
+            fig.savefig(
+                paths["plots"] + "average_wealth.png", transparent=True, dpi=300
+            )
 
 
 def plot_choice_shares_single(paths, specs, params):
@@ -101,32 +80,36 @@ def plot_choice_shares_single(paths, specs, params):
     data_sim["age"] = data_sim["period"] + specs["start_age"]
 
     for sex in range(specs["n_sexes"]):
-        data_sim_restr = data_sim[data_sim["sex"] == sex]
-        data_decision_restr = data_decision[data_decision["sex"] == sex]
+        fig, axes = plt.subplots(2, specs["n_choices"])
+        for edu_var, edu_label in enumerate(specs["education_labels"]):
+            data_sim_restr = data_sim[data_sim["sex"] == sex]
+            data_decision_restr = data_decision[data_decision["sex"] == sex]
 
-        choice_shares_sim = (
-            data_sim_restr.groupby(["age"])["choice"]
-            .value_counts(normalize=True)
-            .unstack()
-        )
-        choice_shares_obs = (
-            data_decision_restr.groupby(["age"])["choice"]
-            .value_counts(normalize=True)
-            .unstack()
-        )
+            choice_shares_sim = (
+                data_sim_restr.groupby(["age"])["choice"]
+                .value_counts(normalize=True)
+                .unstack()
+            )
+            choice_shares_obs = (
+                data_decision_restr.groupby(["age"])["choice"]
+                .value_counts(normalize=True)
+                .unstack()
+            )
+            if sex == 0:
+                choice_range = [0, 1, 3]
+            else:
+                choice_range = range(4)
 
-        if sex == 0:
-            choice_range = [0, 1, 3]
-        else:
-            choice_range = [0, 1, 2, 3]
-        fig, axes = plt.subplots(1, len(choice_range))
-        for i, choice in enumerate(choice_range):
-            ax = axes[i]
-            choice_shares_sim[choice].plot(ax=ax, label=f"Simulated")
-            choice_shares_obs[choice].plot(ax=ax, label="Observed", ls="--")
-            ax.set_title(f"Choice {specs}")
-            ax.set_ylim([0, 1])
-            ax.legend()
+            for choice in choice_range:
+                ax = axes[edu_var, choice]
+                choice_share_sim = choice_shares_sim[choice]
+                choice_share_obs = choice_shares_obs[choice]
+                ax.plot(choice_share_sim, label=f"Simulated")
+                ax.plot(choice_share_obs, label=f"Observed", ls="--")
+                choice_label = specs["choice_labels"][choice]
+                ax.set_title(f"{edu_label}; Choice {choice_label}")
+                ax.set_ylim([0, 1])
+                ax.legend()
 
 
 def plot_choice_shares(paths):

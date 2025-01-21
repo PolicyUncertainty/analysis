@@ -5,11 +5,12 @@ from matplotlib import pyplot as plt
 from model_code.stochastic_processes.policy_states_belief import (
     update_specs_exp_ret_age_trans_mat,
 )
-from simulation.policy_state_scenarios.step_function import (
-    update_specs_for_step_function_scale_1,
-)
 from specs.derive_specs import generate_derived_and_data_derived_specs
 from specs.derive_specs import read_and_derive_specs
+
+# from simulation.policy_state_scenarios.step_function import (
+#     update_specs_for_step_function_scale_1,
+# )
 
 
 def plot_full_time(paths_dict):
@@ -42,20 +43,20 @@ def plot_full_time(paths_dict):
 
 
 def plot_average_savings(paths_dict):
-    data_no_unc = pd.read_pickle(
-        paths_dict["intermediate_data"] + "sim_data/data_real_scale_1.pkl"
-    ).reset_index()
+    # data_no_unc = pd.read_pickle(
+    #     paths_dict["intermediate_data"] + "sim_data/data_real_scale_1.pkl"
+    # ).reset_index()
     data_unc = pd.read_pickle(
         paths_dict["intermediate_data"] + "sim_data/data_subj_scale_1.pkl"
     ).reset_index()
 
     savings_unc = data_unc.groupby("age")["savings_dec"].median()
-    savings_no_unc = data_no_unc.groupby("age")["savings_dec"].median()
-    savings_increase = savings_unc[:35] / savings_no_unc[:35]
+    # savings_no_unc = data_no_unc.groupby("age")["savings_dec"].median()
+    # savings_increase = savings_unc[:35] / savings_no_unc[:35]
 
     fig, ax = plt.subplots()
     ax.plot(savings_unc, label="Uncertainty")
-    ax.plot(savings_no_unc, label="No Uncertainty")
+    # ax.plot(savings_no_unc, label="No Uncertainty")
     ax.set_title("Average savings by age")
     ax.legend()
 

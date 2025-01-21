@@ -54,7 +54,7 @@ from export_results.figures.observed_model_fit import (
 )
 
 data_decision, states_dict = load_and_prep_data_for_model_fit(
-    path_dict, specs, params_post, model
+    path_dict, specs, params_post, model, drop_retirees=True
 )
 
 unobserved_state_specs = create_unobserved_state_specs(data_decision, model)
@@ -115,7 +115,7 @@ data_decision["post_ll"] = choice_probs_for_choice_vals(
 data_decision["ll_diff"] = data_decision["start_ll"] - data_decision["post_ll"]
 
 breakpoint()
-#
+
 # for choice in range(specs["n_choices"]):
 #     for informed in range(2):
 #         for job_offer in range(2):

@@ -92,8 +92,6 @@ def plot_choice_shares_single(paths, specs, params):
     data_sim = pd.read_pickle(
         paths["intermediate_data"] + "sim_data/data_subj_scale_1.pkl"
     ).reset_index()
-    breakpoint()
-
     data_decision = pd.read_pickle(
         paths["intermediate_data"] + "structural_estimation_sample.pkl"
     )

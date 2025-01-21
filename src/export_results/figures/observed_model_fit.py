@@ -110,9 +110,11 @@ def plot_observed_model_fit_choice_probs(
         # fig.suptitle(f"Choice shares {specs['education_labels'][edu]}")
 
 
-def load_and_prep_data_for_model_fit(paths_dict, specs, params, model):
+def load_and_prep_data_for_model_fit(
+    paths_dict, specs, params, model, drop_retirees=False
+):
     data_decision, _ = load_and_prep_data(
-        paths_dict, params, model, drop_retirees=False
+        paths_dict, params, model, drop_retirees=drop_retirees
     )
     data_decision["age"] = data_decision["period"] + specs["start_age"]
     data_decision = data_decision[data_decision["age"] < 75]

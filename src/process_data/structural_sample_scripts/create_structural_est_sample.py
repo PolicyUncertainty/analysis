@@ -44,7 +44,7 @@ def create_structural_est_sample(paths, specs, load_data=False, debug=False):
     # filter data. Leave additional years in for lagging and leading.
     df = filter_data(df, specs)
 
-    df = generate_job_separation_var(df)
+    # df = generate_job_separation_var(df)
     df = create_lagged_and_lead_variables(df, specs)
     df = add_wealth_interpolate_and_deflate(df, paths, specs)
     df["period"] = df["age"] - specs["start_age"]
@@ -60,10 +60,9 @@ def create_structural_est_sample(paths, specs, load_data=False, debug=False):
     df = create_informed_state(df)
 
     # Construct job offer state
-    was_fired_last_period = df["job_sep_this_year"] == 1
-    df = determine_observed_job_offers(
-        df, working_choices=[2, 3], was_fired_last_period=was_fired_last_period
-    )
+    # was_fired_last_period = df["job_sep_this_year"] == 1
+    df = determine_observed_job_offers(df, working_choices=[2, 3])
+
     # Filter out part-time men
     mask = df["sex"] == 0
     df = df[~(mask & (df["choice"] == 2))]
@@ -126,19 +125,19 @@ def load_and_merge_soep_core(soep_c38_path):
         pgen_data, ppathl_data, on=["pid", "hid", "syear"], how="inner"
     )
 
-    # Add pl data
-    pl_data_reader = pd.read_stata(
-        f"{soep_c38_path}/pl.dta",
-        columns=["pid", "hid", "syear", "plb0304_h"],
-        chunksize=100000,
-        convert_categoricals=False,
-    )
-    pl_data = pd.DataFrame()
-    for itm in pl_data_reader:
-        pl_data = pd.concat([pl_data, itm])
-    merged_data = pd.merge(
-        merged_data, pl_data, on=["pid", "hid", "syear"], how="inner"
-    )
+    # # Add pl data
+    # pl_data_reader = pd.read_stata(
+    #     f"{soep_c38_path}/pl.dta",
+    #     columns=["pid", "hid", "syear", "plb0304_h"],
+    #     chunksize=100000,
+    #     convert_categoricals=False,
+    # )
+    # pl_data = pd.DataFrame()
+    # for itm in pl_data_reader:
+    #     pl_data = pd.concat([pl_data, itm])
+    # merged_data = pd.merge(
+    #     merged_data, pl_data, on=["pid", "hid", "syear"], how="inner"
+    # )
 
     # get household level data
     hl_data = pd.read_stata(

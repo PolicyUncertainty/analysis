@@ -62,8 +62,8 @@ for i, alpha_sim in enumerate(alphas_realized):
         model_name="all_free",
         df_exists=None,
         solution_exists=False,
-        sol_model_exists=True,
-        sim_model_exists=True,
+        sol_model_exists=False,
+        sim_model_exists=False,
     )
 
     result_df.loc[i, "below_sixty_savings"] = below_sixty_savings(df)

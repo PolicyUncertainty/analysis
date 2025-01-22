@@ -30,11 +30,6 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     # Read in health transition matrix
     specs["health_trans_mat"] = read_in_health_transition_specs(path_dict, specs)
 
-    # Set initial experience
-    specs["max_init_experience"], specs["max_experience"] = create_max_experience(
-        path_dict, specs, load_precomputed
-    )
-
     specs["job_sep_probs"] = jnp.asarray(
         pkl.load(open(path_dict["est_results"] + "job_sep_probs.pkl", "rb"))
     )
@@ -42,6 +37,10 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     # Add informed process specs
     specs = add_informed_process_specs(specs, path_dict)
 
+    # Set initial experience
+    specs["max_init_experience"] = create_max_experience(
+        path_dict, specs, load_precomputed
+    )
     return specs
 
 

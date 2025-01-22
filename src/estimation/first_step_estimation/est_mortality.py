@@ -1,4 +1,5 @@
 import itertools
+
 import matplotlib.pyplot as plt
 import numpy as np
 import optimagic as om
@@ -11,7 +12,7 @@ def estimate_mortality(paths_dict, specs):
 
     # load life table data and expand/duplicate it to include all possible combinations of health, education and sex
     lifetable_df = pd.read_csv(
-        paths_dict["intermediate_data"] + "mortality_table_for_pandas.csv",
+        paths_dict["open_data"] + "mortality_table_for_pandas.csv",
         sep=";",
     )
     mortality_df = pd.DataFrame(
@@ -194,9 +195,11 @@ def loglike(params, data, start_data):
     event = data["death event"]
     death = event.astype(bool)
 
-    
-    loglike = log_density_function(data[death], params).sum() + log_survival_function(data[~death], params).sum() - log_survival_function(start_data, params).sum()
-    
+    loglike = (
+        log_density_function(data[death], params).sum()
+        + log_survival_function(data[~death], params).sum()
+        - log_survival_function(start_data, params).sum()
+    )
 
     # show progress every 20 iterations
     globals()["Iteration"] += 1

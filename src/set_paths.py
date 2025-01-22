@@ -37,7 +37,9 @@ def create_path_dict(define_user=False, user=None):
     paths_dict = {
         **paths_dict,
         "intermediate_data": analysis_path + "output/intermediate_data/",
+        "open_data": analysis_path + "output/open_access_data/",
         "est_results": analysis_path + "output/est_results/",
+        "first_step_results": analysis_path + "output/est_results/first_step/",
         "tables": analysis_path + "output/tables/",
         "specs": analysis_path + "src/spec.yaml",
         "start_params_and_bounds": analysis_path

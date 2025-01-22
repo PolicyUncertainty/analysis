@@ -13,9 +13,9 @@ def utility_final_consume_all(
     wealth,
     params,
 ):
-    unscaled_bequest_mu_not_one = (
-        wealth ** (1 - params["mu"]) / (1 - params["mu"])
-    ) - 1
+    unscaled_bequest_mu_not_one = (wealth ** (1 - params["mu"]) - 1) / (
+        1 - params["mu"]
+    )
     unscaled_bequest = jax.lax.select(
         jnp.allclose(params["mu"], 1),
         jnp.log(wealth),

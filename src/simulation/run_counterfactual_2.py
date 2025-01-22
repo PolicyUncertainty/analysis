@@ -80,5 +80,3 @@ for i, alpha_sim in enumerate(alphas_realized):
             params=params,
             specs=specs,
         )
-
-breakpoint()

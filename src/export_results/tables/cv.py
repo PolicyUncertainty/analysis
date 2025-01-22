@@ -29,20 +29,20 @@ def create_real_utility(df, specs):
 
 
 def calc_adjusted_scale(df_base, df_count, params, n_agents):
-    mu = params["mu"]
-
+    # First construct the discounted sum of utilities for the counterfactual scenario
     disc_sum_cf = create_disc_sum(df_count, params)
 
-    realized_utility = df_count["real_util"].values
+    # Then we construct the relevant objects to be able to scale consumption,
+    # such that it matches the discounted sum from above
+    mu = params["mu"]
 
-    random_utiltiy_base = realized_utility - df_base["utility"].values
     # Generate not scaled utility by substracting from random utility 1 / (1 - mu)
-    not_scaled_utility = random_utiltiy_base - 1 / (1 - mu)
+    not_scaled_utility = df_base["real_taste_shock"].values - 1 / (1 - mu)
     # Now scaled utility
-    utility_to_scale = realized_utility - not_scaled_utility
+    utility_to_scale = df_base["real_util"].values - not_scaled_utility
 
     # Generate the discount factor for the base dataframe
-    disc_factor_base = params["beta"] ** df_count["period"].values
+    disc_factor_base = params["beta"] ** df_base["period"].values
 
     partial_adjustment = lambda scale_in: create_adjusted_difference(
         utility_to_scale=utility_to_scale,

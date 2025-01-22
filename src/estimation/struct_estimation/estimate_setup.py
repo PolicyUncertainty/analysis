@@ -137,8 +137,9 @@ class est_class_from_paths:
         intermediate_est_data = (
             path_dict["intermediate_data"] + f"estimation_{file_append}/"
         )
-        if not os.path.exists(intermediate_est_data):
-            os.makedirs(intermediate_est_data)
+        if save_results:
+            if not os.path.exists(intermediate_est_data):
+                os.makedirs(intermediate_est_data)
 
         self.intermediate_est_data = intermediate_est_data
 

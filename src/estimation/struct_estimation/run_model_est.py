@@ -18,7 +18,7 @@ params_to_estimate_names = [
     "disutil_ft_work_bad_women",
     "disutil_pt_work_bad_women",
     "disutil_unemployed_women",
-    "disutil_children_pt_work",
+    # "disutil_children_pt_work",
     "disutil_children_ft_work_low",
     "disutil_children_ft_work_high",
     # "disutil_not_retired_bad",

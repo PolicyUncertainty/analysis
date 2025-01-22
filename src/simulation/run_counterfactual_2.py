@@ -77,25 +77,28 @@ for i, alpha_sim in enumerate(alphas_realized):
     if i == 0:
         df_base = df.reset_index().copy()
 
-    for k, df_scneario in enumerate([df, df_base]):
-        if k == 0:
-            col_pre = ""
-        else:
-            col_pre = "base_"
+    else:
+        for k, df_scneario in enumerate([df, df_base]):
+            if k == 0:
+                col_pre = ""
+            else:
+                col_pre = "base_"
 
-        result_df.loc[i, col_pre + "below_sixty_savings"] = below_sixty_savings(
-            df_scneario
-        )
-        result_df.loc[i, col_pre + "ret_age"] = calc_average_retirement_age(df_scneario)
-        result_df.loc[i, col_pre + "sra_at_ret"] = sra_at_retirement(df_scneario)
-        result_df.loc[i, col_pre + "working_hours"] = df["working_hours"].mean()
+            result_df.loc[i, col_pre + "below_sixty_savings"] = below_sixty_savings(
+                df_scneario
+            )
+            result_df.loc[i, col_pre + "ret_age"] = calc_average_retirement_age(
+                df_scneario
+            )
+            result_df.loc[i, col_pre + "sra_at_ret"] = sra_at_retirement(df_scneario)
+            result_df.loc[i, col_pre + "working_hours"] = df["working_hours"].mean()
 
-        result_df.loc[i, "cv"] = calc_compensated_variation(
-            df_base=df_base,
-            df_cf=df.reset_index(),
-            params=params,
-            specs=specs,
-        )
+            result_df.loc[i, "cv"] = calc_compensated_variation(
+                df_base=df_base,
+                df_cf=df.reset_index(),
+                params=params,
+                specs=specs,
+            )
 
 # Save results
 result_df.to_csv(path_dict["sim_results"] + f"counterfactual_2_{model_name}.csv")

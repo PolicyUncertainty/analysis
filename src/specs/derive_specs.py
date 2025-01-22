@@ -38,7 +38,7 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     specs = add_informed_process_specs(specs, path_dict)
 
     # Set initial experience
-    specs["max_init_experience"] = create_max_experience(
+    specs["max_exp_diffs_per_period"] = create_max_experience(
         path_dict, specs, load_precomputed
     )
     return specs

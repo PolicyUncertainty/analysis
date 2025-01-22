@@ -21,6 +21,7 @@ from model_code.policy_processes.policy_states_belief import (
     update_specs_exp_ret_age_trans_mat,
 )
 from model_code.specify_model import specify_model
+from model_code.state_space import construct_experience_years
 from model_code.unobserved_state_weighting import create_unobserved_state_specs
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
@@ -244,7 +245,7 @@ def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):
     specs = generate_derived_and_data_derived_specs(path_dict)
     # Load data
     data_decision = pd.read_pickle(path_dict["struct_est_sample"])
-    data_decision = data_decision[data_decision["sex"] == 0]
+
     # We need to filter observations in period 0 because of job offer weighting from last period
     data_decision = data_decision[data_decision["period"] > 0]
     # Also already retired individuals hold no identification
@@ -263,7 +264,9 @@ def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):
     )["age_weights"].transform("sum")
 
     # Transform experience
-    max_init_exp = model["options"]["model_params"]["max_init_experience"]
+    max_init_exp = model["options"]["model_params"]["max_exp_diffs_per_period"][
+        data_decision["period"].values
+    ]
     exp_denominator = data_decision["period"].values + max_init_exp
     data_decision["experience"] = data_decision["experience"] / exp_denominator
 

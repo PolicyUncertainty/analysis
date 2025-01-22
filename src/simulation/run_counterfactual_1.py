@@ -39,7 +39,7 @@ load_df = True
 # Load params
 params = pkl.load(open(path_dict["est_results"] + f"est_params_{model_name}.pkl", "rb"))
 
-# Initialize alpha values and replace 0.04 with subjective alpha
+# Initialize alpha values and replace 0.04 with subjective alpha(0.041...)
 alphas_realized = np.arange(0, 0.11, 0.01)
 alphas_realized[alphas_realized == 0.04] = np.loadtxt(
     path_dict["est_results"] + "exp_val_params.txt"
@@ -61,8 +61,8 @@ result_df = pd.DataFrame(
 result_df["alpha"] = alphas_realized
 for i, alpha_sim in enumerate(alphas_realized):
     print("Start simulation for alpha: ", alpha_sim)
-    # Create estimated model
-    df = solve_and_simulate_scenario(
+    # Simulate baseline with subjective belief
+    df_base = solve_and_simulate_scenario(
         path_dict=path_dict,
         params=params,
         sim_alpha=alpha_sim,
@@ -74,10 +74,21 @@ for i, alpha_sim in enumerate(alphas_realized):
         sim_model_exists=load_sim_model,
     )
 
-    if i == 0:
-        df_base = df.reset_index().copy()
+    # Simulate counterfactual with no uncertainty and expected increase
+    # same as simulated alpha_sim
+    df_cf = solve_and_simulate_scenario(
+        path_dict=path_dict,
+        params=params,
+        sim_alpha=alpha_sim,
+        expected_alpha=alpha_sim,
+        model_name=model_name,
+        df_exists=load_df,
+        solution_exists=load_solution,
+        sol_model_exists=load_sol_model,
+        sim_model_exists=load_sim_model,
+    )
 
-    for k, df_scneario in enumerate([df, df_base]):
+    for k, df_scneario in enumerate([df_cf, df_base]):
         if k == 0:
             col_pre = ""
         else:
@@ -88,14 +99,16 @@ for i, alpha_sim in enumerate(alphas_realized):
         )
         result_df.loc[i, col_pre + "ret_age"] = calc_average_retirement_age(df_scneario)
         result_df.loc[i, col_pre + "sra_at_ret"] = sra_at_retirement(df_scneario)
-        result_df.loc[i, col_pre + "working_hours"] = df["working_hours"].mean()
+        result_df.loc[i, col_pre + "working_hours"] = df_scneario[
+            "working_hours"
+        ].mean()
 
-        result_df.loc[i, "cv"] = calc_compensated_variation(
-            df_base=df_base,
-            df_cf=df.reset_index(),
-            params=params,
-            specs=specs,
-        )
+    result_df.loc[i, "cv"] = calc_compensated_variation(
+        df_base=df_base,
+        df_cf=df_cf.reset_index(),
+        params=params,
+        specs=specs,
+    )
 
 # Save results
-result_df.to_csv(path_dict["sim_results"] + f"counterfactual_2_{model_name}.csv")
+result_df.to_csv(path_dict["sim_results"] + f"counterfactual_1_{model_name}.csv")

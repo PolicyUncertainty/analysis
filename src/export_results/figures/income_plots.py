@@ -163,11 +163,13 @@ def plot_total_income(specs):
                 for choice, work_label in enumerate(specs["choice_labels"]):
                     total_income = np.zeros_like(exp_levels, dtype=float)
                     for i, exp in enumerate(exp_levels):
-                        exp_share = exp / (exp + specs["max_init_experience"])
                         if work_label == "Retired":
                             period = 45
                         else:
                             period = exp
+                        exp_share = exp / (
+                            exp + specs["max_exp_diffs_per_period"][period]
+                        )
                         total_income[i] = budget_constraint(
                             period=period,
                             education=edu_val,

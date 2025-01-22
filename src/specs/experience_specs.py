@@ -1,3 +1,4 @@
+import jax.numpy as jnp
 import numpy as np
 import pandas as pd
 from model_code.state_space import calc_experience_years_for_pension_adjustment
@@ -6,8 +7,8 @@ from model_code.state_space import calc_experience_years_for_pension_adjustment
 def create_max_experience(path_dict, specs, load_precomputed):
     # Initial experience
     if load_precomputed:
-        max_exp_diff = int(
-            np.loadtxt(path_dict["first_step_results"] + "max_init_exp.txt")
+        max_exp_diffs_per_period = np.loadtxt(
+            path_dict["first_step_results"] + "max_exp_diffs_per_period.txt"
         )
     else:
         # max initial experience
@@ -60,8 +61,13 @@ def create_max_experience(path_dict, specs, load_precomputed):
         # Get the maximum over all and assign to the rest of the periods,
         # always minus 1
         max_exp_diff = max_exp_diff_to_periods.max()
-        max_exp_diffs_per_period[ret_periods[-1] + 1 :] = max_exp_diff
+        last_periods = np.arange(ret_periods[-1] + 1, specs["n_periods"])
+        exp_diff_reduction = last_periods - ret_periods[-1]
+        max_exp_diffs_per_period[last_periods] = max_exp_diff - exp_diff_reduction
 
-        np.savetxt(path_dict["first_step_results"] + "max_init_exp.txt", [max_exp_diff])
+        np.savetxt(
+            path_dict["first_step_results"] + "max_exp_diffs_per_period.txt",
+            [max_exp_diffs_per_period],
+        )
 
-    return max_exp_diff
+    return jnp.asarray(max_exp_diffs_per_period)

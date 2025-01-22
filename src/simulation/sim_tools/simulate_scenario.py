@@ -6,6 +6,7 @@ from model_code.policy_processes.select_policy_belief import (
 )
 from model_code.specify_model import specify_and_solve_model
 from model_code.specify_model import specify_model
+from model_code.state_space import construct_experience_years
 from set_paths import get_model_resutls_path
 from simulation.sim_tools.initial_conditions_sim import generate_start_states
 
@@ -108,8 +109,10 @@ def simulate_scenario(
     model_params = options["model_params"]
     df["age"] = df.index.get_level_values("period") + model_params["start_age"]
     # Create experience years
-    df["exp_years"] = df["experience"] * (
-        model_params["max_init_experience"] + df.index.get_level_values("period")
+    df["exp_years"] = construct_experience_years(
+        experience=df["experience"].values,
+        period=df.index.get_level_values("period").values,
+        max_exp_diffs_per_period=model_params["max_exp_diffs_per_period"],
     )
 
     # Create policy value

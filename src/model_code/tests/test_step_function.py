@@ -1,7 +1,7 @@
 import jax.numpy as jnp
 import pytest
 from model_code.policy_processes.step_function import (
-    create_update_function_subj_alpha,
+    create_update_function_for_slope,
 )
 from model_code.policy_processes.step_function import (
     realized_policy_step_function,
@@ -20,7 +20,7 @@ def paths_and_specs():
 def test_step_function(paths_and_specs):
     path_dict, specs = paths_and_specs
 
-    update_func = create_update_function_subj_alpha(path_dict, 1.0)
+    update_func = create_update_function_for_slope(1.0)
 
     specs = update_func(
         specs=specs,

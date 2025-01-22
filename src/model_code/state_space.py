@@ -153,8 +153,11 @@ def get_next_period_experience(
     period, lagged_choice, policy_state, sex, education, experience, informed, options
 ):
     """Update experience based on lagged choice and period."""
-    max_experience_period = period + options["max_init_experience"]
-    exp_years_last_period = (max_experience_period - 1) * experience
+    exp_years_last_period = construct_experience_years(
+        experience=experience,
+        period=period - 1,
+        max_exp_diffs_per_period=options["max_exp_diffs_per_period"],
+    )
 
     # Update if working part or full time
     exp_update = (lagged_choice == 3) + (lagged_choice == 2) * options[
@@ -180,7 +183,7 @@ def get_next_period_experience(
     exp_new_period = jax.lax.select(
         fresh_retired, experience_years_with_penalty, exp_new_period
     )
-    return (1 / max_experience_period) * exp_new_period
+    return (1 / (period + options["max_exp_diffs_per_period"][period])) * exp_new_period
 
 
 def calc_experience_years_for_pension_adjustment(
@@ -229,3 +232,8 @@ def calc_experience_years_for_pension_adjustment(
         options=options,
     )
     return reduced_experience_years
+
+
+def construct_experience_years(experience, period, max_exp_diffs_per_period):
+    """Experience and period can also be arrays."""
+    return experience * (period + max_exp_diffs_per_period[period])

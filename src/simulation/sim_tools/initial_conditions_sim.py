@@ -144,7 +144,7 @@ def generate_start_states(path_dict, params, model, n_agents, seed):
             health_agents[type_mask] = health_states_edu
 
     # Transform it to be between 0 and 1
-    exp_agents /= specs["max_init_experience"]
+    exp_agents /= specs["max_exp_diffs_per_period"][0]
 
     # Set lagged choice to 1(unemployment) if experience is 0
     exp_zero_mask = exp_agents == 0

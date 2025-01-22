@@ -341,7 +341,7 @@ def test_bequest(consumption, mu, bequest_scale):
     if mu == 1:
         bequest = bequest_scale * np.log(consumption)
     else:
-        bequest = bequest_scale * (consumption ** (1 - mu) / (1 - mu))
+        bequest = bequest_scale * ((consumption ** (1 - mu) - 1) / (1 - mu))
     np.testing.assert_almost_equal(
         utility_final_consume_all(consumption, params), bequest
     )

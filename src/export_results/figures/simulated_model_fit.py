@@ -73,7 +73,6 @@ def plot_choice_shares_single(paths, specs, params):
     data_decision = pd.read_pickle(
         paths["intermediate_data"] + "structural_estimation_sample.pkl"
     )
-    data_decision = data_decision[data_decision["sex"] == 0]
 
     data_decision["age"] = data_decision["period"] + specs["start_age"]
     data_sim["age"] = data_sim["period"] + specs["start_age"]

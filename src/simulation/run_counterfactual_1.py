@@ -46,7 +46,7 @@ alphas_realized[alphas_realized == 0.04] = np.loadtxt(
 )
 
 # Create result df
-result_df = pd.DataFrame(
+res_df = pd.DataFrame(
     columns=[
         "alpha",
         "below_sixty_savings",
@@ -58,7 +58,7 @@ result_df = pd.DataFrame(
     dtype=float,
 )
 # Assign alphas in dataframe
-result_df["alpha"] = alphas_realized
+res_df["alpha"] = alphas_realized
 for i, alpha_sim in enumerate(alphas_realized):
     print("Start simulation for alpha: ", alpha_sim)
     # Simulate baseline with subjective belief
@@ -88,22 +88,18 @@ for i, alpha_sim in enumerate(alphas_realized):
         sim_model_exists=load_sim_model,
     )
 
-    for k, df_scneario in enumerate([df_cf, df_base]):
+    for k, df_scen in enumerate([df_cf, df_base]):
         if k == 0:
-            col_pre = ""
+            pre = ""
         else:
-            col_pre = "base_"
+            pre = "base_"
 
-        result_df.loc[i, col_pre + "below_sixty_savings"] = below_sixty_savings(
-            df_scneario
-        )
-        result_df.loc[i, col_pre + "ret_age"] = calc_average_retirement_age(df_scneario)
-        result_df.loc[i, col_pre + "sra_at_ret"] = sra_at_retirement(df_scneario)
-        result_df.loc[i, col_pre + "working_hours"] = df_scneario[
-            "working_hours"
-        ].mean()
+        res_df.loc[i, pre + "below_sixty_savings"] = below_sixty_savings(df_scen)
+        res_df.loc[i, pre + "ret_age"] = calc_average_retirement_age(df_scen)
+        res_df.loc[i, pre + "sra_at_ret"] = sra_at_retirement(df_scen)
+        res_df.loc[i, pre + "working_hours"] = df_scen["working_hours"].mean()
 
-    result_df.loc[i, "cv"] = calc_compensated_variation(
+    res_df.loc[i, "cv"] = calc_compensated_variation(
         df_base=df_base,
         df_cf=df_cf.reset_index(),
         params=params,
@@ -111,4 +107,4 @@ for i, alpha_sim in enumerate(alphas_realized):
     )
 
 # Save results
-result_df.to_csv(path_dict["sim_results"] + f"counterfactual_1_{model_name}.csv")
+res_df.to_csv(path_dict["sim_results"] + f"counterfactual_1_{model_name}.csv")

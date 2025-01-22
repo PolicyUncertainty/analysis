@@ -10,12 +10,9 @@ def generate_job_separation_var(data):
     return data
 
 
-def determine_observed_job_offers(data, working_choices):
+def determine_observed_job_offers(data, working_choices, was_fired_last_period):
     """Determine if a job offer is observed and if so what it is. The function
     implements the following rule:
-
-    OVERWRITE RIGHT NOW:
-    Only working people have an observed job offer of 1.
 
     Assume lagged choice is working (column "lagged_choice" is in working_choices),
     then the state is fully observed:
@@ -43,15 +40,15 @@ def determine_observed_job_offers(data, working_choices):
     # Individuals working have job offer equal to 1 and are fully observed
     data.loc[working_this_period, "job_offer"] = 1
 
-    # # Individuals who are unemployed or retired and are fired this period have job offer
-    # # equal to 0. This includes individuals with lagged choice unemployment, as they
-    # # might be interviewed after firing.
-    # maskfired = (~working_this_period) & was_fired_last_period & was_working_last_period
-    # data.loc[maskfired, "job_offer"] = 0
-    #
-    # # Everybody who was not fired is also fully observed an has an job offer
-    # mask_not_fired = (
-    #     (~working_this_period) & (~was_fired_last_period) & was_working_last_period
-    # )
-    # data.loc[mask_not_fired, "job_offer"] = 1
+    # Individuals who are unemployed or retired and are fired this period have job offer
+    # equal to 0. This includes individuals with lagged choice unemployment, as they
+    # might be interviewed after firing.
+    maskfired = (~working_this_period) & was_fired_last_period & was_working_last_period
+    data.loc[maskfired, "job_offer"] = 0
+
+    # Everybody who was not fired is also fully observed an has an job offer
+    mask_not_fired = (
+        (~working_this_period) & (~was_fired_last_period) & was_working_last_period
+    )
+    data.loc[mask_not_fired, "job_offer"] = 1
     return data

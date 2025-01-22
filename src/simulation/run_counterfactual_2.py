@@ -32,7 +32,7 @@ seeed = 123
 params = pkl.load(open(path_dict["est_params"], "rb"))
 
 # Initialize alpha values and replace 0.04 with subjective alpha
-alphas_realized = np.arange(0, 0.05, 0.01)
+alphas_realized = np.arange(0, 0.11, 0.01)
 alphas_realized[alphas_realized == 0.04] = np.loadtxt(
     path_dict["est_results"] + "exp_val_params.txt"
 )
@@ -59,11 +59,11 @@ for i, alpha_sim in enumerate(alphas_realized):
         params=params,
         sim_alpha=alpha_sim,
         expected_alpha=False,
-        model_name="all_free",
-        df_exists=None,
-        solution_exists=False,
-        sol_model_exists=False,
-        sim_model_exists=False,
+        model_name="pete",
+        df_exists=False,
+        solution_exists=True,
+        sol_model_exists=True,
+        sim_model_exists=True,
     )
 
     result_df.loc[i, "below_sixty_savings"] = below_sixty_savings(df)

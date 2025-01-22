@@ -24,7 +24,7 @@ def span_dataframe(df, start_year, end_year):
     return full_container
 
 
-def create_lagged_and_lead_variables(merged_data, specs):
+def create_lagged_and_lead_variables(merged_data, specs, lead_job_sep=False):
     """This function creates the lagged choice variable and drops missing lagged
     choices."""
 
@@ -33,11 +33,15 @@ def create_lagged_and_lead_variables(merged_data, specs):
     )
 
     full_container["lagged_choice"] = full_container.groupby(["pid"])["choice"].shift()
-    # full_container["job_sep_this_year"] = full_container.groupby(["pid"])[
-    #     "job_sep"
-    # ].shift(-1)
+
+    if lead_job_sep:
+        full_container["job_sep_this_year"] = full_container.groupby(["pid"])[
+            "job_sep"
+        ].shift(-1)
+
     merged_data = full_container[full_container["lagged_choice"].notna()]
-    # merged_data = merged_data[merged_data["job_sep_this_year"].notna()]
+    if lead_job_sep:
+        merged_data = merged_data[merged_data["job_sep_this_year"].notna()]
 
     # We now have observations with a valid lagged or lead variable but not with
     # actual valid state variables. Delete those by looking at the choice variable.

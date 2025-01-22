@@ -34,17 +34,11 @@ def sparsity_condition(
     # Degenerated policy state
     degenerate_policy_state = options["n_policy_states"] - 1
 
-    # Construct sra
-    SRA_pol_state = options["min_SRA"] + policy_state * options["SRA_grid_size"]
-    min_ret_age_pol_state = apply_retirement_constraint_for_SRA(SRA_pol_state, options)
-
     age = start_age + period
     if (sex == 0) & (lagged_choice == 2):
         return False
     # You cannot retire before the earliest retirement age
     if (age <= min_ret_age_state_space) & (lagged_choice == 0):
-        return False
-    elif (age > min_ret_age_pol_state) & (lagged_choice == 1) & (health != 2):
         return False
     # After the maximum retirement age, you must be retired.
     elif (age > max_ret_age) & (lagged_choice != 0) & (health != 2):

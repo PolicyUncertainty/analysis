@@ -13,7 +13,7 @@ from simulation.sim_tools.initial_conditions_sim import generate_start_states
 def solve_and_simulate_scenario(
     path_dict,
     params,
-    policy_exp_params,
+    expected_alpha,
     sim_alpha,
     model_name,
     df_exists,
@@ -25,7 +25,7 @@ def solve_and_simulate_scenario(
         path_dict=path_dict,
         params=params,
         file_append=model_name,
-        policy_exp_params=policy_exp_params,
+        expected_alpha=expected_alpha,
         load_model=sol_model_exists,
         load_solution=solution_exists,
     )
@@ -36,15 +36,14 @@ def solve_and_simulate_scenario(
         transition_funcs,
         model_sol_names,
     ) = select_expectation_functions_and_model_sol_names(
-        path_dict, exp_params_sol=policy_exp_params, sim_alpha=sim_alpha
+        path_dict, expected_alpha=expected_alpha, sim_alpha=sim_alpha
     )
 
     solve_folder = get_model_resutls_path(path_dict, model_name)
 
     df_file = solve_folder["simulation"] + model_sol_names["simulation"]
-
     if df_exists:
-        data_sim = pd.read_pickle(solve_folder["simulation"] + "data_sim.pkl")
+        data_sim = pd.read_pickle(df_file)
         return data_sim
     else:
         data_sim = simulate_scenario(
@@ -104,29 +103,50 @@ def simulate_scenario(
         model_sim=model_sim,
     )
     df = create_simulation_df(sim_dict)
-    df["age"] = (
-        df.index.get_level_values("period") + options["model_params"]["start_age"]
-    )
-    # Create lagged health state for each agent and period
-    df["health_lag"] = df.groupby("agent")["health"].shift(1)
-    # Filter out individuals for which health state and health lag is 2
-    df = df[(df["health"] != 2) | ((df["health"] == 2) & (df["health_lag"] != 2))]
 
+    # Create additional variables
+    model_params = options["model_params"]
+    df["age"] = df.index.get_level_values("period") + model_params["start_age"]
+    # Create experience years
+    df["exp_years"] = df["experience"] * (
+        model_params["max_init_experience"] + df.index.get_level_values("period")
+    )
+
+    # Create policy value
+    df["policy_state_value"] = (
+        model_params["min_SRA"] + df["policy_state"] * model_params["SRA_grid_size"]
+    )
+
+    # Assign working hours for choice 1
+    df["working_hours"] = 0.0
+    for sex_var in range(model_params["n_sexes"]):
+        for edu_var in range(model_params["n_education_types"]):
+            df.loc[
+                (df["choice"] == 3)
+                & (df["sex"] == sex_var)
+                & (df["education"] == edu_var),
+                "working_hours",
+            ] = model_params["av_annual_hours_ft"][sex_var, edu_var]
+
+            df.loc[
+                (df["choice"] == 2)
+                & (df["sex"] == sex_var)
+                & (df["education"] == edu_var),
+                "working_hours",
+            ] = model_params["av_annual_hours_pt"][sex_var, edu_var]
+
+    # Create income vars:
+    # First wealth at the beginning of period as the sum of savings and consumption
     df["wealth_at_beginning"] = df["savings"] + df["consumption"]
-    # Create income var by shifting period of 1 of individuals and then substract
-    # savings from resoures at beginning of period
-    df["labor_income"] = df.groupby("agent")["wealth_at_beginning"].shift(-1) - df[
-        "savings"
-    ] * (1 + params["interest_rate"])
+    # Then total income as the difference between wealth at the beginning of next period and savings
     df["total_income"] = (
         df.groupby("agent")["wealth_at_beginning"].shift(-1) - df["savings"]
     )
+    # Finally the savings decision
     df["savings_dec"] = df["total_income"] - df["consumption"]
-    df["age"] = (
-        df.index.get_level_values("period") + options["model_params"]["start_age"]
-    )
-    df["exp_years"] = df["experience"] * (
-        options["model_params"]["max_init_experience"]
-        + df.index.get_level_values("period")
-    )
+
+    # Create lagged health state to filter out already dead people
+    df["health_lag"] = df.groupby("agent")["health"].shift(1)
+    df = df[(df["health"] != 2) | ((df["health"] == 2) & (df["health_lag"] != 2))]
+
     return df

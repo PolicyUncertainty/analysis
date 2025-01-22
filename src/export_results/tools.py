@@ -1,17 +1,12 @@
 import numpy as np
 
 
-def create_realized_taste_shock(df):
+def create_realized_taste_shock(df, specs):
     df.loc[:, "real_taste_shock"] = np.nan
-    df.loc[df["choice"] == 0, "real_taste_shock"] = df.loc[
-        df["choice"] == 0, "taste_shocks_0"
-    ]
-    df.loc[df["choice"] == 1, "real_taste_shock"] = df.loc[
-        df["choice"] == 1, "taste_shocks_1"
-    ]
-    df.loc[df["choice"] == 2, "real_taste_shock"] = df.loc[
-        df["choice"] == 2, "taste_shocks_2"
-    ]
+    for choice in range(specs["n_choices"]):
+        df.loc[df["choice"] == choice, "real_taste_shock"] = df.loc[
+            df["choice"] == choice, f"taste_shocks_{choice}"
+        ]
     return df
 
 

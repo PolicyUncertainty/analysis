@@ -148,7 +148,7 @@ def specify_and_solve_model(
     path_dict,
     file_append,
     params,
-    policy_exp_params,
+    expected_alpha,
     load_model,
     load_solution,
 ):
@@ -162,7 +162,7 @@ def specify_and_solve_model(
         transition_funcs,
         model_sol_names,
     ) = select_expectation_functions_and_model_sol_names(
-        path_dict, exp_params_sol=policy_exp_params, sim_alpha=None
+        path_dict, expected_alpha=expected_alpha, sim_alpha=None
     )
 
     # Generate model_specs

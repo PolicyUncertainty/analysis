@@ -10,27 +10,20 @@ from model_code.policy_processes.step_function import realized_policy_step_funct
 
 
 def select_expectation_functions_and_model_sol_names(
-    path_dict, exp_params_sol, sim_alpha=None
+    path_dict, expected_alpha, sim_alpha=None
 ):
-    if isinstance(exp_params_sol, dict):
-        # Check if alpha and sigma_sq are in the exp_params, otherwise raise error
-        if "alpha" not in exp_params_sol:
-            raise ValueError("exp_params must contain the key 'alpha', if it is a dict")
+    if isinstance(expected_alpha, float):
+        update_func_sol = create_update_function_for_slope(expected_alpha)
+        transition_func_sol = realized_policy_step_function
 
-        if exp_params_sol["alpha"] == "subjective":
-            alpha_hat = np.loadtxt(path_dict["est_results"] + "exp_val_params.txt")
-            update_func_sol = create_update_function_for_slope(alpha_hat)
-            transition_func_sol = realized_policy_step_function
+        subj_alpha = np.loadtxt(path_dict["est_results"] + "exp_val_params.txt")
+        if np.allclose(subj_alpha, expected_alpha):
             sol_name = "subj_no_unc"
-        # Check if alpha is a float or int
-        elif exp_params_sol["alpha"] in [float, int]:
-            update_func_sol = create_update_function_for_slope(exp_params_sol["alpha"])
-            transition_func_sol = realized_policy_step_function
-            # Generate a string with only 3 digits after the comma
-            sol_name = "{:.3f}".format(exp_params_sol["alpha"])
         else:
-            raise ValueError("exp_params['alpha'] must be a float, int or 'subject'")
-    elif not exp_params_sol:
+            # Generate a string with only 3 digits after the comma
+            sol_name = "{:.3f}".format(expected_alpha)
+
+    elif not expected_alpha:
         update_func_sol = update_specs_exp_ret_age_trans_mat
         transition_func_sol = expected_SRA_probs_estimation
         sol_name = "subj_unc"
@@ -47,7 +40,7 @@ def select_expectation_functions_and_model_sol_names(
         "solution": transition_func_sol,
     }
     if sim_alpha is not None:
-        if isinstance(sim_alpha, float) or isinstance(sim_alpha, int):
+        if isinstance(sim_alpha, float):
             update_func_sim = create_update_function_for_slope(sim_alpha)
             transition_func_sim = realized_policy_step_function
             subj_alpha = np.loadtxt(path_dict["est_results"] + "exp_val_params.txt")

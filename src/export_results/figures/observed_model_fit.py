@@ -13,15 +13,14 @@ from model_code.specify_model import specify_and_solve_model
 from model_code.unobserved_state_weighting import create_unobserved_state_specs
 
 
-def observed_model_fit(paths_dict, specs, params):
+def observed_model_fit(paths_dict, specs, params, model_name):
     est_model, model, params = specify_and_solve_model(
         path_dict=paths_dict,
         params=params,
-        update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
-        policy_state_trans_func=expected_SRA_probs_estimation,
-        file_append="mu_fixed",
+        expected_alpha=False,
+        file_append=model_name,
         load_model=True,
-        load_solution=False,
+        load_solution=True,
     )
 
     data_decision, states_dict = load_and_prep_data_for_model_fit(
@@ -70,6 +69,10 @@ def plot_observed_model_fit_choice_probs(
         choice_probs_observations = np.nan_to_num(choice_probs_observations, nan=0.0)
         data_decision[f"choice_{choice}"] = choice_probs_observations
 
+    # df_poss = data_decision[data_decision["choice_0"] > 0]
+    # df_poss = df_poss[df_poss["lagged_choice"] != 0]
+    # post_sra = df_poss["age"] - df_poss["policy_state_value"]
+    # breakpoint()
     # for partner_val, partner_label in enumerate(partner_labels):
     for edu in range(2):
         fig, axes = plt.subplots(2, specs["n_choices"], figsize=(10, 5))

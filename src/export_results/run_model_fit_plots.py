@@ -8,6 +8,8 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 path_dict = create_path_dict()
 
 specs = generate_derived_and_data_derived_specs(path_dict)
+model_name = "pete"
+
 
 kind_string = input("Execute [pre]- or [post]-estimation plots? (pre/post) ")
 
@@ -18,7 +20,9 @@ if kind_string == "pre":
 
     params = load_and_set_start_params(path_dict)
 elif kind_string == "post":
-    params = pickle.load(open(path_dict["est_params"], "rb"))
+    params = pickle.load(
+        open(path_dict["est_results"] + f"est_params_{model_name}.pkl", "rb")
+    )
 else:
     raise ValueError("Either pre or post estimation plots.")
 
@@ -32,7 +36,7 @@ which_plot = input("Which plot to show? ([a]ll/[f]it]/[s]im): ")
 if which_plot in ["a", "f"]:
     from export_results.figures.observed_model_fit import observed_model_fit
 
-    observed_model_fit(path_dict, specs, params)
+    observed_model_fit(path_dict, specs, params, model_name)
     plt.show()
 plt.close("all")
 

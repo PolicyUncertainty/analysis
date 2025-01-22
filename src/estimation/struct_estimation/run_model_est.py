@@ -9,7 +9,7 @@ paths_dict = create_path_dict(define_user=False)
 from estimation.struct_estimation.estimate_setup import estimate_model
 
 params_to_estimate_names = [
-    "mu",
+    # "mu",
     "disutil_unemployed_men",
     "disutil_ft_work_good_men",
     "disutil_ft_work_bad_men",
@@ -25,7 +25,7 @@ params_to_estimate_names = [
     # "disutil_working_bad",
     # "disutil_not_retired_good",
     # "disutil_working_good",
-    "bequest_scale",
+    # "bequest_scale",
     # "taste_shock_scale_men",
     # "taste_shock_scale_women",
     "lambda",
@@ -56,7 +56,7 @@ params_to_estimate_names = [
 estimation_results = estimate_model(
     paths_dict,
     params_to_estimate_names=params_to_estimate_names,
-    file_append="pete",
+    file_append="all_free",
     slope_disutil_method=False,
     load_model=True,
     use_weights=True,

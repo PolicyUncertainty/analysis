@@ -3,16 +3,13 @@ import pickle
 import numpy as np
 import pandas as pd
 import scipy.optimize as opt
-from export_results.tools import create_discounted_sum_utilities
 from export_results.tools import create_realized_taste_shock
 
 
 def calc_compensated_variation(df_base, df_cf, params, specs):
+    """We assume the dfs have resetted index."""
     df_base = create_real_utility(df_base, specs)
     df_cf = create_real_utility(df_cf, specs)
-
-    df_base.reset_index(inplace=True)
-    df_cf.reset_index(inplace=True)
 
     df_base = add_number_cons_scale(df_base, specs)
     df_cf = add_number_cons_scale(df_cf, specs)
@@ -76,10 +73,8 @@ def create_adjusted_difference(
     return adjusted_disc_sum - disc_sum_cf
 
 
-def create_disc_sum(df, params, reset_index=False):
+def create_disc_sum(df, params):
     beta = params["beta"]
-    if reset_index:
-        df.reset_index(inplace=True)
     df.loc[:, "disc_util"] = df["real_util"] * (beta ** df["period"])
 
     return df.groupby("agent")["disc_util"].sum().mean()

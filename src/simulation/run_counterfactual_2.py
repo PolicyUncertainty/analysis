@@ -32,7 +32,7 @@ seeed = 123
 params = pkl.load(open(path_dict["est_params"], "rb"))
 
 # Initialize alpha values and replace 0.04 with subjective alpha
-alphas_realized = np.arange(0, 0.11, 0.01)
+alphas_realized = np.arange(0, 0.05, 0.01)
 alphas_realized[alphas_realized == 0.04] = np.loadtxt(
     path_dict["est_results"] + "exp_val_params.txt"
 )
@@ -59,9 +59,9 @@ for i, alpha_sim in enumerate(alphas_realized):
         params=params,
         sim_alpha=alpha_sim,
         expected_alpha=False,
-        model_name="pete",
-        df_exists=False,
-        solution_exists=True,
+        model_name="all_free",
+        df_exists=None,
+        solution_exists=False,
         sol_model_exists=True,
         sim_model_exists=True,
     )
@@ -72,11 +72,14 @@ for i, alpha_sim in enumerate(alphas_realized):
     result_df.loc[i, "working_hours"] = df["working_hours"].mean()
 
     if i == 0:
-        df_base = df.copy()
+        df_base = df.reset_index().copy()
     else:
         result_df.loc[i, "cv"] = calc_compensated_variation(
             df_base=df_base,
-            df_cf=df,
+            df_cf=df.reset_index(),
             params=params,
             specs=specs,
         )
+
+# Save results
+result_df.to_csv("counterfactual_2.csv")

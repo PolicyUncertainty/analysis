@@ -97,6 +97,7 @@ def test_utility_func(
         "disutil_unemployed_women": disutil_unemployed,
         "disutil_children_ft_work_low": 0.1,
         "disutil_children_ft_work_high": 0.1,
+        "bequest_scale": 2,
     }
     options = paths_and_specs[1]
     cons_scale = consumption_scale(
@@ -228,6 +229,7 @@ def test_marginal_utility(
         "disutil_unemployed_women": disutil_unemployed,
         "disutil_children_ft_work_low": 0.1,
         "disutil_children_ft_work_high": 0.1,
+        "bequest_scale": 2,
     }
 
     random_choice = np.random.choice(np.array([0, 1, 2]))
@@ -298,6 +300,7 @@ def test_inv_marginal_utility(
         "disutil_unemployed_women": disutil_unemployed,
         "disutil_children_ft_work_low": 0.1,
         "disutil_children_ft_work_high": 0.1,
+        "bequest_scale": 2,
     }
 
     options = paths_and_specs[1]
@@ -341,7 +344,7 @@ def test_bequest(consumption, mu, bequest_scale):
     if mu == 1:
         bequest = bequest_scale * np.log(consumption)
     else:
-        bequest = bequest_scale * ((consumption ** (1 - mu) - 1) / (1 - mu))
+        bequest = bequest_scale * (((consumption ** (1 - mu)) - 1) / (1 - mu))
     np.testing.assert_almost_equal(
         utility_final_consume_all(consumption, params), bequest
     )

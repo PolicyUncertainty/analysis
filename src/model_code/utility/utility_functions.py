@@ -11,16 +11,10 @@ def create_utility_functions():
     }
 
 
-def create_utility_functions_sim():
-    return {
-        "utility": utility_func_sim,
-    }
-
-
-def utility_func_sim(
+def utility_func(
     consumption, sex, partner_state, education, health, period, choice, params, options
 ):
-    utility_alive = utility_func(
+    utility_alive = utility_func_alive(
         consumption=consumption,
         sex=sex,
         partner_state=partner_state,
@@ -40,7 +34,7 @@ def utility_func_sim(
     return utility
 
 
-def utility_func(
+def utility_func_alive(
     consumption, sex, partner_state, education, health, period, choice, params, options
 ):
     """Calculate the choice specific cobb-douglas utility, i.e. u =

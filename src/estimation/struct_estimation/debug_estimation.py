@@ -139,14 +139,20 @@ def plot_value(
             else:
                 raise ValueError("Wealth not in state_dict or var_name")
 
+            def final_period(**kwargs):
+                return model["model_funcs"]["compute_utility_final"](
+                    wealth=kwargs["consumption"], params=params
+                )
+
             policy, value = policy_and_value_for_state_choice_vec(
-                endog_grid_solved,
-                value_solved,
-                policy_solved,
-                params,
-                model,
-                state_choice_dict,
-                wealth,
+                endog_grid_solved=endog_grid_solved,
+                value_solved=value_solved,
+                policy_solved=policy_solved,
+                params=params,
+                model=model,
+                state_choice_vec=state_choice_dict,
+                wealth=wealth,
+                compute_utility=final_period,
                 second_continous=second_cont,
             )
             value_all[var_id] = value
@@ -169,8 +175,8 @@ discrete_state_to_plot = {
     "period": 70,
     "lagged_choice": 0,
     "policy_state": 29,
-    "job_offer": 1,
-    "education": 1,
+    "job_offer": 0,
+    "education": 0,
     "health": 2,
     "sex": 0,
     "informed": 1,

@@ -7,6 +7,7 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 
 path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
+model_name = "both"
 
 kind_string = input("Execute [pre]- or [post]-estimation plots? (pre/post)\n")
 
@@ -17,7 +18,9 @@ if kind_string == "pre":
 
     params = load_and_set_start_params(path_dict)
 elif kind_string == "post":
-    params = pickle.load(open(path_dict["est_params"], "rb"))
+    params = pickle.load(
+        open(path_dict["est_results"] + f"est_params_{model_name}.pkl", "rb")
+    )
 else:
     raise ValueError("Either pre or post estimation plots.")
 
@@ -71,10 +74,15 @@ if exec_family:
 # ##########################################
 exec_utility = input("Show utility plots? (y/n) ") == "y"
 if exec_utility:
-    from export_results.figures.utility import plot_utility, plot_cons_scale
+    from export_results.figures.utility import (
+        plot_utility,
+        plot_cons_scale,
+        plot_bequest,
+    )
 
     plot_utility(params, specs)
     plot_cons_scale(specs)
+    plot_bequest(params, specs)
     plt.show()
     plt.close("all")
 

@@ -1,6 +1,7 @@
 # %%
 import matplotlib.pyplot as plt
 import numpy as np
+from model_code.utility.bequest_utility import utility_final_consume_all
 from model_code.utility.utility_functions import consumption_scale
 from model_code.utility.utility_functions import utility_func
 
@@ -38,6 +39,28 @@ def plot_utility(params, specs):
     ax.set_xlabel("Utility")
     ax.set_ylabel("Consumption")
     ax.set_title("Utility function (reversed axes)")
+
+
+def plot_bequest(params, specs):
+    wealth = np.linspace(5_000, 100_000, 1000) / specs["wealth_unit"]
+
+    choice_labels = specs["choice_labels"]
+    fig, ax = plt.subplots()
+    for choice, choice_label in enumerate(choice_labels):
+        bequests = np.zeros_like(wealth)
+        for i, w in enumerate(wealth):
+            bequests[i] = utility_final_consume_all(
+                wealth=w,
+                params=params,
+            )
+        ax.plot(
+            wealth,
+            bequests,
+            label=choice_label,
+        )
+    ax.legend()
+    ax.set_ylabel("Bequest Utility")
+    ax.set_xlabel("Consumption")
 
 
 def plot_cons_scale(specs):

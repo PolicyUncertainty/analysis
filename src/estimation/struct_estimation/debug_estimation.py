@@ -53,6 +53,7 @@ solution, model, params = specify_and_solve_model(
     load_model=True,
     load_solution=True,
 )
+
 from estimation.struct_estimation.estimate_setup import load_and_prep_data
 
 data_decision, states_dict = load_and_prep_data(
@@ -139,11 +140,6 @@ def plot_value(
             else:
                 raise ValueError("Wealth not in state_dict or var_name")
 
-            def final_period(**kwargs):
-                return model["model_funcs"]["compute_utility_final"](
-                    wealth=kwargs["consumption"], params=params
-                )
-
             policy, value = policy_and_value_for_state_choice_vec(
                 endog_grid_solved=endog_grid_solved,
                 value_solved=value_solved,
@@ -152,7 +148,7 @@ def plot_value(
                 model=model,
                 state_choice_vec=state_choice_dict,
                 wealth=wealth,
-                compute_utility=final_period,
+                compute_utility=model["model_funcs"]["compute_utility"],
                 second_continous=second_cont,
             )
             value_all[var_id] = value
@@ -172,20 +168,20 @@ def plot_value(
 import jax.numpy as jnp
 
 discrete_state_to_plot = {
-    "period": 70,
+    "period": 69,
     "lagged_choice": 0,
     "policy_state": 29,
     "job_offer": 0,
-    "education": 0,
-    "health": 2,
+    "education": 1,
+    "health": 0,
     "sex": 0,
     "informed": 1,
     "partner_state": jnp.array(1),
-    "experience": 0.5,
+    "experience": 0.325406,
     # "wealth": 50,
 }
 exp_grid = np.arange(0, 1, 0.1, dtype=float)
-wealth_grid = np.arange(5, 100, 1, dtype=float)
+wealth_grid = np.arange(40, 80, 0.5, dtype=float)
 plot_value(
     solution["value"],
     solution["endog_grid"],

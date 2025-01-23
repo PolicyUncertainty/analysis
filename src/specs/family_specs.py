@@ -78,6 +78,18 @@ def read_in_partner_transition_specs(paths_dict, specs):
                             ),
                             "proportion",
                         ]
+                    # Assign absorbing 1 if no one in the data
+                    if not np.allclose(
+                        trans_probs[sex_var, edu_var, period, partner_state_var].sum(),
+                        1,
+                    ):
+                        trans_probs[
+                            sex_var,
+                            edu_var,
+                            period,
+                            partner_state_var,
+                            partner_state_var,
+                        ] = 1
                         #
                         # mask = (
                         #     (est_probs_df["sex"] == sex_label)
@@ -96,5 +108,4 @@ def read_in_partner_transition_specs(paths_dict, specs):
                         #     partner_state_var,
                         #     lead_partner_state_var,
                         # ] = est_probs_df.loc[mask, "probability"].values[0]
-
     return jnp.asarray(trans_probs), n_partner_states

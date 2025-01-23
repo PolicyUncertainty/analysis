@@ -33,7 +33,7 @@ model_name = "both"
 load_solution = True
 load_sol_model = True
 load_sim_model = True
-load_df = None
+load_df = True
 
 
 # Load params

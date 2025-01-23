@@ -54,20 +54,22 @@ def create_max_experience(path_dict, specs, load_precomputed):
                     max_exp_diff_to_periods[sex_var, edu_var, i] = new_exp - period
 
         # Get the maximum experience diff across periods
-        max_across_ret_periods = max_exp_diff_to_periods.max(axis=(0, 1))
+        max_across_ret_periods = max_exp_diff_to_periods.max()
         # Assign the maximum experience diff to the respective periods
-        max_exp_diffs_per_period[ret_periods] = max_across_ret_periods
-
-        # Get the maximum over all and assign to the rest of the periods,
-        # always minus 1
-        max_exp_diff = max_exp_diff_to_periods.max()
-        last_periods = np.arange(ret_periods[-1] + 1, specs["n_periods"])
-        exp_diff_reduction = last_periods - ret_periods[-1]
-        max_exp_diffs_per_period[last_periods] = max_exp_diff - exp_diff_reduction
+        # max_exp_diffs_per_period[ret_periods] = max_across_ret_periods
+        #
+        # # Get the maximum over all and assign to the rest of the periods,
+        # # always minus 1
+        # max_exp_diff = max_exp_diff_to_periods.max()
+        # last_periods = np.arange(ret_periods[-1] + 1, specs["n_periods"])
+        # exp_diff_reduction = last_periods - ret_periods[-1]
+        # max_exp_diffs_per_period[last_periods] = max_exp_diff - exp_diff_reduction
+        total_max = np.maximum(max_across_ret_periods, max_exp_diff_data)
+        max_exp_diffs_per_period[:] = total_max
 
         np.savetxt(
             path_dict["first_step_results"] + "max_exp_diffs_per_period.txt",
-            [max_exp_diffs_per_period],
+            max_exp_diffs_per_period,
         )
 
     return jnp.asarray(max_exp_diffs_per_period)

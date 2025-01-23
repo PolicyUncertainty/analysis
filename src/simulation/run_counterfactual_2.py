@@ -30,10 +30,10 @@ from export_results.tables.cv import calc_compensated_variation
 n_agents = 10000
 seeed = 123
 model_name = "both"
-load_solution = True
-load_sol_model = True
-load_sim_model = True
-load_df = None
+load_solution = False
+load_sol_model = False
+load_sim_model = False
+load_df = True
 
 
 # Load params
@@ -73,6 +73,10 @@ for i, alpha_sim in enumerate(alphas_realized):
         sol_model_exists=load_sol_model,
         sim_model_exists=load_sim_model,
     )
+    # After the first run we can always set models and solutions to True
+    load_sol_model = True
+    load_sim_model = True
+    load_solution = True
 
     if i == 0:
         df_base = df.reset_index().copy()

@@ -33,7 +33,7 @@ model_name = "both"
 load_solution = None
 load_base_solution = True
 load_sol_model = True
-load_sim_model = False
+load_sim_model = True
 load_df = None
 
 
@@ -63,12 +63,6 @@ res_df["alpha"] = alphas_realized
 for i, alpha_sim in enumerate(alphas_realized):
     print("Start simulation for alpha: ", alpha_sim)
 
-    # # Check which run
-    # if i == 0:
-    #     load_base_solution = load_solution
-    # else:
-    #     load_base_solution = True
-
     # Simulate baseline with subjective belief
     df_base = solve_and_simulate_scenario(
         path_dict=path_dict,
@@ -84,6 +78,7 @@ for i, alpha_sim in enumerate(alphas_realized):
 
     load_sim_model = True
     load_sol_model = True
+    load_base_solution = True
 
     # Simulate counterfactual with no uncertainty and expected increase
     # same as simulated alpha_sim

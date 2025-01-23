@@ -17,8 +17,10 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 
 specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
 
+model_name = "both"
+
 # %%
-params = pkl.load(open(path_dict["est_params"], "rb"))
+params = pkl.load(open(path_dict["est_results"] + f"est_params_{model_name}.pkl", "rb"))
 # params = load_and_set_start_params(path_dict)
 
 
@@ -45,10 +47,9 @@ from model_code.specify_model import specify_and_solve_model
 
 solution, model, params = specify_and_solve_model(
     path_dict=paths_dict,
-    file_append="pete",
+    file_append=model_name,
     params=params,
-    update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
-    policy_state_trans_func=expected_SRA_probs_estimation,
+    expected_alpha=False,
     load_model=True,
     load_solution=True,
 )
@@ -164,27 +165,28 @@ def plot_value(
 
 import jax.numpy as jnp
 
-exp_grid = np.arange(7.5, 1_000, 50, dtype=float)
 discrete_state_to_plot = {
-    "period": 34,
-    "lagged_choice": 3,
-    "policy_state": 1,
-    "job_offer": 0,
-    "education": 0,
-    "health": 1,
+    "period": 70,
+    "lagged_choice": 0,
+    "policy_state": 29,
+    "job_offer": 1,
+    "education": 1,
+    "health": 2,
     "sex": 0,
     "informed": 1,
-    "partner_state": jnp.array(0),
-    "experience": 0.88,
-    # "wealth": 250,
+    "partner_state": jnp.array(1),
+    "experience": 0.5,
+    # "wealth": 50,
 }
+exp_grid = np.arange(0, 1, 0.1, dtype=float)
+wealth_grid = np.arange(5, 100, 1, dtype=float)
 plot_value(
     solution["value"],
     solution["endog_grid"],
     solution["policy"],
     "wealth",
-    exp_grid,
+    wealth_grid,
     discrete_state_to_plot,
     model,
-    [0, 1],
+    [0],
 )

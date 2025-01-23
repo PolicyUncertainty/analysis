@@ -15,17 +15,17 @@ def plot_budget_of_unemployed(specs):
         "interest_rate": specs["interest_rate"],
     }
 
-    savings = np.linspace(0, 60)
+    savings = np.linspace(0, 1_000)
 
     fig, axs = plt.subplots(ncols=2, figsize=(12, 6))
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
         ax = axs[sex_var]
         for edu_var, edu_label in enumerate(specs["education_labels"]):
             wealth = budget_constraint(
-                period=72,
+                period=70,
                 education=edu_var,
-                lagged_choice=1,
-                experience=0.05,
+                lagged_choice=0,
+                experience=0.95,
                 sex=sex_var,
                 partner_state=np.array([0]),
                 savings_end_of_previous_period=savings,
@@ -33,7 +33,7 @@ def plot_budget_of_unemployed(specs):
                 params=params,
                 options=specs,
             )
-            ax.plot(savings, wealth * specs["wealth_unit"], label=edu_label)
+            ax.plot(savings, wealth, label=edu_label)
             ax.set_xlabel("Savings")
             ax.set_ylabel("Wealth")
             ax.legend()

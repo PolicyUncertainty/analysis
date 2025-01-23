@@ -82,6 +82,9 @@ for i, alpha_sim in enumerate(alphas_realized):
         sim_model_exists=load_sim_model,
     ).reset_index()
 
+    load_sim_model = True
+    load_sol_model = True
+
     # Simulate counterfactual with no uncertainty and expected increase
     # same as simulated alpha_sim
     df_cf = solve_and_simulate_scenario(

@@ -30,8 +30,8 @@ from export_results.tables.cv import calc_compensated_variation
 n_agents = 10000
 seeed = 123
 model_name = "pete"
-load_solution = True
-load_sol_model = False
+load_solution = False
+load_sol_model = True
 load_sim_model = False
 load_df = True
 

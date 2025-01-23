@@ -30,7 +30,8 @@ from export_results.tables.cv import calc_compensated_variation
 n_agents = 10000
 seeed = 123
 model_name = "both"
-load_solution = False
+load_solution = None
+load_base_solution = True
 load_sol_model = True
 load_sim_model = False
 load_df = None
@@ -62,11 +63,11 @@ res_df["alpha"] = alphas_realized
 for i, alpha_sim in enumerate(alphas_realized):
     print("Start simulation for alpha: ", alpha_sim)
 
-    # Check which run
-    if i == 0:
-        load_base_solution = load_solution
-    else:
-        load_base_solution = True
+    # # Check which run
+    # if i == 0:
+    #     load_base_solution = load_solution
+    # else:
+    #     load_base_solution = True
 
     # Simulate baseline with subjective belief
     df_base = solve_and_simulate_scenario(
@@ -79,11 +80,7 @@ for i, alpha_sim in enumerate(alphas_realized):
         solution_exists=load_base_solution,
         sol_model_exists=load_sol_model,
         sim_model_exists=load_sim_model,
-    )
-
-    # After the first simulation, we can set it permanently to True
-    load_sol_model = True
-    load_sim_model = True
+    ).reset_index()
 
     # Simulate counterfactual with no uncertainty and expected increase
     # same as simulated alpha_sim
@@ -97,7 +94,7 @@ for i, alpha_sim in enumerate(alphas_realized):
         solution_exists=load_solution,
         sol_model_exists=load_sol_model,
         sim_model_exists=load_sim_model,
-    )
+    ).reset_index()
 
     for k, df_scen in enumerate([df_cf, df_base]):
         if k == 0:

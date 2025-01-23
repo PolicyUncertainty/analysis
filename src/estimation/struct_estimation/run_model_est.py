@@ -55,11 +55,11 @@ params_to_estimate_names = [
 estimation_results = estimate_model(
     paths_dict,
     params_to_estimate_names=params_to_estimate_names,
-    file_append="both",
+    file_append="new",
     slope_disutil_method=False,
     load_model=True,
     use_weights=True,
-    last_estimate=last_estimate,
+    last_estimate=None,
     save_results=False,
 )
 print(estimation_results)

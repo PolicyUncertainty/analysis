@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from export_results.figures.color_map import JET_COLOR_MAP
 
 
 def plot_children(paths_dict, specs):
@@ -42,14 +43,23 @@ def plot_children(paths_dict, specs):
                 nb_children_container.update(nb_children_data_edu)
 
                 nb_children_est_edu = nb_children_est[sex, edu, has_partner, :]
-                ax.plot(ages, nb_children_container, label=f"edu {edu}")
                 ax.plot(
-                    ages, nb_children_est_edu, linestyle="--", label=f"edu {edu} est"
+                    ages,
+                    nb_children_container,
+                    color=JET_COLOR_MAP[edu],
+                    linestyle="--",
+                    label=f"Obs. {edu_label}",
+                )
+                ax.plot(
+                    ages,
+                    nb_children_est_edu,
+                    color=JET_COLOR_MAP[edu],
+                    label=f"Est. {edu_label}",
                 )
 
             ax.set_ylim([0, 2.5])
             ax.set_title(f"{sex_label}, {partner_label}")
-            ax.legend()
+        ax[0].legend()
         fig.savefig(paths_dict["plots"] + "children.png")
 
     # calculate avewealth_shock_scalerage hours worked by partner by

@@ -13,25 +13,42 @@ from statsmodels.discrete.discrete_model import MNLogit
 
 def estimate_partner_transitions(paths_dict, specs, load_data):
     """Estimate the partner state transition matrix."""
-    transition_data = create_partner_transition_sample(
-        paths_dict, specs, load_data=load_data
-    )
+    est_data = create_partner_transition_sample(paths_dict, specs, load_data=load_data)
 
     # modify
-    transition_data = transition_data[transition_data["age"] <= specs["end_age"]]
-    transition_data["age_bin"] = np.floor(transition_data["age"] / 10) * 10
+    est_data = est_data[est_data["age"] <= specs["end_age"]]
+    est_data["age_bin"] = np.floor(est_data["age"] / 10) * 10
 
-    cov_list = ["sex", "education", "age_bin", "partner_state"]
+    # Create a transition matrix for the partner state
+    type_list = ["sex", "education"]
+    cov_list = ["age", "partner_state_1.0", "partner_state_2.0"]
+    # Create dummies for partner_state
+    est_data = pd.get_dummies(est_data, columns=["partner_state"])
 
-    trans_mat_df = transition_data.groupby(cov_list)["lead_partner_state"].value_counts(
+    trans_mat_df = est_data.groupby(cov_list)["lead_partner_state"].value_counts(
         normalize=True
     )
+    # Fo a multinominal logit model with lead_partner_state as dependent variable and cov list plus constant as
+    # independent variables. # Condition the models of each type from type_list
+    #
+    # for sex in range(specs["n_sexes"]):
+    #     for edu_var in range(specs["n_education_types"]):
+    #         df_reduced = est_data[
+    #             (est_data["sex"] == sex) & (est_data["education"] == edu_var)
+    #         ]
+    #         X = df_reduced[cov_list].astype(float)
+    #         X = sm.add_constant(X)
+    #         Y = df_reduced["lead_partner_state"]
+    #         model = MNLogit(Y, X).fit()
+    #         # Add prediction
+    #         df_reduced[[0, 1, 2]] = model.predict(X).copy()
+    #         breakpoint()
 
     full_index = pd.MultiIndex.from_product(
         [
             range(specs["n_sexes"]),
             range(specs["n_education_types"]),
-            transition_data["age_bin"].unique().tolist(),
+            est_data["age_bin"].unique().tolist(),
             range(specs["n_partner_states"]),
             range(specs["n_partner_states"]),
         ],

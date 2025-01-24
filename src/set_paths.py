@@ -34,24 +34,34 @@ def create_path_dict(define_user=False, user=None):
 
     analysis_path = str(Path(__file__).resolve().parents[1]) + "/"
 
+    # Assign input folders
     paths_dict = {
         **paths_dict,
         "intermediate_data": analysis_path + "output/intermediate_data/",
         "open_data": analysis_path + "output/open_access_data/",
-        "est_results": analysis_path + "output/est_results/",
-        "sim_results": analysis_path + "output/sim_results/",
-        "first_step_results": analysis_path + "output/est_results/first_step/",
-        "tables": analysis_path + "output/tables/",
-        "specs": analysis_path + "src/spec.yaml",
-        "start_params_and_bounds": analysis_path
-        + "src/estimation/struct_estimation/start_params_and_bounds/",
-        "plots": analysis_path + "output/plots/",
     }
-    # Check if the output folder exists
+    # Assign result folders
+    paths_dict["est_results"] = analysis_path + "output/est_results/"
+    paths_dict["first_step_results"] = analysis_path + "output/est_results/first_step/"
+    paths_dict["struct_results"] = analysis_path + "output/est_results/struct_results/"
+    paths_dict["sim_results"] = analysis_path + "output/sim_results/"
 
+    # Assign output folders
+    paths_dict["tables"] = analysis_path + "output/tables/"
+    paths_dict["plots"] = analysis_path + "output/plots/"
+
+    # Assign model specification file
+    paths_dict["specs"] = analysis_path + "src/spec.yaml"
+
+    # Assign start params and bounds folder for structural estimation
+    paths_dict["start_params_and_bounds"]: analysis_path
+    +"src/estimation/struct_estimation/start_params_and_bounds/"
+
+    # Assign name of structural estimation sample
     paths_dict["struct_est_sample"] = (
         paths_dict["intermediate_data"] + "structural_estimation_sample.pkl"
     )
+
     return paths_dict
 
 

@@ -92,13 +92,13 @@ def estimate_model(
         error_handling="continue",
     )
     pickle.dump(
-        result, open(path_dict["est_results"] + f"em_result_{file_append}.pkl", "wb")
+        result, open(path_dict["struct_results"] + f"em_result_{file_append}.pkl", "wb")
     )
     start_params_all.update(result.params)
 
     pickle.dump(
         start_params_all,
-        open(path_dict["est_results"] + f"est_params_{file_append}.pkl", "wb"),
+        open(path_dict["struct_results"] + f"est_params_{file_append}.pkl", "wb"),
     )
 
     calc_and_save_standard_errors(

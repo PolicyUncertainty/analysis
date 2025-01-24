@@ -20,7 +20,9 @@ specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True
 model_name = "both"
 
 # %%
-params = pkl.load(open(path_dict["est_results"] + f"est_params_{model_name}.pkl", "rb"))
+params = pkl.load(
+    open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
+)
 # params = load_and_set_start_params(path_dict)
 
 

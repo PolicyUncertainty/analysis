@@ -29,7 +29,7 @@ from export_results.tables.cv import calc_compensated_variation
 # Set specifications
 n_agents = 10000
 seeed = 123
-model_name = "both"
+model_name = "new"
 load_solution = True
 load_sol_model = True
 load_sim_model = True
@@ -37,7 +37,9 @@ load_df = None
 
 
 # Load params
-params = pkl.load(open(path_dict["est_results"] + f"est_params_{model_name}.pkl", "rb"))
+params = pkl.load(
+    open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
+)
 
 # Initialize alpha values and replace 0.04 with subjective alpha
 alphas_realized = np.arange(0, 0.11, 0.01)

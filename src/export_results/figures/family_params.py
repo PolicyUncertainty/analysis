@@ -50,6 +50,7 @@ def plot_children(paths_dict, specs):
             ax.set_ylim([0, 2.5])
             ax.set_title(f"{sex_label}, {partner_label}")
             ax.legend()
+        fig.savefig(paths_dict["plots"] + "children.png")
 
     # calculate avewealth_shock_scalerage hours worked by partner by
 

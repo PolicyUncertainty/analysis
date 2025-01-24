@@ -54,8 +54,9 @@ def create_path_dict(define_user=False, user=None):
     paths_dict["specs"] = analysis_path + "src/spec.yaml"
 
     # Assign start params and bounds folder for structural estimation
-    paths_dict["start_params_and_bounds"]: analysis_path
-    +"src/estimation/struct_estimation/start_params_and_bounds/"
+    paths_dict["start_params_and_bounds"] = (
+        analysis_path + "src/estimation/struct_estimation/start_params_and_bounds/"
+    )
 
     # Assign name of structural estimation sample
     paths_dict["struct_est_sample"] = (

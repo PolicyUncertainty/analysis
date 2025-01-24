@@ -9,94 +9,103 @@ path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
 model_name = "both"
 
-kind_string = input("Execute [pre]- or [post]-estimation plots? (pre/post)\n")
+# kind_string = input("Execute [pre]- or [post]-estimation plots? (pre/post)\n")
 
-if kind_string == "pre":
-    from estimation.struct_estimation.start_params_and_bounds.set_start_params import (
-        load_and_set_start_params,
-    )
+# if kind_string == "pre":
+#     from estimation.struct_estimation.start_params_and_bounds.set_start_params import (
+#         load_and_set_start_params,
+#     )
+#
+#     params = load_and_set_start_params(path_dict)
+# elif kind_string == "post":
+#     params = pickle.load(
+#         open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
+#     )
+# else:
+#     raise ValueError("Either pre or post estimation plots.")
 
-    params = load_and_set_start_params(path_dict)
-elif kind_string == "post":
-    params = pickle.load(
-        open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
-    )
-else:
-    raise ValueError("Either pre or post estimation plots.")
+from estimation.struct_estimation.start_params_and_bounds.set_start_params import (
+    load_and_set_start_params,
+)
 
-
-# %%###################################
-# Health characteristics
-######################################
-exec_health = input("Show health transition plots? (y/n) ") == "y"
-if exec_health:
-    from export_results.figures.expected_health import (
-        plot_healthy_unhealthy,
-        plot_health_transition_prob,
-    )
-
-    plot_healthy_unhealthy(path_dict, specs)
-    plt.show()
-    plot_health_transition_prob(specs)
-    plt.show()
-    plt.close("all")
-
-# %%###################################
-# Mortality characteristics
-######################################
-exec_mortality = input("Execute Mortality characteristics? (y/n) ") == "y"
-if exec_mortality:
-    from export_results.figures.plot_mortality import (
-        plot_mortality,
-    )
-
-    plot_mortality(path_dict, specs)
-    plt.close("all")
+params = load_and_set_start_params(path_dict)
+#
+# # %%###################################
+# # Health characteristics
+# ######################################
+# exec_health = input("Show health transition plots? (y/n) ") == "y"
+# if exec_health:
+#     from export_results.figures.expected_health import (
+#         plot_healthy_unhealthy,
+#         plot_health_transition_prob,
+#     )
+#
+#     plot_healthy_unhealthy(path_dict, specs)
+#     plt.show()
+#     plot_health_transition_prob(specs)
+#     plt.show()
+#     plt.close("all")
+#
+# # %%###################################
+# # Mortality characteristics
+# ######################################
+# exec_mortality = input("Execute Mortality characteristics? (y/n) ") == "y"
+# if exec_mortality:
+#     from export_results.figures.plot_mortality import (
+#         plot_mortality,
+#     )
+#
+#     plot_mortality(path_dict, specs)
+#     plt.close("all")
 
 # %%###################################
 # Family characteristics
 ######################################
-exec_family = input("Execute family characteristics? (y/n) ") == "y"
-if exec_family:
-    from export_results.figures.family_params import (
-        plot_children,
-        plot_marriage_and_divorce,
-    )
-
-    plot_children(path_dict, specs)
-    plot_marriage_and_divorce(path_dict, specs)
-    plt.show()
-    plt.close("all")
+# exec_family = input("Execute family characteristics? (y/n) ") == "y"
+# if exec_family:
+# from export_results.figures.family_params import (
+#     plot_children,
+#     plot_marriage_and_divorce,
+# )
+#
+# plot_children(path_dict, specs)
+# plot_marriage_and_divorce(path_dict, specs)
+# plt.show()
+# plt.close("all")
 
 
 # %% ########################################
 # # Utility plots
 # ##########################################
-exec_utility = input("Show utility plots? (y/n) ") == "y"
-if exec_utility:
-    from export_results.figures.utility import (
-        plot_utility,
-        plot_cons_scale,
-        plot_bequest,
-    )
-
-    plot_utility(params, specs)
-    plot_cons_scale(specs)
-    plot_bequest(params, specs)
-    plt.show()
-    plt.close("all")
+# exec_utility = input("Show utility plots? (y/n) ") == "y"
+# if exec_utility:
+#     from export_results.figures.utility import (
+#         plot_utility,
+#         plot_cons_scale,
+#         plot_bequest,
+#     )
+#
+#     plot_utility(params, specs)
+#     plot_cons_scale(specs)
+#     plot_bequest(params, specs)
+#     plt.show()
+#     plt.close("all")
 
 
 # %% ########################################
 # Job offer plots
 # ##########################################
-exec_job_offer = input("Show job offer plots? (y/n) ") == "y"
+# exec_job_offer = input("Show job offer plots? (y/n) ") == "y"
 from export_results.figures.job_offer_plots import plot_job_transitions
 
-if exec_job_offer:
-    plot_job_transitions(path_dict, params)
-    plt.show()
-    plt.close("all")
+# if exec_job_offer:
+plot_job_transitions(
+    path_dict=path_dict,
+    specs=specs,
+    # params=params
+)
+plt.show()
+plt.close("all")
 
 
 # %% ########################################

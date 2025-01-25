@@ -117,7 +117,7 @@ if exec_budget:
 # # SRA plots
 # ##########################################
 show_SRA = input("Show SRA plots? (y/n)") == "y"
-from export_results.figures.expected_SRA_plots import plot_markov_process
+from export_results.figures.expected_policy_plots import plot_markov_process
 
 if show_SRA:
     plot_markov_process(path_dict)

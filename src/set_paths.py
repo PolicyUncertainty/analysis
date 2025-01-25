@@ -46,6 +46,7 @@ def create_path_dict(define_user=False, user=None):
         paths_dict = {}
 
     analysis_path = str(Path(__file__).resolve().parents[1]) + "/"
+    paper_path = str(Path(__file__).resolve().parents[2]) + "/paper/"
 
     # Assign input folders
     paths_dict = {
@@ -62,6 +63,10 @@ def create_path_dict(define_user=False, user=None):
     # Assign output folders
     paths_dict["tables"] = analysis_path + "output/tables/"
     paths_dict["plots"] = analysis_path + "output/plots/"
+
+    # Assign folders directly in paper
+    paths_dict["paper_plots"] = paper_path + "plots/"
+    paths_dict["paper_tables"] = paper_path + "tables/"
 
     # Assign model specification file
     paths_dict["specs"] = analysis_path + "src/spec.yaml"

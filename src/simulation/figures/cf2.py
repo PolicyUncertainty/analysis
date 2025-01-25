@@ -14,7 +14,7 @@ def plot_percentage_change(df):
         fig, ax = plt.subplots(figsize=(12, 8))
 
         change = df[var] / df["base_" + var] - 1
-        ax.plot(df["alpha"], change, label=var)
+        ax.plot(df["sra_at_63"], change, label=var)
 
         # ax.plot(df["alpha"], df["cv"], label="Compensated Variation")
         ax.set_xlabel("Simulated yearly SRA increase")

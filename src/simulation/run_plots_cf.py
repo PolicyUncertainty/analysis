@@ -2,14 +2,14 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 from set_paths import create_path_dict
-from simulation.figures import plot_percentage_change
+from simulation.figures.cf2 import plot_percentage_change
 
 path_dict = create_path_dict()
 
 model_name = "new"
 
 # Load results
-df = pd.read_csv(path_dict["sim_results"] + f"counterfactual_2_{model_name}.csv").iloc[
+df = pd.read_csv(path_dict["sim_results"] + f"counterfactual_1_{model_name}.csv").iloc[
     1:
 ]
 # Exclude the first rpw

@@ -30,10 +30,10 @@ from export_results.tables.cv import calc_compensated_variation
 n_agents = 10000
 seeed = 123
 model_name = "new"
-load_base_solution = False
-load_second_solution = False
-load_sol_model = False
-load_sim_model = False
+load_base_solution = True
+load_second_solution = True
+load_sol_model = True
+load_sim_model = True
 load_df = None
 
 
@@ -60,7 +60,7 @@ res_df = pd.DataFrame(
 # Assign alphas in dataframe
 res_df["sra_at_63"] = sra_at_63
 for i, sra in enumerate(sra_at_63):
-    print("Start simulation for alpha: ", sra)
+    print("Start simulation for sra: ", sra)
     # Calculate how much it has to increase starting from 67 in beaseline
     alpha_sim = (sra - 67) / (63 - specs["start_age"])
 

@@ -24,17 +24,6 @@ def solve_and_simulate_scenario(
     sol_model_exists=True,
     sim_model_exists=True,
 ):
-    solution_est, model, params = specify_and_solve_model(
-        path_dict=path_dict,
-        params=params,
-        file_append=model_name,
-        resolution=resolution,
-        expected_alpha=expected_alpha,
-        load_model=sol_model_exists,
-        load_solution=solution_exists,
-    )
-
-    model_params = model["options"]["model_params"]
     (
         update_funcs,
         transition_funcs,
@@ -46,13 +35,25 @@ def solve_and_simulate_scenario(
         resolution=resolution,
     )
 
+    solution_est, model, params = specify_and_solve_model(
+        path_dict=path_dict,
+        params=params,
+        file_append=model_name,
+        resolution=resolution,
+        expected_alpha=expected_alpha,
+        load_model=sol_model_exists,
+        load_solution=solution_exists,
+    )
+
+    model_params = model["options"]["model_params"]
+
     solve_folder = get_model_resutls_path(path_dict, model_name)
 
     # Make intitial SRA only two digits after point
     df_file = (
-        f"sra_"
+        solve_folder["simulation"]
+        + f"sra_"
         + "{:.2f}".format(expected_alpha)
-        + solve_folder["simulation"]
         + model_sol_names["simulation"]
     )
     if df_exists:

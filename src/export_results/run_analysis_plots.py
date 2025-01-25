@@ -29,22 +29,23 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
 )
 
 params = load_and_set_start_params(path_dict)
-#
-# # %%###################################
-# # Health characteristics
-# ######################################
+
+# %%###################################
+# Health characteristics
+######################################
 # exec_health = input("Show health transition plots? (y/n) ") == "y"
 # if exec_health:
-#     from export_results.figures.expected_health import (
-#         plot_healthy_unhealthy,
-#         plot_health_transition_prob,
-#     )
-#
-#     plot_healthy_unhealthy(path_dict, specs)
-#     plt.show()
-#     plot_health_transition_prob(specs)
-#     plt.show()
-#     plt.close("all")
+from export_results.figures.expected_health import (
+    plot_healthy_unhealthy,
+    plot_health_transition_prob,
+)
+
+plot_healthy_unhealthy(path_dict, specs)
+plt.show()
+# plot_health_transition_prob(specs)
+# plt.show()
+# plt.close("all")
+exit()
 #
 # # %%###################################
 # # Mortality characteristics

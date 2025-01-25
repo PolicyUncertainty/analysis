@@ -3,10 +3,23 @@ import os
 from pathlib import Path
 
 import jax
+import matplotlib.pyplot as plt
 
 
 def create_path_dict(define_user=False, user=None):
+    # Set jax to 64 bit
     jax.config.update("jax_enable_x64", True)
+
+    # Set matplotlib fontsizes
+    plt.rcParams.update(
+        {
+            "axes.titlesize": 16,
+            "axes.labelsize": 14,
+            "xtick.labelsize": 12,
+            "ytick.labelsize": 12,
+            "legend.fontsize": 12,
+        }
+    )
     if define_user:
         if user is None:
             user = input("Enter user name ([b]runo / [m]ax / [g]regor): ")

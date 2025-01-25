@@ -32,10 +32,14 @@ def est_job_for_sample(df_job, specs):
     job_sep_params = pd.DataFrame(index=index, columns=["age", "age_sq", "const"])
 
     # Estimate job separation probabilities until max retirement age
-    n_ages = specs["max_ret_age"] - specs["start_age"] + 1
+    n_working_age = specs["max_ret_age"] - specs["start_age"] + 1
     job_sep_probs = np.zeros(
-        (specs["n_sexes"], specs["n_education_types"], n_ages), dtype=float
+        (specs["n_sexes"], specs["n_education_types"], n_working_age), dtype=float
     )
+
+    max_age_labor = specs["max_est_age_labor"]
+    max_period_labor = max_age_labor - specs["start_age"]
+    df_job = df_job[df_job["age"] <= max_age_labor]
 
     # Loop over sexes
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
@@ -45,21 +49,27 @@ def est_job_for_sample(df_job, specs):
             df_job_edu = df_job[
                 (df_job["sex"] == sex_var) & (df_job["education"] == edu_var)
             ]
-            model = sm.OLS(
-                endog=df_job_edu["job_sep"],
+            # Estimate a logit model with age and age squared
+            model = sm.Logit(
+                endog=df_job_edu["job_sep"].astype(float),
                 exog=sm.add_constant(df_job_edu[["age", "age_sq"]]),
             )
             results = model.fit()
-
             # Save params
             job_sep_params.loc[(sex_label, edu_label), :] = results.params
             # Calculate job sep for each age
             ages = np.sort(df_job_edu["age"].unique())
-            job_sep_probs_group = (
+            exp_factor = (
                 job_sep_params.loc[(sex_label, edu_label), "const"]
                 + job_sep_params.loc[(sex_label, edu_label), "age"] * ages
                 + job_sep_params.loc[(sex_label, edu_label), "age_sq"] * ages**2
             )
-            job_sep_probs[sex_var, edu_var, :] = job_sep_probs_group
+            job_sep_probs_group = 1 / (1 + np.exp(-exp_factor))
+            job_sep_probs[
+                sex_var, edu_var, : max_period_labor + 1
+            ] = job_sep_probs_group
+            job_sep_probs[
+                sex_var, edu_var, max_period_labor + 1 :
+            ] = job_sep_probs_group[-1]
 
     return job_sep_probs, job_sep_params

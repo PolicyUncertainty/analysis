@@ -14,6 +14,7 @@ plt.savefig(paths_dict["paper_plots"] + "pension_rates.png", transparent=True, d
 #plt.show()
 
 # chart: 2007 reform
+plt.close('all')
 from export_results.figures.policy_states import plot_SRA_2007_reform
 plot_SRA_2007_reform(paths_dict)
 plt.savefig(paths_dict["paper_plots"] + "SRA_2007_reform.png", transparent=True, dpi=300)
@@ -24,3 +25,27 @@ from export_results.tables.describe_datasets import create_table_describing_data
 df_description = create_table_describing_datasets(paths_dict, specs)
 #print(df_description)
 df_description.to_latex(paths_dict["paper_tables"] + "datasets.tex", index=False)
+
+
+# Ch 3 Policy Beliefs  ---------------------------------------------------------------------------------------
+
+# chart: SRA beliefs by cohort
+plt.close('all')
+from export_results.figures.expected_policy_plots import plot_sra_beliefs_by_cohort
+plot_sra_beliefs_by_cohort(paths_dict)
+plt.savefig(paths_dict["paper_plots"] + "sra_beliefs_by_cohort.png", transparent=True, dpi=300)
+#plt.show()
+
+# chart: ERP beliefs by cohort
+plt.close('all')
+from export_results.figures.expected_policy_plots import plot_erp_beliefs_by_cohort
+plot_erp_beliefs_by_cohort(paths_dict)
+plt.savefig(paths_dict["paper_plots"] + "erp_beliefs_by_cohort.png", transparent=True, dpi=300)
+#plt.show()
+
+# chart: example SRA evolution of expectation
+plt.close('all')
+from export_results.figures.expected_policy_plots import plot_example_sra_evolution
+plot_example_sra_evolution(alpha_star=0)
+plt.savefig(paths_dict["paper_plots"] + "example_sra_evolution.png", transparent=True, dpi=300)
+plt.show()

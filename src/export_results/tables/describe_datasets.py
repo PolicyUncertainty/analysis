@@ -75,6 +75,7 @@ def describe_datasets(datasets, specs):
         else:
             df_description.loc[df_description[""] == "Years", name] = "2022"
 
+    # Populate the other columns
     for name, df in datasets.items():
         df_description.loc[df_description[""] == "Nb. of Observations", name] = len(df)
         df_description.loc[

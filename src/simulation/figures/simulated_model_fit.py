@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import yaml
-from estimation.struct_estimation.estimate_setup import load_and_prep_data
+from estimation.struct_estimation.scripts.estimate_setup import load_and_prep_data
 from model_code.policy_processes.policy_states_belief import (
     expected_SRA_probs_estimation,
 )
@@ -12,16 +12,35 @@ from model_code.policy_processes.policy_states_belief import (
     update_specs_exp_ret_age_trans_mat,
 )
 from model_code.specify_model import specify_model
+from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 
 
-def plot_average_wealth(paths, specs, params):
-    data_sim = pd.read_pickle(
-        paths["intermediate_data"] + "sim_data/data_subj_scale_1.pkl"
+def plot_average_wealth(
+    path_dict,
+    specs,
+    params,
+    model_name,
+    load_df=True,
+    load_solution=True,
+    load_sol_model=True,
+    load_sim_model=True,
+):
+    # Simulate baseline with subjective belief
+    data_sim = solve_and_simulate_scenario(
+        path_dict=path_dict,
+        params=params,
+        sim_alpha=0.0,
+        expected_alpha=False,
+        model_name=model_name,
+        df_exists=load_df,
+        solution_exists=load_solution,
+        sol_model_exists=load_sol_model,
+        sim_model_exists=load_sim_model,
     ).reset_index()
 
     # Generate model_specs
     model, params = specify_model(
-        path_dict=paths,
+        path_dict=path_dict,
         update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
         policy_state_trans_func=expected_SRA_probs_estimation,
         params=params,
@@ -29,7 +48,7 @@ def plot_average_wealth(paths, specs, params):
         model_type="solution",
     )
 
-    data_decision, _ = load_and_prep_data(paths, params, model, drop_retirees=False)
+    data_decision, _ = load_and_prep_data(path_dict, params, model, drop_retirees=False)
     data_decision["age"] = data_decision["period"] + specs["start_age"]
 
     data_sim["age"] = data_sim["period"] + specs["start_age"]
@@ -62,16 +81,38 @@ def plot_average_wealth(paths, specs, params):
             )
             ax.legend()
             fig.savefig(
-                paths["plots"] + "average_wealth.png", transparent=True, dpi=300
+                path_dict["plots"] + "average_wealth.png", transparent=True, dpi=300
             )
 
 
-def plot_choice_shares_single(paths, specs, params):
-    data_sim = pd.read_pickle(
-        paths["intermediate_data"] + "sim_data/data_subj_scale_1.pkl"
+def plot_choice_shares_single(
+    path_dict,
+    specs,
+    params,
+    model_name,
+    load_df=True,
+    load_solution=True,
+    load_sol_model=True,
+    load_sim_model=True,
+):
+    # alpha_belief = float(np.loadtxt(
+    # path_dict["est_results"] + "exp_val_params.txt"))
+
+    # Simulate baseline with subjective belief
+    data_sim = solve_and_simulate_scenario(
+        path_dict=path_dict,
+        params=params,
+        sim_alpha=0.0,
+        expected_alpha=False,
+        model_name=model_name,
+        df_exists=load_df,
+        solution_exists=load_solution,
+        sol_model_exists=load_sol_model,
+        sim_model_exists=load_sim_model,
     ).reset_index()
+
     data_decision = pd.read_pickle(
-        paths["intermediate_data"] + "structural_estimation_sample.pkl"
+        path_dict["intermediate_data"] + "structural_estimation_sample.pkl"
     )
 
     data_decision["age"] = data_decision["period"] + specs["start_age"]

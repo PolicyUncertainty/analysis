@@ -26,13 +26,6 @@ params = pkl.load(
 # params = load_and_set_start_params(path_dict)
 
 
-from model_code.policy_processes.policy_states_belief import (
-    expected_SRA_probs_estimation,
-)
-from model_code.policy_processes.policy_states_belief import (
-    update_specs_exp_ret_age_trans_mat,
-)
-
 # from model_code.specify_model import specify_model
 #
 # load_model = input("Load model? (y/n): ") == "y"
@@ -56,7 +49,7 @@ solution, model, params = specify_and_solve_model(
     load_solution=True,
 )
 
-from estimation.struct_estimation.estimate_setup import load_and_prep_data
+from estimation.struct_estimation.scripts.estimate_setup import load_and_prep_data
 
 data_decision, states_dict = load_and_prep_data(
     path_dict, params, model, drop_retirees=True

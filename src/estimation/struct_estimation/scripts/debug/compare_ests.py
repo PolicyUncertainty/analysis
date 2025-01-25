@@ -45,7 +45,7 @@ est_model_post, _, params_post = specify_and_solve_model(
     load_solution=True,
 )
 
-from export_results.figures.observed_model_fit import (
+from estimation.struct_estimation.scripts.observed_model_fit import (
     load_and_prep_data_for_model_fit,
     choice_probs_for_choice_vals,
 )
@@ -172,4 +172,3 @@ data_decision["ll_diff"] = data_decision["start_ll"] - data_decision["post_ll"]
 # plt.plot(wealth_grid, value_grid_post)
 # plt.plot(wealth_grid, value_grid_pre)
 # plt.show()
-# breakpoint()

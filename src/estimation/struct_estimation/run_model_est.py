@@ -1,12 +1,9 @@
 # Set paths of project
-import pickle as pkl
-
-import pandas as pd
 from set_paths import create_path_dict
 
 paths_dict = create_path_dict(define_user=False)
 
-from estimation.struct_estimation.estimate_setup import estimate_model
+from estimation.struct_estimation.scripts.estimate_setup import estimate_model
 
 params_to_estimate_names = [
     # "mu",

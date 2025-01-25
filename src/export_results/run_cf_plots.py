@@ -1,12 +1,12 @@
 # %% Set paths of project
 import matplotlib.pyplot as plt
 import pandas as pd
-from export_results.cf_plots.cf2 import plot_percentage_change
 from set_paths import create_path_dict
+from simulation.figures import plot_percentage_change
 
 path_dict = create_path_dict()
 
-model_name = "pete"
+model_name = "new"
 
 # Load results
 df = pd.read_csv(path_dict["sim_results"] + f"counterfactual_2_{model_name}.csv").iloc[

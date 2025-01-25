@@ -2,25 +2,22 @@ import matplotlib.pyplot as plt
 import numpy as np
 from dcegm.likelihood import create_choice_prob_func_unobserved_states
 from dcegm.likelihood import create_partial_choice_prob_calculation
-from estimation.struct_estimation.estimate_setup import load_and_prep_data
-from model_code.policy_processes.policy_states_belief import (
-    expected_SRA_probs_estimation,
-)
-from model_code.policy_processes.policy_states_belief import (
-    update_specs_exp_ret_age_trans_mat,
-)
+from estimation.struct_estimation.scripts.estimate_setup import load_and_prep_data
+from export_results.figures.color_map import JET_COLOR_MAP
 from model_code.specify_model import specify_and_solve_model
 from model_code.unobserved_state_weighting import create_unobserved_state_specs
 
 
-def observed_model_fit(paths_dict, specs, params, model_name):
+def observed_model_fit(
+    paths_dict, specs, params, model_name, load_sol_model, load_solution
+):
     est_model, model, params = specify_and_solve_model(
         path_dict=paths_dict,
         params=params,
         expected_alpha=False,
         file_append=model_name,
-        load_model=True,
-        load_solution=True,
+        load_model=load_sol_model,
+        load_solution=load_solution,
     )
 
     data_decision, states_dict = load_and_prep_data_for_model_fit(
@@ -74,13 +71,15 @@ def plot_observed_model_fit_choice_probs(
     # post_sra = df_poss["age"] - df_poss["policy_state_value"]
     # breakpoint()
     # for partner_val, partner_label in enumerate(partner_labels):
-    for edu in range(2):
-        fig, axes = plt.subplots(2, specs["n_choices"], figsize=(10, 5))
-        for sex_var, sex_label in enumerate(specs["sex_labels"]):
+
+    fig, axes = plt.subplots(specs["n_sexes"], specs["n_choices"])
+    for sex_var, sex_label in enumerate(specs["sex_labels"]):
+        for edu_var, edu_label in enumerate(specs["education_labels"]):
             data_subset = data_decision[
-                (data_decision["education"] == edu) & (data_decision["sex"] == sex_var)
+                (data_decision["education"] == edu_var)
+                & (data_decision["sex"] == sex_var)
             ]
-            choice_shares_obs = (
+            all_choice_shares_obs = (
                 data_subset.groupby(["age"])["choice"]
                 .value_counts(normalize=True)
                 .unstack()
@@ -89,24 +88,36 @@ def plot_observed_model_fit_choice_probs(
             labels = specs["choice_labels"]
             for choice in range(specs["n_choices"]):
                 ax = axes[sex_var, choice]
+
                 choice_shares_predicted = data_subset.groupby(["age"])[
                     f"choice_{choice}"
                 ].mean()
-                choice_shares_predicted.plot(ax=ax, label="Simulated")
-                if not ((sex_var == 0 and (choice == 2))):
-                    choice_shares_obs[choice].plot(ax=ax, label="Observed", ls="--")
+
+                # Only plot if we are not in men and part-time
+                men_and_part_time = (sex_var == 0) and (choice == 2)
+                if not men_and_part_time:
+                    ax.plot(
+                        choice_shares_predicted,
+                        label=f"Pred. {edu_label}",
+                        color=JET_COLOR_MAP[edu_var],
+                    )
+                    ax.plot(
+                        all_choice_shares_obs[choice],
+                        label=f"Obs. {edu_label}",
+                        color=JET_COLOR_MAP[edu_var],
+                        linestyle="--",
+                    )
                 ax.set_xlabel("Age")
-                ax.set_ylabel("Choice share")
                 ax.set_title(f"{labels[choice]}")
                 ax.set_ylim([-0.05, 1.05])
                 if choice == 0:
                     ax.legend(loc="upper left")
+                    ax.set_ylabel("Choice share")
         # Fig title
         fig.tight_layout()
 
-        file_append = ["low", "high"]
         fig.savefig(
-            save_folder + f"observed_model_fit_{file_append[edu]}.png",
+            save_folder + f"observed_model_fit.png",
             transparent=True,
             dpi=300,
         )

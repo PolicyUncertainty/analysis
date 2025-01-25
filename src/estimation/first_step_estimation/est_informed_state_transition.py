@@ -158,7 +158,7 @@ def plot_predicted_vs_actual(path_dict, predicted_shares, observed_shares, specs
     for edu_val, edu_label in enumerate(specs["education_labels"]):
         ax.plot(
             observed_shares[edu_label].rolling(window=3).mean(),
-            label="Actual_edu" + edu_label,
+            label=f"Obs. {edu_label}",
             marker="o",
             linestyle="None",
             markersize=4,
@@ -167,11 +167,11 @@ def plot_predicted_vs_actual(path_dict, predicted_shares, observed_shares, specs
         ax.plot(
             predicted_shares[edu_label],
             color=JET_COLOR_MAP[edu_val],
-            label="Predicted education" + edu_label,
+            label=f"Est. {edu_label}",
         )
     # Set labels
     ax.set_xlabel("Age")
     ax.set_ylabel("Share Informed")
     ax.legend()
-    fig
+    fig.savefig(path_dict["plots"] + "informed_shares.png")
     plt.show()

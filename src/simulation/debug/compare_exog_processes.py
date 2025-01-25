@@ -32,4 +32,3 @@ df_working_age = df_working_age[df_working_age["age"] > 32]
 job_offer_params_sim = est_job_offer_params_full_obs(
     df_working_age, specs, sex_append=["men"]
 )
-breakpoint()

@@ -40,8 +40,9 @@ from export_results.figures.expected_health import (
     plot_health_transition_prob,
 )
 
-plot_healthy_unhealthy(path_dict, specs)
-plt.show()
+#
+# plot_healthy_unhealthy(path_dict, specs)
+# plt.show()
 # plot_health_transition_prob(specs)
 # plt.show()
 # plt.close("all")
@@ -52,12 +53,12 @@ exit()
 # ######################################
 # exec_mortality = input("Execute Mortality characteristics? (y/n) ") == "y"
 # if exec_mortality:
-#     from export_results.figures.plot_mortality import (
-#         plot_mortality,
-#     )
-#
-#     plot_mortality(path_dict, specs)
-#     plt.close("all")
+from export_results.figures.plot_mortality import (
+    plot_mortality,
+)
+
+plot_mortality(path_dict, specs)
+plt.close("all")
 
 # %%###################################
 # Family characteristics

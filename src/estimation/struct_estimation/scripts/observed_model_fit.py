@@ -15,6 +15,7 @@ def observed_model_fit(
         path_dict=paths_dict,
         params=params,
         expected_alpha=False,
+        resolution=False,
         file_append=model_name,
         load_model=load_sol_model,
         load_solution=load_solution,

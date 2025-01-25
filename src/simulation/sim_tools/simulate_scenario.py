@@ -16,6 +16,8 @@ def solve_and_simulate_scenario(
     params,
     expected_alpha,
     sim_alpha,
+    initial_SRA,
+    resolution,
     model_name,
     df_exists,
     solution_exists,
@@ -37,7 +39,10 @@ def solve_and_simulate_scenario(
         transition_funcs,
         model_sol_names,
     ) = select_expectation_functions_and_model_sol_names(
-        path_dict, expected_alpha=expected_alpha, sim_alpha=sim_alpha
+        path_dict,
+        expected_alpha=expected_alpha,
+        sim_alpha=sim_alpha,
+        resolution=resolution,
     )
 
     solve_folder = get_model_resutls_path(path_dict, model_name)
@@ -54,6 +59,7 @@ def solve_and_simulate_scenario(
             seed=model_params["seed"],
             update_spec_for_policy_state=update_funcs["simulation"],
             policy_state_func_scenario=transition_funcs["simulation"],
+            initial_SRA=initial_SRA,
             solution=solution_est,
             model_of_solution=model,
             sim_model_exists=sim_model_exists,
@@ -72,6 +78,7 @@ def simulate_scenario(
     params,
     update_spec_for_policy_state,
     policy_state_func_scenario,
+    initial_SRA,
     solution,
     model_of_solution,
     sim_model_exists,
@@ -88,7 +95,12 @@ def simulate_scenario(
     options = model_of_solution["options"]
 
     initial_states, wealth_agents = generate_start_states(
-        path_dict, params, model_of_solution, n_agents, seed
+        path_dict=path_dict,
+        params=params,
+        model=model_of_solution,
+        inital_SRA=initial_SRA,
+        n_agents=n_agents,
+        seed=seed,
     )
 
     sim_dict = simulate_all_periods(

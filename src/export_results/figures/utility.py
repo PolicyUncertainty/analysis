@@ -1,6 +1,7 @@
 # %%
 import matplotlib.pyplot as plt
 import numpy as np
+from model_code.utility.bequest_utility import utility_final_consume_all
 from model_code.utility.utility_functions import consumption_scale
 from model_code.utility.utility_functions import utility_func
 
@@ -21,6 +22,8 @@ def plot_utility(params, specs):
             utilities[i] = utility_func(
                 consumption=c,
                 partner_state=partner_state,
+                sex=0,
+                health=1,
                 education=education,
                 period=period,
                 choice=choice,
@@ -38,6 +41,28 @@ def plot_utility(params, specs):
     ax.set_title("Utility function (reversed axes)")
 
 
+def plot_bequest(params, specs):
+    wealth = np.linspace(5_000, 100_000, 1000) / specs["wealth_unit"]
+
+    choice_labels = specs["choice_labels"]
+    fig, ax = plt.subplots()
+    for choice, choice_label in enumerate(choice_labels):
+        bequests = np.zeros_like(wealth)
+        for i, w in enumerate(wealth):
+            bequests[i] = utility_final_consume_all(
+                wealth=w,
+                params=params,
+            )
+        ax.plot(
+            wealth,
+            bequests,
+            label=choice_label,
+        )
+    ax.legend()
+    ax.set_ylabel("Bequest Utility")
+    ax.set_xlabel("Consumption")
+
+
 def plot_cons_scale(specs):
     n_periods = specs["n_periods"]
     married_labels = ["Single", "Partnered"]
@@ -48,7 +73,7 @@ def plot_cons_scale(specs):
             cons_scale = np.zeros(n_periods)
             for period in range(n_periods):
                 cons_scale[period] = consumption_scale(
-                    np.array(married_val), sex, edu_val, period, specs
+                    np.array(married_val), 0, edu_val, period, specs
                 )
             axs[married_val].plot(cons_scale, label=edu_label)
             axs[married_val].set_title(married_label)

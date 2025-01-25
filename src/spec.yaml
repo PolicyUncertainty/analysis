@@ -15,16 +15,20 @@ end_age: 100
 choice_labels: ["Retired", "Unemployed", "Part-time", "Full-time"]
 education_labels: ["Low Education", "High Education"]
 health_labels: ["Bad Health", "Good Health", "Death"]
-sex_labels: ["Men","Women"]
+sex_labels: ["Men", "Women"]
 partner_labels: ["Single","Working Partner", "Retired Partner"]
 # Belief process parameters
 SRA_grid_size: 0.25
 min_SRA: 65
 max_SRA: 72
+informed_threshhold: 5
+
+# Retirement parameters
 ret_years_before_SRA: 4
 min_ret_age: 63
 max_ret_age: 72
-informed_threshhold: 5
+# Maximum age to estimate labor market
+max_est_age_labor: 65
 # Assume that part time gives half a year of experience
 exp_increase_part_time: 0.5
 
@@ -70,7 +74,7 @@ max_birth_year: 2000
 ###############################################
 # Health process estimation parameters
 # smoothing bandwidth for weighted moving average (half of age range used to smooth)
-health_smoothing_bandwidth: 10
+health_smoothing_bandwidth: 5
 health_kernel_type: "epanechnikov" # "gaussian" # type of kernel used for smoothing
 ###############################################
 # Mortality process estimation parameters

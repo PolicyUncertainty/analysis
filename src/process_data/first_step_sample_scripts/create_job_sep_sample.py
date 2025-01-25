@@ -2,8 +2,8 @@ import os
 
 import numpy as np
 import pandas as pd
-from process_data.aux_scripts.filter_data import filter_data
-from process_data.aux_scripts.lagged_and_lead_vars import (
+from process_data.aux_and_plots.filter_data import filter_data
+from process_data.aux_and_plots.lagged_and_lead_vars import (
     create_lagged_and_lead_variables,
 )
 from process_data.soep_vars.education import create_education_type
@@ -29,12 +29,13 @@ def create_job_sep_sample(paths, specs, load_data=False):
 
     # create choice and lagged choice variable
     df = create_choice_variable(df)
+    # lagged choice
+    df = create_lagged_and_lead_variables(df, specs)
 
     # Job separation
     df = generate_job_separation_var(df)
-
-    # lagged choice (Also leads the job separation variable, which we will not use.
-    df = create_lagged_and_lead_variables(df, specs)
+    # Overwrite job separation when individuals choose working
+    df.loc[df["choice"] >= 2, "job_sep"] = 0
 
     # education
     df = create_education_type(df)

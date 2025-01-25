@@ -3,6 +3,7 @@ from functools import partial
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from export_results.figures.color_map import JET_COLOR_MAP
 from scipy.optimize import minimize
 
 
@@ -62,7 +63,10 @@ def calibrate_uninformed_hazard_rate(paths, specs):
     uninformed_beliefs.to_csv(out_file_path_belief)
     predicted_shares.to_csv(out_file_shares)
     plot_predicted_vs_actual(
-        predicted_shares=predicted_shares, observed_shares=edu_moments, specs=specs
+        path_dict=paths,
+        predicted_shares=predicted_shares,
+        observed_shares=edu_moments,
+        specs=specs,
     )
 
 
@@ -149,17 +153,25 @@ def predicted_shares_by_age(params, ages_to_predict):
     return relevant_shares
 
 
-def plot_predicted_vs_actual(predicted_shares, observed_shares, specs):
+def plot_predicted_vs_actual(path_dict, predicted_shares, observed_shares, specs):
+    fig, ax = plt.subplots(figsize=(12, 8))
     for edu_val, edu_label in enumerate(specs["education_labels"]):
-        plt.plot(
-            observed_shares[edu_label],
-            label="Actual_edu" + edu_label,
+        ax.plot(
+            observed_shares[edu_label].rolling(window=3).mean(),
+            label=f"Obs. {edu_label}",
             marker="o",
             linestyle="None",
             markersize=4,
+            color=JET_COLOR_MAP[edu_val],
         )
-        plt.plot(predicted_shares[edu_label], label="Predicted education" + edu_label)
-    plt.xlabel("Age")
-    plt.ylabel("Share Informed")
-    plt.legend()
+        ax.plot(
+            predicted_shares[edu_label],
+            color=JET_COLOR_MAP[edu_val],
+            label=f"Est. {edu_label}",
+        )
+    # Set labels
+    ax.set_xlabel("Age")
+    ax.set_ylabel("Share Informed")
+    ax.legend()
+    fig.savefig(path_dict["plots"] + "informed_shares.png")
     plt.show()

@@ -5,8 +5,8 @@
 #SBATCH --mail-type=end
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=3:00:00
-#SBATCH --mem=20GB
+#SBATCH --time=7:00:00
+#SBATCH --mem=40GB
 #SBATCH --partition=scavenger
 #SBATCH --gres=gpu:h100:1
 #SBATCH --qos=standard

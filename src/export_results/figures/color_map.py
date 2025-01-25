@@ -10,3 +10,4 @@ JET_COLOR_MAP = [
     "#bcbd22",
     "#17becf",
 ]
+FIGSIZE = 12

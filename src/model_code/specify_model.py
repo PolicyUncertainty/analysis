@@ -5,17 +5,21 @@ import numpy as np
 from dcegm.pre_processing.setup_model import load_and_setup_model
 from dcegm.pre_processing.setup_model import setup_and_save_model
 from dcegm.solve import get_solve_func_for_model
-from model_code.state_space import create_state_space_functions
-from model_code.stochastic_processes.health_transition import health_transition
-from model_code.stochastic_processes.informed_state_transition import (
+from model_code.policy_processes.informed_state_transition import (
     informed_transition,
 )
+from model_code.policy_processes.select_policy_belief import (
+    select_expectation_functions_and_model_sol_names,
+)
+from model_code.state_space import create_state_space_functions
+from model_code.stochastic_processes.health_transition import health_transition
 from model_code.stochastic_processes.job_offers import job_offer_process_transition
 from model_code.stochastic_processes.partner_transitions import partner_transition
 from model_code.utility.bequest_utility import create_final_period_utility_functions
 from model_code.utility.utility_functions import create_utility_functions
 from model_code.wealth_and_budget.budget_equation import budget_constraint
 from model_code.wealth_and_budget.savings_grid import create_savings_grid
+from set_paths import get_model_resutls_path
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
@@ -89,14 +93,21 @@ def specify_model(
     }
     informed_states = np.arange(2, dtype=int)
     if model_type == "solution":
+        # Set informed state as not changing state
         options["state_space"]["endogenous_states"]["informed"] = informed_states
+        # Determine path
         model_path = path_dict["intermediate_data"] + "model_spec_solution.pkl"
+        sim_model = False
+
     elif model_type == "simulation":
+        # Set informed state as exogenous changing state
         options["state_space"]["exogenous_processes"]["informed"] = {
             "transition": informed_transition,
             "states": informed_states,
         }
+        # Determine path
         model_path = path_dict["intermediate_data"] + "model_spec_simulation.pkl"
+        sim_model = True
     else:
         raise ValueError("model_type must be either 'solution' or 'simulation'")
 
@@ -107,7 +118,9 @@ def specify_model(
             utility_functions=create_utility_functions(),
             utility_functions_final_period=create_final_period_utility_functions(),
             budget_constraint=budget_constraint,
+            # shock_functions=shock_function_dict(),
             path=model_path,
+            sim_model=sim_model,
         )
 
     else:
@@ -117,7 +130,9 @@ def specify_model(
             utility_functions=create_utility_functions(),
             utility_functions_final_period=create_final_period_utility_functions(),
             budget_constraint=budget_constraint,
+            # shock_functions=shock_function_dict(),
             path=model_path,
+            sim_model=sim_model,
         )
 
     print("Model specified.")
@@ -128,8 +143,7 @@ def specify_and_solve_model(
     path_dict,
     file_append,
     params,
-    update_spec_for_policy_state,
-    policy_state_trans_func,
+    expected_alpha,
     load_model,
     load_solution,
 ):
@@ -138,20 +152,28 @@ def specify_and_solve_model(
     Also includes possibility to save solutions.
 
     """
+    (
+        update_funcs,
+        transition_funcs,
+        model_sol_names,
+    ) = select_expectation_functions_and_model_sol_names(
+        path_dict, expected_alpha=expected_alpha, sim_alpha=None
+    )
 
     # Generate model_specs
     model, params = specify_model(
         path_dict=path_dict,
-        update_spec_for_policy_state=update_spec_for_policy_state,
-        policy_state_trans_func=policy_state_trans_func,
+        update_spec_for_policy_state=update_funcs["solution"],
+        policy_state_trans_func=transition_funcs["solution"],
         params=params,
         load_model=load_model,
         model_type="solution",
     )
 
-    solution_file = path_dict["intermediate_data"] + (
-        f"solved_models/model_solution" f"_{file_append}.pkl"
-    )
+    # check if folder of model objects exits:
+    solve_folder = get_model_resutls_path(path_dict, file_append)
+    solution_file = solve_folder["solution"] + model_sol_names["solution"]
+
     if load_solution is None:
         solution = {}
         (

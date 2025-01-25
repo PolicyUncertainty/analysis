@@ -14,7 +14,10 @@ def plot_healthy_unhealthy(paths_dict, specs):
     # Load the data and define age range
     start_age = specs["start_age"]
     end_age = specs["end_age"]
-    ages = np.arange(start_age, end_age + 1)
+
+    max_age_est_physical = 90
+    max_period_physical = max_age_est_physical - start_age
+    est_ages = np.arange(start_age, end_age + 1)
 
     # Load the health transition sample
     df = pd.read_pickle(
@@ -28,7 +31,7 @@ def plot_healthy_unhealthy(paths_dict, specs):
         .loc[slice(None), slice(None), slice(start_age, end_age + 1)]
     )
     full_index = pd.MultiIndex.from_product(
-        [range(specs["n_sexes"]), range(specs["n_education_types"]), ages],
+        [range(specs["n_sexes"]), range(specs["n_education_types"]), est_ages],
         names=["sex", "education", "age"],
     )
     edu_shares_healthy = pd.DataFrame(index=full_index, columns=["health"], data=0.0)
@@ -38,9 +41,9 @@ def plot_healthy_unhealthy(paths_dict, specs):
     initial_dist = np.zeros(specs["n_health_states"])
 
     # Create the plot
-    fig, ax = plt.subplots(figsize=(12, 8))
-    color_id = 0
+    fig, axs = plt.subplots(ncols=2, figsize=(12, 8))
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
+        ax = axs[sex_var]
         for edu_var, edu_label in enumerate(specs["education_labels"]):
             # Set the initial distribution for the Markov simulation
             # and assume nobody is dead
@@ -61,45 +64,49 @@ def plot_healthy_unhealthy(paths_dict, specs):
 
             # Plot the estimates and the data
             ax.plot(
-                ages,
-                health_prob_edu_est,
-                color=JET_COLOR_MAP[color_id],
-                label=f"{edu_label}; {sex_label} MC-Estimate",
+                est_ages[:max_period_physical],
+                health_prob_edu_est[:max_period_physical],
+                color=JET_COLOR_MAP[edu_var],
+                label=f"Est. {edu_label}",
             )
+            # ax.plot(
+            #     ages,
+            #     health_prob_edu_data,
+            #     linestyle="--",
+            #     color=JET_COLOR_MAP[edu_var],
+            #     label=f"{edu_label}; {sex_label} Data, RM w. BW={specs['health_smoothing_bandwidth']}",
+            # )
             ax.plot(
-                ages,
-                health_prob_edu_data,
+                est_ages[:max_period_physical],
+                health_prob_edu_data[:max_period_physical],
+                color=JET_COLOR_MAP[edu_var],
                 linestyle="--",
-                color=JET_COLOR_MAP[color_id],
-                label=f"{edu_label}; {sex_label} Data, RM w. BW={specs['health_smoothing_bandwidth']}",
+                label=f"Obs. {edu_label}",
+                # alpha=0.5,
+                # s=8,
             )
-            ax.scatter(
-                ages,
-                health_prob_edu_data,
-                color=JET_COLOR_MAP[color_id],
-                alpha=0.5,
-                s=8,
-            )
-            color_id += 1
 
-    # Adjust the x-axis ticks and labels
-    x_ticks = np.arange(start_age, end_age + 1, 10)
-    ax.set_xticks(x_ticks)
-    ax.set_xticklabels(x_ticks)
+            # Adjust the x-axis ticks and labels
+            x_ticks = np.arange(start_age, max_age_est_physical + 1, 10)
+            ax.set_xticks(x_ticks)
+            # Set font size for x-axis labels
+            ax.set_xticklabels(x_ticks, fontsize=12)
 
-    # Set y-axis limits and ticks
-    ax.set_ylim(0.4, 1)  # Set y-axis limits from 0 to 1
-    ax.set_yticks(np.arange(0.4, 1.1, 0.1))  # Set y-axis ticks at intervals of 0.1
+        # Set y-axis limits and ticks
+        ax.set_ylim(0, 1)  # Set y-axis limits from 0 to 1
+        ax.set_yticks(np.arange(0.0, 1.1, 0.1))
+        # Set yticks labels and fontsize
+        ax.set_yticklabels([f"{i:.0%}" for i in np.arange(0.0, 1.1, 0.1)], fontsize=12)
 
-    # Add title and legend
-    ax.set_title("Health shares", fontsize=14)
-    ax.set_xlabel("Age", fontsize=12)
-    ax.set_ylabel("Probability of being Healthy", fontsize=12)
-    ax.legend()
+        # Add title and legend
+        ax.set_title(f"{sex_label}", fontsize=14)
+        ax.set_xlabel("Age", fontsize=12)
+        ax.set_ylabel("Probability of being Healthy", fontsize=12)
+    axs[0].legend()
 
     # Show the plot
-    plt.tight_layout()
-    plt.show()
+    fig.tight_layout()
+    fig.savefig(paths_dict["plots"] + "health_transition.png")
 
 
 def markov_simulator(initial_dist, trans_probs):

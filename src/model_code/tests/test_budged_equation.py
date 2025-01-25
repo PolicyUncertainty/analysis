@@ -55,7 +55,7 @@ def test_budget_unemployed(
 
     params = {"interest_rate": specs_internal["interest_rate"]}
 
-    max_init_exp_period = period + specs_internal["max_init_experience"]
+    max_init_exp_period = period + specs_internal["max_exp_diffs_per_period"][period]
     exp_cont = 2 / max_init_exp_period
 
     wealth = budget_constraint(
@@ -172,7 +172,7 @@ def test_budget_worker(
     specs_internal["gamma_1"] = gamma_array
 
     params = {"interest_rate": specs_internal["interest_rate"]}
-    max_init_exp_period = period + specs_internal["max_init_experience"]
+    max_init_exp_period = period + specs_internal["max_exp_diffs_per_period"][period]
     exp_cont = experience / max_init_exp_period
 
     wealth = budget_constraint(
@@ -297,8 +297,11 @@ def test_retiree(
     path_dict, specs_internal = paths_and_specs
 
     params = {"interest_rate": specs_internal["interest_rate"]}
-    max_init_exp_period = period + specs_internal["max_init_experience"]
-    exp_cont_last_period = exp / (max_init_exp_period - 1)
+    last_period = period - 1
+    max_exp_last_period = (
+        specs_internal["max_exp_diffs_per_period"][last_period] + last_period
+    )
+    exp_cont_last_period = exp / max_exp_last_period
 
     exp_cont = get_next_period_experience(
         period=period,
@@ -311,7 +314,8 @@ def test_retiree(
         options=specs_internal,
     )
     # Check that experience does not get updated or added any penalty
-    np.testing.assert_allclose(exp_cont * max_init_exp_period, exp)
+    max_exp_this_period = period + specs_internal["max_exp_diffs_per_period"][period]
+    np.testing.assert_allclose(exp_cont * max_exp_this_period, exp)
 
     wealth = budget_constraint(
         period=period,
@@ -425,7 +429,10 @@ def test_fresh_retiree(
     actual_retirement_age = specs_internal["start_age"] + period - 1
 
     params = {"interest_rate": specs_internal["interest_rate"]}
-    max_init_exp_prev_period = period + specs_internal["max_init_experience"] - 1
+    last_period = period - 1
+    max_init_exp_prev_period = (
+        last_period + specs_internal["max_exp_diffs_per_period"][last_period]
+    )
     exp_cont_prev = exp / max_init_exp_prev_period
 
     exp_cont = get_next_period_experience(

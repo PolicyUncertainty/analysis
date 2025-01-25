@@ -33,7 +33,6 @@ def calc_unemployment_benefits(
     )
 
     # reduced benefits for savings slightly above threshold
-
     reduced_benefits_threshhold = (
         options["unemployment_wealth_thresh"] + total_unemployment_benefits
     )

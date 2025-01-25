@@ -21,7 +21,7 @@ def budget_constraint(
 ):
     savings_scaled = savings_end_of_previous_period * options["wealth_unit"]
     # Recalculate experience
-    max_exp_period = period + options["max_init_experience"]
+    max_exp_period = period + options["max_exp_diffs_per_period"][period]
     experience_years = max_exp_period * experience
 
     # Calculate partner income

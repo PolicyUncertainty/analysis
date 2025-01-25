@@ -1,5 +1,6 @@
 import jax
 import jax.numpy as jnp
+from model_code.utility.bequest_utility import utility_final_consume_all
 
 
 def create_utility_functions():
@@ -11,6 +12,29 @@ def create_utility_functions():
 
 
 def utility_func(
+    consumption, sex, partner_state, education, health, period, choice, params, options
+):
+    utility_alive = utility_func_alive(
+        consumption=consumption,
+        sex=sex,
+        partner_state=partner_state,
+        education=education,
+        health=health,
+        period=period,
+        choice=choice,
+        params=params,
+        options=options,
+    )
+    utility_death = utility_final_consume_all(
+        wealth=consumption,
+        params=params,
+    )
+    death_bool = health == 2
+    utility = jax.lax.select(death_bool, utility_death, utility_alive)
+    return utility
+
+
+def utility_func_alive(
     consumption, sex, partner_state, education, health, period, choice, params, options
 ):
     """Calculate the choice specific cobb-douglas utility, i.e. u =
@@ -35,7 +59,14 @@ def utility_func(
         options=options,
     )
     # compute utility
-    utility = (consumption * eta / cons_scale) ** (1 - mu) / (1 - mu)
+    scaled_consumption = consumption * eta / cons_scale
+    utility_mu_not_one = (scaled_consumption ** (1 - mu) - 1) / (1 - mu)
+
+    utility = jax.lax.select(
+        jnp.allclose(mu, 1),
+        jnp.log(consumption * eta / cons_scale),
+        utility_mu_not_one,
+    )
     return utility
 
 
@@ -60,7 +91,14 @@ def marg_utility(
         params=params,
         options=options,
     )
-    marg_util = ((eta / cons_scale) ** (1 - mu)) * (consumption ** (-mu))
+    marg_util_mu_not_one = ((eta / cons_scale) ** (1 - mu)) * (consumption ** (-mu))
+
+    marg_util = jax.lax.select(
+        jnp.allclose(mu, 1),
+        1 / consumption,
+        marg_util_mu_not_one,
+    )
+
     return marg_util
 
 
@@ -93,7 +131,12 @@ def inverse_marginal(
         params=params,
         options=options,
     )
-    consumption = marginal_utility ** (-1 / mu) * (eta / cons_scale) ** ((1 - mu) / mu)
+    consumption_mu_not_one = marginal_utility ** (-1 / mu) * (eta / cons_scale) ** (
+        (1 - mu) / mu
+    )
+    consumption = jax.lax.select(
+        jnp.allclose(mu, 1), 1 / marginal_utility, consumption_mu_not_one
+    )
     return consumption
 
 
@@ -128,12 +171,16 @@ def disutility_work(
     )
     has_partner_int = (partner_state > 0).astype(int)
     nb_children = options["children_by_state"][sex, education, has_partner_int, period]
-    disutil_children_pt = params["disutil_children_pt_work"] * nb_children
-    disutil_children_ft = params["disutil_children_ft_work"] * nb_children
+
+    disutil_children_high = params["disutil_children_ft_work_high"] * nb_children
+    disutil_children_low = params["disutil_children_ft_work_low"] * nb_children
+    disutil_children_ft = disutil_children_high * education + disutil_children_low * (
+        1 - education
+    )
 
     exp_factor_women = (
         params["disutil_unemployed_women"] * is_unemployed
-        + (disutil_pt_work_women + disutil_children_pt) * is_working_part_time
+        + disutil_pt_work_women * is_working_part_time
         + (disutil_ft_work_women + disutil_children_ft) * is_working_full_time
     )
 

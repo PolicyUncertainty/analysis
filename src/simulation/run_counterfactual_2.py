@@ -42,10 +42,7 @@ params = pkl.load(
 )
 
 # Initialize alpha values and replace 0.04 with subjective alpha
-alphas_realized = np.arange(0, 0.11, 0.01)
-alphas_realized[alphas_realized == 0.04] = np.loadtxt(
-    path_dict["est_results"] + "exp_val_params.txt"
-)
+sra_at_63 = np.arange(67, 70 + specs["SRA_grid_size"], specs["SRA_grid_size"])
 
 # Create result df
 result_df = pd.DataFrame(
@@ -60,15 +57,19 @@ result_df = pd.DataFrame(
     dtype=float,
 )
 # Assign alphas in dataframe
-result_df["alpha"] = alphas_realized
-for i, alpha_sim in enumerate(alphas_realized):
-    print("Start simulation for alpha: ", alpha_sim)
+result_df["sra_at_63"] = sra_at_63
+for i, sra in enumerate(sra_at_63):
+    print("Start simulation for alpha: ", sra)
+    alpha_sim = (sra - 67) / (63 - specs["start_age"])
+
     # Create estimated model
     df = solve_and_simulate_scenario(
         path_dict=path_dict,
         params=params,
         sim_alpha=alpha_sim,
         expected_alpha=False,
+        resolution=True,
+        initial_SRA=67,
         model_name=model_name,
         df_exists=load_df,
         solution_exists=load_solution,

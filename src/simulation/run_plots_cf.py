@@ -9,14 +9,31 @@ path_dict = create_path_dict()
 model_name = "new"
 
 # Load results
-df = pd.read_csv(path_dict["sim_results"] + f"counterfactual_1_{model_name}.csv").iloc[
-    1:
-]
+df = pd.read_csv(path_dict["sim_results"] + f"counterfactual_1_{model_name}.csv")
 # Exclude the first rpw
-plot_percentage_change(df)
-plt.savefig(path_dict["plots"] + "cf2_results.png")
-plt.show()
+plot_percentage_change(df, path_dict, cf_name="cf1", show_sra_diff=False)
+plt.savefig(path_dict["plots"] + "cf1_results.png")
 
+df = pd.read_csv(
+    path_dict["sim_results"] + f"counterfactual_2_{model_name}.csv", index_col=0
+)
+# get colmn names without "base_" as list
+columns = [col for col in df.columns if "base_" not in col]
+for column in columns:
+    if column == "sra_at_63":
+        continue
+    elif column != "cv":
+        # Assign to 0 itemn 1 from base
+        df.loc[0, column] = df.loc[1, "base_" + column]
+        df.loc[0, "base_" + column] = df.loc[1, "base_" + column]
+    else:
+        # Assign to 0 itemn 1 from base
+        df.loc[0, column] = df.loc[1, column]
+
+# Exclude the first rpw
+plot_percentage_change(df, path_dict, cf_name="cf2", show_sra_diff=True)
+plt.show()
+# plt.savefig(path_dict["plots"] + "cf2_results.png")
 
 #
 # show_any_plots = input("Show any plots? (y/n): ") == "y"

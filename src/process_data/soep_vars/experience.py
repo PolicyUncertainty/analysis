@@ -19,8 +19,6 @@ def create_experience_variable(data):
     """This function creates an experience variable as the sum of full-time and 0.5
     weighted part-time experience and rounds the sum."""
     data = sum_experience_variables(data)
-    # Round experience
-    data.loc[:, "experience"] = data["experience"].round()
     return data
 
 

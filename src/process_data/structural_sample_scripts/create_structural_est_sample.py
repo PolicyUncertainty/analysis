@@ -1,8 +1,8 @@
 import os
 
 import pandas as pd
-from process_data.aux_scripts.filter_data import filter_data
-from process_data.aux_scripts.lagged_and_lead_vars import (
+from process_data.aux_and_plots.filter_data import filter_data
+from process_data.aux_and_plots.lagged_and_lead_vars import (
     create_lagged_and_lead_variables,
 )
 from process_data.soep_vars.education import create_education_type
@@ -20,7 +20,7 @@ from process_data.structural_sample_scripts.model_restrictions import (
 from process_data.structural_sample_scripts.policy_state import create_policy_state
 
 
-def create_structural_est_sample(paths, specs, load_data=False, debug=False):
+def create_structural_est_sample(paths, specs, load_data=False):
     if not os.path.exists(paths["intermediate_data"]):
         os.makedirs(paths["intermediate_data"])
 
@@ -28,12 +28,7 @@ def create_structural_est_sample(paths, specs, load_data=False, debug=False):
 
     if load_data:
         df = pd.read_pickle(out_file_path)
-        if debug:
-            print("Debug mode active. Executing only subset of the code")
-            # paste functions to be tested individually here
-            df = add_wealth_interpolate_and_deflate(df, paths, specs)
-        else:
-            return df
+        return df
 
     # Load and merge data state data from SOEP core (all but wealth)
     df = load_and_merge_soep_core(soep_c38_path=paths["soep_c38"])
@@ -45,7 +40,7 @@ def create_structural_est_sample(paths, specs, load_data=False, debug=False):
     df = filter_data(df, specs)
 
     df = generate_job_separation_var(df)
-    df = create_lagged_and_lead_variables(df, specs)
+    df = create_lagged_and_lead_variables(df, specs, lead_job_sep=True)
     df = add_wealth_interpolate_and_deflate(df, paths, specs)
     df["period"] = df["age"] - specs["start_age"]
     df = create_policy_state(df, specs)
@@ -64,6 +59,7 @@ def create_structural_est_sample(paths, specs, load_data=False, debug=False):
     df = determine_observed_job_offers(
         df, working_choices=[2, 3], was_fired_last_period=was_fired_last_period
     )
+
     # Filter out part-time men
     mask = df["sex"] == 0
     df = df[~(mask & (df["choice"] == 2))]

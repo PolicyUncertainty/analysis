@@ -1,4 +1,5 @@
 import itertools
+
 import matplotlib.pyplot as plt
 import numpy as np
 import optimagic as om
@@ -11,7 +12,7 @@ def estimate_mortality(paths_dict, specs):
 
     # load life table data and expand/duplicate it to include all possible combinations of health, education and sex
     lifetable_df = pd.read_csv(
-        paths_dict["intermediate_data"] + "mortality_table_for_pandas.csv",
+        paths_dict["open_data"] + "mortality_table_for_pandas.csv",
         sep=";",
     )
     mortality_df = pd.DataFrame(
@@ -59,12 +60,48 @@ def estimate_mortality(paths_dict, specs):
 
         # Initial parameters
         initial_params_data = {
-            "intercept": {"value": -13, "lower_bound": -np.inf, "upper_bound": np.inf, "soft_lower_bound": -15.0, "soft_upper_bound": 15.0},
-            "age": {"value": 0.1, "lower_bound": 1e-8, "upper_bound": np.inf, "soft_lower_bound": 0.0001, "soft_upper_bound": 1.0},
-            f"{specs['health_labels'][1]} {specs['education_labels'][1]}": {"value": -0.4, "lower_bound": -np.inf, "upper_bound": np.inf, "soft_lower_bound": -2.5, "soft_upper_bound": 2.5},
-            f"{specs['health_labels'][1]} {specs['education_labels'][0]}": {"value": -0.3, "lower_bound": -np.inf, "upper_bound": np.inf, "soft_lower_bound": -2.5, "soft_upper_bound": 2.5},
-            f"{specs['health_labels'][0]} {specs['education_labels'][1]}": {"value": 0.0, "lower_bound": -np.inf, "upper_bound": np.inf, "soft_lower_bound": -2.5, "soft_upper_bound": 2.5},
-            f"{specs['health_labels'][0]} {specs['education_labels'][0]}": {"value": 0.2, "lower_bound": -np.inf, "upper_bound": np.inf, "soft_lower_bound": -2.5, "soft_upper_bound": 2.5},
+            "intercept": {
+                "value": -13,
+                "lower_bound": -np.inf,
+                "upper_bound": np.inf,
+                "soft_lower_bound": -15.0,
+                "soft_upper_bound": 15.0,
+            },
+            "age": {
+                "value": 0.1,
+                "lower_bound": 1e-8,
+                "upper_bound": np.inf,
+                "soft_lower_bound": 0.0001,
+                "soft_upper_bound": 1.0,
+            },
+            f"{specs['health_labels'][1]} {specs['education_labels'][1]}": {
+                "value": -0.4,
+                "lower_bound": -np.inf,
+                "upper_bound": np.inf,
+                "soft_lower_bound": -2.5,
+                "soft_upper_bound": 2.5,
+            },
+            f"{specs['health_labels'][1]} {specs['education_labels'][0]}": {
+                "value": -0.3,
+                "lower_bound": -np.inf,
+                "upper_bound": np.inf,
+                "soft_lower_bound": -2.5,
+                "soft_upper_bound": 2.5,
+            },
+            f"{specs['health_labels'][0]} {specs['education_labels'][1]}": {
+                "value": 0.0,
+                "lower_bound": -np.inf,
+                "upper_bound": np.inf,
+                "soft_lower_bound": -2.5,
+                "soft_upper_bound": 2.5,
+            },
+            f"{specs['health_labels'][0]} {specs['education_labels'][0]}": {
+                "value": 0.2,
+                "lower_bound": -np.inf,
+                "upper_bound": np.inf,
+                "soft_lower_bound": -2.5,
+                "soft_upper_bound": 2.5,
+            },
         }
         initial_params = pd.DataFrame.from_dict(initial_params_data, orient="index")
 
@@ -177,11 +214,14 @@ def loglike(params, data, start_data):
         DataFrame with the data.
     data: pd.DataFrame
         DataFrame with the start data.
-        
 
     """
 
     event = data["death event"]
     death = event.astype(bool)
 
-    return log_density_function(data[death], params).sum() + log_survival_function(data[~death], params).sum() - log_survival_function(start_data, params).sum()
+    return (
+        log_density_function(data[death], params).sum()
+        + log_survival_function(data[~death], params).sum()
+        - log_survival_function(start_data, params).sum()
+    )

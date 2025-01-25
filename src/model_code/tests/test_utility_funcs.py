@@ -15,7 +15,7 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 
 jax.config.update("jax_enable_x64", True)
 
-MU_GRID = [1.5]
+MU_GRID = [1, 1.5]
 CONSUMPTION_GRID = np.linspace(10, 100, 3)
 disutil_UNEMPLOYED_GRID = np.linspace(0.1, 0.9, 2)
 disutil_WORK_GRID = np.linspace(0.1, 0.9, 2)
@@ -95,8 +95,9 @@ def test_utility_func(
         "disutil_ft_work_good_women": disutil_work + 1,
         "disutil_ft_work_bad_women": disutil_work,
         "disutil_unemployed_women": disutil_unemployed,
-        "disutil_children_pt_work": 0.1,
-        "disutil_children_ft_work": 0.1,
+        "disutil_children_ft_work_low": 0.1,
+        "disutil_children_ft_work_high": 0.1,
+        "bequest_scale": 2,
     }
     options = paths_and_specs[1]
     cons_scale = consumption_scale(
@@ -106,7 +107,6 @@ def test_utility_func(
         period=period,
         options=options,
     )
-    cons_utility = (consumption / cons_scale) ** (1 - mu) / (1 - mu)
 
     # Read out disutil params
     health_str = "good" * health + "bad" * (1 - health)
@@ -124,11 +124,21 @@ def test_utility_func(
         nb_children = options["children_by_state"][
             sex, education, has_partner_int, period
         ]
-        exp_factor_ft_work += params["disutil_children_ft_work"] * nb_children
-        exp_factor_pt_work += params["disutil_children_pt_work"] * nb_children
+        exp_factor_ft_work += (
+            params["disutil_children_ft_work_high"] * nb_children * education
+        )
+        exp_factor_ft_work += (
+            params["disutil_children_ft_work_low"] * nb_children * (1 - education)
+        )
 
     disutil_pt_work = np.exp(-exp_factor_pt_work)
     disutil_ft_work = np.exp(-exp_factor_ft_work)
+    if mu == 1:
+        utility_lambda = lambda disutil: np.log(consumption * disutil / cons_scale)
+    else:
+        utility_lambda = lambda disutil: (
+            (consumption * disutil / cons_scale) ** (1 - mu) - 1
+        ) / (1 - mu)
 
     np.testing.assert_almost_equal(
         utility_func(
@@ -142,7 +152,7 @@ def test_utility_func(
             params=params,
             options=options,
         ),
-        cons_utility * disutil_unemployment ** (1 - mu),
+        utility_lambda(disutil_unemployment),
     )
     if sex == 1:
         np.testing.assert_almost_equal(
@@ -157,7 +167,7 @@ def test_utility_func(
                 params=params,
                 options=options,
             ),
-            cons_utility * disutil_pt_work ** (1 - mu),
+            utility_lambda(disutil_pt_work),
         )
 
     np.testing.assert_almost_equal(
@@ -172,7 +182,7 @@ def test_utility_func(
             params=params,
             options=options,
         ),
-        cons_utility * disutil_ft_work ** (1 - mu),
+        utility_lambda(disutil_ft_work),
     )
 
 
@@ -217,8 +227,9 @@ def test_marginal_utility(
         "disutil_ft_work_good_women": disutil_work + 1,
         "disutil_ft_work_bad_women": disutil_work,
         "disutil_unemployed_women": disutil_unemployed,
-        "disutil_children_pt_work": 0.1,
-        "disutil_children_ft_work": 0.1,
+        "disutil_children_ft_work_low": 0.1,
+        "disutil_children_ft_work_high": 0.1,
+        "bequest_scale": 2,
     }
 
     random_choice = np.random.choice(np.array([0, 1, 2]))
@@ -287,8 +298,9 @@ def test_inv_marginal_utility(
         "disutil_ft_work_good_women": disutil_work + 1,
         "disutil_ft_work_bad_women": disutil_work,
         "disutil_unemployed_women": disutil_unemployed,
-        "disutil_children_pt_work": 0.1,
-        "disutil_children_ft_work": 0.1,
+        "disutil_children_ft_work_low": 0.1,
+        "disutil_children_ft_work_high": 0.1,
+        "bequest_scale": 2,
     }
 
     options = paths_and_specs[1]
@@ -329,7 +341,10 @@ def test_bequest(consumption, mu, bequest_scale):
         "mu": mu,
         "bequest_scale": bequest_scale,
     }
-    bequest = bequest_scale * (consumption ** (1 - mu) / (1 - mu))
+    if mu == 1:
+        bequest = bequest_scale * np.log(consumption)
+    else:
+        bequest = bequest_scale * (((consumption ** (1 - mu)) - 1) / (1 - mu))
     np.testing.assert_almost_equal(
         utility_final_consume_all(consumption, params), bequest
     )

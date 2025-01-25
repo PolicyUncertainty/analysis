@@ -3,11 +3,11 @@ import os
 
 import numpy as np
 import pandas as pd
-from process_data.aux_scripts.filter_data import filter_above_age
-from process_data.aux_scripts.filter_data import filter_below_age
-from process_data.aux_scripts.filter_data import filter_years
-from process_data.aux_scripts.filter_data import recode_sex
-from process_data.aux_scripts.lagged_and_lead_vars import span_dataframe
+from process_data.aux_and_plots.filter_data import filter_above_age
+from process_data.aux_and_plots.filter_data import filter_below_age
+from process_data.aux_and_plots.filter_data import filter_years
+from process_data.aux_and_plots.filter_data import recode_sex
+from process_data.aux_and_plots.lagged_and_lead_vars import span_dataframe
 from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.health import clean_health_create_states
 from process_data.soep_vars.health import create_health_var

@@ -30,9 +30,9 @@ from export_results.tables.cv import calc_compensated_variation
 n_agents = 10000
 seeed = 123
 model_name = "new"
-load_base_solution = False
+load_base_solution = True
 load_sol_model = True
-load_sim_model = False
+load_sim_model = True
 load_solution = None
 load_df = None
 
@@ -43,10 +43,7 @@ params = pkl.load(
 )
 
 # Initialize alpha values and replace 0.04 with subjective alpha(0.041...)
-alphas_realized = np.arange(0, 0.11, 0.01)
-alphas_realized[alphas_realized == 0.04] = np.loadtxt(
-    path_dict["est_results"] + "exp_val_params.txt"
-)
+sra_at_63 = np.arange(69.25, 70 + specs["SRA_grid_size"], specs["SRA_grid_size"])
 
 # Create result df
 res_df = pd.DataFrame(
@@ -61,9 +58,11 @@ res_df = pd.DataFrame(
     dtype=float,
 )
 # Assign alphas in dataframe
-res_df["alpha"] = alphas_realized
-for i, alpha_sim in enumerate(alphas_realized):
-    print("Start simulation for alpha: ", alpha_sim)
+res_df["sra_at_63"] = sra_at_63
+for i, sra in enumerate(sra_at_63):
+    print("Start simulation for alpha: ", sra)
+    # Calculate how much it has to increase starting from 67 in beaseline
+    alpha_sim = (sra - 67) / (63 - specs["start_age"])
 
     # Simulate baseline with subjective belief
     df_base = solve_and_simulate_scenario(
@@ -72,6 +71,7 @@ for i, alpha_sim in enumerate(alphas_realized):
         sim_alpha=alpha_sim,
         expected_alpha=False,
         resolution=True,
+        initial_SRA=67,
         model_name=model_name,
         df_exists=load_df,
         solution_exists=load_base_solution,
@@ -80,7 +80,6 @@ for i, alpha_sim in enumerate(alphas_realized):
     ).reset_index()
 
     load_sim_model = True
-    load_sol_model = True
     load_base_solution = True
 
     # Simulate counterfactual with no uncertainty and expected increase
@@ -88,15 +87,17 @@ for i, alpha_sim in enumerate(alphas_realized):
     df_cf = solve_and_simulate_scenario(
         path_dict=path_dict,
         params=params,
-        sim_alpha=alpha_sim,
-        expected_alpha=alpha_sim,
+        sim_alpha=0.0,
+        expected_alpha=0.0,
         resolution=True,
+        initial_SRA=sra,
         model_name=model_name,
         df_exists=load_df,
         solution_exists=load_solution,
         sol_model_exists=load_sol_model,
         sim_model_exists=load_sim_model,
     ).reset_index()
+    load_sol_model = True
 
     for k, df_scen in enumerate([df_cf, df_base]):
         if k == 0:

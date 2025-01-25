@@ -2,10 +2,10 @@
 import os
 
 import pandas as pd
-from process_data.aux_scripts.filter_data import filter_below_age
-from process_data.aux_scripts.filter_data import filter_years
-from process_data.aux_scripts.filter_data import recode_sex
-from process_data.aux_scripts.lagged_and_lead_vars import span_dataframe
+from process_data.aux_and_plots.filter_data import filter_below_age
+from process_data.aux_and_plots.filter_data import filter_years
+from process_data.aux_and_plots.filter_data import recode_sex
+from process_data.aux_and_plots.lagged_and_lead_vars import span_dataframe
 from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.partner_code import create_partner_state
 

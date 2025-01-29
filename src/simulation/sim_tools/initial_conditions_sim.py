@@ -6,7 +6,7 @@ from dcegm.wealth_correction import adjust_observed_wealth
 from scipy.stats import pareto
 
 
-def generate_start_states(path_dict, params, model, n_agents, seed):
+def generate_start_states(path_dict, params, model, inital_SRA, n_agents, seed):
     specs = model["options"]["model_params"]
 
     observed_data = pd.read_pickle(
@@ -150,6 +150,14 @@ def generate_start_states(path_dict, params, model, n_agents, seed):
     exp_zero_mask = exp_agents == 0
     lagged_choice[exp_zero_mask] = 1
 
+    # Generate start policy state from initial SRA
+    initial_policy_state = np.floor(
+        (inital_SRA - specs["min_SRA"]) / specs["SRA_grid_size"]
+    )
+    policy_state_agents = (jnp.ones_like(exp_agents) * initial_policy_state).astype(
+        jnp.uint8
+    )
+
     states = {
         "period": jnp.zeros_like(exp_agents, dtype=jnp.uint8),
         "experience": jnp.array(exp_agents, dtype=jnp.float64),
@@ -158,7 +166,7 @@ def generate_start_states(path_dict, params, model, n_agents, seed):
         "education": jnp.array(education_agents, dtype=jnp.uint8),
         "informed": jnp.array(informed_agents, dtype=jnp.uint8),
         "lagged_choice": jnp.array(lagged_choice, dtype=jnp.uint8),
-        "policy_state": jnp.zeros_like(exp_agents, dtype=jnp.uint8) + 8,
+        "policy_state": policy_state_agents,
         "job_offer": jnp.ones_like(exp_agents, dtype=jnp.uint8),
         "partner_state": jnp.array(partner_states, dtype=jnp.uint8),
     }

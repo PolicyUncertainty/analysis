@@ -16,33 +16,46 @@ def solve_and_simulate_scenario(
     params,
     expected_alpha,
     sim_alpha,
+    initial_SRA,
+    resolution,
     model_name,
     df_exists,
     solution_exists,
     sol_model_exists=True,
     sim_model_exists=True,
 ):
+    (
+        update_funcs,
+        transition_funcs,
+        model_sol_names,
+    ) = select_expectation_functions_and_model_sol_names(
+        path_dict,
+        expected_alpha=expected_alpha,
+        sim_alpha=sim_alpha,
+        resolution=resolution,
+    )
+
     solution_est, model, params = specify_and_solve_model(
         path_dict=path_dict,
         params=params,
         file_append=model_name,
+        resolution=resolution,
         expected_alpha=expected_alpha,
         load_model=sol_model_exists,
         load_solution=solution_exists,
     )
 
     model_params = model["options"]["model_params"]
-    (
-        update_funcs,
-        transition_funcs,
-        model_sol_names,
-    ) = select_expectation_functions_and_model_sol_names(
-        path_dict, expected_alpha=expected_alpha, sim_alpha=sim_alpha
-    )
 
     solve_folder = get_model_resutls_path(path_dict, model_name)
 
-    df_file = solve_folder["simulation"] + model_sol_names["simulation"]
+    # Make intitial SRA only two digits after point
+    df_file = (
+        solve_folder["simulation"]
+        + f"sra_"
+        + "{:.2f}".format(expected_alpha)
+        + model_sol_names["simulation"]
+    )
     if df_exists:
         data_sim = pd.read_pickle(df_file)
         return data_sim
@@ -54,6 +67,7 @@ def solve_and_simulate_scenario(
             seed=model_params["seed"],
             update_spec_for_policy_state=update_funcs["simulation"],
             policy_state_func_scenario=transition_funcs["simulation"],
+            initial_SRA=initial_SRA,
             solution=solution_est,
             model_of_solution=model,
             sim_model_exists=sim_model_exists,
@@ -72,6 +86,7 @@ def simulate_scenario(
     params,
     update_spec_for_policy_state,
     policy_state_func_scenario,
+    initial_SRA,
     solution,
     model_of_solution,
     sim_model_exists,
@@ -88,7 +103,12 @@ def simulate_scenario(
     options = model_of_solution["options"]
 
     initial_states, wealth_agents = generate_start_states(
-        path_dict, params, model_of_solution, n_agents, seed
+        path_dict=path_dict,
+        params=params,
+        model=model_of_solution,
+        inital_SRA=initial_SRA,
+        n_agents=n_agents,
+        seed=seed,
     )
 
     sim_dict = simulate_all_periods(

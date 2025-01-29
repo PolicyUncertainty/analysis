@@ -7,7 +7,7 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 
 path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
-model_name = "both"
+model_name = "new"
 
 # kind_string = input("Execute [pre]- or [post]-estimation plots? (pre/post)\n")
 
@@ -46,7 +46,6 @@ from export_results.figures.expected_health import (
 # plot_health_transition_prob(specs)
 # plt.show()
 # plt.close("all")
-exit()
 #
 # # %%###################################
 # # Mortality characteristics
@@ -58,8 +57,10 @@ from export_results.figures.plot_mortality import (
 )
 
 plot_mortality(path_dict, specs)
+plt.show()
 plt.close("all")
 
+exit()
 # %%###################################
 # Family characteristics
 ######################################

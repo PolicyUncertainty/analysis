@@ -2,21 +2,21 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 from set_paths import create_path_dict
-from simulation.figures import plot_percentage_change
+from simulation.figures.cf1 import plot_savings
+from simulation.figures.cf2 import plot_cf2_plots
 
 path_dict = create_path_dict()
 
 model_name = "new"
 
-# Load results
-df = pd.read_csv(path_dict["sim_results"] + f"counterfactual_2_{model_name}.csv").iloc[
-    1:
-]
-# Exclude the first rpw
-plot_percentage_change(df)
-plt.savefig(path_dict["plots"] + "cf2_results.png")
-plt.show()
 
+# Exclude the first rpw
+plot_savings(path_dict, model_name)
+
+
+# Exclude the first rpw
+plot_cf2_plots(path_dict, model_name)
+plt.show()
 
 #
 # show_any_plots = input("Show any plots? (y/n): ") == "y"

@@ -144,6 +144,7 @@ def specify_and_solve_model(
     file_append,
     params,
     expected_alpha,
+    resolution,
     load_model,
     load_solution,
 ):
@@ -157,7 +158,10 @@ def specify_and_solve_model(
         transition_funcs,
         model_sol_names,
     ) = select_expectation_functions_and_model_sol_names(
-        path_dict, expected_alpha=expected_alpha, sim_alpha=None
+        path_dict,
+        expected_alpha=expected_alpha,
+        sim_alpha=None,
+        resolution=resolution,
     )
 
     # Generate model_specs

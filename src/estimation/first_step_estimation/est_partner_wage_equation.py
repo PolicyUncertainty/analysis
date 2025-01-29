@@ -1,72 +1,83 @@
 # Description: This file estimates the parameters of the HOURLY wage equation using the SOEP panel data.
 # We estimate the following equation for each education level:
 # ln_partner_wage = beta_0 + beta_1 * ln(age) individual_FE + time_FE + epsilon
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
+from export_results.figures.color_map import JET_COLOR_MAP
 from specs.derive_specs import read_and_derive_specs
 
 
-def estimate_partner_wage_parameters(paths_dict, specs, est_men):
+def estimate_partner_wage_parameters(paths_dict, specs):
     """Estimate the wage parameters partners by education group in the sample.
 
     Est_men is a boolean that determines whether the estimation is done for men or for
     women.
 
     """
-    wage_data = prepare_estimation_data(paths_dict, specs, est_men=est_men)
-
     edu_labels = specs["education_labels"]
     model_params = ["constant", "period", "period_sq"]
-    # Initialize empty container for coefficients
-    wage_parameters = pd.DataFrame(
-        index=pd.Index(data=edu_labels, name="education"),
-        columns=model_params,
-    )
 
-    for edu_val, edu_label in enumerate(edu_labels):
-        # Filter df
-        wage_data_edu = wage_data[wage_data["education"] == edu_val]
-        wage_data_edu = sm.add_constant(wage_data_edu)
-        # make ols regression
-        model = sm.OLS(
-            endog=wage_data_edu["wage_p"],
-            exog=sm.add_constant(wage_data_edu[["constant", "period", "period_sq"]]),
-            missing="drop",
+    for sex_var, sex_label in enumerate(specs["sex_labels"]):
+        wage_data = prepare_estimation_data(paths_dict, specs, sex_var=sex_var)
+        # Initialize empty container for coefficients
+        wage_parameters = pd.DataFrame(
+            index=pd.Index(data=edu_labels, name="education"),
+            columns=model_params,
         )
-        fitted_model = model.fit()
 
-        # Assign estimated parameters (column list corresponds to model params, so only these are assigned)
-        wage_parameters.loc[edu_label] = fitted_model.params
+        fig, ax = plt.subplots()
+        for edu_val, edu_label in enumerate(edu_labels):
+            # Filter df
+            wage_data_edu = wage_data[wage_data["education"] == edu_val].copy()
+            wage_data_edu = sm.add_constant(wage_data_edu)
+            # make ols regression
+            model = sm.OLS(
+                endog=wage_data_edu["wage_p"],
+                exog=sm.add_constant(
+                    wage_data_edu[["constant", "period", "period_sq"]]
+                ),
+                missing="drop",
+            )
+            fitted_model = model.fit()
+            # Assign prediction
+            wage_data_edu["wage_pred"] = fitted_model.predict()
+            # Plot wage and prediction
+            ax.plot(
+                wage_data_edu.groupby("age")["wage_p"].mean(),
+                label=f"Obs. {edu_label}",
+                linestyle="--",
+                color=JET_COLOR_MAP[edu_val],
+            )
+            ax.plot(
+                wage_data_edu.groupby("age")["wage_pred"].mean(),
+                label=f"Est. {edu_label}",
+                color=JET_COLOR_MAP[edu_val],
+            )
 
-        # # Get estimate for income shock std
-        # income_shock_std = np.sqrt(fitted_model.resids.var())
-        # wage_parameters.loc[education, "income_shock_std"] = income_shock_std
+            # Assign estimated parameters (column list corresponds to model params, so only these are assigned)
+            wage_parameters.loc[edu_label] = fitted_model.params
 
-        # # Plot fitted values
-        # wage_data_edu["wage_pred"] = fitted_model.predict()
-        # wage_data_edu.groupby("age")["wage_pred"].mean().plot()
-        # wage_data_edu.groupby("age")["wage_p"].mean().plot()
-        # import matplotlib.pyplot as plt
-        #
-        # plt.show()
+        append = "men" if sex_var == 0 else "women"
+        ax.legend()
+        ax.set_title(f"Partner Wages of {sex_label}")
+        ax.set_xlabel("Age")
+        ax.set_ylabel("Monthly Wage")
+        fig.savefig(paths_dict["plots"] + f"partner_wages_{append}.png")
 
-    append = "men" if est_men else "women"
-    out_file_path = paths_dict["est_results"] + f"partner_wage_eq_params_{append}.csv"
-    wage_parameters.to_csv(out_file_path)
-    return wage_parameters
+        out_file_path = (
+            paths_dict["est_results"] + f"partner_wage_eq_params_{append}.csv"
+        )
+        wage_parameters.to_csv(out_file_path)
 
 
-def prepare_estimation_data(paths_dict, specs, est_men):
+def prepare_estimation_data(paths_dict, specs, sex_var):
     """Prepare the data for the wage estimation."""
     # load and modify data
     wage_data = pd.read_pickle(
         paths_dict["intermediate_data"] + "partner_wage_estimation_sample.pkl"
     )
-    if est_men:
-        sex_var = 0
-    else:
-        sex_var = 1
 
     wage_data = wage_data[wage_data["sex"] == sex_var]
 

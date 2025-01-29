@@ -15,6 +15,7 @@ def observed_model_fit(
         path_dict=paths_dict,
         params=params,
         expected_alpha=False,
+        resolution=False,
         file_append=model_name,
         load_model=load_sol_model,
         load_solution=load_solution,
@@ -72,7 +73,7 @@ def plot_observed_model_fit_choice_probs(
     # breakpoint()
     # for partner_val, partner_label in enumerate(partner_labels):
 
-    fig, axes = plt.subplots(specs["n_sexes"], specs["n_choices"])
+    fig, axes = plt.subplots(specs["n_sexes"], specs["n_choices"], figsize=(14, 8))
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
         for edu_var, edu_label in enumerate(specs["education_labels"]):
             data_subset = data_decision[
@@ -107,21 +108,27 @@ def plot_observed_model_fit_choice_probs(
                         color=JET_COLOR_MAP[edu_var],
                         linestyle="--",
                     )
-                ax.set_xlabel("Age")
-                ax.set_title(f"{labels[choice]}")
-                ax.set_ylim([-0.05, 1.05])
-                if choice == 0:
-                    ax.legend(loc="upper left")
-                    ax.set_ylabel("Choice share")
-        # Fig title
-        fig.tight_layout()
 
-        fig.savefig(
-            save_folder + f"observed_model_fit.png",
-            transparent=True,
-            dpi=300,
-        )
-        # fig.suptitle(f"Choice shares {specs['education_labels'][edu]}")
+                ax.set_ylim([-0.05, 1.05])
+                if sex_var == 0:
+                    ax.set_title(f"{labels[choice]}")
+                    if choice == 1:
+                        ax.legend(loc="upper left")
+                elif sex_var == 1:
+                    ax.set_xlabel("Age")
+
+    axes[0, 0].set_ylabel("Choice Share Men")
+    axes[1, 0].set_ylabel("Choice Share Women")
+
+    # Fig title
+    fig.tight_layout()
+
+    fig.savefig(  # fig.suptitle(f"Choice shares {specs['education_labels'][edu]}")
+        save_folder + f"observed_model_fit.png",
+        transparent=True,
+        dpi=300,
+    )
+    # fig.suptitle(f"Choice shares {specs['education_labels'][edu]}")
 
 
 def load_and_prep_data_for_model_fit(

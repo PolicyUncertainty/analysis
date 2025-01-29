@@ -11,21 +11,75 @@ def expected_SRA_probs_estimation(policy_state, choice, lagged_choice, options):
 
     # If fresh retired, you stay one more year in the same policy state
     fresh_retired = (choice == 0) & (lagged_choice != 0)
-    n_policy_states = options["n_policy_states"]
+    trans_vector = select_no_policy_change(
+        no_change_bool=fresh_retired,
+        n_policy_states=options["n_policy_states"],
+        current_policy_state=policy_state,
+        trans_vector_policy_change=trans_vector_not_retired,
+    )
+
+    trans_vector = check_for_longer_retirement_and_degenerate_vector(
+        choice=choice,
+        lagged_choice=lagged_choice,
+        degenerate_probs=trans_mat[-1, :],
+        trans_vector=trans_vector,
+    )
+
+    return trans_vector
+
+
+def expected_SRA_with_resolution(period, policy_state, choice, lagged_choice, options):
+    trans_mat = options["policy_states_trans_mat"]
+    # Take the row of the transition matrix for expected policy change
+    trans_vector_not_retired = jnp.take(trans_mat, policy_state, axis=0)
+
+    # If fresh retired, you stay one more year in the same policy state
+    fresh_retired = (choice == 0) & (lagged_choice != 0)
+    # With resolution, the policy state also does not change after resolution period
+    resolution_period = options["resolution_age"] - options["start_age"]
+    past_resolution = period >= resolution_period
+    no_change = fresh_retired | past_resolution
+    trans_vector = select_no_policy_change(
+        no_change_bool=no_change,
+        n_policy_states=options["n_policy_states"],
+        current_policy_state=policy_state,
+        trans_vector_policy_change=trans_vector_not_retired,
+    )
+
+    trans_vector = check_for_longer_retirement_and_degenerate_vector(
+        choice=choice,
+        lagged_choice=lagged_choice,
+        degenerate_probs=trans_mat[-1, :],
+        trans_vector=trans_vector,
+    )
+
+    return trans_vector
+
+
+def select_no_policy_change(
+    no_change_bool, n_policy_states, current_policy_state, trans_vector_policy_change
+):
     no_policy_change = jnp.zeros(n_policy_states, dtype=float)
-    no_policy_change = no_policy_change.at[policy_state].set(1)
+    no_policy_change = no_policy_change.at[current_policy_state].set(1)
 
     # Aggregate the two transition vectors
     trans_vector = jax.lax.select(
-        fresh_retired, no_policy_change, trans_vector_not_retired
+        no_change_bool, no_policy_change, trans_vector_policy_change
     )
+    return trans_vector
 
-    # Check if already longer retired, then take transition probabilities for degenerate state
+
+def check_for_longer_retirement_and_degenerate_vector(
+    choice,
+    lagged_choice,
+    degenerate_probs,
+    trans_vector,
+):
+    # Check if already longer retired, then take transition
+    # probabilities for degenerate state
     already_retired = (choice == 0) & (lagged_choice == 0)
-    degenerate_probs = trans_mat[-1, :]
     # Set to degenerate if already retired
     trans_vector = jax.lax.select(already_retired, degenerate_probs, trans_vector)
-
     return trans_vector
 
 

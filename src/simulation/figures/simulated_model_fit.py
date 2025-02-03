@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import yaml
 from estimation.struct_estimation.scripts.estimate_setup import load_and_prep_data
+from export_results.figures.color_map import JET_COLOR_MAP
 from model_code.policy_processes.policy_states_belief import (
     expected_SRA_probs_estimation,
 )
@@ -55,12 +56,15 @@ def plot_average_wealth(
 
     data_sim["age"] = data_sim["period"] + specs["start_age"]
 
-    for sex in range(1):
-        for edu in range(2):
-            mask_sim = (data_sim["sex"] == sex) & (data_sim["education"] == edu)
+    fig, axs = plt.subplots(ncols=specs["n_education_types"])
+    # Also generate an aggregate graph
+    for sex_var, sex_label in enumerate(specs["sex_labels"]):
+        for edu_var, edu_label in enumerate(specs["education_labels"]):
+            ax = axs[edu_var]
+            mask_sim = (data_sim["sex"] == sex_var) & (data_sim["education"] == edu_var)
             data_sim_edu = data_sim[mask_sim]
-            mask_obs = (data_decision["sex"] == sex) & (
-                data_decision["education"] == edu
+            mask_obs = (data_decision["sex"] == sex_var) & (
+                data_decision["education"] == edu_var
             )
             data_decision_edu = data_decision[mask_obs]
 
@@ -72,19 +76,22 @@ def plot_average_wealth(
                 data_decision_edu.groupby("age")["adjusted_wealth"].median().loc[ages]
             )
 
-            fig, ax = plt.subplots()
-
-            ax.plot(ages, average_wealth_sim, label=f"Simulated")
+            ax.plot(
+                ages,
+                average_wealth_sim,
+                label=f"Sim. Median {sex_label}",
+                color=JET_COLOR_MAP[sex_var],
+            )
             ax.plot(
                 ages,
                 average_wealth_obs,
-                label="Median observed wealth by age",
+                label=f"Obs. Median {sex_label}",
                 ls="--",
+                color=JET_COLOR_MAP[sex_var],
             )
-            ax.legend()
-            fig.savefig(
-                path_dict["plots"] + "average_wealth.png", transparent=True, dpi=300
-            )
+        ax.legend()
+        ax.set_title(f"{edu_label}")
+    fig.savefig(path_dict["plots"] + "average_wealth.png", transparent=True, dpi=300)
 
 
 def plot_choice_shares_single(

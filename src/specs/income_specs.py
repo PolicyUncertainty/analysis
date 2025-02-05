@@ -93,15 +93,15 @@ def add_pt_and_ft_min_wage(specs):
     Type-specific as hours are different between types.
 
     """
-    annual_min_wage_pt = np.zeros((specs["n_education_types"], 2))
+    annual_min_wage_pt = np.zeros((specs["n_sexes"], specs["n_education_types"]))
 
     for edu in range(specs["n_education_types"]):
         for sex in [0, 1]:
             hours_ratio = (
-                specs["av_annual_hours_pt"][edu][sex]
-                / specs["av_annual_hours_ft"][edu][sex]
+                specs["av_annual_hours_pt"][sex, edu]
+                / specs["av_annual_hours_ft"][sex, edu]
             )
-            annual_min_wage_pt[edu][sex] = specs["monthly_min_wage"] * hours_ratio * 12
+            annual_min_wage_pt[sex, edu] = specs["monthly_min_wage"] * hours_ratio * 12
 
     return jnp.asarray(annual_min_wage_pt), specs["monthly_min_wage"] * 12
 
@@ -128,12 +128,12 @@ def process_wage_params(path_dict, specs):
     gamma_1 = np.zeros((specs["n_sexes"], specs["n_education_types"]), dtype=float)
 
     for edu_id, edu_label in enumerate(specs["education_labels"]):
-        for sex_id, sex in enumerate(specs["sex_labels"]):
+        for sex_var, sex in enumerate(specs["sex_labels"]):
             mask = (wage_params["education"] == edu_label) & (wage_params["sex"] == sex)
-            gamma_0[sex_id, edu_id] = wage_params.loc[
+            gamma_0[sex_var, edu_id] = wage_params.loc[
                 mask & (wage_params["parameter"] == "constant"), "value"
             ].values[0]
-            gamma_1[sex_id, edu_id] = wage_params.loc[
+            gamma_1[sex_var, edu_id] = wage_params.loc[
                 mask & (wage_params["parameter"] == "ln_exp"), "value"
             ].values[0]
 
@@ -153,7 +153,7 @@ def calculate_partner_incomes(path_dict, specs):
     # Limit periods to the one of max retirement age as we restricted our estimation sample
     # until then. For the predictions after max retirement age we use the last max retirement period
     not_predicted_periods = np.where(
-        periods > specs["max_ret_age"] - specs["start_age"]
+        periods > (specs["max_ret_age"] - specs["start_age"])
     )[0]
     periods[not_predicted_periods] = specs["max_ret_age"] - specs["start_age"]
 

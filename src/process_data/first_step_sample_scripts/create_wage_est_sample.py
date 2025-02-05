@@ -7,7 +7,6 @@ from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.experience import sum_experience_variables
 from process_data.soep_vars.hours import generate_working_hours
 from process_data.soep_vars.work_choices import create_choice_variable
-from set_paths import create_path_dict
 
 
 def create_wage_est_sample(paths, specs, load_data=False):
@@ -29,6 +28,9 @@ def create_wage_est_sample(paths, specs, load_data=False):
     # create labor choice, keep only working (2: part-time, 3: full-time)
     df = create_choice_variable(df)
 
+    # education
+    df = create_education_type(df)
+
     # weekly working hours
     df = generate_working_hours(df)
 
@@ -48,9 +50,6 @@ def create_wage_est_sample(paths, specs, load_data=False):
     # Hourly wage
     df["monthly_hours"] = df["working_hours"] * 52 / 12
     df["hourly_wage"] = df["monthly_wage"] / df["monthly_hours"]
-
-    # education
-    df = create_education_type(df)
 
     # bring back indeces (pid, syear)
     df = df.reset_index()

@@ -44,11 +44,11 @@ if which_plots in ["a", "s"]:
         load_sol_model=load_sol_model,
         load_sim_model=load_sim_model,
     )
-# After first run all loading is true
-load_df = True
-load_solution = True
-load_sim_model = True
-load_sol_model = True
+    # After first run all loading is true
+    load_df = True
+    load_solution = True
+    load_sim_model = True
+    load_sol_model = True
 
 if which_plots in ["a", "w"]:
     plot_average_wealth(

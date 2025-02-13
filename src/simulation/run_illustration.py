@@ -23,24 +23,42 @@ params = pickle.load(
 which_plots = input(
     "Which plots do you want to show?\n \n"
     " - [a]ll\n"
-    " - [c]hoices\n"
+    " - [c]onsumption\n"
+    " - [u]tility\n"
     " - [w]ealth\n"
-    " - [i]ncome\n"
-    " - [s]tates\n"
+    " - [s]avings\n"
 )
 
-from simulation.figures.simulated_model_fit import (
-    plot_quantiles,
-    plot_choice_shares_single,
-    plot_states,
-)
+
+from simulation.figures.illustrate_sim_data import plot_sim_vars
 
 if which_plots in ["a", "c"]:
-    plot_choice_shares_single(
-        path_dict=path_dict,
-        specs=specs,
-        params=params,
-        model_name=model_name,
+    plot_sim_vars(
+        path_dict,
+        specs,
+        params,
+        model_name,
+        plot_dead=False,
+        sim_var="consumption",
+        load_df=load_df,
+        load_solution=load_solution,
+        load_sol_model=load_sol_model,
+        load_sim_model=load_sim_model,
+    )
+    # After running, we can set all to true
+    load_df = True
+    load_solution = True
+    load_sim_model = True
+    load_sol_model = True
+
+if which_plots in ["a", "u"]:
+    plot_sim_vars(
+        path_dict,
+        specs,
+        params,
+        model_name,
+        plot_dead=False,
+        sim_var="utility",
         load_df=load_df,
         load_solution=load_solution,
         load_sol_model=load_sol_model,
@@ -53,15 +71,13 @@ if which_plots in ["a", "c"]:
     load_sol_model = True
 
 if which_plots in ["a", "w"]:
-    plot_quantiles(
-        path_dict=path_dict,
-        specs=specs,
-        params=params,
-        model_name=model_name,
-        quantiles=[0.5],
-        sim_col_name="wealth_at_beginning",
-        obs_col_name="adjusted_wealth",
-        file_name="average_wealth",
+    plot_sim_vars(
+        path_dict,
+        specs,
+        params,
+        model_name,
+        plot_dead=False,
+        sim_var="wealth_at_beginning",
         load_df=load_df,
         load_solution=load_solution,
         load_sol_model=load_sol_model,
@@ -73,33 +89,24 @@ if which_plots in ["a", "w"]:
     load_sim_model = True
     load_sol_model = True
 
-if which_plots in ["a", "i"]:
-    plot_quantiles(
-        path_dict=path_dict,
-        specs=specs,
-        params=params,
-        model_name=model_name,
-        quantiles=[0.5],
-        sim_col_name="total_income",
-        obs_col_name="hh_net_income",
-        file_name=None,
-        load_df=load_df,
-        load_solution=load_solution,
-        load_sol_model=load_sol_model,
-        load_sim_model=load_sim_model,
-    )
-
-
 if which_plots in ["a", "s"]:
-    plot_states(
+    plot_sim_vars(
         path_dict,
         specs,
         params,
         model_name,
+        plot_dead=False,
+        sim_var="savings_dec",
         load_df=load_df,
         load_solution=load_solution,
         load_sol_model=load_sol_model,
         load_sim_model=load_sim_model,
     )
+    # After running, we can set all to true
+    load_df = True
+    load_solution = True
+    load_sim_model = True
+    load_sol_model = True
+
 
 plt.show()

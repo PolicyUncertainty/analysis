@@ -35,7 +35,6 @@ def predict_children_by_state(path_dict, specs):
 def read_in_partner_transition_specs(paths_dict, specs):
     est_probs_df = pd.read_csv(
         paths_dict["est_results"] + "partner_transition_matrix.csv",
-        index_col=[0, 1, 2, 3, 4],
     )
 
     n_periods = specs["n_periods"]
@@ -52,60 +51,35 @@ def read_in_partner_transition_specs(paths_dict, specs):
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
         for edu_var, edu_label in enumerate(specs["education_labels"]):
             for period in range(n_periods):
+                age = period + specs["start_age"]
                 for partner_state_var, partner_state_label in enumerate(
                     specs["partner_labels"]
                 ):
-                    age = period + specs["start_age"]
-
                     for lead_partner_state_var, lead_partner_state_label in enumerate(
                         specs["partner_labels"]
                     ):
-                        # Check if age is in between 30 and 40, 40 and 50, 50 and 60, 60 and 70
-                        age_bin = np.floor(age / 10) * 10
+                        mask = (
+                            (est_probs_df["sex"] == sex_label)
+                            & (est_probs_df["education"] == edu_label)
+                            & (est_probs_df["age"] == age)
+                            & (est_probs_df["partner_state"] == partner_state_label)
+                            & (
+                                est_probs_df["lead_partner_state"]
+                                == lead_partner_state_label
+                            )
+                        )
                         trans_probs[
                             sex_var,
                             edu_var,
                             period,
                             partner_state_var,
                             lead_partner_state_var,
-                        ] = est_probs_df.loc[
-                            (
-                                sex_var,
-                                edu_var,
-                                age_bin,
-                                partner_state_var,
-                                lead_partner_state_var,
-                            ),
-                            "proportion",
-                        ]
+                        ] = est_probs_df.loc[mask, "proportion"].values[0]
                     # Assign absorbing 1 if no one in the data
                     if not np.allclose(
                         trans_probs[sex_var, edu_var, period, partner_state_var].sum(),
                         1,
                     ):
-                        trans_probs[
-                            sex_var,
-                            edu_var,
-                            period,
-                            partner_state_var,
-                            partner_state_var,
-                        ] = 1
-                        #
-                        # mask = (
-                        #     (est_probs_df["sex"] == sex_label)
-                        #     & (est_probs_df["education"] == edu_label)
-                        #     & (est_probs_df["age"] == age)
-                        #     & (est_probs_df["partner_state"] == partner_state_label)
-                        #     & (
-                        #         est_probs_df["lead_partner_state"]
-                        #         == lead_partner_state_label
-                        #     )
-                        # )
-                        # trans_probs[
-                        #     sex_var,
-                        #     edu_var,
-                        #     period,
-                        #     partner_state_var,
-                        #     lead_partner_state_var,
-                        # ] = est_probs_df.loc[mask, "probability"].values[0]
+                        raise ValueError("This should happen in a parametric world")
+
     return jnp.asarray(trans_probs), n_partner_states

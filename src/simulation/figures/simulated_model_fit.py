@@ -232,23 +232,67 @@ def plot_states(
     for state_name in discrete_state_names:
         if state_name in ["period", "informed", "policy_state"]:
             continue
-        fig, ax = plt.subplots()
-        obs_shares = data_decision.groupby(["age"])[state_name].value_counts(
-            normalize=True
-        )
-        sim_shares = data_sim.groupby(["age"])[state_name].value_counts(normalize=True)
 
-        for state_val in sim_shares.index.get_level_values(1).unique():
-            ax.plot(
-                obs_shares.loc[(slice(None), state_val)],
-                # label=f"Observed; {state_name} = {state_val}",
-                ls="--",
-                color=JET_COLOR_MAP[state_val],
+        if state_name in ["education", "sex"]:
+            obs_shares = data_decision.groupby(["age"])[state_name].value_counts(
+                normalize=True
             )
-            ax.plot(
-                sim_shares.loc[(slice(None), state_val)],
-                label=f"{state_val}",
-                color=JET_COLOR_MAP[state_val],
+            sim_shares = data_sim.groupby(["age"])[state_name].value_counts(
+                normalize=True
             )
-        ax.legend()
-        ax.set_title(state_name)
+
+            fig, ax = plt.subplots()
+
+            for state_val in sim_shares.index.get_level_values(1).unique():
+                ax.plot(
+                    obs_shares.loc[(slice(None), state_val)],
+                    # label=f"Observed; {state_name} = {state_val}",
+                    ls="--",
+                    color=JET_COLOR_MAP[state_val],
+                )
+                ax.plot(
+                    sim_shares.loc[(slice(None), state_val)],
+                    label=f"{state_val}",
+                    color=JET_COLOR_MAP[state_val],
+                )
+                ax.legend()
+                ax.set_title(state_name)
+
+        else:
+            fig, axs = plt.subplots(
+                nrows=specs["n_sexes"], ncols=specs["n_education_types"]
+            )
+            for sex_var, sex_label in enumerate(specs["sex_labels"]):
+                for edu_var, edu_label in enumerate(specs["education_labels"]):
+                    ax = axs[sex_var, edu_var]
+                    df_type_sim = data_sim[
+                        (data_sim["sex"] == sex_var)
+                        & (data_sim["education"] == edu_var)
+                    ]
+                    df_type_obs = data_decision[
+                        (data_decision["sex"] == sex_var)
+                        & (data_decision["education"] == edu_var)
+                    ]
+
+                    obs_shares = df_type_obs.groupby(["age"])[state_name].value_counts(
+                        normalize=True
+                    )
+                    sim_shares = df_type_sim.groupby(["age"])[state_name].value_counts(
+                        normalize=True
+                    )
+
+                    for state_val in sim_shares.index.get_level_values(1).unique():
+                        ax.plot(
+                            obs_shares.loc[(slice(None), state_val)],
+                            # label=f"Observed; {state_name} = {state_val}",
+                            ls="--",
+                            color=JET_COLOR_MAP[state_val],
+                        )
+                        ax.plot(
+                            sim_shares.loc[(slice(None), state_val)],
+                            label=f"{state_val}",
+                            color=JET_COLOR_MAP[state_val],
+                        )
+                        ax.legend()
+                        ax.set_title(f"{sex_label}; {edu_label}")
+            fig.suptitle(state_name)

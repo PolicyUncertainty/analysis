@@ -17,50 +17,88 @@ def estimate_partner_transitions(paths_dict, specs, load_data):
 
     # modify
     est_data = est_data[est_data["age"] <= specs["end_age"]]
-    est_data["age_bin"] = np.floor(est_data["age"] / 10) * 10
 
     # Create a transition matrix for the partner state
     type_list = ["sex", "education"]
     cov_list = ["age", "partner_state_1.0", "partner_state_2.0"]
     # Create dummies for partner_state
-    est_data = pd.get_dummies(est_data, columns=["partner_state"])
-
-    trans_mat_df = est_data.groupby(cov_list)["lead_partner_state"].value_counts(
-        normalize=True
+    est_data_dummies = pd.get_dummies(est_data, columns=["partner_state"])
+    est_data = pd.concat(
+        [est_data, est_data_dummies[["partner_state_1.0", "partner_state_2.0"]]], axis=1
     )
-    # Fo a multinominal logit model with lead_partner_state as dependent variable and cov list plus constant as
-    # independent variables. # Condition the models of each type from type_list
-    #
-    # for sex in range(specs["n_sexes"]):
-    #     for edu_var in range(specs["n_education_types"]):
-    #         df_reduced = est_data[
-    #             (est_data["sex"] == sex) & (est_data["education"] == edu_var)
-    #         ]
-    #         X = df_reduced[cov_list].astype(float)
-    #         X = sm.add_constant(X)
-    #         Y = df_reduced["lead_partner_state"]
-    #         model = MNLogit(Y, X).fit()
-    #         # Add prediction
-    #         df_reduced[[0, 1, 2]] = model.predict(X).copy()
-    #         breakpoint()
+
+    # Get dataframe of cartesian products of cov variables
+    all_ages = np.arange(specs["start_age"], specs["end_age"] + 1)
+    dummies = [False, True]
+    full_index = pd.MultiIndex.from_product(
+        [
+            all_ages,
+            dummies,
+            dummies,
+        ],
+        names=["age", "partner_state_1.0", "partner_state_2.0"],
+    )
+    df_to_predict = pd.DataFrame(index=full_index).reset_index()
+    # Filter out True, True
+    mask = (df_to_predict["partner_state_1.0"] == True) & (
+        df_to_predict["partner_state_2.0"] == True
+    )
+    df_to_predict = df_to_predict[~mask]
 
     full_index = pd.MultiIndex.from_product(
         [
-            range(specs["n_sexes"]),
-            range(specs["n_education_types"]),
-            est_data["age_bin"].unique().tolist(),
-            range(specs["n_partner_states"]),
-            range(specs["n_partner_states"]),
+            specs["sex_labels"],
+            specs["education_labels"],
+            all_ages,
+            specs["partner_labels"],
+            specs["partner_labels"],
         ],
-        names=cov_list + ["lead_partner_state"],
+        names=["sex", "education", "age", "partner_state", "lead_partner_state"],
     )
-    full_df = pd.Series(index=full_index, data=0.0, name="proportion")
-    full_df.update(trans_mat_df)
+    full_df = pd.Series(index=full_index, data=np.nan, name="proportion")
+
+    for sex, sex_label in enumerate(specs["sex_labels"]):
+        for edu_var, edu_label in enumerate(specs["education_labels"]):
+            df_reduced = est_data[
+                (est_data["sex"] == sex) & (est_data["education"] == edu_var)
+            ]
+            X = df_reduced[cov_list].astype(float)
+            X = sm.add_constant(X)
+            Y = df_reduced["lead_partner_state"]
+            model = MNLogit(Y, X).fit()
+            # Add prediction
+            df_edu_predict = df_to_predict.copy()
+            X_predict = sm.add_constant(df_edu_predict[cov_list].astype(float))
+            df_edu_predict[[0, 1, 2]] = model.predict(X_predict)
+            # Add to full_df
+            df_edu_predict.set_index(
+                ["age", "partner_state_1.0", "partner_state_2.0"], inplace=True
+            )
+            for current_partner_state, current_partner_label in enumerate(
+                specs["partner_labels"]
+            ):
+                for lead_partner_state, lead_partner_label in enumerate(
+                    specs["partner_labels"]
+                ):
+                    dummy_state_1 = current_partner_state == 1
+                    dummy_state_2 = current_partner_state == 2
+                    full_df.loc[
+                        (
+                            sex_label,
+                            edu_label,
+                            all_ages,
+                            current_partner_label,
+                            lead_partner_label,
+                        )
+                    ] = df_edu_predict.loc[
+                        (all_ages, dummy_state_1, dummy_state_2), lead_partner_state
+                    ].values
+
+    if full_df.isna().any():
+        raise ValueError("There should not be a None")
 
     out_file_path = paths_dict["est_results"] + "partner_transition_matrix.csv"
     full_df.to_csv(out_file_path)
-
-    return trans_mat_df
 
 
 def estimate_nb_children(paths_dict, specs):

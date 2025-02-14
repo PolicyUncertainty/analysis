@@ -1,289 +1,2557 @@
-sex,education,age_bin,partner_state,lead_partner_state,proportion
-0,0,50.0,0,0,0.9730861244019139
-0,0,50.0,0,1,0.02332535885167464
-0,0,50.0,0,2,0.0035885167464114833
-0,0,50.0,1,0,0.003265063817156426
-0,0,50.0,1,1,0.98753339269813
-0,0,50.0,1,2,0.009201543484713566
-0,0,50.0,2,0,0.007772020725388601
-0,0,50.0,2,1,0.05958549222797927
-0,0,50.0,2,2,0.9326424870466321
-0,0,60.0,0,0,0.984873949579832
-0,0,60.0,0,1,0.011764705882352941
-0,0,60.0,0,2,0.0033613445378151263
-0,0,60.0,1,0,0.0031914893617021275
-0,0,60.0,1,1,0.9061170212765958
-0,0,60.0,1,2,0.09069148936170213
-0,0,60.0,2,0,0.0051740357478833494
-0,0,60.0,2,1,0.036688617121354655
-0,0,60.0,2,2,0.958137347130762
-0,0,70.0,0,0,0.993601462522852
-0,0,70.0,0,1,0.0018281535648994515
-0,0,70.0,0,2,0.004570383912248629
-0,0,70.0,1,0,0.013969732246798603
-0,0,70.0,1,1,0.8288707799767171
-0,0,70.0,1,2,0.15715948777648428
-0,0,70.0,2,0,0.00821851583272903
-0,0,70.0,2,1,0.01740391588107324
-0,0,70.0,2,2,0.9743775682861977
-0,0,80.0,0,0,0.9912472647702407
-0,0,80.0,0,1,0.0
-0,0,80.0,0,2,0.0087527352297593
-0,0,80.0,1,0,0.05660377358490566
-0,0,80.0,1,1,0.7830188679245284
-0,0,80.0,1,2,0.16037735849056603
-0,0,80.0,2,0,0.0136986301369863
-0,0,80.0,2,1,0.02054794520547945
-0,0,80.0,2,2,0.9657534246575342
-0,0,40.0,0,0,0.9593094944512947
-0,0,40.0,0,1,0.03945745992601726
-0,0,40.0,0,2,0.0012330456226880395
-0,0,40.0,1,0,0.0033365622645570984
-0,0,40.0,1,1,0.992788720266925
-0,0,40.0,1,2,0.0038747174685179204
-0,0,40.0,2,0,0.0
-0,0,40.0,2,1,0.11382113821138211
-0,0,40.0,2,2,0.8861788617886179
-0,0,30.0,0,0,0.9379562043795621
-0,0,30.0,0,1,0.06204379562043796
-0,0,30.0,0,2,0.0
-0,0,30.0,1,0,0.0026423957721667646
-0,0,30.0,1,1,0.9964768056371109
-0,0,30.0,1,2,0.0008807985907222549
-0,0,30.0,2,0,0.0
-0,0,30.0,2,1,0.13043478260869565
-0,0,30.0,2,2,0.8695652173913043
-0,0,90.0,0,0,1.0
-0,0,90.0,0,1,0.0
-0,0,90.0,0,2,0.0
-0,0,90.0,1,0,0.058823529411764705
-0,0,90.0,1,1,0.8235294117647058
-0,0,90.0,1,2,0.11764705882352941
-0,0,90.0,2,0,0.04054054054054054
-0,0,90.0,2,1,0.02702702702702703
-0,0,90.0,2,2,0.9324324324324325
-0,0,100.0,0,0,0.0
-0,0,100.0,0,1,0.0
-0,0,100.0,0,2,0.0
-0,0,100.0,1,0,0.0
-0,0,100.0,1,1,0.0
-0,0,100.0,1,2,0.0
-0,0,100.0,2,0,0.0
-0,0,100.0,2,1,0.0
-0,0,100.0,2,2,0.0
-0,1,50.0,0,0,0.9834437086092715
-0,1,50.0,0,1,0.016556291390728478
-0,1,50.0,0,2,0.0
-0,1,50.0,1,0,0.002627257799671593
-0,1,50.0,1,1,0.9917898193760263
-0,1,50.0,1,2,0.005582922824302135
-0,1,50.0,2,0,0.0
-0,1,50.0,2,1,0.06
-0,1,50.0,2,2,0.94
-0,1,60.0,0,0,0.990909090909091
-0,1,60.0,0,1,0.006818181818181818
-0,1,60.0,0,2,0.0022727272727272726
-0,1,60.0,1,0,0.004723346828609987
-0,1,60.0,1,1,0.9109311740890689
-0,1,60.0,1,2,0.08434547908232119
-0,1,60.0,2,0,0.005376344086021506
-0,1,60.0,2,1,0.028225806451612902
-0,1,60.0,2,2,0.9663978494623656
-0,1,70.0,0,0,0.9840764331210191
-0,1,70.0,0,1,0.006369426751592357
-0,1,70.0,0,2,0.009554140127388535
-0,1,70.0,1,0,0.0025974025974025974
-0,1,70.0,1,1,0.8675324675324675
-0,1,70.0,1,2,0.12987012987012986
-0,1,70.0,2,0,0.0035790980672870437
-0,1,70.0,2,1,0.024337866857551897
-0,1,70.0,2,2,0.972083035075161
-0,1,80.0,0,0,0.9906542056074766
-0,1,80.0,0,1,0.0
-0,1,80.0,0,2,0.009345794392523364
-0,1,80.0,1,0,0.01818181818181818
-0,1,80.0,1,1,0.9
-0,1,80.0,1,2,0.08181818181818182
-0,1,80.0,2,0,0.014534883720930232
-0,1,80.0,2,1,0.03197674418604651
-0,1,80.0,2,2,0.9534883720930233
-0,1,40.0,0,0,0.9547445255474453
-0,1,40.0,0,1,0.04525547445255475
-0,1,40.0,0,2,0.0
-0,1,40.0,1,0,0.0015659955257270694
-0,1,40.0,1,1,0.9975391498881432
-0,1,40.0,1,2,0.0008948545861297539
-0,1,40.0,2,0,0.0
-0,1,40.0,2,1,0.23529411764705882
-0,1,40.0,2,2,0.7647058823529411
-0,1,30.0,0,0,0.9362017804154302
-0,1,30.0,0,1,0.06379821958456973
-0,1,30.0,0,2,0.0
-0,1,30.0,1,0,0.0036850921273031824
-0,1,30.0,1,1,0.995644891122278
-0,1,30.0,1,2,0.0006700167504187605
-0,1,30.0,2,0,0.0
-0,1,30.0,2,1,1.0
-0,1,30.0,2,2,0.0
-0,1,90.0,0,0,1.0
-0,1,90.0,0,1,0.0
-0,1,90.0,0,2,0.0
-0,1,90.0,1,0,0.0
-0,1,90.0,1,1,0.8
-0,1,90.0,1,2,0.2
-0,1,90.0,2,0,0.0
-0,1,90.0,2,1,0.05263157894736842
-0,1,90.0,2,2,0.9473684210526315
-0,1,100.0,0,0,0.0
-0,1,100.0,0,1,0.0
-0,1,100.0,0,2,0.0
-0,1,100.0,1,0,0.0
-0,1,100.0,1,1,0.0
-0,1,100.0,1,2,0.0
-0,1,100.0,2,0,1.0
-0,1,100.0,2,1,0.0
-0,1,100.0,2,2,0.0
-1,0,50.0,0,0,0.9910799617712648
-1,0,50.0,0,1,0.007327174259318254
-1,0,50.0,0,2,0.0015928639694170119
-1,0,50.0,1,0,0.005773475972151469
-1,0,50.0,1,1,0.9482085243674647
-1,0,50.0,1,2,0.046017999660383765
-1,0,50.0,2,0,0.018945634266886325
-1,0,50.0,2,1,0.07907742998352553
-1,0,50.0,2,2,0.9019769357495881
-1,0,60.0,0,0,0.9959821428571428
-1,0,60.0,0,1,0.002232142857142857
-1,0,60.0,0,2,0.0017857142857142857
-1,0,60.0,1,0,0.008403361344537815
-1,0,60.0,1,1,0.8077113198220465
-1,0,60.0,1,2,0.18388531883341572
-1,0,60.0,2,0,0.012104283054003724
-1,0,60.0,2,1,0.031424581005586594
-1,0,60.0,2,2,0.9564711359404097
-1,0,70.0,0,0,0.9985974754558204
-1,0,70.0,0,1,0.0003506311360448808
-1,0,70.0,0,2,0.0010518934081346423
-1,0,70.0,1,0,0.020202020202020204
-1,0,70.0,1,1,0.7138047138047138
-1,0,70.0,1,2,0.265993265993266
-1,0,70.0,2,0,0.02100646352723915
-1,0,70.0,2,1,0.019159741458910435
-1,0,70.0,2,2,0.9598337950138505
-1,0,80.0,0,0,1.0
-1,0,80.0,0,1,0.0
-1,0,80.0,0,2,0.0
-1,0,80.0,1,0,0.038461538461538464
-1,0,80.0,1,1,0.7307692307692307
-1,0,80.0,1,2,0.23076923076923078
-1,0,80.0,2,0,0.04927884615384615
-1,0,80.0,2,1,0.01201923076923077
-1,0,80.0,2,2,0.9387019230769231
-1,0,40.0,0,0,0.9747388875394705
-1,0,40.0,0,1,0.024289531212047608
-1,0,40.0,0,2,0.0009715812484819043
-1,0,40.0,1,0,0.0074469267533622315
-1,0,40.0,1,1,0.9853284428142715
-1,0,40.0,1,2,0.007224630432366344
-1,0,40.0,2,0,0.010169491525423728
-1,0,40.0,2,1,0.11864406779661017
-1,0,40.0,2,2,0.8711864406779661
-1,0,30.0,0,0,0.9423374613003096
-1,0,30.0,0,1,0.0576625386996904
-1,0,30.0,0,2,0.0
-1,0,30.0,1,0,0.01218670958841113
-1,0,30.0,1,1,0.984939066452058
-1,0,30.0,1,2,0.0028742239595309265
-1,0,30.0,2,0,0.01694915254237288
-1,0,30.0,2,1,0.23728813559322035
-1,0,30.0,2,2,0.7457627118644068
-1,0,90.0,0,0,1.0
-1,0,90.0,0,1,0.0
-1,0,90.0,0,2,0.0
-1,0,90.0,1,0,0.0
-1,0,90.0,1,1,0.0
-1,0,90.0,1,2,0.0
-1,0,90.0,2,0,0.19047619047619047
-1,0,90.0,2,1,0.0
-1,0,90.0,2,2,0.8095238095238095
-1,0,100.0,0,0,1.0
-1,0,100.0,0,1,0.0
-1,0,100.0,0,2,0.0
-1,0,100.0,1,0,0.0
-1,0,100.0,1,1,0.0
-1,0,100.0,1,2,0.0
-1,0,100.0,2,0,0.0
-1,0,100.0,2,1,0.0
-1,0,100.0,2,2,0.0
-1,1,50.0,0,0,0.9913644214162349
-1,1,50.0,0,1,0.007772020725388601
-1,1,50.0,0,2,0.0008635578583765112
-1,1,50.0,1,0,0.006071929005137786
-1,1,50.0,1,1,0.9649696403549743
-1,1,50.0,1,2,0.028958430639887903
-1,1,50.0,2,0,0.012658227848101266
-1,1,50.0,2,1,0.05063291139240506
-1,1,50.0,2,2,0.9367088607594937
-1,1,60.0,0,0,0.9956709956709957
-1,1,60.0,0,1,0.004329004329004329
-1,1,60.0,0,2,0.0
-1,1,60.0,1,0,0.0
-1,1,60.0,1,1,0.7991803278688525
-1,1,60.0,1,2,0.20081967213114754
-1,1,60.0,2,0,0.008658008658008658
-1,1,60.0,2,1,0.04004329004329004
-1,1,60.0,2,2,0.9512987012987013
-1,1,70.0,0,0,1.0
-1,1,70.0,0,1,0.0
-1,1,70.0,0,2,0.0
-1,1,70.0,1,0,0.0625
-1,1,70.0,1,1,0.75
-1,1,70.0,1,2,0.1875
-1,1,70.0,2,0,0.02030456852791878
-1,1,70.0,2,1,0.00676818950930626
-1,1,70.0,2,2,0.9729272419627749
-1,1,80.0,0,0,1.0
-1,1,80.0,0,1,0.0
-1,1,80.0,0,2,0.0
-1,1,80.0,1,0,0.0
-1,1,80.0,1,1,0.5
-1,1,80.0,1,2,0.5
-1,1,80.0,2,0,0.04950495049504951
-1,1,80.0,2,1,0.0
-1,1,80.0,2,2,0.9504950495049505
-1,1,40.0,0,0,0.9810671256454389
-1,1,40.0,0,1,0.0189328743545611
-1,1,40.0,0,2,0.0
-1,1,40.0,1,0,0.0048638132295719845
-1,1,40.0,1,1,0.9919747081712063
-1,1,40.0,1,2,0.00316147859922179
-1,1,40.0,2,0,0.021739130434782608
-1,1,40.0,2,1,0.043478260869565216
-1,1,40.0,2,2,0.9347826086956522
-1,1,30.0,0,0,0.9577861163227017
-1,1,30.0,0,1,0.04221388367729831
-1,1,30.0,0,2,0.0
-1,1,30.0,1,0,0.006178489702517162
-1,1,30.0,1,1,0.9935926773455378
-1,1,30.0,1,2,0.0002288329519450801
-1,1,30.0,2,0,0.0
-1,1,30.0,2,1,1.0
-1,1,30.0,2,2,0.0
-1,1,90.0,0,0,1.0
-1,1,90.0,0,1,0.0
-1,1,90.0,0,2,0.0
-1,1,90.0,1,0,0.0
-1,1,90.0,1,1,0.0
-1,1,90.0,1,2,0.0
-1,1,90.0,2,0,0.0
-1,1,90.0,2,1,0.0
-1,1,90.0,2,2,1.0
-1,1,100.0,0,0,0.0
-1,1,100.0,0,1,0.0
-1,1,100.0,0,2,0.0
-1,1,100.0,1,0,0.0
-1,1,100.0,1,1,0.0
-1,1,100.0,1,2,0.0
-1,1,100.0,2,0,0.0
-1,1,100.0,2,1,0.0
-1,1,100.0,2,2,0.0
+sex,education,age,partner_state,lead_partner_state,proportion
+Men,Low Education,30,Single,Single,0.9106902095714874
+Men,Low Education,30,Single,Working Partner,0.08855482668713725
+Men,Low Education,30,Single,Retired Partner,0.0007549637413755081
+Men,Low Education,30,Working Partner,Single,0.0008702414456932863
+Men,Low Education,30,Working Partner,Working Partner,0.9975893582881941
+Men,Low Education,30,Working Partner,Retired Partner,0.0015404002661126679
+Men,Low Education,30,Retired Partner,Single,0.01721064007108527
+Men,Low Education,30,Retired Partner,Working Partner,0.6065114721455094
+Men,Low Education,30,Retired Partner,Retired Partner,0.3762778877834053
+Men,Low Education,31,Single,Single,0.9158920639418583
+Men,Low Education,31,Single,Working Partner,0.0833170150916182
+Men,Low Education,31,Single,Retired Partner,0.0007909209665234008
+Men,Low Education,31,Working Partner,Single,0.0009300150184138326
+Men,Low Education,31,Working Partner,Working Partner,0.9973551704712216
+Men,Low Education,31,Working Partner,Retired Partner,0.0017148145103644881
+Men,Low Education,31,Retired Partner,Single,0.01762360175814201
+Men,Low Education,31,Retired Partner,Working Partner,0.5810112010995963
+Men,Low Education,31,Retired Partner,Retired Partner,0.4013651971422617
+Men,Low Education,32,Single,Single,0.920809423591768
+Men,Low Education,32,Single,Working Partner,0.07836226829824823
+Men,Low Education,32,Single,Retired Partner,0.0008283081099836622
+Men,Low Education,32,Working Partner,Single,0.000993870447971269
+Men,Low Education,32,Working Partner,Working Partner,0.9970971981106268
+Men,Low Education,32,Working Partner,Retired Partner,0.0019089314414019118
+Men,Low Education,32,Retired Partner,Single,0.0179968966771521
+Men,Low Education,32,Retired Partner,Working Partner,0.5550540742015027
+Men,Low Education,32,Retired Partner,Retired Partner,0.42694902912134525
+Men,Low Education,33,Single,Single,0.925454428861287
+Men,Low Education,33,Single,Working Partner,0.0736783885243939
+Men,Low Education,33,Single,Retired Partner,0.0008671826143190646
+Men,Low Education,33,Working Partner,Single,0.0010620821667705232
+Men,Low Education,33,Working Partner,Working Partner,0.9968129515847606
+Men,Low Education,33,Working Partner,Retired Partner,0.0021249662484689206
+Men,Low Education,33,Retired Partner,Single,0.018326814133963882
+Men,Low Education,33,Retired Partner,Working Partner,0.5287769113414147
+Men,Low Education,33,Retired Partner,Retired Partner,0.45289627452462133
+Men,Low Education,34,Single,Single,0.9298390588143243
+Men,Low Education,34,Single,Working Partner,0.0692533366129561
+Men,Low Education,34,Single,Retired Partner,0.0009076045727196955
+Men,Low Education,34,Working Partner,Single,0.0011349422666726955
+Men,Low Education,34,Working Partner,Working Partner,0.9964996769973941
+Men,Low Education,34,Working Partner,Retired Partner,0.002365380735933187
+Men,Low Education,34,Retired Partner,Single,0.018610169400309063
+Men,Low Education,34,Retired Partner,Working Partner,0.5023237030371869
+Men,Low Education,34,Retired Partner,Retired Partner,0.479066127562504
+Men,Low Education,35,Single,Single,0.9339750833330129
+Men,Low Education,35,Single,Working Partner,0.0650752798444573
+Men,Low Education,35,Single,Retired Partner,0.0009496368225297856
+Men,Low Education,35,Working Partner,Single,0.0012127614878167806
+Men,Low Education,35,Working Partner,Working Partner,0.9961543283026443
+Men,Low Education,35,Working Partner,Retired Partner,0.0026329102095390073
+Men,Low Education,35,Retired Partner,Single,0.01884438873602418
+Men,Low Education,35,Retired Partner,Working Partner,0.47584250897051816
+Men,Low Education,35,Retired Partner,Retired Partner,0.5053131022934576
+Men,Low Education,36,Single,Single,0.9378740224573845
+Men,Low Education,36,Single,Working Partner,0.06113263250021413
+Men,Low Education,36,Single,Retired Partner,0.0009933450424012256
+Men,Low Education,36,Working Partner,Single,0.0012958702342236873
+Men,Low Education,36,Working Partner,Working Partner,0.9957735366056848
+Men,Low Education,36,Working Partner,Retired Partner,0.0029305931600916014
+Men,Low Education,36,Retired Partner,Single,0.01902757498466641
+Men,Low Education,36,Retired Partner,Working Partner,0.4494821619830722
+Men,Low Education,36,Retired Partner,Retired Partner,0.5314902630322613
+Men,Low Education,37,Single,Single,0.9415471124159839
+Men,Low Education,37,Single,Working Partner,0.05741408973063551
+Men,Low Education,37,Single,Retired Partner,0.0010387978533805341
+Men,Low Education,37,Working Partner,Single,0.0013846196106209938
+Men,Low Education,37,Working Partner,Working Partner,0.9953535763856036
+Men,Low Education,37,Working Partner,Retired Partner,0.0032618040037754705
+Men,Low Education,37,Retired Partner,Single,0.019158550357091863
+Men,Low Education,37,Retired Partner,Working Partner,0.4233889320043806
+Men,Low Education,37,Retired Partner,Retired Partner,0.5574525176385274
+Men,Low Education,38,Single,Single,0.945005277785704
+Men,Low Education,38,Single,Working Partner,0.05390865529007253
+Men,Low Education,38,Single,Retired Partner,0.0010860669242234145
+Men,Low Education,38,Working Partner,Single,0.0014793824732516193
+Men,Low Education,38,Working Partner,Working Partner,0.9948903283722719
+Men,Low Education,38,Working Partner,Retired Partner,0.0036302891544764708
+Men,Low Education,38,Retired Partner,Single,0.019236874439120213
+Men,Low Education,38,Retired Partner,Working Partner,0.39770330777247664
+Men,Low Education,38,Retired Partner,Retired Partner,0.5830598177884031
+Men,Low Education,39,Single,Single,0.948259109222751
+Men,Low Education,39,Single,Working Partner,0.050605663696029486
+Men,Low Education,39,Single,Retired Partner,0.0011352270812195163
+Men,Low Education,39,Working Partner,Single,0.0015805544854255679
+Men,Low Education,39,Working Partner,Working Partner,0.9943792387960512
+Men,Low Education,39,Working Partner,Retired Partner,0.00404020671852332
+Men,Low Education,39,Retired Partner,Single,0.019262837033485712
+Men,Low Education,39,Retired Partner,Working Partner,0.37255704489282365
+Men,Low Education,39,Retired Partner,Retired Partner,0.6081801180736907
+Men,Low Education,40,Single,Single,0.9513188462191302
+Men,Low Education,40,Single,Working Partner,0.04749479735807006
+Men,Low Education,40,Single,Retired Partner,0.0011863564227996726
+Men,Low Education,40,Working Partner,Single,0.0016885551661871589
+Men,Low Education,40,Working Partner,Working Partner,0.9938152747183879
+Men,Low Education,40,Working Partner,Retired Partner,0.004496170115424968
+Men,Low Education,40,Retired Partner,Single,0.019237427014142786
+Men,Low Education,40,Retired Partner,Working Partner,0.34807060788063365
+Men,Low Education,40,Retired Partner,Retired Partner,0.6326919651052235
+Men,Low Education,41,Single,Single,0.9541943643584544
+Men,Low Education,41,Single,Working Partner,0.04456609920235664
+Men,Low Education,41,Single,Retired Partner,0.0012395364391890131
+Men,Low Education,41,Working Partner,Single,0.0018038289176398434
+Men,Low Education,41,Working Partner,Working Partner,0.9931928751438834
+Men,Low Education,41,Working Partner,Retired Partner,0.005003295938476783
+Men,Low Education,41,Retired Partner,Single,0.0191622797791961
+Men,Low Education,41,Retired Partner,Working Partner,0.32435110382144205
+Men,Low Education,41,Retired Partner,Retired Partner,0.6564866163993618
+Men,Low Education,42,Single,Single,0.9568951665694908
+Men,Low Education,42,Single,Working Partner,0.041809981293147454
+Men,Low Education,42,Single,Retired Partner,0.0012948521373618523
+Men,Low Education,42,Working Partner,Single,0.0019268460131287954
+Men,Low Education,42,Working Partner,Working Partner,0.9925058976115717
+Men,Low Education,42,Working Partner,Retired Partner,0.00556725637529951
+Men,Low Education,42,Retired Partner,Single,0.019039607010568754
+Men,Low Education,42,Retired Partner,Working Partner,0.30149076958671317
+Men,Low Education,42,Retired Partner,Retired Partner,0.6794696234027181
+Men,Low Education,43,Single,Single,0.959430377904221
+Men,Low Education,43,Single,Working Partner,0.03921722992423049
+Men,Low Education,43,Single,Retired Partner,0.0013523921715483452
+Men,Low Education,43,Working Partner,Single,0.002058103524552617
+Men,Low Education,43,Working Partner,Working Partner,0.9917475599665443
+Men,Low Education,43,Working Partner,Retired Partner,0.006194336508903087
+Men,Low Education,43,Retired Partner,Single,0.018872113199879383
+Men,Low Education,43,Retired Partner,Working Partner,0.27956603698333393
+Men,Low Education,43,Retired Partner,Retired Partner,0.7015618498167867
+Men,Low Education,44,Single,Single,0.9618087433980064
+Men,Low Education,44,Single,Working Partner,0.0367790076224553
+Men,Low Education,44,Single,Retired Partner,0.0014122489795383515
+Men,Low Education,44,Working Partner,Single,0.0021981261624773626
+Men,Low Education,44,Working Partner,Working Partner,0.9909103770247283
+Men,Low Education,44,Working Partner,Retired Partner,0.006891496812794438
+Men,Low Education,44,Retired Partner,Single,0.018662903746891942
+Men,Low Education,44,Retired Partner,Working Partner,0.2586371644727621
+Men,Low Education,44,Retired Partner,Retired Partner,0.722699931780346
+Men,Low Education,45,Single,Single,0.9640386286016794
+Men,Low Education,45,Single,Working Partner,0.03448685247329581
+Men,Low Education,45,Single,Retired Partner,0.0014745189250249364
+Men,Low Education,45,Working Partner,Single,0.0023474669973697973
+Men,Low Education,45,Working Partner,Working Partner,0.9899860918660459
+Men,Low Education,45,Working Partner,Retired Partner,0.007666441136584397
+Men,Low Education,45,Retired Partner,Single,0.01841538939432246
+Men,Low Education,45,Retired Partner,Working Partner,0.23874839321495145
+Men,Low Education,45,Retired Partner,Retired Partner,0.742836217390726
+Men,Low Education,46,Single,Single,0.9661280224081631
+Men,Low Education,46,Single,Working Partner,0.032332675145608746
+Men,Low Education,46,Single,Retired Partner,0.0015393024462282
+Men,Low Education,46,Working Partner,Single,0.0025067080240593525
+Men,Low Education,46,Working Partner,Working Partner,0.9889656015273687
+Men,Low Education,46,Working Partner,Retired Partner,0.008527690448571962
+Men,Low Education,46,Retired Partner,Single,0.018133191386121995
+Men,Low Education,46,Retired Partner,Working Partner,0.21992856128113605
+Men,Low Education,46,Retired Partner,Retired Partner,0.761938247332742
+Men,Low Education,47,Single,Single,0.9680845418288135
+Men,Low Education,47,Single,Working Partner,0.03030875396014675
+Men,Low Education,47,Single,Retired Partner,0.0016067042110397777
+Men,Low Education,47,Working Partner,Single,0.002676460524383514
+Men,Low Education,47,Working Partner,Working Partner,0.9878388769202663
+Men,Low Education,47,Working Partner,Retired Partner,0.009484662555350252
+Men,Low Education,47,Retired Partner,Single,0.01782005110804197
+Men,Low Education,47,Retired Partner,Working Partner,0.20219209398190277
+Men,Low Education,47,Retired Partner,Retired Partner,0.7799878549100553
+Men,Low Education,48,Single,Single,0.9699154384065756
+Men,Low Education,48,Single,Working Partner,0.02840772831449535
+Men,Low Education,48,Single,Retired Partner,0.001676833278929092
+Men,Low Education,48,Working Partner,Single,0.002857365174775336
+Men,Low Education,48,Working Partner,Working Partner,0.9865948768738951
+Men,Low Education,48,Working Partner,Retired Partner,0.010547757951329603
+Men,Low Education,48,Retired Partner,Single,0.017479747183858214
+Men,Low Education,48,Retired Partner,Working Partner,0.1855402804083005
+Men,Low Education,48,Retired Partner,Retired Partner,0.7969799724078412
+Men,Low Education,49,Single,Single,0.9716276059837928
+Men,Low Education,49,Single,Working Partner,0.02662259074635281
+Men,Low Education,49,Single,Retired Partner,0.001749803269854386
+Men,Low Education,49,Working Partner,Single,0.003050091836226977
+Men,Low Education,49,Working Partner,Working Partner,0.9852214563056317
+Men,Low Education,49,Working Partner,Retired Partner,0.011728451858141233
+Men,Low Education,49,Retired Partner,Single,0.017116022150929278
+Men,Low Education,49,Retired Partner,Working Partner,0.16996274570012715
+Men,Low Education,49,Retired Partner,Retired Partner,0.8129212321489436
+Men,Low Education,50,Single,Single,0.9732275895718056
+Men,Low Education,50,Single,Working Partner,0.024946677887770094
+Men,Low Education,50,Single,Retired Partner,0.0018257325404244097
+Men,Low Education,50,Working Partner,Single,0.0032553389535371893
+Men,Low Education,50,Working Partner,Working Partner,0.9837052686572628
+Men,Low Education,50,Working Partner,Retired Partner,0.013039392389200079
+Men,Low Education,50,Retired Partner,Single,0.016732520005365164
+Men,Low Education,50,Retired Partner,Working Partner,0.15543903389632388
+Men,Low Education,50,Retired Partner,Retired Partner,0.827828446098311
+Men,Low Education,51,Single,Single,0.9747215950971049
+Men,Low Education,51,Single,Working Partner,0.02337366053533473
+Men,Low Education,51,Single,Retired Partner,0.0019047443675604982
+Men,Low Education,51,Working Partner,Single,0.0034738324789759236
+Men,Low Education,51,Working Partner,Working Partner,0.9820316629097051
+Men,Low Education,51,Working Partner,Retired Partner,0.014494504611318943
+Men,Low Education,51,Retired Partner,Single,0.016332735151777075
+Men,Low Education,51,Retired Partner,Working Partner,0.14194022586772329
+Men,Low Education,51,Retired Partner,Retired Partner,0.8417270389804996
+Men,Low Education,52,Single,Single,0.9761154998246339
+Men,Low Education,52,Single,Working Partner,0.02189753303545298
+Men,Low Education,52,Single,Retired Partner,0.001986967139913316
+Men,Low Education,52,Working Partner,Single,0.0037063242224681233
+Men,Low Education,52,Working Partner,Working Partner,0.9801845757123326
+Men,Low Education,52,Working Partner,Retired Partner,0.01610910006519923
+Men,Low Education,52,Retired Partner,Single,0.015919972655953792
+Men,Low Education,52,Retired Partner,Working Partner,0.12943052912947864
+Men,Low Education,52,Retired Partner,Retired Partner,0.8546494982145676
+Men,Low Education,53,Single,Single,0.9774148632827704
+Men,Low Education,53,Single,Working Partner,0.020512602159935837
+Men,Low Education,53,Single,Retired Partner,0.0020725345572939024
+Men,Low Education,53,Working Partner,Single,0.003953589516161558
+Men,Low Education,53,Working Partner,Working Partner,0.978146419442974
+Men,Low Education,53,Working Partner,Retired Partner,0.017899991040864413
+Men,Low Education,53,Retired Partner,Single,0.01549731920114077
+Men,Low Education,53,Retired Partner,Working Partner,0.11786878978027576
+Men,Low Education,53,Retired Partner,Retired Partner,0.8666338910185836
+Men,Low Education,54,Single,Single,0.978624938536569
+Men,Low Education,54,Single,Working Partner,0.01921347562504634
+Men,Low Education,54,Single,Retired Partner,0.0021615858383845178
+Men,Low Education,54,Working Partner,Single,0.004216424065932315
+Men,Low Education,54,Working Partner,Working Partner,0.9758979673613996
+Men,Low Education,54,Working Partner,Retired Partner,0.01988560857266811
+Men,Low Education,54,Retired Partner,Single,0.015067623793022898
+Men,Low Education,54,Retired Partner,Working Partner,0.10720989018939374
+Men,Low Education,54,Retired Partner,Retired Partner,0.8777224860175834
+Men,Low Education,55,Single,Single,0.9797506836759958
+Men,Low Education,55,Single,Working Partner,0.017995050387002862
+Men,Low Education,55,Single,Retired Partner,0.002254265937001286
+Men,Low Education,55,Working Partner,Single,0.004495639846240752
+Men,Low Education,55,Working Partner,Working Partner,0.9734182374431346
+Men,Low Education,55,Working Partner,Retired Partner,0.022086122710624736
+Men,Low Education,55,Retired Partner,Single,0.014633487035352999
+Men,Low Education,55,Retired Partner,Working Partner,0.09740600844419721
+Men,Low Education,55,Retired Partner,Retired Partner,0.8879605045204498
+Men,Low Education,56,Single,Single,0.9807967734042088
+Men,Low Education,56,Single,Working Partner,0.01685250082860379
+Men,Low Education,56,Single,Retired Partner,0.0023507257671874604
+Men,Low Education,56,Working Partner,Single,0.004792059878173749
+Men,Low Education,56,Working Partner,Working Partner,0.9706843769926001
+Men,Low Education,56,Working Partner,Retired Partner,0.024523563129226073
+Men,Low Education,56,Retired Partner,Single,0.014197257689477197
+Men,Low Education,56,Retired Partner,Working Partner,0.08840772639379628
+Men,Low Education,56,Retired Partner,Retired Partner,0.8973950159167264
+Men,Low Education,57,Single,Single,0.9817676106275032
+Men,Low Education,57,Single,Working Partner,0.01578126693507339
+Men,Low Education,57,Single,Retired Partner,0.002451122437423401
+Men,Low Education,57,Working Partner,Single,0.0051065117140827055
+Men,Low Education,57,Working Partner,Working Partner,0.9676715507454892
+Men,Low Education,57,Working Partner,Retired Partner,0.027221937540428252
+Men,Low Education,57,Retired Partner,Single,0.01376103521465505
+Men,Low Education,57,Retired Partner,Working Partner,0.08016498207737649
+Men,Low Education,57,Retired Partner,Retired Partner,0.9060739827079685
+Men,Low Education,58,Single,Single,0.9826673379634181
+Men,Low Education,58,Single,Working Partner,0.01477704254233514
+Men,Low Education,58,Single,Retired Partner,0.0025556194942468165
+Men,Low Education,58,Working Partner,Single,0.0054398194367838975
+Men,Low Education,58,Working Partner,Working Partner,0.9643528358894352
+Men,Low Education,58,Working Partner,Retired Partner,0.030207344673780858
+Men,Low Education,58,Retired Partner,Single,0.013326677039021986
+Men,Low Education,58,Retired Partner,Working Partner,0.07262786933371831
+Men,Low Education,58,Retired Partner,Retired Partner,0.9140454536272596
+Men,Low Education,59,Single,Single,0.9834998490968161
+Men,Low Education,59,Single,Working Partner,0.013835763727599426
+Men,Low Education,59,Single,Retired Partner,0.0026643871755845845
+Men,Low Education,59,Working Partner,Single,0.005792793967966366
+Men,Low Education,59,Working Partner,Working Partner,0.960699128266635
+Men,Low Education,59,Working Partner,Retired Partner,0.033508077765398755
+Men,Low Education,59,Retired Partner,Single,0.012895809411676395
+Men,Low Education,59,Retired Partner,Working Partner,0.06574729254276089
+Men,Low Education,59,Retired Partner,Retired Partner,0.9213568980455626
+Men,Low Education,60,Single,Single,0.9842687999255947
+Men,Low Education,60,Single,Working Partner,0.0129535974003
+Men,Low Education,60,Single,Retired Partner,0.002777602674105241
+Men,Low Education,60,Working Partner,Single,0.00616622147075778
+Men,Low Education,60,Working Partner,Working Partner,0.9566790649753282
+Men,Low Education,60,Working Partner,Retired Partner,0.037154713553914046
+Men,Low Education,60,Retired Partner,Single,0.012469840815918527
+Men,Low Education,60,Retired Partner,Working Partner,0.05947548794838867
+Men,Low Education,60,Retired Partner,Retired Partner,0.9280546712356927
+Men,Low Education,61,Single,Single,0.9849776194481734
+Men,Low Education,61,Single,Working Partner,0.012126930140917484
+Men,Low Education,61,Single,Retired Partner,0.0028954504109091495
+Men,Low Education,61,Working Partner,Single,0.006560849627271115
+Men,Low Education,61,Working Partner,Working Partner,0.9522589696560336
+Men,Low Education,61,Working Partner,Retired Partner,0.04118018071669523
+Men,Low Education,61,Retired Partner,Single,0.012049977066861912
+Men,Low Education,61,Retired Partner,Working Partner,0.05376642510835587
+Men,Low Education,61,Retired Partner,Retired Partner,0.9341835978247822
+Men,Low Education,62,Single,Single,0.9856295203541383
+Men,Low Education,62,Single,Working Partner,0.011352357325980486
+Men,Low Education,62,Single,Retired Partner,0.0030181223198811743
+Men,Low Education,62,Working Partner,Single,0.006977371575824652
+Men,Low Education,62,Working Partner,Working Partner,0.947402827921254
+Men,Low Education,62,Working Partner,Retired Partner,0.04561980050292125
+Men,Low Education,62,Retired Partner,Single,0.011637237361847371
+Men,Low Education,62,Retired Partner,Working Partner,0.048576102985138786
+Men,Low Education,62,Retired Partner,Retired Partner,0.9397866596530138
+Men,Low Education,63,Single,Single,0.9862275092875347
+Men,Low Education,63,Single,Working Partner,0.010626672569426733
+Men,Low Education,63,Single,Retired Partner,0.0031458181430385587
+Men,Low Education,63,Working Partner,Single,0.0074164073073619725
+Men,Low Education,63,Working Partner,Working Partner,0.9420723016397964
+Men,Low Education,63,Working Partner,Retired Partner,0.050511291052841606
+Men,Low Education,63,Retired Partner,Single,0.01123247069104873
+Men,Low Education,63,Retired Partner,Working Partner,0.043862755294407134
+Men,Low Education,63,Retired Partner,Retired Partner,0.9449047740145442
+Men,Low Education,64,Single,Single,0.9867743967593524
+Men,Low Education,64,Single,Working Partner,0.009946857503433217
+Men,Low Education,64,Single,Retired Partner,0.0032787457372141938
+Men,Low Education,64,Working Partner,Single,0.00787848234991137
+Men,Low Education,64,Working Partner,Working Partner,0.9362267920781869
+Men,Low Education,64,Working Partner,Retired Partner,0.055894725571901636
+Men,Low Education,64,Retired Partner,Single,0.010836372143002471
+Men,Low Education,64,Retired Partner,Working Partner,0.03958697920383832
+Men,Low Education,64,Retired Partner,Retired Partner,0.9495766486531593
+Men,Low Education,65,Single,Single,0.9872728066918885
+Men,Low Education,65,Single,Working Partner,0.009310071915688587
+Men,Low Education,65,Single,Retired Partner,0.003417121392422985
+Men,Low Education,65,Working Partner,Single,0.008364003617741044
+Men,Low Education,65,Working Partner,Working Partner,0.9298235631702478
+Men,Low Education,65,Working Partner,Retired Partner,0.06181243321201107
+Men,Low Education,65,Retired Partner,Single,0.010449498752495236
+Men,Low Education,65,Retired Partner,Working Partner,0.03571180052756309
+Men,Low Education,65,Retired Partner,Retired Partner,0.9538387007199417
+Men,Low Education,66,Single,Single,0.9877251855829482
+Men,Low Education,66,Single,Working Partner,0.008713644254785925
+Men,Low Education,66,Single,Retired Partner,0.0035611701622659487
+Men,Low Education,66,Working Partner,Single,0.008873232372613215
+Men,Low Education,66,Working Partner,Working Partner,0.9228179373442617
+Men,Low Education,66,Working Partner,Retired Partner,0.06830883028312518
+Men,Low Education,66,Retired Partner,Single,0.010072284635066172
+Men,Low Education,66,Retired Partner,Working Partner,0.03220268735642571
+Men,Low Education,66,Retired Partner,Retired Partner,0.9577250280085081
+Men,Low Education,67,Single,Single,0.9881338112823919
+Men,Low Education,67,Single,Working Partner,0.00815506251087465
+Men,Low Education,67,Single,Retired Partner,0.0037111262067335434
+Men,Low Education,67,Working Partner,Single,0.009406254342824692
+Men,Low Education,67,Working Partner,Working Partner,0.9151635772674683
+Men,Low Education,67,Working Partner,Retired Partner,0.07543016838970693
+Men,Low Education,67,Retired Partner,Single,0.009705055233367097
+Men,Low Education,67,Retired Partner,Working Partner,0.02902752273080404
+Men,Low Education,67,Retired Partner,Retired Partner,0.9612674220358289
+Men,Low Education,68,Single,Single,0.9885008013773814
+Men,Low Education,68,Single,Working Partner,0.007631965474842903
+Men,Low Education,68,Single,Retired Partner,0.0038672331477757832
+Men,Low Education,68,Working Partner,Single,0.009962947175979479
+Men,Low Education,68,Working Partner,Working Partner,0.9068128674181528
+Men,Low Education,68,Working Partner,Retired Partner,0.08322418540586775
+Men,Low Education,68,Retired Partner,Single,0.009348040566670606
+Men,Low Education,68,Retired Partner,Working Partner,0.026156545597392687
+Men,Low Education,68,Retired Partner,Retired Partner,0.9644954138359367
+Men,Low Education,69,Single,Single,0.9888281211859554
+Men,Low Education,69,Single,Working Partner,0.007142134376032252
+Men,Low Education,69,Single,Retired Partner,0.004029744438012473
+Men,Low Education,69,Working Partner,Single,0.010542945567406509
+Men,Low Education,69,Working Partner,Working Partner,0.8977174093790655
+Men,Low Education,69,Working Partner,Retired Partner,0.09173964505352801
+Men,Low Education,69,Retired Partner,Single,0.009001387427334459
+Men,Low Education,69,Retired Partner,Working Partner,0.023562267962413477
+Men,Low Education,69,Retired Partner,Retired Partner,0.9674363446102521
+Men,Low Education,70,Single,Single,0.9891175913612924
+Men,Low Education,70,Single,Working Partner,0.006683484895745683
+Men,Low Education,70,Single,Retired Partner,0.004198923742961884
+Men,Low Education,70,Working Partner,Single,0.011145604610120532
+Men,Low Education,70,Working Partner,Working Partner,0.8878286439417298
+Men,Low Education,70,Working Partner,Retired Partner,0.10102575144814975
+Men,Low Education,70,Retired Partner,Single,0.0086651705086879
+Men,Low Education,70,Retired Partner,Working Partner,0.021219374906501345
+Men,Low Education,70,Retired Partner,Retired Partner,0.9701154545848107
+Men,Low Education,71,Single,Single,0.9893708951112948
+Men,Low Education,71,Single,Working Partner,0.006254059551534711
+Men,Low Education,71,Single,Retired Partner,0.004375045337170432
+Men,Low Education,71,Working Partner,Single,0.011769962154172182
+Men,Low Education,71,Working Partner,Working Partner,0.8770986112724265
+Men,Low Education,71,Working Partner,Retired Partner,0.11113142657340139
+Men,Low Education,71,Retired Partner,Single,0.00833940247934224
+Men,Low Education,71,Retired Partner,Working Partner,0.019104612988281172
+Men,Low Education,71,Retired Partner,Retired Partner,0.9725559845323767
+Men,Low Education,72,Single,Single,0.989589585039986
+Men,Low Education,72,Single,Working Partner,0.00585202044538471
+Men,Low Education,72,Single,Retired Partner,0.004558394514629434
+Men,Low Education,72,Working Partner,Single,0.012414701239599167
+Men,Low Education,72,Working Partner,Working Partner,0.8654808572587616
+Men,Low Education,72,Working Partner,Retired Partner,0.12210444150163936
+Men,Low Education,72,Retired Partner,Single,0.00802404304103133
+Men,Low Education,72,Retired Partner,Working Partner,0.017196671548021743
+Men,Low Education,72,Retired Partner,Retired Partner,0.9747792854109469
+Men,Low Education,73,Single,Single,0.9897750896187241
+Men,Low Education,73,Single,Working Partner,0.005475642367408628
+Men,Low Education,73,Single,Retired Partner,0.00474926801386737
+Men,Low Education,73,Working Partner,Single,0.013078113969687007
+Men,Low Education,73,Working Partner,Working Partner,0.8529314894841011
+Men,Low Education,73,Working Partner,Retired Partner,0.1339903965462118
+Men,Low Education,73,Retired Partner,Single,0.007719007022317952
+Men,Low Education,73,Retired Partner,Working Partner,0.015476060533470962
+Men,Low Education,73,Retired Partner,Retired Partner,0.9768049324442112
+Men,Low Education,74,Single,Single,0.9899287192964317
+Men,Low Education,74,Single,Working Partner,0.005123306245460554
+Men,Low Education,74,Single,Retired Partner,0.004947974458107608
+Men,Low Education,74,Working Partner,Single,0.013758068505602841
+Men,Low Education,74,Working Partner,Working Partner,0.8394103798653576
+Men,Low Education,74,Working Partner,Retired Partner,0.14683155162903958
+Men,Low Education,74,Retired Partner,Single,0.007424171570247812
+Men,Low Education,74,Retired Partner,Working Partner,0.013924987703950417
+Men,Low Education,74,Retired Partner,Retired Partner,0.9786508407258017
+Men,Low Education,75,Single,Single,0.9900516722589667
+Men,Low Education,75,Single,Working Partner,0.00479349293015179
+Men,Low Education,75,Single,Retired Partner,0.005154834810881493
+Men,Low Education,75,Working Partner,Single,0.014451981168385093
+Men,Low Education,75,Working Partner,Working Partner,0.8248825027284306
+Men,Low Education,75,Working Partner,Retired Partner,0.16066551610318427
+Men,Low Education,75,Retired Partner,Single,0.007139382507496828
+Men,Low Education,75,Retired Partner,Working Partner,0.012527237418524037
+Men,Low Education,75,Retired Partner,Retired Partner,0.9803333800739792
+Men,Low Education,76,Single,Single,0.9901450398484586
+Men,Low Education,76,Single,Working Partner,0.004484777304055452
+Men,Low Education,76,Single,Retired Partner,0.00537018284748576
+Men,Low Education,76,Working Partner,Single,0.01515679590091733
+Men,Low Education,76,Working Partner,Working Partner,0.8093193870212722
+Men,Low Education,76,Working Partner,Retired Partner,0.17552381707781048
+Men,Low Education,76,Retired Partner,Single,0.006864459924755313
+Men,Low Education,76,Retired Partner,Working Partner,0.011268052669460604
+Men,Low Education,76,Retired Partner,Retired Partner,0.9818674874057841
+Men,Low Education,77,Single,Single,0.9902098116539413
+Men,Low Education,77,Single,Working Partner,0.004195822703388419
+Men,Low Education,77,Single,Retired Partner,0.00559436564267033
+Men,Low Education,77,Working Partner,Single,0.015868973534840746
+Men,Low Education,77,Working Partner,Working Partner,0.7927006497175056
+Men,Low Education,77,Working Partner,Retired Partner,0.19143037674765356
+Men,Low Education,77,Retired Partner,Single,0.006599203077866034
+Men,Low Education,77,Retired Partner,Working Partner,0.0101340215719478
+Men,Low Education,77,Retired Partner,Retired Partner,0.9832667753501861
+Men,Low Education,78,Single,Single,0.9902468802849291
+Men,Low Education,78,Single,Working Partner,0.0039253756401326275
+Men,Low Education,78,Single,Retired Partner,0.0058277440749382676
+Men,Low Education,78,Working Partner,Single,0.01658449338371133
+Men,Low Education,78,Working Partner,Working Partner,0.775015564743971
+Men,Low Education,78,Working Partner,Retired Partner,0.2083999418723177
+Men,Low Education,78,Retired Partner,Single,0.0063433946572639425
+Men,Low Education,78,Retired Partner,Working Partner,0.009112969153439952
+Men,Low Education,78,Retired Partner,Retired Partner,0.9845436361892962
+Men,Low Education,79,Single,Single,0.9902570458397911
+Men,Low Education,79,Single,Working Partner,0.0036722608123754773
+Men,Low Education,79,Single,Retired Partner,0.006070693347833361
+Men,Low Education,79,Working Partner,Single,0.017298869600023623
+Men,Low Education,79,Working Partner,Working Partner,0.7562646087735174
+Men,Low Education,79,Working Partner,Retired Partner,0.2264365216264589
+Men,Low Education,79,Retired Partner,Single,0.006096804494098893
+Men,Low Education,79,Retired Partner,Working Partner,0.008193854989817185
+Men,Low Education,79,Retired Partner,Retired Partner,0.9857093405160839
+Men,Low Education,80,Single,Single,0.990241020080829
+Men,Low Education,80,Single,Working Partner,0.003435376390588362
+Men,Low Education,80,Single,Retired Partner,0.006323603528582617
+Men,Low Education,80,Working Partner,Single,0.018007184448523717
+Men,Low Education,80,Working Partner,Working Partner,0.7364609130698854
+Men,Low Education,80,Working Partner,Retired Partner,0.2455319024815909
+Men,Low Education,80,Retired Partner,Single,0.005859192763484148
+Men,Low Education,80,Retired Partner,Working Partner,0.0073666770001091
+Men,Low Education,80,Retired Partner,Retired Partner,0.9867741302364067
+Men,Low Education,81,Single,Single,0.9901994303279457
+Men,Low Education,81,Single,Working Partner,0.0032136895676040415
+Men,Low Education,81,Single,Retired Partner,0.006586880104450271
+Men,Low Education,81,Working Partner,Single,0.018704140129293282
+Men,Low Education,81,Working Partner,Working Partner,0.7156315406387487
+Men,Low Education,81,Working Partner,Retired Partner,0.265664319231958
+Men,Low Education,81,Retired Partner,Single,0.005630312740931463
+Men,Low Education,81,Retired Partner,Working Partner,0.006622381527256516
+Men,Low Education,81,Retired Partner,Retired Partner,0.987747305731812
+Men,Low Education,82,Single,Single,0.9901328230826737
+Men,Low Education,82,Single,Working Partner,0.003006232360179252
+Men,Low Education,82,Single,Retired Partner,0.006860944557147064
+Men,Low Education,82,Working Partner,Single,0.019384130016251562
+Men,Low Education,82,Working Partner,Working Partner,0.6938185017903469
+Men,Low Education,82,Working Partner,Retired Partner,0.2867973681934015
+Men,Low Education,82,Retired Partner,Single,0.005409913163453306
+Men,Low Education,82,Retired Partner,Working Partner,0.005952779690662612
+Men,Low Education,82,Retired Partner,Retired Partner,0.9886373071458842
+Men,Low Education,83,Single,Single,0.9900416673941532
+Men,Low Education,83,Single,Working Partner,0.002812097650224308
+Men,Low Education,83,Single,Retired Partner,0.007146234955622563
+Men,Low Education,83,Working Partner,Single,0.02004132916982244
+Men,Low Education,83,Working Partner,Working Partner,0.6710794204334339
+Men,Low Education,83,Working Partner,Retired Partner,0.3088792503967436
+Men,Low Education,83,Retired Partner,Single,0.005197740242216055
+Men,Low Education,83,Retired Partner,Working Partner,0.005350469889608524
+Men,Low Education,83,Retired Partner,Retired Partner,0.9894517898681755
+Men,Low Education,84,Single,Single,0.9899263579784173
+Men,Low Education,84,Single,Working Partner,0.0026304354540328217
+Men,Low Education,84,Single,Retired Partner,0.007443206567549856
+Men,Low Education,84,Working Partner,Single,0.020669802777844404
+Men,Low Education,84,Working Partner,Working Partner,0.6474877693700553
+Men,Low Education,84,Working Partner,Retired Partner,0.33184242785210044
+Men,Low Education,84,Retired Partner,Single,0.00499353936914268
+Men,Low Education,84,Retired Partner,Working Partner,0.004808766258492442
+Men,Low Education,84,Retired Partner,Retired Partner,0.9901976943723648
+Men,Low Education,85,Single,Single,0.9897872181020696
+Men,Low Education,85,Single,Working Partner,0.002460449408140688
+Men,Low Education,85,Single,Retired Partner,0.007752332489789743
+Men,Low Education,85,Working Partner,Single,0.021263629852320446
+Men,Low Education,85,Working Partner,Working Partner,0.6231326064513953
+Men,Low Education,85,Working Partner,Retired Partner,0.35560376369628427
+Men,Low Education,85,Retired Partner,Single,0.00479705655557821
+Men,Low Education,85,Retired Partner,Working Partner,0.004321632819771483
+Men,Low Education,85,Retired Partner,Retired Partner,0.9908813106246503
+Men,Low Education,86,Single,Single,0.9896245022411294
+Men,Low Education,86,Single,Working Partner,0.0023013934607745007
+Men,Low Education,86,Single,Retired Partner,0.008074104298096147
+Men,Low Education,86,Working Partner,Single,0.021817038170072325
+Men,Low Education,86,Working Partner,Working Partner,0.5981177648655043
+Men,Low Education,86,Working Partner,Retired Partner,0.3800651969644235
+Men,Low Education,86,Retired Partner,Single,0.004608039637101852
+Men,Low Education,86,Retired Partner,Working Partner,0.0038836230437838573
+Men,Low Education,86,Retired Partner,Retired Partner,0.9915083373191143
+Men,Low Education,87,Single,Single,0.9894383985254981
+Men,Low Education,87,Single,Working Partner,0.002152568758206976
+Men,Low Education,87,Single,Retired Partner,0.008409032716294925
+Men,Low Education,87,Working Partner,Single,0.02232454522619995
+Men,Low Education,87,Working Partner,Working Partner,0.5725604793061093
+Men,Low Education,87,Working Partner,Retired Partner,0.40511497546769076
+Men,Low Education,87,Retired Partner,Single,0.0044262392748292845
+Men,Low Education,87,Retired Partner,Working Partner,0.0034898245024173906
+Men,Low Education,87,Retired Partner,Retired Partner,0.9920839362227533
+Men,Low Education,88,Single,Single,0.9892290309791518
+Men,Low Education,88,Single,Working Partner,0.002013320715713431
+Men,Low Education,88,Single,Retired Partner,0.008757648305134806
+Men,Low Education,88,Working Partner,Single,0.02278109901397674
+Men,Low Education,88,Working Partner,Working Partner,0.5465894635437137
+Men,Low Education,88,Working Partner,Retired Partner,0.4306294374423095
+Men,Low Education,88,Retired Partner,Single,0.00425140978011161
+Men,Low Education,88,Retired Partner,Working Partner,0.003135808292652465
+Men,Low Education,88,Retired Partner,Retired Partner,0.9926127819272359
+Men,Low Education,89,Single,Single,0.988996461565816
+Men,Low Education,89,Single,Working Partner,0.001883036263213118
+Men,Low Education,89,Single,Retired Partner,0.009120502170970806
+Men,Low Education,89,Working Partner,Single,0.023182211887473835
+Men,Low Education,89,Working Partner,Working Partner,0.5203424912589975
+Men,Low Education,89,Working Partner,Retired Partner,0.4564752968535287
+Men,Low Education,89,Retired Partner,Single,0.004083309786406436
+Men,Low Education,89,Retired Partner,Working Partner,0.002817582903706312
+Men,Low Education,89,Retired Partner,Retired Partner,0.9930991073098873
+Men,Low Education,90,Single,Single,0.9887406920495261
+Men,Low Education,90,Single,Working Partner,0.00176114125607656
+Men,Low Education,90,Single,Retired Partner,0.009498166694397398
+Men,Low Education,90,Working Partner,Single,0.023524080706646376
+Men,Low Education,90,Working Partner,Working Partner,0.49396356747690895
+Men,Low Education,90,Working Partner,Retired Partner,0.48251235181644475
+Men,Low Education,90,Retired Partner,Single,0.003921702789263958
+Men,Low Education,90,Retired Partner,Working Partner,0.0025315522056948846
+Men,Low Education,90,Retired Partner,Retired Partner,0.9935467450050411
+Men,Low Education,91,Single,Single,0.9884616656791191
+Men,Low Education,91,Single,Working Partner,0.0016470980419810025
+Men,Low Education,91,Single,Retired Partner,0.00989123627889997
+Men,Low Education,91,Working Partner,Single,0.023803686960750203
+Men,Low Education,91,Working Partner,Working Partner,0.4675998088480851
+Men,Low Education,91,Working Partner,Retired Partner,0.5085965041911645
+Men,Low Education,91,Retired Partner,Single,0.003766357572823954
+Men,Low Education,91,Retired Partner,Working Partner,0.002274477246679734
+Men,Low Education,91,Retired Partner,Retired Partner,0.9939591651804963
+Men,Low Education,92,Single,Single,0.9881592687053642
+Men,Low Education,92,Single,Working Partner,0.0015404031750968416
+Men,Low Education,92,Single,Retired Partner,0.010300328119539
+Men,Low Education,92,Working Partner,Single,0.02401887160239892
+Men,Low Education,92,Working Partner,Working Partner,0.44139817389389296
+Men,Low Education,92,Working Partner,Retired Partner,0.5345829545037081
+Men,Low Education,92,Retired Partner,Single,0.003617048538940871
+Men,Low Education,92,Retired Partner,Working Partner,0.0020434415572967747
+Men,Low Education,92,Retired Partner,Retired Partner,0.9943395099037624
+Men,Low Education,93,Single,Single,0.9878333317390944
+Men,Low Education,93,Single,Working Partner,0.0014405852692853265
+Men,Low Education,93,Single,Retired Partner,0.010726082991620336
+Men,Low Education,93,Working Partner,Single,0.024168380821163515
+Men,Low Education,93,Working Partner,Working Partner,0.41550219647122033
+Men,Low Education,93,Working Partner,Retired Partner,0.5603294227076162
+Men,Low Education,93,Retired Partner,Single,0.0034735559530247777
+Men,Low Education,93,Retired Partner,Working Partner,0.0018358196767773256
+Men,Low Education,93,Retired Partner,Retired Partner,0.9946906243701978
+Men,Low Education,94,Single,Single,0.9874836309583824
+Men,Low Education,94,Single,Working Partner,0.0013472029823797024
+Men,Low Education,94,Single,Retired Partner,0.011169166059237784
+Men,Low Education,94,Working Partner,Single,0.02425188080253468
+Men,Low Education,94,Working Partner,Working Partner,0.3900488756491961
+Men,Low Education,94,Working Partner,Retired Partner,0.5856992435482691
+Men,Low Education,94,Retired Partner,Single,0.003335666118885098
+Men,Low Education,94,Retired Partner,Working Partner,0.0016492486302109003
+Men,Low Education,94,Retired Partner,Retired Partner,0.9950150852509039
+Men,Low Education,95,Single,Single,0.987109889172495
+Men,Low Education,95,Single,Working Partner,0.001259843124006051
+Men,Low Education,95,Single,Retired Partner,0.01163026770349906
+Men,Low Education,95,Working Partner,Single,0.024269941474595914
+Men,Low Education,95,Working Partner,Working Partner,0.36516586291498376
+Men,Low Education,95,Working Partner,Retired Partner,0.6105641956104202
+Men,Low Education,95,Retired Partner,Single,0.0032031714932716673
+Men,Low Education,95,Retired Partner,Working Partner,0.0014816021036996767
+Men,Low Education,95,Retired Partner,Retired Partner,0.9953152264030286
+Men,Low Education,96,Single,Single,0.9867117767500613
+Men,Low Education,96,Single,Working Partner,0.001178118879774813
+Men,Low Education,96,Single,Retired Partner,0.012110104370163896
+Men,Low Education,96,Working Partner,Single,0.024223991145326917
+Men,Low Education,96,Working Partner,Working Partner,0.3409690646020678
+Men,Low Education,96,Working Partner,Retired Partner,0.6348069442526053
+Men,Low Education,96,Retired Partner,Single,0.003075870749403492
+Men,Low Education,96,Retired Partner,Working Partner,0.001330967081108626
+Men,Low Education,96,Retired Partner,Retired Partner,0.9955931621694879
+Men,Low Education,97,Single,Single,0.9862889124186301
+Men,Low Education,97,Single,Working Partner,0.0011016681450382918
+Men,Low Education,97,Single,Retired Partner,0.01260941943633161
+Men,Low Education,97,Working Partner,Single,0.02411624559587325
+Men,Low Education,97,Working Partner,Working Partner,0.31756074634978476
+Men,Low Education,97,Working Partner,Retired Partner,0.658323008054342
+Men,Low Education,97,Retired Partner,Single,0.002953568797540887
+Men,Low Education,97,Retired Partner,Working Partner,0.0011956227230425903
+Men,Low Education,97,Retired Partner,Retired Partner,0.9958508084794164
+Men,Low Education,98,Single,Single,0.9858408639425223
+Men,Low Education,98,Single,Working Partner,0.0010301519617620326
+Men,Low Education,98,Single,Retired Partner,0.013128984095715402
+Men,Low Education,98,Working Partner,Single,0.0239496164754228
+Men,Low Education,98,Working Partner,Working Partner,0.2950281907325865
+Men,Low Education,98,Working Partner,Retired Partner,0.6810221927919907
+Men,Low Education,98,Retired Partner,Single,0.0028360767695732444
+Men,Low Education,98,Retired Partner,Working Partner,0.0010740212852020923
+Men,Low Education,98,Retired Partner,Retired Partner,0.9960899019452246
+Men,Low Education,99,Single,Single,0.9853671486856707
+Men,Low Education,99,Single,Working Partner,0.0009632530523985265
+Men,Low Education,99,Single,Retired Partner,0.01366959826193088
+Men,Low Education,99,Working Partner,Single,0.023727604652802284
+Men,Low Education,99,Working Partner,Working Partner,0.2734429226681652
+Men,Low Education,99,Working Partner,Retired Partner,0.7028294726790325
+Men,Low Education,99,Retired Partner,Single,0.002723211973646134
+Men,Low Education,99,Retired Partner,Working Partner,0.0009647708891846705
+Men,Low Education,99,Retired Partner,Retired Partner,0.9963120171371692
+Men,Low Education,100,Single,Single,0.984867234065915
+Men,Low Education,100,Single,Working Partner,0.0009006744449794168
+Men,Low Education,100,Single,Retired Partner,0.014232091489105635
+Men,Low Education,100,Working Partner,Single,0.023454184491693567
+Men,Low Education,100,Working Partner,Working Partner,0.25286048327504057
+Men,Low Education,100,Working Partner,Retired Partner,0.7236853322332659
+Men,Low Education,100,Retired Partner,Single,0.0026147978240225363
+Men,Low Education,100,Retired Partner,Working Partner,0.000866619973972138
+Men,Low Education,100,Retired Partner,Retired Partner,0.9965185822020053
+Men,High Education,30,Single,Single,0.9241070016401828
+Men,High Education,30,Single,Working Partner,0.07559917259478191
+Men,High Education,30,Single,Retired Partner,0.00029382576503530415
+Men,High Education,30,Working Partner,Single,0.0009336431217886273
+Men,High Education,30,Working Partner,Working Partner,0.9981335065457108
+Men,High Education,30,Working Partner,Retired Partner,0.0009328503325006105
+Men,High Education,30,Retired Partner,Single,0.01817693966882563
+Men,High Education,30,Retired Partner,Working Partner,0.7147916659347818
+Men,High Education,30,Retired Partner,Retired Partner,0.2670313943963926
+Men,High Education,31,Single,Single,0.9277674133639072
+Men,High Education,31,Single,Working Partner,0.07191972939830452
+Men,High Education,31,Single,Retired Partner,0.0003128572377883719
+Men,High Education,31,Working Partner,Single,0.0009851356066643818
+Men,High Education,31,Working Partner,Working Partner,0.9979709459695191
+Men,High Education,31,Working Partner,Retired Partner,0.001043918423816544
+Men,High Education,31,Retired Partner,Single,0.018572494919106394
+Men,High Education,31,Retired Partner,Working Partner,0.692058984862201
+Men,High Education,31,Retired Partner,Retired Partner,0.28936852021869275
+Men,High Education,32,Single,Single,0.9312609035437552
+Men,High Education,32,Single,Working Partner,0.06840603993604312
+Men,High Education,32,Single,Retired Partner,0.0003330565202017524
+Men,High Education,32,Working Partner,Single,0.0010394512907572241
+Men,High Education,32,Working Partner,Working Partner,0.9977923568750257
+Men,High Education,32,Working Partner,Retired Partner,0.0011681918342171464
+Men,High Education,32,Retired Partner,Single,0.01892744518563726
+Men,High Education,32,Retired Partner,Working Partner,0.6683116148690516
+Men,High Education,32,Retired Partner,Retired Partner,0.31276093994531123
+Men,High Education,33,Single,Single,0.9345935993947388
+Men,High Education,33,Single,Working Partner,0.06505190663760269
+Men,High Education,33,Single,Retired Partner,0.00035449396765844176
+Men,High Education,33,Working Partner,Single,0.0010967421380716014
+Men,High Education,33,Working Partner,Working Partner,0.9975960217683169
+Men,High Education,33,Working Partner,Retired Partner,0.0013072360936115027
+Men,High Education,33,Retired Partner,Single,0.01923699520504367
+Men,High Education,33,Retired Partner,Working Partner,0.6436331398344801
+Men,High Education,33,Retired Partner,Retired Partner,0.3371298649604762
+Men,High Education,34,Single,Single,0.9377715154536683
+Men,High Education,34,Single,Working Partner,0.06185124035511775
+Men,High Education,34,Single,Retired Partner,0.00037724419121382445
+Men,High Education,34,Working Partner,Single,0.0011571678030112375
+Men,High Education,34,Working Partner,Working Partner,0.9973800309586454
+Men,High Education,34,Working Partner,Retired Partner,0.001462801238343467
+Men,High Education,34,Retired Partner,Single,0.019496723105378262
+Men,High Education,34,Retired Partner,Working Partner,0.6181258882675001
+Men,High Education,34,Retired Partner,Retired Partner,0.3623773886271216
+Men,High Education,35,Single,Single,0.9408005419341853
+Men,High Education,35,Single,Working Partner,0.05879807175169288
+Men,High Education,35,Single,Retired Partner,0.00040138631412188947
+Men,High Education,35,Working Partner,Single,0.0012208959323411963
+Men,High Education,35,Working Partner,Working Partner,0.9971422607787963
+Men,High Education,35,Working Partner,Retired Partner,0.0016368432888624832
+Men,High Education,35,Retired Partner,Single,0.019702718579709455
+Men,High Education,35,Retired Partner,Working Partner,0.5919099112710045
+Men,High Education,35,Retired Partner,Retired Partner,0.38838737014928615
+Men,High Education,36,Single,Single,0.9436864347670497
+Men,High Education,36,Single,Working Partner,0.05588656098930278
+Men,High Education,36,Single,Retired Partner,0.00042700424364747484
+Men,High Education,36,Working Partner,Single,0.0012881024624523435
+Men,High Education,36,Working Partner,Working Partner,0.9968803493761339
+Men,High Education,36,Working Partner,Retired Partner,0.0018315481614137972
+Men,High Education,36,Retired Partner,Single,0.019851713750505977
+Men,High Education,36,Retired Partner,Working Partner,0.5651212144644367
+Men,High Education,36,Retired Partner,Retired Partner,0.4150270717850572
+Men,High Education,37,Single,Single,0.9464348071993607
+Men,High Education,37,Single,Working Partner,0.05311100584156914
+Men,High Education,37,Single,Retired Partner,0.0004541869590702219
+Men,High Education,37,Working Partner,Single,0.0013589719079767696
+Men,High Education,37,Working Partner,Working Partner,0.9965916698189623
+Men,High Education,37,Working Partner,Retired Partner,0.0020493582730608975
+Men,High Education,37,Retired Partner,Single,0.01994119918724816
+Men,High Education,37,Retired Partner,Working Partner,0.537909267643691
+Men,High Education,37,Retired Partner,Retired Partner,0.4421495331690608
+Men,High Education,38,Single,Single,0.9490511228283709
+Men,High Education,38,Single,Working Partner,0.050465848354791294
+Men,High Education,38,Single,Retired Partner,0.00048302881683769225
+Men,High Education,38,Working Partner,Single,0.0014336976369597144
+Men,High Education,38,Working Partner,Working Partner,0.9962733002402805
+Men,High Education,38,Working Partner,Retired Partner,0.0022930021227597734
+Men,High Education,38,Retired Partner,Single,0.019969517862225422
+Men,High Education,38,Retired Partner,Working Partner,0.5104338688661656
+Men,High Education,38,Retired Partner,Retired Partner,0.469596613271609
+Men,High Education,39,Single,Single,0.9515406899486339
+Men,High Education,39,Single,Working Partner,0.04794568017748657
+Men,High Education,39,Single,Retired Partner,0.0005136298738795886
+Men,High Education,39,Working Partner,Single,0.001512482126802939
+Men,High Education,39,Working Partner,Working Partner,0.9959219907176055
+Men,High Education,39,Working Partner,Retired Partner,0.0025655271555916543
+Men,High Education,39,Retired Partner,Single,0.019935930834081163
+Men,High Education,39,Retired Partner,Working Partner,0.48286149073232315
+Men,High Education,39,Retired Partner,Retired Partner,0.4972025784335958
+Men,High Education,40,Single,Single,0.9539086570951449
+Men,High Education,40,Single,Working Partner,0.045545246674702736
+Men,High Education,40,Single,Retired Partner,0.0005460962301523776
+Men,High Education,40,Working Partner,Single,0.0015955371940334104
+Men,High Education,40,Working Partner,Working Partner,0.9955341265636498
+Men,High Education,40,Working Partner,Retired Partner,0.002870336242316688
+Men,High Education,40,Retired Partner,Single,0.019840650086482566
+Men,High Education,40,Retired Partner,Working Partner,0.4553612799698195
+Men,High Education,40,Retired Partner,Retired Partner,0.5247980699436979
+Men,High Education,41,Single,Single,0.956160009669765
+Men,High Education,41,Single,Working Partner,0.04325944993869091
+Men,High Education,41,Single,Retired Partner,0.0005805403915439422
+Men,High Education,41,Working Partner,Single,0.0016830841895938283
+Men,High Education,41,Working Partner,Working Partner,0.9951056876787178
+Men,High Education,41,Working Partner,Retired Partner,0.0032112281316883724
+Men,High Education,41,Retired Partner,Single,0.01968483608034439
+Men,High Education,41,Retired Partner,Working Partner,0.4281009116211633
+Men,High Education,41,Retired Partner,Retired Partner,0.5522142522984923
+Men,High Education,42,Single,Single,0.9582995675433297
+Men,High Education,42,Single,Working Partner,0.041083350802339165
+Men,High Education,42,Single,Retired Partner,0.0006170816543313257
+Men,High Education,42,Working Partner,Single,0.0017753541497691756
+Men,High Education,42,Working Partner,Working Partner,0.9946322035923827
+Men,High Education,42,Working Partner,Retired Partner,0.0035924422578482414
+Men,High Education,42,Retired Partner,Single,0.019470559986593253
+Men,High Education,42,Retired Partner,Working Partner,0.4012425122553625
+Men,High Education,42,Retired Partner,Retired Partner,0.5792869277580444
+Men,High Education,43,Single,Single,0.960331983531333
+Men,High Education,43,Single,Working Partner,0.0390121699562156
+Men,High Education,43,Single,Retired Partner,0.0006558465124513073
+Men,High Education,43,Working Partner,Single,0.0018725878910241722
+Men,High Education,43,Working Partner,Working Partner,0.9941087038002112
+Men,High Education,43,Working Partner,Retired Partner,0.00401870830876459
+Men,High Education,43,Retired Partner,Single,0.019200732992016443
+Men,High Education,43,Retired Partner,Working Partner,0.37493886090045475
+Men,High Education,43,Retired Partner,Retired Partner,0.6058604061075288
+Men,High Education,44,Single,Single,0.9622617426468065
+Men,High Education,44,Single,Working Partner,0.03704128826427988
+Men,High Education,44,Single,Retired Partner,0.0006969690889135862
+Men,High Education,44,Working Partner,Single,0.0019750360348955464
+Men,High Education,44,Working Partner,Working Partner,0.993529662982127
+Men,High Education,44,Working Partner,Retired Partner,0.00449530098297747
+Men,High Education,44,Retired Partner,Single,0.018879007248682394
+Men,High Education,44,Retired Partner,Working Partner,0.3493300525584115
+Men,High Education,44,Retired Partner,Retired Partner,0.6317909401929062
+Men,High Education,45,Single,Single,0.9640931620398352
+Men,High Education,45,Single,Working Partner,0.035166246367404966
+Men,High Education,45,Single,Retired Partner,0.000740591592759866
+Men,High Education,45,Working Partner,Single,0.0020829589466227374
+Men,High Education,45,Working Partner,Working Partner,0.9928889406739639
+Men,High Education,45,Working Partner,Retired Partner,0.005028100379413262
+Men,High Education,45,Retired Partner,Single,0.01850965474079355
+Men,High Education,45,Retired Partner,Working Partner,0.3245407703146187
+Men,High Education,45,Retired Partner,Retired Partner,0.6569495749445877
+Men,High Education,46,Single,Single,0.9658303915390494
+Men,High Education,46,Single,Working Partner,0.03338274365790143
+Men,High Education,46,Single,Retired Partner,0.00078686480304927
+Men,High Education,46,Working Partner,Single,0.0021966265683712686
+Men,High Education,46,Working Partner,Working Partner,0.9921797149547641
+Men,High Education,46,Working Partner,Retired Partner,0.005623658476864599
+Men,High Education,46,Retired Partner,Single,0.018097431416265988
+Men,High Education,46,Retired Partner,Working Partner,0.30067826309223195
+Men,High Education,46,Retired Partner,Retired Partner,0.6812243054915021
+Men,High Education,47,Single,Single,0.9674774147162412
+Men,High Education,47,Single,Working Partner,0.031686636702327596
+Men,High Education,47,Single,Retired Partner,0.0008359485814313709
+Men,High Education,47,Working Partner,Single,0.0023163181246637155
+Men,High Education,47,Working Partner,Working Partner,0.9913944097118275
+Men,High Education,47,Working Partner,Retired Partner,0.0062892721635088465
+Men,High Education,47,Retired Partner,Single,0.017647434309290243
+Men,High Education,47,Retired Partner,Working Partner,0.2778310728727209
+Men,High Education,47,Retired Partner,Retired Partner,0.7045214928179889
+Men,High Education,48,Single,Single,0.9690380504009787
+Men,High Education,48,Single,Working Partner,0.03007393718406851
+Men,High Education,48,Single,Retired Partner,0.0008880124149528092
+Men,High Education,48,Working Partner,Single,0.00244232167394302
+Men,High Education,48,Working Partner,Working Partner,0.9905246150565088
+Men,High Education,48,Working Partner,Retired Partner,0.007033063269548158
+Men,High Education,48,Retired Partner,Single,0.0171649590925823
+Men,High Education,48,Retired Partner,Working Partner,0.2560685035410725
+Men,High Education,48,Retired Partner,Retired Partner,0.7267665373663452
+Men,High Education,49,Single,Single,0.9705159545776443
+Men,High Education,49,Single,Working Partner,0.028540809431523522
+Men,High Education,49,Single,Retired Partner,0.0009432359908321169
+Men,High Education,49,Working Partner,Single,0.0025749334760135
+Men,High Education,49,Working Partner,Working Partner,0.9895610004900565
+Men,High Education,49,Working Partner,Retired Partner,0.007864066033930014
+Men,High Education,49,Retired Partner,Single,0.016655364649944444
+Men,High Education,49,Retired Partner,Working Partner,0.23544077838659874
+Men,High Education,49,Retired Partner,Retired Partner,0.7479038569634568
+Men,High Education,50,Single,Single,0.971914622602673
+Men,High Education,50,Single,Working Partner,0.02708356759229691
+Men,High Education,50,Single,Retired Partner,0.0010018098050300294
+Men,High Education,50,Working Partner,Single,0.0027144571404032233
+Men,High Education,50,Working Partner,Working Partner,0.9884932204651129
+Men,High Education,50,Working Partner,Retired Partner,0.008792322394483836
+Men,High Education,50,Retired Partner,Single,0.01612395000934376
+Men,High Education,50,Retired Partner,Working Partner,0.21597979821100521
+Men,High Education,50,Retired Partner,Retired Partner,0.767896251779651
+Men,High Education,51,Single,Single,0.9732373916848915
+Men,High Education,51,Single,Working Partner,0.025698672508569123
+Men,High Education,51,Single,Retired Partner,0.0010639358065393548
+Men,High Education,51,Working Partner,Single,0.0028612025154440366
+Men,High Education,51,Working Partner,Working Partner,0.9873098120605943
+Men,High Education,51,Working Partner,Retired Partner,0.009828985423961569
+Men,High Education,51,Retired Partner,Single,0.015575847504167807
+Men,High Education,51,Retired Partner,Working Partner,0.19770038876151344
+Men,High Education,51,Retired Partner,Retired Partner,0.7867237637343187
+Men,High Education,52,Single,Single,0.9744874435767198
+Men,High Education,52,Single,Working Partner,0.02438272834386069
+Men,High Education,52,Single,Retired Partner,0.0011298280794194671
+Men,High Education,52,Working Partner,Single,0.0030154842720644267
+Men,High Education,52,Working Partner,Working Partner,0.985998084592495
+Men,High Education,52,Working Partner,Retired Partner,0.01098643113544043
+Men,High Education,52,Retired Partner,Single,0.015015934509422213
+Men,High Education,52,Retired Partner,Working Partner,0.18060191496224567
+Men,High Education,52,Retired Partner,Retired Partner,0.8043821505283322
+Men,High Education,53,Single,Single,0.9756678074285946
+Men,High Education,53,Single,Working Partner,0.02313247900669961
+Men,High Education,53,Single,Retired Partner,0.001199713564705664
+Men,High Education,53,Working Partner,Single,0.003177620129950712
+Men,High Education,53,Working Partner,Working Partner,0.9845440011290834
+Men,High Education,53,Working Partner,Retired Partner,0.012278378740965884
+Men,High Education,53,Retired Partner,Single,0.014448764676124382
+Men,High Education,53,Retired Partner,Working Partner,0.1646701389598785
+Men,High Education,53,Retired Partner,Retired Partner,0.8208810963639972
+Men,High Education,54,Single,Single,0.9767813627632885
+Men,High Education,54,Single,Working Partner,0.02194480441227826
+Men,High Education,54,Single,Retired Partner,0.0012738328244331317
+Men,High Education,54,Working Partner,Single,0.0033479286669017413
+Men,High Education,54,Working Partner,Working Partner,0.9829320520758669
+Men,High Education,54,Working Partner,Retired Partner,0.013720019257231373
+Men,High Education,54,Retired Partner,Single,0.013878518366050438
+Men,High Education,54,Retired Partner,Working Partner,0.14987920722569448
+Men,High Education,54,Retired Partner,Retired Partner,0.836242274408255
+Men,High Education,55,Single,Single,0.977830842530833
+Men,High Education,55,Single,Working Partner,0.02081671661903821
+Men,High Education,55,Single,Retired Partner,0.0013524408501289894
+Men,High Education,55,Working Partner,Single,0.003526726644975787
+Men,High Education,55,Working Partner,Working Partner,0.9811451212551957
+Men,High Education,55,Working Partner,Retired Partner,0.015328152099828405
+Men,High Education,55,Retired Partner,Single,0.013308971030998875
+Men,High Education,55,Retired Partner,Working Partner,0.1361936663298326
+Men,High Education,55,Retired Partner,Retired Partner,0.8504973626391685
+Men,High Education,56,Single,Single,0.9788188362085035
+Men,High Education,56,Single,Working Partner,0.01974535587325278
+Men,High Education,56,Single,Retired Partner,0.0014358079182438452
+Men,High Education,56,Working Partner,Single,0.0037143257795618167
+Men,High Education,56,Working Partner,Working Partner,0.979164345240788
+Men,High Education,56,Working Partner,Retired Partner,0.01712132897965019
+Men,High Education,56,Retired Partner,Single,0.012743477605792622
+Men,High Education,56,Retired Partner,Working Partner,0.12357042496924676
+Men,High Education,56,Retired Partner,Retired Partner,0.8636860974249606
+Men,High Education,57,Single,Single,0.9797477929138003
+Men,High Education,57,Single,Working Partner,0.018727986591083247
+Men,High Education,57,Single,Retired Partner,0.0015242204951164515
+Men,High Education,57,Working Partner,Single,0.003911028870039661
+Men,High Education,57,Working Partner,Working Partner,0.976968967133903
+Men,High Education,57,Working Partner,Retired Partner,0.019120003996057244
+Men,High Education,57,Retired Partner,Single,0.012184970579814361
+Men,High Education,57,Retired Partner,Working Partner,0.11196059911694875
+Men,High Education,57,Retired Partner,Retired Partner,0.875854430303237
+Men,High Education,58,Single,Single,0.9806200245015505
+Men,High Education,58,Single,Working Partner,0.01776199330425831
+Men,High Education,58,Single,Retired Partner,0.0016179821941912375
+Men,High Education,58,Working Partner,Single,0.004117125203570809
+Men,High Education,58,Working Partner,Working Partner,0.9745361865020427
+Men,High Education,58,Working Partner,Retired Partner,0.02134668829438655
+Men,High Education,58,Retired Partner,Single,0.011635969243185605
+Men,High Education,58,Retired Partner,Working Partner,0.10131119595822984
+Men,High Education,58,Retired Partner,Retired Partner,0.8870528347985847
+Men,High Education,59,Single,Single,0.9814377086192014
+Men,High Education,59,Single,Working Partner,0.016844876592459944
+Men,High Education,59,Single,Retired Partner,0.0017174147883386095
+Men,High Education,59,Working Partner,Single,0.004332885137264793
+Men,High Education,59,Working Partner,Working Partner,0.9718410078607957
+Men,High Education,59,Working Partner,Retired Partner,0.023826107001939455
+Men,High Education,59,Retired Partner,Single,0.011098597623845506
+Men,High Education,59,Retired Partner,Working Partner,0.09156660931140968
+Men,High Education,59,Retired Partner,Retired Partner,0.8973347930647448
+Men,High Education,60,Single,Single,0.9822028916970562
+Men,High Education,60,Single,Working Partner,0.015974249022682047
+Men,High Education,60,Single,Retired Partner,0.0018228592802617169
+Men,High Education,60,Working Partner,Single,0.004558553759146387
+Men,High Education,60,Working Partner,Working Partner,0.9688560908831728
+Men,High Education,60,Working Partner,Retired Partner,0.026585355357680737
+Men,High Education,60,Retired Partner,Single,0.010574608790218093
+Men,High Education,60,Retired Partner,Working Partner,0.08266991372785285
+Men,High Education,60,Retired Partner,Retired Partner,0.9067554774819291
+Men,High Education,61,Single,Single,0.9829174918526411
+Men,High Education,61,Single,Working Partner,0.01514783111324826
+Men,High Education,61,Single,Retired Partner,0.0019346770341105858
+Men,High Education,61,Working Partner,Single,0.004794343525862139
+Men,High Education,61,Working Partner,Working Partner,0.9655516064862286
+Men,High Education,61,Working Partner,Retired Partner,0.02965404998790923
+Men,High Education,61,Retired Partner,Single,0.010065413442964207
+Men,High Education,61,Retired Partner,Working Partner,0.07456395609480579
+Men,High Education,61,Retired Partner,Retired Partner,0.9153706304622301
+Men,High Education,62,Single,Single,0.9835833016906131
+Men,High Education,62,Single,Working Partner,0.014363447337822088
+Men,High Education,62,Single,Retired Partner,0.0020532509715648077
+Men,High Education,62,Working Partner,Single,0.005040425776011384
+Men,High Education,62,Working Partner,Working Partner,0.961895104087384
+Men,High Education,62,Working Partner,Retired Partner,0.03306447013660464
+Men,High Education,62,Retired Partner,Single,0.009572111017125613
+Men,High Education,62,Retired Partner,Working Partner,0.06719225232452594
+Men,High Education,62,Retired Partner,Retired Partner,0.9232356366583485
+Men,High Education,63,Single,Single,0.9842019909816099
+Men,High Education,63,Single,Working Partner,0.013619022182601413
+Men,High Education,63,Single,Retired Partner,0.002178986835788856
+Men,High Education,63,Working Partner,Single,0.00529692102374688
+Men,High Education,63,Working Partner,Working Partner,0.9578513966532353
+Men,High Education,63,Working Partner,Retired Partner,0.036851682323017845
+Men,High Education,63,Retired Partner,Single,0.009095521829832025
+Men,High Education,63,Retired Partner,Working Partner,0.06049970283167598
+Men,High Education,63,Retired Partner,Retired Partner,0.930404775338492
+Men,High Education,64,Single,Single,0.9847751092052426
+Men,High Education,64,Single,Working Partner,0.012912576267948278
+Men,High Education,64,Single,Retired Partner,0.0023123145268090866
+Men,High Education,64,Working Partner,Single,0.00556388794955363
+Men,High Education,64,Working Partner,Working Partner,0.9533824716842259
+Men,High Education,64,Working Partner,Retired Partner,0.04105364036622059
+Men,High Education,64,Retired Partner,Single,0.008636219114445884
+Men,High Education,64,Retired Partner,Working Partner,0.05443314433921268
+Men,High Education,64,Retired Partner,Retired Partner,0.9369306365463413
+Men,High Education,65,Single,Single,0.9853040879440411
+Men,High Education,65,Single,Working Partner,0.012242222543951022
+Men,High Education,65,Single,Retired Partner,0.0024536895120078786
+Men,High Education,65,Working Partner,Single,0.005841311025894231
+Men,High Education,65,Working Partner,Working Partner,0.9484474379791513
+Men,High Education,65,Working Partner,Retired Partner,0.04571125099495443
+Men,High Education,65,Retired Partner,Single,0.008194560063388681
+Men,High Education,65,Retired Partner,Working Partner,0.04894175753012838
+Men,High Education,65,Retired Partner,Retired Partner,0.9428636824064829
+Men,High Education,66,Single,Single,0.9857902431165875
+Men,High Education,66,Single,Working Partner,0.011606162567835117
+Men,High Education,66,Single,Retired Partner,0.0026035943155773953
+Men,High Education,66,Working Partner,Single,0.006129086747030791
+Men,High Education,66,Working Partner,Working Partner,0.9430025198755202
+Men,High Education,66,Working Partner,Retired Partner,0.05086839337744898
+Men,High Education,66,Retired Partner,Single,0.00777071524951311
+Men,High Education,66,Retired Partner,Working Partner,0.04397735060032965
+Men,High Education,66,Retired Partner,Retired Partner,0.9482519341501573
+Men,High Education,67,Single,Single,0.9862347770393571
+Men,High Education,67,Single,Working Partner,0.011002682869720679
+Men,High Education,67,Single,Retired Partner,0.0027625400909222744
+Men,High Education,67,Working Partner,Single,0.006427008477379632
+Men,High Education,67,Working Partner,Working Partner,0.9370011126114106
+Men,High Education,67,Working Partner,Retired Partner,0.056571878911209725
+Men,High Education,67,Retired Partner,Single,0.007364696005622098
+Men,High Education,67,Retired Partner,Working Partner,0.03949453825556752
+Men,High Education,67,Retired Partner,Retired Partner,0.9531407657388103
+Men,High Education,68,Single,Single,0.9866387803078995
+Men,High Education,68,Single,Working Partner,0.010430151411954634
+Men,High Education,68,Single,Retired Partner,0.002931068280145853
+Men,High Education,68,Working Partner,Single,0.0067347499939529945
+Men,High Education,68,Working Partner,Working Partner,0.9303939144143409
+Men,High Education,68,Working Partner,Retired Partner,0.06287133559170609
+Men,High Education,68,Retired Partner,Single,0.006976379513282708
+Men,High Education,68,Retired Partner,Working Partner,0.03545083446860889
+Men,High Education,68,Retired Partner,Retired Partner,0.9575727860181084
+Men,High Education,69,Single,Single,0.9870032334889893
+Men,High Education,69,Single,Working Partner,0.009887014146113433
+Men,High Education,69,Single,Retired Partner,0.003109752364897368
+Men,High Education,69,Working Partner,Single,0.007051847878465229
+Men,High Education,69,Working Partner,Working Partner,0.9231291527631179
+Men,High Education,69,Working Partner,Retired Partner,0.06981899935841689
+Men,High Education,69,Retired Partner,Single,0.006605531487683037
+Men,High Education,69,Retired Partner,Working Partner,0.03180667564683322
+Men,High Education,69,Retired Partner,Retired Partner,0.9615877928654838
+Men,High Education,70,Single,Single,0.9873290086162374
+Men,High Education,70,Single,Working Partner,0.009371791670766332
+Men,High Education,70,Single,Retired Partner,0.0032991997129961158
+Men,High Education,70,Working Partner,Single,0.007377683015843442
+Men,High Education,70,Working Partner,Working Partner,0.9151529238088109
+Men,High Education,70,Working Partner,Retired Partner,0.07746939317534571
+Men,High Education,70,Retired Partner,Single,0.0062518264486915755
+Men,High Education,70,Retired Partner,Working Partner,0.028525388969681792
+Men,High Education,70,Retired Partner,Retired Partner,0.9652227845816266
+Men,High Education,71,Single,Single,0.9876168704824198
+Men,High Education,71,Single,Working Partner,0.00888307599219883
+Men,High Education,71,Single,Retired Partner,0.0035000535253813074
+Men,High Education,71,Working Partner,Single,0.0077114615797022985
+Men,High Education,71,Working Partner,Working Partner,0.9064096649413522
+Men,High Education,71,Working Partner,Retired Partner,0.08587887347894546
+Men,High Education,71,Retired Partner,Single,0.00591486564398157
+Men,High Education,71,Retired Partner,Working Partner,0.02557311869917616
+Men,High Education,71,Retired Partner,Retired Partner,0.9685120156568423
+Men,High Education,72,Single,Single,0.9878674777224277
+Men,High Education,72,Single,Working Partner,0.008419527389511157
+Men,High Education,72,Single,Retired Partner,0.0037129948880612242
+Men,High Education,72,Working Partner,Single,0.008052196031953372
+Men,High Education,72,Working Partner,Working Partner,0.8968427806464276
+Men,High Education,72,Working Partner,Retired Partner,0.095105023321619
+Men,High Education,72,Retired Partner,Single,0.005594192742723641
+Men,High Education,72,Retired Partner,Working Partner,0.022918721357068624
+Men,High Education,72,Retired Partner,Retired Partner,0.9714870859002077
+Men,High Education,73,Single,Single,0.9880813836813317
+Men,High Education,73,Single,Working Partner,0.007979871384818262
+Men,High Education,73,Single,Retired Partner,0.00393874493385002
+Men,High Education,73,Working Partner,Single,0.008398686831137451
+Men,High Education,73,Working Partner,Working Partner,0.8863954407500994
+Men,High Education,73,Working Partner,Retired Partner,0.10520587241876324
+Men,High Education,73,Retired Partner,Single,0.005289307452370806
+Men,High Education,73,Retired Partner,Working Partner,0.020533638872557602
+Men,High Education,73,Retired Partner,Retired Partner,0.9741770536750717
+Men,High Education,74,Single,Single,0.988259037062541
+Men,High Education,74,Single,Working Partner,0.007562895818676513
+Men,High Education,74,Single,Retired Partner,0.004178067118782465
+Men,High Education,74,Working Partner,Single,0.008749505727331885
+Men,High Education,74,Working Partner,Working Partner,0.8750115674837243
+Men,High Education,74,Working Partner,Retired Partner,0.11623892678894372
+Men,High Education,74,Retired Partner,Single,0.004999677230482081
+Men,High Education,74,Retired Partner,Working Partner,0.01839175717832872
+Men,High Education,74,Retired Partner,Retired Partner,0.9766085655911891
+Men,High Education,75,Single,Single,0.9884007823514768
+Men,High Education,75,Single,Working Partner,0.007167448030340149
+Men,High Education,75,Single,Retired Partner,0.00443176961818311
+Men,High Education,75,Working Partner,Single,0.009102981711742446
+Men,High Education,75,Working Partner,Working Partner,0.8626370230831986
+Men,High Education,75,Working Partner,Retired Partner,0.12825999520505907
+Men,High Education,75,Retired Partner,Single,0.004724747271848137
+Men,High Education,75,Retired Partner,Working Partner,0.016469256290977487
+Men,High Education,75,Retired Partner,Retired Partner,0.9788059964371744
+Men,High Education,76,Single,Single,0.9885068600105662
+Men,High Education,76,Single,Working Partner,0.0067924321420002745
+Men,High Education,76,Single,Retired Partner,0.004700707847433395
+Men,High Education,76,Working Partner,Single,0.00945719087275553
+Men,High Education,76,Working Partner,Working Partner,0.84922100244788
+Men,High Education,76,Working Partner,Retired Partner,0.14132180667936445
+Men,High Education,76,Retired Partner,Single,0.004463948951330498
+Men,High Education,76,Retired Partner,Working Partner,0.01474445665963654
+Men,High Education,76,Retired Partner,Retired Partner,0.980791594389033
+Men,High Education,77,Single,Single,0.9885774064417031
+Men,High Education,77,Single,Working Partner,0.006436806445772793
+Men,High Education,77,Single,Retired Partner,0.004985787112524224
+Men,High Education,77,Working Partner,Single,0.009809951568407936
+Men,High Education,77,Working Partner,Working Partner,0.8347176253925624
+Men,High Education,77,Working Partner,Retired Partner,0.15547242303902967
+Men,High Education,77,Retired Partner,Single,0.004216706897202504
+Men,High Education,77,Retired Partner,Working Partner,0.013197665498059633
+Men,High Education,77,Retired Partner,Retired Partner,0.9825856276047379
+Men,High Education,78,Single,Single,0.9886124537126284
+Men,High Education,78,Single,Working Partner,0.006099580891873612
+Men,High Education,78,Single,Retired Partner,0.00528796539549803
+Men,High Education,78,Working Partner,Single,0.01015882643367685
+Men,High Education,78,Working Partner,Working Partner,0.8190877100659099
+Men,High Education,78,Working Partner,Retired Partner,0.17075346350041326
+Men,High Education,78,Retired Partner,Single,0.003982444860293238
+Men,High Education,78,Retired Partner,Working Partner,0.011811025917898066
+Men,High Education,78,Retired Partner,Retired Partner,0.9842065292218086
+Men,High Education,79,Single,Single,0.988611929043988
+Men,High Education,79,Single,Working Partner,0.005779814676143214
+Men,High Education,79,Single,Retired Partner,0.005608256279868704
+Men,High Education,79,Working Partner,Single,0.010501132770895693
+Men,High Education,79,Working Partner,Working Partner,0.8023006932873008
+Men,High Education,79,Working Partner,Retired Partner,0.18719817394180352
+Men,High Education,79,Retired Partner,Single,0.0037605905323647867
+Men,High Education,79,Retired Partner,Working Partner,0.010568370938034893
+Men,High Education,79,Retired Partner,Retired Partner,0.9856710385296003
+Men,High Education,80,Single,Single,0.9885756540540934
+Men,High Education,80,Single,Working Partner,0.005476613924852777
+Men,High Education,80,Single,Retired Partner,0.005947732021053913
+Men,High Education,80,Working Partner,Single,0.010833962791572088
+Men,High Education,80,Working Partner,Working Partner,0.784336645358583
+Men,High Education,80,Working Partner,Retired Partner,0.20482939184984483
+Men,High Education,80,Retired Partner,Single,0.0035505794540180327
+Men,High Education,80,Retired Partner,Working Partner,0.009455083838565038
+Men,High Education,80,Retired Partner,Retired Partner,0.986994336707417
+Men,High Education,81,Single,Single,0.988503343758708
+Men,High Education,81,Single,Working Partner,0.005189129474535523
+Men,High Education,81,Single,Retired Partner,0.006307526766756655
+Men,High Education,81,Working Partner,Single,0.011154214957349444
+Men,High Education,81,Working Partner,Working Partner,0.7651883073059507
+Men,High Education,81,Working Partner,Retired Partner,0.2236574777366998
+Men,High Education,81,Retired Partner,Single,0.0033518581388445375
+Men,High Education,81,Retired Partner,Working Partner,0.008457965840100036
+Men,High Education,81,Retired Partner,Retired Partner,0.9881901760210553
+Men,High Education,82,Single,Single,0.9883946053234808
+Men,High Education,82,Single,Working Partner,0.004916554744435447
+Men,High Education,82,Single,Retired Partner,0.006688839932083737
+Men,High Education,82,Working Partner,Single,0.011458637281942805
+Men,High Education,82,Working Partner,Working Partner,0.7448630590116413
+Men,High Education,82,Working Partner,Retired Partner,0.24367830370641594
+Men,High Education,82,Retired Partner,Single,0.0031638865271072306
+Men,High Education,82,Retired Partner,Working Partner,0.007565111702102046
+Men,High Education,82,Retired Partner,Retired Partner,0.9892710017707907
+Men,High Education,83,Single,Single,0.9882489365669727
+Men,High Education,83,Single,Working Partner,0.004658123699046292
+Men,High Education,83,Single,Retired Partner,0.007092939733981071
+Men,High Education,83,Working Partner,Single,0.011743882891548452
+Men,High Education,83,Working Partner,Working Partner,0.723384709355121
+Men,High Education,83,Working Partner,Retired Partner,0.26487140775333057
+Men,High Education,83,Retired Partner,Single,0.0029861398693376315
+Men,High Education,83,Retired Partner,Working Partner,0.006765793531835812
+Men,High Education,83,Retired Partner,Retired Partner,0.9902480665988266
+Men,High Education,84,Single,Single,0.9880657242125866
+Men,High Education,84,Single,Working Partner,0.004413108898123423
+Men,High Education,84,Single,Retired Partner,0.007521166889289903
+Men,High Education,84,Working Partner,Single,0.012006577403901285
+Men,High Education,84,Working Partner,Working Partner,0.7007949867805422
+Men,High Education,84,Working Partner,Retired Partner,0.2871984358155565
+Men,High Education,84,Retired Partner,Single,0.002818110128137594
+Men,High Education,84,Retired Partner,Working Partner,0.006050352863854898
+Men,High Education,84,Retired Partner,Retired Partner,0.9911315370080075
+Men,High Education,85,Single,Single,0.9878442418881385
+Men,High Education,85,Single,Working Partner,0.004180819631486272
+Men,High Education,85,Single,Retired Partner,0.007974938480375305
+Men,High Education,85,Working Partner,Single,0.012243396805718577
+Men,High Education,85,Working Partner,Working Partner,0.6771546033244085
+Men,High Education,85,Working Partner,Retired Partner,0.31060199986987286
+Men,High Education,85,Retired Partner,Single,0.0026593069753154566
+Men,High Education,85,Retired Partner,Working Partner,0.005410100896049116
+Men,High Education,85,Retired Partner,Retired Partner,0.9919305921286354
+Men,High Education,86,Single,Single,0.9875836478722767
+Men,High Education,86,Single,Working Partner,0.003960600135886265
+Men,High Education,86,Single,Retired Partner,0.008455751991837068
+Men,High Education,86,Working Partner,Single,0.012451153542767306
+Men,High Education,86,Working Partner,Working Partner,0.6525437695997199
+Men,High Education,86,Working Partner,Retired Partner,0.3350050768575128
+Men,High Education,86,Retired Partner,Single,0.0025092584513385424
+Men,High Education,86,Retired Partner,Working Partner,0.004837226641252635
+Men,High Education,86,Retired Partner,Retired Partner,0.9926535149074087
+Men,High Education,87,Single,Single,0.9872829825875361
+Men,High Education,87,Single,Working Partner,0.0037518278911916744
+Men,High Education,87,Single,Retired Partner,0.00896518952127235
+Men,High Education,87,Working Partner,Single,0.012626887572097822
+Men,High Education,87,Working Partner,Working Partner,0.6270620544480306
+Men,High Education,87,Working Partner,Retired Partner,0.3603110579798716
+Men,High Education,87,Retired Partner,Single,0.0023675113449580917
+Men,High Education,87,Retired Partner,Working Partner,0.00432471266395836
+Men,High Education,87,Retired Partner,Retired Partner,0.9933077759910836
+Men,High Education,88,Single,Single,0.98694116584046
+Men,High Education,88,Single,Working Partner,0.0035539119931344665
+Men,High Education,88,Single,Retired Partner,0.009504922166405387
+Men,High Education,88,Working Partner,Single,0.01276795826996934
+Men,High Education,88,Working Partner,Working Partner,0.6008275117339862
+Men,High Education,88,Working Partner,Retired Partner,0.38640452999604435
+Men,High Education,88,Retired Partner,Single,0.002233631342732438
+Men,High Education,88,Retired Partner,Working Partner,0.0038662580120045914
+Men,High Education,88,Retired Partner,Retired Partner,0.9939001106452631
+Men,High Education,89,Single,Single,0.9865569938100096
+Men,High Education,89,Single,Working Partner,0.0033662915998720925
+Men,High Education,89,Single,Retired Partner,0.010076714590118392
+Men,High Education,89,Working Partner,Single,0.01287213245960924
+Men,High Education,89,Working Partner,Working Partner,0.5739750373208781
+Men,High Education,89,Working Partner,Retired Partner,0.4131528302195128
+Men,High Education,89,Retired Partner,Single,0.0021072029909880692
+Men,High Education,89,Retired Partner,Working Partner,0.0034562079167174834
+Men,High Education,89,Retired Partner,Retired Partner,0.9944365890922945
+Men,High Education,90,Single,Single,0.9861291357863687
+Men,High Education,90,Single,Working Partner,0.003188434449637792
+Men,High Education,90,Single,Retired Partner,0.010682429763993374
+Men,High Education,90,Working Partner,Single,0.012937663531057549
+Men,High Education,90,Working Partner,Working Partner,0.5466539690956369
+Men,High Education,90,Working Partner,Retired Partner,0.4404083673733056
+Men,High Education,90,Retired Partner,Single,0.0019878295064491808
+Men,High Education,90,Retired Partner,Working Partner,0.0030894898165838725
+Men,High Education,90,Retired Partner,Retired Partner,0.994922680676967
+Men,High Education,91,Single,Single,0.9856561306633258
+Men,High Education,91,Single,Working Partner,0.0030198354467842036
+Men,High Education,91,Single,Retired Partner,0.011324033889890098
+Men,High Education,91,Working Partner,Single,0.01296335675473644
+Men,High Education,91,Working Partner,Working Partner,0.5190249977315387
+Men,High Education,91,Working Partner,Retired Partner,0.46801164551372487
+Men,High Education,91,Retired Partner,Single,0.0018751324662599272
+Men,High Education,91,Retired Partner,Working Partner,0.0027615552547590196
+Men,High Education,91,Retired Partner,Retired Partner,0.995363312278981
+Men,High Education,92,Single,Single,0.9851363831886129
+Men,High Education,92,Single,Working Partner,0.0028600153135652923
+Men,High Education,92,Single,Retired Partner,0.012003601497821807
+Men,High Education,92,Working Partner,Single,0.012948616478897546
+Men,High Education,92,Working Partner,Working Partner,0.491256510069968
+Men,High Education,92,Working Partner,Retired Partner,0.4957948734511343
+Men,High Education,92,Retired Partner,Single,0.001768751403342339
+Men,High Education,92,Retired Partner,Working Partner,0.0024683272060868023
+Men,High Education,92,Retired Partner,Retired Partner,0.9957629213905709
+Men,High Education,93,Single,Single,0.9845681599780225
+Men,High Education,93,Single,Working Partner,0.00270851930504945
+Men,High Education,93,Single,Retired Partner,0.012723320716927885
+Men,High Education,93,Working Partner,Single,0.012893471927466699
+Men,High Education,93,Working Partner,Working Partner,0.4635205343471645
+Men,High Education,93,Working Partner,Retired Partner,0.5235859937253688
+Men,High Education,93,Retired Partner,Single,0.0016683433289003033
+Men,High Education,93,Retired Partner,Working Partner,0.002206152402031918
+Men,High Education,93,Retired Partner,Retired Partner,0.9961255042690678
+Men,High Education,94,Single,Single,0.9839495853007304
+Men,High Education,94,Single,Working Partner,0.0025649159846107745
+Men,High Education,94,Single,Retired Partner,0.013485498714658761
+Men,High Education,94,Working Partner,Single,0.012798579695144148
+Men,High Education,94,Working Partner,Working Partner,0.4359884911224384
+Men,High Education,94,Working Partner,Retired Partner,0.5512129291824174
+Men,High Education,94,Retired Partner,Single,0.0015735822003229189
+Men,High Education,94,Retired Partner,Working Partner,0.0019717582397838964
+Men,High Education,94,Retired Partner,Retired Partner,0.9964546595598933
+Men,High Education,95,Single,Single,0.9832786366451345
+Men,High Education,95,Single,Working Partner,0.0024287960575047046
+Men,High Education,95,Single,Retired Partner,0.01429256729736084
+Men,High Education,95,Working Partner,Single,0.012665202632767868
+Men,High Education,95,Working Partner,Working Partner,0.40882697117063055
+Men,High Education,95,Working Partner,Retired Partner,0.5785078261966016
+Men,High Education,95,Retired Partner,Single,0.0014841583496901989
+Men,High Education,95,Retired Partner,Working Partner,0.0017622138830585624
+Men,High Education,95,Retired Partner,Retired Partner,0.9967536277672513
+Men,High Education,96,Single,Single,0.9825531400766511
+Men,High Education,96,Single,Working Partner,0.0022997712600975715
+Men,High Education,96,Single,Retired Partner,0.015147088663251446
+Men,High Education,96,Working Partner,Single,0.01249516645493509
+Men,High Education,96,Working Partner,Working Partner,0.38219375944414147
+Men,High Education,96,Working Partner,Retired Partner,0.6053110741009234
+Men,High Education,96,Retired Partner,Single,0.001399777885477687
+Men,High Education,96,Retired Partner,Working Partner,0.0015748951854533035
+Men,High Education,96,Retired Partner,Retired Partner,0.997025326929069
+Men,High Education,97,Single,Single,0.9817707654013329
+Men,High Education,97,Single,Working Partner,0.002177473302386148
+Men,High Education,97,Single,Retired Partner,0.016051761296280925
+Men,High Education,97,Working Partner,Single,0.012290796902932829
+Men,High Education,97,Working Partner,Working Partner,0.35623430275785045
+Men,High Education,97,Working Partner,Retired Partner,0.6314749003392167
+Men,High Education,97,Retired Partner,Single,0.0013201620778365542
+Men,High Education,97,Retired Partner,Working Partner,0.0014074530915822927
+Men,High Education,97,Retired Partner,Retired Partner,0.9972723848305811
+Men,High Education,98,Single,Single,0.9809290211519257
+Men,High Education,98,Single,Working Partner,0.0020615528615122686
+Men,High Education,98,Single,Retired Partner,0.017009425986561844
+Men,High Education,98,Working Partner,Single,0.012054841499435254
+Men,High Education,98,Working Partner,Working Partner,0.33107878093367354
+Men,High Education,98,Working Partner,Retired Partner,0.6568663775668911
+Men,High Education,98,Retired Partner,Single,0.0012450467359410601
+Men,High Education,98,Retired Partner,Working Partner,0.0012577851958559018
+Men,High Education,98,Retired Partner,Retired Partner,0.9974971680682031
+Men,High Education,99,Single,Single,0.9800252494160767
+Men,High Education,99,Single,Working Partner,0.0019516786240482116
+Men,High Education,99,Single,Retired Partner,0.01802307195987511
+Men,High Education,99,Working Partner,Single,0.011790380722960426
+Men,High Education,99,Working Partner,Working Partner,0.30683989162888264
+Men,High Education,99,Working Partner,Retired Partner,0.6813697276481568
+Men,High Education,99,Retired Partner,Single,0.0011741815843000782
+Men,High Education,99,Retired Partner,Working Partner,0.0011240101631057782
+Men,High Education,99,Retired Partner,Retired Partner,0.9977018082525941
+Men,High Education,100,Single,Single,0.9790566205298903
+Men,High Education,100,Single,Working Partner,0.0018475363749004168
+Men,High Education,100,Single,Retired Partner,0.019095843095209345
+Men,High Education,100,Working Partner,Single,0.011500733755995056
+Men,High Education,100,Working Partner,Working Partner,0.2836114040015845
+Men,High Education,100,Working Partner,Retired Partner,0.7048878622424204
+Men,High Education,100,Retired Partner,Single,0.0011073296435833689
+Men,High Education,100,Retired Partner,Working Partner,0.0010044447388846945
+Men,High Education,100,Retired Partner,Retired Partner,0.9978882256175319
+Women,Low Education,30,Single,Single,0.9336541639384229
+Women,Low Education,30,Single,Working Partner,0.06603400517545487
+Women,Low Education,30,Single,Retired Partner,0.0003118308861222968
+Women,Low Education,30,Working Partner,Single,0.00228878519876834
+Women,Low Education,30,Working Partner,Working Partner,0.9941127776698353
+Women,Low Education,30,Working Partner,Retired Partner,0.0035984371313963442
+Women,Low Education,30,Retired Partner,Single,0.028538931264491117
+Women,Low Education,30,Retired Partner,Working Partner,0.567168802220071
+Women,Low Education,30,Retired Partner,Retired Partner,0.40429226651543787
+Women,Low Education,31,Single,Single,0.9381392829245173
+Women,Low Education,31,Single,Working Partner,0.06153684098656396
+Women,Low Education,31,Single,Retired Partner,0.00032387608891885195
+Women,Low Education,31,Working Partner,Single,0.002466391886289702
+Women,Low Education,31,Working Partner,Working Partner,0.9935254075912106
+Women,Low Education,31,Working Partner,Retired Partner,0.004008200522499709
+Women,Low Education,31,Retired Partner,Single,0.029347272780655118
+Women,Low Education,31,Retired Partner,Working Partner,0.5409145360848417
+Women,Low Education,31,Retired Partner,Retired Partner,0.42973819113450323
+Women,Low Education,32,Single,Single,0.9423365928578857
+Women,Low Education,32,Single,Working Partner,0.0573271309704256
+Women,Low Education,32,Single,Retired Partner,0.0003362761716886609
+Women,Low Education,32,Working Partner,Single,0.002657619060130782
+Women,Low Education,32,Working Partner,Working Partner,0.9928780275912963
+Women,Low Education,32,Working Partner,Retired Partner,0.004464353348572901
+Women,Low Education,32,Retired Partner,Single,0.03009305289313022
+Women,Low Education,32,Retired Partner,Working Partner,0.5144147672053266
+Women,Low Education,32,Retired Partner,Retired Partner,0.45549217990154306
+Women,Low Education,33,Single,Single,0.9462619538930178
+Women,Low Education,33,Single,Working Partner,0.053389002336366065
+Women,Low Education,33,Single,Retired Partner,0.000349043770616097
+Women,Low Education,33,Working Partner,Single,0.0028634803690076468
+Women,Low Education,33,Working Partner,Working Partner,0.9921644349621143
+Women,Low Education,33,Working Partner,Retired Partner,0.0049720846688780344
+Women,Low Education,33,Retired Partner,Single,0.03076976444673772
+Women,Low Education,33,Retired Partner,Working Partner,0.48781778016294663
+Women,Low Education,33,Retired Partner,Retired Partner,0.4814124553903157
+Women,Low Education,34,Single,Single,0.9499306859369865
+Women,Low Education,34,Single,Working Partner,0.04970712202103819
+Women,Low Education,34,Single,Retired Partner,0.0003621920419753852
+Women,Low Education,34,Working Partner,Single,0.003085058938563734
+Women,Low Education,34,Working Partner,Working Partner,0.9913777916173163
+Women,Low Education,34,Working Partner,Retired Partner,0.00553714944411996
+Women,Low Education,34,Retired Partner,Single,0.03137180087448763
+Women,Low Education,34,Retired Partner,Working Partner,0.46127421553286974
+Women,Low Education,34,Retired Partner,Retired Partner,0.5073539835926426
+Women,Low Education,35,Single,Single,0.953357537918213
+Women,Low Education,35,Single,Working Partner,0.04626672741590431
+Women,Low Education,35,Single,Retired Partner,0.0003757346658829157
+Women,Low Education,35,Working Partner,Single,0.003323510960698718
+Women,Low Education,35,Working Partner,Working Partner,0.9905105621764096
+Women,Low Education,35,Working Partner,Retired Partner,0.006165926862891594
+Women,Low Education,35,Retired Partner,Single,0.031894590023264766
+Women,Low Education,35,Retired Partner,Working Partner,0.4349336689229819
+Women,Low Education,35,Retired Partner,Retired Partner,0.5331717410537533
+Women,Low Education,36,Single,Single,0.9565566662535809
+Women,Low Education,36,Single,Working Partner,0.043053647895229405
+Women,Low Education,36,Single,Retired Partner,0.00038968585118957376
+Women,Low Education,36,Working Partner,Single,0.0035800692226932713
+Women,Low Education,36,Working Partner,Working Partner,0.9895544468967907
+Women,Low Education,36,Working Partner,Retired Partner,0.006865483880515954
+Women,Low Education,36,Retired Partner,Single,0.03233469225279489
+Women,Low Education,36,Retired Partner,Working Partner,0.40894133593649706
+Women,Low Education,36,Retired Partner,Retired Partner,0.5587239718107081
+Women,Low Education,37,Single,Single,0.9595416213506858
+Women,Low Education,37,Single,Working Partner,0.04005431830777059
+Women,Low Education,37,Single,Retired Partner,0.00040406034154376043
+Women,Low Education,37,Working Partner,Single,0.003856046510638768
+Women,Low Education,37,Working Partner,Working Partner,0.9885003092481935
+Women,Low Education,37,Working Partner,Retired Partner,0.00764364424116763
+Women,Low Education,37,Retired Partner,Single,0.03268985854407339
+Women,Low Education,37,Retired Partner,Working Partner,0.38343486156008405
+Women,Low Education,37,Retired Partner,Retired Partner,0.5838752798958425
+Women,Low Education,38,Single,Single,0.9623253410592605
+Women,Low Education,38,Single,Working Partner,0.037255785518096475
+Women,Low Education,38,Single,Retired Partner,0.0004188734226431142
+Women,Low Education,38,Working Partner,Single,0.004152838806489646
+Women,Low Education,38,Working Partner,Working Partner,0.9873380979783608
+Women,Low Education,38,Working Partner,Retired Partner,0.00850906321514964
+Women,Low Education,38,Retired Partner,Single,0.032959046950231656
+Women,Low Education,38,Retired Partner,Working Partner,0.35854153622689683
+Women,Low Education,38,Retired Partner,Retired Partner,0.6084994168228715
+Women,Low Education,39,Single,Single,0.9649201500693648
+Women,Low Education,39,Single,Working Partner,0.03464570899995248
+Women,Low Education,39,Single,Retired Partner,0.00043414093068278807
+Women,Low Education,39,Working Partner,Single,0.0044719281802691295
+Women,Low Education,39,Working Partner,Working Partner,0.986056763594113
+Women,Low Education,39,Working Partner,Retired Partner,0.009471308225617849
+Women,Low Education,39,Retired Partner,Single,0.03314239836361177
+Women,Low Education,39,Retired Partner,Working Partner,0.33437595380033913
+Women,Low Education,39,Retired Partner,Retired Partner,0.6324816478360491
+Women,Low Education,40,Single,Single,0.9673377643403736
+Women,Low Education,40,Single,Working Partner,0.0322123563976263
+Women,Low Education,40,Single,Retired Partner,0.0004498792620002282
+Women,Low Education,40,Working Partner,Single,0.004814885258264988
+Women,Low Education,40,Working Partner,Working Partner,0.9846441692834722
+Women,Low Education,40,Working Partner,Retired Partner,0.010540945458262745
+Women,Low Education,40,Retired Partner,Single,0.03324117499692618
+Women,Low Education,40,Retired Partner,Working Partner,0.3110382121325
+Women,Low Education,40,Retired Partner,Retired Partner,0.6557206128705738
+Women,Low Education,41,Single,Single,0.96958929973159
+Women,Low Education,41,Single,Working Partner,0.029944594884499486
+Women,Low Education,41,Single,Retired Partner,0.0004661053839104776
+Women,Low Education,41,Working Partner,Single,0.005183371124145317
+Women,Low Education,41,Working Partner,Working Partner,0.9830869964378269
+Women,Low Education,41,Working Partner,Retired Partner,0.011729632438027783
+Women,Low Education,41,Retired Partner,Single,0.03325766696527916
+Women,Low Education,41,Retired Partner,Working Partner,0.2886126985244566
+Women,Low Education,41,Retired Partner,Retired Partner,0.6781296345102643
+Women,Low Education,42,Single,Single,0.9716852840903464
+Women,Low Education,42,Single,Working Partner,0.027831879062931962
+Women,Low Education,42,Single,Retired Partner,0.0004828368467217769
+Women,Low Education,42,Working Partner,Single,0.005579138482517226
+Women,Low Education,42,Working Partner,Working Partner,0.9813706451049851
+Women,Low Education,42,Working Partner,Retired Partner,0.01305021641249777
+Women,Low Education,42,Retired Partner,Single,0.033195073760065606
+Women,Low Education,42,Retired Partner,Working Partner,0.2671674643080588
+Women,Low Education,42,Retired Partner,Retired Partner,0.6996374619318756
+Women,Low Education,43,Single,Single,0.9736356721352472
+Women,Low Education,43,Single,Working Partner,0.025864236067834435
+Women,Low Education,43,Single,Retired Partner,0.0005000917969184541
+Women,Low Education,43,Working Partner,Single,0.0060040318833056855
+Women,Low Education,43,Working Partner,Working Partner,0.9794791299218852
+Women,Low Education,43,Working Partner,Retired Partner,0.014516838194809124
+Women,Low Education,43,Retired Partner,Single,0.03305736815804274
+Women,Low Education,43,Retired Partner,Working Partner,0.24675415838704517
+Women,Low Education,43,Retired Partner,Retired Partner,0.7201884734549121
+Women,Low Education,44,Single,Single,0.9754498625496821
+Women,Low Education,44,Single,Working Partner,0.024032248458821213
+Women,Low Education,44,Single,Retired Partner,0.0005178889914965166
+Women,Low Education,44,Working Partner,Single,0.006459986770285126
+Women,Low Education,44,Working Partner,Working Partner,0.9773949723482083
+Women,Low Education,44,Working Partner,Retired Partner,0.016145040881506575
+Women,Low Education,44,Retired Partner,Single,0.03284915022265126
+Women,Low Education,44,Retired Partner,Working Partner,0.2274084615691152
+Women,Low Education,44,Retired Partner,Retired Partner,0.7397423882082336
+Women,Low Education,45,Single,Single,0.9771367167731408
+Women,Low Education,45,Single,Working Partner,0.022327035413422406
+Women,Low Education,45,Single,Retired Partner,0.0005362478134368042
+Women,Low Education,45,Working Partner,Single,0.006949027078124884
+Women,Low Education,45,Working Partner,Working Partner,0.9750990903584039
+Women,Low Education,45,Working Partner,Retired Partner,0.017951882563471175
+Women,Low Education,45,Retired Partner,Single,0.03257549861054638
+Women,Low Education,45,Retired Partner,Working Partner,0.2091509434642131
+Women,Low Education,45,Retired Partner,Retired Partner,0.7582735579252405
+Women,Low Education,46,Single,Single,0.9787045790448022
+Women,Low Education,46,Single,Working Partner,0.020740232666896886
+Women,Low Education,46,Single,Retired Partner,0.0005551882883008121
+Women,Low Education,46,Working Partner,Single,0.007473261059568583
+Women,Low Education,46,Working Partner,Working Partner,0.97257068715959
+Women,Low Education,46,Working Partner,Retired Partner,0.01995605178084139
+Women,Low Education,46,Retired Partner,Single,0.03224182552066085
+Women,Low Education,46,Retired Partner,Working Partner,0.19198825209613082
+Women,Low Education,46,Retired Partner,Retired Partner,0.7757699223832083
+Women,Low Education,47,Single,Single,0.9801612973151457
+Women,Low Education,47,Single,Working Partner,0.019263971582919044
+Women,Low Education,47,Single,Retired Partner,0.000574731101935214
+Women,Low Education,47,Working Partner,Single,0.008034874978288042
+Women,Low Education,47,Working Partner,Working Partner,0.9697871409965038
+Women,Low Education,47,Working Partner,Retired Partner,0.022177984025208198
+Women,Low Education,47,Retired Partner,Single,0.03185374046405853
+Women,Low Education,47,Retired Partner,Working Partner,0.17591454270005444
+Women,Low Education,47,Retired Partner,Retired Partner,0.792231716835887
+Women,Low Education,48,Single,Single,0.9815142446969017
+Women,Low Education,48,Single,Working Partner,0.017890857683825503
+Women,Low Education,48,Single,Retired Partner,0.0005948976192725633
+Women,Low Education,48,Working Partner,Single,0.008636124254327216
+Women,Low Education,48,Working Partner,Working Partner,0.9667238986919994
+Women,Low Education,48,Working Partner,Retired Partner,0.024639977053673406
+Women,Low Education,48,Retired Partner,Single,0.03141692673800538
+Women,Low Education,48,Retired Partner,Working Partner,0.16091305527930602
+Women,Low Education,48,Retired Partner,Retired Partner,0.8076700179826886
+Women,Low Education,49,Single,Single,0.9827703411767036
+Women,Low Education,49,Single,Working Partner,0.016613948919079
+Women,Low Education,49,Single,Retired Partner,0.0006157099042174826
+Women,Low Education,49,Working Partner,Single,0.009279321599166918
+Women,Low Education,49,Working Partner,Working Partner,0.9633543762611861
+Women,Low Education,49,Working Partner,Retired Partner,0.027366302139646984
+Women,Low Education,49,Retired Partner,Single,0.030937033187148893
+Women,Low Education,49,Retired Partner,Working Partner,0.14695775877815806
+Women,Low Education,49,Retired Partner,Retired Partner,0.822105208034693
+Women,Low Education,50,Single,Single,0.9839360753534789
+Women,Low Education,50,Single,Working Partner,0.015426733905911276
+Women,Low Education,50,Single,Retired Partner,0.0006371907406097827
+Women,Low Education,50,Working Partner,Single,0.009966821628207367
+Women,Low Education,50,Working Partner,Working Partner,0.9596498707356127
+Women,Low Education,50,Working Partner,Retired Partner,0.030383307636179926
+Women,Low Education,50,Retired Partner,Single,0.030419582630242626
+Women,Low Education,50,Retired Partner,Working Partner,0.13401499146482623
+Women,Low Education,50,Retired Partner,Retired Partner,0.8355654259049311
+Women,Low Education,51,Single,Single,0.985017526009288
+Women,Low Education,51,Single,Working Partner,0.014323110336453632
+Women,Low Education,51,Single,Retired Partner,0.0006593636542583274
+Women,Low Education,51,Working Partner,Single,0.01070100139259314
+Women,Low Education,51,Working Partner,Working Partner,0.9555794882435167
+Women,Low Education,51,Working Partner,Retired Partner,0.03371951036389017
+Women,Low Education,51,Retired Partner,Single,0.02986989729169605
+Women,Low Education,51,Retired Partner,Working Partner,0.12204504066691467
+Women,Low Education,51,Retired Partner,Retired Partner,0.8480850620413893
+Women,Low Education,52,Single,Single,0.9860203833532435
+Women,Low Education,52,Single,Working Partner,0.013297363710714449
+Women,Low Education,52,Single,Retired Partner,0.0006822529360419331
+Women,Low Education,52,Working Partner,Single,0.011484236233474592
+Women,Low Education,52,Working Partner,Working Partner,0.9511100944097787
+Women,Low Education,52,Working Partner,Retired Partner,0.03740566935674673
+Women,Low Education,52,Retired Partner,Single,0.029293040740991195
+Women,Low Education,52,Retired Partner,Working Partner,0.11100361895787042
+Women,Low Education,52,Retired Partner,Retired Partner,0.8597033403011385
+Women,Low Education,53,Single,Single,0.9869499698097666
+Women,Low Education,53,Single,Working Partner,0.012344146524157301
+Women,Low Education,53,Single,Retired Partner,0.0007058836660761865
+Women,Low Education,53,Working Partner,Single,0.012318870334855882
+Women,Low Education,53,Working Partner,Working Partner,0.9462062942530597
+Women,Low Education,53,Working Partner,Retired Partner,0.04147483541208444
+Women,Low Education,53,Retired Partner,Single,0.028693775220258934
+Women,Low Education,53,Retired Partner,Working Partner,0.10084320717540114
+Women,Low Education,53,Retired Partner,Retired Partner,0.8704630176043401
+Women,Low Education,54,Single,Single,0.9878112602490534
+Women,Low Education,54,Single,Working Partner,0.011458458011998756
+Women,Low Education,54,Single,Retired Partner,0.0007302817389476998
+Women,Low Education,54,Working Partner,Single,0.013207181342303078
+Women,Low Education,54,Working Partner,Working Partner,0.940830449944159
+Women,Low Education,54,Working Partner,Retired Partner,0.04596236871353791
+Women,Low Education,54,Retired Partner,Single,0.028076532821020708
+Women,Low Education,54,Retired Partner,Working Partner,0.0915142465196381
+Women,Low Education,54,Retired Partner,Retired Partner,0.8804092206593412
+Women,Low Education,55,Single,Single,0.9886089015806674
+Women,Low Education,55,Single,Working Partner,0.010635624529312625
+Women,Low Education,55,Single,Retired Partner,0.0007554738900199488
+Women,Low Education,55,Working Partner,Single,0.014151338431633248
+Women,Low Education,55,Working Partner,Working Partner,0.934942746009956
+Women,Low Education,55,Working Partner,Retired Partner,0.05090591555841089
+Women,Low Education,55,Retired Partner,Single,0.027445398731513356
+Women,Low Education,55,Retired Partner,Working Partner,0.08296617200332046
+Women,Low Education,55,Retired Partner,Retired Partner,0.8895884292651661
+Women,Low Education,56,Single,Single,0.9893472316509451
+Women,Low Education,56,Single,Working Partner,0.009871280626237612
+Women,Low Education,56,Single,Retired Partner,0.0007814877228174621
+Women,Low Education,56,Working Partner,Single,0.015153353263472719
+Women,Low Education,56,Working Partner,Working Partner,0.9285013127627223
+Women,Low Education,56,Working Partner,Retired Partner,0.056345333973805034
+Women,Low Education,56,Retired Partner,Single,0.02680410468488708
+Women,Low Education,56,Retired Partner,Working Partner,0.07514828754409182
+Women,Low Education,56,Retired Partner,Retired Partner,0.8980476077710212
+Women,Low Education,57,Single,Single,0.9900302974018069
+Women,Low Education,57,Single,Working Partner,0.009161350860695429
+Women,Low Education,57,Single,Retired Partner,0.0008083517374977038
+Women,Low Education,57,Working Partner,Single,0.01621502335692762
+Women,Low Education,57,Working Partner,Working Partner,0.92146241982233
+Women,Low Education,57,Working Partner,Retired Partner,0.06232255682074229
+Women,Low Education,57,Retired Partner,Single,0.02615603076228248
+Women,Low Education,57,Retired Partner,Working Partner,0.06801048903423203
+Women,Low Education,57,Retired Partner,Retired Partner,0.9058334802034855
+Women,Low Education,58,Single,Single,0.9906618722628643
+Women,Low Education,58,Single,Working Partner,0.00850203237671314
+Women,Low Education,58,Single,Retired Partner,0.0008360953604225301
+Women,Low Education,58,Working Partner,Single,0.01733786757043095
+Women,Low Education,58,Working Partner,Working Partner,0.9137807524677832
+Women,Low Education,58,Working Partner,Retired Partner,0.06888137996178575
+Women,Low Education,58,Retired Partner,Single,0.025504213811027545
+Women,Low Education,58,Retired Partner,Working Partner,0.061503845964412655
+Women,Low Education,58,Retired Partner,Retired Partner,0.9129919402245599
+Women,Low Education,59,Single,Single,0.9912454727607493
+Women,Low Education,59,Single,Working Partner,0.007889778264407206
+Women,Low Education,59,Single,Retired Partner,0.0008647489748435475
+Women,Low Education,59,Working Partner,Single,0.01852305360266473
+Women,Low Education,59,Working Partner,Working Partner,0.9054097840618575
+Women,Low Education,59,Working Partner,Retired Partner,0.07606716233547774
+Women,Low Education,59,Retired Partner,Single,0.024851360898268688
+Women,Low Education,59,Retired Partner,Working Partner,0.055581054862222444
+Women,Low Education,59,Retired Partner,Retired Partner,0.9195675842395089
+Women,Low Education,60,Single,Single,0.9917843743396308
+Women,Low Education,60,Single,Working Partner,0.007321281707650999
+Women,Low Education,60,Single,Retired Partner,0.0008943439527180944
+Women,Low Education,60,Working Partner,Single,0.019771317733611023
+Women,Low Education,60,Working Partner,Working Partner,0.8963022577627212
+Women,Low Education,60,Working Partner,Retired Partner,0.08392642450366773
+Women,Low Education,60,Retired Partner,Single,0.024199866410417943
+Women,Low Education,60,Retired Partner,Working Partner,0.05019677921328818
+Women,Low Education,60,Retired Partner,Retired Partner,0.9256033543762938
+Women,Low Education,61,Single,Single,0.9922816263951645
+Women,Low Education,61,Single,Working Partner,0.006793460917160645
+Women,Low Education,61,Single,Retired Partner,0.0009249126876749035
+Women,Low Education,61,Working Partner,Single,0.021082877425958955
+Women,Low Education,61,Working Partner,Working Partner,0.8864107899624701
+Women,Low Education,61,Working Partner,Retired Partner,0.0925063326115708
+Women,Low Education,61,Retired Partner,Single,0.02355183161019864
+Women,Low Education,61,Retired Partner,Working Partner,0.04530789094317591
+Women,Low Education,61,Retired Partner,Retired Partner,0.9311402774466255
+Women,Low Education,62,Single,Single,0.9927400665308813
+Women,Low Education,62,Single,Working Partner,0.006303444839967893
+Women,Low Education,62,Single,Retired Partner,0.0009564886291507337
+Women,Low Education,62,Working Partner,Single,0.022457337907481313
+Women,Low Education,62,Working Partner,Working Partner,0.875688606143425
+Women,Low Education,62,Working Partner,Retired Partner,0.10185405594909369
+Women,Low Education,62,Retired Partner,Single,0.022909085662080424
+Women,Low Education,62,Retired Partner,Working Partner,0.040873628210971326
+Women,Low Education,62,Retired Partner,Retired Partner,0.9362172861269482
+Women,Low Education,63,Single,Single,0.9931623340514802
+Women,Low Education,63,Single,Working Partner,0.005848559630798286
+Women,Low Education,63,Single,Retired Partner,0.0009891063177214345
+Women,Low Education,63,Working Partner,Single,0.023893594456836725
+Women,Low Education,63,Working Partner,Working Partner,0.8640904168767527
+Women,Low Education,63,Working Partner,Retired Partner,0.11201598866641053
+Women,Low Education,63,Retired Partner,Single,0.02227320732412466
+Women,Low Education,63,Retired Partner,Working Partner,0.03685568342602575
+Women,Low Education,63,Retired Partner,Retired Partner,0.9408711092498496
+Women,Low Education,64,Single,Single,0.993550882711792
+Women,Low Education,64,Single,Working Partner,0.005426315866554937
+Women,Low Education,64,Single,Retired Partner,0.0010228014216530313
+Women,Low Education,64,Working Partner,Single,0.025389732810908353
+Women,Low Education,64,Working Partner,Working Partner,0.8515734372732877
+Women,Low Education,64,Working Partner,Retired Partner,0.12303682991580396
+Women,Low Education,64,Retired Partner,Single,0.021645546673914235
+Women,Low Education,64,Retired Partner,Working Partner,0.033218234234647995
+Women,Low Education,64,Retired Partner,Retired Partner,0.9451362190914379
+Women,Low Education,65,Single,Single,0.9939079927435396
+Women,Low Education,65,Single,Working Partner,0.005034396481760068
+Women,Low Education,65,Single,Retired Partner,0.0010576107747004436
+Women,Low Education,65,Working Partner,Single,0.02694293088148877
+Women,Low Education,65,Working Partner,Working Partner,0.8380985471445092
+Women,Low Education,65,Working Partner,Retired Partner,0.13495852197400193
+Women,Low Education,65,Retired Partner,Single,0.021027246385327755
+Women,Low Education,65,Retired Partner,Working Partner,0.029927928881508598
+Women,Low Education,65,Retired Partner,Retired Partner,0.9490448247331636
+Women,Low Education,66,Single,Single,0.9942357821845328
+Women,Low Education,66,Single,Working Partner,0.004670645400283825
+Women,Low Education,66,Single,Retired Partner,0.0010935724151834216
+Women,Low Education,66,Working Partner,Single,0.028549365777785118
+Women,Low Education,66,Working Partner,Working Partner,0.8236315813375437
+Women,Low Education,66,Working Partner,Retired Partner,0.14781905288467131
+Women,Low Education,66,Retired Partner,Single,0.020419262200514824
+Women,Low Education,66,Retired Partner,Working Partner,0.026953835943283298
+Women,Low Education,66,Retired Partner,Retired Partner,0.9526269018562019
+Women,Low Education,67,Single,Single,0.9945362175367622
+Women,Low Education,67,Single,Working Partner,0.004333056836866537
+Women,Low Education,67,Single,Retired Partner,0.0011307256263712409
+Women,Low Education,67,Working Partner,Single,0.03020413092589286
+Women,Low Education,67,Working Partner,Working Partner,0.8081447302007072
+Women,Low Education,67,Working Partner,Retired Partner,0.16165113887340002
+Women,Low Education,67,Retired Partner,Single,0.01982238234806506
+Women,Low Education,67,Retired Partner,Working Partner,0.024267367040469532
+Women,Low Education,67,Retired Partner,Retired Partner,0.9559102506114654
+Women,Low Education,68,Single,Single,0.9948111237810853
+Women,Low Education,68,Single,Working Partner,0.004019765240705112
+Women,Low Education,68,Single,Retired Partner,0.0011691109782095278
+Women,Low Education,68,Working Partner,Single,0.031901168785056055
+Women,Low Education,68,Working Partner,Working Partner,0.7916180191328236
+Women,Low Education,68,Working Partner,Retired Partner,0.17648081208212035
+Women,Low Education,68,Retired Partner,Single,0.019237245745496973
+Women,Low Education,68,Retired Partner,Working Partner,0.02184217981232899
+Women,Low Education,68,Retired Partner,Retired Partner,0.958920574442174
+Women,Low Education,69,Single,Single,0.9950621937769452
+Women,Low Education,69,Single,Working Partner,0.003729035852630328
+Women,Low Education,69,Single,Retired Partner,0.0012087703704244425
+Women,Low Education,69,Working Partner,Single,0.033633225193242536
+Women,Low Education,69,Working Partner,Working Partner,0.7740408241277048
+Women,Low Education,69,Working Partner,Retired Partner,0.19232595067905267
+Women,Low Education,69,Retired Partner,Single,0.018664358893812575
+Women,Low Education,69,Retired Partner,Working Partner,0.01965406722389694
+Women,Low Education,69,Retired Partner,Retired Partner,0.9616815738822905
+Women,Low Education,70,Single,Single,0.9952909970758937
+Women,Low Education,70,Single,Working Partner,0.0034592558470649733
+Women,Low Education,70,Single,Retired Partner,0.001249747077041202
+Women,Low Education,70,Working Partner,Single,0.03539183162781851
+Women,Low Education,70,Working Partner,Working Partner,0.7554133678806539
+Women,Low Education,70,Working Partner,Retired Partner,0.20919480049152753
+Women,Low Education,70,Retired Partner,Single,0.01810411142620106
+Women,Low Education,70,Retired Partner,Working Partner,0.017680838181546234
+Women,Low Education,70,Retired Partner,Retired Partner,0.9642150503922527
+Women,Low Education,71,Single,Single,0.9954989881776936
+Women,Low Education,71,Single,Working Partner,0.0032089260299507224
+Women,Low Education,71,Single,Retired Partner,0.0012920857923557029
+Women,Low Education,71,Working Partner,Single,0.03716732153230592
+Women,Low Education,71,Working Partner,Working Partner,0.7357481294022657
+Women,Low Education,71,Working Partner,Retired Partner,0.2270845490654283
+Women,Low Education,71,Retired Partner,Single,0.017556790314290745
+Women,Low Education,71,Retired Partner,Working Partner,0.01590219347170269
+Women,Low Education,71,Retired Partner,Retired Partner,0.9665410162140066
+Women,Low Education,72,Single,Single,0.9956875142574986
+Women,Low Education,72,Single,Working Partner,0.0029766530641015324
+Women,Low Education,72,Single,Retired Partner,0.001335832678399695
+Women,Low Education,72,Working Partner,Single,0.0389488862364469
+Women,Low Education,72,Working Partner,Working Partner,0.7150710904714125
+Women,Low Education,72,Working Partner,Retired Partner,0.2459800232921407
+Women,Low Education,72,Retired Partner,Single,0.017022592765805058
+Women,Low Education,72,Retired Partner,Working Partner,0.014299600204855656
+Women,Low Education,72,Retired Partner,Retired Partner,0.9686778070293393
+Women,Low Education,73,Single,Single,0.9958578223921287
+Women,Low Education,73,Single,Working Partner,0.0027611421939296777
+Women,Low Education,73,Single,Retired Partner,0.0013810354139416417
+Women,Low Education,73,Working Partner,Single,0.04072467480755223
+Women,Low Education,73,Working Partner,Working Partner,0.69342273611421
+Women,Low Education,73,Working Partner,Retired Partner,0.26585258907823783
+Women,Low Education,73,Retired Partner,Single,0.01650163786905135
+Women,Low Education,73,Retired Partner,Working Partner,0.012856167237481762
+Women,Low Education,73,Retired Partner,Retired Partner,0.9706421948934669
+Women,Low Education,74,Single,Single,0.9960110663127818
+Women,Low Education,74,Single,Working Partner,0.0025611904421512805
+Women,Low Education,74,Single,Retired Partner,0.0014277432450670769
+Women,Low Education,74,Working Partner,Single,0.04248194038317115
+Women,Low Education,74,Working Partner,Working Partner,0.6708587251081206
+Women,Low Education,74,Working Partner,Retired Partner,0.28665933450870823
+Women,Low Education,74,Retired Partner,Single,0.015993977054113876
+Women,Low Education,74,Retired Partner,Working Partner,0.011556523448116621
+Women,Low Education,74,Retired Partner,Retired Partner,0.9724494994977695
+Women,Low Education,75,Single,Single,0.9961483127107434
+Women,Low Education,75,Single,Working Partner,0.0023756802518726554
+Women,Low Education,75,Single,Retired Partner,0.0014760070373839188
+Women,Low Education,75,Working Partner,Single,0.044207233177045134
+Women,Low Education,75,Working Partner,Working Partner,0.6474501515957088
+Women,Low Education,75,Working Partner,Retired Partner,0.3083426152272461
+Women,Low Education,75,Retired Partner,Single,0.015499603449449431
+Women,Low Education,75,Retired Partner,Working Partner,0.010386700249070548
+Women,Low Education,75,Retired Partner,Retired Partner,0.97411369630148
+Women,Low Education,76,Single,Single,0.9962705471217463
+Women,Low Education,76,Single,Working Partner,0.0022035735483537278
+Women,Low Education,76,Single,Retired Partner,0.0015258793298997867
+Women,Low Education,76,Working Partner,Single,0.04588663752646332
+Women,Low Education,76,Working Partner,Working Partner,0.6232833311521863
+Women,Low Education,76,Working Partner,Retired Partner,0.33083003132135036
+Women,Low Education,76,Retired Partner,Single,0.015018460217075903
+Women,Low Education,76,Retired Partner,Working Partner,0.009334019310089786
+Women,Low Education,76,Retired Partner,Retired Partner,0.9756475204728344
+Women,Low Education,77,Single,Single,0.9963786794136671
+Women,Low Education,77,Single,Working Partner,0.0020439061957127076
+Women,Low Education,77,Single,Retired Partner,0.0015774143906200308
+Women,Low Education,77,Working Partner,Single,0.04750604724502854
+Women,Low Education,77,Working Partner,Working Partner,0.5984590643284057
+Women,Low Education,77,Working Partner,Retired Partner,0.3540348884265657
+Women,Low Education,77,Retired Partner,Single,0.014550447950763384
+Women,Low Education,77,Retired Partner,Working Partner,0.008386986142677178
+Women,Low Education,77,Retired Partner,Retired Partner,0.9770625659065594
+Women,Low Education,78,Single,Single,0.9964735489012295
+Women,Low Education,78,Single,Working Partner,0.0018957828248537978
+Women,Low Education,78,Single,Retired Partner,0.0016306682739167468
+Women,Low Education,78,Working Partner,Single,0.04905147041986957
+Women,Low Education,78,Working Partner,Working Partner,0.5730913571747162
+Women,Low Education,78,Working Partner,Retired Partner,0.3778571724054144
+Women,Low Education,78,Retired Partner,Single,0.014095431220453912
+Women,Low Education,78,Retired Partner,Working Partner,0.007535189932517863
+Women,Low Education,78,Retired Partner,Retired Partner,0.9783693788470282
+Women,Low Education,79,Single,Single,0.9965559291103315
+Women,Low Education,79,Single,Working Partner,0.0017583720099477351
+Women,Low Education,79,Single,Retired Partner,0.00168569887972067
+Women,Low Education,79,Working Partner,Single,0.05050935195780759
+Women,Low Education,79,Working Partner,Working Partner,0.5473056099753634
+Women,Low Education,79,Working Partner,Retired Partner,0.4021850380668291
+Women,Low Education,79,Retired Partner,Single,0.01365324434324378
+Women,Low Education,79,Retired Partner,Working Partner,0.006769209802153597
+Women,Low Education,79,Retired Partner,Retired Partner,0.9795775458546027
+Women,Low Education,80,Single,Single,0.996626532213553
+Women,Low Education,80,Single,Working Partner,0.0016309017718574945
+Women,Low Education,80,Single,Retired Partner,0.0017425660145893888
+Women,Low Education,80,Working Partner,Single,0.051866899968084794
+Women,Low Education,80,Working Partner,Working Partner,0.5212363199144855
+Women,Low Education,80,Working Partner,Retired Partner,0.4268967801174297
+Women,Low Education,80,Retired Partner,Single,0.013223696457215392
+Women,Low Education,80,Retired Partner,Working Partner,0.006080527527442326
+Women,Low Education,80,Retired Partner,Retired Partner,0.9806957760153423
+Women,Low Education,81,Single,Single,0.9966860131573273
+Women,Low Education,81,Single,Working Partner,0.0015126553879655435
+Women,Low Education,81,Single,Retired Partner,0.001801331454706952
+Women,Low Education,81,Working Partner,Single,0.053112400767124326
+Women,Low Education,81,Working Partner,Working Partner,0.49502437748663924
+Women,Low Education,81,Working Partner,Retired Partner,0.45186322174623644
+Women,Low Education,81,Retired Partner,Single,0.012806575969629733
+Women,Low Education,81,Retired Partner,Working Partner,0.005461446611273176
+Women,Low Education,81,Retired Partner,Retired Partner,0.9817319774190971
+Women,Low Education,82,Single,Single,0.9967349735002147
+Women,Low Education,82,Single,Working Partner,0.00140296748891406
+Women,Low Education,82,Single,Retired Partner,0.0018620590108714842
+Women,Low Education,82,Working Partner,Single,0.05423550712216839
+Women,Low Education,82,Working Partner,Working Partner,0.46881406666974557
+Women,Low Education,82,Working Partner,Retired Partner,0.4769504262080859
+Women,Low Education,82,Retired Partner,Single,0.012401654445815475
+Women,Low Education,82,Retired Partner,Working Partner,0.004905017529422157
+Women,Low Education,82,Retired Partner,Retired Partner,0.9826933280247624
+Women,Low Education,83,Single,Single,0.9967739649806638
+Women,Low Education,83,Single,Working Partner,0.0013012204238070828
+Women,Low Education,83,Single,Retired Partner,0.0019248145955289852
+Women,Low Education,83,Working Partner,Single,0.05522748541461516
+Women,Low Education,83,Working Partner,Working Partner,0.4427499018674585
+Women,Low Education,83,Working Partner,Retired Partner,0.5020226127179265
+Women,Low Education,83,Retired Partner,Single,0.012008689999760498
+Women,Low Education,83,Retired Partner,Working Partner,0.004404968900296734
+Women,Low Education,83,Retired Partner,Retired Partner,0.9835863410999427
+Women,Low Education,84,Single,Single,0.9968034928316498
+Women,Low Education,84,Single,Working Partner,0.001206840876437073
+Women,Low Education,84,Single,Retired Partner,0.001989666291913127
+Women,Low Education,84,Working Partner,Single,0.05608140965492196
+Women,Low Education,84,Working Partner,Working Partner,0.41697344773485645
+Women,Low Education,84,Working Partner,Retired Partner,0.5269451426102216
+Women,Low Education,84,Retired Partner,Single,0.011627430242105715
+Women,Low Education,84,Retired Partner,Working Partner,0.003955644287529234
+Women,Low Education,84,Retired Partner,Retired Partner,0.9844169254703651
+Women,Low Education,85,Single,Single,0.996824018858565
+Women,Low Education,85,Single,Working Partner,0.001119296716082611
+Women,Low Education,85,Single,Retired Partner,0.0020566844253523463
+Women,Low Education,85,Working Partner,Single,0.05679229352703266
+Women,Low Education,85,Working Partner,Working Partner,0.391620269651063
+Women,Low Education,85,Working Partner,Retired Partner,0.5515874368219044
+Women,Low Education,85,Retired Partner,Single,0.011257614836087624
+Women,Low Education,85,Retired Partner,Working Partner,0.0035519443176758774
+Women,Low Education,85,Retired Partner,Retired Partner,0.9851904408462364
+Women,Low Education,86,Single,Single,0.9968359642958177
+Women,Low Education,86,Single,Working Partner,0.0010380940673752166
+Women,Low Education,86,Single,Retired Partner,0.0021259416368071492
+Women,Low Education,86,Working Partner,Single,0.05735715556593855
+Women,Low Education,86,Working Partner,Working Partner,0.3668171525747022
+Women,Low Education,86,Working Partner,Retired Partner,0.5758256918593592
+Women,Low Education,86,Retired Partner,Single,0.010898977707060938
+Women,Low Education,86,Retired Partner,Working Partner,0.0031892737811254597
+Women,Low Education,86,Retired Partner,Retired Partner,0.9859117485118136
+Women,Low Education,87,Single,Single,0.9968397124566493
+Women,Low Education,87,Single,Working Partner,0.0009627745846486365
+Women,Low Education,87,Single,Retired Partner,0.002197512958702103
+Women,Low Education,87,Working Partner,Single,0.05777501678270099
+Women,Low Education,87,Working Partner,Working Partner,0.34267970548713345
+Women,Low Education,87,Working Partner,Retired Partner,0.5995452777301656
+Women,Low Education,87,Retired Partner,Single,0.010551248946610695
+Women,Low Education,87,Retired Partner,Working Partner,0.0028634933798163363
+Women,Low Education,87,Retired Partner,Retired Partner,0.986585257673573
+Women,Low Education,88,Single,Single,0.9968356111898198
+Women,Low Education,88,Single,Working Partner,0.0008929129170616356
+Women,Low Education,88,Single,Retired Partner,0.0022714758931185386
+Women,Low Education,88,Working Partner,Single,0.05804683413080915
+Women,Low Education,88,Working Partner,Working Partner,0.3193104399692239
+Women,Low Education,88,Working Partner,Retired Partner,0.6226427258999668
+Women,Low Education,88,Retired Partner,Single,0.01021415644796739
+Women,Low Education,88,Retired Partner,Working Partner,0.0025708757881384705
+Women,Low Education,88,Retired Partner,Retired Partner,0.9872149677638942
+Women,Low Education,89,Single,Single,0.9968239751559603
+Women,Low Education,89,Single,Working Partner,0.0008281143516240934
+Women,Low Education,89,Single,Retired Partner,0.0023479104924155145
+Women,Low Education,89,Working Partner,Single,0.05817537677699235
+Women,Low Education,89,Working Partner,Working Partner,0.29679737786187554
+Women,Low Education,89,Working Partner,Retired Partner,0.645027245361132
+Women,Low Education,89,Retired Partner,Single,0.009887427305481132
+Women,Low Education,89,Retired Partner,Working Partner,0.0023080657015489125
+Women,Low Education,89,Retired Partner,Retired Partner,0.9878045069929698
+Women,Low Education,90,Single,Single,0.9968050879355963
+Women,Low Education,90,Single,Working Partner,0.0007680126220555735
+Women,Low Education,90,Single,Retired Partner,0.002426899442348202
+Women,Low Education,90,Working Partner,Single,0.058165054905796904
+Women,Low Education,90,Working Partner,Working Partner,0.2752132079448036
+Women,Low Education,90,Working Partner,Retired Partner,0.6666217371493994
+Women,Low Education,90,Retired Partner,Single,0.009570789007293247
+Women,Low Education,90,Retired Partner,Working Partner,0.0020720435594258502
+Women,Low Education,90,Retired Partner,Retired Partner,0.9883571674332808
+Women,Low Education,91,Single,Single,0.9967792039800804
+Women,Low Education,91,Single,Working Partner,0.0007122678721653825
+Women,Low Education,91,Single,Retired Partner,0.0025085281477543126
+Women,Low Education,91,Working Partner,Single,0.058021712575312905
+Women,Low Education,91,Working Partner,Working Partner,0.25461497847137193
+Women,Low Education,91,Working Partner,Retired Partner,0.6873633089533151
+Women,Low Education,91,Retired Partner,Single,0.009263970447058217
+Women,Low Education,91,Retired Partner,Working Partner,0.0018600926433160532
+Women,Low Education,91,Retired Partner,Retired Partner,0.9888759369096257
+Women,Low Education,92,Single,Single,0.9967465504159554
+Women,Low Education,92,Single,Working Partner,0.0006605647631638471
+Women,Low Education,92,Single,Retired Partner,0.0025928848208807797
+Women,Low Education,92,Working Partner,Single,0.057752396903600886
+Women,Low Education,92,Working Partner,Working Partner,0.23504428396327587
+Women,Low Education,92,Working Partner,Retired Partner,0.7072033191331234
+Women,Low Education,92,Retired Partner,Single,0.008966702777600264
+Women,Low Education,92,Retired Partner,Working Partner,0.0016697692680409987
+Women,Low Education,92,Retired Partner,Retired Partner,0.9893635279543588
+Women,Low Education,93,Single,Single,0.996707328712579
+Women,Low Education,93,Single,Working Partner,0.0006126107149967382
+Women,Low Education,93,Single,Retired Partner,0.0026800605724243273
+Women,Low Education,93,Working Partner,Single,0.05736511567008671
+Women,Low Education,93,Working Partner,Working Partner,0.21652788277356408
+Women,Low Education,93,Working Partner,Retired Partner,0.7261070015563493
+Women,Low Education,93,Retired Partner,Single,0.00867872012671976
+Women,Low Education,93,Retired Partner,Working Partner,0.0014988758003797319
+Women,Low Education,93,Retired Partner,Retired Partner,0.9898224040729005
+Women,Low Education,94,Single,Single,0.9966617162221993
+Women,Low Education,94,Single,Working Partner,0.0005681342724393854
+Women,Low Education,94,Single,Retired Partner,0.0027701495053611496
+Women,Low Education,94,Working Partner,Single,0.05686859442162829
+Women,Low Education,94,Working Partner,Working Partner,0.19907866747684125
+Women,Low Education,94,Working Partner,Retired Partner,0.7440527381015305
+Women,Low Education,94,Retired Partner,Single,0.008399760192973293
+Women,Low Education,94,Retired Partner,Working Partner,0.0013454362576757121
+Women,Low Education,94,Retired Partner,Retired Partner,0.990254803549351
+Women,Low Education,95,Single,Single,0.9966098676010625
+Women,Low Education,95,Single,Working Partner,0.0005268835872951326
+Women,Low Education,95,Single,Retired Partner,0.0028632488116423186
+Women,Low Education,95,Working Partner,Single,0.05627204259210793
+Women,Low Education,95,Working Partner,Working Partner,0.18269690313603185
+Women,Low Education,95,Working Partner,Retired Partner,0.7610310542718604
+Women,Low Education,95,Retired Partner,Single,0.008129564737117076
+Women,Low Education,95,Retired Partner,Working Partner,0.001207674256294805
+Women,Low Education,95,Retired Partner,Retired Partner,0.9906627610065881
+Women,Low Education,96,Single,Single,0.9965519161195513
+Women,Low Education,96,Single,Working Partner,0.0004886250086156253
+Women,Low Education,96,Single,Retired Partner,0.0029594588718329664
+Women,Low Education,96,Working Partner,Single,0.0555849362092722
+Women,Low Education,96,Working Partner,Working Partner,0.16737164818203726
+Women,Low Education,96,Working Partner,Retired Partner,0.7770434156086905
+Women,Low Education,96,Retired Partner,Single,0.007867879983003858
+Women,Low Education,96,Retired Partner,Working Partner,0.001083993097077887
+Women,Low Education,96,Retired Partner,Retired Partner,0.9910481269199183
+Women,Low Education,97,Single,Single,0.9964879748688259
+Women,Low Education,97,Single,Working Partner,0.0004531417733993461
+Women,Low Education,97,Single,Retired Partner,0.0030588833577747726
+Women,Low Education,97,Working Partner,Single,0.054816822693299946
+Women,Low Education,97,Working Partner,Working Partner,0.153082277782448
+Women,Low Education,97,Working Partner,Retired Partner,0.792100899524252
+Women,Low Education,97,Retired Partner,Single,0.007614456940036869
+Women,Low Education,97,Retired Partner,Working Partner,0.0009729577915590528
+Women,Low Education,97,Retired Partner,Retired Partner,0.991412585268404
+Women,Low Education,98,Single,Single,0.996418137870916
+Women,Low Education,98,Single,Working Partner,0.00042023279073121026
+Women,Low Education,98,Single,Retired Partner,0.003161629338352579
+Women,Low Education,98,Working Partner,Single,0.053977151234350686
+Women,Low Education,98,Working Partner,Working Partner,0.1398000386755833
+Women,Low Education,98,Working Partner,Retired Partner,0.806222810090066
+Women,Low Education,98,Retired Partner,Single,0.007369051657791122
+Women,Low Education,98,Retired Partner,Working Partner,0.0008732788486041356
+Women,Low Education,98,Retired Partner,Retired Partner,0.9917576694936048
+Women,Low Education,99,Single,Single,0.9963424810987513
+Women,Low Education,99,Single,Working Partner,0.00038971151280137346
+Women,Low Education,99,Single,Retired Partner,0.0032678073884472884
+Women,Low Education,99,Working Partner,Single,0.05307513041078694
+Women,Low Education,99,Working Partner,Working Partner,0.12748957598679164
+Women,Low Education,99,Working Partner,Retired Partner,0.8194352936024214
+Women,Low Education,99,Retired Partner,Single,0.007131425422092226
+Women,Low Education,99,Retired Partner,Working Partner,0.0007837976561637094
+Women,Low Education,99,Retired Partner,Retired Partner,0.9920847769217441
+Women,Low Education,100,Single,Single,0.9962610634121543
+Women,Low Education,100,Single,Working Partner,0.00036140488668714624
+Women,Low Education,100,Single,Retired Partner,0.0033775317011585483
+Women,Low Education,100,Working Partner,Single,0.05211961316569445
+Women,Low Education,100,Working Partner,Working Partner,0.11611038514664304
+Women,Low Education,100,Working Partner,Retired Partner,0.8317700016876625
+Women,Low Education,100,Retired Partner,Single,0.0069013449006778875
+Women,Low Education,100,Retired Partner,Working Partner,0.0007034733069719097
+Women,Low Education,100,Retired Partner,Retired Partner,0.9923951817923503
+Women,High Education,30,Single,Single,0.9454282441406354
+Women,High Education,30,Single,Working Partner,0.05455511921413607
+Women,High Education,30,Single,Retired Partner,1.663664522848532e-05
+Women,High Education,30,Working Partner,Single,0.00167544075502759
+Women,High Education,30,Working Partner,Working Partner,0.9975381941440589
+Women,High Education,30,Working Partner,Retired Partner,0.0007863651009134994
+Women,High Education,30,Retired Partner,Single,0.04143472345479626
+Women,High Education,30,Retired Partner,Working Partner,0.782208738651959
+Women,High Education,30,Retired Partner,Retired Partner,0.1763565378932448
+Women,High Education,31,Single,Single,0.9492328025010118
+Women,High Education,31,Single,Working Partner,0.05074912733025809
+Women,High Education,31,Single,Retired Partner,1.807016873015463e-05
+Women,High Education,31,Working Partner,Single,0.001807861776075245
+Women,High Education,31,Working Partner,Working Partner,0.9972742016684915
+Women,High Education,31,Working Partner,Retired Partner,0.0009179365554332754
+Women,High Education,31,Retired Partner,Single,0.04329910663187409
+Women,High Education,31,Retired Partner,Working Partner,0.7573315663678261
+Women,High Education,31,Retired Partner,Retired Partner,0.19936932700029986
+Women,High Education,32,Single,Single,0.9527849808449029
+Women,High Education,32,Single,Working Partner,0.0471953974538141
+Women,High Education,32,Single,Retired Partner,1.9621701282923453e-05
+Women,High Education,32,Working Partner,Single,0.0019506854001809283
+Women,High Education,32,Working Partner,Working Partner,0.9969778274587121
+Women,High Education,32,Working Partner,Retired Partner,0.0010714871411069092
+Women,High Education,32,Retired Partner,Single,0.0450725866503987
+Women,High Education,32,Retired Partner,Working Partner,0.7304130261714918
+Women,High Education,32,Retired Partner,Retired Partner,0.22451438717810943
+Women,High Education,33,Single,Single,0.9560996885449331
+Women,High Education,33,Single,Working Partner,0.04387901059099123
+Women,High Education,33,Single,Retired Partner,2.1300864075489216e-05
+Women,High Education,33,Working Partner,Single,0.0021047142972009276
+Women,High Education,33,Working Partner,Working Partner,0.9966446086883711
+Women,High Education,33,Working Partner,Retired Partner,0.0012506770144280015
+Women,High Education,33,Retired Partner,Single,0.04672243465114527
+Women,High Education,33,Retired Partner,Working Partner,0.7015043962503632
+Women,High Education,33,Retired Partner,Retired Partner,0.2517731690984914
+Women,High Education,34,Single,Single,0.9591911989618408
+Women,High Education,34,Single,Working Partner,0.040785682971231065
+Women,High Education,34,Single,Retired Partner,2.3118066928129073e-05
+Women,High Education,34,Working Partner,Single,0.002270809615172635
+Women,High Education,34,Working Partner,Working Partner,0.9962694183867016
+Women,High Education,34,Working Partner,Retired Partner,0.001459771998125883
+Women,High Education,34,Retired Partner,Single,0.04821502668826073
+Women,High Education,34,Retired Partner,Working Partner,0.6707122641034607
+Women,High Education,34,Retired Partner,Retired Partner,0.2810727092082786
+Women,High Education,35,Single,Single,0.9620731405084639
+Women,High Education,35,Single,Working Partner,0.03790177491877249
+Women,High Education,35,Single,Retired Partner,2.5084572763591383e-05
+Women,High Education,35,Working Partner,Single,0.0024498943856937935
+Women,High Education,35,Working Partner,Working Partner,0.9958463631275206
+Women,High Education,35,Working Partner,Retired Partner,0.0017037424867855622
+Women,High Education,35,Retired Partner,Single,0.04951717517556724
+Women,High Education,35,Retired Partner,Working Partner,0.6382026478970758
+Women,High Education,35,Retired Partner,Retired Partner,0.312280176927357
+Women,High Education,36,Single,Single,0.9647584944225639
+Women,High Education,36,Single,Working Partner,0.03521429301009537
+Women,High Education,36,Single,Retired Partner,2.7212567340597844e-05
+Women,High Education,36,Working Partner,Single,0.0026429569016691635
+Women,High Education,36,Working Partner,Working Partner,0.9953686650515531
+Women,High Education,36,Working Partner,Retired Partner,0.0019883780467776736
+Women,High Education,36,Retired Partner,Single,0.05059766331545493
+Women,High Education,36,Retired Partner,Working Partner,0.6042019262974677
+Women,High Education,36,Retired Partner,Retired Partner,0.3452004103870774
+Women,High Education,37,Single,Single,0.9672595982189539
+Women,High Education,37,Single,Working Partner,0.032710886546364754
+Women,High Education,37,Single,Retired Partner,2.951523468134254e-05
+Women,High Education,37,Working Partner,Single,0.0028510539931964007
+Women,High Education,37,Working Partner,Working Partner,0.9948285259670714
+Women,High Education,37,Working Partner,Retired Partner,0.0023204200397322367
+Women,High Education,37,Retired Partner,Single,0.05142887717329979
+Women,High Education,37,Retired Partner,Working Partner,0.5689938752892507
+Women,High Education,37,Retired Partner,Retired Partner,0.3795772475374495
+Women,High Education,38,Single,Single,0.9695881538879578
+Women,High Education,38,Single,Working Partner,0.030379839273382794
+Women,High Education,38,Single,Retired Partner,3.20068386593926e-05
+Women,High Education,38,Working Partner,Single,0.0030753141043364635
+Women,High Education,38,Working Partner,Working Partner,0.9942169710094113
+Women,High Education,38,Working Partner,Retired Partner,0.0027077148862522404
+Women,High Education,38,Retired Partner,Single,0.05198839632575587
+Women,High Education,38,Retired Partner,Working Partner,0.5329124597146758
+Women,High Education,38,Retired Partner,Retired Partner,0.4150991439595684
+Women,High Education,39,Single,Single,0.9717552400023362
+Women,High Education,39,Single,Working Partner,0.028210057186411647
+Women,High Education,39,Single,Retired Partner,3.470281125226821e-05
+Women,High Education,39,Working Partner,Single,0.0033169400447750344
+Women,High Education,39,Working Partner,Working Partner,0.9935236690679472
+Women,High Education,39,Working Partner,Retired Partner,0.0031593908872778035
+Women,High Education,39,Retired Partner,Single,0.05226038593307866
+Women,High Education,39,Retired Partner,Working Partner,0.4963305072374539
+Women,High Education,39,Retired Partner,Retired Partner,0.45140910682946744
+Women,High Education,40,Single,Single,0.9737713269866002
+Women,High Education,40,Single,Working Partner,0.026191053165395866
+Women,High Education,40,Single,Retired Partner,3.7619848003935254e-05
+Women,High Education,40,Working Partner,Single,0.0035772112546951923
+Women,High Education,40,Working Partner,Working Partner,0.9927367269202261
+Women,High Education,40,Working Partner,Retired Partner,0.003686061825078605
+Women,High Education,40,Retired Partner,Single,0.05223663764804377
+Women,High Education,40,Retired Partner,Working Partner,0.45964493256372485
+Women,High Education,40,Retired Partner,Retired Partner,0.4881184297882313
+Women,High Education,41,Single,Single,0.975646294889784
+Women,High Education,41,Single,Working Partner,0.02431292909892901
+Women,High Education,41,Single,Retired Partner,4.077601128673379e-05
+Women,High Education,41,Working Partner,Single,0.003857485377105766
+Women,High Education,41,Working Partner,Working Partner,0.9918424537633096
+Women,High Education,41,Working Partner,Retired Partner,0.004300060859584677
+Women,High Education,41,Retired Partner,Single,0.05191713676408578
+Women,High Education,41,Retired Partner,Working Partner,0.4232596799948113
+Women,High Education,41,Retired Partner,Retired Partner,0.524823183241103
+Women,High Education,42,Single,Single,0.9773894530843241
+Women,High Education,42,Single,Working Partner,0.022566356073675745
+Women,High Education,42,Single,Retired Partner,4.419084200015808e-05
+Women,High Education,42,Working Partner,Single,0.004159198877750925
+Women,High Education,42,Working Partner,Working Partner,0.9908250926255325
+Women,High Education,42,Working Partner,Retired Partner,0.005015708496716501
+Women,High Education,42,Retired Partner,Single,0.05131008536817282
+Women,High Education,42,Retired Partner,Working Partner,0.38756790708593114
+Women,High Education,42,Retired Partner,Retired Partner,0.5611220075458959
+Women,High Education,43,Single,Single,0.9790095613891792
+Women,High Education,43,Single,Working Partner,0.02094255313042509
+Women,High Education,43,Single,Retired Partner,4.7885480395689354e-05
+Women,High Education,43,Working Partner,Single,0.004483866386712499
+Women,High Education,43,Working Partner,Working Partner,0.9896665150115158
+Women,High Education,43,Working Partner,Retired Partner,0.005849618601771698
+Women,High Education,43,Retired Partner,Single,0.05043137717953496
+Women,High Education,43,Retired Partner,Working Partner,0.35293506017074744
+Women,High Education,43,Retired Partner,Retired Partner,0.5966335626497176
+Women,High Education,44,Single,Single,0.9805148521844493
+Women,High Education,44,Single,Working Partner,0.01943326501877784
+Women,High Education,44,Single,Retired Partner,5.188279677287165e-05
+Women,High Education,44,Working Partner,Single,0.004833078355899693
+Women,High Education,44,Working Partner,Working Partner,0.9883458751262137
+Women,High Education,44,Working Partner,Retired Partner,0.006821046517886654
+Women,High Education,44,Retired Partner,Single,0.0493035866816792
+Women,High Education,44,Retired Partner,Working Partner,0.31968436250164606
+Women,High Education,44,Retired Partner,Retired Partner,0.6310120508166748
+Women,High Education,45,Single,Single,0.9819130531474406
+Women,High Education,45,Single,Working Partner,0.018030739319707105
+Women,High Education,45,Single,Retired Partner,5.62075328523544e-05
+Women,High Education,45,Working Partner,Single,0.005208496530730191
+Women,High Education,45,Working Partner,Working Partner,0.986839220204256
+Women,High Education,45,Working Partner,Retired Partner,0.007952283265013842
+Women,High Education,45,Retired Partner,Single,0.04795459023708431
+Women,High Education,45,Retired Partner,Working Partner,0.2880858767647133
+Women,High Education,45,Retired Partner,Retired Partner,0.6639595329982024
+Women,High Education,46,Single,Single,0.9832114102965482
+Women,High Education,46,Single,Working Partner,0.016727703248754777
+Women,High Education,46,Single,Retired Partner,6.0886454697059355e-05
+Women,High Education,46,Working Partner,Single,0.005611846620471372
+Women,High Education,46,Working Partner,Working Partner,0.9851190539251603
+Women,High Education,46,Working Partner,Retired Partner,0.009269099454368325
+Women,High Education,46,Retired Partner,Single,0.04641597047768251
+Women,High Education,46,Retired Partner,Working Partner,0.2583497959889667
+Women,High Education,46,Retired Partner,Retired Partner,0.6952342335333509
+Women,High Education,47,Single,Single,0.9844167110796785
+Women,High Education,47,Single,Working Partner,0.015517340402197929
+Women,High Education,47,Single,Retired Partner,6.594851812336101e-05
+Women,High Education,47,Working Partner,Single,0.0060449074183317195
+Women,High Education,47,Working Partner,Working Partner,0.9831538507373846
+Women,High Education,47,Working Partner,Retired Partner,0.010801241844283655
+Women,High Education,47,Retired Partner,Single,0.04472136333359144
+Women,High Education,47,Retired Partner,Working Partner,0.2306240670156196
+Women,High Education,47,Retired Partner,Retired Partner,0.7246545696507889
+Women,High Education,48,Single,Single,0.9855353072885674
+Women,High Education,48,Single,Working Partner,0.014393267663812147
+Women,High Education,48,Single,Retired Partner,7.142504762061606e-05
+Women,High Education,48,Working Partner,Single,0.006509495468668556
+Women,High Education,48,Working Partner,Working Partner,0.9809075202931063
+Women,High Education,48,Working Partner,Retired Partner,0.012582984238225103
+Women,High Education,48,Retired Partner,Single,0.04290489154652663
+Women,High Education,48,Retired Partner,Working Partner,0.20499596124025374
+Women,High Education,48,Retired Partner,Retired Partner,0.7520991472132197
+Women,High Education,49,Single,Single,0.9865731376196263
+Women,High Education,49,Single,Working Partner,0.013349512450493711
+Women,High Education,49,Single,Retired Partner,7.73499298799926e-05
+Women,High Education,49,Working Partner,Single,0.007007444205242013
+Women,High Education,49,Working Partner,Working Partner,0.9783388233002992
+Women,High Education,49,Working Partner,Retired Partner,0.014653732494458872
+Women,High Education,49,Retired Partner,Single,0.040999795960046735
+Women,High Education,49,Retired Partner,Working Partner,0.18149685169405047
+Women,High Education,49,Retired Partner,Retired Partner,0.7775033523459027
+Women,High Education,50,Single,Single,0.9875357497363082
+Women,High Education,50,Single,Working Partner,0.012380490440569046
+Women,High Education,50,Single,Retired Partner,8.375982312282466e-05
+Women,High Education,50,Working Partner,Single,0.007540576294287743
+Women,High Education,50,Working Partner,Working Partner,0.9754007431650037
+Women,High Education,50,Working Partner,Retired Partner,0.01705868054070864
+Women,High Education,50,Retired Partner,Single,0.03903733497388214
+Women,High Education,50,Retired Partner,Working Partner,0.16010926587320998
+Women,High Education,50,Retired Partner,Retired Partner,0.8008533991529079
+Women,High Education,51,Single,Single,0.9884283217177909
+Women,High Education,51,Single,Working Partner,0.011480983898693991
+Women,High Education,51,Single,Retired Partner,9.069438351516958e-05
+Women,High Education,51,Working Partner,Single,0.008110667715947437
+Women,High Education,51,Working Partner,Working Partner,0.9720398221106344
+Women,High Education,51,Working Partner,Retired Partner,0.01984951017341811
+Women,High Education,51,Retired Partner,Single,0.037045981624628556
+Women,High Education,51,Retired Partner,Working Partner,0.14077525288993015
+Women,High Education,51,Retired Partner,Retired Partner,0.8221787654854413
+Women,High Education,52,Single,Single,0.9892556828045351
+Women,High Education,52,Single,Working Partner,0.010646120685405368
+Women,High Education,52,Single,Retired Partner,9.819651005945555e-05
+Women,High Education,52,Working Partner,Single,0.008719401919337092
+Women,High Education,52,Working Partner,Working Partner,0.968195476357319
+Women,High Education,52,Working Partner,Retired Partner,0.02308512172334388
+Women,High Education,52,Retired Partner,Single,0.03505091302232659
+Women,High Education,52,Retired Partner,Working Partner,0.12340519671834313
+Women,High Education,52,Retired Partner,Retired Partner,0.8415438902593302
+Women,High Education,53,Single,Single,0.9900223333733115
+Women,High Education,53,Single,Working Partner,0.009871354017221997
+Women,High Education,53,Single,Retired Partner,0.00010631260946666151
+Women,High Education,53,Working Partner,Single,0.00936831220998258
+Women,High Education,53,Working Partner,Working Partner,0.9637993127952214
+Women,High Education,53,Working Partner,Retired Partner,0.02683237499479613
+Women,High Education,53,Retired Partner,Single,0.03307376170662708
+Women,High Education,53,Retired Partner,Working Partner,0.107886377449844
+Women,High Education,53,Retired Partner,Retired Partner,0.859039860843529
+Women,High Education,54,Single,Single,0.9907324640930574
+Women,High Education,54,Single,Working Partner,0.009152443024308577
+Women,High Education,54,Single,Retired Partner,0.000115092882634043
+Women,High Education,54,Working Partner,Single,0.010058710403752419
+Women,High Education,54,Working Partner,Working Partner,0.958774479776458
+Women,High Education,54,Working Partner,Retired Partner,0.03116680981978963
+Women,High Education,54,Retired Partner,Single,0.03113258361711856
+Women,High Education,54,Retired Partner,Working Partner,0.09409078358378886
+Women,High Education,54,Retired Partner,Retired Partner,0.8747766327990927
+Women,High Education,55,Single,Single,0.9913899742287697
+Women,High Education,55,Single,Working Partner,0.00848543413674544
+Women,High Education,55,Single,Retired Partner,0.00012459163448469817
+Women,High Education,55,Working Partner,Single,0.010791599752781137
+Women,High Education,55,Working Partner,Working Partner,0.9530350975287305
+Women,High Education,55,Working Partner,Retired Partner,0.03617330271848841
+Women,High Education,55,Retired Partner,Single,0.029241991621562886
+Women,High Education,55,Retired Partner,Working Partner,0.08188187421060907
+Women,High Education,55,Retired Partner,Retired Partner,0.8888761341678282
+Women,High Education,56,Single,Single,0.991998489073887
+Women,High Education,56,Single,Working Partner,0.007866643317046005
+Women,High Education,56,Single,Retired Partner,0.00013486760906701077
+Women,High Education,56,Working Partner,Single,0.011567570277389496
+Women,High Education,56,Working Partner,Working Partner,0.94648582948858
+Women,High Education,56,Working Partner,Retired Partner,0.04194660023403053
+Women,High Education,56,Retired Partner,Single,0.027413404716752323
+Women,High Education,56,Retired Partner,Working Partner,0.0711201573038318
+Women,High Education,56,Retired Partner,Retired Partner,0.901466437979416
+Women,High Education,57,Single,Single,0.9925613765026179
+Women,High Education,57,Single,Working Partner,0.007292639145417192
+Women,High Education,57,Single,Retired Partner,0.0001459843519650254
+Women,High Education,57,Working Partner,Single,0.012386675004904228
+Women,High Education,57,Working Partner,Working Partner,0.9390216745426345
+Women,High Education,57,Working Partner,Retired Partner,0.048591650452461235
+Women,High Education,57,Retired Partner,Single,0.025655368659982452
+Women,High Education,57,Retired Partner,Working Partner,0.061667578416692584
+Women,High Education,57,Retired Partner,Retired Partner,0.9126770529233249
+Women,High Education,58,Single,Single,0.9930817626426858
+Women,High Education,58,Single,Working Partner,0.006760226755078196
+Women,High Education,58,Single,Retired Partner,0.00015801060223596668
+Women,High Education,58,Working Partner,Single,0.013248286324011921
+Women,High Education,58,Working Partner,Working Partner,0.9305280812943307
+Women,High Education,58,Working Partner,Retired Partner,0.056223632381657396
+Women,High Education,58,Retired Partner,Single,0.023973911714508647
+Women,High Education,58,Retired Partner,Working Partner,0.053390801559763154
+Women,High Education,58,Retired Partner,Retired Partner,0.9226352867257281
+Women,High Education,59,Single,Single,0.9935625466762504
+Women,High Education,59,Single,Working Partner,0.006266432607480173
+Women,High Education,59,Single,Retired Partner,0.00017102071626932995
+Women,High Education,59,Working Partner,Single,0.014150932833085014
+Women,High Education,59,Working Partner,Working Partner,0.920881507895078
+Women,High Education,59,Working Partner,Retired Partner,0.06496755927183687
+Women,High Education,59,Retired Partner,Single,0.022372907721325157
+Women,High Education,59,Retired Partner,Working Partner,0.04616351556973558
+Women,High Education,59,Retired Partner,Retired Partner,0.9314635767089392
+Women,High Education,60,Single,Single,0.994006414782575
+Women,High Education,60,Single,Working Partner,0.005808490091270728
+Women,High Education,60,Single,Retired Partner,0.0001850951261542614
+Women,High Education,60,Working Partner,Single,0.015092118824009373
+Women,High Education,60,Working Partner,Working Partner,0.9099505725443358
+Women,High Education,60,Working Partner,Retired Partner,0.07495730863165494
+Women,High Education,60,Retired Partner,Single,0.02085442672809111
+Women,High Education,60,Retired Partner,Working Partner,0.03986792236218627
+Women,High Education,60,Retired Partner,Retired Partner,0.9392776509097226
+Women,High Education,61,Single,Single,0.9944158532405369
+Women,High Education,61,Single,Working Partner,0.005383825924113845
+Women,High Education,61,Single,Retired Partner,0.00020032083534933683
+Women,High Education,61,Working Partner,Single,0.01606813102188953
+Women,High Education,61,Working Partner,Working Partner,0.8975979569795303
+Women,High Education,61,Working Partner,Retired Partner,0.08633391199858022
+Women,High Education,61,Retired Partner,Single,0.019419060296179243
+Women,High Education,61,Retired Partner,Working Partner,0.034395566160497576
+Women,High Education,61,Retired Partner,Retired Partner,0.9461853735433231
+Women,High Education,62,Single,Single,0.9947931607125033
+Women,High Education,62,Single,Working Partner,0.004990047332824163
+Women,High Education,62,Single,Retired Partner,0.00021679195467250612
+Women,High Education,62,Working Partner,Single,0.017073840476703583
+Women,High Education,62,Working Partner,Working Partner,0.8836832330055469
+Women,High Education,62,Working Partner,Retired Partner,0.09924292651774955
+Women,High Education,62,Retired Partner,Single,0.018066214126457522
+Women,High Education,62,Retired Partner,Working Partner,0.029647652377793706
+Women,High Education,62,Retired Partner,Retired Partner,0.9522861334957489
+Women,High Education,63,Single,Single,0.9951404597335888
+Women,High Education,63,Single,Working Partner,0.004624929984541043
+Women,High Education,63,Single,Retired Partner,0.00023461028187008332
+Women,High Education,63,Working Partner,Single,0.018102511565602407
+Women,High Education,63,Working Partner,Working Partner,0.8680667734422284
+Women,High Education,63,Working Partner,Retired Partner,0.11383071499216917
+Women,High Education,63,Retired Partner,Single,0.016794364800667712
+Women,High Education,63,Retired Partner,Working Partner,0.025534987133413747
+Women,High Education,63,Retired Partner,Retired Partner,0.9576706480659185
+Women,High Education,64,Single,Single,0.9954597074320065
+Women,High Education,64,Single,Working Partner,0.004286406639709806
+Women,High Education,64,Single,Retired Partner,0.00025388592828352077
+Women,High Education,64,Working Partner,Single,0.019145634746340023
+Women,High Education,64,Working Partner,Working Partner,0.8506148753572097
+Women,High Education,64,Working Partner,Retired Partner,0.1302394898964503
+Women,High Education,64,Retired Partner,Single,0.015601280377387327
+Women,High Education,64,Retired Partner,Working Partner,0.021977647677358166
+Women,High Education,64,Retired Partner,Retired Partner,0.9624210719452546
+Women,High Education,65,Single,Single,0.9957527055072575
+Women,High Education,65,Single,Working Partner,0.0039725564963297875
+Women,High Education,65,Single,Retired Partner,0.00027473799641268163
+Women,High Education,65,Working Partner,Single,0.02019280459998113
+Women,High Education,65,Working Partner,Working Partner,0.8312061560189482
+Women,High Education,65,Working Partner,Retired Partner,0.1486010393810707
+Women,High Education,65,Retired Partner,Single,0.014484206521791243
+Women,High Education,65,Retired Partner,Working Partner,0.018904473127682522
+Women,High Education,65,Retired Partner,Retired Partner,0.9666113203505261
+Women,High Education,66,Single,Single,0.9960211094933613
+Women,High Education,66,Single,Working Partner,0.003681595194162894
+Women,High Education,66,Single,Retired Partner,0.00029729531247586505
+Women,High Education,66,Working Partner,Single,0.02123166910400102
+Women,High Education,66,Working Partner,Working Partner,0.8097391727268782
+Women,High Education,66,Working Partner,Retired Partner,0.16902915816912084
+Women,High Education,66,Retired Partner,Single,0.013440021010210457
+Women,High Education,66,Retired Partner,Working Partner,0.016252445611967255
+Women,High Education,66,Retired Partner,Retired Partner,0.9703075333778223
+Women,High Education,67,Single,Single,0.9962664373343308
+Women,High Education,67,Single,Working Partner,0.0034118654472775605
+Women,High Education,67,Single,Retired Partner,0.0003216972183914726
+Women,High Education,67,Working Partner,Single,0.022247978932606573
+Women,High Education,67,Working Partner,Working Partner,0.7861410626651463
+Women,High Education,67,Working Partner,Retired Partner,0.19161095840224718
+Women,High Education,67,Retired Partner,Single,0.012465360038836904
+Women,High Education,67,Retired Partner,Working Partner,0.013966015022420356
+Women,High Education,67,Retired Partner,Retired Partner,0.9735686249387429
+Women,High Education,68,Single,Single,0.9964900772986939
+Women,High Education,68,Single,Working Partner,0.0031618282733505256
+Women,High Education,68,Single,Retired Partner,0.000348094427955588
+Women,High Education,68,Working Partner,Single,0.023225765541852374
+Women,High Education,68,Working Partner,Working Partner,0.7603768021578015
+Women,High Education,68,Working Partner,Retired Partner,0.21639743230034614
+Women,High Education,68,Retired Partner,Single,0.011556719953649945
+Women,High Education,68,Retired Partner,Working Partner,0.011996406453143179
+Women,High Education,68,Retired Partner,Retired Partner,0.9764468735932068
+Women,High Education,69,Single,Single,0.996693295259142
+Women,High Education,69,Single,Working Partner,0.002930054788492497
+Women,High Education,69,Single,Retired Partner,0.0003766499523655324
+Women,High Education,69,Working Partner,Single,0.024147672398342274
+Women,High Education,69,Working Partner,Working Partner,0.7324584621048663
+Women,High Education,69,Working Partner,Retired Partner,0.2433938654967914
+Women,High Education,69,Retired Partner,Single,0.010710537942698037
+Women,High Education,69,Retired Partner,Working Partner,0.010300937940324663
+Women,High Education,69,Retired Partner,Retired Partner,0.9789885241169773
+Women,High Education,70,Single,Single,0.9968772413624125
+Women,High Education,70,Single,Working Partner,0.002715218536944118
+Women,High Education,70,Single,Retired Partner,0.00040754010064352207
+Women,High Education,70,Working Partner,Single,0.024995453714446565
+Women,High Education,70,Working Partner,Working Partner,0.7024536187976401
+Women,High Education,70,Working Partner,Retired Partner,0.2725509274879133
+Women,High Education,70,Retired Partner,Single,0.009923254995480827
+Women,High Education,70,Retired Partner,Working Partner,0.008842367125934067
+Women,High Education,70,Retired Partner,Retired Partner,0.9812343778785851
+Women,High Education,71,Single,Single,0.9970429561132966
+Women,High Education,71,Single,Working Partner,0.0025160883257545393
+Women,High Education,71,Single,Retired Partner,0.00044095556094872197
+Women,High Education,71,Working Partner,Single,0.025750638944782366
+Women,High Education,71,Working Partner,Working Partner,0.6704919123127062
+Women,High Education,71,Working Partner,Retired Partner,0.3037574487425115
+Women,High Education,71,Retired Partner,Single,0.009191364111695554
+Women,High Education,71,Retired Partner,Working Partner,0.00758827857631198
+Women,High Education,71,Retired Partner,Retired Partner,0.9832203573119924
+Women,High Education,72,Single,Single,0.9971913758953042
+Women,High Education,72,Single,Working Partner,0.002331521535463636
+Women,High Education,72,Single,Retired Partner,0.00047710256923226796
+Women,High Education,72,Working Partner,Single,0.026395339834839292
+Women,High Education,72,Working Partner,Working Partner,0.6367686830387389
+Women,High Education,72,Working Partner,Retired Partner,0.33683597712642177
+Women,High Education,72,Retired Partner,Single,0.00851144638419963
+Women,High Education,72,Retired Partner,Working Partner,0.006510518349973173
+Women,High Education,72,Retired Partner,Retired Partner,0.9849780352658272
+Women,High Education,73,Single,Single,0.9973233379489862
+Women,High Education,73,Single,Working Partner,0.0021604578788236932
+Women,High Education,73,Single,Retired Partner,0.0005162041721902533
+Women,High Education,73,Working Partner,Single,0.026913152431232355
+Women,High Education,73,Working Partner,Working Partner,0.601544712604772
+Women,High Education,73,Working Partner,Retired Partner,0.3715421349639957
+Women,High Education,73,Retired Partner,Single,0.007880197222133206
+Women,High Education,73,Retired Partner,Working Partner,0.005584678682535857
+Women,High Education,73,Retired Partner,Retired Partner,0.986535124095331
+Women,High Education,74,Single,Single,0.9974395848273063
+Women,High Education,74,Single,Working Partner,0.0020019135806872506
+Women,High Education,74,Single,Retired Partner,0.0005585015920063612
+Women,High Education,74,Working Partner,Single,0.027290083297189377
+Women,High Education,74,Working Partner,Working Partner,0.5651413805935523
+Women,High Education,74,Working Partner,Retired Partner,0.40756853610925825
+Women,High Education,74,Retired Partner,Single,0.007294444640172302
+Women,High Education,74,Retired Partner,Working Partner,0.004789633037539085
+Women,High Education,74,Retired Partner,Retired Partner,0.9879159223222885
+Women,High Education,75,Single,Single,0.99754076834572
+Women,High Education,75,Single,Working Partner,0.001854975953328949
+Women,High Education,75,Single,Retired Partner,0.0006042557009509657
+Women,High Education,75,Working Partner,Single,0.027515412455174366
+Women,High Education,75,Working Partner,Working Partner,0.5279310171277972
+Women,High Education,75,Working Partner,Retired Partner,0.4445535704170285
+Women,High Education,75,Retired Partner,Single,0.006751161230096977
+Women,High Education,75,Retired Partner,Working Partner,0.004107120002366607
+Women,High Education,75,Retired Partner,Retired Partner,0.9891417187675364
+Women,High Education,76,Single,Single,0.9976274530428408
+Women,High Education,76,Single,Working Partner,0.0017187983426399166
+Women,High Education,76,Single,Retired Partner,0.000653748614519319
+Women,High Education,76,Working Partner,Single,0.027582400382542737
+Women,High Education,76,Working Partner,Working Partner,0.4903228288004147
+Women,High Education,76,Working Partner,Retired Partner,0.48209477081704255
+Women,High Education,76,Retired Partner,Single,0.0062474711562908545
+Women,High Education,76,Retired Partner,Working Partner,0.003521373377081624
+Women,High Education,76,Retired Partner,Retired Partner,0.9902311554666277
+Women,High Education,77,Single,Single,0.9977001191657336
+Women,High Education,77,Single,Working Partner,0.0015925954218160817
+Women,High Education,77,Single,Retired Partner,0.0007072854124502012
+Women,High Education,77,Working Partner,Single,0.02748875603594388
+Women,High Education,77,Working Partner,Working Partner,0.4527454003252727
+Women,High Education,77,Working Partner,Retired Partner,0.5197658436387835
+Women,High Education,77,Retired Partner,Single,0.005780653278434609
+Women,High Education,77,Retired Partner,Working Partner,0.00301879514164284
+Women,High Education,77,Retired Partner,Retired Partner,0.9912005515799225
+Women,High Education,78,Single,Single,0.9977591651919868
+Women,High Education,78,Single,Working Partner,0.0014756388103428005
+Women,High Education,78,Single,Retired Partner,0.0007651959976703191
+Women,High Education,78,Working Partner,Single,0.027236807508767048
+Women,High Education,78,Working Partner,Working Partner,0.4156272997582305
+Women,High Education,78,Working Partner,Retired Partner,0.5571358927330023
+Women,High Education,78,Retired Partner,Single,0.0053481413010533505
+Women,High Education,78,Retired Partner,Working Partner,0.0025876676615340256
+Women,High Education,78,Retired Partner,Retired Partner,0.9920641910374127
+Women,High Education,79,Single,Single,0.9978049098987928
+Women,High Education,79,Single,Working Partner,0.0013672529972460692
+Women,High Education,79,Single,Retired Partner,0.0008278371039611092
+Women,High Education,79,Working Partner,Single,0.026833352889377254
+Women,High Education,79,Working Partner,Working Partner,0.3793776225725523
+Women,High Education,79,Working Partner,Retired Partner,0.5937890245380705
+Women,High Education,79,Retired Partner,Single,0.0049475216778885065
+Women,High Education,79,Retired Partner,Working Partner,0.002217901401912347
+Women,High Education,79,Retired Partner,Retired Partner,0.9928345769201992
+Women,High Education,80,Single,Single,0.9978375939873283
+Women,High Education,80,Single,Working Partner,0.001266811548726293
+Women,High Education,80,Single,Retired Partner,0.0008955944639455509
+Women,High Education,80,Working Partner,Single,0.026289209420887923
+Women,High Education,80,Working Partner,Working Partner,0.3443683254740051
+Women,High Education,80,Working Partner,Retired Partner,0.629342465105107
+Women,High Education,80,Retired Partner,Single,0.004576529855808662
+Women,High Education,80,Retired Partner,Working Partner,0.0019008144895766754
+Women,High Education,80,Retired Partner,Retired Partner,0.9935226556546147
+Women,High Education,81,Single,Single,0.9978573812687476
+Women,High Education,81,Single,Working Partner,0.0011737335814072083
+Women,High Education,81,Single,Retired Partner,0.0009688851498452692
+Women,High Education,81,Working Partner,Single,0.025618516078362477
+Women,High Education,81,Working Partner,Working Partner,0.31091991995724166
+Women,High Education,81,Working Partner,Retired Partner,0.6634615639643959
+Women,High Education,81,Retired Partner,Single,0.004233045324494031
+Women,High Education,81,Retired Partner,Working Partner,0.0016289406338138063
+Women,High Education,81,Retired Partner,Retired Partner,0.9941380140416922
+Women,High Education,82,Single,Single,0.9978643594161208
+Women,High Education,82,Single,Working Partner,0.0010874804835146713
+Women,High Education,82,Single,Retired Partner,0.001048160100364436
+Women,High Education,82,Working Partner,Single,0.024837871077123826
+Women,High Education,82,Working Partner,Working Partner,0.2792915844857443
+Women,High Education,82,Working Partner,Retired Partner,0.6958705444371318
+Women,High Education,82,Retired Partner,Single,0.003915085840879841
+Women,High Education,82,Retired Partner,Working Partner,0.0013958621503664646
+Women,High Education,82,Retired Partner,Retired Partner,0.9946890520087537
+Women,High Education,83,Single,Single,0.9978585402846376
+Women,High Education,83,Single,Working Partner,0.0010075528673437314
+Women,High Education,83,Single,Retired Partner,0.0011339068480185255
+Women,High Education,83,Working Partner,Single,0.02396539743053702
+Women,High Education,83,Working Partner,Working Partner,0.2496761283247534
+Women,High Education,83,Working Partner,Retired Partner,0.7263584742447096
+Women,High Education,83,Retired Partner,Single,0.0036208011180470104
+Women,High Education,83,Retired Partner,Working Partner,0.001196065098063165
+Women,High Education,83,Retired Partner,Retired Partner,0.9951831337838899
+Women,High Education,84,Single,Single,0.997839859800381
+Women,High Education,84,Single,Working Partner,0.0009334877373748511
+Women,High Education,84,Single,Retired Partner,0.0012266524622442326
+Women,High Education,84,Working Partner,Single,0.02301982609403248
+Women,High Education,84,Working Partner,Working Partner,0.2221996284279093
+Women,High Education,84,Working Partner,Retired Partner,0.7547805454780582
+Women,High Education,84,Retired Partner,Single,0.003348466203973195
+Women,High Education,84,Retired Partner,Working Partner,0.00102481381464738
+Women,High Education,84,Retired Partner,Retired Partner,0.9956267199813794
+Women,High Education,85,Single,Single,0.9978081774159379
+Women,High Education,85,Single,Working Partner,0.000864855859359573
+Women,High Education,85,Single,Retired Partner,0.0013269667247027364
+Women,High Education,85,Working Partner,Single,0.022019670438167088
+Women,High Education,85,Working Partner,Working Partner,0.19692507022377476
+Women,High Education,85,Working Partner,Retired Partner,0.7810552593380582
+Women,High Education,85,Retired Partner,Single,0.003096474723743025
+Women,High Education,85,Retired Partner,Working Partner,0.0008780424132568656
+Women,High Education,85,Retired Partner,Retired Partner,0.9960254828630001
+Women,High Education,86,Single,Single,0.9977632751290663
+Women,High Education,86,Single,Working Partner,0.0008012593166111957
+Women,High Education,86,Single,Retired Partner,0.0014354655543225782
+Women,High Education,86,Working Partner,Single,0.020982542779275085
+Women,High Education,86,Working Partner,Working Partner,0.1738590154064391
+Women,High Education,86,Working Partner,Retired Partner,0.8051584418142859
+Women,High Education,86,Retired Partner,Single,0.0028633321172642644
+Women,High Education,86,Retired Partner,Working Partner,0.0007522610649013075
+Women,High Education,86,Retired Partner,Retired Partner,0.9963844068178344
+Women,High Education,87,Single,Single,0.9977048560585728
+Women,High Education,87,Single,Working Partner,0.0007423292406068295
+Women,High Education,87,Single,Retired Partner,0.001552814700820407
+Women,High Education,87,Working Partner,Single,0.01992463882707614
+Women,High Education,87,Working Partner,Working Partner,0.15296020627145857
+Women,High Education,87,Working Partner,Retired Partner,0.8271151549014653
+Women,High Education,87,Retired Partner,Single,0.0026476489713851284
+Women,High Education,87,Retired Partner,Working Partner,0.0006444751397382613
+Women,High Education,87,Retired Partner,Retired Partner,0.9967078758888767
+Women,High Education,88,Single,Single,0.9976325425694796
+Women,High Education,88,Single,Working Partner,0.0006877237038336169
+Women,High Education,88,Single,Retired Partner,0.0016797337266868898
+Women,High Education,88,Working Partner,Single,0.01886039358131763
+Women,High Education,88,Working Partner,Working Partner,0.1341490676422953
+Women,High Education,88,Working Partner,Retired Partner,0.8469905387763871
+Women,High Education,88,Retired Partner,Single,0.0024481345189962863
+Women,High Education,88,Retired Partner,Working Partner,0.000552115508005989
+Women,High Education,88,Retired Partner,Retired Partner,0.9969997499729977
+Women,High Education,89,Single,Single,0.9975458739374764
+Women,High Education,89,Single,Working Partner,0.000637125763594494
+Women,High Education,89,Single,Retired Partner,0.0018170002989290255
+Women,High Education,89,Working Partner,Single,0.017802295142162704
+Women,High Education,89,Working Partner,Working Partner,0.11731723220140547
+Women,High Education,89,Working Partner,Retired Partner,0.8648804726564319
+Women,High Education,89,Retired Partner,Single,0.0022635903569333013
+Women,High Education,89,Retired Partner,Working Partner,0.00047297850891311156
+Women,High Education,89,Retired Partner,Retired Partner,0.9972634311341536
+Women,High Education,90,Single,Single,0.9974443035405557
+Women,High Education,90,Single,Working Partner,0.0005902416462284944
+Women,High Education,90,Single,Retired Partner,0.001965454813215848
+Women,High Education,90,Working Partner,Single,0.016760832064213457
+Women,High Education,90,Working Partner,Working Partner,0.10233643657404369
+Women,High Education,90,Working Partner,Retired Partner,0.8809027313617428
+Women,High Education,90,Retired Partner,Single,0.0020929044182015012
+Women,High Education,90,Retired Partner,Working Partner,0.0004051742825481507
+Women,High Education,90,Retired Partner,Retired Partner,0.9975019212992504
+Women,High Education,91,Single,Single,0.9973271955636245
+Women,High Education,91,Single,Working Partner,0.000546799061898438
+Women,High Education,91,Single,Retired Partner,0.002126005374477185
+Women,High Education,91,Working Partner,Single,0.015744544885390063
+Women,High Education,91,Working Partner,Working Partner,0.08906636568034708
+Women,High Education,91,Working Partner,Retired Partner,0.8951890894342629
+Women,High Education,91,Retired Partner,Single,0.0019350452213488683
+Women,High Education,91,Retired Partner,Working Partner,0.00034708232665355476
+Women,High Education,91,Retired Partner,Retired Partner,0.9977178724519976
+Women,High Education,92,Single,Single,0.9971938211997954
+Women,High Education,92,Single,Working Partner,0.0005065456407561665
+Women,High Education,92,Single,Retired Partner,0.00229963315944838
+Women,High Education,92,Working Partner,Single,0.014760152089891721
+Women,High Education,92,Working Partner,Working Partner,0.07736122835149271
+Women,High Education,92,Working Partner,Retired Partner,0.9078786195586157
+Women,High Education,92,Retired Partner,Single,0.001789056409997347
+Women,High Education,92,Retired Partner,Working Partner,0.0002973132880700721
+Women,High Education,92,Retired Partner,Retired Partner,0.9979136303019326
+Women,High Education,93,Single,Single,0.9970433543299573
+Women,High Education,93,Single,Working Partner,0.00046924748191381945
+Women,High Education,93,Single,Retired Partner,0.002487398188128729
+Women,High Education,93,Working Partner,Single,0.013812723519834128
+Women,High Education,93,Working Partner,Working Partner,0.06707501023445317
+Women,High Education,93,Working Partner,Retired Partner,0.9191122662457127
+Women,High Education,93,Retired Partner,Single,0.0016540515880276558
+Women,High Education,93,Retired Partner,Working Partner,0.00025467612921920815
+Women,High Education,93,Retired Partner,Retired Partner,0.9980912722827531
+Women,High Education,94,Single,Single,0.9968748666601528
+Women,High Education,94,Single,Working Partner,0.00043468780723052196
+Women,High Education,94,Single,Retired Partner,0.0026904455326167286
+Women,High Education,94,Working Partner,Single,0.012905878719980462
+Women,High Education,94,Working Partner,Working Partner,0.05806546557486328
+Women,High Education,94,Working Partner,Retired Partner,0.9290286557051564
+Women,High Education,94,Retired Partner,Single,0.0015292094502259944
+Women,High Education,94,Retired Partner,Working Partner,0.00021814992469094935
+Women,High Education,94,Retired Partner,Retired Partner,0.998252640625083
+Women,High Education,95,Single,Single,0.9966873222942445
+Women,High Education,95,Single,Working Partner,0.00040266571246892893
+Women,High Education,95,Single,Retired Partner,0.0029100119932864345
+Women,High Education,95,Working Partner,Single,0.012041992761962425
+Women,High Education,95,Working Partner,Working Partner,0.050196981115545665
+Women,High Education,95,Working Partner,Retired Partner,0.9377610261224919
+Women,High Education,95,Retired Partner,Single,0.0014137692039631038
+Women,High Education,95,Retired Partner,Working Partner,0.00018685964339803452
+Women,High Education,95,Retired Partner,Retired Partner,0.9983993711526389
+Women,High Education,96,Single,Single,0.9964795717173544
+Women,High Education,96,Single,Working Partner,0.0003729950088870123
+Women,High Education,96,Single,Retired Partner,0.0031474332737584662
+Women,High Education,96,Working Partner,Single,0.011222396979321708
+Women,High Education,96,Working Partner,Working Partner,0.04334248114264591
+Women,High Education,96,Working Partner,Retired Partner,0.9454351218780324
+Women,High Education,96,Retired Partner,Single,0.0013070262743809344
+Women,High Education,96,Retired Partner,Working Partner,0.00016005535936077645
+Women,High Education,96,Retired Partner,Retired Partner,0.9985329183662582
+Women,High Education,97,Single,Single,0.9962503451636174
+Women,High Education,97,Single,Working Partner,0.0003455031488089465
+Women,High Education,97,Single,Retired Partner,0.0034041516875736636
+Women,High Education,97,Working Partner,Single,0.010447566307965084
+Women,High Education,97,Working Partner,Working Partner,0.037384552125759724
+Women,High Education,97,Working Partner,Retired Partner,0.9521678815662752
+Women,High Education,97,Retired Partner,Single,0.0012083282833644797
+Women,High Education,97,Retired Partner,Working Partner,0.00013709441042974993
+Women,High Education,97,Retired Partner,Retired Partner,0.9986545773062058
+Women,High Education,98,Single,Single,0.9959982453399633
+Women,High Education,98,Single,Working Partner,0.00032003022916666135
+Women,High Education,98,Single,Retired Partner,0.003681724430869977
+Women,High Education,98,Working Partner,Single,0.009717288376285979
+Women,High Education,98,Working Partner,Working Partner,0.03221595734052313
+Women,High Education,98,Working Partner,Retired Partner,0.9580667542831909
+Women,High Education,98,Retired Partner,Single,0.0011170712910795095
+Women,High Education,98,Retired Partner,Working Partner,0.00011742609046530275
+Women,High Education,98,Retired Partner,Retired Partner,0.9987655026184552
+Women,High Education,99,Single,Single,0.9957217394759176
+Women,High Education,99,Single,Working Partner,0.00029642806742218123
+Women,High Education,99,Single,Retired Partner,0.003981832456660231
+Women,High Education,99,Working Partner,Single,0.009030812104875907
+Women,High Education,99,Working Partner,Working Partner,0.02773969367666086
+Women,High Education,99,Working Partner,Retired Partner,0.9632294942184633
+Women,High Education,99,Retired Partner,Single,0.0010326962879042517
+Women,High Education,99,Retired Partner,Working Partner,0.0001005785178858378
+Women,High Education,99,Retired Partner,Retired Partner,0.9988667251942099
+Women,High Education,100,Single,Single,0.9954191506678588
+Women,High Education,100,Single,Working Partner,0.00027455934467190794
+Women,High Education,100,Single,Retired Partner,0.004306289987469445
+Women,High Education,100,Working Partner,Single,0.008386975437391166
+Women,High Education,100,Working Partner,Working Partner,0.023868720003447027
+Women,High Education,100,Working Partner,Retired Partner,0.9677443045591618
+Women,High Education,100,Retired Partner,Single,0.000954685924049635
+Women,High Education,100,Retired Partner,Working Partner,8.614737316690585e-05
+Women,High Education,100,Retired Partner,Retired Partner,0.9989591667027834

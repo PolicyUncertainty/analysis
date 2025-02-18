@@ -22,10 +22,11 @@ def below_sixty_savings(df):
     mean_savings = df.loc[below_sixty, "savings_dec"].mean()
     return mean_savings
 
-def below_sixty_savings_by_type(df, type_var):
-    df[f'{type_var}_below_sixty'].unique()
-    types = df[f'{type_var}_below_sixty'].unique() 
-    trimmed_df = df["age"] <= 60 &
 
-    mean_savings = df.loc[below_sixty, "savings_dec"].mean()
-    return mean_savings
+# def below_sixty_savings_by_type(df, type_var):
+#     df[f'{type_var}_below_sixty'].unique()
+#     types = df[f'{type_var}_below_sixty'].unique()
+#     trimmed_df = df["age"] <= 60 &
+#
+#     mean_savings = df.loc[below_sixty, "savings_dec"].mean()
+#     return mean_savings

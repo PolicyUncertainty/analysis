@@ -30,11 +30,13 @@ from export_results.tables.cv import calc_compensated_variation
 n_agents = 10000
 seeed = 123
 model_name = "new"
-load_base_solution = True # baseline solution conntainer
-load_second_solution = True # counterfactual solution conntainer
-load_sol_model = True # informed state as type
-load_sim_model = True # informed state stochastic
-load_df = True # True = load existing df, False = create new df, None = create but not save
+load_base_solution = True  # baseline solution conntainer
+load_second_solution = True  # counterfactual solution conntainer
+load_sol_model = True  # informed state as type
+load_sim_model = True  # informed state stochastic
+load_df = (
+    False  # True = load existing df, False = create new df, None = create but not save
+)
 
 
 # Load params
@@ -69,7 +71,7 @@ for i, sra in enumerate(sra_at_63):
         path_dict=path_dict,
         params=params,
         sim_alpha=alpha_sim,
-        expected_alpha=False, # if False, then exp_alpha = alpha_hat and sigma = sigma_hat, else sigma = 0
+        expected_alpha=False,  # if False, then exp_alpha = alpha_hat and sigma = sigma_hat, else sigma = 0
         resolution=True,
         initial_SRA=67,
         model_name=model_name,
@@ -98,7 +100,7 @@ for i, sra in enumerate(sra_at_63):
         sol_model_exists=load_sol_model,
         sim_model_exists=load_sim_model,
     ).reset_index()
-    breakpoint()
+
     load_second_solution = True
     # Calculate results
     for k, df_scen in enumerate([df_cf, df_base]):
@@ -118,6 +120,6 @@ for i, sra in enumerate(sra_at_63):
         params=params,
         specs=specs,
     )
-  
+
 # Save results
 res_df.to_csv(path_dict["sim_results"] + f"counterfactual_1_{model_name}.csv")

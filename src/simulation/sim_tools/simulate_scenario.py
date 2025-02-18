@@ -165,8 +165,9 @@ def simulate_scenario(
     df["total_income"] = (
         df.groupby("agent")["wealth_at_beginning"].shift(-1) - df["savings"]
     )
-    # Finally the savings decision
+    # periodic savings and savings rate
     df["savings_dec"] = df["total_income"] - df["consumption"]
+    df["savings_rate"] = df["savings_dec"] / df["total_income"]
 
     # Create lagged health state to filter out already dead people
     df["health_lag"] = df.groupby("agent")["health"].shift(1)

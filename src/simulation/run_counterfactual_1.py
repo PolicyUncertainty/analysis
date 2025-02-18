@@ -34,7 +34,7 @@ load_base_solution = True
 load_second_solution = True
 load_sol_model = True
 load_sim_model = True
-load_df = None
+load_df = False
 
 
 # Load params
@@ -100,7 +100,7 @@ for i, sra in enumerate(sra_at_63):
     ).reset_index()
 
     load_second_solution = True
-
+    # Calculate results
     for k, df_scen in enumerate([df_cf, df_base]):
         if k == 0:
             pre = ""

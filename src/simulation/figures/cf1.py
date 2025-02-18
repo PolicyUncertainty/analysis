@@ -9,7 +9,7 @@ def plot_savings(path_dict, model_name):
 
     # Load results
     df = pd.read_csv(path_dict["sim_results"] + f"counterfactual_1_{model_name}.csv")
-
+    breakpoint()
     reform_SRA = [67, 68, 69, 70]
     df = df[df["sra_at_63"].isin(reform_SRA)]
     fig, ax = plt.subplots(figsize=(8, 8))

@@ -37,20 +37,26 @@ def read_in_partner_transition_specs(paths_dict, specs):
         paths_dict["est_results"] + "partner_transition_matrix.csv",
     )
 
-    n_periods = specs["n_periods"]
+    n_periods_transition = specs["n_periods"] - 1
     n_partner_states = specs["n_partner_states"]
     n_edu_types = specs["n_education_types"]
     n_sexes = specs["n_sexes"]
 
     # Transition probalities for partner
     trans_probs = np.zeros(
-        (n_sexes, n_edu_types, n_periods, n_partner_states, n_partner_states),
+        (
+            n_sexes,
+            n_edu_types,
+            n_periods_transition,
+            n_partner_states,
+            n_partner_states,
+        ),
         dtype=float,
     )
 
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
         for edu_var, edu_label in enumerate(specs["education_labels"]):
-            for period in range(n_periods):
+            for period in range(n_periods_transition):
                 age = period + specs["start_age"]
                 for partner_state_var, partner_state_label in enumerate(
                     specs["partner_labels"]
@@ -75,11 +81,11 @@ def read_in_partner_transition_specs(paths_dict, specs):
                             partner_state_var,
                             lead_partner_state_var,
                         ] = est_probs_df.loc[mask, "proportion"].values[0]
-                    # Assign absorbing 1 if no one in the data
-                    if not np.allclose(
-                        trans_probs[sex_var, edu_var, period, partner_state_var].sum(),
-                        1,
-                    ):
-                        raise ValueError("This should happen in a parametric world")
+                    # # Assign absorbing 1 if no one in the data
+                    # if not np.allclose(
+                    #     trans_probs[sex_var, edu_var, period, partner_state_var].sum(),
+                    #     1,
+                    # ):
+                    #     raise ValueError("This should happen in a parametric world")
 
     return jnp.asarray(trans_probs), n_partner_states

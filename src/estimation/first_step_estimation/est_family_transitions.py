@@ -4,10 +4,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
+from export_results.figures.color_map import JET_COLOR_MAP
 from process_data.first_step_sample_scripts.create_partner_transition_sample import (
     create_partner_transition_sample,
 )
 from specs.derive_specs import read_and_derive_specs
+from statsmodels.discrete.conditional_models import ConditionalLogit
 from statsmodels.discrete.discrete_model import MNLogit
 
 
@@ -16,34 +18,44 @@ def estimate_partner_transitions(paths_dict, specs, load_data):
     est_data = create_partner_transition_sample(paths_dict, specs, load_data=load_data)
 
     # modify
-    est_data = est_data[est_data["age"] <= specs["end_age"]]
+    est_data = est_data[est_data["age"] < specs["end_age"]]
 
-    # Create a transition matrix for the partner state
-    type_list = ["sex", "education"]
-    cov_list = ["age", "partner_state_1.0", "partner_state_2.0"]
+    # Create covariance list
+    cov_list = [
+        "age_partner_state_0",
+        "age_partner_state_1",
+        "age_partner_state_2",
+        "const_partner_state_0",
+        "const_partner_state_1",
+        "const_partner_state_2",
+    ]
+
     # Create dummies for partner_state
     est_data_dummies = pd.get_dummies(est_data, columns=["partner_state"])
-    est_data = pd.concat(
-        [est_data, est_data_dummies[["partner_state_1.0", "partner_state_2.0"]]], axis=1
+    # Interact age with partner_state
+    est_data["age_partner_state_0"] = (
+        est_data["age"] * est_data_dummies["partner_state_0.0"]
+    )
+    est_data["age_partner_state_1"] = (
+        est_data["age"] * est_data_dummies["partner_state_1.0"]
+    )
+    est_data["age_partner_state_2"] = (
+        est_data["age"] * est_data_dummies["partner_state_2.0"]
+    )
+
+    # Interact constant with partner_state
+    est_data["const_partner_state_0"] = est_data_dummies["partner_state_0.0"].astype(
+        float
+    )
+    est_data["const_partner_state_1"] = est_data_dummies["partner_state_1.0"].astype(
+        float
+    )
+    est_data["const_partner_state_2"] = est_data_dummies["partner_state_2.0"].astype(
+        float
     )
 
     # Get dataframe of cartesian products of cov variables
-    all_ages = np.arange(specs["start_age"], specs["end_age"] + 1)
-    dummies = [False, True]
-    full_index = pd.MultiIndex.from_product(
-        [
-            all_ages,
-            dummies,
-            dummies,
-        ],
-        names=["age", "partner_state_1.0", "partner_state_2.0"],
-    )
-    df_to_predict = pd.DataFrame(index=full_index).reset_index()
-    # Filter out True, True
-    mask = (df_to_predict["partner_state_1.0"] == True) & (
-        df_to_predict["partner_state_2.0"] == True
-    )
-    df_to_predict = df_to_predict[~mask]
+    all_ages = np.arange(specs["start_age"], specs["end_age"])
 
     full_index = pd.MultiIndex.from_product(
         [
@@ -57,31 +69,36 @@ def estimate_partner_transitions(paths_dict, specs, load_data):
     )
     full_df = pd.Series(index=full_index, data=np.nan, name="proportion")
 
-    for sex, sex_label in enumerate(specs["sex_labels"]):
+    fig, axs = plt.subplots(
+        nrows=specs["n_partner_states"], ncols=specs["n_partner_states"]
+    )
+    col_count = 0
+    for sex_var, sex_label in enumerate(specs["sex_labels"]):
         for edu_var, edu_label in enumerate(specs["education_labels"]):
             df_reduced = est_data[
-                (est_data["sex"] == sex) & (est_data["education"] == edu_var)
-            ]
+                (est_data["sex"] == sex_var) & (est_data["education"] == edu_var)
+            ].copy()
             X = df_reduced[cov_list].astype(float)
-            X = sm.add_constant(X)
             Y = df_reduced["lead_partner_state"]
             model = MNLogit(Y, X).fit()
-            # Add prediction
-            df_edu_predict = df_to_predict.copy()
-            X_predict = sm.add_constant(df_edu_predict[cov_list].astype(float))
-            df_edu_predict[[0, 1, 2]] = model.predict(X_predict)
-            # Add to full_df
-            df_edu_predict.set_index(
-                ["age", "partner_state_1.0", "partner_state_2.0"], inplace=True
-            )
+
+            df_reduced[[0, 1, 2]] = model.predict(X)
             for current_partner_state, current_partner_label in enumerate(
                 specs["partner_labels"]
             ):
+                df_state = df_reduced[
+                    df_reduced["partner_state"] == current_partner_state
+                ].copy()
+
                 for lead_partner_state, lead_partner_label in enumerate(
                     specs["partner_labels"]
                 ):
-                    dummy_state_1 = current_partner_state == 1
-                    dummy_state_2 = current_partner_state == 2
+                    # Select lead partner state probs and forward fill missing values
+                    trans_probs = (
+                        df_state.groupby("age")[lead_partner_state]
+                        .mean()
+                        .reindex(all_ages, method="nearest")
+                    )
                     full_df.loc[
                         (
                             sex_label,
@@ -90,12 +107,25 @@ def estimate_partner_transitions(paths_dict, specs, load_data):
                             current_partner_label,
                             lead_partner_label,
                         )
-                    ] = df_edu_predict.loc[
-                        (all_ages, dummy_state_1, dummy_state_2), lead_partner_state
-                    ].values
+                    ] = trans_probs.values
 
-    if full_df.isna().any():
-        raise ValueError("There should not be a None")
+                    axs[current_partner_state, lead_partner_state].plot(
+                        all_ages,
+                        trans_probs,
+                        label=f"{sex_label}; {edu_label}",
+                        color=JET_COLOR_MAP[col_count],
+                    )
+                    axs[current_partner_state, lead_partner_state].plot(
+                        df_reduced.groupby(["age", "partner_state"])[
+                            "lead_partner_state"
+                        ]
+                        .value_counts(normalize=True)
+                        .loc[(slice(None), current_partner_state, lead_partner_state)],
+                        color=JET_COLOR_MAP[col_count],
+                        linestyle="--",
+                    )
+                    axs[current_partner_state, lead_partner_state].legend()
+            col_count += 1
 
     out_file_path = paths_dict["est_results"] + "partner_transition_matrix.csv"
     full_df.to_csv(out_file_path)

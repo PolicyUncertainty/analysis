@@ -19,8 +19,9 @@ def solve_and_simulate_scenario(
     initial_SRA,
     resolution,
     model_name,
-    df_exists,
-    solution_exists,
+    df_exists=True,
+    only_informed=False,
+    solution_exists=True,
     sol_model_exists=True,
     sim_model_exists=True,
 ):
@@ -49,9 +50,14 @@ def solve_and_simulate_scenario(
 
     solve_folder = get_model_resutls_path(path_dict, model_name)
 
+    if only_informed:
+        name_prefix = "debiased_"
+    else:
+        name_prefix = ""
     # Make intitial SRA only two digits after point
     df_file = (
-        solve_folder["simulation"]
+        name_prefix
+        + solve_folder["simulation"]
         + f"sra_"
         + "{:.2f}".format(expected_alpha)
         + model_sol_names["simulation"]
@@ -71,6 +77,7 @@ def solve_and_simulate_scenario(
             solution=solution_est,
             model_of_solution=model,
             sim_model_exists=sim_model_exists,
+            only_informed=only_informed,
         )
         if df_exists is None:
             return data_sim
@@ -90,6 +97,7 @@ def simulate_scenario(
     solution,
     model_of_solution,
     sim_model_exists,
+    only_informed=False,
 ):
     model_sim, params = specify_model(
         path_dict=path_dict,
@@ -109,6 +117,7 @@ def simulate_scenario(
         inital_SRA=initial_SRA,
         n_agents=n_agents,
         seed=seed,
+        only_informed=only_informed,
     )
 
     sim_dict = simulate_all_periods(
@@ -165,6 +174,10 @@ def simulate_scenario(
     df["total_income"] = (
         df.groupby("agent")["wealth_at_beginning"].shift(-1) - df["savings"]
     )
+    df["income_wo_interest"] = df.groupby("agent")["wealth_at_beginning"].shift(
+        -1
+    ) - df["savings"] * (1 + params["interest_rate"])
+     
     # periodic savings and savings rate
     df["savings_dec"] = df["total_income"] - df["consumption"]
     df["savings_rate"] = df["savings_dec"] / df["total_income"]

@@ -3,10 +3,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from dcegm.wealth_correction import adjust_observed_wealth
+from model_code.stochastic_processes.job_offers import job_offer_process_transition
 from scipy.stats import pareto
 
 
-def generate_start_states(path_dict, params, model, inital_SRA, n_agents, seed):
+def generate_start_states(
+    path_dict, params, model, inital_SRA, n_agents, seed, only_informed=False
+):
     specs = model["options"]["model_params"]
 
     observed_data = pd.read_pickle(
@@ -65,7 +68,8 @@ def generate_start_states(path_dict, params, model, inital_SRA, n_agents, seed):
     exp_agents = np.empty(n_agents, np.float64)
     lagged_choice = np.empty(n_agents, np.uint8)
     partner_states = np.empty(n_agents, np.uint8)
-    health_agents = np.empty(n_agents, np.float64)
+    health_agents = np.empty(n_agents, np.uint8)
+    job_offer_agents = np.empty(n_agents, np.uint8)
 
     for sex_var in range(specs["n_sexes"]):
         for edu in range(specs["n_education_types"]):
@@ -117,6 +121,22 @@ def generate_start_states(path_dict, params, model, inital_SRA, n_agents, seed):
             )
             lagged_choice[type_mask] = lagged_choice_edu
 
+            # Generate job offer probabilities
+            job_offer_probs = job_offer_process_transition(
+                params=params,
+                sex=jnp.ones_like(lagged_choice_edu) * sex_var,
+                options=specs,
+                education=jnp.ones_like(lagged_choice_edu) * edu,
+                period=jnp.zeros_like(lagged_choice_edu),
+                choice=lagged_choice_edu,
+            ).T
+            # Job offer probs is n_agents x 2. Choose for each row the job offer state
+            # with np random choice
+            job_offer_edu = np.array(
+                [np.random.choice(a=len(p), p=p) for p in job_offer_probs]
+            )
+            job_offer_agents[type_mask] = job_offer_edu
+
             # Get type specific partner states
             empirical_partner_probs = start_period_data_edu[
                 "partner_state"
@@ -167,7 +187,7 @@ def generate_start_states(path_dict, params, model, inital_SRA, n_agents, seed):
         "informed": jnp.array(informed_agents, dtype=jnp.uint8),
         "lagged_choice": jnp.array(lagged_choice, dtype=jnp.uint8),
         "policy_state": policy_state_agents,
-        "job_offer": jnp.ones_like(exp_agents, dtype=jnp.uint8),
+        "job_offer": jnp.array(job_offer_agents, dtype=jnp.uint8),
         "partner_state": jnp.array(partner_states, dtype=jnp.uint8),
     }
     return states, wealth_agents

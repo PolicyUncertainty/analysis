@@ -7,12 +7,8 @@ import yaml
 from estimation.struct_estimation.scripts.estimate_setup import load_and_prep_data
 from export_results.figures.color_map import JET_COLOR_MAP
 from model_code.policy_processes.policy_states_belief import (
-    expected_SRA_probs_estimation,
-)
-from model_code.policy_processes.policy_states_belief import (
     update_specs_exp_ret_age_trans_mat,
 )
-from model_code.specify_model import specify_model
 from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 
 
@@ -32,10 +28,9 @@ def plot_sim_vars(
     data_sim = solve_and_simulate_scenario(
         path_dict=path_dict,
         params=params,
-        sim_alpha=0.0,
-        expected_alpha=0.0,
-        resolution=True,
-        initial_SRA=67,
+        subj_unc=True,
+        custom_resolution_age=None,
+        SRA_at_start=67,
         model_name=model_name,
         df_exists=load_df,
         solution_exists=load_solution,

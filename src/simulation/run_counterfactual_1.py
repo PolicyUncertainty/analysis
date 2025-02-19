@@ -63,17 +63,15 @@ res_df = pd.DataFrame(
 res_df["sra_at_63"] = sra_at_63
 for i, sra in enumerate(sra_at_63):
     print("Start simulation for sra: ", sra)
-    # Calculate how much it has to increase starting from 67 in beaseline
-    alpha_sim = (sra - 67) / (63 - specs["start_age"])
 
     # Simulate baseline with subjective belief
     df_base = solve_and_simulate_scenario(
         path_dict=path_dict,
         params=params,
-        sim_alpha=alpha_sim,
-        expected_alpha=False,  # if False, then exp_alpha = alpha_hat and sigma = sigma_hat, else sigma = 0
-        resolution=True,
-        initial_SRA=67,
+        subj_unc=False,
+        custom_resolution_age=None,
+        SRA_at_resolution=sra,
+        SRA_at_start=67,
         model_name=model_name,
         df_exists=load_df,
         solution_exists=load_base_solution,
@@ -90,10 +88,10 @@ for i, sra in enumerate(sra_at_63):
     df_cf = solve_and_simulate_scenario(
         path_dict=path_dict,
         params=params,
-        sim_alpha=0.0,
-        expected_alpha=0.0,
-        resolution=True,
-        initial_SRA=sra,
+        subj_unc=False,
+        custom_resolution_age=None,
+        SRA_at_resolution=sra,
+        SRA_at_start=sra,
         model_name=model_name,
         df_exists=load_df,
         solution_exists=load_second_solution,

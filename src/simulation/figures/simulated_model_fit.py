@@ -7,9 +7,6 @@ import yaml
 from estimation.struct_estimation.scripts.estimate_setup import load_and_prep_data
 from export_results.figures.color_map import JET_COLOR_MAP
 from model_code.policy_processes.policy_states_belief import (
-    expected_SRA_probs_estimation,
-)
-from model_code.policy_processes.policy_states_belief import (
     update_specs_exp_ret_age_trans_mat,
 )
 from model_code.specify_model import specify_model
@@ -34,10 +31,10 @@ def plot_quantiles(
     data_sim = solve_and_simulate_scenario(
         path_dict=path_dict,
         params=params,
-        sim_alpha=0.0,
-        initial_SRA=67,
-        expected_alpha=False,
-        resolution=False,
+        subj_unc=True,
+        custom_resolution_age=None,
+        SRA_at_resolution=67,
+        SRA_at_start=67,
         model_name=model_name,
         df_exists=load_df,
         solution_exists=load_solution,
@@ -48,8 +45,8 @@ def plot_quantiles(
     # Generate model_specs
     model, params = specify_model(
         path_dict=path_dict,
-        update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
-        policy_state_trans_func=expected_SRA_probs_estimation,
+        subj_unc=False,
+        custom_resolution_age=None,
         params=params,
         load_model=True,
         model_type="solution",
@@ -125,10 +122,10 @@ def plot_choice_shares_single(
     data_sim = solve_and_simulate_scenario(
         path_dict=path_dict,
         params=params,
-        sim_alpha=0.0,
-        expected_alpha=False,
-        resolution=False,
-        initial_SRA=67,
+        subj_unc=True,
+        custom_resolution_age=None,
+        SRA_at_resolution=67,
+        SRA_at_start=67,
         model_name=model_name,
         df_exists=load_df,
         solution_exists=load_solution,
@@ -195,10 +192,10 @@ def plot_states(
     data_sim = solve_and_simulate_scenario(
         path_dict=path_dict,
         params=params,
-        sim_alpha=0.0,
-        expected_alpha=False,
-        resolution=False,
-        initial_SRA=67,
+        subj_unc=True,
+        custom_resolution_age=None,
+        SRA_at_resolution=67,
+        SRA_at_start=67,
         model_name=model_name,
         df_exists=load_df,
         solution_exists=load_solution,
@@ -219,8 +216,8 @@ def plot_states(
     # Generate model_specs
     model, params = specify_model(
         path_dict=path_dict,
-        update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
-        policy_state_trans_func=expected_SRA_probs_estimation,
+        subj_unc=False,
+        custom_resolution_age=None,
         params=params,
         load_model=load_sol_model,
         model_type="solution",

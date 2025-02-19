@@ -45,18 +45,17 @@ def realized_policy_step_function(policy_state, period, lagged_choice, choice, o
     return trans_vector
 
 
-def create_update_function_for_slope(slope):
-    def update_specs_for_step_function_with_slope(specs, path_dict):
-        return update_specs_step_function_with_slope(specs, slope)
+def update_specs_step_function_with_slope_and_resolution(specs, slope):
+    # First update specs to create policy step periods
+    specs = update_specs_step_function_with_slope(specs, slope)
+    policy_step_periods = specs["policy_step_periods"]
 
-    return update_specs_for_step_function_with_slope
+    resolution_period = specs["resolution_age"] - specs["start_age"]
+    # Delete all periods from policy step periods which are larger or equal to the resolution period
+    policy_step_periods = policy_step_periods[policy_step_periods < resolution_period]
 
-
-def create_update_function_for_slope_and_resolution(slope):
-    def update_specs_for_step_function_with_slope_and_resolution(specs, path_dict):
-        return update_specs_step_function_with_slope_and_resolution(specs, slope)
-
-    return update_specs_for_step_function_with_slope_and_resolution
+    specs["policy_step_periods"] = policy_step_periods
+    return specs
 
 
 def update_specs_step_function_with_slope(specs, slope):
@@ -71,26 +70,4 @@ def update_specs_step_function_with_slope(specs, slope):
     specs["policy_step_periods"] = (
         np.where(policy_state_ids > np.roll(policy_state_ids, shift=1))[0] - 1
     )
-    return specs
-
-
-def update_specs_step_function_with_slope_and_resolution(specs, slope):
-    # Generate policy state steps for individuals who start in 0. First calculate the
-    # per year expected increase in policy state
-    working_life_span = specs["max_ret_age"] - specs["start_age"] + 1
-    per_period_expec_increase = np.arange(1, working_life_span + 1) * slope
-    # Then round to the nearest value, which you can do by multiplying with the
-    # inverse of the grid size. In the baseline case 1 / 0.25 = 4
-    multiplier = 1 / specs["SRA_grid_size"]
-    policy_state_ids = np.round(per_period_expec_increase * multiplier)
-    # Now we want to increase the resolution of the policy state steps
-    policy_state_ids = np.round(per_period_expec_increase * multiplier)
-    policy_step_periods = (
-        np.where(policy_state_ids > np.roll(policy_state_ids, shift=1))[0] - 1
-    )
-    resolution_period = specs["resolution_age"] - specs["start_age"]
-    # Delete all periods from policy step periods which are larger or equal to the resolution period
-    policy_step_periods = policy_step_periods[policy_step_periods < resolution_period]
-
-    specs["policy_step_periods"] = policy_step_periods
     return specs

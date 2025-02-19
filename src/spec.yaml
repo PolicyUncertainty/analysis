@@ -21,7 +21,7 @@ partner_labels: ["Single","Working Partner", "Retired Partner"]
 SRA_grid_size: 0.25
 min_SRA: 65
 max_SRA: 72
-resolution_age: 63
+resolution_age_estimation: 63
 informed_threshhold: 5
 
 # Retirement parameters

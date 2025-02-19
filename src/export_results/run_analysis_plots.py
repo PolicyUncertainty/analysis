@@ -52,29 +52,28 @@ from export_results.figures.expected_health import (
 # ######################################
 # exec_mortality = input("Execute Mortality characteristics? (y/n) ") == "y"
 # if exec_mortality:
-from export_results.figures.plot_mortality import (
-    plot_mortality,
-)
-
-plot_mortality(path_dict, specs)
-plt.show()
-plt.close("all")
-
-exit()
+# from export_results.figures.plot_mortality import (
+#     plot_mortality,
+# )
+#
+# plot_mortality(path_dict, specs)
+# plt.show()
+# plt.close("all")
+#
+# exit()
 # %%###################################
 # Family characteristics
 ######################################
-# exec_family = input("Execute family characteristics? (y/n) ") == "y"
-# if exec_family:
-# from export_results.figures.family_params import (
-#     plot_children,
-#     plot_marriage_and_divorce,
-# )
-#
-# plot_children(path_dict, specs)
-# plot_marriage_and_divorce(path_dict, specs)
-# plt.show()
-# plt.close("all")
+from export_results.figures.family_params import (
+    plot_children,
+    plot_marriage_and_divorce,
+)
+
+plot_children(path_dict, specs)
+plot_marriage_and_divorce(path_dict, specs)
+plt.show()
+plt.close("all")
+exit()
 
 
 # %% ########################################

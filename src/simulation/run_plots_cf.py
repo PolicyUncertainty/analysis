@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from set_paths import create_path_dict
 from simulation.figures.cf1 import plot_savings
+from simulation.figures.cf1 import plot_savings_heterogeneity
 from simulation.figures.cf2 import plot_cf2_plots
 
 path_dict = create_path_dict()
@@ -12,7 +13,7 @@ model_name = "new"
 
 # Exclude the first rpw
 plot_savings(path_dict, model_name)
-
+plot_savings_heterogeneity(path_dict, model_name)
 
 # Exclude the first rpw
 plot_cf2_plots(path_dict, model_name)

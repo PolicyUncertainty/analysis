@@ -31,3 +31,6 @@ ll*.txt
 
 # Installation files
 *.egg-info/
+
+# Debug files
+src/*/debug/

@@ -1,6 +1,7 @@
 # %%
 import os
 
+import matplotlib.pyplot as plt
 import pandas as pd
 from process_data.aux_and_plots.filter_data import filter_below_age
 from process_data.aux_and_plots.filter_data import filter_years
@@ -27,15 +28,16 @@ def create_partner_transition_sample(paths, specs, load_data=False):
 
     df = create_education_type(df)
 
-    # Filter estimation years
-    df = filter_years(df, specs["start_year"], specs["end_year"])
+    df = recode_sex(df)
+
+    # Filter estimation years, keep one more for leading
+    df = filter_years(df, specs["start_year"], specs["end_year"] + 1)
 
     # In this function also merging is called
     df = create_partner_and_lagged_state(df, specs)
 
     # Filter age and sex
     df = filter_below_age(df, specs["start_age"])
-    df = recode_sex(df)
 
     df = df[
         ["age", "sex", "education", "partner_state", "lead_partner_state", "children"]
@@ -68,6 +70,8 @@ def load_and_merge_soep_core(soep_c38_path):
         columns=["syear", "pid", "hid", "sex", "parid", "gebjahr"],
         convert_categoricals=False,
     )
+    ppathl_data["age"] = ppathl_data["syear"] - ppathl_data["gebjahr"]
+
     pequiv_data = pd.read_stata(
         # d11107: number of children in household
         f"{soep_c38_path}/pequiv.dta",
@@ -88,10 +92,11 @@ def create_partner_and_lagged_state(df, specs):
     # The following code is dependent on span dataframe being called first.
     # In particular the lagged partner state must be after span dataframe and create partner state.
     # We should rewrite this
-    df = span_dataframe(df, specs["start_year"], specs["end_year"])
+    df = span_dataframe(df, specs["start_year"], specs["end_year"] + 1)
 
-    df = create_partner_state(df)
+    df = create_partner_state(df, filter_missing=False)
     df["lead_partner_state"] = df.groupby(["pid"])["partner_state"].shift(-1)
+
     df = df[df["lead_partner_state"].notna()]
     df = df[df["partner_state"].notna()]
     print(

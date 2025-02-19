@@ -17,9 +17,6 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
     load_and_set_start_params,
 )
 from model_code.policy_processes.policy_states_belief import (
-    expected_SRA_probs_estimation,
-)
-from model_code.policy_processes.policy_states_belief import (
     update_specs_exp_ret_age_trans_mat,
 )
 from model_code.specify_model import specify_model
@@ -147,8 +144,8 @@ class est_class_from_paths:
         model, params = specify_model(
             path_dict=path_dict,
             params=start_params_all,
-            update_spec_for_policy_state=update_specs_exp_ret_age_trans_mat,
-            policy_state_trans_func=expected_SRA_probs_estimation,
+            subj_unc=True,
+            custom_resolution_age=None,
             load_model=load_model,
             model_type="solution",
         )

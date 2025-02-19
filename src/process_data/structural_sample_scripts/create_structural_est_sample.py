@@ -65,8 +65,25 @@ def create_structural_est_sample(paths, specs, load_data=False):
     df = df[~(mask & (df["choice"] == 2))]
     df = df[~(mask & (df["lagged_choice"] == 2))]
 
+    # Rename to monthly wage
+    df.rename(
+        columns={
+            "pglabgro": "monthly_wage",
+            "hlc0005_v2": "hh_net_income",
+        },
+        inplace=True,
+    )
+
+    type_dict_add = {
+        "monthly_wage": "float32",
+        "hh_net_income": "float32",
+    }
+
+    df["hh_net_income"] /= specs["wealth_unit"]
+
     # Keep relevant columns (i.e. state variables) and set their minimal datatype
     type_dict = {
+        **type_dict_add,
         "period": "int8",
         "choice": "int8",
         "lagged_choice": "int8",
@@ -139,9 +156,11 @@ def load_and_merge_soep_core(soep_c38_path):
     # get household level data
     hl_data = pd.read_stata(
         f"{soep_c38_path}/hl.dta",
-        columns=["hid", "syear", "hlc0043"],
+        columns=["hid", "syear", "hlc0005_v2"],
         convert_categoricals=False,
     )
+    hl_data["hlc0005_v2"] *= 12
+
     merged_data = pd.merge(merged_data, hl_data, on=["hid", "syear"], how="left")
     pequiv_data = pd.read_stata(
         # d11107: number of children in household

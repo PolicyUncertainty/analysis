@@ -9,7 +9,7 @@ from model_code.policy_processes.informed_state_transition import (
     informed_transition,
 )
 from model_code.policy_processes.select_policy_belief import (
-    select_expectation_functions_and_model_sol_names,
+    select_transition_func_and_update_specs,
 )
 from model_code.state_space import create_state_space_functions
 from model_code.stochastic_processes.health_transition import health_transition
@@ -25,13 +25,22 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 
 def specify_model(
     path_dict,
-    update_spec_for_policy_state,
-    policy_state_trans_func,
     params,
+    subj_unc,
+    custom_resolution_age,
+    sim_alpha=None,
     load_model=False,
     model_type="solution",
 ):
     """Generate model and options dictionaries."""
+    # Check if subjective uncertainty is not requested in simulation model type
+    if subj_unc and model_type == "simulation":
+        raise ValueError("Subjective uncertainty is not available in simulation model")
+
+    # Check if sim_alpha is given and model type is solution. Then error
+    if sim_alpha is not None and model_type == "solution":
+        raise ValueError("sim_alpha is only available for simulation model")
+
     # Generate model_specs
     specs = generate_derived_and_data_derived_specs(path_dict)
 
@@ -41,9 +50,12 @@ def specify_model(
     params["beta"] = specs["discount_factor"]
 
     # Execute load first step estimation data
-    specs = update_spec_for_policy_state(
-        specs=specs,
+    specs, transition_func_sol = select_transition_func_and_update_specs(
         path_dict=path_dict,
+        specs=specs,
+        subj_unc=subj_unc,
+        sim_alpha=sim_alpha,
+        custom_resolution_age=custom_resolution_age,
     )
 
     # Load specifications
@@ -68,7 +80,7 @@ def specify_model(
             },
             "exogenous_processes": {
                 "policy_state": {
-                    "transition": policy_state_trans_func,
+                    "transition": transition_func_sol,
                     "states": np.arange(n_policy_states, dtype=int),
                 },
                 "job_offer": {
@@ -143,8 +155,8 @@ def specify_and_solve_model(
     path_dict,
     file_append,
     params,
-    expected_alpha,
-    resolution,
+    subj_unc,
+    custom_resolution_age,
     load_model,
     load_solution,
 ):
@@ -153,30 +165,29 @@ def specify_and_solve_model(
     Also includes possibility to save solutions.
 
     """
-    (
-        update_funcs,
-        transition_funcs,
-        model_sol_names,
-    ) = select_expectation_functions_and_model_sol_names(
-        path_dict,
-        expected_alpha=expected_alpha,
-        sim_alpha=None,
-        resolution=resolution,
-    )
 
     # Generate model_specs
     model, params = specify_model(
         path_dict=path_dict,
-        update_spec_for_policy_state=update_funcs["solution"],
-        policy_state_trans_func=transition_funcs["solution"],
         params=params,
+        subj_unc=subj_unc,
+        custom_resolution_age=custom_resolution_age,
+        sim_alpha=None,
         load_model=load_model,
         model_type="solution",
     )
 
     # check if folder of model objects exits:
     solve_folder = get_model_resutls_path(path_dict, file_append)
-    solution_file = solve_folder["solution"] + model_sol_names["solution"]
+
+    # Generate name of solution
+    if subj_unc:
+        resolution_age = model["options"]["model_params"]["resolution_age"]
+        sol_name = f"sol_subj_unc_{resolution_age}.pkl"
+    else:
+        sol_name = "sol_no_subj_unc.pkl"
+
+    solution_file = solve_folder["solution"] + sol_name
 
     if load_solution is None:
         solution = {}

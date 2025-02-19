@@ -30,11 +30,13 @@ from export_results.tables.cv import calc_compensated_variation
 n_agents = 10000
 seeed = 123
 model_name = "new"
-load_base_solution = True
-load_second_solution = True
-load_sol_model = True
-load_sim_model = True
-load_df = None
+load_base_solution = True  # baseline solution conntainer
+load_second_solution = True  # counterfactual solution conntainer
+load_sol_model = True  # informed state as type
+load_sim_model = True  # informed state stochastic
+load_df = (
+    False  # True = load existing df, False = create new df, None = create but not save
+)
 
 
 # Load params
@@ -61,17 +63,15 @@ res_df = pd.DataFrame(
 res_df["sra_at_63"] = sra_at_63
 for i, sra in enumerate(sra_at_63):
     print("Start simulation for sra: ", sra)
-    # Calculate how much it has to increase starting from 67 in beaseline
-    alpha_sim = (sra - 67) / (63 - specs["start_age"])
 
     # Simulate baseline with subjective belief
     df_base = solve_and_simulate_scenario(
         path_dict=path_dict,
         params=params,
-        sim_alpha=alpha_sim,
-        expected_alpha=False,
-        resolution=True,
-        initial_SRA=67,
+        subj_unc=False,
+        custom_resolution_age=None,
+        SRA_at_resolution=sra,
+        SRA_at_start=67,
         model_name=model_name,
         df_exists=load_df,
         solution_exists=load_base_solution,
@@ -88,10 +88,10 @@ for i, sra in enumerate(sra_at_63):
     df_cf = solve_and_simulate_scenario(
         path_dict=path_dict,
         params=params,
-        sim_alpha=0.0,
-        expected_alpha=0.0,
-        resolution=True,
-        initial_SRA=sra,
+        subj_unc=False,
+        custom_resolution_age=None,
+        SRA_at_resolution=sra,
+        SRA_at_start=sra,
         model_name=model_name,
         df_exists=load_df,
         solution_exists=load_second_solution,
@@ -100,7 +100,7 @@ for i, sra in enumerate(sra_at_63):
     ).reset_index()
 
     load_second_solution = True
-
+    # Calculate results
     for k, df_scen in enumerate([df_cf, df_base]):
         if k == 0:
             pre = ""

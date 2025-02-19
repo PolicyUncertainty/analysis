@@ -4,30 +4,6 @@ import numpy as np
 from scipy.stats import norm
 
 
-def expected_SRA_probs_estimation(policy_state, choice, lagged_choice, options):
-    trans_mat = options["policy_states_trans_mat"]
-    # Take the row of the transition matrix for expected policy change
-    trans_vector_not_retired = jnp.take(trans_mat, policy_state, axis=0)
-
-    # If fresh retired, you stay one more year in the same policy state
-    fresh_retired = (choice == 0) & (lagged_choice != 0)
-    trans_vector = select_no_policy_change(
-        no_change_bool=fresh_retired,
-        n_policy_states=options["n_policy_states"],
-        current_policy_state=policy_state,
-        trans_vector_policy_change=trans_vector_not_retired,
-    )
-
-    trans_vector = check_for_longer_retirement_and_degenerate_vector(
-        choice=choice,
-        lagged_choice=lagged_choice,
-        degenerate_probs=trans_mat[-1, :],
-        trans_vector=trans_vector,
-    )
-
-    return trans_vector
-
-
 def expected_SRA_with_resolution(period, policy_state, choice, lagged_choice, options):
     trans_mat = options["policy_states_trans_mat"]
     # Take the row of the transition matrix for expected policy change
@@ -127,3 +103,28 @@ def update_specs_exp_ret_age_trans_mat(specs, path_dict):
     policy_states_trans_mat = np.vstack((policy_states_trans_mat, last_row))
     specs["policy_states_trans_mat"] = policy_states_trans_mat
     return specs
+
+
+#
+# def expected_SRA_probs_estimation_without_resolution(policy_state, choice, lagged_choice, options):
+#     trans_mat = options["policy_states_trans_mat"]
+#     # Take the row of the transition matrix for expected policy change
+#     trans_vector_not_retired = jnp.take(trans_mat, policy_state, axis=0)
+#
+#     # If fresh retired, you stay one more year in the same policy state
+#     fresh_retired = (choice == 0) & (lagged_choice != 0)
+#     trans_vector = select_no_policy_change(
+#         no_change_bool=fresh_retired,
+#         n_policy_states=options["n_policy_states"],
+#         current_policy_state=policy_state,
+#         trans_vector_policy_change=trans_vector_not_retired,
+#     )
+#
+#     trans_vector = check_for_longer_retirement_and_degenerate_vector(
+#         choice=choice,
+#         lagged_choice=lagged_choice,
+#         degenerate_probs=trans_mat[-1, :],
+#         trans_vector=trans_vector,
+#     )
+#
+#     return trans_vector

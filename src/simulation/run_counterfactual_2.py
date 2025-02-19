@@ -59,16 +59,15 @@ result_df = pd.DataFrame(
 result_df["sra_at_63"] = sra_at_63
 for i, sra in enumerate(sra_at_63):
     print("Start simulation for sra: ", sra)
-    alpha_sim = (sra - 67) / (63 - specs["start_age"])
 
     # Create estimated model
     df = solve_and_simulate_scenario(
         path_dict=path_dict,
         params=params,
-        sim_alpha=alpha_sim,
-        expected_alpha=False,
-        resolution=True,
-        initial_SRA=67,
+        subj_unc=True,
+        custom_resolution_age=None,
+        SRA_at_resolution=sra,
+        SRA_at_start=67,
         model_name=model_name,
         df_exists=load_df,
         solution_exists=load_solution,

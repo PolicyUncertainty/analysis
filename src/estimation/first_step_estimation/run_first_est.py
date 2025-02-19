@@ -15,8 +15,10 @@ input_str = input(
     "\n   - [i]nformed state transition"
     "\n"
 )
+
+LOAD_DATA = False
 # Set define user only to true if estimate SRA process as we need raw soep data there
-define_user = True if input_str in ["s", "i"] else False
+define_user = True if (input_str in ["s", "i"]) or (not LOAD_DATA) else False
 
 paths_dict = create_path_dict(define_user=define_user)
 specs = read_and_derive_specs(paths_dict["specs"])
@@ -58,7 +60,7 @@ if input_str == "j":
     # Estimate job separation
     from estimation.first_step_estimation.est_job_sep import est_job_sep
 
-    est_job_sep(paths_dict, specs, load_data=True)
+    est_job_sep(paths_dict, specs, load_data=LOAD_DATA)
 
 if input_str == "f":
     # Estimate family transitions
@@ -67,7 +69,7 @@ if input_str == "f":
         estimate_nb_children,
     )
 
-    estimate_partner_transitions(paths_dict, specs, load_data=True)
+    estimate_partner_transitions(paths_dict, specs, load_data=LOAD_DATA)
     estimate_nb_children(paths_dict, specs)
 
 if input_str == "h":

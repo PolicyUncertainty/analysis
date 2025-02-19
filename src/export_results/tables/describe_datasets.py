@@ -24,13 +24,24 @@ from set_paths import create_path_dict
 from specs.derive_specs import read_and_derive_specs
 
 
-def create_table_describing_datasets(paths_dict, specs):
-    df_struct, df_beliefs = import_main_datasets(paths_dict, specs)
-    main_datasets = {
-        "Structural Estimation Data": df_struct,
-        "Policy Belief Data": df_beliefs,
-    }
-    df_description = describe_datasets(main_datasets, specs)
+def create_table_describing_datasets(paths_dict, specs, main = True):
+    if main:
+        df_struct, df_beliefs = import_main_datasets(paths_dict, specs)
+        datasets = {
+            "Structural Estimation Data": df_struct,
+            "Policy Belief Data": df_beliefs,
+        }
+    else:
+        df_mortality, df_jobs, df_partner, df_wage, df_wage_partner = import_auxiliary_datasets(paths_dict, specs)
+        datasets = {
+            #"Health Transition Data": df_health,
+            "Mortalitiy Data": df_mortality,
+            "Job Separation Data": df_jobs,
+            "Partner Transition Data": df_partner,
+            "Wage Estimation Data": df_wage, 
+            "Partner Wage Data": df_wage_partner, 
+        }
+    df_description = describe_datasets(datasets, specs)
     return df_description
 
 
@@ -58,7 +69,6 @@ def describe_datasets(datasets, specs):
         "Age Range",
         "Median Age",
         "Female Share",
-        "Highschool Degree Share",
     ]
 
     df_description = pd.DataFrame(
@@ -68,12 +78,12 @@ def describe_datasets(datasets, specs):
     start_year = specs["start_year"]
     end_year = specs["end_year"]
     for name, df in datasets.items():
-        if name == "Structural Estimation Data":
+        if name == "Policy Belief Data":
+            df_description.loc[df_description[""] == "Years", name] = "2022"
+        else:
             df_description.loc[
                 df_description[""] == "Years", name
-            ] = f"{start_year}-{end_year}"
-        else:
-            df_description.loc[df_description[""] == "Years", name] = "2022"
+            ] = f"{start_year}-{end_year}"            
 
     # Populate the other columns
     for name, df in datasets.items():
@@ -87,15 +97,15 @@ def describe_datasets(datasets, specs):
         df_description.loc[df_description[""] == "Female Share", name] = (
             df["sex"] == 1
         ).mean()
-        # Use the column fweights to calculate the weighted share of highschool degree holders
-        if "fweights" in df.columns:
-            fweights_sum = df["fweights"].sum()
-            edu_high_fweights = df["education"] * df["fweights"]
-            mean_high = edu_high_fweights.sum() / fweights_sum
-        else:
-            mean_high = (df["education"] == 1).mean()
-
-        df_description.loc[
-            df_description[""] == "Highschool Degree Share", name
-        ] = mean_high
     return df_description
+
+def import_auxiliary_datasets(paths_dict, specs):
+    #df_health = create_health_transition_sample(paths_dict, specs=specs, load_data=True)
+    df_mortality = create_survival_transition_sample(paths_dict, specs=specs, load_data=True)
+    df_jobs = create_job_sep_sample(paths_dict, specs=specs, load_data=True)
+    df_partner = create_partner_transition_sample(paths_dict, specs=specs, load_data=True)
+    df_wage = create_wage_est_sample(paths_dict, specs=specs, load_data=True)
+    df_wage_partner = create_partner_wage_est_sample(paths_dict, specs=specs, load_data=True)
+    for dataset in [df_mortality, df_jobs, df_partner, df_wage, df_wage_partner]:
+        dataset["age"] = dataset["age"].astype(int)
+    return df_mortality, df_jobs, df_partner, df_wage, df_wage_partner

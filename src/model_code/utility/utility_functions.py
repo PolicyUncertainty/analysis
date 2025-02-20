@@ -151,35 +151,48 @@ def disutility_work(
 
     # reading parameters
     disutil_ft_work_men = (
-        params["disutil_ft_work_bad_men"] * (1 - health)
-        + params["disutil_ft_work_good_men"] * health
+        params["disutil_ft_work_high_bad_men"] * (1 - health) * education
+        + params["disutil_ft_work_low_bad_men"] * (1 - health) * (1 - education)
+        + params["disutil_ft_work_high_good_men"] * health * education
+        + params["disutil_ft_work_low_good_men"] * health * (1 - education)
     )
+    disutil_unemployment_men = params[
+        "disutil_unemployed_high_men"
+    ] * education + params["disutil_unemployed_low_men"] * (1 - education)
+
     exp_factor_men = (
-        params["disutil_unemployed_men"] * is_unemployed
+        disutil_unemployment_men * is_unemployed
         # + disutil_pt_work * is_working_part_time
         + disutil_ft_work_men * is_working_full_time
         # + partner_retired * disutil_only_partner_retired
     )
 
     disutil_ft_work_women = (
-        params["disutil_ft_work_bad_women"] * (1 - health)
-        + params["disutil_ft_work_good_women"] * health
+        params["disutil_ft_work_high_bad_women"] * (1 - health) * education
+        + params["disutil_ft_work_high_good_women"] * health * education
+        + params["disutil_ft_work_low_bad_women"] * (1 - health) * (1 - education)
+        + params["disutil_ft_work_low_good_women"] * health * (1 - education)
     )
     disutil_pt_work_women = (
-        params["disutil_pt_work_bad_women"] * (1 - health)
-        + params["disutil_pt_work_good_women"] * health
+        params["disutil_pt_work_high_bad_women"] * (1 - health) * education
+        + params["disutil_pt_work_high_good_women"] * health * education
+        + params["disutil_pt_work_low_bad_women"] * (1 - health) * (1 - education)
+        + params["disutil_pt_work_low_good_women"] * health * (1 - education)
     )
+
+    disutil_children = params["disutil_children_ft_work_high"] * education
+    +params["disutil_children_ft_work_low"] * (1 - education)
+
     has_partner_int = (partner_state > 0).astype(int)
     nb_children = options["children_by_state"][sex, education, has_partner_int, period]
+    disutil_children_ft = disutil_children * nb_children
 
-    disutil_children_high = params["disutil_children_ft_work_high"] * nb_children
-    disutil_children_low = params["disutil_children_ft_work_low"] * nb_children
-    disutil_children_ft = disutil_children_high * education + disutil_children_low * (
-        1 - education
-    )
+    disutil_unemployment = params["disutil_unemployed_high_women"] * education + params[
+        "disutil_unemployed_low_women"
+    ] * (1 - education)
 
     exp_factor_women = (
-        params["disutil_unemployed_women"] * is_unemployed
+        disutil_unemployment * is_unemployed
         + disutil_pt_work_women * is_working_part_time
         + (disutil_ft_work_women + disutil_children_ft) * is_working_full_time
     )

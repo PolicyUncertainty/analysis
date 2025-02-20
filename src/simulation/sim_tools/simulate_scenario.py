@@ -3,6 +3,7 @@ from dcegm.simulation.sim_utils import create_simulation_df
 from dcegm.simulation.simulate import simulate_all_periods
 from model_code.specify_model import specify_and_solve_model
 from model_code.specify_model import specify_model
+from specs.derive_specs import read_and_derive_specs
 from model_code.state_space import construct_experience_years
 from set_paths import get_model_resutls_path
 from simulation.sim_tools.initial_conditions_sim import generate_start_states
@@ -22,6 +23,20 @@ def solve_and_simulate_scenario(
     sol_model_exists=True,
     sim_model_exists=True,
 ):
+    
+    model_out_folder = get_model_resutls_path(path_dict, model_name)
+
+    # Make intitial SRA only two digits after point
+    
+    df_name = create_df_name(
+        path_dict, custom_resolution_age, only_informed, SRA_at_start, SRA_at_resolution, subj_unc
+    )
+    df_file = model_out_folder["simulation"] + df_name
+
+    if df_exists:
+        data_sim = pd.read_pickle(df_file)
+        return data_sim
+
     sol_container, model, params = specify_and_solve_model(
         path_dict=path_dict,
         params=params,
@@ -34,13 +49,7 @@ def solve_and_simulate_scenario(
 
     model_params = model["options"]["model_params"]
 
-    model_out_folder = get_model_resutls_path(path_dict, model_name)
 
-    # Make intitial SRA only two digits after point
-    df_name = create_df_name(
-        model_params, only_informed, SRA_at_start, SRA_at_resolution, subj_unc
-    )
-    df_file = model_out_folder["simulation"] + df_name
 
     # Construct sim alpha
     if subj_unc:
@@ -185,7 +194,7 @@ def simulate_scenario(
 
 
 def create_df_name(
-    model_params, only_informed, SRA_at_start, SRA_at_resolution, subj_unc
+    path_dict, custom_resolution_age, only_informed, SRA_at_start, SRA_at_resolution, subj_unc
 ):
     # Create df name
     if only_informed:
@@ -193,10 +202,16 @@ def create_df_name(
     else:
         name_append = "biased.pkl"
 
-    res_age = model_params["resolution_age"]
+
+    if custom_resolution_age is None:
+        specs = read_and_derive_specs(path_dict["specs"])
+        resolution_age = specs["resolution_age_estimation"]
+    else:
+        resolution_age = custom_resolution_age
+    
     if subj_unc:
         df_name = (
-            f"df_subj_unc_{res_age}_{SRA_at_start}_{SRA_at_resolution}_{name_append}"
+            f"df_subj_unc_{resolution_age}_{SRA_at_start}_{SRA_at_resolution}_{name_append}"
         )
     else:
         df_name = f"df_no_unc_{SRA_at_resolution}_{name_append}"

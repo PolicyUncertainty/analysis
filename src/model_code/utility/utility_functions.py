@@ -180,8 +180,9 @@ def disutility_work(
         + params["disutil_pt_work_low_good_women"] * health * (1 - education)
     )
 
-    disutil_children = params["disutil_children_ft_work_high"] * education
-    +params["disutil_children_ft_work_low"] * (1 - education)
+    disutil_children = params["disutil_children_ft_work_high"] * education + params[
+        "disutil_children_ft_work_low"
+    ] * (1 - education)
 
     has_partner_int = (partner_state > 0).astype(int)
     nb_children = options["children_by_state"][sex, education, has_partner_int, period]

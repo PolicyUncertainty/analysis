@@ -25,11 +25,11 @@ def estimate_partner_transitions(paths_dict, specs, load_data):
     est_data = create_partner_transition_sample(paths_dict, specs, load_data=load_data)
 
     # Assume that everybody stays single with 76 onwards.
-    est_data = est_data[est_data["age"] <= specs["end_age_transition_estimation"]]
+    est_data = est_data[est_data["age"] <= specs["end_age"]]
 
     # Determine relevant ages
     all_ages = np.arange(specs["start_age"], specs["end_age"])
-    est_ages = np.arange(specs["start_age"], specs["end_age_transition_estimation"] + 1)
+    old_ages = np.arange(specs["end_age_transition_estimation"] + 1, specs["end_age"])
 
     # Labels
     all_partner_labels = specs["partner_labels"]
@@ -61,30 +61,41 @@ def estimate_partner_transitions(paths_dict, specs, load_data):
 
             empirical_counts = df_reduced.groupby("age")["partner_state"].value_counts()
             mulitindex = pd.MultiIndex.from_product(
-                [est_ages, partner_state_vals], names=["age", "partner_state"]
+                [all_ages, partner_state_vals], names=["age", "partner_state"]
             )
             empirical_counts = empirical_counts.reindex(mulitindex, fill_value=0)
             n_obs_per_age = empirical_counts.groupby("age").transform("sum")
             empirical_shares = empirical_counts / n_obs_per_age
 
+            # We manipulate the empirical shares and assign to all ages above end_age_transition_estimation
+            # and older the empirical single share of the end_age_transition_estimation. Marriage shares,
+            # we set to zero and put the whole share to retirement.
+            empirical_shares.loc[(old_ages, 0)] = empirical_shares.loc[
+                (specs["end_age_transition_estimation"], 0)
+            ]
+            empirical_shares.loc[(old_ages, 1)] = 0.0
+            empirical_shares.loc[(old_ages, 2)] = (
+                1 - empirical_shares.loc[(specs["end_age_transition_estimation"], 0)]
+            )
+
             initial_shares = empirical_shares.loc[
-                (est_ages[0], partner_state_vals)
+                (all_ages[0], partner_state_vals)
             ].values
 
-            params_start = {}
-            for current_state in param_name_states[:2]:
-                for next_state in param_name_states[1:]:
-                    params_start[f"const_{current_state}_to_{next_state}"] = 0
-                    params_start[f"age_{current_state}_to_{next_state}"] = 0
-                    if next_state == "working_age":
-                        params_start[f"age_squared_{current_state}_to_{next_state}"] = 0
-                        params_start[f"age_cubic_{current_state}_to_{next_state}"] = 0
-
-            # params_start = pkl.load(open(f"result_{sex_label}_{edu_label}.pkl", "rb"))
-            # for param_name in param_name_states[1:]:
-            #     params_start.pop(f"const_retirement_to_{param_name}")
-            #     params_start.pop(f"age_retirement_to_{param_name}")
-            # params_result = params_start
+            # params_start = {}
+            # for current_state in param_name_states[:2]:
+            #     for next_state in param_name_states[1:]:
+            #         params_start[f"const_{current_state}_to_{next_state}"] = 0
+            #         params_start[f"age_{current_state}_to_{next_state}"] = 0
+            #         params_start[f"age_squared_{current_state}_to_{next_state}"] = 0
+            #         params_start[f"age_cubic_{current_state}_to_{next_state}"] = 0
+            params_start = pkl.load(
+                open(
+                    paths_dict["first_step_results"]
+                    + f"result_{sex_label}_{edu_label}.pkl",
+                    "rb",
+                )
+            )
 
             # Set upper bounds to 500 and lower bounds to -inf
             upper_bounds = {key: 5 for key in params_start.keys()}
@@ -92,35 +103,36 @@ def estimate_partner_transitions(paths_dict, specs, load_data):
             bounds = om.Bounds(lower=lower_bounds, upper=upper_bounds)
 
             kwargs = {
-                "age_grid": est_ages,
+                "age_grid": all_ages,
                 "empirical_shares": empirical_shares,
                 "start_shares": initial_shares,
                 "weights": n_obs_per_age / n_obs_per_age.sum(),
             }
 
-            result = om.minimize(
-                fun=method_of_moments,
-                params=params_start,
-                fun_kwargs=kwargs,
-                algorithm="scipy_neldermead",
-                # algo_options={
-                #     "n_cores": 7,
-                # },
-                bounds=bounds,
-            )
+            # result = om.minimize(
+            #     fun=method_of_moments,
+            #     params=params_start,
+            #     fun_kwargs=kwargs,
+            #     algorithm="scipy_neldermead",
+            #     # algo_options={
+            #     #     "n_cores": 7,
+            #     # },
+            #     bounds=bounds,
+            # )
+            #
+            # params_result = result.params
+            #
+            # pkl.dump(
+            #     params_result,
+            #     open(
+            #         paths_dict["first_step_results"]
+            #         + f"result_{sex_label}_{edu_label}.pkl",
+            #         "wb",
+            #     ),
+            # )
+            params_result = params_start
 
-            params_result = result.params
-
-            pkl.dump(
-                params_result,
-                open(
-                    paths_dict["first_step_results"]
-                    + f"result_{sex_label}_{edu_label}.pkl",
-                    "wb",
-                ),
-            )
-
-            for age in est_ages:
+            for age in all_ages:
                 trans_mat = calc_trans_mat(params_result, age)
                 for current_partner_state, partner_label in enumerate(
                     all_partner_labels
@@ -134,12 +146,12 @@ def estimate_partner_transitions(paths_dict, specs, load_data):
                     all_partner_labels
                 ):
                     axs2[current_partner_state, next_partner_state].plot(
-                        est_ages,
+                        all_ages,
                         full_df.loc[
                             (
                                 sex_label,
                                 edu_label,
-                                est_ages,
+                                all_ages,
                                 partner_label,
                                 next_partner_label,
                             )
@@ -150,21 +162,21 @@ def estimate_partner_transitions(paths_dict, specs, load_data):
 
             pred_shares = predicted_shares(
                 params=params_result,
-                est_ages=est_ages,
+                est_ages=all_ages,
                 start_shares=initial_shares,
             )
 
             ax = axs[col_count // 2, col_count % 2]
             for current_partner_state in partner_state_vals:
                 ax.plot(
-                    est_ages,
-                    pred_shares.loc[(est_ages, current_partner_state)],
+                    all_ages,
+                    pred_shares.loc[(all_ages, current_partner_state)],
                     label=f"{current_partner_state}",
                     color=JET_COLOR_MAP[current_partner_state],
                 )
                 ax.plot(
-                    est_ages,
-                    empirical_shares.loc[(est_ages, current_partner_state)],
+                    all_ages,
+                    empirical_shares.loc[(all_ages, current_partner_state)],
                     linestyle="--",
                     color=JET_COLOR_MAP[current_partner_state],
                     label=f"{current_partner_state}",
@@ -173,16 +185,10 @@ def estimate_partner_transitions(paths_dict, specs, load_data):
             ax.legend()
             col_count += 1
 
-    for age in range(specs["end_age_transition_estimation"] + 1, specs["end_age"]):
-        for current_partner_state, partner_label in enumerate(all_partner_labels):
-            full_df.loc[(slice(None), slice(None), age, slice(None), slice(None))] = 0
-            # Assign 1 to diagonal
-            full_df.loc[
-                (slice(None), slice(None), age, partner_label, partner_label)
-            ] = 1
     axs2[0, 0].legend()
     plt.show()
     out_file_path = paths_dict["est_results"] + "partner_transition_matrix.csv"
+    # Check if it sums for each partner state to 1
     full_df.to_csv(out_file_path)
 
 
@@ -191,6 +197,8 @@ def calc_trans_mat(params, age):
     specification."""
 
     above_40 = age > 40
+    if age >= 75:
+        return np.array([[1, 0, 0], [0, 0, 1], [0, 0, 1]], dtype=float)
 
     param_state_names = ["single", "working_age", "retirement"]
     age_sq = age**2 / 1_000
@@ -206,19 +214,12 @@ def calc_trans_mat(params, age):
                 val = (
                     params[f"const_{current_state_name}_to_{next_state_name}"]
                     + params[f"age_{current_state_name}_to_{next_state_name}"] * age
+                    + params[f"age_squared_{current_state_name}_to_{next_state_name}"]
+                    * age_sq
+                    + params[f"age_cubic_{current_state_name}_to_{next_state_name}"]
+                    * age_cub
                 )
-                if next_state_name == "working_age":
-                    val += (
-                        params[f"age_squared_{current_state_name}_to_{next_state_name}"]
-                        * age_sq
-                    )
-                    val += (
-                        params[f"age_cubic_{current_state_name}_to_{next_state_name}"]
-                        * age_cub
-                    )
-                    exp_vals += [np.exp(val)]
-                else:
-                    exp_vals += [np.exp(val)]
+                exp_vals += [np.exp(val)]
             else:
                 exp_vals[2] *= above_40
                 exp_vals = np.array(exp_vals, dtype=float)

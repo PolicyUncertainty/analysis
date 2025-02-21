@@ -35,7 +35,7 @@ load_second_solution = True  # counterfactual solution conntainer
 load_sol_model = True  # informed state as type
 load_sim_model = True  # informed state stochastic
 load_df = (
-    True  # True = load existing df, False = create new df, None = create but not save
+    False  # True = load existing df, False = create new df, None = create but not save
 )
 
 
@@ -61,7 +61,6 @@ res_df = pd.DataFrame(
     ],
     dtype=float,
 )
-
 
 res_df_life_cycle = pd.DataFrame(dtype=float)
 
@@ -97,12 +96,13 @@ for i, sra in enumerate(sra_at_63):
     df_cf = solve_and_simulate_scenario(
         path_dict=path_dict,
         params=params,
-        subj_unc=False,
+        subj_unc=True,
         custom_resolution_age=None,
         SRA_at_resolution=sra,
         SRA_at_start=sra,
         model_name=model_name,
         df_exists=load_df,
+        only_informed=True,
         solution_exists=load_second_solution,
         sol_model_exists=load_sol_model,
         sim_model_exists=load_sim_model,
@@ -179,4 +179,4 @@ plt.tight_layout()
 plt.show()
 
 # Save results
-res_df.to_csv(path_dict["sim_results"] + f"counterfactual_1_{model_name}.csv")
+res_df.to_csv(path_dict["sim_results"] + f"counterfactual_3_{model_name}.csv")

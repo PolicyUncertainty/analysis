@@ -50,10 +50,10 @@ params_to_estimate_names = [
 estimation_results = estimate_model(
     paths_dict,
     params_to_estimate_names=params_to_estimate_names,
-    file_append="new",
+    file_append="partner_est",
     slope_disutil_method=False,
-    load_model=True,
-    use_weights=True,
+    load_model=False,
+    use_weights=False,
     last_estimate=None,
     save_results=False,
 )

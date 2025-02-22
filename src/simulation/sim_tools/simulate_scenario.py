@@ -3,10 +3,10 @@ from dcegm.simulation.sim_utils import create_simulation_df
 from dcegm.simulation.simulate import simulate_all_periods
 from model_code.specify_model import specify_and_solve_model
 from model_code.specify_model import specify_model
-from specs.derive_specs import read_and_derive_specs
 from model_code.state_space import construct_experience_years
 from set_paths import get_model_resutls_path
 from simulation.sim_tools.initial_conditions_sim import generate_start_states
+from specs.derive_specs import read_and_derive_specs
 
 
 def solve_and_simulate_scenario(
@@ -16,6 +16,7 @@ def solve_and_simulate_scenario(
     custom_resolution_age,
     SRA_at_start,
     SRA_at_resolution,
+    annoucement_age,
     model_name,
     df_exists=True,
     only_informed=False,
@@ -23,13 +24,17 @@ def solve_and_simulate_scenario(
     sol_model_exists=True,
     sim_model_exists=True,
 ):
-    
     model_out_folder = get_model_resutls_path(path_dict, model_name)
 
     # Make intitial SRA only two digits after point
-    
+
     df_name = create_df_name(
-        path_dict, custom_resolution_age, only_informed, SRA_at_start, SRA_at_resolution, subj_unc
+        path_dict,
+        custom_resolution_age,
+        only_informed,
+        SRA_at_start,
+        SRA_at_resolution,
+        subj_unc,
     )
     df_file = model_out_folder["simulation"] + df_name
 
@@ -49,8 +54,6 @@ def solve_and_simulate_scenario(
 
     model_params = model["options"]["model_params"]
 
-
-
     # Construct sim alpha
     if subj_unc:
         sim_alpha = (SRA_at_resolution - SRA_at_start) / (
@@ -63,7 +66,7 @@ def solve_and_simulate_scenario(
             raise ValueError(
                 "SRA at start and resolution must be the same when there is no uncertainty"
             )
-        sim_alpha = None
+        sim_alpha = 0.0
 
     if df_exists:
         data_sim = pd.read_pickle(df_file)
@@ -76,6 +79,7 @@ def solve_and_simulate_scenario(
             seed=model_params["seed"],
             custom_resolution_age=custom_resolution_age,
             sim_alpha=sim_alpha,
+            annoucement_age=annoucement_age,
             initial_SRA=SRA_at_start,
             solution=sol_container,
             model_of_solution=model,
@@ -96,6 +100,8 @@ def simulate_scenario(
     params,
     custom_resolution_age,
     sim_alpha,
+    annoucement_age,
+    annoucement_SRA,
     initial_SRA,
     solution,
     model_of_solution,
@@ -108,6 +114,8 @@ def simulate_scenario(
         subj_unc=False,
         custom_resolution_age=custom_resolution_age,
         sim_alpha=sim_alpha,
+        annoucement_age=annoucement_age,
+        annoucement_SRA=annoucement_SRA,
         load_model=sim_model_exists,
         model_type="simulation",
     )
@@ -194,7 +202,12 @@ def simulate_scenario(
 
 
 def create_df_name(
-    path_dict, custom_resolution_age, only_informed, SRA_at_start, SRA_at_resolution, subj_unc
+    path_dict,
+    custom_resolution_age,
+    only_informed,
+    SRA_at_start,
+    SRA_at_resolution,
+    subj_unc,
 ):
     # Create df name
     if only_informed:
@@ -202,17 +215,14 @@ def create_df_name(
     else:
         name_append = "biased.pkl"
 
-
     if custom_resolution_age is None:
         specs = read_and_derive_specs(path_dict["specs"])
         resolution_age = specs["resolution_age_estimation"]
     else:
         resolution_age = custom_resolution_age
-    
+
     if subj_unc:
-        df_name = (
-            f"df_subj_unc_{resolution_age}_{SRA_at_start}_{SRA_at_resolution}_{name_append}"
-        )
+        df_name = f"df_subj_unc_{resolution_age}_{SRA_at_start}_{SRA_at_resolution}_{name_append}"
     else:
         df_name = f"df_no_unc_{SRA_at_resolution}_{name_append}"
     return df_name

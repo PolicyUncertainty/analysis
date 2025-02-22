@@ -29,17 +29,19 @@ def specify_model(
     subj_unc,
     custom_resolution_age,
     sim_alpha=None,
+    annoucement_age=None,
+    annoucement_SRA=None,
     load_model=False,
     model_type="solution",
 ):
     """Generate model and options dictionaries."""
-    # Check if subjective uncertainty is not requested in simulation model type
-    if subj_unc and model_type == "simulation":
-        raise ValueError("Subjective uncertainty is not available in simulation model")
-
-    # Check if sim_alpha is given and model type is solution. Then error
-    if sim_alpha is not None and model_type == "solution":
-        raise ValueError("sim_alpha is only available for simulation model")
+    check_flags(
+        subj_unc,
+        model_type,
+        sim_alpha,
+        annoucement_age,
+        annoucement_SRA,
+    )
 
     # Generate model_specs
     specs = generate_derived_and_data_derived_specs(path_dict)
@@ -173,6 +175,8 @@ def specify_and_solve_model(
         subj_unc=subj_unc,
         custom_resolution_age=custom_resolution_age,
         sim_alpha=None,
+        annoucement_age=None,
+        annoucement_SRA=None,
         load_model=load_model,
         model_type="solution",
     )
@@ -209,3 +213,36 @@ def specify_and_solve_model(
         ) = get_solve_func_for_model(model)(params)
         pickle.dump(solution, open(solution_file, "wb"))
         return solution, model, params
+
+
+def check_flags(
+    subj_unc,
+    model_type,
+    sim_alpha,
+    annoucement_age,
+    annoucement_SRA,
+):
+    # Check if subjective uncertainty is not requested in simulation model type
+    if subj_unc and model_type == "simulation":
+        raise ValueError("Subjective uncertainty is not available in simulation model")
+
+    # Check if sim_alpha is given and model type is solution. Then error
+    if sim_alpha is not None and model_type == "solution":
+        raise ValueError("sim_alpha is only available for simulation model")
+
+    # Check if annoucement_age and annoucement_SRA are given and model type is solution.
+    # Then error
+    annoucement_info_given = (annoucement_age is not None) or (
+        annoucement_SRA is not None
+    )
+    if annoucement_info_given and (model_type == "solution"):
+        raise ValueError(
+            "Annoucement age and SRA are only available for simulation model"
+        )
+
+    if annoucement_info_given and (sim_alpha is not None):
+        raise ValueError("Annoucement age and SRA are not compatible with sim_alpha")
+
+    # Check if one announcement info is given, then both must be given
+    if annoucement_info_given and (annoucement_age is None or annoucement_SRA is None):
+        raise ValueError("Both annoucement_age and annoucement_SRA must be given")

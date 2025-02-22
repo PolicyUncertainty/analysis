@@ -1,4 +1,6 @@
 import numpy as np
+from model_code.policy_processes.announcment import announce_policy_state
+from model_code.policy_processes.announcment import update_specs_for_policy_announcement
 from model_code.policy_processes.policy_states_belief import (
     expected_SRA_with_resolution,
 )
@@ -12,7 +14,13 @@ from model_code.policy_processes.step_function import (
 
 
 def select_transition_func_and_update_specs(
-    path_dict, specs, subj_unc, sim_alpha, custom_resolution_age
+    path_dict,
+    specs,
+    subj_unc,
+    sim_alpha,
+    custom_resolution_age,
+    annoucement_age,
+    annoucement_SRA,
 ):
     # Check if subj_unc is bool
     if not isinstance(subj_unc, bool):
@@ -31,13 +39,17 @@ def select_transition_func_and_update_specs(
         specs = update_specs_exp_ret_age_trans_mat(specs, path_dict)
         transition_func_sol = expected_SRA_with_resolution
     else:
-        if sim_alpha is None:
-            slope = 0.0
+        announcment_given = annoucement_age is not None and annoucement_SRA is not None
+        if sim_alpha is None and not announcment_given:
+            transition_func_sol = announce_policy_state
+            specs = update_specs_for_policy_announcement(
+                specs, annoucement_age, annoucement_SRA
+            )
         else:
-            slope = sim_alpha
-
-        specs = update_specs_step_function_with_slope_and_resolution(specs, slope)
-        transition_func_sol = realized_policy_step_function
+            specs = update_specs_step_function_with_slope_and_resolution(
+                specs, sim_alpha
+            )
+            transition_func_sol = realized_policy_step_function
 
     return specs, transition_func_sol
 

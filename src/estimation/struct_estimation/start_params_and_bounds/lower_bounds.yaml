@@ -1,4 +1,6 @@
-mu: 1.0e-12
+mu_men: 1.0e-12
+mu_women: 1.0e-12
+
 
 
 # Full time work dis-utility men

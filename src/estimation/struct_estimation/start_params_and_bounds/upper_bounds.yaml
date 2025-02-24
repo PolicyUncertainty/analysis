@@ -1,4 +1,5 @@
-mu: 2
+mu_men: 2
+mu_women: 2
 
 # Full time work dis-utility men
 disutil_ft_work_high_good_men: 5.0

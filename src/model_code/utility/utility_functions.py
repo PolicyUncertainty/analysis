@@ -27,6 +27,7 @@ def utility_func(
     )
     utility_death = utility_final_consume_all(
         wealth=consumption,
+        sex=sex,
         params=params,
     )
     death_bool = health == 2
@@ -40,7 +41,7 @@ def utility_func_alive(
     """Calculate the choice specific cobb-douglas utility, i.e. u =
     ((c*eta/consumption_scale)^(1-mu))/(1-mu) ."""
     # gather params
-    mu = params["mu"]
+    mu = jax.lax.select(sex == 0, params["mu_men"], params["mu_women"])
     eta = disutility_work(
         period=period,
         choice=choice,
@@ -80,7 +81,7 @@ def marg_utility(
         period=period,
         options=options,
     )
-    mu = params["mu"]
+    mu = jax.lax.select(sex == 0, params["mu_men"], params["mu_women"])
     eta = disutility_work(
         period=period,
         choice=choice,
@@ -120,7 +121,7 @@ def inverse_marginal(
         period=period,
         options=options,
     )
-    mu = params["mu"]
+    mu = jax.lax.select(sex == 0, params["mu_men"], params["mu_women"])
     eta = disutility_work(
         period=period,
         choice=choice,

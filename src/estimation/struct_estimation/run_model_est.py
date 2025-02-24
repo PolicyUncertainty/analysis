@@ -8,7 +8,8 @@ paths_dict = create_path_dict(define_user=False)
 from estimation.struct_estimation.scripts.estimate_setup import estimate_model
 
 params_to_estimate_names = [
-    # "mu",
+    "mu_men",
+    "mu_women",
     # Men Full-time - 4 parameters
     "disutil_ft_work_high_good_men",
     "disutil_ft_work_high_bad_men",

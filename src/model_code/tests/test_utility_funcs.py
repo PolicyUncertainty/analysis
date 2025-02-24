@@ -84,7 +84,8 @@ def test_utility_func(
     paths_and_specs,
 ):
     params = {
-        "mu": mu,
+        "mu_men": mu + 1,
+        "mu_women": mu,
         # Men
         "disutil_ft_work_high_good_men": disutil_work + 1,
         "disutil_ft_work_high_bad_men": disutil_work,
@@ -107,6 +108,9 @@ def test_utility_func(
         "disutil_children_ft_work_high": 0.1,
         "bequest_scale": 2,
     }
+    if sex == 0:
+        mu += 1
+
     options = paths_and_specs[1]
     cons_scale = consumption_scale(
         partner_state=partner_state,
@@ -223,7 +227,8 @@ def test_marginal_utility(
 ):
     options = paths_and_specs[1]
     params = {
-        "mu": mu,
+        "mu_men": mu + 1,
+        "mu_women": mu,
         # Men
         "disutil_ft_work_high_good_men": disutil_work + 1,
         "disutil_ft_work_high_bad_men": disutil_work,
@@ -246,6 +251,8 @@ def test_marginal_utility(
         "disutil_children_ft_work_high": 0.1,
         "bequest_scale": 2,
     }
+    if sex == 0:
+        mu += 1
 
     random_choice = np.random.choice(np.array([0, 1, 2]))
     marg_util_jax = jax.jacfwd(utility_func, argnums=0)(
@@ -302,7 +309,8 @@ def test_inv_marginal_utility(
     paths_and_specs,
 ):
     params = {
-        "mu": mu,
+        "mu_men": mu + 1,
+        "mu_women": mu,
         # Men
         "disutil_ft_work_high_good_men": disutil_work + 1,
         "disutil_ft_work_high_bad_men": disutil_work,
@@ -325,6 +333,8 @@ def test_inv_marginal_utility(
         "disutil_children_ft_work_high": 0.1,
         "bequest_scale": 2,
     }
+    if sex == 0:
+        mu += 1
 
     options = paths_and_specs[1]
     random_choice = np.random.choice(np.array([0, 1, 2]))
@@ -356,34 +366,40 @@ def test_inv_marginal_utility(
 
 
 @pytest.mark.parametrize(
-    "consumption, mu, bequest_scale",
-    list(product(CONSUMPTION_GRID, MU_GRID, BEQUEST_SCALE)),
+    "consumption, mu, sex, bequest_scale",
+    list(product(CONSUMPTION_GRID, MU_GRID, SEX_GRID, BEQUEST_SCALE)),
 )
-def test_bequest(consumption, mu, bequest_scale):
+def test_bequest(consumption, mu, sex, bequest_scale):
     params = {
-        "mu": mu,
+        "mu_men": mu + 1,
+        "mu_women": mu,
         "bequest_scale": bequest_scale,
     }
+    if sex == 0:
+        mu += 1
     if mu == 1:
         bequest = bequest_scale * np.log(consumption)
     else:
         bequest = bequest_scale * (((consumption ** (1 - mu)) - 1) / (1 - mu))
     np.testing.assert_almost_equal(
-        utility_final_consume_all(consumption, params), bequest
+        utility_final_consume_all(consumption, sex, params), bequest
     )
 
 
 @pytest.mark.parametrize(
-    "consumption, mu, bequest_scale",
-    list(product(CONSUMPTION_GRID, MU_GRID, BEQUEST_SCALE)),
+    "consumption, mu, sex, bequest_scale",
+    list(product(CONSUMPTION_GRID, MU_GRID, SEX_GRID, BEQUEST_SCALE)),
 )
-def test_bequest_marginal(consumption, mu, bequest_scale):
+def test_bequest_marginal(consumption, mu, sex, bequest_scale):
     params = {
-        "mu": mu,
+        "mu_men": mu + 1,
+        "mu_women": mu,
         "bequest_scale": bequest_scale,
     }
-    bequest = jax.jacfwd(utility_final_consume_all, argnums=0)(consumption, params)
+    if sex == 0:
+        mu += 1
+    bequest = jax.jacfwd(utility_final_consume_all, argnums=0)(consumption, sex, params)
     np.testing.assert_almost_equal(
-        marginal_utility_final_consume_all(consumption, params),
+        marginal_utility_final_consume_all(consumption, sex, params),
         bequest,
     )

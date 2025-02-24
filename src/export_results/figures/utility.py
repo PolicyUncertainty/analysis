@@ -51,6 +51,7 @@ def plot_bequest(params, specs):
         for i, w in enumerate(wealth):
             bequests[i] = utility_final_consume_all(
                 wealth=w,
+                sex=sex,
                 params=params,
             )
         ax.plot(

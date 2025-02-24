@@ -67,7 +67,6 @@ def plot_observed_model_fit_choice_probs(
         choice_probs_observations = np.nan_to_num(choice_probs_observations, nan=0.0)
         data_decision[f"choice_{choice}"] = choice_probs_observations
 
-    breakpoint()
     fig, axes = plt.subplots(specs["n_sexes"], specs["n_choices"], figsize=(14, 8))
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
         for edu_var, edu_label in enumerate(specs["education_labels"]):

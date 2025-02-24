@@ -14,38 +14,46 @@ params_to_estimate_names = [
     "disutil_ft_work_high_bad_men",
     "disutil_ft_work_low_good_men",
     "disutil_ft_work_low_bad_men",
-    # Women Full-time - 4 parameters
-    "disutil_ft_work_high_good_women",
-    "disutil_ft_work_high_bad_women",
-    "disutil_ft_work_low_good_women",
-    "disutil_ft_work_low_bad_women",
-    # Women Part-time - 4 parameters
-    "disutil_pt_work_high_good_women",
-    "disutil_pt_work_high_bad_women",
-    "disutil_pt_work_low_good_women",
-    "disutil_pt_work_low_bad_women",
+    # # Women Full-time - 4 parameters
+    # "disutil_ft_work_high_good_women",
+    # "disutil_ft_work_high_bad_women",
+    # "disutil_ft_work_low_good_women",
+    # "disutil_ft_work_low_bad_women",
+    # # Women Part-time - 4 parameters
+    # "disutil_pt_work_high_good_women",
+    # "disutil_pt_work_high_bad_women",
+    # "disutil_pt_work_low_good_women",
+    # "disutil_pt_work_low_bad_women",
     # Men unemployment - 2 parameters
     "disutil_unemployed_high_men",
     "disutil_unemployed_low_men",
     # Women Unemployment - 2 parameters
-    "disutil_unemployed_high_women",
-    "disutil_unemployed_low_women",
+    # "disutil_unemployed_high_women",
+    # "disutil_unemployed_low_women",
     # Children - 2 parameters
-    "disutil_children_ft_work_low",
-    "disutil_children_ft_work_high",
+    # "disutil_children_ft_work_low",
+    # "disutil_children_ft_work_high",
     "lambda",
+    # Men job finding - 3 parameters
     "job_finding_logit_const_men",
     "job_finding_logit_age_men",
     "job_finding_logit_high_educ_men",
-    "job_finding_logit_const_women",
-    "job_finding_logit_age_women",
-    "job_finding_logit_high_educ_women",
+    # Women job finding - 3 parameters
+    # "job_finding_logit_const_women",
+    # "job_finding_logit_age_women",
+    # "job_finding_logit_high_educ_women",
 ]
 model_name = "partner_est"
+LOAD_LAST_ESTIMATE = True
+LOAD_SOL_MODEL = True
+USE_WEIGHTS = False
 
-last_estimate = pkl.load(
-    open(paths_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
-)
+if LOAD_LAST_ESTIMATE:
+    last_estimate = pkl.load(
+        open(paths_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
+    )
+else:
+    last_estimate = None
 # pop_list = [
 #     "job_finding_logit_const_men",
 #     "job_finding_logit_age_men",
@@ -65,8 +73,8 @@ estimation_results = estimate_model(
     params_to_estimate_names=params_to_estimate_names,
     file_append=model_name,
     slope_disutil_method=False,
-    load_model=False,
-    use_weights=False,
+    load_model=LOAD_SOL_MODEL,
+    use_weights=USE_WEIGHTS,
     last_estimate=last_estimate,
     save_results=False,
 )

@@ -79,7 +79,6 @@ def estimate_model(
         use_weights=use_weights,
         save_results=save_results,
     )
-
     result = om.minimize(
         fun=est_class.crit_func,
         params=start_params,
@@ -305,11 +304,11 @@ def generate_print_func(params_to_estimate_names):
     men_params.pop("all")
     women_params.pop("all")
 
-    taste_shock_params = [
-        param_name
-        for param_name in params_to_estimate_names
-        if "taste_shock" in param_name
-    ]
+    # taste_shock_params = [
+    #     param_name
+    #     for param_name in params_to_estimate_names
+    #     if "taste_shock" in param_name
+    # ]
 
     def print_function(params):
         print("Gender neutral parameters:")

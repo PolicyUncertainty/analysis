@@ -67,12 +67,7 @@ def plot_observed_model_fit_choice_probs(
         choice_probs_observations = np.nan_to_num(choice_probs_observations, nan=0.0)
         data_decision[f"choice_{choice}"] = choice_probs_observations
 
-    # df_poss = data_decision[data_decision["choice_0"] > 0]
-    # df_poss = df_poss[df_poss["lagged_choice"] != 0]
-    # post_sra = df_poss["age"] - df_poss["policy_state_value"]
-    # breakpoint()
-    # for partner_val, partner_label in enumerate(partner_labels):
-
+    breakpoint()
     fig, axes = plt.subplots(specs["n_sexes"], specs["n_choices"], figsize=(14, 8))
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
         for edu_var, edu_label in enumerate(specs["education_labels"]):

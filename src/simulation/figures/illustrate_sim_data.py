@@ -31,6 +31,7 @@ def plot_sim_vars(
         subj_unc=True,
         custom_resolution_age=None,
         SRA_at_start=67,
+        SRA_at_resolution=67,
         model_name=model_name,
         df_exists=load_df,
         solution_exists=load_solution,

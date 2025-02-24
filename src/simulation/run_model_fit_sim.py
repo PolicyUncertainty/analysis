@@ -10,7 +10,7 @@ specs = generate_derived_and_data_derived_specs(path_dict)
 
 
 model_name = "partner_est"
-load_df = False
+load_df = True
 load_solution = True
 load_sim_model = True
 load_sol_model = True

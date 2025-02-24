@@ -143,8 +143,12 @@ def plot_choice_shares_single(
     fig, axes = plt.subplots(2, specs["n_choices"])
     for sex, sex_label in enumerate(specs["sex_labels"]):
         for edu_var, edu_label in enumerate(specs["education_labels"]):
-            data_sim_restr = data_sim[data_sim["sex"] == sex]
-            data_decision_restr = data_decision[data_decision["sex"] == sex]
+            data_sim_restr = data_sim[
+                (data_sim["sex"] == sex) & (data_sim["education"] == edu_var)
+            ]
+            data_decision_restr = data_decision[
+                (data_decision["sex"] == sex) & (data_decision["education"] == edu_var)
+            ]
 
             choice_shares_sim = (
                 data_sim_restr.groupby(["age"])["choice"]
@@ -162,20 +166,28 @@ def plot_choice_shares_single(
                 choice_range = range(4)
 
             for choice in choice_range:
-                ax = axes[edu_var, choice]
+                ax = axes[sex, choice]
                 choice_share_sim = choice_shares_sim[choice]
                 choice_share_obs = choice_shares_obs[choice]
-                ax.plot(choice_share_sim, label=f"Simulated; {sex_label}")
-                ax.plot(choice_share_obs, label=f"Observed; {sex_label}", ls="--")
+                ax.plot(
+                    choice_share_sim,
+                    label=f"Simulated; {edu_label}",
+                    color=JET_COLOR_MAP[edu_var],
+                )
+                ax.plot(
+                    choice_share_obs,
+                    label=f"Observed; {edu_label}",
+                    ls="--",
+                    color=JET_COLOR_MAP[edu_var],
+                )
                 choice_label = specs["choice_labels"][choice]
                 ax.set_ylim([0, 1])
-                if edu_var == 0:
+                if sex == 0:
                     ax.set_title(f"{choice_label}")
                     if choice == 1:
                         ax.legend()
 
-    axes[0, 0].set_ylabel("Low Education; Choice shares")
-    axes[1, 0].set_ylabel("High Education; Choice shares")
+        axes[sex, 0].set_ylabel(f"{sex_label}; Choice shares")
 
 
 def plot_states(

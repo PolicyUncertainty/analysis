@@ -291,6 +291,9 @@ def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):
 def generate_print_func(params_to_estimate_names):
     men_params = get_gendered_params(params_to_estimate_names, "_men")
     women_params = get_gendered_params(params_to_estimate_names, "_women")
+    for param_dict in [men_params, women_params]:
+        if "all" not in param_dict.keys():
+            param_dict["all"] = []
 
     for param in ["disutil_children_ft_work_low", "disutil_children_ft_work_high"]:
         if param in params_to_estimate_names:

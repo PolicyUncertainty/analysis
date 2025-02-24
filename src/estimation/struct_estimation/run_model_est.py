@@ -55,19 +55,10 @@ if LOAD_LAST_ESTIMATE:
     )
 else:
     last_estimate = None
-# pop_list = [
-#     "job_finding_logit_const_men",
-#     "job_finding_logit_age_men",
-#     "job_finding_logit_high_educ_men",
-#     "job_finding_logit_const_women",
-#     "job_finding_logit_age_women",
-#     "job_finding_logit_high_educ_women",
-# ]
-# for pop in pop_list:
-#     last_estimate.pop(pop)
-#
-# last_estimate.pop("disutil_unemployed_men")
-# last_estimate.pop("disutil_unemployed_women")
+
+last_estimate["mu_men"] = last_estimate["mu"]
+last_estimate["mu_women"] = last_estimate["mu"]
+last_estimate.pop("mu")
 
 estimation_results = estimate_model(
     paths_dict,

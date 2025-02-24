@@ -33,7 +33,7 @@ params_to_estimate_names = [
     # Children - 2 parameters
     # "disutil_children_ft_work_low",
     # "disutil_children_ft_work_high",
-    "lambda",
+    # "lambda",
     # Men job finding - 3 parameters
     "job_finding_logit_const_men",
     "job_finding_logit_age_men",

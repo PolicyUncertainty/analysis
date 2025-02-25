@@ -35,8 +35,10 @@ def announce_policy_state(policy_state, period, lagged_choice, options):
 
 
 def update_specs_for_policy_announcement(specs, announcement_age, announced_SRA):
-    # Transform announcement age to period
-    announcement_period = announcement_age - specs["start_age"]
+    # Transform announcement age to period. We substract 1, such that agents are in the
+    # announced SRA in announcment age. Therefore in age - 1 the transition has to be with certainty
+    # to this policy state.
+    announcement_period = announcement_age - specs["start_age"] - 1
     # Update specs
     specs["announcement_period"] = announcement_period
 

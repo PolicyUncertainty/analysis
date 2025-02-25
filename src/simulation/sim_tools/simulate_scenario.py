@@ -29,12 +29,13 @@ def solve_and_simulate_scenario(
     # Make intitial SRA only two digits after point
 
     df_name = create_df_name(
-        path_dict,
-        custom_resolution_age,
-        only_informed,
-        SRA_at_start,
-        SRA_at_retirement,
-        subj_unc,
+        path_dict=path_dict,
+        custom_resolution_age=custom_resolution_age,
+        only_informed=only_informed,
+        annoucement_age=annoucement_age,
+        SRA_at_start=SRA_at_start,
+        SRA_at_retirement=SRA_at_retirement,
+        subj_unc=subj_unc,
     )
     df_file = model_out_folder["simulation"] + df_name
 
@@ -225,9 +226,10 @@ def simulate_scenario(
 def create_df_name(
     path_dict,
     custom_resolution_age,
+    annoucement_age,
     only_informed,
     SRA_at_start,
-    SRA_at_resolution,
+    SRA_at_retirement,
     subj_unc,
 ):
     # Create df name
@@ -243,7 +245,10 @@ def create_df_name(
         resolution_age = custom_resolution_age
 
     if subj_unc:
-        df_name = f"df_subj_unc_{resolution_age}_{SRA_at_start}_{SRA_at_resolution}_{name_append}"
+        if annoucement_age is None:
+            df_name = f"df_subj_unc_{resolution_age}_{SRA_at_start}_{SRA_at_retirement}_{name_append}"
+        else:
+            df_name = f"df_subj_unc_{resolution_age}_{SRA_at_start}_{SRA_at_retirement}_{annoucement_age}_{name_append}"
     else:
-        df_name = f"df_no_unc_{SRA_at_resolution}_{name_append}"
+        df_name = f"df_no_unc_{SRA_at_retirement}_{name_append}"
     return df_name

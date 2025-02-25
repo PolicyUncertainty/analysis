@@ -42,7 +42,7 @@ def update_specs_for_policy_announcement(specs, announcement_age, announced_SRA)
 
     # Transform announced_SRA to policy state
     announced_policy_state = int(
-        (announced_SRA - specs["min_SRA"]) / specs["SRA_step_size"]
+        (announced_SRA - specs["min_SRA"]) / specs["SRA_grid_size"]
     )
     specs["announced_policy_state"] = announced_policy_state
     return specs

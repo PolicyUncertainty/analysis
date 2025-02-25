@@ -56,10 +56,6 @@ if LOAD_LAST_ESTIMATE:
 else:
     last_estimate = None
 
-last_estimate["mu_men"] = last_estimate["mu"]
-last_estimate["mu_women"] = last_estimate["mu"]
-last_estimate.pop("mu")
-
 estimation_results = estimate_model(
     paths_dict,
     params_to_estimate_names=params_to_estimate_names,

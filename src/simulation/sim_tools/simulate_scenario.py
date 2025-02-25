@@ -243,7 +243,7 @@ def create_df_name(
         resolution_age = custom_resolution_age
 
     if subj_unc:
-        df_name = f"df_subj_unc_{int(resolution_age)}_{int(SRA_at_start)}_{int(SRA_at_resolution)}_{name_append}"
+        df_name = f"df_subj_unc_{resolution_age}_{SRA_at_start}_{SRA_at_resolution}_{name_append}"
     else:
-        df_name = f"df_no_unc_{int(SRA_at_resolution)}_{name_append}"
+        df_name = f"df_no_unc_{SRA_at_resolution}_{name_append}"
     return df_name

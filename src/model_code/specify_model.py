@@ -57,6 +57,8 @@ def specify_model(
         specs=specs,
         subj_unc=subj_unc,
         sim_alpha=sim_alpha,
+        annoucement_age=annoucement_age,
+        annoucement_SRA=annoucement_SRA,
         custom_resolution_age=custom_resolution_age,
     )
 
@@ -246,3 +248,8 @@ def check_flags(
     # Check if one announcement info is given, then both must be given
     if annoucement_info_given and (annoucement_age is None or annoucement_SRA is None):
         raise ValueError("Both annoucement_age and annoucement_SRA must be given")
+
+    if annoucement_info_given and not subj_unc:
+        raise ValueError(
+            "Announcment info can't be given with no subjective uncertainty."
+        )

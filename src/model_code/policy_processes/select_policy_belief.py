@@ -40,12 +40,15 @@ def select_transition_func_and_update_specs(
         transition_func_sol = expected_SRA_with_resolution
     else:
         announcment_given = annoucement_age is not None and annoucement_SRA is not None
-        if sim_alpha is None and not announcment_given:
+        if sim_alpha is None and announcment_given:
             transition_func_sol = announce_policy_state
             specs = update_specs_for_policy_announcement(
                 specs, annoucement_age, annoucement_SRA
             )
         else:
+            if sim_alpha is None:
+                sim_alpha = 0.0
+
             specs = update_specs_step_function_with_slope_and_resolution(
                 specs, sim_alpha
             )

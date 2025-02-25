@@ -45,8 +45,8 @@ params = pkl.load(
 )
 
 # Initialize alpha values and replace 0.04 with subjective alpha(0.041...)
-#sra_at_63 = np.arange(67, 70 + specs["SRA_grid_size"], specs["SRA_grid_size"])
-#sra_at_63 = np.arange(67, 70 + specs["SRA_grid_size"], 1)
+# sra_at_63 = np.arange(67, 70 + specs["SRA_grid_size"], specs["SRA_grid_size"])
+# sra_at_63 = np.arange(67, 70 + specs["SRA_grid_size"], 1)
 sra_at_63 = [67.0, 68.0, 69.0, 70.0]
 
 # Create result dfs: one for aggregates and one for life-cycle profiles
@@ -78,7 +78,8 @@ for i, sra in enumerate(sra_at_63):
         params=params,
         subj_unc=True,
         custom_resolution_age=None,
-        SRA_at_resolution=sra,
+        annoucement_age=None,
+        SRA_at_retirement=sra,
         SRA_at_start=67,
         model_name=model_name,
         df_exists=load_df,
@@ -98,7 +99,7 @@ for i, sra in enumerate(sra_at_63):
         params=params,
         subj_unc=True,
         custom_resolution_age=None,
-        SRA_at_resolution=sra,
+        SRA_at_retirement=sra,
         SRA_at_start=sra,
         model_name=model_name,
         df_exists=load_df,
@@ -108,10 +109,8 @@ for i, sra in enumerate(sra_at_63):
         sim_model_exists=load_sim_model,
     ).reset_index()
 
-
-
-    #load_second_solution = True
-    # Calculate results 
+    # load_second_solution = True
+    # Calculate results
     for k, df_scen in enumerate([df_cf, df_base]):
         if k == 0:
             pre = ""
@@ -122,7 +121,6 @@ for i, sra in enumerate(sra_at_63):
         res_df.loc[i, pre + "ret_age"] = calc_average_retirement_age(df_scen)
         res_df.loc[i, pre + "sra_at_ret"] = sra_at_retirement(df_scen)
         res_df.loc[i, pre + "working_hours"] = df_scen["working_hours"].mean()
-        
 
     ages = np.arange(30, 101, 1)
     for df in [df_base, df_cf]:
@@ -131,19 +129,43 @@ for i, sra in enumerate(sra_at_63):
         else:
             string = "cf"
 
-        res_df_life_cycle[f"working_hours_{sra}_{string}"] = df.groupby("age")["working_hours"].aggregate("mean")
-        res_df_life_cycle[f"savings_{sra}_{string}"] = df.groupby("age")["savings_dec"].aggregate("mean")
-        res_df_life_cycle[f"consumption_{sra}_{string}"] = df.groupby("age")["consumption"].aggregate("mean")
-        res_df_life_cycle[f"income_{sra}_{string}"] = df.groupby("age")["total_income"].aggregate("mean")
-        res_df_life_cycle[f"assets_{sra}_{string}"] = df.groupby("age")["savings"].aggregate("mean")
-        res_df_life_cycle[f"savings_rate_{sra}_{string}"] = res_df_life_cycle[f"savings_{sra}_{string}"] / res_df_life_cycle[f"income_{sra}_{string}"]
-        res_df_life_cycle[f"employment_rate_{sra}_{string}"] = df.groupby("age")["choice"].apply(lambda x: x.isin([2, 3]).sum() / len(x))
-        res_df_life_cycle[f"retirement_rate_{sra}_{string}"] = df.groupby("age")["choice"].apply(lambda x: x.isin([0]).sum() / len(x))
-    res_df_life_cycle[f"savings_rate_diff_{sra}"] = res_df_life_cycle[f"savings_rate_{sra}_cf"] - res_df_life_cycle[f"savings_rate_{sra}_base"]
-    res_df_life_cycle[f"employment_rate_diff_{sra}"] = res_df_life_cycle[f"employment_rate_{sra}_cf"] - res_df_life_cycle[f"employment_rate_{sra}_base"]
-    res_df_life_cycle[f"retirement_rate_diff_{sra}"] = res_df_life_cycle[f"retirement_rate_{sra}_cf"] - res_df_life_cycle[f"retirement_rate_{sra}_base"]
-
-
+        res_df_life_cycle[f"working_hours_{sra}_{string}"] = df.groupby("age")[
+            "working_hours"
+        ].aggregate("mean")
+        res_df_life_cycle[f"savings_{sra}_{string}"] = df.groupby("age")[
+            "savings_dec"
+        ].aggregate("mean")
+        res_df_life_cycle[f"consumption_{sra}_{string}"] = df.groupby("age")[
+            "consumption"
+        ].aggregate("mean")
+        res_df_life_cycle[f"income_{sra}_{string}"] = df.groupby("age")[
+            "total_income"
+        ].aggregate("mean")
+        res_df_life_cycle[f"assets_{sra}_{string}"] = df.groupby("age")[
+            "savings"
+        ].aggregate("mean")
+        res_df_life_cycle[f"savings_rate_{sra}_{string}"] = (
+            res_df_life_cycle[f"savings_{sra}_{string}"]
+            / res_df_life_cycle[f"income_{sra}_{string}"]
+        )
+        res_df_life_cycle[f"employment_rate_{sra}_{string}"] = df.groupby("age")[
+            "choice"
+        ].apply(lambda x: x.isin([2, 3]).sum() / len(x))
+        res_df_life_cycle[f"retirement_rate_{sra}_{string}"] = df.groupby("age")[
+            "choice"
+        ].apply(lambda x: x.isin([0]).sum() / len(x))
+    res_df_life_cycle[f"savings_rate_diff_{sra}"] = (
+        res_df_life_cycle[f"savings_rate_{sra}_cf"]
+        - res_df_life_cycle[f"savings_rate_{sra}_base"]
+    )
+    res_df_life_cycle[f"employment_rate_diff_{sra}"] = (
+        res_df_life_cycle[f"employment_rate_{sra}_cf"]
+        - res_df_life_cycle[f"employment_rate_{sra}_base"]
+    )
+    res_df_life_cycle[f"retirement_rate_diff_{sra}"] = (
+        res_df_life_cycle[f"retirement_rate_{sra}_cf"]
+        - res_df_life_cycle[f"retirement_rate_{sra}_base"]
+    )
 
     # res_df.loc[i, "cv"] = calc_compensated_variation(
     #     df_base=df_base,
@@ -153,24 +175,31 @@ for i, sra in enumerate(sra_at_63):
     # )
 
 import matplotlib.pyplot as plt
+
 fig, ax = plt.subplots(3, 1, figsize=(10, 10))
 subset_ages = np.arange(30, 81, 2)
 filtered_df = res_df_life_cycle.loc[subset_ages]
 
 colors = {
-    67.0: 'darkblue',
-    68.0: 'lightblue',
-    69.0: 'lightcoral',  # light red
-    70.0: 'darkred'
+    67.0: "darkblue",
+    68.0: "lightblue",
+    69.0: "lightcoral",  # light red
+    70.0: "darkred",
 }
 
 for i, sra in enumerate(sra_at_63):
     savings_diff = filtered_df[f"savings_rate_diff_{sra}"]
     labor_supply_diff = filtered_df[f"employment_rate_diff_{sra}"]
     retirement_diff = filtered_df[f"retirement_rate_diff_{sra}"]
-    ax[0].plot(filtered_df.index, savings_diff, label=f"SRA at {sra}", color=colors[sra])
-    ax[1].plot(filtered_df.index, labor_supply_diff, label=f"SRA at {sra}", color=colors[sra])
-    ax[2].plot(filtered_df.index, retirement_diff, label=f"SRA at {sra}", color=colors[sra])
+    ax[0].plot(
+        filtered_df.index, savings_diff, label=f"SRA at {sra}", color=colors[sra]
+    )
+    ax[1].plot(
+        filtered_df.index, labor_supply_diff, label=f"SRA at {sra}", color=colors[sra]
+    )
+    ax[2].plot(
+        filtered_df.index, retirement_diff, label=f"SRA at {sra}", color=colors[sra]
+    )
 ax[0].set_title("Difference in savings rate")
 ax[1].set_title("Difference in employment rate")
 ax[2].set_title("Difference in retirement rate")

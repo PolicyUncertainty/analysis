@@ -6,6 +6,7 @@ from model_code.specify_model import specify_model
 from model_code.state_space import construct_experience_years
 from set_paths import get_model_resutls_path
 from simulation.sim_tools.initial_conditions_sim import generate_start_states
+from specs.derive_specs import read_and_derive_specs
 
 
 def solve_and_simulate_scenario(
@@ -14,7 +15,8 @@ def solve_and_simulate_scenario(
     subj_unc,
     custom_resolution_age,
     SRA_at_start,
-    SRA_at_resolution,
+    SRA_at_retirement,
+    annoucement_age,
     model_name,
     df_exists=True,
     only_informed=False,
@@ -22,6 +24,28 @@ def solve_and_simulate_scenario(
     sol_model_exists=True,
     sim_model_exists=True,
 ):
+    model_out_folder = get_model_resutls_path(path_dict, model_name)
+
+    # Make intitial SRA only two digits after point
+
+    df_name = create_df_name(
+        path_dict=path_dict,
+        custom_resolution_age=custom_resolution_age,
+        only_informed=only_informed,
+        annoucement_age=annoucement_age,
+        SRA_at_start=SRA_at_start,
+        SRA_at_retirement=SRA_at_retirement,
+        subj_unc=subj_unc,
+    )
+    df_file = model_out_folder["simulation"] + df_name
+
+    if df_exists:
+        data_sim = pd.read_pickle(df_file)
+        return data_sim
+
+    # First we create the solution. As this is the expectation, the only
+    # thing we need to know, if there is subjective uncertainty and if so
+    # what the resolution age is (internal check for coherence)
     sol_container, model, params = specify_and_solve_model(
         path_dict=path_dict,
         params=params,
@@ -34,27 +58,36 @@ def solve_and_simulate_scenario(
 
     model_params = model["options"]["model_params"]
 
-    model_out_folder = get_model_resutls_path(path_dict, model_name)
-
-    # Make intitial SRA only two digits after point
-    df_name = create_df_name(
-        model_params, only_informed, SRA_at_start, SRA_at_resolution, subj_unc
-    )
-    df_file = model_out_folder["simulation"] + df_name
-
-    # Construct sim alpha
+    # In the simulation, things can be more difficult. First, suppose
+    # agents hold subjective uncertainty. Then in the simulation, there can be two cases:
+    # Smooth change of SRA(including no change) and announcment. Determine the relevant parameters
+    # for this
     if subj_unc:
-        sim_alpha = (SRA_at_resolution - SRA_at_start) / (
-            model_params["resolution_age"] - model_params["start_age"]
-        )
+        # If there is no announcment, we have a smooth change with sim_alpha
+        if annoucement_age is None:
+            sim_alpha = (SRA_at_retirement - SRA_at_start) / (
+                model_params["resolution_age"] - model_params["start_age"]
+            )
+            announcment_SRA = None
+        else:
+            sim_alpha = None
+            announcment_SRA = SRA_at_retirement
     else:
         # If there is no uncertainty then we SRA at resolution is the same as SRA at start.
         # We also check that here
-        if SRA_at_start != SRA_at_resolution:
+        if SRA_at_start != SRA_at_retirement:
             raise ValueError(
                 "SRA at start and resolution must be the same when there is no uncertainty"
             )
-        sim_alpha = None
+        # Announcment is not allowed to be given
+        if annoucement_age is not None:
+            raise ValueError(
+                "Announcment age can only be given in case of subjective uncertainty"
+            )
+        # We set sim_alpha to 0 for the simulation. (For the solution it is clear if subj_exp is False)
+        sim_alpha = 0.0
+        # We also set the announcment SRA to None
+        announcment_SRA = None
 
     if df_exists:
         data_sim = pd.read_pickle(df_file)
@@ -67,6 +100,8 @@ def solve_and_simulate_scenario(
             seed=model_params["seed"],
             custom_resolution_age=custom_resolution_age,
             sim_alpha=sim_alpha,
+            annoucement_age=annoucement_age,
+            annoucement_SRA=announcment_SRA,
             initial_SRA=SRA_at_start,
             solution=sol_container,
             model_of_solution=model,
@@ -87,6 +122,8 @@ def simulate_scenario(
     params,
     custom_resolution_age,
     sim_alpha,
+    annoucement_age,
+    annoucement_SRA,
     initial_SRA,
     solution,
     model_of_solution,
@@ -99,6 +136,8 @@ def simulate_scenario(
         subj_unc=False,
         custom_resolution_age=custom_resolution_age,
         sim_alpha=sim_alpha,
+        annoucement_age=annoucement_age,
+        annoucement_SRA=annoucement_SRA,
         load_model=sim_model_exists,
         model_type="simulation",
     )
@@ -185,7 +224,13 @@ def simulate_scenario(
 
 
 def create_df_name(
-    model_params, only_informed, SRA_at_start, SRA_at_resolution, subj_unc
+    path_dict,
+    custom_resolution_age,
+    annoucement_age,
+    only_informed,
+    SRA_at_start,
+    SRA_at_retirement,
+    subj_unc,
 ):
     # Create df name
     if only_informed:
@@ -193,11 +238,17 @@ def create_df_name(
     else:
         name_append = "biased.pkl"
 
-    res_age = model_params["resolution_age"]
-    if subj_unc:
-        df_name = (
-            f"df_subj_unc_{res_age}_{SRA_at_start}_{SRA_at_resolution}_{name_append}"
-        )
+    if custom_resolution_age is None:
+        specs = read_and_derive_specs(path_dict["specs"])
+        resolution_age = specs["resolution_age_estimation"]
     else:
-        df_name = f"df_no_unc_{SRA_at_resolution}_{name_append}"
+        resolution_age = custom_resolution_age
+
+    if subj_unc:
+        if annoucement_age is None:
+            df_name = f"df_subj_unc_{resolution_age}_{SRA_at_start}_{SRA_at_retirement}_{name_append}"
+        else:
+            df_name = f"df_subj_unc_{resolution_age}_{SRA_at_start}_{SRA_at_retirement}_{annoucement_age}_{name_append}"
+    else:
+        df_name = f"df_no_unc_{SRA_at_retirement}_{name_append}"
     return df_name

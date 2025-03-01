@@ -174,9 +174,13 @@ def generate_start_states(
     initial_policy_state = np.floor(
         (inital_SRA - specs["min_SRA"]) / specs["SRA_grid_size"]
     )
+    
     policy_state_agents = (jnp.ones_like(exp_agents) * initial_policy_state).astype(
         jnp.uint8
     )
+
+    if only_informed:
+        informed_agents = jnp.ones_like(informed_agents)
 
     states = {
         "period": jnp.zeros_like(exp_agents, dtype=jnp.uint8),

@@ -146,6 +146,9 @@ class est_class_from_paths:
             params=start_params_all,
             subj_unc=True,
             custom_resolution_age=None,
+            sim_alpha=None,
+            annoucement_age=None,
+            annoucement_SRA=None,
             load_model=load_model,
             model_type="solution",
         )

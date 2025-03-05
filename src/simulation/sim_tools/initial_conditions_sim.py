@@ -2,9 +2,11 @@ import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import seaborn as sns
 from dcegm.wealth_correction import adjust_observed_wealth
 from model_code.stochastic_processes.job_offers import job_offer_process_transition
-from scipy.stats import pareto
+import scipy.stats as stats
+from sklearn.neighbors import KernelDensity
 
 
 def generate_start_states(
@@ -33,6 +35,50 @@ def generate_start_states(
         params=params,
         model=model,
     )
+
+    # # Define unique values
+    # education_levels = start_period_data["education"].unique()
+    # sexes = start_period_data["sex"].unique()
+    # periods = sorted(start_period_data["period"].unique())
+
+    # # Compute 99th percentile threshold for adjusted_wealth
+    # wealth_99 = np.percentile(start_period_data["adjusted_wealth"], 99)
+
+    # # Filter out top 1%
+    # filtered_data = start_period_data[start_period_data["adjusted_wealth"] <= wealth_99]
+
+    # # Create a figure with 4 subplots (one for each period)
+    # fig, axes = plt.subplots(2, 2, figsize=(15, 12), sharex=True, sharey=True)
+
+    # # Plot distributions separately for each period
+    # for period, ax in zip(periods, axes.flatten()):
+    #     subset = filtered_data[filtered_data["period"] == period]
+
+    #     for edu in education_levels:
+    #         for sex in sexes:
+    #             sub_subset = subset[(subset["education"] == edu) & (subset["sex"] == sex)]
+
+    #             if not sub_subset.empty:
+    #                 sns.histplot(
+    #                     data=sub_subset,
+    #                     x="adjusted_wealth",
+    #                     bins=30,
+    #                     ax=ax,
+    #                     alpha=0.3,  # Translucent bars
+    #                     kde=True,  # Add KDE
+    #                     label=f"Edu: {edu}, Sex: {sex}"
+    #                 )
+
+    #     ax.set_title(f"Period {period}")
+    #     ax.set_xlabel("Adjusted Wealth")
+    #     ax.set_ylabel("Density / Count")
+    #     ax.legend(title="Groups")
+
+    # # Adjust layout and show the plot
+    # plt.tight_layout()
+    # plt.show()
+
+    # breakpoint()
 
     # Generate container
     sex_agents = np.array([], np.uint8)
@@ -197,26 +243,57 @@ def generate_start_states(
     return states, wealth_agents
 
 
-def draw_start_wealth_dist(start_period_data_edu, n_agents_edu):
-    # # From now use uniform from 30 to 70th quantile
-    wealth_start_edu = np.random.uniform(
-        start_period_data_edu["adjusted_wealth"].quantile(0.3),
-        start_period_data_edu["adjusted_wealth"].quantile(0.7),
-        n_agents_edu,
-    )
+def draw_start_wealth_dist(start_period_data_edu, n_agents_edu, method="pareto"):
+    """
+    Draws samples from the starting wealth distribution using different methods.
+    
+    Methods:
+    - "uniform": Uniform sampling between the 30th and 70th percentiles.
+    - "lognormal": Fit a shifted lognormal distribution and sample from it.
+    - "kde": Kernel Density Estimation (KDE) based sampling.
+    - "pareto": Fit a shifted Pareto distribution and sample from it.
+
+    Parameters:
+        start_period_data_edu (pd.DataFrame): Data containing "adjusted_wealth".
+        n_agents_edu (int): Number of samples to draw.
+        method (str): Sampling method ("uniform", "lognormal", "kde", "pareto").
+
+    Returns:
+        np.ndarray: Sampled wealth values.
+    """
+    
+    wealth_data = start_period_data_edu["adjusted_wealth"]
+    
+    if method == "uniform":
+        # Existing uniform sampling between 30th and 70th quantiles
+        wealth_start_edu = np.random.uniform(
+            wealth_data.quantile(0.3),
+            wealth_data.quantile(0.7),
+            n_agents_edu
+        )
+
+    elif method == "lognormal":
+        # Fit a shifted lognormal distribution
+        min_val = wealth_data.min()
+        shifted_data = wealth_data - min_val + 1e-6  # Avoid log(0)
+        shape, loc, scale = stats.lognorm.fit(shifted_data, floc=0)  # Fix location at zero
+        samples = stats.lognorm.rvs(shape, loc=loc, scale=scale, size=n_agents_edu)
+        wealth_start_edu = samples + min_val - 1e-6  # Shift back
+
+    elif method == "kde":
+        # Kernel Density Estimation (KDE) sampling
+        kde = KernelDensity(kernel="gaussian", bandwidth=0.1 * wealth_data.std()).fit(wealth_data.values.reshape(-1, 1))
+        wealth_start_edu = kde.sample(n_agents_edu).flatten()
+
+    elif method == "pareto":
+        # Fit a Pareto-like distribution (Shifted Pareto)
+        min_val = wealth_data.min()
+        shifted_data = wealth_data - min_val + 1e-6  # Shift data to avoid 0
+        shape, loc, scale = stats.pareto.fit(shifted_data, floc=0)  # Fix location at zero
+        samples = stats.pareto.rvs(shape, loc=loc, scale=scale, size=n_agents_edu)
+        wealth_start_edu = samples + min_val - 1e-6  # Shift back
+
+    else:
+        raise ValueError("Invalid method. Choose 'uniform', 'lognormal', 'kde', or 'pareto'.")
+
     return wealth_start_edu
-    # if edu == 1:
-    #     # Filter out high outliers for high
-    #     wealth_edu = wealth_edu[wealth_edu < np.quantile(wealth_edu, 0.85)]
-    #
-    # median = np.quantile(wealth_edu, 0.5)
-    # fscale = min_unemployment_benefits - 0.01
-    #
-    # # # Adjust shape to ensure the median is as desired
-    # # adjusted_shape = np.log(2) / np.log(median / fscale)
-    #
-    # # Estimate pareto wealth distribution. Take single unemployment benefits as minimum.
-    # shape_param, loc_param, scale_param = pareto.fit(wealth_edu, fscale=fscale)
-    #
-    # wealth_agents[edu_agents == edu] = pareto.rvs(shape_param, loc=loc_param, scale=fscale, size=n_agents_edu)
-    # breakpoint()

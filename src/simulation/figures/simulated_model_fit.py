@@ -29,6 +29,7 @@ def plot_quantiles(
 ):
     # Simulate baseline with subjective belief
     data_sim = solve_and_simulate_scenario(
+        annoucement_age=None,
         path_dict=path_dict,
         params=params,
         subj_unc=True,
@@ -123,6 +124,7 @@ def plot_choice_shares_single(
 
     # Simulate baseline with subjective belief
     data_sim = solve_and_simulate_scenario(
+        annoucement_age=None,
         path_dict=path_dict,
         params=params,
         subj_unc=True,

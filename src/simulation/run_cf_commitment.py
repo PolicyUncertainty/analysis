@@ -29,7 +29,7 @@ from export_results.tables.cv import calc_compensated_variation
 # Set specifications
 n_agents = 10000
 seeed = 123
-model_name = "new"
+model_name = "partner_est"
 load_base_solution = True  # baseline solution conntainer
 load_second_solution = True  # counterfactual solution conntainer
 load_sol_model = True  # informed state as type

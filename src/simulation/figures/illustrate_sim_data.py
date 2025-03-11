@@ -28,10 +28,11 @@ def plot_sim_vars(
     data_sim = solve_and_simulate_scenario(
         path_dict=path_dict,
         params=params,
+        annoucement_age=None,
         subj_unc=True,
         custom_resolution_age=None,
         SRA_at_start=67,
-        SRA_at_resolution=67,
+        SRA_at_retirement=67,
         model_name=model_name,
         df_exists=load_df,
         solution_exists=load_solution,

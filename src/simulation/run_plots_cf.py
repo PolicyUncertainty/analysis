@@ -8,7 +8,7 @@ from simulation.figures.cf2 import plot_cf2_plots
 
 path_dict = create_path_dict()
 
-model_name = "new"
+model_name = "partner_est"
 
 
 # Exclude the first rpw

@@ -15,7 +15,6 @@ def paths_and_specs():
     specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
     return path_dict, specs
 
-
 def test_step_function(paths_and_specs):
     path_dict, specs = paths_and_specs
 

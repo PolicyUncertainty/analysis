@@ -84,21 +84,33 @@ def test_utility_func(
     paths_and_specs,
 ):
     params = {
-        "mu": mu,
-        "disutil_pt_work_good_men": disutil_work + 1,
-        "disutil_pt_work_bad_men": disutil_work,
-        "disutil_ft_work_good_men": disutil_work + 1,
-        "disutil_ft_work_bad_men": disutil_work,
-        "disutil_unemployed_men": disutil_unemployed,
-        "disutil_pt_work_good_women": disutil_work + 1,
-        "disutil_pt_work_bad_women": disutil_work,
-        "disutil_ft_work_good_women": disutil_work + 1,
-        "disutil_ft_work_bad_women": disutil_work,
-        "disutil_unemployed_women": disutil_unemployed,
+        "mu_men": mu + 1,
+        "mu_women": mu,
+        # Men
+        "disutil_ft_work_high_good_men": disutil_work + 1,
+        "disutil_ft_work_high_bad_men": disutil_work,
+        "disutil_ft_work_low_good_men": disutil_work + 1,
+        "disutil_ft_work_low_bad_men": disutil_work,
+        "disutil_unemployed_high_men": disutil_unemployed,
+        "disutil_unemployed_low_men": disutil_unemployed,
+        # Women
+        "disutil_ft_work_high_good_women": disutil_work + 1,
+        "disutil_ft_work_high_bad_women": disutil_work,
+        "disutil_ft_work_low_good_women": disutil_work + 1,
+        "disutil_ft_work_low_bad_women": disutil_work,
+        "disutil_pt_work_high_good_women": disutil_work + 1,
+        "disutil_pt_work_high_bad_women": disutil_work,
+        "disutil_pt_work_low_good_women": disutil_work + 1,
+        "disutil_pt_work_low_bad_women": disutil_work,
+        "disutil_unemployed_high_women": disutil_unemployed,
+        "disutil_unemployed_low_women": disutil_unemployed,
         "disutil_children_ft_work_low": 0.1,
         "disutil_children_ft_work_high": 0.1,
         "bequest_scale": 2,
     }
+    if sex == 0:
+        mu += 1
+
     options = paths_and_specs[1]
     cons_scale = consumption_scale(
         partner_state=partner_state,
@@ -110,15 +122,12 @@ def test_utility_func(
 
     # Read out disutil params
     health_str = "good" * health + "bad" * (1 - health)
-    if sex == 0:
-        sex_str = "men"
-    else:
-        sex_str = "women"
+    sex_str = "women" * sex + "men" * (1 - sex)
+    edu_str = "high" * education + "low" * (1 - education)
 
-    disutil_unemployment = np.exp(-params[f"disutil_unemployed_{sex_str}"])
+    disutil_unemployment = np.exp(-params[f"disutil_unemployed_{edu_str}_{sex_str}"])
 
-    exp_factor_pt_work = params[f"disutil_pt_work_{health_str}_{sex_str}"]
-    exp_factor_ft_work = params[f"disutil_ft_work_{health_str}_{sex_str}"]
+    exp_factor_ft_work = params[f"disutil_ft_work_{edu_str}_{health_str}_{sex_str}"]
     if sex == 1:
         has_partner_int = int(partner_state > 0)
         nb_children = options["children_by_state"][
@@ -131,7 +140,6 @@ def test_utility_func(
             params["disutil_children_ft_work_low"] * nb_children * (1 - education)
         )
 
-    disutil_pt_work = np.exp(-exp_factor_pt_work)
     disutil_ft_work = np.exp(-exp_factor_ft_work)
     if mu == 1:
         utility_lambda = lambda disutil: np.log(consumption * disutil / cons_scale)
@@ -155,6 +163,9 @@ def test_utility_func(
         utility_lambda(disutil_unemployment),
     )
     if sex == 1:
+        exp_factor_pt_work = params[f"disutil_pt_work_{edu_str}_{health_str}_{sex_str}"]
+        disutil_pt_work = np.exp(-exp_factor_pt_work)
+
         np.testing.assert_almost_equal(
             utility_func(
                 consumption=consumption,
@@ -216,21 +227,32 @@ def test_marginal_utility(
 ):
     options = paths_and_specs[1]
     params = {
-        "mu": mu,
-        "disutil_pt_work_good_men": disutil_work + 1,
-        "disutil_pt_work_bad_men": disutil_work,
-        "disutil_ft_work_good_men": disutil_work + 1,
-        "disutil_ft_work_bad_men": disutil_work,
-        "disutil_unemployed_men": disutil_unemployed,
-        "disutil_pt_work_good_women": disutil_work + 1,
-        "disutil_pt_work_bad_women": disutil_work,
-        "disutil_ft_work_good_women": disutil_work + 1,
-        "disutil_ft_work_bad_women": disutil_work,
-        "disutil_unemployed_women": disutil_unemployed,
+        "mu_men": mu + 1,
+        "mu_women": mu,
+        # Men
+        "disutil_ft_work_high_good_men": disutil_work + 1,
+        "disutil_ft_work_high_bad_men": disutil_work,
+        "disutil_ft_work_low_good_men": disutil_work + 1,
+        "disutil_ft_work_low_bad_men": disutil_work,
+        "disutil_unemployed_high_men": disutil_unemployed,
+        "disutil_unemployed_low_men": disutil_unemployed,
+        # Women
+        "disutil_ft_work_high_good_women": disutil_work + 1,
+        "disutil_ft_work_high_bad_women": disutil_work,
+        "disutil_ft_work_low_good_women": disutil_work + 1,
+        "disutil_ft_work_low_bad_women": disutil_work,
+        "disutil_pt_work_high_good_women": disutil_work + 1,
+        "disutil_pt_work_high_bad_women": disutil_work,
+        "disutil_pt_work_low_good_women": disutil_work + 1,
+        "disutil_pt_work_low_bad_women": disutil_work,
+        "disutil_unemployed_high_women": disutil_unemployed,
+        "disutil_unemployed_low_women": disutil_unemployed,
         "disutil_children_ft_work_low": 0.1,
         "disutil_children_ft_work_high": 0.1,
         "bequest_scale": 2,
     }
+    if sex == 0:
+        mu += 1
 
     random_choice = np.random.choice(np.array([0, 1, 2]))
     marg_util_jax = jax.jacfwd(utility_func, argnums=0)(
@@ -287,21 +309,32 @@ def test_inv_marginal_utility(
     paths_and_specs,
 ):
     params = {
-        "mu": mu,
-        "disutil_pt_work_good_men": disutil_work + 1,
-        "disutil_pt_work_bad_men": disutil_work,
-        "disutil_ft_work_good_men": disutil_work + 1,
-        "disutil_ft_work_bad_men": disutil_work,
-        "disutil_unemployed_men": disutil_unemployed,
-        "disutil_pt_work_good_women": disutil_work + 1,
-        "disutil_pt_work_bad_women": disutil_work,
-        "disutil_ft_work_good_women": disutil_work + 1,
-        "disutil_ft_work_bad_women": disutil_work,
-        "disutil_unemployed_women": disutil_unemployed,
+        "mu_men": mu + 1,
+        "mu_women": mu,
+        # Men
+        "disutil_ft_work_high_good_men": disutil_work + 1,
+        "disutil_ft_work_high_bad_men": disutil_work,
+        "disutil_ft_work_low_good_men": disutil_work + 1,
+        "disutil_ft_work_low_bad_men": disutil_work,
+        "disutil_unemployed_high_men": disutil_unemployed,
+        "disutil_unemployed_low_men": disutil_unemployed,
+        # Women
+        "disutil_ft_work_high_good_women": disutil_work + 1,
+        "disutil_ft_work_high_bad_women": disutil_work,
+        "disutil_ft_work_low_good_women": disutil_work + 1,
+        "disutil_ft_work_low_bad_women": disutil_work,
+        "disutil_pt_work_high_good_women": disutil_work + 1,
+        "disutil_pt_work_high_bad_women": disutil_work,
+        "disutil_pt_work_low_good_women": disutil_work + 1,
+        "disutil_pt_work_low_bad_women": disutil_work,
+        "disutil_unemployed_high_women": disutil_unemployed,
+        "disutil_unemployed_low_women": disutil_unemployed,
         "disutil_children_ft_work_low": 0.1,
         "disutil_children_ft_work_high": 0.1,
         "bequest_scale": 2,
     }
+    if sex == 0:
+        mu += 1
 
     options = paths_and_specs[1]
     random_choice = np.random.choice(np.array([0, 1, 2]))
@@ -333,34 +366,40 @@ def test_inv_marginal_utility(
 
 
 @pytest.mark.parametrize(
-    "consumption, mu, bequest_scale",
-    list(product(CONSUMPTION_GRID, MU_GRID, BEQUEST_SCALE)),
+    "consumption, mu, sex, bequest_scale",
+    list(product(CONSUMPTION_GRID, MU_GRID, SEX_GRID, BEQUEST_SCALE)),
 )
-def test_bequest(consumption, mu, bequest_scale):
+def test_bequest(consumption, mu, sex, bequest_scale):
     params = {
-        "mu": mu,
+        "mu_men": mu + 1,
+        "mu_women": mu,
         "bequest_scale": bequest_scale,
     }
+    if sex == 0:
+        mu += 1
     if mu == 1:
         bequest = bequest_scale * np.log(consumption)
     else:
         bequest = bequest_scale * (((consumption ** (1 - mu)) - 1) / (1 - mu))
     np.testing.assert_almost_equal(
-        utility_final_consume_all(consumption, params), bequest
+        utility_final_consume_all(consumption, sex, params), bequest
     )
 
 
 @pytest.mark.parametrize(
-    "consumption, mu, bequest_scale",
-    list(product(CONSUMPTION_GRID, MU_GRID, BEQUEST_SCALE)),
+    "consumption, mu, sex, bequest_scale",
+    list(product(CONSUMPTION_GRID, MU_GRID, SEX_GRID, BEQUEST_SCALE)),
 )
-def test_bequest_marginal(consumption, mu, bequest_scale):
+def test_bequest_marginal(consumption, mu, sex, bequest_scale):
     params = {
-        "mu": mu,
+        "mu_men": mu + 1,
+        "mu_women": mu,
         "bequest_scale": bequest_scale,
     }
-    bequest = jax.jacfwd(utility_final_consume_all, argnums=0)(consumption, params)
+    if sex == 0:
+        mu += 1
+    bequest = jax.jacfwd(utility_final_consume_all, argnums=0)(consumption, sex, params)
     np.testing.assert_almost_equal(
-        marginal_utility_final_consume_all(consumption, params),
+        marginal_utility_final_consume_all(consumption, sex, params),
         bequest,
     )

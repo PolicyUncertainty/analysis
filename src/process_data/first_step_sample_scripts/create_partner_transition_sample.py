@@ -97,7 +97,6 @@ def create_partner_and_lagged_state(df, specs):
     df = create_partner_state(df, filter_missing=False)
     df["lead_partner_state"] = df.groupby(["pid"])["partner_state"].shift(-1)
 
-    df = df[df["lead_partner_state"].notna()]
     df = df[df["partner_state"].notna()]
     print(
         str(len(df))

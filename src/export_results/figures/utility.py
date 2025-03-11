@@ -45,22 +45,25 @@ def plot_bequest(params, specs):
     wealth = np.linspace(5_000, 100_000, 1000) / specs["wealth_unit"]
 
     choice_labels = specs["choice_labels"]
-    fig, ax = plt.subplots()
-    for choice, choice_label in enumerate(choice_labels):
-        bequests = np.zeros_like(wealth)
-        for i, w in enumerate(wealth):
-            bequests[i] = utility_final_consume_all(
-                wealth=w,
-                params=params,
+    fig, axs = plt.subplots(nrows=2)
+    for sex in range(2):
+        for choice, choice_label in enumerate(choice_labels):
+            bequests = np.zeros_like(wealth)
+            for i, w in enumerate(wealth):
+                bequests[i] = utility_final_consume_all(
+                    wealth=w,
+                    sex=sex,
+                    params=params,
+                )
+            axs[sex].plot(
+                wealth,
+                bequests,
+                label=choice_label,
             )
-        ax.plot(
-            wealth,
-            bequests,
-            label=choice_label,
-        )
-    ax.legend()
-    ax.set_ylabel("Bequest Utility")
-    ax.set_xlabel("Consumption")
+    axs[0].legend()
+    axs[0].set_ylabel("Bequest Utility")
+    axs[0].set_xlabel("Consumption")
+    axs[1].set_xlabel("Consumption")
 
 
 def plot_cons_scale(specs):

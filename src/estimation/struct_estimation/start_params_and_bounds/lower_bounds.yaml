@@ -1,21 +1,38 @@
-mu: 1.0e-12
-#disutil_not_retired_bad: 1.0e-12
-#disutil_working_bad: 1.0e-12
-#disutil_not_retired_good: 1.0e-12
-#disutil_working_good: 1.0e-12
-disutil_ft_work_good_men: 1.0e-12
-disutil_ft_work_bad_men: 1.0e-12
-disutil_pt_work_good_men: 1.0e-12
-disutil_pt_work_bad_men: 1.0e-12
-disutil_unemployed_men: 1.0e-12
-disutil_ft_work_good_women: 1.0e-12
-disutil_ft_work_bad_women: 1.0e-12
-disutil_pt_work_good_women: 1.0e-12
-disutil_pt_work_bad_women: 1.0e-12
-disutil_unemployed_women: 1.0e-12
-disutil_children_pt_work: 1.0e-12
-disutil_children_ft_work_low: 1.0e-12
-disutil_children_ft_work_high: 1.0e-12
+mu_men: 1.0e-12
+mu_women: 1.0e-12
+
+
+
+# Full time work dis-utility men
+disutil_ft_work_high_good_men: 1e-12
+disutil_ft_work_high_bad_men: 1e-12
+disutil_ft_work_low_good_men: 1e-12
+disutil_ft_work_low_bad_men: 1e-12
+
+# Full time work dis-utility women
+disutil_ft_work_high_good_women: 1e-12
+disutil_ft_work_high_bad_women: 1e-12
+disutil_ft_work_low_good_women: 1e-12
+disutil_ft_work_low_bad_women: 1e-12
+
+# Part time dis-utility men
+disutil_pt_work_high_good_women: 1e-12
+disutil_pt_work_high_bad_women: 1e-12
+disutil_pt_work_low_good_women: 1e-12
+disutil_pt_work_low_bad_women: 1e-12
+
+# Unemployment dis-utility men
+disutil_unemployed_high_men: 1e-12
+disutil_unemployed_low_men: 1e-12
+
+# Unemployment dis-utility women
+disutil_unemployed_high_women: 1e-12
+disutil_unemployed_low_women: 1e-12
+
+# Children dis-utility
+disutil_children_ft_work_low: 1e-12
+disutil_children_ft_work_high: 1e-12
+
 lambda: 1.0e-12
 #taste_shock_scale_men: 1.0e-12
 #taste_shock_scale_women: 1.0e-12

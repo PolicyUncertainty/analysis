@@ -33,7 +33,7 @@ model_name = "new"
 load_solution = True
 load_sol_model = True
 load_sim_model = True
-load_df = None
+load_df = False
 
 
 # Load params
@@ -66,7 +66,8 @@ for i, sra in enumerate(sra_at_63):
         params=params,
         subj_unc=True,
         custom_resolution_age=None,
-        SRA_at_resolution=sra,
+        annoucement_age=None,
+        SRA_at_retirement=sra,
         SRA_at_start=67,
         model_name=model_name,
         df_exists=load_df,

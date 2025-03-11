@@ -9,7 +9,6 @@ from model_code.policy_processes.step_function import (
 from set_paths import create_path_dict
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
-
 @pytest.fixture(scope="module")
 def paths_and_specs():
     path_dict = create_path_dict()

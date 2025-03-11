@@ -29,11 +29,12 @@ def plot_quantiles(
 ):
     # Simulate baseline with subjective belief
     data_sim = solve_and_simulate_scenario(
+        annoucement_age=None,
         path_dict=path_dict,
         params=params,
         subj_unc=True,
         custom_resolution_age=None,
-        SRA_at_resolution=67,
+        SRA_at_retirement=67,
         SRA_at_start=67,
         model_name=model_name,
         df_exists=load_df,
@@ -47,6 +48,9 @@ def plot_quantiles(
         path_dict=path_dict,
         subj_unc=False,
         custom_resolution_age=None,
+        sim_alpha=None,
+        annoucement_age=None,
+        annoucement_SRA=None,
         params=params,
         load_model=True,
         model_type="solution",
@@ -120,11 +124,12 @@ def plot_choice_shares_single(
 
     # Simulate baseline with subjective belief
     data_sim = solve_and_simulate_scenario(
+        annoucement_age=None,
         path_dict=path_dict,
         params=params,
         subj_unc=True,
         custom_resolution_age=None,
-        SRA_at_resolution=67,
+        SRA_at_retirement=67,
         SRA_at_start=67,
         model_name=model_name,
         df_exists=load_df,
@@ -206,7 +211,7 @@ def plot_states(
         params=params,
         subj_unc=True,
         custom_resolution_age=None,
-        SRA_at_resolution=67,
+        SRA_at_retirement=67,
         SRA_at_start=67,
         model_name=model_name,
         df_exists=load_df,
@@ -230,6 +235,8 @@ def plot_states(
         path_dict=path_dict,
         subj_unc=False,
         custom_resolution_age=None,
+        annoucement_age=None,
+        annoucement_SRA=None,
         params=params,
         load_model=load_sol_model,
         model_type="solution",

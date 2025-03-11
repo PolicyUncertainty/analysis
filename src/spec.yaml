@@ -85,6 +85,11 @@ end_year_mortality: 2020 # end year of lifespells in soep38
 end_age_mortality: 110
 life_table_max_age: 100
 
+###############################################################################
+# Partner process estimation parameters
+###############################################################################
+end_age_transition_estimation: 75
+
 
 
 ###############################################################################

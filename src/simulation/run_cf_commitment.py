@@ -19,12 +19,7 @@ import pickle as pkl
 
 import numpy as np
 
-from export_results.tables.cv import calc_compensated_variation
-from simulation.sim_tools.calc_aggregate_results import (
-    below_sixty_savings,
-    calc_average_retirement_age,
-    sra_at_retirement,
-)
+from simulation.sim_tools.calc_life_time_results import add_new_life_cycle_results
 from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 
 # %%
@@ -65,7 +60,9 @@ res_df = pd.DataFrame(
 )
 
 
-res_df_life_cycle = pd.DataFrame(dtype=float)
+# Create life cylce df object which is None.
+# The result function will then initialize in the first iteration.
+res_df_life_cycle = None
 
 # Assign alphas in dataframe
 res_df["sra_at_63"] = sra_at_63
@@ -112,61 +109,11 @@ for i, sra in enumerate(sra_at_63):
         sim_model_exists=load_sim_model,
     ).reset_index()
 
-    # load_second_solution = True
-    # Calculate results
-    for k, df_scen in enumerate([df_cf, df_base]):
-        if k == 0:
-            pre = ""
-        else:
-            pre = "base_"
-
-        res_df.loc[i, pre + "below_sixty_savings"] = below_sixty_savings(df_scen)
-        res_df.loc[i, pre + "ret_age"] = calc_average_retirement_age(df_scen)
-        res_df.loc[i, pre + "sra_at_ret"] = sra_at_retirement(df_scen)
-        res_df.loc[i, pre + "working_hours"] = df_scen["working_hours"].mean()
-
-    ages = np.arange(30, 101, 1)
-    for k, df in enumerate([df_base, df_cf]):
-
-        if k == 0:
-            string = "base"
-        else:
-            string = "cf"
-
-        res_df_life_cycle[f"working_hours_{sra}_{string}"] = df.groupby("age")[
-            "working_hours"
-        ].aggregate("mean")
-        res_df_life_cycle[f"savings_{sra}_{string}"] = df.groupby("age")[
-            "savings_dec"
-        ].aggregate("mean")
-        res_df_life_cycle[f"consumption_{sra}_{string}"] = df.groupby("age")[
-            "consumption"
-        ].aggregate("mean")
-        res_df_life_cycle[f"income_{sra}_{string}"] = df.groupby("age")[
-            "total_income"
-        ].aggregate("mean")
-        res_df_life_cycle[f"assets_{sra}_{string}"] = df.groupby("age")[
-            "savings"
-        ].aggregate("mean")
-        res_df_life_cycle[f"savings_rate_{sra}_{string}"] = (
-            res_df_life_cycle[f"savings_{sra}_{string}"]
-            / res_df_life_cycle[f"income_{sra}_{string}"]
-        )
-        res_df_life_cycle[f"employment_rate_{sra}_{string}"] = df.groupby("age")[
-            "choice"
-        ].apply(lambda x: x.isin([2, 3]).sum() / len(x))
-        res_df_life_cycle[f"retirement_rate_{sra}_{string}"] = df.groupby("age")[
-            "choice"
-        ].apply(lambda x: x.isin([0]).sum() / len(x))
-    res_df_life_cycle[f"savings_rate_diff_{sra}"] = (
-        res_df_life_cycle[f"savings_rate_{sra}_cf"]
-        - res_df_life_cycle[f"savings_rate_{sra}_base"]
+    res_df_life_cycle = add_new_life_cycle_results(
+        df_base=df_base,
+        df_cf=df_cf,
+        scenatio_indicator=sra,
+        res_df_life_cycle=res_df_life_cycle,
     )
-    res_df_life_cycle[f"employment_rate_diff_{sra}"] = (
-        res_df_life_cycle[f"employment_rate_{sra}_cf"]
-        - res_df_life_cycle[f"employment_rate_{sra}_base"]
-    )
-    res_df_life_cycle[f"retirement_rate_diff_{sra}"] = (
-        res_df_life_cycle[f"retirement_rate_{sra}_cf"]
-        - res_df_life_cycle[f"retirement_rate_{sra}_base"]
-    )
+
+res_df_life_cycle.to_csv(path_dict["sim_results"] + f"commitment_lc_{model_name}.csv")

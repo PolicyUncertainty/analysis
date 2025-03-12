@@ -3,9 +3,10 @@ import numpy as np
 import pandas as pd
 
 
-def create_life_cycle_plot(path_dict, model_name):
+def create_life_cycle_plots(path_dict, model_name):
+
     res_df_life_cycle = pd.read_csv(
-        path_dict["sim_results"] + f"commitment_lc_{model_name}.csv"
+        path_dict["sim_results"] + f"debias_lc_{model_name}.csv"
     )
 
     fig, ax = plt.subplots(3, 1, figsize=(10, 10))
@@ -19,6 +20,7 @@ def create_life_cycle_plot(path_dict, model_name):
         70.0: "darkred",
     }
     sra_at_63 = [67.0, 68.0, 69.0, 70.0]
+
     for i, sra in enumerate(sra_at_63):
         savings_diff = filtered_df[f"savings_rate_diff_{sra}"]
         labor_supply_diff = filtered_df[f"employment_rate_diff_{sra}"]
@@ -38,6 +40,7 @@ def create_life_cycle_plot(path_dict, model_name):
     ax[0].set_title("Difference in savings rate")
     ax[1].set_title("Difference in employment rate")
     ax[2].set_title("Difference in retirement rate")
+    plt.legend()
     for axis in ax:
         axis.axhline(y=0, color="black")
         axis.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, pos: f"{x:.3f}"))

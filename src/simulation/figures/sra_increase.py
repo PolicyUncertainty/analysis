@@ -1,14 +1,16 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+
 from export_results.figures.color_map import JET_COLOR_MAP
 
 
-def plot_cf2_plots(path_dict, model_name):
+def plot_aggregate_results(path_dict, model_name):
     """Plot the change in baseline outcomes as a percentage of the baseline outcome."""
 
     df = pd.read_csv(
-        path_dict["sim_results"] + f"counterfactual_2_{model_name}.csv", index_col=0
+        path_dict["sim_results"] + f"sra_increase_aggregate_{model_name}.csv",
+        index_col=0,
     )
 
     # Transform df to also have 67 data

@@ -1,6 +1,7 @@
 # %%
 # Set paths of project
 import pandas as pd
+
 from set_paths import create_path_dict
 
 path_dict = create_path_dict()
@@ -15,11 +16,12 @@ import jax
 jax.config.update("jax_enable_x64", True)
 
 import pickle as pkl
+
 import numpy as np
-from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
-from simulation.sim_tools.calc_life_time_results  import add_new_life_cycle_results
 
 from export_results.tables.cv import calc_compensated_variation
+from simulation.sim_tools.calc_life_time_results import add_new_life_cycle_results
+from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 
 # %%
 # Set specifications
@@ -67,14 +69,13 @@ for announcement_age in annoucement_ages:
         sim_model_exists=load_sim_model,
     ).reset_index()
 
-
-    # Simulate counterfactual 
+    # Simulate counterfactual
     df_cf = solve_and_simulate_scenario(
         path_dict=path_dict,
         params=params,
         subj_unc=True,
         custom_resolution_age=None,
-        annoucement_age= announcement_age,  # Let's earliest age is 31
+        annoucement_age=announcement_age,  # Let's earliest age is 31
         SRA_at_retirement=69,
         SRA_at_start=67,
         model_name=model_name,
@@ -92,4 +93,4 @@ for announcement_age in annoucement_ages:
     )
 
 
-res_df_life_cycle.to_csv(path_dict["sim_results"] + f"announcment_l_{model_name}.csv")
+res_df_life_cycle.to_csv(path_dict["sim_results"] + f"announcement_lc_{model_name}.csv")

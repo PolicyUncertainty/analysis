@@ -31,8 +31,9 @@ model_name = "partner_est"
 load_solution = False  # baseline solution conntainer
 load_sol_model = True  # informed state as type
 load_sim_model = True  # informed state stochastic
-load_df = (
-    None  # True = load existing df, False = create new df, None = create but not save
+load_df_biased = True
+load_df_unbiased = (
+    False  # True = load existing df, False = create new df, None = create but not save
 )
 
 
@@ -50,10 +51,6 @@ res_df_life_cycle = None
 # sra_at_63 = np.arange(67, 70 + specs["SRA_grid_size"], 1)
 sra_at_63 = [67.0, 68.0, 69.0, 70.0]
 for i, sra in enumerate(sra_at_63):
-    if load_df:
-        print("Load existing dfs for sra: ", sra)
-    else:
-        print("Start simulation for sra: ", sra)
 
     # Simulate baseline with subjective belief
     df_base = solve_and_simulate_scenario(
@@ -65,7 +62,8 @@ for i, sra in enumerate(sra_at_63):
         SRA_at_retirement=sra,
         SRA_at_start=67,
         model_name=model_name,
-        df_exists=load_df,
+        df_exists=load_df_biased,
+        only_informed=False,
         solution_exists=load_solution,
         sol_model_exists=load_sol_model,
         sim_model_exists=load_sim_model,
@@ -86,7 +84,7 @@ for i, sra in enumerate(sra_at_63):
         SRA_at_retirement=sra,
         SRA_at_start=sra,
         model_name=model_name,
-        df_exists=load_df,
+        df_exists=load_df_unbiased,
         only_informed=True,
         solution_exists=load_solution,
         sol_model_exists=load_sol_model,

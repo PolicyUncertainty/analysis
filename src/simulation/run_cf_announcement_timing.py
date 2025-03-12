@@ -69,7 +69,9 @@ for announcement_age in annoucement_ages:
         sim_model_exists=load_sim_model,
     ).reset_index()
 
-    load_df_base = True
+    if load_df_base is not None:
+        load_df_base = True
+
     load_sol_model = True
     load_sim_model = True
     load_solution = True

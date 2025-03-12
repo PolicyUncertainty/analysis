@@ -94,6 +94,8 @@ for i, sra in enumerate(sra_at_63):
         sim_model_exists=load_sim_model,
     ).reset_index()
 
+    load_cf_solution = True
+
     res_df_life_cycle = add_new_life_cycle_results(
         df_base=df_base,
         df_cf=df_cf,

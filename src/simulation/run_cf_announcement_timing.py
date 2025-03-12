@@ -28,10 +28,9 @@ from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 n_agents = 10000
 seeed = 123
 model_name = "partner_est"
-load_base_solution = False  # baseline solution conntainer
-load_cf_solution = False  # counterfactual solution conntainer
-load_sol_model = False  # informed state as types
-load_sim_model = False  # informed state stochastic
+load_solution = True  # baseline solution conntainer
+load_sol_model = True  # informed state as types
+load_sim_model = True  # informed state stochastic
 load_df = (
     None  # True = load existing df, False = create new df, None = create but not save
 )
@@ -65,7 +64,7 @@ for announcement_age in annoucement_ages:
         SRA_at_start=67,
         model_name=model_name,
         df_exists=load_df_base,
-        solution_exists=load_base_solution,
+        solution_exists=load_solution,
         sol_model_exists=load_sol_model,
         sim_model_exists=load_sim_model,
     ).reset_index()
@@ -73,6 +72,7 @@ for announcement_age in annoucement_ages:
     load_df_base = True
     load_sol_model = True
     load_sim_model = True
+    load_solution = True
 
     # Simulate counterfactual
     df_cf = solve_and_simulate_scenario(
@@ -85,7 +85,7 @@ for announcement_age in annoucement_ages:
         SRA_at_start=67,
         model_name=model_name,
         df_exists=load_df,
-        solution_exists=load_base_solution,
+        solution_exists=load_solution,
         sol_model_exists=load_sol_model,
         sim_model_exists=load_sim_model,
     ).reset_index()

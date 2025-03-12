@@ -27,7 +27,7 @@ from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 n_agents = 10000
 seeed = 123
 model_name = "partner_est"
-load_base_solution = False  # baseline solution conntainer
+load_base_solution = True  # baseline solution conntainer
 load_cf_solution = False  # counterfactual solution conntainer
 load_sol_model = True  # informed state as type
 load_sim_model = True  # informed state stochastic
@@ -92,6 +92,8 @@ for i, sra in enumerate(sra_at_63):
         sol_model_exists=load_sol_model,
         sim_model_exists=load_sim_model,
     ).reset_index()
+
+    load_cf_solution = True
 
     res_df_life_cycle = add_new_life_cycle_results(
         df_base=df_base,

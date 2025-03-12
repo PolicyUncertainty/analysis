@@ -28,10 +28,10 @@ from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 n_agents = 10000
 seeed = 123
 model_name = "partner_est"
-load_solution = True
+load_solution = False
 load_sol_model = True
 load_sim_model = True
-load_df = False
+load_df = None
 
 
 # Load params

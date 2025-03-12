@@ -28,12 +28,12 @@ from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 n_agents = 10000
 seeed = 123
 model_name = "partner_est"
-load_base_solution = True  # baseline solution conntainer
-load_cf_solution = True  # counterfactual solution conntainer
+load_base_solution = False  # baseline solution conntainer
+load_cf_solution = False  # counterfactual solution conntainer
 load_sol_model = True  # informed state as type
 load_sim_model = True  # informed state stochastic
 load_df = (
-    True  # True = load existing df, False = create new df, None = create but not save
+    None  # True = load existing df, False = create new df, None = create but not save
 )
 
 

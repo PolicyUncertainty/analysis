@@ -1,6 +1,7 @@
 # %%
 # Set paths of project
 import pandas as pd
+
 from set_paths import create_path_dict
 
 path_dict = create_path_dict()
@@ -15,13 +16,12 @@ import jax
 jax.config.update("jax_enable_x64", True)
 
 import pickle as pkl
+
 import numpy as np
-from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
-from simulation.sim_tools.calc_overall_results import (
-    calc_overall_results
-)
 
 from export_results.tables.cv import calc_compensated_variation
+from simulation.sim_tools.calc_aggregate_results import calc_overall_results
+from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 
 # %%
 # Set specifications

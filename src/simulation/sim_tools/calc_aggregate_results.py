@@ -1,4 +1,6 @@
 import pandas as pd
+
+
 def calc_overall_results(df_base, df_cf):
 
     out_row = pd.Series()
@@ -34,4 +36,3 @@ def below_sixty_savings(df):
 
     mean_savings = df.loc[below_sixty, "savings_dec"].mean()
     return mean_savings
-

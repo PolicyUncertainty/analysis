@@ -1,25 +1,28 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+
 from export_results.figures.color_map import JET_COLOR_MAP
 
 
-def plot_cf2_plots(path_dict, model_name):
+def sra_increase_aggregate_plot(path_dict, model_name):
     """Plot the change in baseline outcomes as a percentage of the baseline outcome."""
 
     df = pd.read_csv(
-        path_dict["sim_results"] + f"counterfactual_2_{model_name}.csv", index_col=0
+        path_dict["sim_results"] + f"sra_increase_aggregate_{model_name}.csv",
+        index_col=0,
     )
 
     # Transform df to also have 67 data
-    columns = [col for col in df.columns if "base_" not in col]
-    for column in columns:
-        if column == "sra_at_63":
+    for column in df.columns.values:
+        if column in "sra_at_63":
             continue
         elif column != "cv":
-            # Assign to 0 itemn 1 from base
-            df.loc[0, column] = df.loc[1, "base_" + column]
-            df.loc[0, "base_" + column] = df.loc[1, "base_" + column]
+            if "base" in column:
+                df.loc[0, column] = df.loc[1, column]
+            else:
+                column_name_without_cf = column[2:]
+                df.loc[0, column] = df.loc[1, "base" + column_name_without_cf]
         else:
             # Assign to 0 itemn 1 from base
             df.loc[0, column] = 0.0
@@ -35,7 +38,7 @@ def plot_cf2_plots(path_dict, model_name):
 
     for i, var in enumerate(row_names.keys()):
         ax = axs[i]
-        change = df[var] / df["base_" + var] - 1
+        change = df["cf_" + var] / df["base_" + var] - 1
         ax.plot(df["sra_at_63"], change * 100, label=row_names[var])
 
         # ax.plot(df["alpha"], df["cv"], label="Compensated Variation")
@@ -53,11 +56,11 @@ def plot_cf2_plots(path_dict, model_name):
     # ax_right.set_ylabel("Change in years")
 
     # Change of retirement age
-    change = df["ret_age"] - df["base_ret_age"]
+    change = df["cf_ret_age"] - df["base_ret_age"]
 
     ax.plot(df["sra_at_63"], change, label="Simulated Retirement Age")
     # change of SRA
-    change = df["sra_at_ret"] - df["base_sra_at_ret"]
+    change = df["cf_sra_at_ret"] - df["base_sra_at_ret"]
     ax.plot(
         df["sra_at_63"],
         change,

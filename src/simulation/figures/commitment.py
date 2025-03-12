@@ -5,7 +5,7 @@ import pandas as pd
 
 def commitment_lc_plot(path_dict, model_name):
     res_df_life_cycle = pd.read_csv(
-        path_dict["sim_results"] + f"commitment_lc_{model_name}.csv"
+        path_dict["sim_results"] + f"commitment_lc_{model_name}.csv", index_col=0
     )
 
     fig, ax = plt.subplots(3, 1, figsize=(10, 10))
@@ -42,4 +42,4 @@ def commitment_lc_plot(path_dict, model_name):
         axis.axhline(y=0, color="black")
         axis.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, pos: f"{x:.3f}"))
     fig.tight_layout()
-    ax.legend()
+    fig.legend()

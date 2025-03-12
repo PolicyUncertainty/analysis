@@ -17,7 +17,7 @@ jax.config.update("jax_enable_x64", True)
 import pickle as pkl
 import numpy as np
 from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
-from simulation.sim_tools.calc_margin_results import (
+from simulation.sim_tools.calc_overall_results import (
     calc_average_retirement_age,
     sra_at_retirement,
     below_sixty_savings,
@@ -124,8 +124,9 @@ for i, sra in enumerate(sra_at_63):
         res_df.loc[i, pre + "working_hours"] = df_scen["working_hours"].mean()
 
     ages = np.arange(30, 101, 1)
-    for df in [df_base, df_cf]:
-        if df is df_base:
+    for k, df in enumerate([df_base, df_cf]):
+
+        if k == 0:
             string = "base"
         else:
             string = "cf"

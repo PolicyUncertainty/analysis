@@ -17,10 +17,8 @@ jax.config.update("jax_enable_x64", True)
 import pickle as pkl
 import numpy as np
 from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
-from simulation.sim_tools.calc_margin_results import (
-    calc_average_retirement_age,
-    sra_at_retirement,
-    below_sixty_savings,
+from simulation.sim_tools.calc_overall_results import (
+    calc_overall_results
 )
 
 from export_results.tables.cv import calc_compensated_variation
@@ -84,20 +82,9 @@ for i, sra in enumerate(sra_at_63):
         df_base = df.reset_index().copy()
 
     else:
-        for k, df_scen in enumerate([df, df_base]):
-            if k == 0:
-                col_pre = ""
-            else:
-                col_pre = "base_"
-
-            result_df.loc[i, col_pre + "below_sixty_savings"] = below_sixty_savings(
-                df_scen
-            )
-            result_df.loc[i, col_pre + "ret_age"] = calc_average_retirement_age(df_scen)
-            result_df.loc[i, col_pre + "sra_at_ret"] = sra_at_retirement(df_scen)
-            result_df.loc[i, col_pre + "working_hours"] = df_scen[
-                "working_hours"
-            ].mean()
+        result_df.loc[i, :] = calc_overall_results(
+            df_base=df_base, df_cf=df.reset_index()
+        )
 
         result_df.loc[i, "cv"] = calc_compensated_variation(
             df_base=df_base,

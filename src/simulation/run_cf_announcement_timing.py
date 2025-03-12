@@ -71,6 +71,8 @@ for announcement_age in annoucement_ages:
     ).reset_index()
 
     load_df_base = True
+    load_sol_model = True
+    load_sim_model = True
 
     # Simulate counterfactual
     df_cf = solve_and_simulate_scenario(

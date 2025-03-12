@@ -29,12 +29,13 @@ n_agents = 10000
 seeed = 123
 model_name = "partner_est"
 load_base_solution = True  # baseline solution conntainer
-load_second_solution = True  # counterfactual solution conntainer
+load_cf_solution = True  # counterfactual solution conntainer
 load_sol_model = True  # informed state as types
 load_sim_model = True  # informed state stochastic
 load_df = (
-    True  # True = load existing df, False = create new df, None = create but not save
+    False  # True = load existing df, False = create new df, None = create but not save
 )
+load_df_base = load_df
 
 # Load params
 params = pkl.load(
@@ -63,11 +64,13 @@ for announcement_age in annoucement_ages:
         SRA_at_retirement=69,
         SRA_at_start=67,
         model_name=model_name,
-        df_exists=load_df,
+        df_exists=load_df_base,
         solution_exists=load_base_solution,
         sol_model_exists=load_sol_model,
         sim_model_exists=load_sim_model,
     ).reset_index()
+
+    load_df_base = True
 
     # Simulate counterfactual
     df_cf = solve_and_simulate_scenario(

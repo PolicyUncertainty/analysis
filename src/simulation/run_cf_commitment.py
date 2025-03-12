@@ -28,11 +28,11 @@ n_agents = 10000
 seeed = 123
 model_name = "partner_est"
 load_base_solution = True  # baseline solution conntainer
-load_second_solution = True  # counterfactual solution conntainer
+load_cf_solution = True  # counterfactual solution conntainer
 load_sol_model = True  # informed state as type
 load_sim_model = True  # informed state stochastic
 load_df = (
-    True  # True = load existing df, False = create new df, None = create but not save
+    False  # True = load existing df, False = create new df, None = create but not save
 )
 
 
@@ -41,31 +41,15 @@ params = pkl.load(
     open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
 )
 
+# Create life cylce df object which is None.
+# The result function will then initialize in the first iteration.
+res_df_life_cycle = None
+
 # Initialize alpha values and replace 0.04 with subjective alpha(0.041...)
 # sra_at_63 = np.arange(67, 70 + specs["SRA_grid_size"], specs["SRA_grid_size"])
 # sra_at_63 = np.arange(67, 70 + specs["SRA_grid_size"], 1)
 sra_at_63 = [67.0, 68.0, 69.0, 70.0]
 
-# Create result dfs: one for aggregates and one for life-cycle profiles
-res_df = pd.DataFrame(
-    columns=[
-        "alpha",
-        "below_sixty_savings",
-        "sra_at_ret",
-        "ret_age",
-        "working_hours",
-        "cv",
-    ],
-    dtype=float,
-)
-
-
-# Create life cylce df object which is None.
-# The result function will then initialize in the first iteration.
-res_df_life_cycle = None
-
-# Assign alphas in dataframe
-res_df["sra_at_63"] = sra_at_63
 for i, sra in enumerate(sra_at_63):
     if load_df:
         print("Load existing dfs for sra: ", sra)
@@ -104,7 +88,7 @@ for i, sra in enumerate(sra_at_63):
         SRA_at_start=sra,
         model_name=model_name,
         df_exists=load_df,
-        solution_exists=load_second_solution,
+        solution_exists=load_cf_solution,
         sol_model_exists=load_sol_model,
         sim_model_exists=load_sim_model,
     ).reset_index()

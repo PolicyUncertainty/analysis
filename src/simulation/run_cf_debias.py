@@ -29,7 +29,7 @@ n_agents = 10000
 seeed = 123
 model_name = "partner_est"
 load_base_solution = True  # baseline solution conntainer
-load_second_solution = True  # counterfactual solution conntainer
+load_cf_solution = True  # counterfactual solution conntainer
 load_sol_model = True  # informed state as type
 load_sim_model = True  # informed state stochastic
 load_df = (
@@ -89,7 +89,7 @@ for i, sra in enumerate(sra_at_63):
         model_name=model_name,
         df_exists=load_df,
         only_informed=True,
-        solution_exists=load_second_solution,
+        solution_exists=load_cf_solution,
         sol_model_exists=load_sol_model,
         sim_model_exists=load_sim_model,
     ).reset_index()

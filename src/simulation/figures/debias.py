@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 
-def create_life_cycle_plots(path_dict, model_name):
+def debias_lc_plot(path_dict, model_name):
 
     res_df_life_cycle = pd.read_csv(
         path_dict["sim_results"] + f"debias_lc_{model_name}.csv"
@@ -44,6 +44,5 @@ def create_life_cycle_plots(path_dict, model_name):
     for axis in ax:
         axis.axhline(y=0, color="black")
         axis.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, pos: f"{x:.3f}"))
-    plt.tight_layout()
-    plt.legend()
-    plt.show()
+    fig.tight_layout()
+    ax.legend()

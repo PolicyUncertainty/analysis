@@ -28,10 +28,10 @@ from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 n_agents = 10000
 seeed = 123
 model_name = "partner_est"
-load_solution = False
+load_solution = True
 load_sol_model = True
 load_sim_model = True
-load_df = None
+load_df = True
 
 
 # Load params
@@ -43,16 +43,7 @@ params = pkl.load(
 sra_at_63 = np.arange(67, 70 + specs["SRA_grid_size"], specs["SRA_grid_size"])
 
 # Create result df
-result_df = pd.DataFrame(
-    columns=[
-        "below_sixty_savings",
-        "sra_at_ret",
-        "ret_age",
-        "working_hours",
-        "cv",
-    ],
-    dtype=float,
-)
+result_df = pd.DataFrame(dtype=float)
 # Assign sras
 result_df["sra_at_63"] = sra_at_63
 for i, sra in enumerate(sra_at_63):
@@ -82,9 +73,10 @@ for i, sra in enumerate(sra_at_63):
         df_base = df.reset_index().copy()
 
     else:
-        result_df.loc[i, :] = calc_overall_results(
-            df_base=df_base, df_cf=df.reset_index()
-        )
+        results_row = calc_overall_results(df_base=df_base, df_cf=df.reset_index())
+
+        for key, value in results_row.items():
+            result_df.loc[i, key] = value
 
         result_df.loc[i, "cv"] = calc_compensated_variation(
             df_base=df_base,

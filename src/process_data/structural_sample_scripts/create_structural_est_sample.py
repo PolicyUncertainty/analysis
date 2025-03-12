@@ -77,6 +77,7 @@ def create_structural_est_sample(paths, specs, load_data=False):
     type_dict_add = {
         "monthly_wage": "float32",
         "hh_net_income": "float32",
+        "working_years": "float32",
     }
 
     df["hh_net_income"] /= specs["wealth_unit"]

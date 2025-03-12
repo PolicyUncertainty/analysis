@@ -94,4 +94,4 @@ for i, sra in enumerate(sra_at_63):
         )
 
 # Save results
-result_df.to_csv(path_dict["sim_results"] + f"counterfactual_2_{model_name}.csv")
+result_df.to_csv(path_dict["sim_results"] + f"sra_increase_overall_{model_name}.csv")

@@ -40,7 +40,8 @@ params = pkl.load(
     open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
 )
 
-# Create life cylce df object which is None. The result function will then initialize in the first iteration
+# Create life cylce df object which is None.
+# The result function will then initialize in the first iteration.
 res_df_life_cycle = None
 
 # Initialize retirement ages
@@ -94,12 +95,9 @@ for i, sra in enumerate(sra_at_63):
     res_df_life_cycle = add_new_life_cycle_results(
         df_base=df_base,
         df_cf=df_cf,
-        sra=sra,
+        scenatio_indicator=sra,
         res_df_life_cycle=res_df_life_cycle,
     )
-    breakpoint()
-
-
 
 import matplotlib.pyplot as plt
 

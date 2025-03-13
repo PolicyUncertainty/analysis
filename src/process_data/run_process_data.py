@@ -19,6 +19,7 @@ string_in = input(
     \n- partner [t]ransition
     \n- [h]ealth transition
     \n- sur[v]ival transition
+    \n- [c]redited periods for long work life pensions
     \n\n Please write the corresponding letter:"""
 )
 
@@ -47,6 +48,10 @@ from process_data.first_step_sample_scripts.create_health_transition_sample impo
 from process_data.first_step_sample_scripts.create_survival_transition_sample import (
     create_survival_transition_sample,
 )
+from process_data.first_step_sample_scripts.create_credited_periods_est_sample import (
+    create_credited_periods_est_sample,
+)
+
 
 
 if string_in == "a" or string_in == "s":
@@ -69,4 +74,7 @@ if string_in == "a" or string_in == "h":
 
 if string_in == "a" or string_in == "v":
     create_survival_transition_sample(paths_dict, specs=specs, load_data=False)
+    
+if string_in == "a" or string_in == "c":
+    create_credited_periods_est_sample(paths_dict, specs=specs, load_data=False)
 # %%

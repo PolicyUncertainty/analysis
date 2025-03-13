@@ -1,10 +1,12 @@
 import jax
 import jax.numpy as jnp
 import numpy as np
+from black import adjusted_lines
+
 from model_code.wealth_and_budget.pensions import (
     calc_experience_for_total_pension_points,
+    calc_total_pension_points,
 )
-from model_code.wealth_and_budget.pensions import calc_total_pension_points
 
 
 def create_state_space_functions():
@@ -179,7 +181,7 @@ def get_next_period_experience(
     fresh_retired = (degenerate_state_id != policy_state) & (lagged_choice == 0)
 
     # Calculate experience with early retirement penalty
-    experience_years_with_penalty = calc_experience_years_for_pension_adjustment(
+    adjusted_exp_years = calc_experience_years_for_pension_adjustment(
         period=period,
         experience_years=exp_years_last_period,
         sex=sex,
@@ -189,9 +191,7 @@ def get_next_period_experience(
         options=options,
     )
     # Update if fresh retired
-    exp_new_period = jax.lax.select(
-        fresh_retired, experience_years_with_penalty, exp_new_period
-    )
+    exp_new_period = jax.lax.select(fresh_retired, adjusted_exp_years, exp_new_period)
     return (1 / (period + options["max_exp_diffs_per_period"][period])) * exp_new_period
 
 
@@ -234,13 +234,13 @@ def calc_experience_years_for_pension_adjustment(
     )
 
     adjusted_pension_points = pension_factor * total_pension_points
-    reduced_experience_years = calc_experience_for_total_pension_points(
+    adjusted_experience_years = calc_experience_for_total_pension_points(
         total_pension_points=adjusted_pension_points,
         sex=sex,
         education=education,
         options=options,
     )
-    return reduced_experience_years
+    return adjusted_experience_years
 
 
 def construct_experience_years(experience, period, max_exp_diffs_per_period):

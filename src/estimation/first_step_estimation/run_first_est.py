@@ -2,7 +2,6 @@
 from set_paths import create_path_dict
 from specs.derive_specs import read_and_derive_specs
 
-
 input_str = input(
     "\n\n Which of the following steps do you want to estimate? Please type the corresponding letter. "
     "\n   - [s]ra process"
@@ -65,8 +64,8 @@ if input_str == "j":
 if input_str == "f":
     # Estimate family transitions
     from estimation.first_step_estimation.est_family_transitions import (
-        estimate_partner_transitions,
         estimate_nb_children,
+        estimate_partner_transitions,
     )
 
     estimate_partner_transitions(paths_dict, specs, load_data=LOAD_DATA)
@@ -74,8 +73,7 @@ if input_str == "f":
 
 if input_str == "h":
     # Estimate health transitions
-    from estimation.first_step_estimation.est_health_transition import (
-        estimate_health_transitions,
+    from estimation.first_step_estimation.est_health_transition import (  # estimate_health_transitions,
         estimate_health_transitions_parametric,
     )
 

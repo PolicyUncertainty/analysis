@@ -1,58 +1,61 @@
 ---
 repos:
-#  - repo: meta
-#    hooks:
-#      - id: check-hooks-apply
-#      - id: check-useless-excludes
-#    # -   id: identity  # Prints all files passed to pre-commits. Debugging.
-#  - repo: https://github.com/adrienverge/yamllint.git
-#    rev: v1.32.0
-#    hooks:
-#      - id: yamllint
-#  - repo: https://github.com/lyz-code/yamlfix
-#    rev: 1.13.0
-#    hooks:
-#      - id: yamlfix
+  - repo: meta
+    hooks:
+      - id: check-hooks-apply
+      - id: check-useless-excludes
+    # -   id: identity  # Prints all files passed to pre-commits. Debugging.
+  - repo: https://github.com/adrienverge/yamllint.git
+    rev: v1.35.1
+    hooks:
+      - id: yamllint
+  - repo: https://github.com/lyz-code/yamlfix
+    rev: 1.17.0
+    hooks:
+      - id: yamlfix
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v5.0.0
     hooks:
       - id: check-added-large-files
-        args:
-          - --maxkb=150
+        args: [--maxkb=200]
       - id: check-case-conflict
       - id: check-merge-conflict
       - id: check-vcs-permalinks
-#      - id: check-yaml
+      - id: check-yaml
       - id: debug-statements
       - id: end-of-file-fixer
       - id: fix-byte-order-marker
       - id: mixed-line-ending
-#      - id: no-commit-to-branch
-#        args:
-#          - --branch
-#          - main
+      - id: no-commit-to-branch
+        args: [--branch, main]
       - id: trailing-whitespace
-#  - repo: https://github.com/pre-commit/pygrep-hooks
-#    rev: v1.10.0
-#    hooks:
-#      - id: python-check-blanket-noqa
-#      - id: python-check-mock-methods
-#      - id: python-no-eval
-#      - id: python-no-log-warn
-#      - id: python-use-type-annotations
-#      - id: text-unicode-replacement-char
-  - repo: https://github.com/asottile/reorder-python-imports
-    rev: v3.10.0
+  - repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.10.0
     hooks:
-      - id: reorder-python-imports
-        args:
-          - --py37-plus
-#  - repo: https://github.com/asottile/setup-cfg-fmt
-#    rev: v2.4.0
-#    hooks:
-#      - id: setup-cfg-fmt
+      - id: python-check-blanket-noqa
+      - id: python-check-mock-methods
+      - id: python-no-eval
+      - id: python-no-log-warn
+      - id: python-use-type-annotations
+      - id: text-unicode-replacement-char
+  # - repo: https://github.com/asottile/reorder-python-imports
+  #   rev: v3.13.0
+  #   hooks:
+  #     - id: reorder-python-imports
+  #       args:
+  #         - --py37-plus
+  - repo: https://github.com/pycqa/isort
+    rev: 6.0.0
+    hooks:
+      - id: isort
+        name: isort
+        args: [--profile=black]
+  - repo: https://github.com/asottile/setup-cfg-fmt
+    rev: v2.7.0
+    hooks:
+      - id: setup-cfg-fmt
   - repo: https://github.com/psf/black
-    rev: 23.7.0
+    rev: 25.1.0
     hooks:
       - id: black
         language_version: python3.12
@@ -62,49 +65,36 @@ repos:
 #      - id: ruff
 #        exclude: |
 #          (?x)^(
-#            tests/sandbox/|
+#            tests/|
 #            docs/source/conf.py|
 #          )$
-  - repo: https://github.com/PyCQA/docformatter
-    rev: v1.7.5
-    hooks:
-      - id: docformatter
-        args:
-          - --in-place
-          - --wrap-summaries
-          - '88'
-          - --wrap-descriptions
-          - '88'
-          - --blank
+#  - repo: https://github.com/PyCQA/docformatter
+#    rev: v1.7.5
+#    hooks:
+#      - id: docformatter
+#        args:
+#          - --in-place
+#          - --wrap-summaries
+#          - '88'
+#          - --wrap-descriptions
+#          - '88'
+#          - --blank
 #  - repo: https://github.com/nbQA-dev/nbQA
-#    rev: 1.7.0
+#    rev: 1.9.1
 #    hooks:
 #      - id: nbqa-black
 #      - id: nbqa-ruff
 #        exclude: tests/sandbox/
 #  - repo: https://github.com/executablebooks/mdformat
-#    rev: 0.7.16
+#    rev: 0.7.22
 #    hooks:
 #      - id: mdformat
-#        additional_dependencies:
-#          - mdformat-gfm
-#          - mdformat-black
-#        args:
-#          - --wrap
-#          - '88'
+#        additional_dependencies: [mdformat-gfm, mdformat-black]
+#        args: [--wrap, '88']
 #        files: (README\.md)
 #  - repo: https://github.com/codespell-project/codespell
-#    rev: v2.2.5
+#    rev: v2.4.1
 #    hooks:
 #      - id: codespell
-#        additional_dependencies:
-#          - tomli
+#        additional_dependencies: [tomli]
 #        exclude: tests/sandbox/
-# -   repo: https://github.com/mgedmin/check-manifest
-#     rev: "0.49"
-#     hooks:
-#     -   id: check-manifest
-#         args: [--no-build-isolation]
-#         additional_dependencies: [setuptools-scm, toml]
-#ci:
-#  autoupdate_schedule: monthly

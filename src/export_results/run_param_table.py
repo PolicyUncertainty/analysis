@@ -9,7 +9,7 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 
 specs = generate_derived_and_data_derived_specs(path_dict)
 
-model_name = "new"
+model_name = "partner_est"
 params_util = [
     "disutil_unemployed_men",
     "disutil_ft_work_good_men",

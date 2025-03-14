@@ -19,6 +19,8 @@ dependencies:
   - statsmodels
   - lifelines
   - optimagic
+  - seaborn
+  - scikit-learn
 
   # Misc
   - black

@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import optimagic as om
 import pandas as pd
+
 from specs.derive_specs import read_and_derive_specs
 
 
@@ -15,6 +16,10 @@ def estimate_mortality(paths_dict, specs):
         paths_dict["open_data"] + "mortality_table_for_pandas.csv",
         sep=";",
     )
+
+    good_health_var = specs["good_health_var"]
+    bad_health_var = specs["bad_health_var"]
+
     mortality_df = pd.DataFrame(
         [
             {
@@ -22,9 +27,11 @@ def estimate_mortality(paths_dict, specs):
                 "health": combo[0],
                 "education": combo[1],
                 "sex": combo[2],
-                "death_prob": row["death_prob_male"]
-                if combo[2] == 0
-                else row["death_prob_female"],  # male (0) or female (1) death prob
+                "death_prob": (
+                    row["death_prob_male"]
+                    if combo[2] == 0
+                    else row["death_prob_female"]
+                ),  # male (0) or female (1) death prob
             }
             for _, row in lifetable_df.iterrows()
             for combo in list(
@@ -32,6 +39,7 @@ def estimate_mortality(paths_dict, specs):
             )  # (health, education, sex)
         ]
     )
+
     mortality_df.reset_index(drop=True, inplace=True)
 
     # plain life table data
@@ -47,6 +55,7 @@ def estimate_mortality(paths_dict, specs):
     start_df = df[
         [col for col in df.columns if col.startswith("start")] + ["sex"]
     ].copy()
+
     str_cols = start_df.columns.str.replace("start ", "")
     start_df.columns = str_cols
     # add a intercept column to the df and start_df
@@ -74,28 +83,28 @@ def estimate_mortality(paths_dict, specs):
                 "soft_lower_bound": 0.0001,
                 "soft_upper_bound": 1.0,
             },
-            f"{specs['health_labels'][1]} {specs['education_labels'][1]}": {
+            f"{specs['health_labels'][good_health_var]} {specs['education_labels'][1]}": {
                 "value": -0.4,
                 "lower_bound": -np.inf,
                 "upper_bound": np.inf,
                 "soft_lower_bound": -2.5,
                 "soft_upper_bound": 2.5,
             },
-            f"{specs['health_labels'][1]} {specs['education_labels'][0]}": {
+            f"{specs['health_labels'][good_health_var]} {specs['education_labels'][0]}": {
                 "value": -0.3,
                 "lower_bound": -np.inf,
                 "upper_bound": np.inf,
                 "soft_lower_bound": -2.5,
                 "soft_upper_bound": 2.5,
             },
-            f"{specs['health_labels'][0]} {specs['education_labels'][1]}": {
+            f"{specs['health_labels'][bad_health_var]} {specs['education_labels'][1]}": {
                 "value": 0.0,
                 "lower_bound": -np.inf,
                 "upper_bound": np.inf,
                 "soft_lower_bound": -2.5,
                 "soft_upper_bound": 2.5,
             },
-            f"{specs['health_labels'][0]} {specs['education_labels'][0]}": {
+            f"{specs['health_labels'][bad_health_var]} {specs['education_labels'][0]}": {
                 "value": 0.2,
                 "lower_bound": -np.inf,
                 "upper_bound": np.inf,
@@ -128,7 +137,7 @@ def estimate_mortality(paths_dict, specs):
 
         # update mortality_df with the estimated parameters
         for health, health_label in enumerate(
-            specs["health_labels"][:-1]
+            specs["observed_health_labels"]
         ):  # exclude the last health label (death)
             for education, education_label in enumerate(specs["education_labels"]):
                 param = f"{health_label} {education_label}"

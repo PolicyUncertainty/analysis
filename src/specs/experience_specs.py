@@ -1,7 +1,10 @@
 import jax.numpy as jnp
 import numpy as np
 import pandas as pd
-from model_code.state_space import calc_experience_years_for_pension_adjustment
+
+from model_code.state_space.experience import (
+    calc_experience_years_for_pension_adjustment,
+)
 
 
 def create_max_experience(path_dict, specs, load_precomputed):

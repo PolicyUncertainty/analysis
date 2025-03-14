@@ -2,9 +2,11 @@ from itertools import product
 
 import numpy as np
 import pytest
-from model_code.state_space import apply_retirement_constraint_for_SRA
-from model_code.state_space import state_specific_choice_set
 
+from model_code.state_space.choice_set import (
+    apply_retirement_constraint_for_SRA,
+    state_specific_choice_set,
+)
 
 # tests of choice set
 PERIOD_GRID = np.linspace(10, 30, 3)

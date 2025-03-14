@@ -3,6 +3,7 @@ import pickle
 import numpy as np
 import pandas as pd
 import scipy.optimize as opt
+
 from export_results.tools import create_realized_taste_shock
 
 
@@ -31,10 +32,11 @@ def calc_adjusted_scale(df_base, df_count, params, n_agents):
 
     # Then we construct the relevant objects to be able to scale consumption,
     # such that it matches the discounted sum from above
-    mu = params["mu"]
+    sex_values = df_base["sex"].values
+    mu_vector = params["mu_men"] * (1 - sex_values) + params["mu_women"] * sex_values
 
     # Generate not scaled utility by substracting from random utility 1 / (1 - mu)
-    not_scaled_utility = df_base["real_taste_shock"].values - 1 / (1 - mu)
+    not_scaled_utility = df_base["real_taste_shock"].values - 1 / (1 - mu_vector)
     # Now scaled utility
     utility_to_scale = df_base["real_util"].values - not_scaled_utility
 
@@ -47,7 +49,7 @@ def calc_adjusted_scale(df_base, df_count, params, n_agents):
         disc_factor_base=disc_factor_base,
         disc_sum_cf=disc_sum_cf,
         n_agents=n_agents,
-        mu=mu,
+        mu_vector=mu_vector,
         scale=scale_in,
     )
 
@@ -62,10 +64,10 @@ def create_adjusted_difference(
     disc_factor_base,
     disc_sum_cf,
     n_agents,
-    mu,
+    mu_vector,
     scale,
 ):
-    scaled_utility = utility_to_scale * ((1 + scale) ** (1 - mu))
+    scaled_utility = utility_to_scale * ((1 + scale) ** (1 - mu_vector))
 
     adjusted_utility = scaled_utility + not_scaled_utility
     adjusted_disc_sum = (adjusted_utility * disc_factor_base).sum() / n_agents

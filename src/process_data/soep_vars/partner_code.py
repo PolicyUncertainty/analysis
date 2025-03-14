@@ -56,3 +56,8 @@ def merge_couples(df):
 
     print(str(len(merged_data)) + " observations after merging couples.")
     return merged_data
+
+def create_haspartner(df):
+    df["has_partner"] = df["parid"] > 0
+    df["has_partner"] = df["has_partner"].astype("int8")
+    return df

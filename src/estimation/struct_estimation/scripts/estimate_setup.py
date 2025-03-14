@@ -38,8 +38,7 @@ def estimate_model(
     # Load start params and bounds
     start_params_all = load_and_set_start_params(path_dict)
 
-    # print_function(last_estimate)
-    # breakpoint()
+    print_function(last_estimate)
 
     # # Assign start params from before
     if last_estimate is not None:
@@ -80,7 +79,6 @@ def estimate_model(
         use_weights=use_weights,
         save_results=save_results,
     )
-
     result = om.minimize(
         fun=est_class.crit_func,
         params=start_params,
@@ -296,6 +294,9 @@ def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):
 def generate_print_func(params_to_estimate_names):
     men_params = get_gendered_params(params_to_estimate_names, "_men")
     women_params = get_gendered_params(params_to_estimate_names, "_women")
+    for param_dict in [men_params, women_params]:
+        if "all" not in param_dict.keys():
+            param_dict["all"] = []
 
     for param in ["disutil_children_ft_work_low", "disutil_children_ft_work_high"]:
         if param in params_to_estimate_names:
@@ -309,11 +310,11 @@ def generate_print_func(params_to_estimate_names):
     men_params.pop("all")
     women_params.pop("all")
 
-    taste_shock_params = [
-        param_name
-        for param_name in params_to_estimate_names
-        if "taste_shock" in param_name
-    ]
+    # taste_shock_params = [
+    #     param_name
+    #     for param_name in params_to_estimate_names
+    #     if "taste_shock" in param_name
+    # ]
 
     def print_function(params):
         print("Gender neutral parameters:")
@@ -354,6 +355,10 @@ def get_gendered_params(params_to_estimate_names, append):
     disutil_params = [
         param_name for param_name in gender_params if "disutil_" in param_name
     ]
+    disutil_unemployed_params = [
+        param_name for param_name in disutil_params if "unemployed" in param_name
+    ]
+
     disutil_params_pt_params = [
         param_name for param_name in disutil_params if "pt_work" in param_name
     ]
@@ -366,8 +371,8 @@ def get_gendered_params(params_to_estimate_names, append):
 
     # We do it this weird way for printing order
     params = {}
-    if f"disutil_unemployed{append}" in disutil_params:
-        params["unemployed"] = [f"disutil_unemployed{append}"]
+    if len(disutil_unemployed_params) > 0:
+        params["unemployed"] = disutil_unemployed_params
 
     if len(disutil_params_ft_params) > 0:
         params["full-time"] = disutil_params_ft_params

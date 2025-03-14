@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+
 from export_results.figures.color_map import JET_COLOR_MAP
 
 
@@ -28,20 +29,14 @@ def plot_mortality(paths_dict, specs):
     )
     df_params_female.set_index("Unnamed: 0", inplace=True)
 
-    n_edu_types = len(specs["education_labels"])
-    n_ages = specs["end_age_mortality"] - specs["start_age_mortality"] + 1
-    n_alive_health_states = len(specs["health_labels"]) - 1
-    alive_health_states = np.where(np.array(specs["health_labels"]) != "Death")[0]
-    health_states = [specs["health_labels"][i] for i in alive_health_states]
-    education_states = specs["education_labels"]
-    age_range = np.arange(specs["start_age_mortality"], specs["end_age_mortality"] + 1)
+    observed_health_vars = specs["observed_health_vars"]
 
     # Generate out cols in estimated mortality
     estimated_mortality["survival_prob_year"] = np.nan
     estimated_mortality["survival_prob"] = np.nan
 
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
-        for health in alive_health_states:
+        for health in observed_health_vars:
             for edu_var, edu_label in enumerate(specs["education_labels"]):
                 # Health label of alive state
                 mask = (
@@ -67,9 +62,9 @@ def plot_mortality(paths_dict, specs):
                 filtered_data["survival_prob"] = filtered_data["survival_prob"].shift(
                     1
                 )  # age = x -> survival prob up to x+1 (end of period x)
-                filtered_data.loc[
-                    0, "survival_prob"
-                ] = 1  # Set 100% survival at beginning of first period
+                filtered_data.loc[0, "survival_prob"] = (
+                    1  # Set 100% survival at beginning of first period
+                )
 
                 # Now update general container. We did leave the indexes of estimated mortality in place
                 estimated_mortality.update(filtered_data)
@@ -141,7 +136,7 @@ def plot_mortality(paths_dict, specs):
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
         ax = axes[sex_var]
         for edu_var, edu_label in enumerate(specs["education_labels"]):
-            for health in alive_health_states:
+            for health in observed_health_vars:
                 # Health label of alive state
                 mask = (
                     (estimated_mortality["sex"] == sex_var)

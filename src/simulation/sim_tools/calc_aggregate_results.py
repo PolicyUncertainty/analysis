@@ -1,3 +1,18 @@
+import pandas as pd
+
+
+def calc_overall_results(df_base, df_cf):
+
+    out_row = pd.Series()
+    for pre, df_scenario in zip(["cf", "base"], [df_cf, df_base]):
+        out_row[f"{pre}_below_sixty_savings"] = below_sixty_savings(df_scenario)
+        out_row[f"{pre}_ret_age"] = calc_average_retirement_age(df_scenario)
+        out_row[f"{pre}_sra_at_ret"] = sra_at_retirement(df_scenario)
+        out_row[f"{pre}_working_hours"] = df_scenario["working_hours"].mean()
+
+    return out_row
+
+
 def calc_average_retirement_age(df):
     fresh_retired_mask = (
         (df["choice"] == 0) & (df["lagged_choice"] != 0) & (df["health"] != 2)
@@ -21,12 +36,3 @@ def below_sixty_savings(df):
 
     mean_savings = df.loc[below_sixty, "savings_dec"].mean()
     return mean_savings
-
-
-# def below_sixty_savings_by_type(df, type_var):
-#     df[f'{type_var}_below_sixty'].unique()
-#     types = df[f'{type_var}_below_sixty'].unique()
-#     trimmed_df = df["age"] <= 60 &
-#
-#     mean_savings = df.loc[below_sixty, "savings_dec"].mean()
-#     return mean_savings

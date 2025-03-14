@@ -2,6 +2,18 @@
 ###############################################################################
 # Model specification
 ###############################################################################
+# State and choice labels
+choice_labels: [Retired, Unemployed, Part-time, Full-time]
+education_labels: [Low Education, High Education]
+# Define health labels. There are four health states in the model,
+# but we only observe two of them in the data with the self
+# assesed health variable.
+health_labels: [Good Health, Bad Health, Disabled, Death]
+observed_health_labels: [Good Health, Bad Health]
+# Define sex and partner labes
+sex_labels: [Men, Women]
+partner_labels: [Single, Working Partner, Retired Partner]
+
 # mathematical model features
 quadrature_points_stochastic: 5
 n_experience_grid_points: 11
@@ -12,11 +24,7 @@ discount_factor: 0.97
 # economic model parameters
 start_age: 30
 end_age: 100
-choice_labels: [Retired, Unemployed, Part-time, Full-time]
-education_labels: [Low Education, High Education]
-health_labels: [Bad Health, Good Health, Death]
-sex_labels: [Men, Women]
-partner_labels: [Single, Working Partner, Retired Partner]
+
 # Belief process parameters
 SRA_grid_size: 0.25
 min_SRA: 65
@@ -44,15 +52,16 @@ unemployment_wealth_thresh: 10_500
 monthly_child_benefits: 184
 monthly_min_wage: 1360
 
-# Retirement parameters
+# Retirement system parameters
 early_retirement_penalty: 0.036
 late_retirement_bonus: 0.06
 monthly_pension_point_value_west_2010: 27.20
 monthly_pension_point_value_east_2010: 24.13
 
 ###############################################################################
-# Data preparation
+# Data and estimation preparation
 ###############################################################################
+# Estimation sample
 start_year: 2010  # start year of estimation sample
 end_year: 2017  # end year of estimation sample
 reference_year: 2010  # reference year for monetary values, taxes, etc.
@@ -79,8 +88,8 @@ health_smoothing_bandwidth: 5
 # type of kernel used for smoothing
 health_kernel_type: epanechnikov
 # health_kernel_type: gaussian
-
-# End age for disability estimation (start values)
+###############################################
+# Disability pension estimation parameters (only for start values)
 end_disability_age: 63
 ###############################################
 # Mortality process estimation parameters
@@ -89,10 +98,8 @@ start_age_mortality: 16
 end_year_mortality: 2020  # end year of lifespells in soep38
 end_age_mortality: 110
 life_table_max_age: 100
-
-###############################################################################
+###############################################
 # Partner process estimation parameters
-###############################################################################
 end_age_transition_estimation: 75
 
 ###############################################################################

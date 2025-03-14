@@ -10,16 +10,16 @@ from specs.derive_specs import read_and_derive_specs
 
 specs = read_and_derive_specs(paths_dict["specs"])
 string_in = input(
-    """Which dataset should be created?
-    \n\n- [a]ll
+    """Which dataset should be created?\n
+    \n- [a]ll
     \n- [s]tructural
     \n- [w]age
-    \n- wage [p]artner
+    \n- [p]artner wage
     \n- [j]ob separation
-    \n- partner [t]ransition
+    \n- [f]amily transitions
     \n- [h]ealth transition
-    \n- sur[v]ival transition
-    \n - [d]isability pension
+    \n- [m]ortality
+    \n- [d]isability pension
     \n\n Please write the corresponding letter:"""
 )
 
@@ -59,7 +59,7 @@ if string_in == "a" or string_in == "s":
 if string_in == "a" or string_in == "w":
     create_wage_est_sample(paths_dict, specs=specs, load_data=False)
 
-if string_in == "a" or string_in == "p":
+if string_in == "a" or string_in == "f":
     create_partner_wage_est_sample(paths_dict, specs=specs, load_data=False)
 
 if string_in == "a" or string_in == "j":
@@ -71,7 +71,7 @@ if string_in == "a" or string_in == "t":
 if string_in == "a" or string_in == "h":
     create_health_transition_sample(paths_dict, specs=specs, load_data=False)
 
-if string_in == "a" or string_in == "v":
+if string_in == "a" or string_in == "m":
     create_survival_transition_sample(paths_dict, specs=specs, load_data=False)
 
 if string_in == "a" or string_in == "d":

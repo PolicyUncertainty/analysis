@@ -54,7 +54,7 @@ def create_disability_pension_sample(paths, specs, load_data=False):
 
     # Now drop already retired people and people who are not in bad health
     df = df[df["lagged_choice"] != 0]
-    df = df[df["health"] == 0]
+    df = df[df["health"] == 1]
     print(str(len(df)) + " left after filtering people who are not in bad health.")
 
     # Filter age and estimation years

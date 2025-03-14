@@ -1,10 +1,11 @@
 import numpy as np
 import pandas as pd
 import statsmodels.formula.api as smf
+from scipy.stats import norm  # Import norm from scipy.stats for the Gaussian kernel
+
 from process_data.first_step_sample_scripts.create_health_transition_sample import (
     create_health_transition_sample,
 )
-from scipy.stats import norm  # Import norm from scipy.stats for the Gaussian kernel
 
 
 def estimate_health_transitions(paths_dict, specs):
@@ -66,10 +67,10 @@ def estimate_health_transitions(paths_dict, specs):
 
     # Compute transition probabilities
     transition_probabilities = {
-        "hgg_h": calculate_smoothed_probabilities(education=1, health=1),
-        "hgg_l": calculate_smoothed_probabilities(education=0, health=1),
-        "hbg_h": calculate_smoothed_probabilities(education=1, health=0),
-        "hbg_l": calculate_smoothed_probabilities(education=0, health=0),
+        "hgg_h": calculate_smoothed_probabilities(education=1, health=0),
+        "hgg_l": calculate_smoothed_probabilities(education=0, health=0),
+        "hbg_h": calculate_smoothed_probabilities(education=1, health=1),
+        "hbg_l": calculate_smoothed_probabilities(education=0, health=1),
     }
 
     # Complementary probabilities

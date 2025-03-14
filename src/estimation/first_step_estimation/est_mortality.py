@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import optimagic as om
 import pandas as pd
+
 from specs.derive_specs import read_and_derive_specs
 
 
@@ -15,6 +16,7 @@ def estimate_mortality(paths_dict, specs):
         paths_dict["open_data"] + "mortality_table_for_pandas.csv",
         sep=";",
     )
+
     mortality_df = pd.DataFrame(
         [
             {
@@ -22,9 +24,11 @@ def estimate_mortality(paths_dict, specs):
                 "health": combo[0],
                 "education": combo[1],
                 "sex": combo[2],
-                "death_prob": row["death_prob_male"]
-                if combo[2] == 0
-                else row["death_prob_female"],  # male (0) or female (1) death prob
+                "death_prob": (
+                    row["death_prob_male"]
+                    if combo[2] == 0
+                    else row["death_prob_female"]
+                ),  # male (0) or female (1) death prob
             }
             for _, row in lifetable_df.iterrows()
             for combo in list(

@@ -1,6 +1,7 @@
 # %%
 # Set paths of project
 import pandas as pd
+
 from set_paths import create_path_dict
 
 path_dict = create_path_dict()
@@ -15,15 +16,12 @@ import jax
 jax.config.update("jax_enable_x64", True)
 
 import pickle as pkl
+
 import numpy as np
-from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
-from simulation.sim_tools.calc_margin_results import (
-    calc_average_retirement_age,
-    sra_at_retirement,
-    below_sixty_savings,
-)
 
 from export_results.tables.cv import calc_compensated_variation
+from simulation.sim_tools.calc_aggregate_results import calc_overall_results
+from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 
 # %%
 # Set specifications
@@ -33,7 +31,7 @@ model_name = "partner_est"
 load_solution = True
 load_sol_model = True
 load_sim_model = True
-load_df = False
+load_df = True
 
 
 # Load params
@@ -45,16 +43,7 @@ params = pkl.load(
 sra_at_63 = np.arange(67, 70 + specs["SRA_grid_size"], specs["SRA_grid_size"])
 
 # Create result df
-result_df = pd.DataFrame(
-    columns=[
-        "below_sixty_savings",
-        "sra_at_ret",
-        "ret_age",
-        "working_hours",
-        "cv",
-    ],
-    dtype=float,
-)
+result_df = pd.DataFrame(dtype=float)
 # Assign sras
 result_df["sra_at_63"] = sra_at_63
 for i, sra in enumerate(sra_at_63):
@@ -84,20 +73,10 @@ for i, sra in enumerate(sra_at_63):
         df_base = df.reset_index().copy()
 
     else:
-        for k, df_scen in enumerate([df, df_base]):
-            if k == 0:
-                col_pre = ""
-            else:
-                col_pre = "base_"
+        results_row = calc_overall_results(df_base=df_base, df_cf=df.reset_index())
 
-            result_df.loc[i, col_pre + "below_sixty_savings"] = below_sixty_savings(
-                df_scen
-            )
-            result_df.loc[i, col_pre + "ret_age"] = calc_average_retirement_age(df_scen)
-            result_df.loc[i, col_pre + "sra_at_ret"] = sra_at_retirement(df_scen)
-            result_df.loc[i, col_pre + "working_hours"] = df_scen[
-                "working_hours"
-            ].mean()
+        for key, value in results_row.items():
+            result_df.loc[i, key] = value
 
         result_df.loc[i, "cv"] = calc_compensated_variation(
             df_base=df_base,
@@ -107,4 +86,4 @@ for i, sra in enumerate(sra_at_63):
         )
 
 # Save results
-result_df.to_csv(path_dict["sim_results"] + f"counterfactual_2_{model_name}.csv")
+result_df.to_csv(path_dict["sim_results"] + f"sra_increase_aggregate_{model_name}.csv")

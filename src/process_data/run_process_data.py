@@ -76,5 +76,5 @@ if string_in == "a" or string_in == "v":
     create_survival_transition_sample(paths_dict, specs=specs, load_data=False)
     
 if string_in == "a" or string_in == "c":
-    create_credited_periods_est_sample(paths_dict, specs=specs, load_data=False)
+    create_credited_periods_est_sample(paths_dict, load_data=False)
 # %%

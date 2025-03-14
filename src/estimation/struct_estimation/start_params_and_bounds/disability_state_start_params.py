@@ -18,7 +18,7 @@ def est_disability_prob(paths, specs):
     logit_vars = [
         "intercept",
         "education",
-        "age",
+        "period",
     ]
 
     disability_prob_params = {}
@@ -29,7 +29,7 @@ def est_disability_prob(paths, specs):
 
     type_params = {
         f"disability_logit_const": params["intercept"],
-        f"disability_logit_age": params["age"],
+        f"disability_logit_period": params["period"],
         f"disability_logit_high_educ": params["education"],
     }
     disability_prob_params = {**disability_prob_params, **type_params}

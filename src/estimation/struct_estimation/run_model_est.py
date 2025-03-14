@@ -37,11 +37,11 @@ params_to_estimate_names = [
     "lambda",
     # Men job finding - 3 parameters
     "job_finding_logit_const_men",
-    "job_finding_logit_age_men",
+    "job_finding_logit_period_men",
     "job_finding_logit_high_educ_men",
     # Women job finding - 3 parameters
     "job_finding_logit_const_women",
-    "job_finding_logit_age_women",
+    "job_finding_logit_period_women",
     "job_finding_logit_high_educ_women",
 ]
 model_name = "partner_est"

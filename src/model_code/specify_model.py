@@ -11,7 +11,7 @@ from model_code.policy_processes.informed_state_transition import (
 from model_code.policy_processes.select_policy_belief import (
     select_transition_func_and_update_specs,
 )
-from model_code.state_space import create_state_space_functions
+from model_code.state_space.state_space import create_state_space_functions
 from model_code.stochastic_processes.health_transition import health_transition
 from model_code.stochastic_processes.job_offers import job_offer_process_transition
 from model_code.stochastic_processes.partner_transitions import partner_transition

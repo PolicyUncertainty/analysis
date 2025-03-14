@@ -14,8 +14,8 @@ def create_health_var(data):
 
     with np.nan and converts the variables to float.
 
-    The function uses a two category split of the population, encoding 1 if an
-    individual has good health and 0 if an individual has bad health.
+    The function uses a two category split of the population, encoding 0 if an
+    individual has good health and 1 if an individual has bad health.
 
     """
 
@@ -31,9 +31,9 @@ def create_health_var(data):
         + " observations left after dropping people with missing disability data."
     )
 
-    # create health state = 0 if bad health, 1 if good health
-    data["health"] = 0
-    data.loc[data["m11126"].isin([1, 2, 3]) & data["m11124"].isin([0]), "health"] = 1
+    # create health state = 1 if bad health, 0 if good health
+    data["health"] = 1
+    data.loc[data["m11126"].isin([1, 2, 3]) & data["m11124"].isin([0]), "health"] = 0
 
     return data
 
@@ -52,9 +52,9 @@ def clean_health_create_states(data):
 
     # one year bad health in between two years of good health is still considered good health
     data.loc[
-        (data["lag_health"] == 1) & (data["lead_health"] == 1),
+        (data["lag_health"] == 0) & (data["lead_health"] == 0),
         "health",
-    ] = 1
+    ] = 0
 
     # update lead_health
     data["lead_health"] = data.groupby(["pid"])["health"].shift(-1)

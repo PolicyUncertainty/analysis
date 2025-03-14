@@ -2,6 +2,7 @@ from itertools import product
 
 import numpy as np
 import pytest
+
 from model_code.stochastic_processes.job_offers import job_offer_process_transition
 from set_paths import create_path_dict
 from specs.derive_specs import generate_derived_and_data_derived_specs
@@ -34,7 +35,7 @@ def test_job_destruction(
     for append in ["men", "women"]:
         gender_params = {
             f"job_finding_logit_const_{append}": logit_param,
-            f"job_finding_logit_age_{append}": logit_param,
+            f"job_finding_logit_period_{append}": logit_param,
             f"job_finding_logit_high_educ_{append}": logit_param,
         }
         params = {**params, **gender_params}

@@ -2,9 +2,9 @@ import pickle
 
 import jax.numpy as jnp
 import numpy as np
-from dcegm.pre_processing.setup_model import load_and_setup_model
-from dcegm.pre_processing.setup_model import setup_and_save_model
+from dcegm.pre_processing.setup_model import load_and_setup_model, setup_and_save_model
 from dcegm.solve import get_solve_func_for_model
+
 from model_code.policy_processes.informed_state_transition import (
     informed_transition,
 )
@@ -97,7 +97,7 @@ def specify_model(
                 },
                 "health": {
                     "transition": health_transition,
-                    "states": np.arange(specs["n_health_states"], dtype=int),
+                    "states": np.arange(specs["n_all_health_states"], dtype=int),
                 },
             },
             "continuous_states": {

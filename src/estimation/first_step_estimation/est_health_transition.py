@@ -1,11 +1,14 @@
 import numpy as np
 import pandas as pd
 import statsmodels.formula.api as smf
-from scipy.stats import norm  # Import norm from scipy.stats for the Gaussian kernel
 
 from process_data.first_step_sample_scripts.create_health_transition_sample import (
     create_health_transition_sample,
 )
+
+# from pandas.conftest import observed
+# from scipy.stats import norm  # Import norm from scipy.stats for the Gaussian kernel
+
 
 # THis function is not used and (in parts) does not work with new health variable structure
 # def estimate_health_transitions(paths_dict, specs):
@@ -120,16 +123,16 @@ def estimate_health_transitions_parametric(paths_dict, specs):
     # Parameters
     ages = np.arange(specs["start_age"], specs["end_age"] + 1)
 
-    alive_health_vars = specs["alive_health_vars"]
-    alive_health_labels = [specs["health_labels"][i] for i in alive_health_vars]
+    observed_health_vars = specs["observed_health_vars"]
+    observed_health_labels = specs["observed_health_labels"]
 
     index = pd.MultiIndex.from_product(
         [
             specs["sex_labels"],
             specs["education_labels"],
             ages - specs["start_age"],
-            alive_health_labels,
-            alive_health_labels,
+            observed_health_labels,
+            observed_health_labels,
         ],
         names=["sex", "education", "period", "health", "lead_health"],
     )
@@ -140,13 +143,13 @@ def estimate_health_transitions_parametric(paths_dict, specs):
     )
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
         for edu_var, edu_label in enumerate(specs["education_labels"]):
-            for alive_health_var in alive_health_vars:
-                alive_health_label = specs["health_labels"][alive_health_var]
+            for observed_health_var in observed_health_vars:
+                observed_health_label = specs["health_labels"][observed_health_var]
                 # Filter the data
                 data = transition_data[
                     (transition_data["sex"] == sex_var)
                     & (transition_data["education"] == edu_var)
-                    & (transition_data["health"] == alive_health_var)
+                    & (transition_data["health"] == observed_health_var)
                 ]
 
                 # Fit the logit model
@@ -161,33 +164,33 @@ def estimate_health_transitions_parametric(paths_dict, specs):
                     pd.DataFrame({"age": ages})
                 ).values
 
-                healthy_label = specs["health_labels"][1]
-                # For transition to healthy, we take the transition probabilities
+                healthy_label = specs["health_labels"][specs["good_health_var"]]
+                # IMPORTANT: As health is coded as 1=bad health, the transition to bad is the predicted
                 health_transition_matrix.loc[
                     (
                         sex_label,
                         edu_label,
                         slice(None),
-                        alive_health_label,
+                        observed_health_label,
                         healthy_label,
                     ),
                     "transition_prob",
-                ] = transition_probabilities
+                ] = (
+                    1 - transition_probabilities
+                )
 
-                unhealthy_label = specs["health_labels"][0]
+                unhealthy_label = specs["health_labels"][specs["bad_health_var"]]
                 # for transition to unhealthy, we simply take the complement of the transition to healthy
                 health_transition_matrix.loc[
                     (
                         sex_label,
                         edu_label,
                         slice(None),
-                        alive_health_label,
+                        observed_health_label,
                         unhealthy_label,
                     ),
                     "transition_prob",
-                ] = (
-                    1 - transition_probabilities
-                )
+                ] = transition_probabilities
 
     # Save the results to a CSV file
     out_file_path = paths_dict["est_results"] + "health_transition_matrix.csv"

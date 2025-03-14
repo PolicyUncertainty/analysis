@@ -2,6 +2,7 @@
 import pickle
 
 import matplotlib.pyplot as plt
+
 from set_paths import create_path_dict
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
@@ -24,43 +25,39 @@ model_name = "partner_est"
 # else:
 #     raise ValueError("Either pre or post estimation plots.")
 
-from estimation.struct_estimation.start_params_and_bounds.set_start_params import (
-    load_and_set_start_params,
-)
-
-params = load_and_set_start_params(path_dict)
+# from estimation.struct_estimation.start_params_and_bounds.set_start_params import (
+#     load_and_set_start_params,
+# )
+#
+# params = load_and_set_start_params(path_dict)
 
 # %%###################################
 # Health characteristics
 ######################################
 # exec_health = input("Show health transition plots? (y/n) ") == "y"
 # if exec_health:
-from export_results.figures.expected_health import (
-    plot_healthy_unhealthy,
+from export_results.figures.health_states_observed import (
     plot_health_transition_prob,
+    plot_healthy_unhealthy,
 )
 
-#
-# plot_healthy_unhealthy(path_dict, specs)
-# plt.show()
-# plot_health_transition_prob(specs)
-# plt.show()
-# plt.close("all")
+plot_healthy_unhealthy(path_dict, specs)
+plot_health_transition_prob(specs)
+plt.show()
+plt.close("all")
 #
 # # %%###################################
 # # Mortality characteristics
 # ######################################
-# exec_mortality = input("Execute Mortality characteristics? (y/n) ") == "y"
-# if exec_mortality:
-# from export_results.figures.plot_mortality import (
-#     plot_mortality,
-# )
-#
-# plot_mortality(path_dict, specs)
-# plt.show()
-# plt.close("all")
-#
-# exit()
+from export_results.figures.mortality import (
+    plot_mortality,
+)
+
+plot_mortality(path_dict, specs)
+plt.show()
+plt.close("all")
+
+exit()
 # %%###################################
 # Family characteristics
 ######################################
@@ -114,10 +111,10 @@ plt.close("all")
 # ##########################################
 exec_budget = input("Execute budget plots? (y/n) ") == "y"
 from export_results.figures.income_plots import (
-    plot_incomes,
-    plot_total_income,
-    plot_partner_wage,
     plot_child_benefits,
+    plot_incomes,
+    plot_partner_wage,
+    plot_total_income,
 )
 from export_results.figures.wealth_plots import plot_budget_of_unemployed
 

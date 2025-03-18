@@ -30,13 +30,13 @@ def sparsity_condition(
     degenerate_policy_state = options["n_policy_states"] - 1
 
     age = start_age + period
+    # Men can't have lagged choice part-time.
     if (sex == 0) & (lagged_choice == 2):
         return False
-    # You cannot retire before the earliest retirement age
-    if (age <= min_ret_age_state_space) & (lagged_choice == 0):
-        return False
-    # After the maximum retirement age, you must be retired.
-    elif (
+    # After the maximum retirement age, you must be retired. We exclude the states, where
+    # the agent is dead. All death states will be proxied later anyways to death states in the last
+    # period.
+    if (
         (age > max_ret_age)
         & (lagged_choice != 0)
         & (health != options["death_health_var"])
@@ -44,11 +44,17 @@ def sparsity_condition(
         return False
     else:
         # Now turn to the states, where it is decided by the value of an exogenous
-        # state if it is valid or not. For invalid states we provide a proxy child state
+        # state if it is valid or not. For invalid states we provide a proxy state
         if health == options["death_health_var"]:
             # Lead all states with death to last period death states
-            # with job offer 0 (not relevant for bequest). You could be in principle
-            # die upon retirement for which we need informed and policy state
+            # with job offer 0, as dead agent's only get assigned a dummy choice
+            # set, only including 0.
+
+            # For retirement choice last period (lagged_choice=0):
+            # You could be in principle die upon retirement for which we need informed and policy state.
+            # Note, that in the solution of the model (for the expectations), the agent's do not expect,
+            # that their informed state can't change. In the simulation, the agent always
+            # gets informed when they choose retirement.
             state_proxy = {
                 "period": last_period,
                 "lagged_choice": lagged_choice,
@@ -61,11 +67,12 @@ def sparsity_condition(
                 "policy_state": policy_state,
             }
             return state_proxy
-        elif (age <= max_ret_age + 1) and (lagged_choice == 0):
+        elif lagged_choice == 0:
             # If retirement is already chosen we proxy all states to job offer 0.
+
             # Until age max_ret_age + 1 the individual could also be freshly retired
             # so we check if the policy state is degenerated. If so, we proxy to
-            # informed states only
+            # informed states only.
             if policy_state == degenerate_policy_state:
                 state_proxy = {
                     "period": period,

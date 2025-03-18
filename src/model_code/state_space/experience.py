@@ -81,18 +81,18 @@ def calc_experience_years_for_pension_adjustment(
         "uninformed_early_retirement_penalty"
     ][education]
     very_long_insured_test = test_very_long_insured(
-        retirement_age_difference,
-        experience_years,
-        sex,
-        education,
-        partner_state,
-        options,
+        retirement_age_difference=retirement_age_difference,
+        experience_years=experience_years,
+        sex=sex,
+        education=education,
+        partner_state=partner_state,
+        options=options,
     )
     early_retirement_penalty = (
         informed * early_retirement_penalty_informed
         + (1 - informed) * early_retirement_penalty_uninformed
     )
-    early_retirement_penalty = (
+    early_retirement_factor = (
         1
         - early_retirement_penalty
         * retirement_age_difference
@@ -100,13 +100,15 @@ def calc_experience_years_for_pension_adjustment(
     )
 
     # Total bonus for late retirement
-    late_retirement_bonus = 1 + (
+    late_retirement_factor = 1 + (
         options["late_retirement_bonus"] * retirement_age_difference
     )
 
     # Select bonus or penalty depending on age difference
     pension_factor = jax.lax.select(
-        early_retired_bool, early_retirement_penalty, late_retirement_bonus
+        early_retired_bool,
+        on_true=early_retirement_factor,
+        on_false=late_retirement_factor,
     )
 
     adjusted_pension_points = pension_factor * total_pension_points

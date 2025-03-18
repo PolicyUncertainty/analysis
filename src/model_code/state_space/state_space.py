@@ -36,12 +36,16 @@ def sparsity_condition(
     if (age <= min_ret_age_state_space) & (lagged_choice == 0):
         return False
     # After the maximum retirement age, you must be retired.
-    elif (age > max_ret_age) & (lagged_choice != 0) & (health != 2):
+    elif (
+        (age > max_ret_age)
+        & (lagged_choice != 0)
+        & (health != options["death_health_var"])
+    ):
         return False
     else:
         # Now turn to the states, where it is decided by the value of an exogenous
         # state if it is valid or not. For invalid states we provide a proxy child state
-        if health == 2:
+        if health == options["death_health_var"]:
             # Lead all states with death to last period death states
             # with job offer 0 (not relevant for bequest). You could be in principle
             # die upon retirement for which we need informed and policy state

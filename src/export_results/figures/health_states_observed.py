@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+
 from export_results.figures.color_map import JET_COLOR_MAP
 
 
@@ -24,21 +25,28 @@ def plot_healthy_unhealthy(paths_dict, specs):
         paths_dict["intermediate_data"] + "health_transition_estimation_sample.pkl"
     )
 
+    good_health_var = specs["good_health_var"]
+    bad_health_var = specs["bad_health_var"]
+    death_health_var = specs["death_health_var"]
+
     # Calculate the smoothed shares for healthy individuals
-    edu_shares_data = (
+    edu_shares_data_healthy = (
         df.groupby(["sex", "education", "age"])["health"]
-        .mean()
-        .loc[slice(None), slice(None), slice(start_age, end_age + 1)]
+        .value_counts(normalize=True)
+        .loc[slice(None), slice(None), slice(start_age, end_age + 1), good_health_var]
     )
+    edu_shares_data_healthy.index = edu_shares_data_healthy.index.droplevel("health")
     full_index = pd.MultiIndex.from_product(
         [range(specs["n_sexes"]), range(specs["n_education_types"]), est_ages],
         names=["sex", "education", "age"],
     )
-    edu_shares_healthy = pd.DataFrame(index=full_index, columns=["health"], data=0.0)
-    edu_shares_healthy.update(edu_shares_data)
+    edu_shares_healthy = pd.DataFrame(
+        index=full_index, columns=["proportion"], data=0.0
+    )
+    edu_shares_healthy.update(edu_shares_data_healthy)
 
     # Initialize the distribution
-    initial_dist = np.zeros(specs["n_health_states"])
+    initial_dist = np.zeros(specs["n_all_health_states"])
 
     # Create the plot
     fig, axs = plt.subplots(ncols=2, figsize=(12, 8))
@@ -47,25 +55,26 @@ def plot_healthy_unhealthy(paths_dict, specs):
         for edu_var, edu_label in enumerate(specs["education_labels"]):
             # Set the initial distribution for the Markov simulation
             # and assume nobody is dead
-            initial_dist[1] = edu_shares_healthy.loc[(sex_var, edu_var, start_age)]
-            initial_dist[0] = 1 - initial_dist[1]
+            initial_dist[good_health_var] = edu_shares_healthy.loc[
+                (sex_var, edu_var, start_age), "proportion"
+            ]
+            initial_dist[bad_health_var] = 1 - initial_dist[good_health_var]
 
             # Simulate the Markov process and get health probabilities
             shares_over_time = markov_simulator(
                 initial_dist, specs["health_trans_mat"][sex_var, edu_var, :, :, :]
             )
             # Construct health probabilities if alive (Use death probs as column vector)
-            alive_share = 1 - shares_over_time[:, 2:]
-            alive_health_shares = shares_over_time[:, :2] / alive_share
-            health_prob_edu_est = alive_health_shares[:, 1]
-            health_prob_edu_data = edu_shares_healthy.loc[
+            alive_share = 1 - shares_over_time[:, death_health_var]
+            healthy_share_type_est = shares_over_time[:, good_health_var] / alive_share
+            healthy_share_type_data = edu_shares_healthy.loc[
                 (sex_var, edu_var, slice(None))
             ].values
 
             # Plot the estimates and the data
             ax.plot(
                 est_ages[:max_period_physical],
-                health_prob_edu_est[:max_period_physical],
+                healthy_share_type_est[:max_period_physical],
                 color=JET_COLOR_MAP[edu_var],
                 label=f"Est. {edu_label}",
             )
@@ -78,7 +87,7 @@ def plot_healthy_unhealthy(paths_dict, specs):
             # )
             ax.plot(
                 est_ages[:max_period_physical],
-                health_prob_edu_data[:max_period_physical],
+                healthy_share_type_data[:max_period_physical],
                 color=JET_COLOR_MAP[edu_var],
                 linestyle="--",
                 label=f"Obs. {edu_label}",
@@ -143,7 +152,7 @@ def plot_health_transition_prob(specs):
     bandwidth = specs["health_smoothing_bandwidth"]
     fig, axs = plt.subplots(2, 1, figsize=(10, 12), sharex=True)
 
-    for health_var in specs["alive_health_vars"]:
+    for health_var in specs["observed_health_vars"]:
         color_id = 0
         ax = axs[health_var]
         for sex_var, sex_label in enumerate(specs["sex_labels"]):

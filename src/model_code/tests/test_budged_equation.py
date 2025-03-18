@@ -3,16 +3,18 @@ from itertools import product
 
 import numpy as np
 import pytest
-from model_code.state_space import get_next_period_experience
+
+from model_code.state_space.experience import get_next_period_experience
 from model_code.wealth_and_budget.budget_equation import budget_constraint
 from model_code.wealth_and_budget.partner_income import calc_partner_income_after_ssc
-from model_code.wealth_and_budget.tax_and_ssc import calc_health_ltc_contr
-from model_code.wealth_and_budget.tax_and_ssc import calc_inc_tax_for_single_income
-from model_code.wealth_and_budget.tax_and_ssc import calc_pension_unempl_contr
+from model_code.wealth_and_budget.tax_and_ssc import (
+    calc_health_ltc_contr,
+    calc_inc_tax_for_single_income,
+    calc_pension_unempl_contr,
+)
 from model_code.wealth_and_budget.transfers import calc_unemployment_benefits
 from set_paths import create_path_dict
 from specs.derive_specs import generate_derived_and_data_derived_specs
-
 
 SAVINGS_GRID_UNEMPLOYED = np.linspace(10, 25, 3)
 PARTNER_STATES = np.array([0, 1, 2], dtype=int)

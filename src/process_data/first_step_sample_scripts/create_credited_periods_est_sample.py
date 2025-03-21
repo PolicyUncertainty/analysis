@@ -27,15 +27,14 @@ def create_credited_periods_est_sample(paths, load_data=False):
     df = df.drop_duplicates(subset="rv_id", keep="last")
     print(f"Created credited periods variable with {df.shape[0]} observations.")
 
-
-    # import matplotlib.pyplot as plt
-    # plt.scatter(df["pgexpft"], df["VSMO"]/12, label="VSMO")
-    # plt.scatter(df["pgexpft"], df["credited_periods"], label="AZ")
-    # plt.scatter(df["pgexpft"], df["pgexpft"], label="45 degree line")
-    # plt.xlabel("experience")
-    # plt.ylabel("credited periods")
-    # plt.legend()
-    # plt.show()
+    breakpoint()
+    import matplotlib.pyplot as plt
+    plt.scatter(df["pgexpft"], df["credited_periods"], label="experience vs credited periods")
+    plt.plot([0, 45], [0, 45], label="y=x", color="red")
+    plt.xlabel("experience")
+    plt.ylabel("credited periods")
+    plt.legend()
+    plt.show()
 
     type_dict = {
         "sex": "int8",
@@ -84,11 +83,21 @@ def load_and_merge_soep_core(soep_c38_path, soep_rv_path):
             "rv_id",
             "VSMO", # "Versicherungspflichtige Monate", total months of insurance
             "AZ", # "Anrechnungszeiten", certain credited periods (unemployment, pregnancy, etc.)
+            "EZ", # "Ersatzzeiten", replacement periods (military service, etc.)
             "RTAT", # "Rentenart", type of pension (1: disability, 2: old age)
             "LEAT", # "Leistungsart", type of pension (1: does not apply, 2: disability, 3-7: old age special cases, 8: old age)
         ],
         convert_categoricals=False,
     )
+    soep_rv_vskt_data = pd.read_stata(
+        f"{soep_rv_path}/vskt/SUF.SOEP-RV.VSKT.2020.fix.1-0.dta",
+        columns=[
+            "rv_id",
+            "KBZ", # "Kinderberücksichtigungszeiten", child raising periods
+        ],
+        convert_categoricals=False,
+    )
+
     merged_data = pd.merge(
         pgen_data, ppathl_data, on=["pid", "hid", "syear"], how="inner"
     )
@@ -97,6 +106,9 @@ def load_and_merge_soep_core(soep_c38_path, soep_rv_path):
     )
     merged_data = pd.merge(
         merged_data, soep_rv_data, on=["rv_id"], how="inner"
+    )
+    merged_data = pd.merge(
+        merged_data, soep_rv_vskt_data, on=["rv_id"], how="inner"
     )
     merged_data = merged_data.dropna()
     n_obs = merged_data.shape[0]

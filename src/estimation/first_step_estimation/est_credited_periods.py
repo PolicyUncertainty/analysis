@@ -21,28 +21,34 @@ multiindex = pd.MultiIndex.from_product(
     names=sub_group_names,
 )
 columns = [
-    #"const",
+    "const",
     "experience",
-    "has_partner"
+    "has_partner",
+    "sex"
     ]
 estimates = pd.DataFrame(index=multiindex, columns=columns)
 
-for sex in sexes:
-    for education in edu_states:
-        df_reduced = df[
-            (df["sex"] == sex)
-            & (df["education"] == education)
-        ]
-        X = df_reduced[columns]
-        Y = df_reduced["credited_periods"]
-        model = sm.OLS(Y, X).fit()
-        estimates.loc[(sex, education), columns] = model.params
-        print(f'sex: {sex} \n education: {education}')
-        print(model.summary())
+#for sex in sexes:
+#    for education in edu_states:
+#        df_reduced = df[
+#            (df["sex"] == sex)
+#            & (df["education"] == education)
+#        ]
+#        X = df_reduced[columns]
+#        Y = df_reduced["credited_periods"]
+#        model = sm.OLS(Y, X).fit()
+#        estimates.loc[(sex, education), columns] = model.params
+#        print(f'sex: {sex} \n education: {education}')
+#        print(model.summary())
+
+X = df[columns]
+Y = df["credited_periods"]
+model = sm.OLS(Y, X).fit()
+print(model.summary())
+
 
 # predict credited periods for all observations
 df["predicted_credited_periods"] = model.predict(df[columns])
-
 # plot predicted vs actual credited periods by experience
 import matplotlib.pyplot as plt
 plt.scatter(df["experience"], df["credited_periods"], label="actual")

@@ -1,13 +1,17 @@
 
 
 def create_credited_periods(df):
-    """ credited periods for pension of especially long working life (besonders langjährig Versicherte)"""
+    """ credited periods for pension of 'particularly long insurance period' (besonders langjährig Versicherte)"""
     # credited periods: VSMO - AZ
-    # drop all observations with missing VSMO, set all missing AZ to 0 (nan coded as 999)
+    # drop all observations with missing VSMO, set all missing AZ / EZ to 0 (nan coded as 999)
     df = df[df["VSMO"] != 999]
     df.loc[df["AZ"] == 999, "AZ"] = 0
-    df["credited_periods_months"] = df["VSMO"] - df["AZ"]
-    df["credited_periods"] = df["credited_periods_months"] / 12
+    df.loc[df["EZ"] == 999, "EZ"] = 0
+    df.loc[:, "credited_periods_months"] = df["VSMO"] - df["AZ"] + df["EZ"]
+    df.loc[:, "credited_periods"] = df["credited_periods_months"] / 12
+    df.loc[:, "credited_periods"] = df["credited_periods_months"] / 12
+    # add child raising periods (KBZ, in days & no missings) to credited periods
+    df.loc[:, "credited_periods"] = df["credited_periods"] + df["KBZ"] / 365
     # keep only old age pensions (RTAT == 2)
     df = df[df["RTAT"] == 2]
     print(f"{df.shape[0]} observations left after dropping disability pensions.")

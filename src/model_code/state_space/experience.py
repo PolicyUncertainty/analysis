@@ -132,14 +132,15 @@ def test_very_long_insured(
     """Test if the individual qualifies for pension for very long insured
     (Rente besonders für langjährig Versicherte)."""
     qualified_years = get_qualified_years(
-        experience_years, sex, education, partner_state
+        experience_years, sex, education, partner_state, options
     )
     enough_years = qualified_years >= 45
     close_enough_to_SRA = retirement_age_difference <= 2
     return enough_years * close_enough_to_SRA
 
 
-def get_qualified_years(experience_years, sex, education, partner_state):
+def get_qualified_years(experience_years, sex, education, partner_state, options):
     """Calculate the qualified years for pension."""
-    is_woman = sex == 1
-    return experience_years + is_woman * 6
+    credited_periods_per_experience_point = options["credited_periods_per_experience_point"]
+    qualified_years = credited_periods_per_experience_point[sex] * experience_years
+    return qualified_years

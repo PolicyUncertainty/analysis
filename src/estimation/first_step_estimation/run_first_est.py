@@ -12,6 +12,7 @@ input_str = input(
     "\n   - [h]ealth transition"
     "\n   - [m]ortality estimation"
     "\n   - [i]nformed state transition"
+    "\n   - [c]redited periods estimation"
     "\n"
 )
 
@@ -93,5 +94,14 @@ if input_str == "i":
     )
 
     calibrate_uninformed_hazard_rate(paths_dict, specs)
+
+if input_str == "c":
+    # Estimate credited periods
+    from estimation.first_step_estimation.est_credited_periods import (
+        calibrate_credited_periods
+    )
+
+    calibrate_credited_periods(paths_dict, load_data=LOAD_DATA)
+
 
 # %%

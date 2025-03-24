@@ -5,6 +5,7 @@ import numpy as np
 import yaml
 
 from specs.experience_specs import create_max_experience
+from specs.experience_specs import add_credited_periods_specs
 from specs.family_specs import (
     predict_children_by_state,
     read_in_partner_transition_specs,
@@ -44,6 +45,7 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     specs["max_exp_diffs_per_period"] = create_max_experience(
         path_dict, specs, load_precomputed
     )
+    specs = add_credited_periods_specs(specs, path_dict)
     return specs
 
 

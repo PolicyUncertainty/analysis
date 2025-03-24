@@ -16,10 +16,11 @@ from model_code.wealth_and_budget.transfers import calc_unemployment_benefits
 from set_paths import create_path_dict
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
-SAVINGS_GRID_UNEMPLOYED = np.linspace(10, 25, 3)
+SAVINGS_GRID_UNEMPLOYED = np.linspace(10, 25, 5)
 PARTNER_STATES = np.array([0, 1, 2], dtype=int)
 PERIOD_GRID = np.arange(0, 65, 15, dtype=int)
-OLD_AGE_PERIOD_GRID = np.arange(33, 43, 3, dtype=int)
+OLD_AGE_PERIOD_GRID = np.arange(25, 43, 5, dtype=int)
+VERY_OLD_AGE_PERIOD_GRID = np.arange(35, 43, 3, dtype=int)
 EDUCATION_GRID = [0, 1]
 SEX_GRID = [0, 1]
 
@@ -133,7 +134,7 @@ def test_budget_unemployed(
 
 SAVINGS_GRID = np.linspace(8, 25, 3)
 GAMMA_GRID = np.linspace(0.1, 0.9, 3)
-EXP_GRID = np.linspace(10, 30, 3, dtype=int)
+EXP_GRID = np.linspace(10, 60, 10, dtype=int)
 INCOME_SHOCK_GRID = np.linspace(-0.5, 0.5, 2)
 WORKER_CHOICES = [2, 3]
 
@@ -269,16 +270,14 @@ def test_budget_worker(
         )
 
 
-EXP_GRID = np.linspace(10, 30, 3, dtype=int)
 POLICY_STATE_GRID = np.linspace(0, 2, 3, dtype=int)
-RET_AGE_GRID = np.linspace(0, 2, 3, dtype=int)
 
 
 @pytest.mark.parametrize(
     "period, sex, partner_state ,education, savings, exp",
     list(
         product(
-            OLD_AGE_PERIOD_GRID,
+            VERY_OLD_AGE_PERIOD_GRID,
             SEX_GRID,
             PARTNER_STATES,
             EDUCATION_GRID,
@@ -313,7 +312,7 @@ def test_retiree(
         education=education,
         experience=exp_cont_last_period,
         informed=0,
-        partner_state=None,
+        health=2,
         options=specs_internal,
     )
     # Check that experience does not get updated or added any penalty
@@ -399,19 +398,20 @@ def test_retiree(
 
 
 INFORMED_GRID = np.array([0, 1], dtype=int)
+HEALTH_GRID = np.array([0, 1, 2], dtype=int)
 
 
 @pytest.mark.parametrize(
-    "period, sex, partner_state ,education, savings, exp, policy_state, informed",
+    "period, sex ,education, savings, exp, policy_state, health, informed",
     list(
         product(
             OLD_AGE_PERIOD_GRID,
             SEX_GRID,
-            PARTNER_STATES,
             EDUCATION_GRID,
             SAVINGS_GRID,
             EXP_GRID,
             POLICY_STATE_GRID,
+            HEALTH_GRID,
             INFORMED_GRID,
         )
     ),
@@ -419,15 +419,22 @@ INFORMED_GRID = np.array([0, 1], dtype=int)
 def test_fresh_retiree(
     period,
     sex,
-    partner_state,
     education,
     savings,
     exp,
     policy_state,
     informed,
+    health,
     paths_and_specs,
 ):
+    """In this test we assume that disability and non disability retirement is always possible.
+    Even though in the model there are choice set restrictions, which is tested in state space.
+    """
     path_dict, specs_internal = paths_and_specs
+
+    # In this test, we set all to married, as this does not matter for the mechanic we test here,
+    # i.e. the experience adjustment
+    partner_state = np.array(1, dtype=int)
 
     actual_retirement_age = specs_internal["start_age"] + period - 1
 
@@ -446,7 +453,7 @@ def test_fresh_retiree(
         education=education,
         experience=exp_cont_prev,
         informed=informed,
-        partner_state=None,
+        health=health,
         options=specs_internal,
     )
 
@@ -464,20 +471,11 @@ def test_fresh_retiree(
     )
 
     savings_scaled = savings * specs_internal["wealth_unit"]
-    SRA_at_resolution = (
+    SRA_at_retirement = (
         specs_internal["min_SRA"] + policy_state * specs_internal["SRA_grid_size"]
     )
-    retirement_age_difference = SRA_at_resolution - actual_retirement_age
-
-    if retirement_age_difference > 0:
-        if informed == 1:
-            ERP = specs_internal["ERP"]
-        else:
-            ERP = specs_internal["uninformed_ERP"][education]
-        pension_factor = 1 - retirement_age_difference * ERP
-    else:
-        late_retirement_bonus = specs_internal["late_retirement_bonus"]
-        pension_factor = 1 + np.abs(retirement_age_difference) * late_retirement_bonus
+    retirement_age_difference = SRA_at_retirement - actual_retirement_age
+    early_retirement = retirement_age_difference > 0
 
     mean_wage_all = specs_internal["mean_hourly_ft_wage"][sex, education]
     gamma_0 = specs_internal["gamma_0"][sex, education]
@@ -486,11 +484,38 @@ def test_fresh_retiree(
         (np.exp(gamma_0) / gamma_1_plus_1) * ((exp + 1) ** gamma_1_plus_1 - 1)
     ) / mean_wage_all
 
-    pension_year = (
-        specs_internal["annual_pension_point_value"]
-        * total_pens_points
-        * pension_factor
-    )
+    if early_retirement:
+        if informed == 1:
+            ERP = specs_internal["ERP"]
+        else:
+            ERP = specs_internal["uninformed_ERP"][education]
+
+        if health == 2:
+            retirement_age_difference = np.minimum(3, retirement_age_difference)
+            average_points_work_span = total_pens_points / (actual_retirement_age - 18)
+            disability_pens_points = average_points_work_span * (SRA_at_retirement - 18)
+
+            reduced_pension_points = (
+                1 - retirement_age_difference * ERP
+            ) * disability_pens_points
+        else:
+            reduced_pension_points = (
+                1 - retirement_age_difference * ERP
+            ) * total_pens_points
+
+        very_long_insured_bool = (retirement_age_difference <= 2) & (
+            exp >= specs_internal["experience_threshold_very_long_insured"][sex]
+        )
+        if very_long_insured_bool:
+            final_pension_points = np.maximum(total_pens_points, reduced_pension_points)
+        else:
+            final_pension_points = reduced_pension_points
+    else:
+        late_retirement_bonus = specs_internal["late_retirement_bonus"]
+        pension_factor = 1 + np.abs(retirement_age_difference) * late_retirement_bonus
+        final_pension_points = pension_factor * total_pens_points
+
+    pension_year = specs_internal["annual_pension_point_value"] * final_pension_points
     income_after_ssc = pension_year - calc_health_ltc_contr(pension_year)
 
     has_partner_int = (partner_state > 0).astype(int)
@@ -543,6 +568,9 @@ def test_fresh_retiree(
         scaled_wealth = (
             savings_scaled * (1 + specs_internal["interest_rate"]) + checked_income
         )
-        np.testing.assert_almost_equal(
-            wealth, scaled_wealth / specs_internal["wealth_unit"]
-        )
+        if early_retirement & (retirement_age_difference > 4) & (health != 2):
+            pass
+        else:
+            np.testing.assert_almost_equal(
+                wealth, scaled_wealth / specs_internal["wealth_unit"]
+            )

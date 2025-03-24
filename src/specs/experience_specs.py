@@ -2,7 +2,7 @@ import jax.numpy as jnp
 import numpy as np
 import pandas as pd
 
-from model_code.state_space.experience import (
+from model_code.pension_system.experience_stock import (
     calc_experience_years_for_pension_adjustment,
 )
 
@@ -80,9 +80,22 @@ def create_max_experience(path_dict, specs, load_precomputed):
 
     return jnp.asarray(max_exp_diffs_per_period)
 
-def add_credited_periods_specs(specs, path_dict):
-    credited_periods = pd.read_csv(
-        path_dict["est_results"] + "credited_periods_estimates.csv"
+
+def add_very_long_insured_specs(specs, path_dict):
+    """This function adds experience thresholds to be eligible for very long insured retirement path.
+    We scale the 45 year of credited periods threshold by a sex specific multiplicator of experience.
+
+    """
+    exp_factor_for_credited_periods = pd.read_csv(
+        path_dict["est_results"] + "credited_periods_estimates.csv", index_col=0
     )
-    specs["credited_periods_per_experience_point"] = jnp.asarray(credited_periods["estimate"].values)
+
+    exp_thresholds = np.zeros((2,), dtype=float)
+    for sex_var, sex_label in enumerate(["men", "women"]):
+        exp_thresholds[sex_var] = (
+            45
+            / exp_factor_for_credited_periods.loc[f"experience_{sex_label}", "estimate"]
+        )
+
+    specs["experience_threshold_very_long_insured"] = jnp.asarray(exp_thresholds)
     return specs

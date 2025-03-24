@@ -3,8 +3,8 @@ from itertools import product
 import numpy as np
 import pytest
 
+from model_code.pension_system.early_retirement_paths import retirement_age_long_insured
 from model_code.state_space.choice_set import (
-    retirement_age_long_insured,
     state_specific_choice_set,
 )
 from set_paths import create_path_dict

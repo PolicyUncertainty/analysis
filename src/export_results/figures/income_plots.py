@@ -1,13 +1,18 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+
 from export_results.figures.color_map import JET_COLOR_MAP
 from model_code.wealth_and_budget.budget_equation import budget_constraint
-from model_code.wealth_and_budget.pensions import calc_gross_pension_income
-from model_code.wealth_and_budget.pensions import calc_pensions_after_ssc
+from model_code.wealth_and_budget.pension_payments import (
+    calc_gross_pension_income,
+    calc_pensions_after_ssc,
+)
 from model_code.wealth_and_budget.transfers import calc_child_benefits
-from model_code.wealth_and_budget.wages import calc_labor_income_after_ssc
-from model_code.wealth_and_budget.wages import calculate_gross_labor_income
+from model_code.wealth_and_budget.wages import (
+    calc_labor_income_after_ssc,
+    calculate_gross_labor_income,
+)
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 

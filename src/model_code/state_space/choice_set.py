@@ -1,5 +1,7 @@
 import numpy as np
 
+from model_code.pension_system.early_retirement_paths import retirement_age_long_insured
+
 
 def state_specific_choice_set(
     period, lagged_choice, sex, policy_state, job_offer, health, options
@@ -48,13 +50,3 @@ def state_specific_choice_set(
         if sex == 0:
             choice_set = choice_set[choice_set != 2]
         return choice_set
-
-
-def retirement_age_long_insured(SRA, options):
-    """Everyone can retire 4 years before the SRA but must be at least at 63 y/o.
-    That means that we assume 1) everyone qualifies for "Rente für langjährig Versicherte" and 2) that
-    the threshhold for "Rente für langjährig Versicherte" moves with the SRA. "Rente für besonders langjährig
-    Versicherte" only differs with respect to deductions. Not with respect to entry age. We introduce the
-    lower bound of 63 as this is the current law, even for individuals with SRA below 67.
-    """
-    return np.maximum(SRA - options["ret_years_before_SRA"], 63)

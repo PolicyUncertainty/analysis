@@ -13,6 +13,8 @@ paths_dict = create_path_dict()
 df = create_credited_periods_est_sample(paths_dict, load_data=True)
 
 df["const"] = 1
+df["experience_men"] = df["experience"] * (1-df["sex"])
+df["experience_women"] = df["experience"] * df["sex"]
 edu_states = [0, 1]
 sexes = [0, 1]
 sub_group_names = ["sex", "education"]
@@ -21,10 +23,12 @@ multiindex = pd.MultiIndex.from_product(
     names=sub_group_names,
 )
 columns = [
-    "const",
-    "experience",
-    "has_partner",
-    "sex"
+    #"const",
+    #"experience",
+    #"has_partner",
+    #"sex",
+    "experience_men",
+    "experience_women",
     ]
 estimates = pd.DataFrame(index=multiindex, columns=columns)
 

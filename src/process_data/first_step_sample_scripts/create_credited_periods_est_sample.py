@@ -29,9 +29,11 @@ def create_credited_periods_est_sample(paths, load_data=False):
 
     breakpoint()
     import matplotlib.pyplot as plt
-    plt.scatter(df["pgexpft"], df["credited_periods"], label="experience vs credited periods")
+    men_mask = df["sex"]==0
+    plt.scatter(df[men_mask]["working_years"], df[men_mask]["credited_periods"], label="men: experience vs credited periods")
+    plt.scatter(df[~men_mask]["working_years"], df[~men_mask]["credited_periods"], label="women: experience vs credited periods")
     plt.plot([0, 45], [0, 45], label="y=x", color="red")
-    plt.xlabel("experience")
+    plt.xlabel("ft_exp_plus_pt_exp")
     plt.ylabel("credited periods")
     plt.legend()
     plt.show()
@@ -83,7 +85,9 @@ def load_and_merge_soep_core(soep_c38_path, soep_rv_path):
             "rv_id",
             "VSMO", # "Versicherungspflichtige Monate", total months of insurance
             "AZ", # "Anrechnungszeiten", certain credited periods (unemployment, pregnancy, etc.)
+            "AUAZ", # Anrechnungszeiten because of sickness
             "EZ", # "Ersatzzeiten", replacement periods (military service, etc.)
+            "KIMOBO", #  
             "RTAT", # "Rentenart", type of pension (1: disability, 2: old age)
             "LEAT", # "Leistungsart", type of pension (1: does not apply, 2: disability, 3-7: old age special cases, 8: old age)
         ],
@@ -93,7 +97,7 @@ def load_and_merge_soep_core(soep_c38_path, soep_rv_path):
         f"{soep_rv_path}/vskt/SUF.SOEP-RV.VSKT.2020.fix.1-0.dta",
         columns=[
             "rv_id",
-            "KBZ", # "Kinderberücksichtigungszeiten", child raising periods
+            "KBZ_TAGE", # "Kinderberücksichtigungszeiten", child raising periods
         ],
         convert_categoricals=False,
     )

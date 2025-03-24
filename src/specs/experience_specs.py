@@ -45,6 +45,9 @@ def create_max_experience(path_dict, specs, load_precomputed):
             for edu_var in range(specs["n_education_types"]):
                 for i, period in enumerate(ret_periods):
                     max_exp_period = period + max_exp_diff_data
+
+                    # The largest bonus can be obtained by beiing informed and working after the
+                    # longest after the SRA.
                     new_exp = calc_experience_years_for_pension_adjustment(
                         period=period,
                         sex=sex_var,

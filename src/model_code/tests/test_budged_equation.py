@@ -471,9 +471,9 @@ def test_fresh_retiree(
 
     if retirement_age_difference > 0:
         if informed == 1:
-            ERP = specs_internal["early_retirement_penalty"]
+            ERP = specs_internal["ERP"]
         else:
-            ERP = specs_internal["uninformed_early_retirement_penalty"][education]
+            ERP = specs_internal["uninformed_ERP"][education]
         pension_factor = 1 - retirement_age_difference * ERP
     else:
         late_retirement_bonus = specs_internal["late_retirement_bonus"]

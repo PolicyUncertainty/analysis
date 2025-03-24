@@ -37,7 +37,7 @@ def add_informed_process_specs(specs, path_dict):
         ]
         informed_shares[:, edu_val] = df_predicted_shares.loc[working_ages, edu_label]
 
-    specs["uninformed_early_retirement_penalty"] = jnp.asarray(uninformed_penalties)
+    specs["uninformed_ERP"] = jnp.asarray(uninformed_penalties)
     specs["informed_hazard_rate"] = jnp.asarray(informed_hazard_rate)
     specs["initial_informed_shares"] = jnp.asarray(initial_shares)
     specs["informed_shares"] = jnp.asarray(informed_shares)

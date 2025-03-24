@@ -5,9 +5,10 @@ from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.partner_code import create_haspartner
 from process_data.soep_rv_vars.credited_periods import create_credited_periods
 from process_data.aux_and_plots.filter_data import recode_sex
+from process_data.aux_and_plots.plot_credited_periods_vs_exp import plot_credited_periods_vs_exp
 
 
-def create_credited_periods_est_sample(paths, load_data=False):
+def create_credited_periods_est_sample(paths, load_data=False, plot_data=False):
     if not os.path.exists(paths["intermediate_data"]):
         os.makedirs(paths["intermediate_data"])
 
@@ -27,16 +28,9 @@ def create_credited_periods_est_sample(paths, load_data=False):
     df = df.drop_duplicates(subset="rv_id", keep="last")
     print(f"Created credited periods variable with {df.shape[0]} observations.")
 
-    breakpoint()
-    import matplotlib.pyplot as plt
-    men_mask = df["sex"]==0
-    plt.scatter(df[men_mask]["working_years"], df[men_mask]["credited_periods"], label="men: experience vs credited periods")
-    plt.scatter(df[~men_mask]["working_years"], df[~men_mask]["credited_periods"], label="women: experience vs credited periods")
-    plt.plot([0, 45], [0, 45], label="y=x", color="red")
-    plt.xlabel("ft_exp_plus_pt_exp")
-    plt.ylabel("credited periods")
-    plt.legend()
-    plt.show()
+    if plot_data:
+        plot_credited_periods_vs_exp(df)
+
 
     type_dict = {
         "sex": "int8",

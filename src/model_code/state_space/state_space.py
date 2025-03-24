@@ -1,3 +1,5 @@
+from zmq.backend.cffi import proxy
+
 from model_code.state_space.choice_set import state_specific_choice_set
 from model_code.state_space.experience import get_next_period_experience
 
@@ -23,7 +25,6 @@ def sparsity_condition(
 ):
     start_age = options["start_age"]
     max_ret_age = options["max_ret_age"]
-    min_ret_age_state_space = options["min_ret_age"]
     # Generate last period, because only here are death states
     last_period = options["n_periods"] - 1
     # Degenerated policy state
@@ -68,49 +69,37 @@ def sparsity_condition(
             }
             return state_proxy
         elif lagged_choice == 0:
-            # If retirement is already chosen we proxy all states to job offer 0.
-
-            # Until age max_ret_age + 1 the individual could also be freshly retired
-            # so we check if the policy state is degenerated. If so, we proxy to
-            # informed states only.
-            if policy_state == degenerate_policy_state:
-                state_proxy = {
-                    "period": period,
-                    "lagged_choice": lagged_choice,
-                    "education": education,
-                    "health": health,
-                    "informed": 1,
-                    "sex": sex,
-                    "partner_state": partner_state,
-                    "job_offer": 0,
-                    "policy_state": policy_state,
-                }
+            # If retirement is already chosen we proxy all states to job offer 0. Also, if you are
+            # retired, it does not matter if you are in the bad health state or disabled. We proxy
+            # the health state of those two by bad health.
+            if health == options["good_health_var"]:
+                proxy_health = health
             else:
-                state_proxy = {
-                    "period": period,
-                    "lagged_choice": lagged_choice,
-                    "education": education,
-                    "health": health,
-                    "informed": informed,
-                    "partner_state": partner_state,
-                    "sex": sex,
-                    "job_offer": 0,
-                    "policy_state": policy_state,
-                }
-            return state_proxy
-        elif age > max_ret_age + 1:
-            # If age is larger than max_ret_age + 1, the individual can only be longer retired.
-            # We can degenerate the policy state to and also only keep informed.
+                proxy_health = options["bad_health_var"]
+
+            # Until age max_ret_age + 1 the individual could also be freshly retired.
+            # Therefore, we check if the agent already is longer retired. If so, we proxy
+            # informed only by 1 and policy state only by the degenerate policy state. Otherwise
+            # the agent is freshly retired and we need informed and policy state.
+            already_longer_retired = (age > max_ret_age + 1) | (
+                policy_state == degenerate_policy_state
+            )
+            if already_longer_retired:
+                informed_proxy = 1
+                policy_state_proxy = degenerate_policy_state
+            else:
+                informed_proxy = informed
+                policy_state_proxy = policy_state
             state_proxy = {
                 "period": period,
                 "lagged_choice": lagged_choice,
                 "education": education,
-                "health": health,
-                "informed": 1,
+                "health": proxy_health,
+                "informed": informed_proxy,
                 "sex": sex,
                 "partner_state": partner_state,
                 "job_offer": 0,
-                "policy_state": options["n_policy_states"] - 1,
+                "policy_state": policy_state_proxy,
             }
             return state_proxy
         else:

@@ -313,6 +313,7 @@ def test_retiree(
         education=education,
         experience=exp_cont_last_period,
         informed=0,
+        partner_state=None,
         options=specs_internal,
     )
     # Check that experience does not get updated or added any penalty
@@ -445,6 +446,7 @@ def test_fresh_retiree(
         education=education,
         experience=exp_cont_prev,
         informed=informed,
+        partner_state=None,
         options=specs_internal,
     )
 

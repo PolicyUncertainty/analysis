@@ -1,6 +1,7 @@
 import jax
 from jax import numpy as jnp
 
+from model_code.state_space.choice_set import retirement_age_long_insured
 from model_code.wealth_and_budget.pensions import (
     calc_experience_for_total_pension_points,
     calc_total_pension_points,
@@ -16,6 +17,7 @@ def get_next_period_experience(
     experience,
     informed,
     partner_state,
+    health,
     options,
 ):
     """Update experience based on lagged choice and period."""
@@ -31,11 +33,9 @@ def get_next_period_experience(
     ]
     exp_new_period = exp_years_last_period + exp_update
 
-    # If retired, then we update experience according to the deduction function
-    degenerate_state_id = options["n_policy_states"] - 1
-    fresh_retired = (degenerate_state_id != policy_state) & (lagged_choice == 0)
-
-    # Calculate experience with early retirement penalty
+    # Calculate experience in the case of fresh retirement
+    # We track all deductions and bonuses of the retirement decision through an adjusted
+    # experience stock
     adjusted_exp_years = calc_experience_years_for_pension_adjustment(
         period=period,
         experience_years=exp_years_last_period,
@@ -46,9 +46,18 @@ def get_next_period_experience(
         partner_state=partner_state,
         options=options,
     )
-    # Update if fresh retired
+
+    # Check for fresh retirement. Not that we degenerate the policy state after the first period of
+    # retirement and thus don't need to track when retired.
+    degenerate_state_id = options["n_policy_states"] - 1
+    fresh_retired = (degenerate_state_id != policy_state) & (lagged_choice == 0)
     exp_new_period = jax.lax.select(fresh_retired, adjusted_exp_years, exp_new_period)
-    return (1 / (period + options["max_exp_diffs_per_period"][period])) * exp_new_period
+
+    # Now scale between 0 and 1
+    exp_scaled = (
+        1 / (period + options["max_exp_diffs_per_period"][period])
+    ) * exp_new_period
+    return exp_scaled
 
 
 def calc_experience_years_for_pension_adjustment(
@@ -59,9 +68,12 @@ def calc_experience_years_for_pension_adjustment(
     policy_state,
     informed,
     partner_state,
+    health,
     options,
 ):
-    """Calculate the reduced experience with early retirement penalty."""
+    """Calculate a new experience stock accounting for the pension adjustment. This function will only
+    be used if the individual is fresh retired. So we can take this as a given here."""
+    # Start by calculating the type specific pension points(Endgeltpunkte)
     total_pension_points = calc_total_pension_points(
         education=education,
         experience_years=experience_years,
@@ -75,12 +87,25 @@ def calc_experience_years_for_pension_adjustment(
     retirement_age_difference = jnp.abs(SRA_at_retirement - actual_retirement_age)
     early_retired_bool = actual_retirement_age < SRA_at_retirement
 
-    # deduction factor for early  retirement
-    early_retirement_penalty_informed = options["early_retirement_penalty"]
-    early_retirement_penalty_uninformed = options[
-        "uninformed_early_retirement_penalty"
-    ][education]
-    very_long_insured_test = test_very_long_insured(
+    # Check if the individual gets disability pension
+    # (remember in this function everybody is fresh retired)
+    age = period + options["start_age"]
+    long_insured_age = retirement_age_long_insured(
+        SRA=SRA_at_retirement, options=options
+    )
+    disability_pension_bool = (age < long_insured_age) & (
+        health == options["disabled_health_var"]
+    )
+
+    # Additional pension points if disability retired.
+    average_points_work_span = total_pension_points / (age - 18)
+    total_points_disability = (SRA_at_retirement - 18) * average_points_work_span
+
+    total_pension_points = jax.lax.select(
+        disability_pension_bool, total_points_disability, total_pension_points
+    )
+
+    very_long_insured_bool = test_very_long_insured(
         retirement_age_difference=retirement_age_difference,
         experience_years=experience_years,
         sex=sex,
@@ -88,16 +113,27 @@ def calc_experience_years_for_pension_adjustment(
         partner_state=partner_state,
         options=options,
     )
+
+    # deduction factor for early  retirement
     early_retirement_penalty = (
-        informed * early_retirement_penalty_informed
-        + (1 - informed) * early_retirement_penalty_uninformed
+        informed * options["ERP"]
+        + (1 - informed) * options["uninformed_ERP"][education]
     )
-    early_retirement_factor = (
-        1
-        - early_retirement_penalty
-        * retirement_age_difference
-        * (1 - very_long_insured_test)
+
+    # Penalty years. First check if disability pension(then limit to 3 years)
+    penalty_years = jax.lax.select(
+        disability_pension_bool,
+        on_true=3,
+        on_false=retirement_age_difference,
     )
+    # Then check if very long insured (inclusive if that has to be two years to SRA)
+    penalty_years = jax.lax.select(
+        very_long_insured_bool,
+        on_true=0,
+        on_false=penalty_years,
+    )
+
+    early_retirement_factor = 1 - early_retirement_penalty * penalty_years
 
     # Total bonus for late retirement
     late_retirement_factor = 1 + (

@@ -313,6 +313,7 @@ def test_retiree(
         education=education,
         experience=exp_cont_last_period,
         informed=0,
+        partner_state=None,
         options=specs_internal,
     )
     # Check that experience does not get updated or added any penalty
@@ -445,6 +446,7 @@ def test_fresh_retiree(
         education=education,
         experience=exp_cont_prev,
         informed=informed,
+        partner_state=None,
         options=specs_internal,
     )
 
@@ -469,9 +471,9 @@ def test_fresh_retiree(
 
     if retirement_age_difference > 0:
         if informed == 1:
-            ERP = specs_internal["early_retirement_penalty"]
+            ERP = specs_internal["ERP"]
         else:
-            ERP = specs_internal["uninformed_early_retirement_penalty"][education]
+            ERP = specs_internal["uninformed_ERP"][education]
         pension_factor = 1 - retirement_age_difference * ERP
     else:
         late_retirement_bonus = specs_internal["late_retirement_bonus"]

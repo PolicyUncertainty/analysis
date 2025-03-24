@@ -54,7 +54,7 @@ def calibrate_credited_periods(paths, load_data=False, plot_results=False):
     print(model.summary())
 
     if plot_results:
-        plot_credited_periods_vs_exp(df, model)
+        plot_credited_periods_vs_exp(df, model, columns)
 
     # save estimates to csv
     estimates = pd.DataFrame(model.params, columns=['estimate'])
@@ -62,7 +62,7 @@ def calibrate_credited_periods(paths, load_data=False, plot_results=False):
     estimates.to_csv(out_file_path)
     return estimates 
 
-def plot_credited_periods_vs_exp(df, model):
+def plot_credited_periods_vs_exp(df, model, columns):
     """ Plot credited periods (actual + predicted) vs experience """
     df["predicted_credited_periods"] = model.predict(df[columns])
     men_mask = df["sex"]==0

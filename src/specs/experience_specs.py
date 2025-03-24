@@ -76,3 +76,10 @@ def create_max_experience(path_dict, specs, load_precomputed):
         )
 
     return jnp.asarray(max_exp_diffs_per_period)
+
+def add_credited_periods_specs(specs, path_dict):
+    credited_periods = pd.read_csv(
+        path_dict["est_results"] + "credited_periods_estimates.csv"
+    )
+    specs["credited_periods_per_experience_point"] = jnp.asarray(credited_periods["estimate"].values)
+    return specs

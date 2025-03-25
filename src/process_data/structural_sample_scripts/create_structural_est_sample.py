@@ -1,6 +1,8 @@
 import os
 
+import matplotlib.pyplot as plt
 import pandas as pd
+
 from process_data.aux_and_plots.filter_data import filter_data
 from process_data.aux_and_plots.lagged_and_lead_vars import (
     create_lagged_and_lead_variables,
@@ -8,10 +10,14 @@ from process_data.aux_and_plots.lagged_and_lead_vars import (
 from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.experience import create_experience_variable
 from process_data.soep_vars.health import create_health_var
-from process_data.soep_vars.job_hire_and_fire import determine_observed_job_offers
-from process_data.soep_vars.job_hire_and_fire import generate_job_separation_var
+from process_data.soep_vars.job_hire_and_fire import (
+    determine_observed_job_offers,
+    generate_job_separation_var,
+)
 from process_data.soep_vars.partner_code import create_partner_state
-from process_data.soep_vars.wealth import add_wealth_interpolate_and_deflate
+from process_data.soep_vars.wealth.linear_interpolation import (
+    add_wealth_interpolate_and_deflate,
+)
 from process_data.soep_vars.work_choices import create_choice_variable
 from process_data.structural_sample_scripts.informed_state import create_informed_state
 from process_data.structural_sample_scripts.model_restrictions import (
@@ -20,7 +26,7 @@ from process_data.structural_sample_scripts.model_restrictions import (
 from process_data.structural_sample_scripts.policy_state import create_policy_state
 
 
-def create_structural_est_sample(paths, specs, load_data=False):
+def create_structural_est_sample(paths, specs, load_data=False, use_processed_pl=False):
     if not os.path.exists(paths["intermediate_data"]):
         os.makedirs(paths["intermediate_data"])
 
@@ -31,17 +37,19 @@ def create_structural_est_sample(paths, specs, load_data=False):
         return df
 
     # Load and merge data state data from SOEP core (all but wealth)
-    df = load_and_merge_soep_core(soep_c38_path=paths["soep_c38"])
+    df = load_and_merge_soep_core(path_dict=paths, use_processed_pl=use_processed_pl)
 
     df = create_partner_state(df, filter_missing=True)
     df = create_choice_variable(df)
+
+    df = add_wealth_interpolate_and_deflate(df, paths, specs)
 
     # filter data. Leave additional years in for lagging and leading.
     df = filter_data(df, specs)
 
     df = generate_job_separation_var(df)
     df = create_lagged_and_lead_variables(df, specs, lead_job_sep=True)
-    df = add_wealth_interpolate_and_deflate(df, paths, specs)
+
     df["period"] = df["age"] - specs["start_age"]
     df = create_policy_state(df, specs)
     df = create_experience_variable(df)
@@ -112,7 +120,9 @@ def create_structural_est_sample(paths, specs, load_data=False):
     return df
 
 
-def load_and_merge_soep_core(soep_c38_path):
+def load_and_merge_soep_core(path_dict, use_processed_pl):
+
+    soep_c38_path = path_dict["soep_c38"]
     # Load SOEP core data
     pgen_data = pd.read_stata(
         f"{soep_c38_path}/pgen.dta",
@@ -140,16 +150,23 @@ def load_and_merge_soep_core(soep_c38_path):
         pgen_data, ppathl_data, on=["pid", "hid", "syear"], how="inner"
     )
 
-    # Add pl data
-    pl_data_reader = pd.read_stata(
-        f"{soep_c38_path}/pl.dta",
-        columns=["pid", "hid", "syear", "plb0304_h"],
-        chunksize=100000,
-        convert_categoricals=False,
-    )
-    pl_data = pd.DataFrame()
-    for itm in pl_data_reader:
-        pl_data = pd.concat([pl_data, itm])
+    pl_intermediate_file = path_dict["intermediate_data"] + "pl_structural.pkl"
+    if use_processed_pl:
+        pl_data = pd.read_pickle(pl_intermediate_file)
+    else:
+        # Add pl data
+        pl_data_reader = pd.read_stata(
+            f"{soep_c38_path}/pl.dta",
+            columns=["pid", "hid", "syear", "plb0304_h"],
+            chunksize=100000,
+            convert_categoricals=False,
+        )
+        pl_data = pd.DataFrame()
+        for itm in pl_data_reader:
+            pl_data = pd.concat([pl_data, itm])
+
+        pl_data.to_pickle(pl_intermediate_file)
+
     merged_data = pd.merge(
         merged_data, pl_data, on=["pid", "hid", "syear"], how="inner"
     )

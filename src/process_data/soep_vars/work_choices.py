@@ -36,4 +36,7 @@ def create_choice_variable(data):
     data.loc[soep_empl_status == 13, "choice"] = 0
     # merged_data.loc[rv_ret_choice == "RTB"] = 2
     data = data[data["choice"].notna()]
+    print(
+        str(len(data)) + " observations after dropping people with unobserved choice."
+    )
     return data

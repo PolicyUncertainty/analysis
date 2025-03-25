@@ -70,6 +70,8 @@ reference_year: 2010  # reference year for monetary values, taxes, etc.
 # Wage process estimation (uses same start and end year)
 wage_trunc_low_perc: 0.01  # lower truncation of wage distribution
 wage_trunc_high_perc: 0.99  # upper truncation of wage distribution
+###############################################
+# Wealth preparation
 wealth_unit: 1_000  # unit of wealth in data
 ###############################################
 # Belief process estimation

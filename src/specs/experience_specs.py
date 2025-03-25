@@ -37,27 +37,31 @@ def create_max_experience(path_dict, specs, load_precomputed):
             - specs["start_age"]
         )
         max_exp_diff_to_periods = np.zeros(
-            (specs["n_sexes"], specs["n_education_types"], len(ret_periods)),
+            (specs["n_sexes"], specs["n_education_types"], len(ret_periods), 2),
             dtype=float,
         )
 
         for sex_var in range(specs["n_sexes"]):
             for edu_var in range(specs["n_education_types"]):
                 for i, period in enumerate(ret_periods):
-                    max_exp_period = period + max_exp_diff_data
+                    for health_id, health in enumerate([1, 2]):
+                        max_exp_period = period + max_exp_diff_data
 
-                    # The largest bonus can be obtained by beiing informed and working after the
-                    # longest after the SRA.
-                    new_exp = calc_experience_years_for_pension_adjustment(
-                        period=period,
-                        sex=sex_var,
-                        experience_years=max_exp_period,
-                        education=edu_var,
-                        policy_state=0,
-                        informed=1,
-                        options=specs,
-                    )
-                    max_exp_diff_to_periods[sex_var, edu_var, i] = new_exp - period
+                        # The largest bonus can be obtained by beiing informed and working after the
+                        # longest after the SRA.
+                        new_exp = calc_experience_years_for_pension_adjustment(
+                            period=period,
+                            sex=sex_var,
+                            experience_years=max_exp_period,
+                            education=edu_var,
+                            policy_state=0,
+                            informed=1,
+                            health=health,
+                            options=specs,
+                        )
+                        max_exp_diff_to_periods[sex_var, edu_var, i, health_id] = (
+                            new_exp - period
+                        )
 
         # Get the maximum experience diff across periods
         max_across_ret_periods = max_exp_diff_to_periods.max()

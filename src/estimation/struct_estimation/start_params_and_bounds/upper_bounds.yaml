@@ -44,3 +44,8 @@ job_finding_logit_high_educ_men: 5
 job_finding_logit_const_women: 5
 job_finding_logit_period_women: 0.5
 job_finding_logit_high_educ_women: 5
+
+# Disability probability
+disability_logit_const: 5
+disability_logit_period: 0.5
+disability_logit_high_educ: 5

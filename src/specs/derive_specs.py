@@ -40,11 +40,14 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     # Add informed process specs
     specs = add_informed_process_specs(specs, path_dict)
 
+    # Information for checking if individuals are eligible for pension of
+    # very long insured
+    specs = add_very_long_insured_specs(specs, path_dict)
+
     # Set initial experience
     specs["max_exp_diffs_per_period"] = create_max_experience(
         path_dict, specs, load_precomputed
     )
-    specs = add_very_long_insured_specs(specs, path_dict)
     return specs
 
 

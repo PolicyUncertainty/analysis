@@ -55,7 +55,7 @@ plt.close("all")
 
 if which_plots in ["a", "f"]:
     from process_data.aux_and_plots.retiree_classification import plot_retiree_classification
-
+    path_dict = create_path_dict(define_user=True)
     plot_retiree_classification(path_dict)
     plt.show()
     plt.close("all")

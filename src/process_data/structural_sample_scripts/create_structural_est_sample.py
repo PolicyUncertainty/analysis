@@ -73,8 +73,9 @@ def create_structural_est_sample(paths, specs, load_data=False):
         },
         inplace=True,
     )
-
+    df.reset_index(inplace=True)
     type_dict_add = {
+        "pid": "int32",
         "monthly_wage": "float32",
         "hh_net_income": "float32",
         "working_years": "float32",
@@ -106,7 +107,7 @@ def create_structural_est_sample(paths, specs, load_data=False):
     print_data_description(df)
 
     # Anonymize and save data
-    df.reset_index(drop=True, inplace=True)
+    #df.reset_index(drop=True, inplace=True)
     df.to_pickle(out_file_path)
 
     return df

@@ -5,12 +5,13 @@ def create_working_status(df):
     df["work_status"] = np.nan
 
     soep_empl_status = df["pgstib"]
+    not_nan_mask = soep_empl_status.notna()
 
     # assign employment choices
-    df.loc[soep_empl_status != 13, "work_status"] = 1
+    df.loc[(soep_empl_status != 13) & not_nan_mask, "work_status"] = 1
 
     # assign retirement status
-    df.loc[soep_empl_status == 13, "work_status"] = 0
+    df.loc[(soep_empl_status == 13) & not_nan_mask, "work_status"] = 0
     return df
 
 

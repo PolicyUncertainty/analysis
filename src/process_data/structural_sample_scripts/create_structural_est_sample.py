@@ -18,7 +18,10 @@ from process_data.soep_vars.job_hire_and_fire import (
     determine_observed_job_offers,
     generate_job_separation_var,
 )
-from process_data.soep_vars.partner_code import create_partner_state
+from process_data.soep_vars.partner_code import (
+    correct_partner_state,
+    create_partner_state,
+)
 from process_data.soep_vars.wealth.linear_interpolation import (
     add_wealth_interpolate_and_deflate,
 )
@@ -30,7 +33,9 @@ from process_data.structural_sample_scripts.model_restrictions import (
 from process_data.structural_sample_scripts.policy_state import create_policy_state
 
 
-def create_structural_est_sample(paths, specs, load_data=False, use_processed_pl=False):
+def create_structural_est_sample(
+    paths, specs, load_data=False, use_processed_pl=False, load_wealth=False
+):
     if not os.path.exists(paths["intermediate_data"]):
         os.makedirs(paths["intermediate_data"])
 
@@ -46,7 +51,6 @@ def create_structural_est_sample(paths, specs, load_data=False, use_processed_pl
     df = create_partner_state(df, filter_missing=False)
 
     # filter data. Leave additional years for lagging and leading
-    df = filter_below_age(df, specs["start_age"] - 1)
     df = filter_years(df, specs["start_year"] - 1, specs["end_year"] + 1)
     df = recode_sex(df)
 
@@ -57,13 +61,18 @@ def create_structural_est_sample(paths, specs, load_data=False, use_processed_pl
         df, specs, lead_job_sep=True, filter_missings=False
     )
 
+    df = correct_partner_state(df)
+
+    df = filter_below_age(df, specs["start_age"])
     df["period"] = df["age"] - specs["start_age"]
+
     df = create_policy_state(df, specs)
     df = create_experience_and_working_years(df.copy(), filter_missings=True)
     df = create_education_type(df, filter_missings=True)
     df = create_health_var(df)
 
-    df = add_wealth_interpolate_and_deflate(df, paths, specs)
+    df = add_wealth_interpolate_and_deflate(df, paths, specs, load_wealth=load_wealth)
+
     # enforce choice restrictions based on model setup
     df = enforce_model_choice_restriction(df, specs)
 
@@ -114,8 +123,10 @@ def create_structural_est_sample(paths, specs, load_data=False, use_processed_pl
         "sex": "int8",
         "health": "int8",
     }
+
     # Drop observations if any of core variables are nan
     df = df[df[list(core_type_dict.keys())].notna().all(axis=1)]
+
     all_type_dict = {
         **core_type_dict,
         **type_dict_add,

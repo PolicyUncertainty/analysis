@@ -34,6 +34,25 @@ def create_partner_state(df, filter_missing=False):
     return df
 
 
+def correct_partner_state(full_df):
+
+    # Lag and lead partner state
+    lead_partner_state = full_df.groupby("pid")["partner_state"].shift(-1)
+    lagged_parner_state = full_df.groupby("pid")["partner_state"].shift(1)
+
+    # Generate masks
+    equal_mask = lead_partner_state == lagged_parner_state
+    nan_mask = full_df["partner_state"].isna()
+    lead_non_nan_mask = lead_partner_state.notna()
+    overwrite_mask = equal_mask & nan_mask & lead_non_nan_mask
+
+    # Overwrite partner state
+    full_df.loc[overwrite_mask, "partner_state"] = lead_partner_state.loc[
+        overwrite_mask
+    ].values
+    return full_df
+
+
 def merge_couples(df):
     """This function merges couples based on the 'parid' identifier.
 

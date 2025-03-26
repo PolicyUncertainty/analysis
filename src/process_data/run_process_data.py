@@ -25,6 +25,7 @@ string_in = input(
 )
 
 USE_PROCESSED_PL = True
+LOAD_WEALTH = True
 
 
 from process_data.first_step_sample_scripts.create_credited_periods_est_sample import (
@@ -61,7 +62,11 @@ from process_data.structural_sample_scripts.create_structural_est_sample import 
 
 if string_in == "a" or string_in == "s":
     create_structural_est_sample(
-        paths_dict, specs=specs, load_data=False, use_processed_pl=USE_PROCESSED_PL
+        paths_dict,
+        specs=specs,
+        load_data=False,
+        use_processed_pl=USE_PROCESSED_PL,
+        load_wealth=LOAD_WEALTH,
     )
 
 if string_in == "a" or string_in == "w":

@@ -8,9 +8,9 @@ def enforce_model_choice_restriction(df, specs):
     max_ret_age = specs["max_ret_age"]
     min_ret_age = specs["min_long_insured_age"]
 
-    # Filter out people who are retired before min_ret_age
-    df = df[~((df["choice"] == 0) & (df["age"] < min_ret_age))]
-    df = df[~((df["lagged_choice"] == 0) & (df["age"] <= min_ret_age))]
+    # # Filter out people who are retired before min_ret_age
+    # df = df[~((df["choice"] == 0) & (df["age"] < min_ret_age))]
+    # df = df[~((df["lagged_choice"] == 0) & (df["age"] <= min_ret_age))]
 
     # Filter out people who are working after max_ret_age
     df = df[~((df["choice"] != 0) & (df["age"] >= max_ret_age))]
@@ -29,8 +29,10 @@ def enforce_model_choice_restriction(df, specs):
     df = df[(df["lagged_choice"] != 0) | (df["choice"] == 0)]
 
     # Filter out people who are unemployed after sra
-    df = df[~((df["age"] - df["policy_state_value"] >= 0) & (df["choice"] == 1))]
-    df = df[~((df["age"] - df["policy_state_value"] >= 1) & (df["lagged_choice"] == 1))]
+    df = df[~(((df["age"] - df["policy_state_value"]) >= 0) & (df["choice"] == 1))]
+    df = df[
+        ~(((df["age"] - df["policy_state_value"]) >= 1) & (df["lagged_choice"] == 1))
+    ]
 
     print(str(len(df)) + " left after dropping people who come back from retirement.")
     return df

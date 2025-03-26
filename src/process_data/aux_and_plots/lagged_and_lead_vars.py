@@ -24,7 +24,9 @@ def span_dataframe(df, start_year, end_year):
     return full_container
 
 
-def create_lagged_and_lead_variables(data, specs, lead_job_sep=False):
+def create_lagged_and_lead_variables(
+    data, specs, lead_job_sep=False, filter_missings=True
+):
     """This function creates the lagged choice variable and drops missing lagged
     choices."""
 
@@ -39,18 +41,14 @@ def create_lagged_and_lead_variables(data, specs, lead_job_sep=False):
             "job_sep"
         ].shift(-1)
 
-    data = full_container[full_container["lagged_choice"].notna()]
+    if filter_missings:
+        if lead_job_sep:
+            data = data[data["job_sep_this_year"].notna()]
 
-    if lead_job_sep:
-        data = data[data["job_sep_this_year"].notna()]
+        data = full_container[full_container["lagged_choice"].notna()]
+        # We now have observations with a valid lagged or lead variable but not with
+        # actual valid state variables. Delete those by looking at the choice variable.
+        data = data[data["choice"].notna()]
 
-    # We now have observations with a valid lagged or lead variable but not with
-    # actual valid state variables. Delete those by looking at the choice variable.
-    data = data[data["choice"].notna()]
-
-    # We left too young people in the sample to construct lagged choice. Delete those
-    # now.
-    data = data[data["age"] >= specs["start_age"]]
-
-    print(str(len(data)) + " left after filtering missing lagged choices.")
+        print(str(len(data)) + " left after filtering missing lagged choices.")
     return data

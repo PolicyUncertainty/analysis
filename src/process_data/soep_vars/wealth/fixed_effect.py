@@ -2,9 +2,7 @@ import pandas as pd
 from linearmodels import PanelOLS
 
 from process_data.soep_vars.wealth.linear_interpolation import (
-    load_wealth_data,
     span_full_wealth_panel,
-    trim_and_rename,
 )
 
 
@@ -93,3 +91,24 @@ def impute_wealth_with_panel_reg(
         "wealth"
     ].combine_first(wealth_data_with_covariates["wealth_predicted"])
     return wealth_data_with_covariates
+
+
+def trim_and_rename(wealth_data):
+    """This function trims the wealth data (no missings, negatives set to 0) and renames
+    the wealth variable."""
+    wealth_data = wealth_data[wealth_data["w011ha"].notna()]
+    wealth_data.loc[wealth_data["w011ha"] < 0, "w011ha"] = 0
+    wealth_data.rename(columns={"w011ha": "wealth"}, inplace=True)
+    return wealth_data
+
+
+def load_wealth_data(soep_c38_path):
+    # Load SOEP core data
+    wealth_data = pd.read_stata(
+        f"{soep_c38_path}/hwealth.dta",
+        columns=["hid", "syear", "w011ha"],
+        convert_categoricals=False,
+    )
+    wealth_data["hid"] = wealth_data["hid"].astype(int)
+    wealth_data.set_index(["hid", "syear"], inplace=True)
+    return wealth_data

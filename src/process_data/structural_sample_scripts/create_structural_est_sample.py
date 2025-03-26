@@ -3,12 +3,16 @@ import os
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from process_data.aux_and_plots.filter_data import filter_data
+from process_data.aux_and_plots.filter_data import (
+    filter_below_age,
+    filter_years,
+    recode_sex,
+)
 from process_data.aux_and_plots.lagged_and_lead_vars import (
     create_lagged_and_lead_variables,
 )
 from process_data.soep_vars.education import create_education_type
-from process_data.soep_vars.experience import create_experience_variable
+from process_data.soep_vars.experience import create_experience_and_working_years
 from process_data.soep_vars.health import create_health_var
 from process_data.soep_vars.job_hire_and_fire import (
     determine_observed_job_offers,
@@ -39,23 +43,26 @@ def create_structural_est_sample(paths, specs, load_data=False, use_processed_pl
     # Load and merge data state data from SOEP core (all but wealth)
     df = load_and_merge_soep_core(path_dict=paths, use_processed_pl=use_processed_pl)
 
-    df = create_partner_state(df, filter_missing=True)
-    df = create_choice_variable(df)
+    df = create_partner_state(df, filter_missing=False)
 
-    df = add_wealth_interpolate_and_deflate(df, paths, specs)
+    # filter data. Leave additional years for lagging and leading
+    df = filter_below_age(df, specs["start_age"] - 1)
+    df = filter_years(df, specs["start_year"] - 1, specs["end_year"] + 1)
 
-    # filter data. Leave additional years in for lagging and leading.
-    df = filter_data(df, specs)
-
+    df = create_choice_variable(df, filter_missings=False)
     df = generate_job_separation_var(df)
-    df = create_lagged_and_lead_variables(df, specs, lead_job_sep=True)
+
+    df = create_lagged_and_lead_variables(
+        df, specs, lead_job_sep=True, filter_missings=False
+    )
 
     df["period"] = df["age"] - specs["start_age"]
     df = create_policy_state(df, specs)
-    df = create_experience_variable(df)
-    df = create_education_type(df)
+    df = create_experience_and_working_years(df, filter_missings=True)
+    df = create_education_type(df, filter_missings=True)
     df = create_health_var(df)
 
+    df = add_wealth_interpolate_and_deflate(df, paths, specs)
     # enforce choice restrictions based on model setup
     df = enforce_model_choice_restriction(df, specs)
 
@@ -63,7 +70,7 @@ def create_structural_est_sample(paths, specs, load_data=False, use_processed_pl
     df = create_informed_state(df)
 
     # Construct job offer state
-    was_fired_last_period = df["job_sep_this_year"] == 1
+    was_fired_last_period = (df["job_sep"] == 1) | (df["job_sep_this_year"] == 1)
     df = determine_observed_job_offers(
         df, working_choices=[2, 3], was_fired_last_period=was_fired_last_period
     )

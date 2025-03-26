@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+
 from process_data.soep_vars.work_choices import create_working_status
 
 
@@ -22,6 +23,7 @@ def create_partner_state(df, filter_missing=False):
     df.loc[:, "partner_state"] = np.where(
         df["work_status_p"] == 0, 2, df["partner_state"]
     )
+
     if filter_missing:
         # drop nans
         df = df[df["partner_state"].notna()]
@@ -56,6 +58,7 @@ def merge_couples(df):
 
     print(str(len(merged_data)) + " observations after merging couples.")
     return merged_data
+
 
 def create_haspartner(df):
     df["has_partner"] = df["parid"] > 0

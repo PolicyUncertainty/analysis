@@ -15,15 +15,15 @@ def classify_retirees(paths):
         (struct_est_sample["choice"] == 0) & (struct_est_sample["lagged_choice"] != 0)
     ]
 
-    # 1. age to be replaced with actual retirement age
     actual_retirement_age_df = get_actual_retirement_age(paths)
     breakpoint()
     fresh_retirees = pd.merge(fresh_retirees, actual_retirement_age_df, on="pid", how="left")
-    fresh_retirees["actual_retirement_year"] = fresh_retirees["jahr_renteneintr_pl"] + fresh_retirees["monat_renteneintr_pl"] / 12
 
-    breakpoint()
-
-    # 2. working years to be replaced with credited periods
+    # plot difference between actual retirement age and age
+    fresh_retirees["age_diff"] = fresh_retirees["actual_retirement_age"] - fresh_retirees["age"]
+    fresh_retirees["age_diff"].plot(kind="hist", bins=20)
+    
+    # 1. age to be replaced with actual retirement age and 2. working years to be replaced with credited periods
     fresh_retirees.loc[:, "ret_after_SRA"] = (fresh_retirees["age"] >= fresh_retirees["policy_state_value"]).astype(int)
     fresh_retirees.loc[:, "ret_before_SRA_over_45_years"] = ((fresh_retirees["age"] < fresh_retirees["policy_state_value"]) & (fresh_retirees["working_years"] >= 45)).astype(int)
     fresh_retirees.loc[:, "ret_before_SRA_under_45_years"] = ((fresh_retirees["age"] < fresh_retirees["policy_state_value"]) & (fresh_retirees["working_years"] < 45)).astype(int)
@@ -48,16 +48,24 @@ def get_actual_retirement_age(paths):
     pl_data = pd.DataFrame()
     for itm in pl_data_reader:    
         pl_data = pd.concat([pl_data, itm])
+
+    ppath_data = pd.read_stata(f"{soep_c38_path}/ppath.dta",
+                               columns=["pid", "gebjahr", "gebmonat"],
+                               convert_categoricals=False,)
+     
+
+    # for each person, get the retirement year (i.e. the row before the first occurrence of plc0235 == 12)
     pl_orig = pl_data.copy()
     pl_data = pl_orig.copy()
-
-
-    # for each person, get the row before the first occurrence of plc0235 == 12
     result_rows = pl_data.groupby('pid').apply(get_prev_row)
-
-    # since groupby.apply() returns a MultiIndex, extract the rows that are not None
     df = result_rows.dropna().reset_index(drop=True)
     df = df.apply(get_year_of_retirement, axis=1)
+    # compute float actual retirement year
+    df["actual_retirement_year"] = df["jahr_renteneintr_pl"] + df["monat_renteneintr_pl"] / 12 
+    # get float birth year
+    df = create_birth_year(df, ppath_data)
+    # compute actual retirement age
+    df["actual_retirement_age"] = df["actual_retirement_year"] - df["birth_year"]
     breakpoint()
     return df
 
@@ -105,7 +113,16 @@ def get_year_of_retirement(row):
     # Case 2 plc is positive
     # plc corresponds to the number of months the person was retired in the previous year
     else:
-        row["monat_renteneintr_pl"] = 11 - row["plc0235"]
+        row["monat_renteneintr_pl"] = 13 - row["plc0235"]
         row["jahr_renteneintr_pl"] = row["syear"] - 1     
     return row
 
+def create_birth_year(main_df, ppath_data):
+    # drop when gebjahr <0 in ppath (missing birth year)
+    ppath_data = ppath_data[ppath_data["gebjahr"] >= 0]
+    # whenever gemonat is <0 in ppath, we assume that the person was born in June
+    ppath_data["gebmonat"] = ppath_data["gebmonat"].apply(lambda x: x if x >= 0 else 6)
+    # merge birth year and birth month
+    main_df = pd.merge(main_df, ppath_data, on="pid", how="left")
+    main_df["birth_year"] = main_df["gebjahr"] + main_df["gebmonat"] / 12
+    return main_df

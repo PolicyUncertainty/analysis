@@ -30,25 +30,21 @@ def create_lagged_and_lead_variables(
     """This function creates the lagged choice variable and drops missing lagged
     choices."""
 
-    full_container = span_dataframe(
-        data, specs["start_year"] - 1, specs["end_year"] + 1
-    )
+    df_full = span_dataframe(data, specs["start_year"] - 1, specs["end_year"] + 1)
 
-    full_container["lagged_choice"] = full_container.groupby(["pid"])["choice"].shift()
+    df_full["lagged_choice"] = df_full.groupby(["pid"])["choice"].shift()
 
     if lead_job_sep:
-        full_container["job_sep_this_year"] = full_container.groupby(["pid"])[
-            "job_sep"
-        ].shift(-1)
+        df_full["job_sep_this_year"] = df_full.groupby(["pid"])["job_sep"].shift(-1)
 
     if filter_missings:
         if lead_job_sep:
-            data = data[data["job_sep_this_year"].notna()]
+            df_full = df_full[df_full["job_sep_this_year"].notna()]
 
-        data = full_container[full_container["lagged_choice"].notna()]
+        df_full = df_full[df_full["lagged_choice"].notna()]
         # We now have observations with a valid lagged or lead variable but not with
         # actual valid state variables. Delete those by looking at the choice variable.
-        data = data[data["choice"].notna()]
+        df_full = df_full[df_full["choice"].notna()]
 
-        print(str(len(data)) + " left after filtering missing lagged choices.")
-    return data
+        print(str(len(df_full)) + " left after filtering missing lagged choices.")
+    return df_full

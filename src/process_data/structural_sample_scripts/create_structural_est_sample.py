@@ -58,7 +58,7 @@ def create_structural_est_sample(paths, specs, load_data=False, use_processed_pl
 
     df["period"] = df["age"] - specs["start_age"]
     df = create_policy_state(df, specs)
-    df = create_experience_and_working_years(df, filter_missings=True)
+    df = create_experience_and_working_years(df.copy(), filter_missings=True)
     df = create_education_type(df, filter_missings=True)
     df = create_health_var(df)
 
@@ -93,13 +93,13 @@ def create_structural_est_sample(paths, specs, load_data=False, use_processed_pl
         "monthly_wage": "float32",
         "hh_net_income": "float32",
         "working_years": "float32",
+        "children": "int8",
     }
 
     df["hh_net_income"] /= specs["wealth_unit"]
 
     # Keep relevant columns (i.e. state variables) and set their minimal datatype
-    type_dict = {
-        **type_dict_add,
+    core_type_dict = {
         "period": "int8",
         "choice": "int8",
         "lagged_choice": "int8",
@@ -112,11 +112,16 @@ def create_structural_est_sample(paths, specs, load_data=False, use_processed_pl
         "wealth": "float32",
         "education": "int8",
         "sex": "int8",
-        "children": "int8",
         "health": "int8",
     }
-    df = df[list(type_dict.keys())]
-    df = df.astype(type_dict)
+    # Drop observations if any of core variables are nan
+    df = df[df[list(core_type_dict.keys())].notna().all(axis=1)]
+    all_type_dict = {
+        **core_type_dict,
+        **type_dict_add,
+    }
+    df = df[list(all_type_dict.keys())]
+    df = df.astype(all_type_dict)
 
     print_data_description(df)
 
@@ -130,6 +135,13 @@ def create_structural_est_sample(paths, specs, load_data=False, use_processed_pl
 def load_and_merge_soep_core(path_dict, use_processed_pl):
 
     soep_c38_path = path_dict["soep_c38"]
+    # Start with ppathl. Everyone is in there even if not individually surveyed and just member
+    # of surveyed household
+    ppathl_data = pd.read_stata(
+        f"{soep_c38_path}/ppathl.dta",
+        columns=["pid", "hid", "syear", "sex", "gebjahr", "parid", "rv_id"],
+        convert_categoricals=False,
+    )
     # Load SOEP core data
     pgen_data = pd.read_stata(
         f"{soep_c38_path}/pgen.dta",
@@ -147,14 +159,9 @@ def load_and_merge_soep_core(path_dict, use_processed_pl):
         ],
         convert_categoricals=False,
     )
-    ppathl_data = pd.read_stata(
-        f"{soep_c38_path}/ppathl.dta",
-        columns=["pid", "hid", "syear", "sex", "gebjahr", "parid", "rv_id"],
-        convert_categoricals=False,
-    )
     # Merge pgen data with pathl data and hl data
     merged_data = pd.merge(
-        pgen_data, ppathl_data, on=["pid", "hid", "syear"], how="inner"
+        ppathl_data, pgen_data, on=["pid", "hid", "syear"], how="left"
     )
 
     pl_intermediate_file = path_dict["intermediate_data"] + "pl_structural.pkl"
@@ -174,9 +181,7 @@ def load_and_merge_soep_core(path_dict, use_processed_pl):
 
         pl_data.to_pickle(pl_intermediate_file)
 
-    merged_data = pd.merge(
-        merged_data, pl_data, on=["pid", "hid", "syear"], how="inner"
-    )
+    merged_data = pd.merge(merged_data, pl_data, on=["pid", "hid", "syear"], how="left")
 
     # get household level data
     hl_data = pd.read_stata(
@@ -196,10 +201,9 @@ def load_and_merge_soep_core(path_dict, use_processed_pl):
         columns=["pid", "syear", "d11107", "d11101", "m11126", "m11124"],
         convert_categoricals=False,
     )
-    merged_data = pd.merge(merged_data, pequiv_data, on=["pid", "syear"], how="inner")
-    merged_data.rename(columns={"d11107": "children"}, inplace=True)
+    merged_data = pd.merge(merged_data, pequiv_data, on=["pid", "syear"], how="left")
+    merged_data.rename(columns={"d11107": "children", "d11101": "age"}, inplace=True)
 
-    merged_data["age"] = merged_data["d11101"].astype(int)
     merged_data.set_index(["pid", "syear"], inplace=True)
     print(str(len(merged_data)) + " observations in SOEP C38 core.")
     return merged_data

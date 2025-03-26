@@ -47,7 +47,7 @@ def sum_experience_variables(data, filter_missings=True):
     invalid_pt_exp = data["pgexppt"] < 0
 
     # Initialize empty experience column
-    data["experience"] = np.nan
+    data.loc[:, "experience"] = np.nan
 
     # If both are valid use the sum
     mask_both_valid = ~invalid_ft_exp & ~invalid_pt_exp
@@ -81,7 +81,7 @@ def raw_working_years(data, filter_missings=True):
     invalid_pt_exp = data["pgexppt"] < 0
 
     # Initialize empty experience column
-    data["working_years"] = np.nan
+    data.loc[:, "working_years"] = np.nan
 
     # If both are valid use the sum
     mask_both_valid = ~invalid_ft_exp & ~invalid_pt_exp
@@ -97,8 +97,7 @@ def raw_working_years(data, filter_missings=True):
         # If both are invalid drop observations
         data = data[data["working_years"].notna()]
         print(
-            str(len(data))
-            + " left after dropping people with invalid w valueork years."
+            str(len(data)) + " left after dropping people with invalid working years."
         )
     return data
 

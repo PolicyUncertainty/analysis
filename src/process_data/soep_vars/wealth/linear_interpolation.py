@@ -4,11 +4,10 @@ import pandas as pd
 from process_data.soep_vars.wealth.deflate_wealth import deflate_wealth
 
 
-def add_wealth_interpolate_and_deflate(data, path_dict, specs):
+def add_wealth_interpolate_and_deflate(data, path_dict, specs, filter_missings=True):
     """Loads wealth data, interpolates linearly between first and last year of
     observation for each household, and deflates wealth using the consumer price
     index."""
-    data = data.reset_index()
     wealth_data = load_wealth_data(path_dict["soep_c38"])
     wealth_data_full = interpolate_and_extrapolate_wealth(wealth_data, path_dict, specs)
     # Deflate wealth
@@ -17,10 +16,12 @@ def add_wealth_interpolate_and_deflate(data, path_dict, specs):
     wealth_data_full.loc[wealth_data_full["wealth"] < 0, "wealth"] = 0
 
     # Now merge with existing dataset on hid and syear
+    data = data.reset_index()
     data = data.merge(wealth_data_full, on=["hid", "syear"], how="left")
     data.set_index(["pid", "syear"], inplace=True)
-    data = data[(data["wealth"].notna())]
-    print(str(len(data)) + " left after dropping people with missing wealth.")
+    if filter_missings:
+        data = data[(data["wealth"].notna())]
+        print(str(len(data)) + " left after dropping people with missing wealth.")
     return data
 
 

@@ -48,6 +48,7 @@ def create_structural_est_sample(paths, specs, load_data=False, use_processed_pl
     # filter data. Leave additional years for lagging and leading
     df = filter_below_age(df, specs["start_age"] - 1)
     df = filter_years(df, specs["start_year"] - 1, specs["end_year"] + 1)
+    df = recode_sex(df)
 
     df = create_choice_variable(df, filter_missings=False)
     df = generate_job_separation_var(df)
@@ -76,9 +77,8 @@ def create_structural_est_sample(paths, specs, load_data=False, use_processed_pl
     )
 
     # Filter out part-time men
-    mask = df["sex"] == 0
-    df = df[~(mask & (df["choice"] == 2))]
-    df = df[~(mask & (df["lagged_choice"] == 2))]
+    df = df[~((df["sex"] == 0) & (df["choice"] == 2))]
+    df = df[~((df["sex"] == 0) & (df["lagged_choice"] == 2))]
 
     # Rename to monthly wage
     df.rename(

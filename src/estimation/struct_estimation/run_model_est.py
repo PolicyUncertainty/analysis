@@ -45,7 +45,7 @@ params_to_estimate_names = [
     "job_finding_logit_high_educ_women",
 ]
 model_name = "partner_est"
-LOAD_LAST_ESTIMATE = True
+LOAD_LAST_ESTIMATE = False
 LOAD_SOL_MODEL = True
 USE_WEIGHTS = False
 

@@ -5,16 +5,17 @@ def create_working_status(df):
     df["work_status"] = np.nan
 
     soep_empl_status = df["pgstib"]
+    not_nan_mask = soep_empl_status.notna()
 
     # assign employment choices
-    df.loc[soep_empl_status != 13, "work_status"] = 1
+    df.loc[(soep_empl_status != 13) & not_nan_mask, "work_status"] = 1
 
     # assign retirement status
-    df.loc[soep_empl_status == 13, "work_status"] = 0
+    df.loc[(soep_empl_status == 13) & not_nan_mask, "work_status"] = 0
     return df
 
 
-def create_choice_variable(data):
+def create_choice_variable(data, filter_missings=True):
     """This function creates the choice variable for the structural model.
 
     0: retirement, 1: unemployed, 2: part-time, 3: full-time
@@ -35,5 +36,11 @@ def create_choice_variable(data):
     # assign retirement choice
     data.loc[soep_empl_status == 13, "choice"] = 0
     # merged_data.loc[rv_ret_choice == "RTB"] = 2
-    data = data[data["choice"].notna()]
+
+    if filter_missings:
+        data = data[data["choice"].notna()]
+        print(
+            str(len(data))
+            + " observations after dropping people with unobserved choice."
+        )
     return data

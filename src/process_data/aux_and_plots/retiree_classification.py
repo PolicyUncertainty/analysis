@@ -25,12 +25,11 @@ def classify_retirees(paths):
     #    fresh_retirees,
     #    ret_age_pl_df["actual_retirement_age"].rename(columns={"actual_retirement_age": "actual_retirement_age_pl"}),
     #    on="pid", how="left")
-    
 
     # plot difference between actual retirement age and age
     fresh_retirees["age_diff"] = fresh_retirees["actual_retirement_age_artkalen"] - fresh_retirees["age"]
     fresh_retirees["age_diff"].plot(kind="hist", bins=20)
-    breakpoint()
+
     # 1. age to be replaced with actual retirement age and 2. working years to be replaced with credited periods
     fresh_retirees.loc[:, "ret_after_SRA"] = (fresh_retirees["age"] >= fresh_retirees["policy_state_value"]).astype(int)
     fresh_retirees.loc[:, "ret_before_SRA_over_45_years"] = ((fresh_retirees["age"] < fresh_retirees["policy_state_value"]) & (fresh_retirees["working_years"] >= 45)).astype(int)

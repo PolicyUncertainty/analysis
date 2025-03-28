@@ -30,7 +30,7 @@ def est_disability_prob(paths, specs):
     type_params = {
         f"disability_logit_const": params["intercept"],
         f"disability_logit_period": params["period"],
-        f"disability_logit_high_educ": params["education"],
+        f"disability_logit_education": params["education"],
     }
     disability_prob_params = {**disability_prob_params, **type_params}
     # Plot prediction and data

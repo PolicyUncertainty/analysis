@@ -1,5 +1,3 @@
-from zmq.backend.cffi import proxy
-
 from model_code.state_space.choice_set import state_specific_choice_set
 from model_code.state_space.experience import get_next_period_experience
 

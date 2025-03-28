@@ -10,6 +10,7 @@ import pandas as pd
 import yaml
 from dcegm.likelihood import create_individual_likelihood_function_for_model
 from dcegm.wealth_correction import adjust_observed_wealth
+
 from estimation.struct_estimation.scripts.std_errors import (
     calc_and_save_standard_errors,
 )
@@ -38,10 +39,10 @@ def estimate_model(
     # Load start params and bounds
     start_params_all = load_and_set_start_params(path_dict)
 
-    print_function(last_estimate)
-
     # # Assign start params from before
     if last_estimate is not None:
+        print_function(last_estimate)
+
         for key in last_estimate.keys():
             if key in ["sigma", "interest_rate", "beta"]:
                 continue
@@ -138,6 +139,8 @@ class est_class_from_paths:
                 os.makedirs(intermediate_est_data)
 
         self.intermediate_est_data = intermediate_est_data
+
+        from dcegm.interface import get_n_state_choice_period
 
         model, params = specify_model(
             path_dict=path_dict,

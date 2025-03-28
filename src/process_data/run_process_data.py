@@ -24,7 +24,13 @@ string_in = input(
     \n\n Please write the corresponding letter:"""
 )
 
+USE_PROCESSED_PL = True
+LOAD_WEALTH = True
 
+
+from process_data.first_step_sample_scripts.create_credited_periods_est_sample import (
+    create_credited_periods_est_sample,
+)
 from process_data.first_step_sample_scripts.create_disability_pension_sample import (
     create_disability_pension_sample,
 )
@@ -43,11 +49,6 @@ from process_data.first_step_sample_scripts.create_partner_wage_est_sample impor
 from process_data.first_step_sample_scripts.create_survival_transition_sample import (
     create_survival_transition_sample,
 )
-
-from process_data.first_step_sample_scripts.create_credited_periods_est_sample import (
-    create_credited_periods_est_sample,
-)
-
 from process_data.first_step_sample_scripts.create_wage_est_sample import (
     create_wage_est_sample,
 )
@@ -60,7 +61,13 @@ from process_data.structural_sample_scripts.create_structural_est_sample import 
 )
 
 if string_in == "a" or string_in == "s":
-    create_structural_est_sample(paths_dict, specs=specs, load_data=False)
+    create_structural_est_sample(
+        paths_dict,
+        specs=specs,
+        load_data=False,
+        use_processed_pl=USE_PROCESSED_PL,
+        load_wealth=LOAD_WEALTH,
+    )
 
 if string_in == "a" or string_in == "w":
     create_wage_est_sample(paths_dict, specs=specs, load_data=False)
@@ -79,10 +86,10 @@ if string_in == "a" or string_in == "h":
 
 if string_in == "a" or string_in == "m":
     create_survival_transition_sample(paths_dict, specs=specs, load_data=False)
-    
+
 if string_in == "a" or string_in == "c":
     create_credited_periods_est_sample(paths_dict, load_data=False)
-   
+
 if string_in == "a" or string_in == "d":
     create_disability_pension_sample(paths_dict, specs=specs, load_data=False)
 # %%

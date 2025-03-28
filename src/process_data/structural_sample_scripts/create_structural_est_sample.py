@@ -3,6 +3,7 @@ import os
 import matplotlib.pyplot as plt
 import pandas as pd
 
+
 from process_data.aux_and_plots.filter_data import (
     filter_below_age,
     filter_years,

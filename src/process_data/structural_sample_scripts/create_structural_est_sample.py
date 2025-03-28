@@ -1,6 +1,7 @@
 import os
 
 import pandas as pd
+
 from process_data.aux_and_plots.filter_data import filter_data
 from process_data.aux_and_plots.lagged_and_lead_vars import (
     create_lagged_and_lead_variables,
@@ -8,8 +9,10 @@ from process_data.aux_and_plots.lagged_and_lead_vars import (
 from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.experience import create_experience_variable
 from process_data.soep_vars.health import create_health_var
-from process_data.soep_vars.job_hire_and_fire import determine_observed_job_offers
-from process_data.soep_vars.job_hire_and_fire import generate_job_separation_var
+from process_data.soep_vars.job_hire_and_fire import (
+    determine_observed_job_offers,
+    generate_job_separation_var,
+)
 from process_data.soep_vars.partner_code import create_partner_state
 from process_data.soep_vars.wealth import add_wealth_interpolate_and_deflate
 from process_data.soep_vars.work_choices import create_choice_variable
@@ -73,9 +76,8 @@ def create_structural_est_sample(paths, specs, load_data=False):
         },
         inplace=True,
     )
-    df.reset_index(inplace=True)
+
     type_dict_add = {
-        "pid": "int32",
         "monthly_wage": "float32",
         "hh_net_income": "float32",
         "working_years": "float32",
@@ -107,7 +109,7 @@ def create_structural_est_sample(paths, specs, load_data=False):
     print_data_description(df)
 
     # Anonymize and save data
-    #df.reset_index(drop=True, inplace=True)
+    df.reset_index(drop=True, inplace=True)
     df.to_pickle(out_file_path)
 
     return df

@@ -5,24 +5,31 @@ import pandas as pd
 
 def plot_retirement_timing_data(paths, specs):
     struct_est_sample = pd.read_pickle(paths["struct_est_sample"])
-    fresh_retirees = struct_est_sample[
+    df_fresh = struct_est_sample[
         (struct_est_sample["choice"] == 0) & (struct_est_sample["lagged_choice"] != 0)
     ]
-    n_fresh_retirees = fresh_retirees.shape[0]
 
     # Calculate actual retirement age vs SRA
-    fresh_retirees["age"] = fresh_retirees["period"] + specs["start_age"]
-    fresh_retirees["SRA"] = (
-        specs["min_SRA"] + fresh_retirees["policy_state"] * specs["SRA_grid_size"]
+    df_fresh["age"] = df_fresh["period"] + specs["start_age"]
+    df_fresh["SRA"] = (
+        specs["min_SRA"] + df_fresh["policy_state"] * specs["SRA_grid_size"]
     )
-    fresh_retirees["actual_ret_age_vs_SRA"] = (
-        fresh_retirees["age"] - fresh_retirees["SRA"]
-    )
-    counts = fresh_retirees["actual_ret_age_vs_SRA"].value_counts().sort_index()
-    percentages = (counts / n_fresh_retirees) * 100
+    df_fresh["actual_ret_age_vs_SRA"] = df_fresh["age"] - df_fresh["SRA"]
 
     # bar chart of actual retirement age vs SRA as percentage of total
-    percentages.plot(kind="bar")
-    plt.xlabel("Actual retirement age vs SRA")
-    plt.ylabel("Percentage of Just-Retired Individuals")
-    plt.title("Actual Retirement Age vs SRA")
+    fig, axs = plt.subplots(2, 2)
+    # Plot in first plot distance and in second the age
+    for sex, sex_label in enumerate(specs["sex_labels"]):
+        df_sex = df_fresh[df_fresh["sex"] == sex]
+        counts_distance = df_sex["actual_ret_age_vs_SRA"].value_counts().sort_index()
+        counts_age = df_sex["age"].value_counts().sort_index()
+
+        axs[sex, 0].plot(counts_distance)
+        axs[sex, 0].set_title(f"Actual Retirement Age vs SRA; {sex_label}")
+
+        axs[sex, 1].plot(counts_age)
+        axs[sex, 1].set_title(f"Retirement Age; {sex_label}")
+
+        axs[sex, 1].plot()
+
+    plt.show()

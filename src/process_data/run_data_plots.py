@@ -1,6 +1,7 @@
 # This script is used to run the data_plots.py script to generate plots of the structural estimation dataset.
 # %%
 import matplotlib.pyplot as plt
+
 from set_paths import create_path_dict
 
 path_dict = create_path_dict()
@@ -16,7 +17,6 @@ which_plots = input(
     " - [c]hoices\n"
     " - [s]tates\n"
     " - [w]ealth\n"
-    
 )
 
 # %% ########################################
@@ -54,8 +54,10 @@ plt.show()
 plt.close("all")
 
 if which_plots in ["a", "f"]:
-    from process_data.aux_and_plots.retiree_classification import plot_retiree_classification
-    path_dict = create_path_dict(define_user=True)
+    from process_data.aux_and_plots.retiree_classification import (
+        plot_retiree_classification,
+    )
+
     plot_retiree_classification(path_dict)
     plt.show()
     plt.close("all")

@@ -14,14 +14,11 @@ def span_dataframe(df, start_year, end_year):
         [pid_indexes, range(start_year, end_year + 1)],
         names=["pid", "syear"],
     )
-    full_container = pd.DataFrame(
-        index=full_index, data=np.nan, dtype=float, columns=df.columns
-    )
-    full_container.update(df)
+    full_df = df.reindex(full_index)
 
-    if "hid" in full_container.columns.values:
-        full_container["hid"] = full_container.groupby(["pid"])["hid"].transform("last")
-    return full_container
+    if "hid" in full_df.columns.values:
+        full_df["hid"] = full_df.groupby(["pid"])["hid"].transform("last")
+    return full_df
 
 
 def create_lagged_and_lead_variables(

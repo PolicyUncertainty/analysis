@@ -3,14 +3,13 @@ import os
 import matplotlib.pyplot as plt
 import pandas as pd
 
-
 from process_data.aux_and_plots.filter_data import (
     filter_below_age,
     filter_years,
     recode_sex,
 )
 from process_data.aux_and_plots.lagged_and_lead_vars import (
-    create_lagged_and_lead_variables,
+    span_dataframe,
 )
 from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.experience import create_experience_and_working_years
@@ -23,6 +22,7 @@ from process_data.soep_vars.partner_code import (
     correct_partner_state,
     create_partner_state,
 )
+from process_data.soep_vars.retirement_timing import align_retirement_choice
 from process_data.soep_vars.wealth.linear_interpolation import (
     add_wealth_interpolate_and_deflate,
 )
@@ -55,17 +55,17 @@ def create_structural_est_sample(
     df = filter_years(df, specs["start_year"] - 1, specs["end_year"] + 1)
     df = recode_sex(df)
 
-    df = create_choice_variable(df, filter_missings=False)
-    df = generate_job_separation_var(df)
+    df = span_dataframe(df, specs["start_year"] - 1, specs["end_year"] + 1)
 
-    df = create_lagged_and_lead_variables(
-        df, specs, lead_job_sep=True, filter_missings=False
-    )
+    df = create_choice_variable(df, filter_missings=False)
+
+    df = align_retirement_choice(paths, df)
 
     df = correct_partner_state(df)
 
     df = filter_below_age(df, specs["start_age"])
     df["period"] = df["age"] - specs["start_age"]
+    breakpoint()
 
     df = create_policy_state(df, specs)
     df = create_experience_and_working_years(df.copy(), filter_missings=True)
@@ -210,7 +210,7 @@ def load_and_merge_soep_core(path_dict, use_processed_pl):
         # m11126: Self-Rated Health Status
         # m11124: Disability Status of Individual
         f"{soep_c38_path}/pequiv.dta",
-        columns=["pid", "syear", "d11107", "d11101", "m11126", "m11124"],
+        columns=["pid", "syear", "d11107", "d11101", "m11126", "m11124", "igrv1"],
         convert_categoricals=False,
     )
     merged_data = pd.merge(merged_data, pequiv_data, on=["pid", "syear"], how="left")

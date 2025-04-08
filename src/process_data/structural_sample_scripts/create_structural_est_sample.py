@@ -11,9 +11,12 @@ from process_data.aux_and_plots.filter_data import (
 from process_data.aux_and_plots.lagged_and_lead_vars import (
     span_dataframe,
 )
+from process_data.soep_vars.choice_from_spell import (
+    create_choice_variable_from_artkalen,
+)
 from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.experience import create_experience_and_working_years
-from process_data.soep_vars.health import create_health_var
+from process_data.soep_vars.health import correct_health_state, create_health_var
 from process_data.soep_vars.job_hire_and_fire import (
     determine_observed_job_offers,
     generate_job_separation_var,
@@ -22,7 +25,6 @@ from process_data.soep_vars.partner_code import (
     correct_partner_state,
     create_partner_state,
 )
-from process_data.soep_vars.retirement_timing import align_retirement_choice
 from process_data.soep_vars.wealth.linear_interpolation import (
     add_wealth_interpolate_and_deflate,
 )
@@ -49,28 +51,37 @@ def create_structural_est_sample(
     # Load and merge data state data from SOEP core (all but wealth)
     df = load_and_merge_soep_core(path_dict=paths, use_processed_pl=use_processed_pl)
 
+    # First start with partner state, as these could be also out of age range.
     df = create_partner_state(df, filter_missing=False)
 
-    # filter data. Leave additional years for lagging and leading
+    # Filter data to estimation years. Leave additional years for lagging and leading
     df = filter_years(df, specs["start_year"] - 1, specs["end_year"] + 1)
+    # Filter ages below
+    df = filter_below_age(df, specs["start_age"] - 1)
+
+    # Create type variables. They should not be missing anyway
     df = recode_sex(df)
+    df = create_education_type(df, filter_missings=False)
 
     df = span_dataframe(df, specs["start_year"] - 1, specs["end_year"] + 1)
 
-    df = create_choice_variable(df, filter_missings=False)
-
-    df = align_retirement_choice(paths, df)
-
+    # Having a spanned dataframe we can correct the partner state
+    # (missing partner observation in a single year).
     df = correct_partner_state(df)
 
+    # We create the health variable and correct it
+    df = create_health_var(df, filter_missings=False)
+    df = correct_health_state(df)
+
+    df = create_choice_variable_from_artkalen(path_dict=paths, df=df)
+
+    # Now we can also kick out the buffer age for lagging
     df = filter_below_age(df, specs["start_age"])
     df["period"] = df["age"] - specs["start_age"]
     breakpoint()
 
     df = create_policy_state(df, specs)
     df = create_experience_and_working_years(df.copy(), filter_missings=True)
-    df = create_education_type(df, filter_missings=True)
-    df = create_health_var(df)
 
     df = add_wealth_interpolate_and_deflate(df, paths, specs, load_wealth=load_wealth)
 
@@ -151,9 +162,10 @@ def load_and_merge_soep_core(path_dict, use_processed_pl):
     # of surveyed household
     ppathl_data = pd.read_stata(
         f"{soep_c38_path}/ppathl.dta",
-        columns=["pid", "hid", "syear", "sex", "gebjahr", "parid", "rv_id"],
+        columns=["pid", "hid", "syear", "sex", "parid", "rv_id", "gebjahr", "gebmonat"],
         convert_categoricals=False,
     )
+
     # Load SOEP core data
     pgen_data = pd.read_stata(
         f"{soep_c38_path}/pgen.dta",
@@ -183,7 +195,7 @@ def load_and_merge_soep_core(path_dict, use_processed_pl):
         # Add pl data
         pl_data_reader = pd.read_stata(
             f"{soep_c38_path}/pl.dta",
-            columns=["pid", "hid", "syear", "plb0304_h"],
+            columns=["pid", "hid", "syear", "plb0304_h", "iyear", "pmonin", "ptagin"],
             chunksize=100000,
             convert_categoricals=False,
         )

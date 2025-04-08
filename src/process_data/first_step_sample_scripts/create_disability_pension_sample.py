@@ -12,7 +12,7 @@ from process_data.aux_and_plots.filter_data import (
 )
 from process_data.aux_and_plots.lagged_and_lead_vars import span_dataframe
 from process_data.soep_vars.education import create_education_type
-from process_data.soep_vars.health import clean_health_create_states, create_health_var
+from process_data.soep_vars.health import correct_health_state, create_health_var
 from process_data.soep_vars.work_choices import create_choice_variable
 
 
@@ -46,7 +46,7 @@ def create_disability_pension_sample(paths, specs, load_data=False):
 
     df["lagged_choice"] = df.groupby(["pid"])["choice"].shift()
 
-    df = clean_health_create_states(df)
+    df = correct_health_state(df)
 
     # Drop missing lagged choices
     df = df[df["lagged_choice"].notna()]

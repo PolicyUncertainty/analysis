@@ -3,14 +3,16 @@ import os
 
 import numpy as np
 import pandas as pd
-from process_data.aux_and_plots.filter_data import filter_above_age
-from process_data.aux_and_plots.filter_data import filter_below_age
-from process_data.aux_and_plots.filter_data import filter_years
-from process_data.aux_and_plots.filter_data import recode_sex
+
+from process_data.aux_and_plots.filter_data import (
+    filter_above_age,
+    filter_below_age,
+    filter_years,
+    recode_sex,
+)
 from process_data.aux_and_plots.lagged_and_lead_vars import span_dataframe
 from process_data.soep_vars.education import create_education_type
-from process_data.soep_vars.health import clean_health_create_states
-from process_data.soep_vars.health import create_health_var
+from process_data.soep_vars.health import correct_health_state, create_health_var
 
 
 # %%
@@ -42,7 +44,7 @@ def create_health_transition_sample(paths, specs, load_data=False):
     # create health states
     df = create_health_var(df)
     df = span_dataframe(df, specs["start_year"] - 1, specs["end_year"] + 1)
-    df = clean_health_create_states(df)
+    df = correct_health_state(df)
 
     df = df[["age", "education", "health", "lead_health", "sex"]]
 

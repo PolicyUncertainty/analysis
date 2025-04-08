@@ -9,6 +9,10 @@ def create_float_birth_year(df, drop_missing_month=True):
     instead.
 
     """
+    # Make sure, all pids have same birth year everywhere. It might be that some
+    # are missing for particular years
+    df["gebjahr"] = df.groupby("pid")["gebjahr"].transform("max")
+    df["gebmonat"] = df.groupby("pid")["gebmonat"].transform("max")
 
     invalid_year = df["gebjahr"] < 0
     invalid_month = df["gebmonat"] < 0
@@ -17,10 +21,9 @@ def create_float_birth_year(df, drop_missing_month=True):
 
     if drop_missing_month:
         valid_data = ~invalid_year & ~invalid_month
-        df.loc[valid_data, "float_birth_year"] = df["gebjahr"] + df["gebmonat"] / 12
+        df.loc[valid_data, "float_birth_year"] = df["gebjahr"] + (df["gebmonat"] - 1) / 12
     else:
         month = df["gebmonat"]
         month[invalid_month] = 6
-        df.loc[~invalid_year, "float_birth_year"] = df["gebjahr"] + month / 12
-
+        df.loc[~invalid_year, "float_birth_year"] = df["gebjahr"] + (month - 1) / 12
     return df

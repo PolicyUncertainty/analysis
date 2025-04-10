@@ -1,9 +1,14 @@
+import pickle as pkl
+
+import matplotlib.pyplot as plt
 import numpy as np
 
 from process_data.soep_vars.artkalen import prepare_artkalen_data
-from process_data.soep_vars.interview_date import create_float_interview_date
 from process_data.soep_vars.birth import create_float_birth_year
-import matplotlib.pyplot as plt
+from process_data.soep_vars.interview_date import create_float_interview_date
+from process_data.soep_vars.work_choices import create_choice_variable
+
+
 def create_choice_variable_from_artkalen(path_dict, df):
 
     artkalen_data = prepare_artkalen_data(path_dict)
@@ -12,12 +17,32 @@ def create_choice_variable_from_artkalen(path_dict, df):
     df = create_float_birth_year(df)
     df["choice"] = np.nan
     df["float_age"] = df["age"].astype(float)
-    artkalen_data["choice"] = np.nan
 
-    partial_select = lambda pid_group: select_spell_for_pid(pid_group, artkalen_data)
-    new_df = df.groupby("pid").apply(partial_select)
+    # With create artkalen choice
+    # partial_select = lambda pid_group: select_spell_for_pid(pid_group, artkalen_data)
+    # new_df = df.groupby("pid").apply(partial_select)
+    # new_df["art_choice"] = new_df["choice"].copy()
+    # pkl.dump(new_df["art_choice"], open("art_choice.pkl", "wb"))
+    # new_df = create_choice_variable(new_df, filter_missings=False)
 
+    # Load artkalen choice
+    new_df = create_choice_variable(df, filter_missings=False)
+    new_df["art_choice"] = pkl.load(open("art_choice.pkl", "rb"))
 
+    nan_mask = new_df["art_choice"].isna()
+    new_df.loc[nan_mask, "art_choice"] = new_df.loc[nan_mask, "choice"]
+
+    new_df["choice"] = new_df["art_choice"].copy()
+
+    new_df["lagged_choice"] = new_df["choice"].shift(1)
+
+    df_fresh = new_df[
+        (new_df["choice"] == 0)
+        & (new_df["lagged_choice"] != 0)
+        & (new_df["lagged_choice"].notna())
+    ]
+    # Make fine bin plot of float age
+    plt.hist(df_fresh["float_age"], bins=100)
 
     breakpoint()
 
@@ -27,7 +52,6 @@ def select_spell_for_pid(pid_group, artkalen_data):
     Select the spells for a given pid group.
     """
     pid = pid_group.index.get_level_values("pid")[0]
-    first_interview = pid_group["float_interview"].min()
 
     # We first need to clean the spells and assign a correct choice
     # Select pid spells of arkalen
@@ -45,74 +69,44 @@ def select_spell_for_pid(pid_group, artkalen_data):
             # but it might be usefull for lagging or leading
             interview_date = id[1] + 0.5
 
-        overlapping_spells = pid_spells[(pid_spells["float_begin"] <= interview_date )& (pid_spells["float_end"] >= interview_date)]
-        choice = select_dominant_spelltyp_and_recode(overlapping_spells, pid_group.loc[id, "pgemplst"])
+        overlapping_spells = pid_spells[
+            (pid_spells["float_begin"] <= interview_date)
+            & (pid_spells["float_end"] >= interview_date)
+        ]
+        choice = select_dominant_spelltyp_and_recode(
+            overlapping_spells, pid_group.loc[id, "pgemplst"]
+        )
         pid_group.loc[id, "choice"] = choice
         if (choice == 0) & (ret_count == 0):
-            start_first_ret_spell = overlapping_spells[overlapping_spells["spelltyp"] == 6].iloc[0]["float_begin"]
-            pid_group.loc[id, "float_age"] = start_first_ret_spell - pid_group.iloc[0]["float_birth_year"]
+            start_first_ret_spell = overlapping_spells[
+                overlapping_spells["spelltyp"] == 6
+            ].iloc[0]["float_begin"]
+            pid_group.loc[id, "float_age"] = (
+                start_first_ret_spell - pid_group.iloc[0]["float_birth_year"]
+            )
             ret_count += 1
-    #
-    # # Assign spell type of last spell
-    # start_first_spell = pid_spells.iloc[id_spells[0]]["float_begin"]
-    # interviews_before = pid_group["float_interview"] < start_first_spell
-    #
-    # spelltyp_before = pid_spells.iloc[id_spells[0] - 1]["spelltyp"]
-    # # If spelltype before is retirement. We make it absorbing by assigning it to all years
-    # # and return
-    # if spelltyp_before == 15:
-    #     pid_group.loc[(pid, (slice(None))), "spelltyp"] = spelltyp_before
-    #     return pid_group.loc[(pid, (slice(None)))]
-    # else:
-    #     pid_group.loc[interviews_before, "spelltyp"] = spelltyp_before
-    #
-    # for count_spell in range(len(id_spells) - 1):
-    #     id_spell = id_spells[count_spell]
-    #     spelltyp = pid_spells.iloc[id_spells[count_spell]]["spelltyp"]
-    #     # Assign spell type of last spell
-    #     interviews_after_spell = (
-    #         pid_group["float_interview"]
-    #         >= pid_spells.iloc[id_spell]["float_begin"]
-    #     )
-    #     if spelltyp == 15:
-    #         first_ret_interview = np.where(interviews_after_spell)[0][0]
-    #         float_age_start = pid_spells.iloc[id_spell]["float_begin"] - pid_group.iloc[0]["float_birth_year"]
-    #         pid_group.iloc[first_ret_interview]["float_age"] = float_age_start
-    #         pid_group.loc[interviews_after_spell, "spelltyp"] = spelltyp
-    #         return pid_group.loc[(pid, (slice(None)))]
-    #     else:
-    #         interviews_before_next = (
-    #             pid_group["float_interview"]
-    #             < pid_spells.iloc[id_spells[count_spell + 1]]["float_begin"]
-    #         )
-    #         relevant_interviews_spell = interviews_after_spell & interviews_before_next
-    #         pid_group.loc[relevant_interviews_spell, "spelltyp"] = spelltyp
-    #
-    # # Assign spell type of last spell
-    # interviews_in_last_spell = (
-    #     pid_group["float_interview"] >= pid_spells.iloc[id_spells[-1]]["float_begin"]
-    # )
-    # last_spell_typ = pid_spells.iloc[
-    #     id_spells[-1]
-    # ]["spelltyp"]
-    # pid_group.loc[interviews_in_last_spell, "spelltyp"] = last_spell_typ
-    #
-    # # If spelltyp is retirement, also correct start age of first interview in last spell
-    # if last_spell_typ == 15:
-    #     first_ret_interview_in_last_sepll = np.where(interviews_in_last_spell)[0][0]
-    #     float_age_start = pid_spells.iloc[id_spells[-1]]["float_begin"] - pid_group.iloc[0]["float_birth_year"]
-    #     pid_group.iloc[first_ret_interview_in_last_sepll]["float_age"] = float_age_start
 
     return pid_group.loc[(pid, (slice(None)))]
 
 
 def select_dominant_spelltyp_and_recode(spells, employment_status):
-    """This functions implements the following rules:
+    """Select choice by spelltyp and recode it to the choice variable.
 
+    This functions implements the following rules. They are exclusive downwards. So we always select
+    a rule further downwards, if none was full-filled before:
+
+        - If there are no spells, we return nan
+        - If there is an education spell (8) or a training spell (4, 13), which constitutes a
+          initial education, we classify them as nan, as they will be dropped later. Also if they
+          are in military service (Zivil/Wehrdienst)
         - If there is full-time employment (1) or short hours (2), we select this as full-time
-        - If there is no full-time, but regular part-time (3), then we select this.
-        - If there is no full- or regular part-time, but retirement (6) we select this.
-        - If none of the above is there it is unemployment
+        - If there is retirement (6) we select this.
+        - If there is regular part-time (3) then we select this.
+          We do not select minijobs (15) as part-time. They will be dropped later
+        - If there is unemployment (5), parental leave (7), housewife-husband (10) or retraining (14),
+          we select this as unemployment.
+        - We drop the observation if there is non of the above, but side job (11), "other" (12),
+          marginal employment (15) or missing (99)
 
     We code:
         - 0: retirement
@@ -121,18 +115,25 @@ def select_dominant_spelltyp_and_recode(spells, employment_status):
         - 3: full-time
 
     """
-    # Treat missing data. Check if the only spelltyp is 99
-    if (list(spells["spelltyp"].unique()) == [99]) | (len(spells) == 0):
+    if len(spells) == 0:
         return np.nan
+    # Education spells
+    elif spells["spelltyp"].isin([4, 8, 9, 13]).any():
+        return np.nan
+    # Full-time spells
     elif spells["spelltyp"].isin([1, 2]).any():
-       return 3
-    elif spells["spelltyp"].isin([3]).any():
-        return 2
+        return 3
+    # Retirement spells
     elif spells["spelltyp"].isin([6]).any():
         return 0
-    elif employment_status == 1:
-        return 3
-    elif employment_status == 2:
+    # Part-time spells
+    elif spells["spelltyp"].isin([3]).any():
         return 2
-    else:
+    # Unemployment spells
+    elif spells["spelltyp"].isin([5, 7, 10, 14]).any():
         return 1
+    # Non-dominant missings
+    elif spells["spelltyp"].isin([11, 12, 15, 99]).any():
+        return np.nan
+    else:
+        raise ValueError("This should not happen")

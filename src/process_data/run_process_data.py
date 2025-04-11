@@ -26,7 +26,7 @@ string_in = input(
 
 USE_PROCESSED_PL = True
 LOAD_WEALTH = True
-LOAD_ARTKALEN_CHOICE = True
+LOAD_ARTKALEN_CHOICE = False
 
 
 from process_data.first_step_sample_scripts.create_credited_periods_est_sample import (

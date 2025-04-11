@@ -53,6 +53,7 @@ def create_choice_variable_from_artkalen(
     ]
 
     df["lagged_choice"] = df.groupby("pid")["choice"].shift(1)
+    breakpoint()
     return df
 
 
@@ -70,8 +71,11 @@ def select_spell_for_pid(pid_group, artkalen_data):
         return pid_group.loc[(pid, (slice(None)))]
 
     already_retired = False
+    changed_back = False
     id_first_retirement = -1
     past_ret_ids = []
+    past_ret_spells = []
+    float_ends_dominant_spells = []
     for interview_count in range(len(pid_group)):
         id = pid_group.index[interview_count]
         interview_date = pid_group.loc[id, "float_interview"]
@@ -84,7 +88,7 @@ def select_spell_for_pid(pid_group, artkalen_data):
             (pid_spells["float_begin"] <= interview_date)
             & (pid_spells["float_end"] >= interview_date)
         ]
-        choice = select_dominant_spelltyp_and_recode(
+        choice, float_end_dominant_spell = select_dominant_spelltyp_and_recode(
             overlapping_spells, pid_group.loc[id, "pgemplst"]
         )
         pid_group.loc[id, "choice"] = choice
@@ -92,24 +96,45 @@ def select_spell_for_pid(pid_group, artkalen_data):
         # Now lets treat retirement
         ret_choice = choice == 0
 
-        # If retirement is chosen we add the id to the list of past retirements
-        if ret_choice:
-            past_ret_ids += [id]
+        # Get all covering retirement spells
+        ids_overlap_ret_spells = overlapping_spells[
+            overlapping_spells["spelltyp"] == 6
+        ].index.values
 
-        # If this is the first time, we change the age of the observation to the float age
+        # Check if the retirement spell was covering a choice before, if not add
+        # it to the list of new retirement spells.
+        # As spells are ordered the first element of new_ret_spells will be the one
+        # which started first.
+        new_ret_spells = []
+        for id_ret_spell in ids_overlap_ret_spells:
+            if id_ret_spell not in past_ret_spells:
+                new_ret_spells += [id_ret_spell]
+
+        # If this person is not already retired, we need to manipulate the float age
         if ret_choice & (not already_retired):
-            start_first_ret_spell = overlapping_spells[
-                overlapping_spells["spelltyp"] == 6
-            ].iloc[0]["float_begin"]
+            # If there is no new retirement spell we take the date
+            # of the last dominant spell
+            if len(new_ret_spells) == 0:
+                start_ret_spell = float_ends_dominant_spells[-1]
+            else:
+                # If there is a new retirement spell we take the date of the first one
+                start_ret_spell = overlapping_spells.loc[
+                    new_ret_spells[0], "float_begin"
+                ]
+
             pid_group.loc[id, "float_age"] = (
-                start_first_ret_spell - pid_group.iloc[0]["float_birth_year"]
+                start_ret_spell - pid_group.iloc[0]["float_birth_year"]
             )
             id_first_retirement = id
             already_retired = True
 
-        # If a person is already retired, but now changes back, we need to set all past retirement choices
-        # to unemployment, set already retired to False and set the float age back to the even age in the first
-        # retirement observation
+        # If retirement is chosen we add the id to the list of past retirements choices
+        if ret_choice:
+            past_ret_ids += [id]
+
+        # If a person is already retired, but now changes back, we need to set all past retirement
+        # choices to unemployment, set already_retired to False and set the float_age back to
+        # the even age in the first retirement observation
         if (not ret_choice) & already_retired & ~np.isnan(choice):
             for past_id in past_ret_ids:
                 pid_group.loc[past_id, "choice"] = 1
@@ -118,12 +143,24 @@ def select_spell_for_pid(pid_group, artkalen_data):
             ]
             already_retired = False
             past_ret_ids = []
+            changed_back = True
+
+        # Add all retirement spells to the list of past retirement spells
+        for id_ret_spell in ids_overlap_ret_spells:
+            if id_ret_spell not in past_ret_spells:
+                past_ret_spells += [id_ret_spell]
+        # Add the end date of the dominant spell for this id to the list of end dates
+        # of dominant spells
+        float_ends_dominant_spells += [float_end_dominant_spell]
+        if changed_back:
+            breakpoint()
 
     return pid_group.loc[(pid, (slice(None)))]
 
 
 def select_dominant_spelltyp_and_recode(spells, employment_status):
-    """Select choice by spelltyp and recode it to the choice variable.
+    """Select choice by spelltyp and recode it to the choice variable. Also return the end
+    date of the selected spell.
 
     This functions implements the following rules. They are exclusive downwards. So we always select
     a rule further downwards, if none was full-filled before:
@@ -149,24 +186,30 @@ def select_dominant_spelltyp_and_recode(spells, employment_status):
 
     """
     if len(spells) == 0:
-        return np.nan
+        return np.nan, np.nan
     # Education spells
     elif spells["spelltyp"].isin([4, 8, 9, 13]).any():
-        return np.nan
+        return np.nan, np.nan
     # Full-time spells
     elif spells["spelltyp"].isin([1, 2]).any():
-        return 3
+        float_end_spells = spells[spells["spelltyp"].isin([1, 2])]["float_end"].max()
+        return 3, float_end_spells
     # Retirement spells
     elif spells["spelltyp"].isin([6]).any():
-        return 0
+        float_end_spells = spells[spells["spelltyp"].isin([6])]["float_end"].max()
+        return 0, float_end_spells
     # Part-time spells
     elif spells["spelltyp"].isin([3]).any():
-        return 2
+        float_end_spells = spells[spells["spelltyp"].isin([3])]["float_end"].max()
+        return 2, float_end_spells
     # Unemployment spells
     elif spells["spelltyp"].isin([5, 7, 10, 14]).any():
-        return 1
+        float_end_spells = spells[spells["spelltyp"].isin([5, 7, 10, 14])][
+            "float_end"
+        ].max()
+        return 1, float_end_spells
     # Non-dominant missings
     elif spells["spelltyp"].isin([11, 12, 15, 99]).any():
-        return np.nan
+        return np.nan, np.nan
     else:
         raise ValueError("This should not happen")

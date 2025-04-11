@@ -109,11 +109,15 @@ def create_structural_est_sample(
             "education",
         ],
     )
+    df = add_wealth_interpolate_and_deflate(df, paths, specs, load_wealth=load_wealth)
+
+    fresh_ids = (df["choice"] == 0) & (df["lagged_choice"] != 0)
+    fresh = df[fresh_ids].copy()
+    fresh["age_diff"] = fresh["age"] - fresh["float_age"]
 
     breakpoint()
 
     df = create_experience_and_working_years(df.copy(), filter_missings=True)
-    df = add_wealth_interpolate_and_deflate(df, paths, specs, load_wealth=load_wealth)
 
     # Now we can also kick out the buffer age for lagging
     df = filter_below_age(df, specs["start_age"])
@@ -247,7 +251,7 @@ def load_and_merge_soep_core(path_dict, use_processed_pl):
         convert_categoricals=False,
     )
     merged_data = pd.merge(merged_data, pequiv_data, on=["pid", "syear"], how="left")
-    merged_data.rename(columns={"d11107": "children", "d11101": "age"}, inplace=True)
+    merged_data.rename(columns={"d11107": "children"}, inplace=True)
 
     merged_data.set_index(["pid", "syear"], inplace=True)
     print(str(len(merged_data)) + " observations in SOEP C38 core.")

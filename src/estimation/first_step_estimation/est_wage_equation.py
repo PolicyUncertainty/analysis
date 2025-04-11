@@ -20,7 +20,7 @@ def estimate_wage_parameters(paths_dict, specs):
     regressors = ["constant", "ln_exp"]
     coefficents = regressors + [param + "_ser" for param in regressors]
     wage_data = load_and_prepare_wage_data(paths_dict)
-
+    
     # Initialize empty containers for coefficients
     index = pd.MultiIndex.from_product(
         [edu_labels, sex_labels, coefficents], names=["education", "sex", "parameter"]
@@ -159,7 +159,10 @@ def calc_population_averages(df, year_fixed_effects, specs, paths_dict):
     edu_labels = specs["education_labels"]
     sex_labels = specs["sex_labels"]
 
-    # annual average wage (deflated by type-specific year fixed effects)
+    # annual average wage (deflated or inflated by type-specific year fixed effects)
+    reference_year = specs["reference_year"]
+    year_fe_list = year_fixed_effects[('all', 'all')].keys()
+    
     df["ln_wage_deflated"] = df["ln_wage"].copy()
     for edu_val, edu_label in enumerate(edu_labels):
         for sex_val, sex_label in enumerate(sex_labels):
@@ -167,9 +170,20 @@ def calc_population_averages(df, year_fixed_effects, specs, paths_dict):
                 edu_mask = df["education"] == edu_val
                 sex_mask = df["sex"] == sex_val
                 year_mask = df["year"] = year
-                df.loc[
-                    edu_mask & sex_mask & year_mask, "ln_wage_deflated"
-                ] -= year_fixed_effects[(edu_label, sex_label)][year]
+                if reference_year in year_fe_list: 
+                    # deflate to base year
+                    df.loc[
+                        edu_mask & sex_mask & year_mask, "ln_wage_deflated"
+                    ] -= year_fixed_effects[(edu_label, sex_label)][year]
+                    # inflate to reference year
+                    df.loc[
+                        edu_mask & sex_mask & year_mask, "ln_wage_deflated"
+                    ] += year_fixed_effects[(edu_label, sex_label)][reference_year]                        
+                else: 
+                    # ref year is the omitted category, so we deflate to the omitted category
+                    df.loc[
+                        edu_mask & sex_mask & year_mask, "ln_wage_deflated"
+                    ] -= year_fixed_effects[(edu_label, sex_label)][year]
 
     df["annual_hours"] = df["monthly_hours"] * 12
     df["annual_wage_deflated"] = np.exp(df["ln_wage_deflated"]) * df["annual_hours"]

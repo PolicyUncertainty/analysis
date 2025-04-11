@@ -24,6 +24,8 @@ def filter_above_age(df, age):
 def recode_sex(df):
     """Recode sex to 0(men) and 1(women), from SOEP definition 1(men) and 2(women)."""
     df.loc[:, "sex"] = df["sex"] - 1
+    df = df[df["sex"]>= 0]
+    print(str(len(df)) + " left after dropping missing and unspecified sex.") 
     return df
 
 

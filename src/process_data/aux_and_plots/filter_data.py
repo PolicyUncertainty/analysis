@@ -48,3 +48,20 @@ def filter_data(merged_data, specs, lag_and_lead_buffer_years=True):
 
     merged_data = filter_years(merged_data, start_year, end_year)
     return merged_data
+
+
+def drop_missings(df, vars_to_check):
+    """This function drops missing values in the data.
+
+    It drops all observations with missing values in the specified variables.
+
+    """
+    for var in vars_to_check:
+        df = df[df[var].notna()]
+        print(
+            str(len(df))
+            + " observations left after dropping people with missing "
+            + var
+            + " data."
+        )
+    return df

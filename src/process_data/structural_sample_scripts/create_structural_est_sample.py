@@ -1,9 +1,9 @@
 import os
 
-import matplotlib.pyplot as plt
 import pandas as pd
 
 from process_data.aux_and_plots.filter_data import (
+    drop_missings,
     filter_below_age,
     filter_years,
     recode_sex,
@@ -28,7 +28,6 @@ from process_data.soep_vars.partner_code import (
 from process_data.soep_vars.wealth.linear_interpolation import (
     add_wealth_interpolate_and_deflate,
 )
-from process_data.soep_vars.work_choices import create_choice_variable
 from process_data.structural_sample_scripts.informed_state import create_informed_state
 from process_data.structural_sample_scripts.model_restrictions import (
     enforce_model_choice_restriction,
@@ -82,26 +81,43 @@ def create_structural_est_sample(
         path_dict=paths, specs=specs, df=df, load_artkalen_choice=load_artkalen_choice
     )
 
-    # Now we can also kick out the buffer age for lagging
-    df = filter_below_age(df, specs["start_age"])
-    df["period"] = df["age"] - specs["start_age"]
-
     df = create_policy_state(df, specs)
-    df = create_experience_and_working_years(df.copy(), filter_missings=True)
-
-    df = add_wealth_interpolate_and_deflate(df, paths, specs, load_wealth=load_wealth)
 
     # Create informed state
     df = create_informed_state(df)
 
-    # Construct job offer state
+    # Generare job separation variable and lag
+    df = generate_job_separation_var(df)
     df["job_sep_this_year"] = df.groupby(["pid"])["job_sep"].shift(-1)
+
+    # Now use this information to determine job offer state
     was_fired_last_period = (df["job_sep"] == 1) | (df["job_sep_this_year"] == 1)
     df = determine_observed_job_offers(
         df, working_choices=[2, 3], was_fired_last_period=was_fired_last_period
     )
 
+    # We are done with lagging and leading and drop the buffer years
+    df = filter_years(df, specs["start_year"], specs["end_year"])
+
+    # We also delete now the observations with invalid data, which we left before to have a continuous panel
+    df = drop_missings(
+        df=df,
+        vars_to_check=[
+            "health",
+            "choice",
+            "lagged_choice",
+            "education",
+        ],
+    )
+
     breakpoint()
+
+    df = create_experience_and_working_years(df.copy(), filter_missings=True)
+    df = add_wealth_interpolate_and_deflate(df, paths, specs, load_wealth=load_wealth)
+
+    # Now we can also kick out the buffer age for lagging
+    df = filter_below_age(df, specs["start_age"])
+    df["period"] = df["age"] - specs["start_age"]
 
     # enforce choice restrictions based on model setup
     df = enforce_model_choice_restriction(df, specs)

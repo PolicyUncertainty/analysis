@@ -29,8 +29,7 @@ def calc_early_retirement_pension_points(
           points fill up to the same level as if you would have worked until SRA and your
           deductions are limited to 3 years.
         - Pension for very long insured is always better than the pension for long insured.
-          So we really only need to check if very long insured path is better than disability
-          pension
+          So we only check if very long insured path is better than disability pension.
 
     """
     # Check if the individual gets disability pension

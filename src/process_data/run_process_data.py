@@ -25,7 +25,8 @@ string_in = input(
 )
 
 USE_PROCESSED_PL = True
-LOAD_WEALTH = True
+LOAD_WEALTH = False
+LOAD_ARTKALEN_CHOICE = False
 
 
 from process_data.first_step_sample_scripts.create_credited_periods_est_sample import (
@@ -65,6 +66,7 @@ if string_in == "a" or string_in == "s":
         paths_dict,
         specs=specs,
         load_data=False,
+        load_artkalen_choice=LOAD_ARTKALEN_CHOICE,
         use_processed_pl=USE_PROCESSED_PL,
         load_wealth=LOAD_WEALTH,
     )

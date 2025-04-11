@@ -37,7 +37,12 @@ from process_data.structural_sample_scripts.policy_state import create_policy_st
 
 
 def create_structural_est_sample(
-    paths, specs, load_data=False, use_processed_pl=False, load_wealth=False
+    paths,
+    specs,
+    load_data=False,
+    use_processed_pl=False,
+    load_artkalen_choice=False,
+    load_wealth=False,
 ):
     if not os.path.exists(paths["intermediate_data"]):
         os.makedirs(paths["intermediate_data"])
@@ -73,33 +78,33 @@ def create_structural_est_sample(
     df = create_health_var(df, filter_missings=False)
     df = correct_health_state(df)
 
-    df = create_choice_variable_from_artkalen(path_dict=paths, df=df)
+    df = create_choice_variable_from_artkalen(
+        path_dict=paths, specs=specs, df=df, load_artkalen_choice=load_artkalen_choice
+    )
 
     # Now we can also kick out the buffer age for lagging
     df = filter_below_age(df, specs["start_age"])
     df["period"] = df["age"] - specs["start_age"]
-    breakpoint()
 
     df = create_policy_state(df, specs)
     df = create_experience_and_working_years(df.copy(), filter_missings=True)
 
     df = add_wealth_interpolate_and_deflate(df, paths, specs, load_wealth=load_wealth)
 
-    # enforce choice restrictions based on model setup
-    df = enforce_model_choice_restriction(df, specs)
-
     # Create informed state
     df = create_informed_state(df)
 
     # Construct job offer state
+    df["job_sep_this_year"] = df.groupby(["pid"])["job_sep"].shift(-1)
     was_fired_last_period = (df["job_sep"] == 1) | (df["job_sep_this_year"] == 1)
     df = determine_observed_job_offers(
         df, working_choices=[2, 3], was_fired_last_period=was_fired_last_period
     )
 
-    # Filter out part-time men
-    df = df[~((df["sex"] == 0) & (df["choice"] == 2))]
-    df = df[~((df["sex"] == 0) & (df["lagged_choice"] == 2))]
+    breakpoint()
+
+    # enforce choice restrictions based on model setup
+    df = enforce_model_choice_restriction(df, specs)
 
     # Rename to monthly wage
     df.rename(

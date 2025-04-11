@@ -34,5 +34,9 @@ def enforce_model_choice_restriction(df, specs):
         ~(((df["age"] - df["policy_state_value"]) >= 1) & (df["lagged_choice"] == 1))
     ]
 
+    # Filter out part-time men
+    df = df[~((df["sex"] == 0) & (df["choice"] == 2))]
+    df = df[~((df["sex"] == 0) & (df["lagged_choice"] == 2))]
+
     print(str(len(df)) + " left after dropping people who come back from retirement.")
     return df

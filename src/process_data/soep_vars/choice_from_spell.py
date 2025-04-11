@@ -2,6 +2,7 @@ import pickle as pkl
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 
 from process_data.soep_vars.artkalen import prepare_artkalen_data
 from process_data.soep_vars.birth import create_float_birth_year
@@ -9,42 +10,50 @@ from process_data.soep_vars.interview_date import create_float_interview_date
 from process_data.soep_vars.work_choices import create_choice_variable
 
 
-def create_choice_variable_from_artkalen(path_dict, df):
+def create_choice_variable_from_artkalen(
+    path_dict, specs, df, load_artkalen_choice=True
+):
 
-    artkalen_data = prepare_artkalen_data(path_dict)
+    relevant_pids = df.index.get_level_values("pid").unique().tolist()
+    artkalen_data = prepare_artkalen_data(
+        path_dict, relevant_pids, specs["start_year"] - 1, specs["end_year"] + 1
+    )
 
     df = create_float_interview_date(df)
     df = create_float_birth_year(df)
-    df["choice"] = np.nan
-    df["float_age"] = df["age"].astype(float)
 
-    # With create artkalen choice
-    # partial_select = lambda pid_group: select_spell_for_pid(pid_group, artkalen_data)
-    # new_df = df.groupby("pid").apply(partial_select)
-    # new_df["art_choice"] = new_df["choice"].copy()
-    # pkl.dump(new_df["art_choice"], open("art_choice.pkl", "wb"))
-    # new_df = create_choice_variable(new_df, filter_missings=False)
+    if not load_artkalen_choice:
+        df["choice"] = np.nan
+        df["float_age"] = df["age"].astype(float)
+        # With create artkalen choice
+        partial_select = lambda pid_group: select_spell_for_pid(
+            pid_group, artkalen_data
+        )
+        df = df.groupby("pid").apply(partial_select)
+        df["art_choice"] = df["choice"].copy()
+        df[["art_choice", "float_age"]].to_pickle(
+            path_dict["intermediate_data"] + "art_choice.pkl"
+        )
+    else:
+        df[["art_choice", "float_age"]] = pd.read_pickle(
+            path_dict["intermediate_data"] + "art_choice.pkl"
+        )
 
-    # Load artkalen choice
-    new_df = create_choice_variable(df, filter_missings=False)
-    new_df["art_choice"] = pkl.load(open("art_choice.pkl", "rb"))
+    df["lagged_art_choice"] = df.groupby("pid")["art_choice"].shift(1)
 
-    nan_mask = new_df["art_choice"].isna()
-    new_df.loc[nan_mask, "art_choice"] = new_df.loc[nan_mask, "choice"]
+    # Create pgen choice and overwrite
+    df = create_choice_variable(df, filter_missings=False)
+    df["pgen_choice"] = df["choice"].copy()
 
-    new_df["choice"] = new_df["art_choice"].copy()
-
-    new_df["lagged_choice"] = new_df["choice"].shift(1)
-
-    df_fresh = new_df[
-        (new_df["choice"] == 0)
-        & (new_df["lagged_choice"] != 0)
-        & (new_df["lagged_choice"].notna())
+    df["choice"] = df["art_choice"].copy()
+    nan_mask = df["choice"].isna()
+    cont_choice = df["pgen_choice"] == df["lagged_art_choice"]
+    df.loc[nan_mask & cont_choice, "choice"] = df.loc[
+        nan_mask & cont_choice, "pgen_choice"
     ]
-    # Make fine bin plot of float age
-    plt.hist(df_fresh["float_age"], bins=100)
 
-    breakpoint()
+    df["lagged_choice"] = df.groupby("pid")["choice"].shift(1)
+    return df
 
 
 def select_spell_for_pid(pid_group, artkalen_data):
@@ -60,7 +69,9 @@ def select_spell_for_pid(pid_group, artkalen_data):
     if len(pid_spells) == 0:
         return pid_group.loc[(pid, (slice(None)))]
 
-    ret_count = 0
+    already_retired = False
+    id_first_retirement = -1
+    past_ret_ids = []
     for interview_count in range(len(pid_group)):
         id = pid_group.index[interview_count]
         interview_date = pid_group.loc[id, "float_interview"]
@@ -77,14 +88,36 @@ def select_spell_for_pid(pid_group, artkalen_data):
             overlapping_spells, pid_group.loc[id, "pgemplst"]
         )
         pid_group.loc[id, "choice"] = choice
-        if (choice == 0) & (ret_count == 0):
+
+        # Now lets treat retirement
+        ret_choice = choice == 0
+
+        # If retirement is chosen we add the id to the list of past retirements
+        if ret_choice:
+            past_ret_ids += [id]
+
+        # If this is the first time, we change the age of the observation to the float age
+        if ret_choice & (not already_retired):
             start_first_ret_spell = overlapping_spells[
                 overlapping_spells["spelltyp"] == 6
             ].iloc[0]["float_begin"]
             pid_group.loc[id, "float_age"] = (
                 start_first_ret_spell - pid_group.iloc[0]["float_birth_year"]
             )
-            ret_count += 1
+            id_first_retirement = id
+            already_retired = True
+
+        # If a person is already retired, but now changes back, we need to set all past retirement choices
+        # to unemployment, set already retired to False and set the float age back to the even age in the first
+        # retirement observation
+        if (not ret_choice) & already_retired & ~np.isnan(choice):
+            for past_id in past_ret_ids:
+                pid_group.loc[past_id, "choice"] = 1
+            pid_group.loc[id_first_retirement, "float_age"] = pid_group.loc[
+                id_first_retirement, "age"
+            ]
+            already_retired = False
+            past_ret_ids = []
 
     return pid_group.loc[(pid, (slice(None)))]
 

@@ -76,6 +76,9 @@ def estimate_wage_parameters(paths_dict, specs):
         ax.legend(loc="upper left")
         file_appends = ["men", "women"]
         fig.savefig(paths_dict["plots"] + f"wages_{file_appends[sex_val]}.png")
+        #plt.show()
+    
+
 
     # Save results
     wage_parameters.to_csv(paths_dict["est_results"] + "wage_eq_params.csv")
@@ -135,7 +138,6 @@ def fit_panel_reg_model(
         year_fixed_effects[(edu_label, sex_label)][year] = fitted_model.params[
             f"year.{year}"
         ]
-
     # Get estimate for income shock std
     (
         wage_parameters.loc[edu_label, sex_label, "income_shock_std"],

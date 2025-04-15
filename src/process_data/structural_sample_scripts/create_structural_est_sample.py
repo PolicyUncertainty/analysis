@@ -77,10 +77,7 @@ def create_structural_est_sample(
 
     df = span_dataframe(df, specs["start_year"] - 1, specs["end_year"] + 1)
 
-    df = create_float_interview_date(df)
-    df = create_float_birth_date(df)
     df = calc_age_at_interview(df)
-    df["age"] = np.floor(df["float_age"])
 
     # Filter ages below
     df = filter_below_age(df, specs["start_age"] - 1)
@@ -175,7 +172,11 @@ def create_structural_est_sample(
     }
 
     # Drop observations if any of core variables are nan
-    df = df[df[list(core_type_dict.keys())].notna().all(axis=1)]
+    # We also delete now the observations with invalid data, which we left before to have a continuous panel
+    df = drop_missings(
+        df=df,
+        vars_to_check=list(core_type_dict.keys()),
+    )
 
     all_type_dict = {
         **core_type_dict,

@@ -74,13 +74,13 @@ if string_in == "a" or string_in == "s":
 if string_in == "a" or string_in == "w":
     create_wage_est_sample(paths_dict, specs=specs, load_data=False)
 
-if string_in == "a" or string_in == "f":
+if string_in == "a" or string_in == "p":
     create_partner_wage_est_sample(paths_dict, specs=specs, load_data=False)
 
 if string_in == "a" or string_in == "j":
     create_job_sep_sample(paths_dict, specs=specs, load_data=False)
 
-if string_in == "a" or string_in == "t":
+if string_in == "a" or string_in == "f":
     create_partner_transition_sample(paths_dict, specs=specs, load_data=False)
 
 if string_in == "a" or string_in == "h":

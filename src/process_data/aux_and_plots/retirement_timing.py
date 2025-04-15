@@ -1,5 +1,4 @@
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 
 
@@ -33,6 +32,3 @@ def plot_retirement_timing_data(paths, specs):
         axs[sex, 1].plot()
 
     plt.show()
-
-
-# def correct_age(df):

@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 
 from process_data.aux_and_plots.filter_data import (
+    drop_missings,
     filter_above_age,
     filter_below_age,
     filter_years,
@@ -46,7 +47,11 @@ def create_health_transition_sample(paths, specs, load_data=False):
     df = span_dataframe(df, specs["start_year"] - 1, specs["end_year"] + 1)
     df = correct_health_state(df)
 
-    df = df[["age", "education", "health", "lead_health", "sex"]]
+    out_cols = ["age", "education", "health", "lead_health", "sex"]
+
+    df = drop_missings(df, out_cols)
+
+    df = df[out_cols]
 
     print(
         str(len(df))
@@ -84,9 +89,9 @@ def load_and_merge_soep_core(soep_c38_path):
         convert_categoricals=False,
     )
     merged_data = pd.merge(
-        pgen_data, ppathl_data, on=["pid", "hid", "syear"], how="inner"
+        pgen_data, ppathl_data, on=["pid", "hid", "syear"], how="left"
     )
-    merged_data = pd.merge(merged_data, pequiv_data, on=["pid", "syear"], how="inner")
+    merged_data = pd.merge(merged_data, pequiv_data, on=["pid", "syear"], how="left")
     merged_data["age"] = merged_data["syear"] - merged_data["gebjahr"]
     merged_data.set_index(["pid", "syear"], inplace=True)
     print(str(len(merged_data)) + " observations in SOEP C38 core.")

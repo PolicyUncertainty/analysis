@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 
 from process_data.aux_and_plots.filter_data import (
+    drop_missings,
     filter_above_age,
     filter_below_age,
     filter_years,
@@ -38,9 +39,10 @@ def create_disability_pension_sample(paths, specs, load_data=False):
 
     df = create_choice_variable(df)
 
+    df = filter_years(df, specs["start_year"] - 1, specs["end_year"] + 1)
+
     # create health states
     df = create_health_var(df)
-    df = filter_years(df, specs["start_year"] - 1, specs["end_year"] + 1)
 
     df = span_dataframe(df, specs["start_year"] - 1, specs["end_year"] + 1)
 
@@ -64,7 +66,10 @@ def create_disability_pension_sample(paths, specs, load_data=False):
 
     df["retirement"] = (df["choice"] == 0).astype(float)
 
-    df = df[["age", "education", "sex", "retirement"]]
+    out_cols = ["age", "education", "sex", "retirement"]
+
+    df = drop_missings(df, out_cols)
+    df = df[out_cols]
 
     print(
         str(len(df))
@@ -102,9 +107,9 @@ def load_and_merge_soep_core(soep_c38_path):
         convert_categoricals=False,
     )
     merged_data = pd.merge(
-        pgen_data, ppathl_data, on=["pid", "hid", "syear"], how="inner"
+        ppathl_data, pgen_data, on=["pid", "hid", "syear"], how="left"
     )
-    merged_data = pd.merge(merged_data, pequiv_data, on=["pid", "syear"], how="inner")
+    merged_data = pd.merge(merged_data, pequiv_data, on=["pid", "syear"], how="left")
     merged_data["age"] = merged_data["syear"] - merged_data["gebjahr"]
     merged_data.set_index(["pid", "syear"], inplace=True)
     print(str(len(merged_data)) + " observations in SOEP C38 core.")

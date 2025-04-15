@@ -74,7 +74,7 @@ if string_in == "a" or string_in == "s":
 if string_in == "a" or string_in == "w":
     create_wage_est_sample(paths_dict, specs=specs, load_data=False)
 
-if string_in == "a" or string_in == "f":
+if string_in == "a" or string_in == "p":
     create_partner_wage_est_sample(paths_dict, specs=specs, load_data=False)
 
 if string_in == "a" or string_in == "j":

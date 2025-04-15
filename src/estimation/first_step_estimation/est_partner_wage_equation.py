@@ -18,28 +18,31 @@ def estimate_partner_wage_parameters(paths_dict, specs):
     """
     edu_labels = specs["education_labels"]
     model_params = ["constant", "period", "period_sq"]
+    wage_data, year_fe_list = prepare_estimation_data(paths_dict, specs)
+    wage_data = sm.add_constant(wage_data)
+    rhs_vars = model_params + year_fe_list
 
+    #wage_data[(wage_data["sex"] == 0) & (wage_data["education"] == 0)] 
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
-        wage_data = prepare_estimation_data(paths_dict, specs, sex_var=sex_var)
+        wage_data_sex = wage_data[wage_data["sex"] == sex_var]
+
         # Initialize empty container for coefficients
         wage_parameters = pd.DataFrame(
             index=pd.Index(data=edu_labels, name="education"),
-            columns=model_params,
+            columns=rhs_vars,
         )
-
         fig, ax = plt.subplots()
         for edu_val, edu_label in enumerate(edu_labels):
             # Filter df
-            wage_data_edu = wage_data[wage_data["education"] == edu_val].copy()
-            wage_data_edu = sm.add_constant(wage_data_edu)
+            wage_data_edu = wage_data_sex[wage_data_sex["education"] == edu_val].copy()
+ 
             # make ols regression
             model = sm.OLS(
                 endog=wage_data_edu["wage_p"],
-                exog=sm.add_constant(
-                    wage_data_edu[["constant", "period", "period_sq"]]
-                ),
+                exog=wage_data_edu[rhs_vars].astype(float),
                 missing="drop",
             )
+            
             fitted_model = model.fit()
             # Assign prediction
             wage_data_edu["wage_pred"] = fitted_model.predict()
@@ -72,14 +75,13 @@ def estimate_partner_wage_parameters(paths_dict, specs):
         wage_parameters.to_csv(out_file_path)
 
 
-def prepare_estimation_data(paths_dict, specs, sex_var):
+def prepare_estimation_data(paths_dict, specs):
     """Prepare the data for the wage estimation."""
     # load and modify data
     wage_data = pd.read_pickle(
         paths_dict["intermediate_data"] + "partner_wage_estimation_sample.pkl"
     )
 
-    wage_data = wage_data[wage_data["sex"] == sex_var]
 
     # Add period
     wage_data["period"] = wage_data["age"] - specs["start_age"]
@@ -87,16 +89,21 @@ def prepare_estimation_data(paths_dict, specs, sex_var):
 
     # We only want to look at working age people
     wage_data = wage_data[wage_data["age"] < specs["max_ret_age"]]
-
-    # partner data
-    # wage_data["ln_partner_hrl_wage"] = np.log(wage_data["hourly_wage_p"])
+    
 
     # prepare format
-    wage_data["year"] = wage_data["syear"].astype("category")
+    wage_data["year"] = wage_data["syear"].astype("int")
     wage_data = wage_data.set_index(["pid", "syear"])
     wage_data["constant"] = np.ones(len(wage_data))
 
-    return wage_data
+    # add year dummies
+    reference_year = specs["reference_year"]
+    year_dummies = pd.get_dummies(wage_data["year"], prefix="year", drop_first=False)
+    year_dummies = year_dummies.drop(columns=[f"year_{reference_year}"])
+    year_fe_list = year_dummies.columns.tolist()
+    wage_data = pd.concat([wage_data, year_dummies], axis=1)
+    
+    return wage_data, year_fe_list
 
 
 def calculate_partner_hours(path_dict):
@@ -105,6 +112,7 @@ def calculate_partner_hours(path_dict):
     specs = read_and_derive_specs(path_dict["specs"])
     start_age = specs["start_age"]
     end_age = specs["max_ret_age"]
+
     # load data, filter, create age bins
     df = pd.read_pickle(
         path_dict["intermediate_data"] + "partner_wage_estimation_sample.pkl"

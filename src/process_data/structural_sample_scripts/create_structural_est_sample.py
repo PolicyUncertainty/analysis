@@ -1,20 +1,26 @@
 import os
 
-import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 
-
 from process_data.aux_and_plots.filter_data import (
+    drop_missings,
     filter_below_age,
     filter_years,
     recode_sex,
 )
 from process_data.aux_and_plots.lagged_and_lead_vars import (
-    create_lagged_and_lead_variables,
+    span_dataframe,
+)
+from process_data.soep_vars.age import calc_age_at_interview
+from process_data.soep_vars.birth import create_float_birth_date
+from process_data.soep_vars.choice_from_spell import (
+    create_choice_variable_from_artkalen,
 )
 from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.experience import create_experience_and_working_years
-from process_data.soep_vars.health import create_health_var
+from process_data.soep_vars.health import correct_health_state, create_health_var
+from process_data.soep_vars.interview_date import create_float_interview_date
 from process_data.soep_vars.job_hire_and_fire import (
     determine_observed_job_offers,
     generate_job_separation_var,
@@ -26,16 +32,23 @@ from process_data.soep_vars.partner_code import (
 from process_data.soep_vars.wealth.linear_interpolation import (
     add_wealth_interpolate_and_deflate,
 )
-from process_data.soep_vars.work_choices import create_choice_variable
 from process_data.structural_sample_scripts.informed_state import create_informed_state
 from process_data.structural_sample_scripts.model_restrictions import (
     enforce_model_choice_restriction,
 )
-from process_data.structural_sample_scripts.policy_state import create_policy_state
+from process_data.structural_sample_scripts.policy_state import (
+    create_policy_state,
+    create_SRA_by_gebjahr,
+)
 
 
 def create_structural_est_sample(
-    paths, specs, load_data=False, use_processed_pl=False, load_wealth=False
+    paths,
+    specs,
+    load_data=False,
+    use_processed_pl=False,
+    load_artkalen_choice=False,
+    load_wealth=False,
 ):
     if not os.path.exists(paths["intermediate_data"]):
         os.makedirs(paths["intermediate_data"])
@@ -49,46 +62,79 @@ def create_structural_est_sample(
     # Load and merge data state data from SOEP core (all but wealth)
     df = load_and_merge_soep_core(path_dict=paths, use_processed_pl=use_processed_pl)
 
+    # Create the cohort specific SRA and its enumerated policy state
+    df = create_SRA_by_gebjahr(df)
+
+    # First start with partner state, as these could be also out of age range.
     df = create_partner_state(df, filter_missing=False)
 
-    # filter data. Leave additional years for lagging and leading
+    # Filter data to estimation years. Leave additional years for lagging and leading
     df = filter_years(df, specs["start_year"] - 1, specs["end_year"] + 1)
+
+    # Create type variables. They should not be missing anyway
     df = recode_sex(df)
+    df = create_education_type(df, filter_missings=False)
 
-    df = create_choice_variable(df, filter_missings=False)
-    df = generate_job_separation_var(df)
+    df = span_dataframe(df, specs["start_year"] - 1, specs["end_year"] + 1)
 
-    df = create_lagged_and_lead_variables(
-        df, specs, lead_job_sep=True, filter_missings=False
-    )
+    df = calc_age_at_interview(df)
 
+    # Filter ages below
+    df = filter_below_age(df, specs["start_age"] - 1)
+
+    # Having a spanned dataframe we can correct the partner state
+    # (missing partner observation in a single year).
     df = correct_partner_state(df)
 
-    df = filter_below_age(df, specs["start_age"])
-    df["period"] = df["age"] - specs["start_age"]
+    # We create the health variable and correct it
+    df = create_health_var(df, filter_missings=False)
+    df = correct_health_state(df)
 
-    df = create_policy_state(df, specs)
-    df = create_experience_and_working_years(df.copy(), filter_missings=True)
-    df = create_education_type(df, filter_missings=True)
-    df = create_health_var(df)
-
-    df = add_wealth_interpolate_and_deflate(df, paths, specs, load_wealth=load_wealth)
-
-    # enforce choice restrictions based on model setup
-    df = enforce_model_choice_restriction(df, specs)
+    df = create_choice_variable_from_artkalen(
+        path_dict=paths, specs=specs, df=df, load_artkalen_choice=load_artkalen_choice
+    )
 
     # Create informed state
     df = create_informed_state(df)
 
-    # Construct job offer state
+    # Generare job separation variable and lag
+    df = generate_job_separation_var(df)
+    df["job_sep_this_year"] = df.groupby(["pid"])["job_sep"].shift(-1)
+
+    # Now use this information to determine job offer state
     was_fired_last_period = (df["job_sep"] == 1) | (df["job_sep_this_year"] == 1)
     df = determine_observed_job_offers(
         df, working_choices=[2, 3], was_fired_last_period=was_fired_last_period
     )
 
-    # Filter out part-time men
-    df = df[~((df["sex"] == 0) & (df["choice"] == 2))]
-    df = df[~((df["sex"] == 0) & (df["lagged_choice"] == 2))]
+    # We are done with lagging and leading and drop the buffer years
+    df = filter_years(df, specs["start_year"], specs["end_year"])
+
+    # We also delete now the observations with invalid data, which we left before to have a continuous panel
+    df = drop_missings(
+        df=df,
+        vars_to_check=[
+            "health",
+            "choice",
+            "lagged_choice",
+            "education",
+            "age",
+        ],
+    )
+    # Add wealth
+    df = add_wealth_interpolate_and_deflate(df, paths, specs, load_wealth=load_wealth)
+
+    # Correct policy state
+    df = create_policy_state(df, specs)
+
+    df = create_experience_and_working_years(df.copy(), filter_missings=True)
+
+    # Now we can also kick out the buffer age for lagging
+    df = filter_below_age(df, specs["start_age"])
+    df["period"] = df["age"] - specs["start_age"]
+
+    # enforce choice restrictions based on model setup
+    df = enforce_model_choice_restriction(df, specs)
 
     # Rename to monthly wage
     df.rename(
@@ -103,7 +149,7 @@ def create_structural_est_sample(
         "monthly_wage": "float32",
         "hh_net_income": "float32",
         "working_years": "float32",
-        "children": "int8",
+        "children": "float32",
     }
 
     df["hh_net_income"] /= specs["wealth_unit"]
@@ -126,7 +172,11 @@ def create_structural_est_sample(
     }
 
     # Drop observations if any of core variables are nan
-    df = df[df[list(core_type_dict.keys())].notna().all(axis=1)]
+    # We also delete now the observations with invalid data, which we left before to have a continuous panel
+    df = drop_missings(
+        df=df,
+        vars_to_check=list(core_type_dict.keys()),
+    )
 
     all_type_dict = {
         **core_type_dict,
@@ -151,9 +201,10 @@ def load_and_merge_soep_core(path_dict, use_processed_pl):
     # of surveyed household
     ppathl_data = pd.read_stata(
         f"{soep_c38_path}/ppathl.dta",
-        columns=["pid", "hid", "syear", "sex", "gebjahr", "parid", "rv_id"],
+        columns=["pid", "hid", "syear", "sex", "parid", "rv_id", "gebjahr", "gebmonat"],
         convert_categoricals=False,
     )
+
     # Load SOEP core data
     pgen_data = pd.read_stata(
         f"{soep_c38_path}/pgen.dta",
@@ -183,7 +234,7 @@ def load_and_merge_soep_core(path_dict, use_processed_pl):
         # Add pl data
         pl_data_reader = pd.read_stata(
             f"{soep_c38_path}/pl.dta",
-            columns=["pid", "hid", "syear", "plb0304_h"],
+            columns=["pid", "hid", "syear", "plb0304_h", "iyear", "pmonin", "ptagin"],
             chunksize=100000,
             convert_categoricals=False,
         )
@@ -210,11 +261,11 @@ def load_and_merge_soep_core(path_dict, use_processed_pl):
         # m11126: Self-Rated Health Status
         # m11124: Disability Status of Individual
         f"{soep_c38_path}/pequiv.dta",
-        columns=["pid", "syear", "d11107", "d11101", "m11126", "m11124"],
+        columns=["pid", "syear", "d11107", "d11101", "m11126", "m11124", "igrv1"],
         convert_categoricals=False,
     )
     merged_data = pd.merge(merged_data, pequiv_data, on=["pid", "syear"], how="left")
-    merged_data.rename(columns={"d11107": "children", "d11101": "age"}, inplace=True)
+    merged_data.rename(columns={"d11107": "children"}, inplace=True)
 
     merged_data.set_index(["pid", "syear"], inplace=True)
     print(str(len(merged_data)) + " observations in SOEP C38 core.")

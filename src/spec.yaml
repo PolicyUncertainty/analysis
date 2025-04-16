@@ -42,30 +42,33 @@ max_est_age_labor: 65
 exp_increase_part_time: 0.5
 
 # Parameters of the policy environment:
-# Start with unemployment benefits
-monthly_unemployment_benefits: 350
-monthly_unemployment_benefits_housing: 300
-monthly_child_unemployment_benefits: 250
-# Wealth threshold (for unemployment benefits)
-unemployment_wealth_thresh: 10_500
-# Now additional parameters for working and retirement
+# Unemployment benefits (Source: GETTSIM)
+monthly_unemployment_benefits: 432 # single adult 
+monthly_child_unemployment_benefits: 304 # weighted average of (250, 308 and 350)
+monthly_unemployment_benefits_housing: 350 
+# Wealth threshold (for unemployment benefits, still GETTSIM)
+unemployment_wealth_thresh: 10_050
+# Child benefits (Source: GETTSIM)
 monthly_child_benefits: 184
-monthly_min_wage: 1360
+# Minimum Wage (Source: Destatis) 
+monthly_min_wage: 1620 # 9.35 * 40 hours * 4.33 weeks = 1620
 
 # Retirement system parameters.
 # Start with early retirement penalty (ERP)
 ERP: 0.036
 late_retirement_bonus: 0.06
-monthly_pension_point_value_west_2010: 27.20
-monthly_pension_point_value_east_2010: 24.13
+monthly_pension_point_value_west_2020: 33.05
+monthly_pension_point_value_east_2020: 31.89
+pop_share_west: 0.83
+pop_share_east: 0.17
 
 ###############################################################################
 # Data and estimation preparation
 ###############################################################################
 # Estimation sample
-start_year: 2010  # start year of estimation sample
-end_year: 2017  # end year of estimation sample
-reference_year: 2010  # reference year for monetary values, taxes, etc.
+start_year: 2013  # start year of estimation sample
+end_year: 2020  # end year of estimation sample
+reference_year: 2020  # reference year for monetary values, taxes, etc.
 ###############################################
 # Wage process estimation (uses same start and end year)
 wage_trunc_low_perc: 0.01  # lower truncation of wage distribution

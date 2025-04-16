@@ -24,6 +24,8 @@ def filter_above_age(df, age):
 def recode_sex(df):
     """Recode sex to 0(men) and 1(women), from SOEP definition 1(men) and 2(women)."""
     df.loc[:, "sex"] = df["sex"] - 1
+    df = df[df["sex"]>= 0]
+    print(str(len(df)) + " left after dropping missing and unspecified sex.") 
     return df
 
 
@@ -48,3 +50,20 @@ def filter_data(merged_data, specs, lag_and_lead_buffer_years=True):
 
     merged_data = filter_years(merged_data, start_year, end_year)
     return merged_data
+
+
+def drop_missings(df, vars_to_check):
+    """This function drops missing values in the data.
+
+    It drops all observations with missing values in the specified variables.
+
+    """
+    for var in vars_to_check:
+        df = df[df[var].notna()]
+        print(
+            str(len(df))
+            + " observations left after dropping people with missing "
+            + var
+            + " data."
+        )
+    return df

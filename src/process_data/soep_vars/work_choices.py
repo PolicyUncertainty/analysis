@@ -35,7 +35,7 @@ def create_choice_variable(data, filter_missings=True):
 
     # assign retirement choice
     data.loc[soep_empl_status == 13, "choice"] = 0
-    # merged_data.loc[rv_ret_choice == "RTB"] = 2
+    # merged_data.loc[rv_ret_choice == "RTB"] = 2y
 
     if filter_missings:
         data = data[data["choice"].notna()]

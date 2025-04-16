@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 
 from process_data.aux_and_plots.filter_data import (
+    drop_missings,
     filter_above_age,
     filter_below_age,
     filter_years,
@@ -12,7 +13,7 @@ from process_data.aux_and_plots.filter_data import (
 )
 from process_data.aux_and_plots.lagged_and_lead_vars import span_dataframe
 from process_data.soep_vars.education import create_education_type
-from process_data.soep_vars.health import clean_health_create_states, create_health_var
+from process_data.soep_vars.health import correct_health_state, create_health_var
 from process_data.soep_vars.work_choices import create_choice_variable
 
 
@@ -38,15 +39,16 @@ def create_disability_pension_sample(paths, specs, load_data=False):
 
     df = create_choice_variable(df)
 
+    df = filter_years(df, specs["start_year"] - 1, specs["end_year"] + 1)
+
     # create health states
     df = create_health_var(df)
-    df = filter_years(df, specs["start_year"] - 1, specs["end_year"] + 1)
 
     df = span_dataframe(df, specs["start_year"] - 1, specs["end_year"] + 1)
 
     df["lagged_choice"] = df.groupby(["pid"])["choice"].shift()
 
-    df = clean_health_create_states(df)
+    df = correct_health_state(df)
 
     # Drop missing lagged choices
     df = df[df["lagged_choice"].notna()]
@@ -64,7 +66,10 @@ def create_disability_pension_sample(paths, specs, load_data=False):
 
     df["retirement"] = (df["choice"] == 0).astype(float)
 
-    df = df[["age", "education", "sex", "retirement"]]
+    out_cols = ["age", "education", "sex", "retirement"]
+
+    df = drop_missings(df, out_cols)
+    df = df[out_cols]
 
     print(
         str(len(df))
@@ -102,9 +107,9 @@ def load_and_merge_soep_core(soep_c38_path):
         convert_categoricals=False,
     )
     merged_data = pd.merge(
-        pgen_data, ppathl_data, on=["pid", "hid", "syear"], how="inner"
+        ppathl_data, pgen_data, on=["pid", "hid", "syear"], how="left"
     )
-    merged_data = pd.merge(merged_data, pequiv_data, on=["pid", "syear"], how="inner")
+    merged_data = pd.merge(merged_data, pequiv_data, on=["pid", "syear"], how="left")
     merged_data["age"] = merged_data["syear"] - merged_data["gebjahr"]
     merged_data.set_index(["pid", "syear"], inplace=True)
     print(str(len(merged_data)) + " observations in SOEP C38 core.")

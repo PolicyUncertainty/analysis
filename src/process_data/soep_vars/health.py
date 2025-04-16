@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def create_health_var(data):
+def create_health_var(data, filter_missings=True):
     """This function creates the health variables in the soep-PEQUIV dataset.
 
     - m11126: Self-Rated Health Status
@@ -18,27 +18,31 @@ def create_health_var(data):
     individual has good health and 1 if an individual has bad health.
 
     """
+    if filter_missings:
+        data = data[data["m11126"] >= 0]
+        print(
+            str(len(data))
+            + " observations left after dropping people with missing health data."
+        )
 
-    data = data[data["m11126"] >= 0]
-    print(
-        str(len(data))
-        + " observations left after dropping people with missing health data."
-    )
+        data = data[data["m11124"] >= 0]
+        print(
+            str(len(data))
+            + " observations left after dropping people with missing disability data."
+        )
 
-    data = data[data["m11124"] >= 0]
-    print(
-        str(len(data))
-        + " observations left after dropping people with missing disability data."
-    )
-
-    # create health state = 1 if bad health, 0 if good health
-    data["health"] = 1
+    # Initialize variable with nan
+    data["health"] = np.nan
+    # Then assign all valid observations bad health initially (this is all if missings are filtered)
+    valid_data = (data["m11126"] >= 0) & (data["m11124"] >= 0)
+    data.loc[valid_data, "health"] = 1
+    # Then we assign good health to all observations with self assessed good health and no disability
     data.loc[data["m11126"].isin([1, 2, 3]) & data["m11124"].isin([0]), "health"] = 0
 
     return data
 
 
-def clean_health_create_states(data):
+def correct_health_state(data):
     """This function creates a lagged health state variable in the soep-PEQUIV dataset.
 
     The function replaces the health variable with 1 if both the previous and next

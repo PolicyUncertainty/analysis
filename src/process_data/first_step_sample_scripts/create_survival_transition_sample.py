@@ -13,7 +13,7 @@ from process_data.aux_and_plots.filter_data import (
 )
 from process_data.aux_and_plots.lagged_and_lead_vars import span_dataframe
 from process_data.soep_vars.education import create_education_type
-from process_data.soep_vars.health import clean_health_create_states, create_health_var
+from process_data.soep_vars.health import correct_health_state, create_health_var
 
 
 # %%
@@ -227,7 +227,7 @@ def load_and_process_soep_health(soep_c38_path, specs):
     pequiv_data = span_dataframe(
         pequiv_data, specs["start_year_mortality"], specs["end_year_mortality"]
     )
-    pequiv_data = clean_health_create_states(pequiv_data)
+    pequiv_data = correct_health_state(pequiv_data)
     # Fill health gaps
     pequiv_data = fill_health_gaps_vectorized(pequiv_data)
     # forward fill health state for every individual

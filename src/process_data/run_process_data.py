@@ -24,9 +24,9 @@ string_in = input(
     \n\n Please write the corresponding letter:"""
 )
 
-USE_PROCESSED_PL = True
-LOAD_WEALTH = True
-LOAD_ARTKALEN_CHOICE = True
+USE_PROCESSED_PL = False
+LOAD_WEALTH = False
+LOAD_ARTKALEN_CHOICE = False
 
 
 from process_data.first_step_sample_scripts.create_credited_periods_est_sample import (

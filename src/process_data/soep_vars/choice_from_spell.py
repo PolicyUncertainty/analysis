@@ -95,7 +95,7 @@ def select_spell_for_pid(pid_group, artkalen_data):
         ret_choice = choice == 0
 
         # We first check if person already chose retirement past the retirement age
-        post_sra = pid_group.loc[id, "sra"] <= pid_group.loc[id, "age"]
+        post_sra = pid_group.loc[id, "SRA"] <= pid_group.loc[id, "age"]
 
         # The first time a person chooses retirement
         if ret_choice & post_sra:

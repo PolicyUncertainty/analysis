@@ -50,7 +50,7 @@ params_to_estimate_names = [
 ]
 model_name = "partner_est"
 LOAD_LAST_ESTIMATE = False
-LOAD_SOL_MODEL = False
+LOAD_SOL_MODEL = True
 USE_WEIGHTS = False
 
 if LOAD_LAST_ESTIMATE:

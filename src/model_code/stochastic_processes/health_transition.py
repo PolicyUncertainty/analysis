@@ -34,7 +34,7 @@ def calc_disability_probability(params, education, period):
     exp_value = jnp.exp(
         params["disability_logit_const"]
         + params["disability_logit_period"] * period
-        + params["disability_logit_education"] * education
+        + params["disability_logit_high_educ"] * education
     )
     prob = exp_value / (1 + exp_value)
     return prob

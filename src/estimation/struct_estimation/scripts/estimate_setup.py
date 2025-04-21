@@ -29,7 +29,6 @@ def estimate_model(
     path_dict,
     params_to_estimate_names,
     file_append,
-    slope_disutil_method,
     load_model,
     use_weights=True,
     last_estimate=None,
@@ -73,7 +72,6 @@ def estimate_model(
     est_class = est_class_from_paths(
         path_dict=path_dict,
         start_params_all=start_params_all,
-        slope_disutil_method=slope_disutil_method,
         print_function=print_function,
         file_append=file_append,
         load_model=load_model,
@@ -115,7 +113,6 @@ class est_class_from_paths:
         self,
         path_dict,
         start_params_all,
-        slope_disutil_method,
         file_append,
         load_model,
         use_weights,
@@ -123,7 +120,6 @@ class est_class_from_paths:
         save_results=True,
     ):
         self.iter_count = 0
-        self.slope_disutil_method = slope_disutil_method
         self.save_results = save_results
 
         if print_function is None:
@@ -179,29 +175,19 @@ class est_class_from_paths:
             return_model_solution=True,
         )
         self.ll_func = individual_likelihood
-        # specs = generate_derived_and_data_derived_specs(path_dict)
-        # self.pt_ratio_low = (
-        #     specs["av_annual_hours_pt"][0] / specs["av_annual_hours_ft"][0]
-        # )
-        # self.pt_ratio_high = (
-        #     specs["av_annual_hours_pt"][1] / specs["av_annual_hours_ft"][1]
-        # )
 
     def crit_func(self, params):
         start = time.time()
-        # if self.slope_disutil_method:
-        #     params = update_according_to_slope_disutil(
-        #         params, self.pt_ratio_low, self.pt_ratio_high
-        #     )
         ll_value_individual, model_solution = self.ll_func(params)
         ll_value = jnp.dot(self.weights, ll_value_individual) / self.weight_sum
         if self.save_results:
-            save_iter_step(
-                model_solution,
-                ll_value,
+            alternate_save_count = self.iter_count % 2
+            pkl.dump(
                 params,
-                self.intermediate_est_data,
-                self.iter_count,
+                open(
+                    self.intermediate_est_data + f"params_{alternate_save_count}.pkl",
+                    "wb",
+                ),
             )
         end = time.time()
         self.iter_count += 1
@@ -210,38 +196,6 @@ class est_class_from_paths:
         print("Likelihood evaluation took, ", end - start)
 
         return ll_value
-
-
-# def update_according_to_slope_disutil(params, pt_ratio_bad, pt_ratio_good):
-#     """Use this function to entforce slope condition of disutility parameters."""
-#     params["disutil_unemployed_bad"] = params["disutil_not_retired_low"]
-#     params["disutil_pt_work_bad"] = (
-#         params["disutil_not_retired_bad"]
-#         + pt_ratio_bad * params["disutil_working_bad"]
-#     )
-#     params["disutil_ft_work_bad"] = (
-#         params["disutil_not_retired_bad"] + params["disutil_working_bad"]
-#     )
-#
-#     params["disutil_unemployed"] = params["disutil_not_retired_good"]
-#     params["disutil_pt_work_good"] = (
-#         params["disutil_not_retired_good"]
-#         + pt_ratio_good * params["disutil_working_good"]
-#     )
-#     params["disutil_ft_work_good"] = (
-#         params["disutil_not_retired_good"] + params["disutil_working_good"]
-#     )
-#     return params
-
-
-def save_iter_step(model_sol, ll_value, params, logging_folder, iter_count):
-    alternate_save_count = iter_count % 2
-    saving_object = {"model_sol": model_sol, "ll_value": ll_value}
-    pkl.dump(
-        saving_object,
-        open(logging_folder + f"solving_log_{alternate_save_count}.pkl", "wb"),
-    )
-    pkl.dump(params, open(logging_folder + f"params_{alternate_save_count}.pkl", "wb"))
 
 
 def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):

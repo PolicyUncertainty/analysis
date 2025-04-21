@@ -32,6 +32,9 @@ from process_data.soep_vars.partner_code import (
 from process_data.soep_vars.wealth.linear_interpolation import (
     add_wealth_interpolate_and_deflate,
 )
+from process_data.structural_sample_scripts.disability_pension_health import (
+    modify_health_for_disability_pension,
+)
 from process_data.structural_sample_scripts.informed_state import create_informed_state
 from process_data.structural_sample_scripts.model_restrictions import (
     enforce_model_choice_restriction,
@@ -136,6 +139,10 @@ def create_structural_est_sample(
     # enforce choice restrictions based on model setup
     df = enforce_model_choice_restriction(df, specs)
 
+    # Modify health state for incorporation of disability pension
+    df["surveyed_health"] = df["health"].copy()
+    df = modify_health_for_disability_pension(df, specs)
+
     # Rename to monthly wage
     df.rename(
         columns={
@@ -150,6 +157,7 @@ def create_structural_est_sample(
         "hh_net_income": "float32",
         "working_years": "float32",
         "children": "float32",
+        "surveyed_health": "int8",
     }
 
     df["hh_net_income"] /= specs["wealth_unit"]

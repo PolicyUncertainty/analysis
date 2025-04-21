@@ -15,7 +15,7 @@ sex_labels: [Men, Women]
 partner_labels: [Single, Working Partner, Retired Partner]
 
 # mathematical model features
-quadrature_points_stochastic: 5
+n_quad_points_stochastic: 5
 n_experience_grid_points: 11
 # Fixed structural parameters, we will not estimate
 interest_rate: 0.03
@@ -43,15 +43,15 @@ exp_increase_part_time: 0.5
 
 # Parameters of the policy environment:
 # Unemployment benefits (Source: GETTSIM)
-monthly_unemployment_benefits: 432 # single adult 
-monthly_child_unemployment_benefits: 304 # weighted average of (250, 308 and 350)
-monthly_unemployment_benefits_housing: 350 
+monthly_unemployment_benefits: 432  # single adult
+monthly_child_unemployment_benefits: 304  # weighted average of (250, 308, 350)
+monthly_unemployment_benefits_housing: 350
 # Wealth threshold (for unemployment benefits, still GETTSIM)
 unemployment_wealth_thresh: 10_050
 # Child benefits (Source: GETTSIM)
 monthly_child_benefits: 184
-# Minimum Wage (Source: Destatis) 
-monthly_min_wage: 1620 # 9.35 * 40 hours * 4.33 weeks = 1620
+# Minimum Wage (Source: Destatis)
+monthly_min_wage: 1620  # 9.35 * 40 hours * 4.33 weeks = 1620
 
 # Retirement system parameters.
 # Start with early retirement penalty (ERP)

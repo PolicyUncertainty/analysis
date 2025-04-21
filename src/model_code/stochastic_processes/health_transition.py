@@ -1,5 +1,4 @@
 import jax.numpy as jnp
-from numba.np.linalg import cond_impl
 
 
 def health_transition(sex, health, education, period, params, options):

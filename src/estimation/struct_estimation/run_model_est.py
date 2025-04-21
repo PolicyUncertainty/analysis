@@ -43,10 +43,14 @@ params_to_estimate_names = [
     "job_finding_logit_const_women",
     "job_finding_logit_period_women",
     "job_finding_logit_high_educ_women",
+    # Disability probability
+    "disability_logit_const",
+    "disability_logit_period",
+    "disability_logit_high_educ",
 ]
 model_name = "partner_est"
 LOAD_LAST_ESTIMATE = False
-LOAD_SOL_MODEL = True
+LOAD_SOL_MODEL = False
 USE_WEIGHTS = False
 
 if LOAD_LAST_ESTIMATE:

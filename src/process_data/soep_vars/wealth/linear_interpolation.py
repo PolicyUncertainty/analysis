@@ -20,7 +20,7 @@ def add_wealth_interpolate_and_deflate(
             wealth_data, path_dict, specs
         )
         # Deflate wealth
-        wealth_data_full = deflate_wealth(wealth_data_full, path_dict)
+        wealth_data_full = deflate_wealth(wealth_data_full, path_dict, specs)
         # We do not allow for negative wealth values
         wealth_data_full.loc[wealth_data_full["wealth"] < 0, "wealth"] = 0
         wealth_data_full.to_pickle(file_name)

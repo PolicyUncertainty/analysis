@@ -25,7 +25,7 @@ string_in = input(
 )
 
 USE_PROCESSED_PL = True
-LOAD_WEALTH = True
+LOAD_WEALTH = False
 LOAD_ARTKALEN_CHOICE = True
 
 

@@ -8,23 +8,16 @@ def calc_net_household_income(own_income, partner_income, has_partner_int, optio
 
     # Calculate split factor. 1 if single, 2 if partnered
     split_factor = 1 + has_partner_int
-    income_tax_split = calc_inc_tax_for_single_income(family_income / split_factor)
+    income_tax_split = calc_inc_tax_for_single_income(family_income / split_factor, options)
 
     # Readjust with split factor
     income_tax = income_tax_split * split_factor
     return family_income - income_tax
 
 
-def calc_inc_tax_for_single_income(gross_income):
-    """Parameters from 2010 gettsim params."""
-    thresholds = [
-        8004,
-        13469,
-        52881,
-        250730,
-    ]
-
-    rates = [0.14, 0.2397, 0.42, 0.45]
+def calc_inc_tax_for_single_income(gross_income, options):
+    thresholds = options["income_tax_brackets"]
+    rates = options["income_tax_rates"]
 
     # In bracket 0 no taxes are paid
     poss_tax_bracket_0 = 0.0

@@ -52,6 +52,10 @@ unemployment_wealth_thresh: 10_050
 monthly_child_benefits: 184
 # Minimum Wage (Source: Destatis)
 monthly_min_wage: 1620  # 9.35 * 40 hours * 4.33 weeks = 1620
+# Tax Brackets (Source: GETTSIM)
+income_tax_brackets: [9408, 14532, 57051, 270500]
+# Tax rates (Source: GETTSIM)
+income_tax_rates: [0.0, 0.14, 0.2397, 0.42, 0.45]
 
 # Retirement system parameters.
 # Start with early retirement penalty (ERP)

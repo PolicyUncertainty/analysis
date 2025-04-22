@@ -86,7 +86,7 @@ def test_budget_unemployed(
     )
     split_factor = 1 + has_partner
     tax_partner = (
-        calc_inc_tax_for_single_income(income_partner / split_factor) * split_factor
+        calc_inc_tax_for_single_income(income_partner / split_factor, specs_internal) * split_factor
     )
     net_partner = income_partner - tax_partner
     net_partner_plus_child_benefits = (
@@ -233,7 +233,7 @@ def test_budget_worker(
     ]
     child_benefits = nb_children * specs_internal["monthly_child_benefits"] * 12
     if partner_state == 0:
-        tax_total = calc_inc_tax_for_single_income(income_after_ssc)
+        tax_total = calc_inc_tax_for_single_income(income_after_ssc, specs_internal)
         total_net_income = income_after_ssc - tax_total + child_benefits
         checked_income = np.maximum(total_net_income, unemployment_benefits)
         np.testing.assert_almost_equal(
@@ -259,7 +259,7 @@ def test_budget_worker(
         income_partner = partner_income_year - sscs_partner
         total_income_after_ssc = income_after_ssc + income_partner
 
-        tax_toal = calc_inc_tax_for_single_income(total_income_after_ssc / 2) * 2
+        tax_toal = calc_inc_tax_for_single_income(total_income_after_ssc / 2, specs_internal) * 2
         total_net_income = total_income_after_ssc + child_benefits - tax_toal
 
         checked_income = np.maximum(total_net_income, unemployment_benefits)
@@ -358,7 +358,7 @@ def test_retiree(
     ]
     child_benefits = nb_children * specs_internal["monthly_child_benefits"] * 12
     if partner_state == 0:
-        tax_total = calc_inc_tax_for_single_income(income_after_ssc)
+        tax_total = calc_inc_tax_for_single_income(income_after_ssc, specs_internal)
         total_net_income = income_after_ssc - tax_total + child_benefits
         checked_income = np.maximum(total_net_income, unemployment_benefits)
         scaled_wealth = (
@@ -385,7 +385,7 @@ def test_retiree(
         income_partner = partner_income_year - sscs_partner
         total_income_after_ssc = income_after_ssc + income_partner
 
-        tax_toal = calc_inc_tax_for_single_income(total_income_after_ssc / 2) * 2
+        tax_toal = calc_inc_tax_for_single_income(total_income_after_ssc / 2, specs_internal) * 2
         total_net_income = total_income_after_ssc + child_benefits - tax_toal
 
         checked_income = np.maximum(total_net_income, unemployment_benefits)
@@ -533,7 +533,7 @@ def test_fresh_retiree(
     ]
     child_benefits = nb_children * specs_internal["annual_child_benefits"]
     if partner_state == 0:
-        tax_total = calc_inc_tax_for_single_income(income_after_ssc)
+        tax_total = calc_inc_tax_for_single_income(income_after_ssc, specs_internal)
         total_net_income = income_after_ssc - tax_total + child_benefits
         checked_income = np.maximum(total_net_income, unemployment_benefits)
         scaled_wealth = (
@@ -561,7 +561,7 @@ def test_fresh_retiree(
         income_partner = partner_income_year - sscs_partner
         total_income_after_ssc = income_after_ssc + income_partner
 
-        tax_toal = calc_inc_tax_for_single_income(total_income_after_ssc / 2) * 2
+        tax_toal = calc_inc_tax_for_single_income(total_income_after_ssc / 2, specs_internal) * 2
         total_net_income = total_income_after_ssc + child_benefits - tax_toal
 
         checked_income = np.maximum(total_net_income, unemployment_benefits)

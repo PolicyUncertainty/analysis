@@ -218,7 +218,7 @@ def simulate_scenario(
 
     # Create lagged health state to filter out already dead people
     df["health_lag"] = df.groupby("agent")["health"].shift(1)
-    df = df[(df["health"] != 2) | ((df["health"] == 2) & (df["health_lag"] != 2))]
+    df = df[(df["health"] != 3) | ((df["health"] == 3) & (df["health_lag"] != 3))]
 
     return df
 

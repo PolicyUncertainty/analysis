@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import yaml
+
 from estimation.struct_estimation.scripts.estimate_setup import load_and_prep_data
 from export_results.figures.color_map import JET_COLOR_MAP
 from model_code.policy_processes.policy_states_belief import (
@@ -211,6 +212,7 @@ def plot_states(
         params=params,
         subj_unc=True,
         custom_resolution_age=None,
+        annoucement_age=None,
         SRA_at_retirement=67,
         SRA_at_start=67,
         model_name=model_name,
@@ -243,7 +245,7 @@ def plot_states(
     )
     discrete_state_names = model["model_structure"]["discrete_states_names"]
 
-    data_sim = data_sim[data_sim["health"] != 2]
+    data_sim = data_sim[data_sim["health"] != 3]
 
     for state_name in discrete_state_names:
         if state_name in ["period", "informed", "policy_state"]:
@@ -290,20 +292,29 @@ def plot_states(
                         & (data_decision["education"] == edu_var)
                     ]
 
-                    obs_shares = df_type_obs.groupby(["age"])[state_name].value_counts(
-                        normalize=True
-                    )
+                    if state_name == "health":
+                        obs_shares = df_type_obs.groupby(["age"])[
+                            "surveyed_health"
+                        ].value_counts(normalize=True)
+
+                    else:
+                        obs_shares = df_type_obs.groupby(["age"])[
+                            state_name
+                        ].value_counts(normalize=True)
                     sim_shares = df_type_sim.groupby(["age"])[state_name].value_counts(
                         normalize=True
                     )
 
                     for state_val in sim_shares.index.get_level_values(1).unique():
-                        ax.plot(
-                            obs_shares.loc[(slice(None), state_val)],
-                            # label=f"Observed; {state_name} = {state_val}",
-                            ls="--",
-                            color=JET_COLOR_MAP[state_val],
-                        )
+                        if (state_name == "health") and (state_val == 2):
+                            continue
+                        else:
+                            ax.plot(
+                                obs_shares.loc[(slice(None), state_val)],
+                                # label=f"Observed; {state_name} = {state_val}",
+                                ls="--",
+                                color=JET_COLOR_MAP[state_val],
+                            )
                         ax.plot(
                             sim_shares.loc[(slice(None), state_val)],
                             label=f"{state_val}",

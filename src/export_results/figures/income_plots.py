@@ -157,7 +157,8 @@ def plot_incomes(path_dict):
 
 def plot_total_income(specs):
     params = {"interest_rate": 0.0}
-    exp_levels = np.arange(0, specs["max_experience"] + 1)
+
+    exp_levels = np.arange(0, 46)
     marriage_labels = ["Single", "Partnered"]
     edu_labels = specs["education_labels"]
 

@@ -89,6 +89,11 @@ if which_plots in ["a", "i"]:
         load_sol_model=load_sol_model,
         load_sim_model=load_sim_model,
     )
+    # After running, we can set all to true
+    load_df = True
+    load_solution = True
+    load_sim_model = True
+    load_sol_model = True
 
 
 if which_plots in ["a", "s"]:

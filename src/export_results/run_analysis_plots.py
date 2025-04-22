@@ -8,7 +8,7 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 
 path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
-model_name = "partner_est"
+model_name = "disability"
 
 # kind_string = input("Execute [pre]- or [post]-estimation plots? (pre/post)\n")
 
@@ -57,7 +57,6 @@ plot_mortality(path_dict, specs)
 plt.show()
 plt.close("all")
 
-exit()
 # %%###################################
 # Family characteristics
 ######################################

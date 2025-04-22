@@ -47,7 +47,7 @@ def estimate_model(
                 continue
             try:
                 print(
-                    f"Start params value of {key} was {start_params_all[key]} and is"
+                    f"Start params value of {key} was {start_params_all[key]} and is "
                     f"replaced by {last_estimate[key]}"
                 )
             except:

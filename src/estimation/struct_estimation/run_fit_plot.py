@@ -2,6 +2,7 @@
 import pickle
 
 import matplotlib.pyplot as plt
+
 from set_paths import create_path_dict
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
@@ -9,7 +10,7 @@ path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict)
 
 # Set run specs
-model_name = "partner_est"
+model_name = "disability"
 load_sol_model = True
 load_solution = True
 

@@ -26,7 +26,7 @@ from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 # Set specifications
 n_agents = 10000
 seeed = 123
-model_name = "partner_est"
+model_name = "disability"
 load_base_solution = True  # baseline solution conntainer
 load_cf_solution = False  # counterfactual solution conntainer
 load_sol_model = True  # informed state as type

@@ -2,11 +2,12 @@ import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import scipy.stats as stats
 import seaborn as sns
 from dcegm.wealth_correction import adjust_observed_wealth
-from model_code.stochastic_processes.job_offers import job_offer_process_transition
-import scipy.stats as stats
 from sklearn.neighbors import KernelDensity
+
+from model_code.stochastic_processes.job_offers import job_offer_process_transition
 
 
 def generate_start_states(
@@ -197,15 +198,14 @@ def generate_start_states(
             partner_states[type_mask] = partner_states_edu
 
             # Generate health states
-            empirical_health_probs = start_period_data_edu["health"].value_counts(
-                normalize=True
-            )
-            health_probs = pd.Series(
-                index=np.arange(specs["n_health_states"]), data=0, dtype=float
-            )
+            empirical_health_probs = start_period_data_edu[
+                "surveyed_health"
+            ].value_counts(normalize=True)
+            # We let people start only in good and bad health
+            health_probs = pd.Series(index=np.arange(2), data=0, dtype=float)
             health_probs.update(empirical_health_probs)
             health_states_edu = np.random.choice(
-                specs["n_health_states"], size=n_agents_edu, p=health_probs.values
+                2, size=n_agents_edu, p=health_probs.values
             )
             health_agents[type_mask] = health_states_edu
 
@@ -220,7 +220,7 @@ def generate_start_states(
     initial_policy_state = np.floor(
         (inital_SRA - specs["min_SRA"]) / specs["SRA_grid_size"]
     )
-    
+
     policy_state_agents = (jnp.ones_like(exp_agents) * initial_policy_state).astype(
         jnp.uint8
     )
@@ -246,7 +246,7 @@ def generate_start_states(
 def draw_start_wealth_dist(start_period_data_edu, n_agents_edu, method="pareto"):
     """
     Draws samples from the starting wealth distribution using different methods.
-    
+
     Methods:
     - "uniform": Uniform sampling between the 30th and 70th percentiles.
     - "lognormal": Fit a shifted lognormal distribution and sample from it.
@@ -261,39 +261,45 @@ def draw_start_wealth_dist(start_period_data_edu, n_agents_edu, method="pareto")
     Returns:
         np.ndarray: Sampled wealth values.
     """
-    
+
     wealth_data = start_period_data_edu["adjusted_wealth"]
-    
+
     if method == "uniform":
         # Existing uniform sampling between 30th and 70th quantiles
         wealth_start_edu = np.random.uniform(
-            wealth_data.quantile(0.3),
-            wealth_data.quantile(0.7),
-            n_agents_edu
+            wealth_data.quantile(0.3), wealth_data.quantile(0.7), n_agents_edu
         )
 
     elif method == "lognormal":
         # Fit a shifted lognormal distribution
         min_val = wealth_data.min()
         shifted_data = wealth_data - min_val + 1e-6  # Avoid log(0)
-        shape, loc, scale = stats.lognorm.fit(shifted_data, floc=0)  # Fix location at zero
+        shape, loc, scale = stats.lognorm.fit(
+            shifted_data, floc=0
+        )  # Fix location at zero
         samples = stats.lognorm.rvs(shape, loc=loc, scale=scale, size=n_agents_edu)
         wealth_start_edu = samples + min_val - 1e-6  # Shift back
 
     elif method == "kde":
         # Kernel Density Estimation (KDE) sampling
-        kde = KernelDensity(kernel="gaussian", bandwidth=0.1 * wealth_data.std()).fit(wealth_data.values.reshape(-1, 1))
+        kde = KernelDensity(kernel="gaussian", bandwidth=0.1 * wealth_data.std()).fit(
+            wealth_data.values.reshape(-1, 1)
+        )
         wealth_start_edu = kde.sample(n_agents_edu).flatten()
 
     elif method == "pareto":
         # Fit a Pareto-like distribution (Shifted Pareto)
         min_val = wealth_data.min()
         shifted_data = wealth_data - min_val + 1e-6  # Shift data to avoid 0
-        shape, loc, scale = stats.pareto.fit(shifted_data, floc=0)  # Fix location at zero
+        shape, loc, scale = stats.pareto.fit(
+            shifted_data, floc=0
+        )  # Fix location at zero
         samples = stats.pareto.rvs(shape, loc=loc, scale=scale, size=n_agents_edu)
         wealth_start_edu = samples + min_val - 1e-6  # Shift back
 
     else:
-        raise ValueError("Invalid method. Choose 'uniform', 'lognormal', 'kde', or 'pareto'.")
+        raise ValueError(
+            "Invalid method. Choose 'uniform', 'lognormal', 'kde', or 'pareto'."
+        )
 
     return wealth_start_edu

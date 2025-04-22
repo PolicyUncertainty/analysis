@@ -16,4 +16,5 @@ module add CUDA/12.0.0
 
 source ~/virts/bin/activate
 
-python run_model_est.py
+# python run_model_est.py
+python run_fit_plot.py

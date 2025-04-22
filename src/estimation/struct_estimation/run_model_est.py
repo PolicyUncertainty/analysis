@@ -26,11 +26,11 @@ params_to_estimate_names = [
     "disutil_pt_work_low_good_women",
     "disutil_pt_work_low_bad_women",
     # Men unemployment - 2 parameters
-    "disutil_unemployed_high_men",
-    "disutil_unemployed_low_men",
-    # Women Unemployment - 2 parameters
-    "disutil_unemployed_high_women",
-    "disutil_unemployed_low_women",
+    # "disutil_unemployed_high_men",
+    # "disutil_unemployed_low_men",
+    # # Women Unemployment - 2 parameters
+    # "disutil_unemployed_high_women",
+    # "disutil_unemployed_low_women",
     # Children - 2 parameters
     "disutil_children_ft_work_low",
     "disutil_children_ft_work_high",
@@ -48,8 +48,8 @@ params_to_estimate_names = [
     "disability_logit_period",
     "disability_logit_high_educ",
 ]
-model_name = "inter"
-LOAD_LAST_ESTIMATE = True
+model_name = "disability"
+LOAD_LAST_ESTIMATE = False
 LOAD_SOL_MODEL = True
 SAVE_RESULTS = True
 USE_WEIGHTS = False

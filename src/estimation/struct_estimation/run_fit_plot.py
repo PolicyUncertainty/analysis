@@ -10,7 +10,7 @@ path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict)
 
 # Set run specs
-model_name = "disability_0"
+model_name = "disability"
 load_sol_model = True
 load_solution = False
 
@@ -29,6 +29,7 @@ else:
     params["disutil_unemployed_high_women"] = 0.0
     params["disutil_unemployed_low_women"] = 0.0
 
+model_name = "disability_0"
 from estimation.struct_estimation.scripts.observed_model_fit import observed_model_fit
 
 observed_model_fit(

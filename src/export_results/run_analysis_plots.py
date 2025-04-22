@@ -60,14 +60,14 @@ model_name = "disability"
 # # %%###################################
 # # Family characteristics
 # ######################################
-# from export_results.figures.family_params import (
-#     plot_children,
-#     plot_marriage_and_divorce,
-# )
-#
-# plot_children(path_dict, specs)
+from export_results.figures.family_params import (
+    plot_children,
+    plot_marriage_and_divorce,
+)
+
+plot_children(path_dict, specs)
 # plot_marriage_and_divorce(path_dict, specs)
-# plt.show()
+plt.show()
 # plt.close("all")
 #
 #

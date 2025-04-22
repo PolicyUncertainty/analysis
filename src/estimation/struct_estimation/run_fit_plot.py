@@ -10,9 +10,9 @@ path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict)
 
 # Set run specs
-model_name = "disability"
+model_name = "disability_0"
 load_sol_model = True
-load_solution = True
+load_solution = False
 
 if model_name == "start":
     from estimation.struct_estimation.start_params_and_bounds.set_start_params import (
@@ -24,6 +24,10 @@ else:
     params = pickle.load(
         open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
     )
+    params["disutil_unemployed_high_men"] = 0.0
+    params["disutil_unemployed_low_men"] = 0.0
+    params["disutil_unemployed_high_women"] = 0.0
+    params["disutil_unemployed_low_women"] = 0.0
 
 from estimation.struct_estimation.scripts.observed_model_fit import observed_model_fit
 

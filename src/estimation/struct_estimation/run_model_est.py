@@ -48,7 +48,7 @@ params_to_estimate_names = [
     "disability_logit_period",
     "disability_logit_high_educ",
 ]
-model_name = "disability"
+model_name = "inter"
 LOAD_LAST_ESTIMATE = True
 LOAD_SOL_MODEL = True
 SAVE_RESULTS = True
@@ -58,7 +58,6 @@ if LOAD_LAST_ESTIMATE:
     last_estimate = pkl.load(
         open(paths_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
     )
-
 else:
     last_estimate = None
 

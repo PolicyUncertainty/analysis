@@ -33,7 +33,7 @@ disutil_children_ft_work_low: 5.2
 disutil_children_ft_work_high: 5.2
 
 # Taste shock
-lambda: 2
+lambda: 5
 
 # taste_shock_scale_men: 2
 # taste_shock_scale_women: 2

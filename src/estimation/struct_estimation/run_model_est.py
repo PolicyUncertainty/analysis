@@ -55,40 +55,9 @@ SAVE_RESULTS = True
 USE_WEIGHTS = False
 
 if LOAD_LAST_ESTIMATE:
-    # last_estimate = pkl.load(
-    #     open(paths_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
-    # )
-    last_estimate = {
-        "lambda": 0.938775655255427,
-        "disability_logit_const": -5.07217057388155,
-        "disability_logit_period": 0.0606801631919178,
-        "disability_logit_high_educ": -0.505096284451959,
-        "disutil_unemployed_high_men": 1.7547023562030946,
-        "disutil_unemployed_low_men": 1.285171306604484,
-        "disutil_ft_work_high_good_men": 0.8209885491499525,
-        "disutil_ft_work_high_bad_men": 1.217057196570522,
-        "disutil_ft_work_low_good_men": 0.8340523194181079,
-        "disutil_ft_work_low_bad_men": 1.1512416736832638,
-        "job_finding_logit_const_men": -1.2721731052897,
-        "job_finding_logit_period_men": -0.0475811807969158,
-        "job_finding_logit_high_educ_men": 0.554225840026031,
-        "disutil_unemployed_high_women": 1.2743640821491782,
-        "disutil_unemployed_low_women": 0.8015361075897802,
-        "disutil_ft_work_high_good_women": 1.2859040196900708,
-        "disutil_ft_work_high_bad_women": 1.318077558189196,
-        "disutil_ft_work_low_good_women": 1.4252533668814757,
-        "disutil_ft_work_low_bad_women": 1.3562066466642761,
-        "disutil_children_ft_work_low": 0.33568016747636004,
-        "disutil_children_ft_work_high": 0.4429893409723915,
-        "disutil_pt_work_high_good_women": 1.2537655230153704,
-        "disutil_pt_work_high_bad_women": 1.3078048776544922,
-        "disutil_pt_work_low_good_women": 1.1779907410723167,
-        "disutil_pt_work_low_bad_women": 1.3516938584463878,
-        "job_finding_logit_const_women": -1.234836517650335,
-        "job_finding_logit_period_women": -0.0540965788852066,
-        "job_finding_logit_high_educ_women": 0.911287401832803,
-    }
-
+    last_estimate = pkl.load(
+        open(paths_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
+    )
 
 else:
     last_estimate = None

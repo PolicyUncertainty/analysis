@@ -41,6 +41,7 @@ if which_plots in ["a", "c"]:
         path_dict=path_dict,
         specs=specs,
         params=params,
+        file_name="sim_choices",
         model_name=model_name,
         load_df=load_df,
         load_solution=load_solution,

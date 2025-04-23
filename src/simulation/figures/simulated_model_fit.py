@@ -115,6 +115,7 @@ def plot_choice_shares_single(
     specs,
     params,
     model_name,
+    file_name=None,
     load_df=True,
     load_solution=True,
     load_sol_model=True,
@@ -194,6 +195,8 @@ def plot_choice_shares_single(
                         ax.legend()
 
         axes[sex, 0].set_ylabel(f"{sex_label}; Choice shares")
+    if file_name is not None:
+        fig.savefig(path_dict["plots"] + f"{file_name}.png", transparent=True, dpi=300)
 
 
 def plot_states(

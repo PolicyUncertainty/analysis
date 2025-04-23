@@ -28,6 +28,7 @@ which_plots = input(
     " - [w]ealth\n"
     " - [i]ncome\n"
     " - [s]tates\n"
+    " - [wc]hoices and wealth\n"
 )
 
 from simulation.figures.simulated_model_fit import (
@@ -36,7 +37,7 @@ from simulation.figures.simulated_model_fit import (
     plot_states,
 )
 
-if which_plots in ["a", "c"]:
+if which_plots in ["a", "c", "wc"]:
     plot_choice_shares_single(
         path_dict=path_dict,
         specs=specs,
@@ -54,7 +55,7 @@ if which_plots in ["a", "c"]:
     load_sim_model = True
     load_sol_model = True
 
-if which_plots in ["a", "w"]:
+if which_plots in ["a", "w", "wc"]:
     plot_quantiles(
         path_dict=path_dict,
         specs=specs,

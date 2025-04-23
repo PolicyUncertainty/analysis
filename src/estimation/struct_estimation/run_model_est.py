@@ -5,6 +5,7 @@ from set_paths import create_path_dict
 
 paths_dict = create_path_dict(define_user=False)
 
+from estimation.struct_estimation.map_params_to_current import new_to_current
 from estimation.struct_estimation.scripts.estimate_setup import estimate_model
 
 params_to_estimate_names = [
@@ -49,15 +50,17 @@ params_to_estimate_names = [
     "disability_logit_high_educ",
 ]
 model_name = "disability"
-LOAD_LAST_ESTIMATE = False
+LOAD_LAST_ESTIMATE = True
 LOAD_SOL_MODEL = True
 SAVE_RESULTS = True
 USE_WEIGHTS = False
 
 if LOAD_LAST_ESTIMATE:
-    last_estimate = pkl.load(
-        open(paths_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
-    )
+    # last_estimate = pkl.load(
+    #     open(paths_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
+    # )
+    last_estimate = new_to_current(paths_dict)
+
 else:
     last_estimate = None
 

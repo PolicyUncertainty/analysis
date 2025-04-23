@@ -13,8 +13,8 @@ def new_to_current(path_dict):
     params["mu_women"] = params["mu"]
     params["job_finding_logit_period_men"] = params["job_finding_logit_age_men"]
     params["job_finding_logit_period_women"] = params["job_finding_logit_age_women"]
-    params["job_finding_logit_const_men"] -= params["job_finding_logit_age_men"] * 30
-    params["job_finding_logit_const_women"] -= (
+    params["job_finding_logit_const_men"] += params["job_finding_logit_age_men"] * 30
+    params["job_finding_logit_const_women"] += (
         params["job_finding_logit_age_women"] * 30
     )
 

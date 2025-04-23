@@ -243,7 +243,7 @@ def generate_start_states(
     return states, wealth_agents
 
 
-def draw_start_wealth_dist(start_period_data_edu, n_agents_edu, method="pareto"):
+def draw_start_wealth_dist(start_period_data_edu, n_agents_edu, method="uniform"):
     """
     Draws samples from the starting wealth distribution using different methods.
 

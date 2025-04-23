@@ -295,21 +295,36 @@ def plot_states(
                         & (data_decision["education"] == edu_var)
                     ]
 
+                    sim_shares = df_type_sim.groupby(["age"])[state_name].value_counts(
+                        normalize=True
+                    )
+
                     if state_name == "health":
                         obs_shares = df_type_obs.groupby(["age"])[
                             "surveyed_health"
                         ].value_counts(normalize=True)
+                        ages = sim_shares.index.get_level_values("age").unique()
+                        full_index = pd.MultiIndex.from_product(
+                            [ages, range(3)], names=["age", "health"]
+                        )
+                        sim_shares = sim_shares.reindex(full_index, fill_value=0)
+                        sim_shares.loc[(slice(None), 1)] = (
+                            sim_shares.loc[(slice(None), 1)].values
+                            + sim_shares.loc[(slice(None), 2)].values
+                        )
 
                     else:
                         obs_shares = df_type_obs.groupby(["age"])[
                             state_name
                         ].value_counts(normalize=True)
-                    sim_shares = df_type_sim.groupby(["age"])[state_name].value_counts(
-                        normalize=True
-                    )
 
                     for state_val in sim_shares.index.get_level_values(1).unique():
                         if (state_name == "health") and (state_val == 2):
+                            ax.plot(
+                                sim_shares.loc[(slice(None), state_val)],
+                                label=f"{state_val}",
+                                color=JET_COLOR_MAP[state_val],
+                            )
                             continue
                         else:
                             ax.plot(
@@ -323,6 +338,9 @@ def plot_states(
                             label=f"{state_val}",
                             color=JET_COLOR_MAP[state_val],
                         )
-                        ax.legend()
-                        ax.set_title(f"{sex_label}; {edu_label}")
+                    ax.legend()
+                    ax.set_title(f"{sex_label}; {edu_label}")
             fig.suptitle(state_name)
+            fig.savefig(
+                path_dict["plots"] + f"{state_name}.png", transparent=True, dpi=300
+            )

@@ -26,11 +26,11 @@ params_to_estimate_names = [
     "disutil_pt_work_low_good_women",
     "disutil_pt_work_low_bad_women",
     # Men unemployment - 2 parameters
-    # "disutil_unemployed_high_men",
-    # "disutil_unemployed_low_men",
-    # # Women Unemployment - 2 parameters
-    # "disutil_unemployed_high_women",
-    # "disutil_unemployed_low_women",
+    "disutil_unemployed_high_men",
+    "disutil_unemployed_low_men",
+    # Women Unemployment - 2 parameters
+    "disutil_unemployed_high_women",
+    "disutil_unemployed_low_women",
     # Children - 2 parameters
     "disutil_children_ft_work_low",
     "disutil_children_ft_work_high",

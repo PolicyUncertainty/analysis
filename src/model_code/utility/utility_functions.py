@@ -151,12 +151,14 @@ def disutility_work(
     is_working_full_time = choice == 3
     # partner_retired = partner_state == 0
 
+    good_health = health == options["good_health_var"]
+
     # reading parameters
     disutil_ft_work_men = (
-        params["disutil_ft_work_high_bad_men"] * health * education
-        + params["disutil_ft_work_low_bad_men"] * health * (1 - education)
-        + params["disutil_ft_work_high_good_men"] * (1 - health) * education
-        + params["disutil_ft_work_low_good_men"] * (1 - health) * (1 - education)
+        params["disutil_ft_work_high_bad_men"] * (1 - good_health) * education
+        + params["disutil_ft_work_low_bad_men"] * (1 - good_health) * (1 - education)
+        + params["disutil_ft_work_high_good_men"] * good_health * education
+        + params["disutil_ft_work_low_good_men"] * good_health * (1 - education)
     )
     disutil_unemployment_men = params[
         "disutil_unemployed_high_men"
@@ -170,16 +172,16 @@ def disutility_work(
     )
 
     disutil_ft_work_women = (
-        params["disutil_ft_work_high_bad_women"] * health * education
-        + params["disutil_ft_work_high_good_women"] * (1 - health) * education
-        + params["disutil_ft_work_low_bad_women"] * health * (1 - education)
-        + params["disutil_ft_work_low_good_women"] * (1 - health) * (1 - education)
+        params["disutil_ft_work_high_bad_women"] * (1 - good_health) * education
+        + params["disutil_ft_work_low_bad_women"] * (1 - good_health) * (1 - education)
+        + params["disutil_ft_work_high_good_women"] * good_health * education
+        + params["disutil_ft_work_low_good_women"] * good_health * (1 - education)
     )
     disutil_pt_work_women = (
-        params["disutil_pt_work_high_bad_women"] * health * education
-        + params["disutil_pt_work_high_good_women"] * (1 - health) * education
-        + params["disutil_pt_work_low_bad_women"] * health * (1 - education)
-        + params["disutil_pt_work_low_good_women"] * (1 - health) * (1 - education)
+        params["disutil_pt_work_high_bad_women"] * (1 - good_health) * education
+        + params["disutil_pt_work_low_bad_women"] * (1 - good_health) * (1 - education)
+        + params["disutil_pt_work_high_good_women"] * good_health * education
+        + params["disutil_pt_work_low_good_women"] * good_health * (1 - education)
     )
 
     disutil_children = params["disutil_children_ft_work_high"] * education + params[

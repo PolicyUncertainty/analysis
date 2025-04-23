@@ -24,10 +24,10 @@ CONSUMPTION_GRID = np.linspace(10, 100, 3)
 disutil_UNEMPLOYED_GRID = np.linspace(0.1, 0.9, 2)
 disutil_WORK_GRID = np.linspace(0.1, 0.9, 2)
 BEQUEST_SCALE = np.linspace(1, 4, 2)
-PARTNER_STATE_GRIRD = np.array([0, 1, 2], dtype=int)
+PARTNER_STATE_GRIRD = np.array([0, 1], dtype=int)
 NB_CHILDREN_GRID = np.arange(0, 2, 0.5, dtype=int)
 EDUCATION_GRID = np.array([0, 1], dtype=int)
-HEALTH_GRID = np.array([0, 1], dtype=int)
+HEALTH_GRID = np.array([0, 1, 2], dtype=int)
 PERIOD_GRID = np.arange(0, 15, 5, dtype=int)
 SEX_GRID = np.array([0, 1], dtype=int)
 
@@ -125,9 +125,9 @@ def test_utility_func(
     )
 
     # Read out disutil params
-    health_str = "good" * (1 - health) + "bad" * health
-    sex_str = "women" * sex + "men" * (1 - sex)
-    edu_str = "high" * education + "low" * (1 - education)
+    health_str = "good" if health == 0 else "bad"
+    sex_str = "men" if sex == 0 else "women"
+    edu_str = "low" if education == 0 else "high"
 
     disutil_unemployment = np.exp(-params[f"disutil_unemployed_{edu_str}_{sex_str}"])
 

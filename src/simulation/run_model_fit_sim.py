@@ -11,7 +11,7 @@ specs = generate_derived_and_data_derived_specs(path_dict)
 
 
 model_name = "disability"
-load_df = True
+load_df = None
 load_solution = True
 load_sim_model = True
 load_sol_model = True

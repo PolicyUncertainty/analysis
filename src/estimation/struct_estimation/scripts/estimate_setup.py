@@ -17,11 +17,11 @@ from estimation.struct_estimation.scripts.std_errors import (
 from estimation.struct_estimation.start_params_and_bounds.set_start_params import (
     load_and_set_start_params,
 )
-from model_code.policy_processes.policy_states_belief import (
-    update_specs_exp_ret_age_trans_mat,
-)
 from model_code.specify_model import specify_model
 from model_code.unobserved_state_weighting import create_unobserved_state_specs
+from process_data.structural_sample_scripts.create_structural_est_sample import (
+    CORE_TYPE_DICT,
+)
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
@@ -201,7 +201,8 @@ class est_class_from_paths:
 def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):
     specs = generate_derived_and_data_derived_specs(path_dict)
     # Load data
-    data_decision = pd.read_pickle(path_dict["struct_est_sample"])
+    data_decision = pd.read_csv(path_dict["struct_est_sample"])
+    data_decision = data_decision.astype(CORE_TYPE_DICT)
 
     # We need to filter observations in period 0 because of job offer weighting from last period
     data_decision = data_decision[data_decision["period"] > 0]

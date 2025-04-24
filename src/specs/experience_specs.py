@@ -15,9 +15,7 @@ def create_max_experience(path_dict, specs, load_precomputed):
         )
     else:
         # max initial experience
-        data_decision = pd.read_pickle(
-            path_dict["intermediate_data"] + "structural_estimation_sample.pkl"
-        )
+        data_decision = pd.read_csv(path_dict["struct_est_sample"])
         max_exp_diff_data = (
             data_decision["experience"] - data_decision["period"]
         ).max()

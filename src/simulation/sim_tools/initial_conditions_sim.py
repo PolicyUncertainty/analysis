@@ -15,9 +15,7 @@ def generate_start_states(
 ):
     specs = model["options"]["model_params"]
 
-    observed_data = pd.read_pickle(
-        path_dict["intermediate_data"] + "structural_estimation_sample.pkl"
-    )
+    observed_data = pd.read_csv(path_dict["struct_est_sample"])
 
     np.random.seed(seed)
     # Define start data and adjust wealth

@@ -44,6 +44,22 @@ from process_data.structural_sample_scripts.policy_state import (
     create_SRA_by_gebjahr,
 )
 
+CORE_TYPE_DICT = {
+    "period": "int8",
+    "choice": "int8",
+    "lagged_choice": "int8",
+    "informed": "int8",
+    "policy_state": "int8",
+    "policy_state_value": "float32",
+    "partner_state": "int8",
+    "job_offer": "int8",
+    "experience": "int8",
+    "wealth": "float32",
+    "education": "int8",
+    "sex": "int8",
+    "health": "int8",
+}
+
 
 def create_structural_est_sample(
     paths,
@@ -56,10 +72,8 @@ def create_structural_est_sample(
     if not os.path.exists(paths["intermediate_data"]):
         os.makedirs(paths["intermediate_data"])
 
-    out_file_path = paths["intermediate_data"] + "structural_estimation_sample.pkl"
-
     if load_data:
-        df = pd.read_pickle(out_file_path)
+        df = pd.read_csv(paths["struct_est_sample"])
         return df
 
     # Load and merge data state data from SOEP core (all but wealth)
@@ -162,32 +176,15 @@ def create_structural_est_sample(
 
     df["hh_net_income"] /= specs["wealth_unit"]
 
-    # Keep relevant columns (i.e. state variables) and set their minimal datatype
-    core_type_dict = {
-        "period": "int8",
-        "choice": "int8",
-        "lagged_choice": "int8",
-        "informed": "int8",
-        "policy_state": "int8",
-        "policy_state_value": "float32",
-        "partner_state": "int8",
-        "job_offer": "int8",
-        "experience": "int8",
-        "wealth": "float32",
-        "education": "int8",
-        "sex": "int8",
-        "health": "int8",
-    }
-
     # Drop observations if any of core variables are nan
     # We also delete now the observations with invalid data, which we left before to have a continuous panel
     df = drop_missings(
         df=df,
-        vars_to_check=list(core_type_dict.keys()),
+        vars_to_check=list(CORE_TYPE_DICT.keys()),
     )
 
     all_type_dict = {
-        **core_type_dict,
+        **CORE_TYPE_DICT,
         **type_dict_add,
     }
     df = df[list(all_type_dict.keys())]
@@ -197,7 +194,7 @@ def create_structural_est_sample(
 
     # Anonymize and save data
     df.reset_index(drop=True, inplace=True)
-    df.to_pickle(out_file_path)
+    df.to_csv(paths["struct_est_sample"])
 
     return df
 

@@ -1,11 +1,12 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
 def plot_average_wealth_by_type(path_dict):
-    struct_est_sample = pd.read_pickle(path_dict["struct_est_sample"])
+    struct_est_sample = pd.read_csv(path_dict["struct_est_sample"])
 
     specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
     struct_est_sample["age"] = struct_est_sample["period"] + specs["start_age"]

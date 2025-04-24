@@ -140,9 +140,7 @@ def plot_choice_shares_single(
         sim_model_exists=load_sim_model,
     ).reset_index()
 
-    data_decision = pd.read_pickle(
-        path_dict["intermediate_data"] + "structural_estimation_sample.pkl"
-    )
+    data_decision = pd.read_csv(path_dict["struct_est_sample"])
 
     data_decision["age"] = data_decision["period"] + specs["start_age"]
     data_sim["age"] = data_sim["period"] + specs["start_age"]
@@ -225,9 +223,7 @@ def plot_states(
         sim_model_exists=load_sim_model,
     ).reset_index()
 
-    data_decision = pd.read_pickle(
-        path_dict["intermediate_data"] + "structural_estimation_sample.pkl"
-    )
+    data_decision = pd.read_csv(path_dict["struct_est_sample"])
 
     data_decision["age"] = data_decision["period"] + specs["start_age"]
     data_sim["age"] = data_sim["period"] + specs["start_age"]

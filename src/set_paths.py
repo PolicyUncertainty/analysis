@@ -78,7 +78,7 @@ def create_path_dict(define_user=False, user=None):
 
     # Assign name of structural estimation sample
     paths_dict["struct_est_sample"] = (
-        paths_dict["intermediate_data"] + "structural_estimation_sample.pkl"
+        paths_dict["intermediate_data"] + "structural_estimation_sample.csv"
     )
 
     return paths_dict

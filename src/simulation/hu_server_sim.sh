@@ -7,8 +7,8 @@
 #SBATCH --ntasks=1
 #SBATCH --time=0:30:00
 #SBATCH --mem=50GB
-#SBATCH --partition=gpu_h100
-#SBATCH --gres=gpu:h100nvl:1
+#SBATCH --partition=gpu_a100
+#SBATCH --gres=gpu:1
 #SBATCH --qos=standard
 
 module add cuda/12.4.1

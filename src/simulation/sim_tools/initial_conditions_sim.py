@@ -35,50 +35,6 @@ def generate_start_states(
         model=model,
     )
 
-    # # Define unique values
-    # education_levels = start_period_data["education"].unique()
-    # sexes = start_period_data["sex"].unique()
-    # periods = sorted(start_period_data["period"].unique())
-
-    # # Compute 99th percentile threshold for adjusted_wealth
-    # wealth_99 = np.percentile(start_period_data["adjusted_wealth"], 99)
-
-    # # Filter out top 1%
-    # filtered_data = start_period_data[start_period_data["adjusted_wealth"] <= wealth_99]
-
-    # # Create a figure with 4 subplots (one for each period)
-    # fig, axes = plt.subplots(2, 2, figsize=(15, 12), sharex=True, sharey=True)
-
-    # # Plot distributions separately for each period
-    # for period, ax in zip(periods, axes.flatten()):
-    #     subset = filtered_data[filtered_data["period"] == period]
-
-    #     for edu in education_levels:
-    #         for sex in sexes:
-    #             sub_subset = subset[(subset["education"] == edu) & (subset["sex"] == sex)]
-
-    #             if not sub_subset.empty:
-    #                 sns.histplot(
-    #                     data=sub_subset,
-    #                     x="adjusted_wealth",
-    #                     bins=30,
-    #                     ax=ax,
-    #                     alpha=0.3,  # Translucent bars
-    #                     kde=True,  # Add KDE
-    #                     label=f"Edu: {edu}, Sex: {sex}"
-    #                 )
-
-    #     ax.set_title(f"Period {period}")
-    #     ax.set_xlabel("Adjusted Wealth")
-    #     ax.set_ylabel("Density / Count")
-    #     ax.legend(title="Groups")
-
-    # # Adjust layout and show the plot
-    # plt.tight_layout()
-    # plt.show()
-
-    # breakpoint()
-
     # Generate container
     sex_agents = np.array([], np.uint8)
     education_agents = np.array([], np.uint8)
@@ -129,7 +85,7 @@ def generate_start_states(
             # Restrict dataset on education level
 
             wealth_start_edu = draw_start_wealth_dist(
-                start_period_data_edu, n_agents_edu, method="kde"
+                start_period_data_edu, n_agents_edu, method="uniform"
             )
             wealth_agents[type_mask] = wealth_start_edu
 
@@ -301,3 +257,47 @@ def draw_start_wealth_dist(start_period_data_edu, n_agents_edu, method="uniform"
         )
 
     return wealth_start_edu
+
+    # # Define unique values
+    # education_levels = start_period_data["education"].unique()
+    # sexes = start_period_data["sex"].unique()
+    # periods = sorted(start_period_data["period"].unique())
+
+    # # Compute 99th percentile threshold for adjusted_wealth
+    # wealth_99 = np.percentile(start_period_data["adjusted_wealth"], 99)
+
+    # # Filter out top 1%
+    # filtered_data = start_period_data[start_period_data["adjusted_wealth"] <= wealth_99]
+
+    # # Create a figure with 4 subplots (one for each period)
+    # fig, axes = plt.subplots(2, 2, figsize=(15, 12), sharex=True, sharey=True)
+
+    # # Plot distributions separately for each period
+    # for period, ax in zip(periods, axes.flatten()):
+    #     subset = filtered_data[filtered_data["period"] == period]
+
+    #     for edu in education_levels:
+    #         for sex in sexes:
+    #             sub_subset = subset[(subset["education"] == edu) & (subset["sex"] == sex)]
+
+    #             if not sub_subset.empty:
+    #                 sns.histplot(
+    #                     data=sub_subset,
+    #                     x="adjusted_wealth",
+    #                     bins=30,
+    #                     ax=ax,
+    #                     alpha=0.3,  # Translucent bars
+    #                     kde=True,  # Add KDE
+    #                     label=f"Edu: {edu}, Sex: {sex}"
+    #                 )
+
+    #     ax.set_title(f"Period {period}")
+    #     ax.set_xlabel("Adjusted Wealth")
+    #     ax.set_ylabel("Density / Count")
+    #     ax.legend(title="Groups")
+
+    # # Adjust layout and show the plot
+    # plt.tight_layout()
+    # plt.show()
+
+    # breakpoint()

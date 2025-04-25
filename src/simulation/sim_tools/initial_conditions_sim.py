@@ -129,7 +129,7 @@ def generate_start_states(
             # Restrict dataset on education level
 
             wealth_start_edu = draw_start_wealth_dist(
-                start_period_data_edu, n_agents_edu
+                start_period_data_edu, n_agents_edu, method="kde"
             )
             wealth_agents[type_mask] = wealth_start_edu
 

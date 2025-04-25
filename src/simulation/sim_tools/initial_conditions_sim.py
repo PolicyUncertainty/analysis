@@ -22,12 +22,17 @@ def generate_start_states(
     min_period = observed_data["period"].min()
     start_period_data = observed_data[observed_data["period"].isin([min_period])].copy()
 
+    # Read out states for wealth adjustment
     states_dict = {
         name: start_period_data[name].values
         for name in model["model_structure"]["discrete_states_names"]
     }
+    # Transform experience for wealth adjustment
+    periods = start_period_data["period"].values
+    max_init_exp = model["options"]["model_params"]["max_exp_diffs_per_period"][periods]
+    exp_denominator = periods + max_init_exp
+    states_dict["experience"] = start_period_data["experience"].values / exp_denominator
     states_dict["wealth"] = start_period_data["wealth"].values / specs["wealth_unit"]
-    states_dict["experience"] = start_period_data["experience"].values
 
     start_period_data.loc[:, "adjusted_wealth"] = adjust_observed_wealth(
         observed_states_dict=states_dict,
@@ -194,6 +199,7 @@ def generate_start_states(
         "job_offer": jnp.array(job_offer_agents, dtype=jnp.uint8),
         "partner_state": jnp.array(partner_states, dtype=jnp.uint8),
     }
+
     return states, wealth_agents
 
 

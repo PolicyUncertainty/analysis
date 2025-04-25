@@ -199,12 +199,14 @@ def generate_start_states(
         "job_offer": jnp.array(job_offer_agents, dtype=jnp.uint8),
         "partner_state": jnp.array(partner_states, dtype=jnp.uint8),
     }
-    # Code to compare wealth
+    # # Code to compare wealth
     # df = pd.DataFrame(states)
     # df["wealth"] = wealth_agents
-    # df.groupby(["sex", "education"])["wealth"].describe().loc[(0, 0)]
-    # start_period_data.groupby(["sex", "education"])["adjusted_wealth"].describe().loc[(0, 0)]
     # breakpoint()
+    # # Make histogram of wealth
+    # df.groupby(["sex", "education"])["wealth"].hist(bins=30, alpha=0.5, legend=True, density=True)
+    # start_period_data.groupby(["sex", "education"])["adjusted_wealth"].describe().quantiles(np.arange(0, 1, 0.1)).loc[(0, 0)].plot()
+    # plt.show()
 
     return states, wealth_agents
 

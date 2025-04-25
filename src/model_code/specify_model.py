@@ -184,17 +184,17 @@ def specify_and_solve_model(
     )
 
     # Code for debugging inital states. Can call it without solution
-    # from simulation.sim_tools.initial_conditions_sim import generate_start_states
-    #
-    # initial_states, wealth_agents = generate_start_states(
-    #     path_dict=path_dict,
-    #     params=params,
-    #     model=model,
-    #     inital_SRA=65,
-    #     n_agents=model["options"]["model_params"]["n_agents"],
-    #     seed=123,
-    #     only_informed=True,
-    # )
+    from simulation.sim_tools.initial_conditions_sim import generate_start_states
+
+    initial_states, wealth_agents = generate_start_states(
+        path_dict=path_dict,
+        params=params,
+        model=model,
+        inital_SRA=65,
+        n_agents=model["options"]["model_params"]["n_agents"],
+        seed=123,
+        only_informed=True,
+    )
 
     # check if folder of model objects exits:
     solve_folder = get_model_resutls_path(path_dict, file_append)

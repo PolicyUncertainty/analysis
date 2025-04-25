@@ -90,7 +90,7 @@ def generate_start_states(
             # Restrict dataset on education level
 
             wealth_start_edu = draw_start_wealth_dist(
-                start_period_data_edu, n_agents_edu, method="uniform"
+                start_period_data_edu, n_agents_edu, method="kde"
             )
             wealth_agents[type_mask] = wealth_start_edu
 
@@ -199,6 +199,12 @@ def generate_start_states(
         "job_offer": jnp.array(job_offer_agents, dtype=jnp.uint8),
         "partner_state": jnp.array(partner_states, dtype=jnp.uint8),
     }
+    # Code to compare wealth
+    # df = pd.DataFrame(states)
+    # df["wealth"] = wealth_agents
+    # df.groupby(["sex", "education"])["wealth"].describe().loc[(0, 0)]
+    # start_period_data.groupby(["sex", "education"])["adjusted_wealth"].describe().loc[(0, 0)]
+    # breakpoint()
 
     return states, wealth_agents
 
@@ -223,6 +229,7 @@ def draw_start_wealth_dist(start_period_data_edu, n_agents_edu, method="uniform"
     """
 
     wealth_data = start_period_data_edu["adjusted_wealth"]
+    min_wealth = wealth_data.values.min()
 
     if method == "uniform":
         # Existing uniform sampling between 30th and 70th quantiles
@@ -261,6 +268,8 @@ def draw_start_wealth_dist(start_period_data_edu, n_agents_edu, method="uniform"
         raise ValueError(
             "Invalid method. Choose 'uniform', 'lognormal', 'kde', or 'pareto'."
         )
+
+    wealth_start_edu[wealth_start_edu < min_wealth] = min_wealth
 
     return wealth_start_edu
 

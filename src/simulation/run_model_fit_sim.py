@@ -13,8 +13,8 @@ specs = generate_derived_and_data_derived_specs(path_dict)
 
 model_name = "disability"
 load_df = None
-load_solution = None
-load_sim_model = False
+load_solution = True
+load_sim_model = True
 load_sol_model = True
 
 
@@ -33,7 +33,7 @@ params = new_to_current(path_dict)
 #     " - [s]tates\n"
 #     " - [wc]hoices and wealth\n"
 # )
-which_plots = "a"
+which_plots = "wc"
 
 from simulation.figures.simulated_model_fit import (
     plot_choice_shares_single,

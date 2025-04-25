@@ -1,6 +1,7 @@
 # %% Set paths of project
 import pickle
 
+import jax
 import matplotlib.pyplot as plt
 
 from estimation.struct_estimation.map_params_to_current import new_to_current
@@ -18,11 +19,11 @@ load_sim_model = True
 load_sol_model = True
 
 
-# params = pickle.load(
-#     open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
-# )
+params = pickle.load(
+    open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
+)
 
-params = new_to_current(path_dict)
+# params = new_to_current(path_dict)
 
 # which_plots = input(
 #     "Which plots do you want to show?\n \n"
@@ -34,6 +35,7 @@ params = new_to_current(path_dict)
 #     " - [wc]hoices and wealth\n"
 # )
 which_plots = "wc"
+print(jax.devices())
 
 from simulation.figures.simulated_model_fit import (
     plot_choice_shares_single,

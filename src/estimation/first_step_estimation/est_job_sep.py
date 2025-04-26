@@ -3,6 +3,7 @@ import pickle as pkl
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
+
 from process_data.first_step_sample_scripts.create_job_sep_sample import (
     create_job_sep_sample,
 )
@@ -31,15 +32,15 @@ def est_job_for_sample(df_job, specs):
     # Create solution containers
     job_sep_params = pd.DataFrame(index=index, columns=["age", "age_sq", "const"])
 
-    # Estimate job separation probabilities until max retirement age
-    n_working_age = specs["max_ret_age"] - specs["start_age"] + 1
+    # Estimate job separation probabilities until max retirement age. We will generate an array starting
+    # with age 0 to be able to use age as index
+    working_ages = np.arange(0, specs["max_ret_age"])
+
     job_sep_probs = np.zeros(
-        (specs["n_sexes"], specs["n_education_types"], n_working_age), dtype=float
+        (specs["n_sexes"], specs["n_education_types"], len(working_ages)), dtype=float
     )
 
-    max_age_labor = specs["max_est_age_labor"]
-    max_period_labor = max_age_labor - specs["start_age"]
-    df_job = df_job[df_job["age"] <= max_age_labor]
+    df_job = df_job[df_job["age"] <= specs["max_est_age_labor"]]
 
     # Loop over sexes
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
@@ -59,17 +60,16 @@ def est_job_for_sample(df_job, specs):
             job_sep_params.loc[(sex_label, edu_label), :] = results.params
             # Calculate job sep for each age
             ages = np.sort(df_job_edu["age"].unique())
+
             exp_factor = (
                 job_sep_params.loc[(sex_label, edu_label), "const"]
                 + job_sep_params.loc[(sex_label, edu_label), "age"] * ages
                 + job_sep_params.loc[(sex_label, edu_label), "age_sq"] * ages**2
             )
             job_sep_probs_group = 1 / (1 + np.exp(-exp_factor))
-            job_sep_probs[
-                sex_var, edu_var, : max_period_labor + 1
-            ] = job_sep_probs_group
-            job_sep_probs[
-                sex_var, edu_var, max_period_labor + 1 :
-            ] = job_sep_probs_group[-1]
+            job_sep_probs[sex_var, edu_var, ages] = job_sep_probs_group
+            job_sep_probs[sex_var, edu_var, specs["max_est_age_labor"] + 1 :] = (
+                job_sep_probs_group[-1]
+            )
 
     return job_sep_probs, job_sep_params

@@ -22,9 +22,10 @@ def add_informed_process_specs(specs, path_dict):
     initial_shares = np.zeros(n_edu_types, dtype=float)
 
     # Get working ages and also number of working ages
-    working_ages = np.arange(specs["start_age"], specs["max_ret_age"] + 1)
-    n_working_ages = len(working_ages)
-    informed_shares = np.zeros((n_working_ages, n_edu_types), dtype=float)
+    ages_until_max_ret = np.arange(0, specs["max_ret_age"] + 1)
+    informed_shares_in_ages = np.zeros(
+        (len(ages_until_max_ret), n_edu_types), dtype=float
+    )
     for edu_val, edu_label in enumerate(specs["education_labels"]):
         uninformed_penalties[edu_val] = (
             df_uninformed_penalties.loc["erp_uninformed_belief", edu_label] / 100
@@ -35,10 +36,12 @@ def add_informed_process_specs(specs, path_dict):
         initial_shares[edu_val] = df_informed_hazard_rate.loc[
             "initial_informed_share", edu_label
         ]
-        informed_shares[:, edu_val] = df_predicted_shares.loc[working_ages, edu_label]
+        predicted_ages = df_predicted_shares.index.values
+        informed_shares_in_ages[predicted_ages, edu_val] = df_predicted_shares.loc[
+            predicted_ages, edu_label
+        ]
 
     specs["uninformed_ERP"] = jnp.asarray(uninformed_penalties)
     specs["informed_hazard_rate"] = jnp.asarray(informed_hazard_rate)
-    specs["initial_informed_shares"] = jnp.asarray(initial_shares)
-    specs["informed_shares"] = jnp.asarray(informed_shares)
+    specs["informed_shares_in_ages"] = jnp.asarray(informed_shares_in_ages)
     return specs

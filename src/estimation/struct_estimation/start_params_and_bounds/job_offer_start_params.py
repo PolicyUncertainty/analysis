@@ -18,11 +18,10 @@ def est_job_offer_params_full_obs(df, specs):
 
     logit_df = logit_df[logit_df["age"] < 65]
     logit_df["intercept"] = 1
-    logit_df["period"] = logit_df["age"] - specs["start_age"]
 
     logit_vars = [
         "intercept",
-        "period",
+        "age",
         "education",
     ]
 
@@ -38,7 +37,7 @@ def est_job_offer_params_full_obs(df, specs):
 
         gender_params = {
             f"job_finding_logit_const_{sex_append}": params["intercept"],
-            f"job_finding_logit_period_{sex_append}": params["period"],
+            f"job_finding_logit_age_{sex_append}": params["age"],
             f"job_finding_logit_high_educ_{sex_append}": params["education"],
         }
         job_offer_params = {**job_offer_params, **gender_params}

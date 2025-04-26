@@ -39,13 +39,13 @@ lambda: 5
 # taste_shock_scale_women: 2
 bequest_scale: 5
 job_finding_logit_const_men: 5
-job_finding_logit_period_men: 0.5
+job_finding_logit_age_men: 0.5
 job_finding_logit_high_educ_men: 5
 job_finding_logit_const_women: 5
-job_finding_logit_period_women: 0.5
+job_finding_logit_age_women: 0.5
 job_finding_logit_high_educ_women: 5
 
 # Disability probability
 disability_logit_const: 5
-disability_logit_period: 0.5
+disability_logit_age: 0.5
 disability_logit_high_educ: 5

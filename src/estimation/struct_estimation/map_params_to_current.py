@@ -38,3 +38,22 @@ def new_to_current(path_dict):
     params["disability_logit_period"] = params_start["disability_logit_period"]
     params["disability_logit_high_educ"] = params_start["disability_logit_high_educ"]
     return params
+
+
+def map_period_to_age(params):
+    """Map period to age for the params dictionary."""
+    params["job_finding_logit_const_women"] -= (
+        params["job_finding_logit_period_women"] * 30
+    )
+    params["job_finding_logit_age_women"] = params["job_finding_logit_period_women"]
+    params.pop("job_finding_logit_period_women")
+
+    params["job_finding_logit_const_men"] -= params["job_finding_logit_period_men"] * 30
+    params["job_finding_logit_age_men"] = params["job_finding_logit_period_men"]
+    params.pop("job_finding_logit_period_men")
+
+    params["disability_logit_const"] -= params["disability_logit_period"] * 30
+    params["disability_logit_age"] = params["disability_logit_period"]
+    params.pop("disability_logit_period")
+
+    return params

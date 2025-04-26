@@ -18,8 +18,10 @@ def create_unobserved_state_specs(data_decision, model):
 
         # For the informed state we use the share of this period. The period in the kwargs is the one from
         # before (see assignment below).
-        this_period = kwargs["period"] + 1
-        informed_share = options["informed_shares"][this_period, kwargs["education"]]
+        current_age = options["start_age"] + kwargs["period"] + 1
+        informed_share = options["informed_shares_in_ages"][
+            current_age, kwargs["education"]
+        ]
         informed_new = kwargs["informed_new"]
         informed_weight = informed_share * informed_new + (1 - informed_share) * (
             1 - informed_new
@@ -32,6 +34,7 @@ def create_unobserved_state_specs(data_decision, model):
             params=kwargs["params"],
             period=kwargs["period"],
             education=kwargs["education"],
+            options=kwargs["options"],
         )
         disabled = kwargs["health_new"] == 2
         bad_health = kwargs["health_new"] == 1
@@ -48,6 +51,7 @@ def create_unobserved_state_specs(data_decision, model):
         "education": data_decision["education"].values,
         "sex": data_decision["sex"].values,
     }
+
     unobserved_state_specs = {
         "observed_bools_states": {
             "job_offer": (data_decision["job_offer"] > -1).values,

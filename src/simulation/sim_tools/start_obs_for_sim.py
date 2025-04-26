@@ -7,7 +7,6 @@ import scipy.stats as stats
 import seaborn as sns
 from dcegm.pre_processing.shared import create_array_with_smallest_int_dtype
 from dcegm.wealth_correction import adjust_observed_wealth
-from sklearn.neighbors import KernelDensity
 
 from model_code.stochastic_processes.health_transition import (
     calc_disability_probability,
@@ -77,7 +76,9 @@ def generate_start_states_from_obs(
         )
 
         # Draw informed state
-        informed_share_edu = specs["initial_informed_shares"][education]
+        informed_share_edu = specs["informed_shares_in_ages"][
+            specs["start_age"], education
+        ]
         # Draw informed states according to inital distribution
         dist = jnp.array([1 - informed_share_edu, informed_share_edu])
         informed_draws_edu = jax.random.choice(
@@ -89,6 +90,7 @@ def generate_start_states_from_obs(
             params=params,
             period=jnp.array(-1, dtype=int),
             education=education,
+            options=specs,
         )
         # 2 Disability, 1 is bad health
         prob_vector = jnp.array([1 - disability_prob, disability_prob])
@@ -114,9 +116,6 @@ def generate_start_states_from_obs(
         random_keys,
     )
 
-    # Overwrite health with surveyed health
-    states_dict["health"] = start_period_data["surveyed_health"].values
-
     # Multiply all states in state dict
     states_dict = {
         name: np.repeat(states_dict[name], n_multiply_start_obs)
@@ -135,6 +134,16 @@ def generate_start_states_from_obs(
 
     states_dict["job_offer"] = job_offers.flatten()
     states_dict["health"] = health_agents.flatten()
+
+    # Generate start policy state from initial SRA
+    initial_policy_state = np.floor(
+        (inital_SRA - specs["min_SRA"]) / specs["SRA_grid_size"]
+    )
+
+    policy_state_agents = (
+        jnp.ones_like(states_dict["health"]) * initial_policy_state
+    ).astype(jnp.uint8)
+    states_dict["policy_state"] = policy_state_agents
 
     initial_states = jax.tree.map(create_array_with_smallest_int_dtype, states_dict)
 

@@ -77,16 +77,10 @@ def read_in_health_transition_specs(paths_dict, specs):
     health_trans_mat[:, :, :, death_health_var, death_health_var] = 1
 
     # Now assign probabilities to disabled state. It will be scaled with the
-    # real probabilities in params later. Here we fill it up, with all mass on
-    # zero chance to enter the disabled state
-    health_trans_mat[:, :, :, disabled_health_var, good_health_var] = health_trans_mat[
-        :, :, :, bad_health_var, good_health_var
-    ]
-    health_trans_mat[:, :, :, disabled_health_var, disabled_health_var] = (
-        health_trans_mat[:, :, :, bad_health_var, bad_health_var]
-    )
-    health_trans_mat[:, :, :, disabled_health_var, death_health_var] = health_trans_mat[
-        :, :, :, bad_health_var, death_health_var
+    # real probabilities in params later. Here we assign the same probability row
+    # as the bad health state
+    health_trans_mat[:, :, :, disabled_health_var, :] = health_trans_mat[
+        :, :, :, bad_health_var, :
     ]
 
     return jnp.asarray(health_trans_mat)

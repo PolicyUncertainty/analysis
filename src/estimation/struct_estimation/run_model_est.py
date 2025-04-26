@@ -5,7 +5,7 @@ from set_paths import create_path_dict
 
 paths_dict = create_path_dict(define_user=False)
 
-from estimation.struct_estimation.map_params_to_current import new_to_current
+from estimation.struct_estimation.map_params_to_current import map_period_to_age
 from estimation.struct_estimation.scripts.estimate_setup import estimate_model
 
 params_to_estimate_names = [
@@ -38,15 +38,15 @@ params_to_estimate_names = [
     "lambda",
     # Men job finding - 3 parameters
     "job_finding_logit_const_men",
-    "job_finding_logit_period_men",
+    "job_finding_logit_age_men",
     "job_finding_logit_high_educ_men",
     # Women job finding - 3 parameters
     "job_finding_logit_const_women",
-    "job_finding_logit_period_women",
+    "job_finding_logit_age_women",
     "job_finding_logit_high_educ_women",
     # Disability probability
     "disability_logit_const",
-    "disability_logit_period",
+    "disability_logit_age",
     "disability_logit_high_educ",
 ]
 model_name = "disability"
@@ -59,6 +59,7 @@ if LOAD_LAST_ESTIMATE:
     last_estimate = pkl.load(
         open(paths_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
     )
+    last_estimate = map_period_to_age(last_estimate)
 
 else:
     last_estimate = None

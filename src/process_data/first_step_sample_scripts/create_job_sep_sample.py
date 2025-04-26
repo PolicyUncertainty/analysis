@@ -2,7 +2,12 @@ import os
 
 import numpy as np
 import pandas as pd
-from process_data.aux_and_plots.filter_data import filter_data
+
+from process_data.aux_and_plots.filter_data import (
+    filter_below_age,
+    filter_years,
+    recode_sex,
+)
 from process_data.aux_and_plots.lagged_and_lead_vars import (
     create_lagged_and_lead_variables,
 )
@@ -24,8 +29,16 @@ def create_job_sep_sample(paths, specs, load_data=False):
     # Load and merge data state data from SOEP core
     df = load_and_merge_soep_core(paths["soep_c38"])
 
-    # filter data (age, sex, estimation period)
-    df = filter_data(df, specs)
+    # We actually need the probablity to be fired for 1 year earlier,
+    # to be able to integrate in the likelihood for unobserved 30-year olds.
+    min_age_job_seps = specs["start_age"] - 1
+
+    # Leave addtional age for leading
+    df = filter_below_age(df, min_age_job_seps - 1)
+
+    df = recode_sex(df)
+
+    df = filter_years(df, specs["start_year"] - 1, specs["end_year"] + 1)
 
     # create choice and lagged choice variable
     df = create_choice_variable(df)
@@ -62,7 +75,7 @@ def create_job_sep_sample(paths, specs, load_data=False):
     # Rename age fired to age
     df.rename(columns={"age_fired": "age"}, inplace=True)
     # Limit age range to start age and maximum retirement age
-    df = df[(df["age"] >= specs["start_age"]) & (df["age"] <= specs["max_ret_age"])]
+    df = df[(df["age"] >= min_age_job_seps) & (df["age"] <= specs["max_ret_age"])]
     print(f"{len(df)} observations in job separation sample.")
 
     # save data

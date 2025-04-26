@@ -96,7 +96,9 @@ def draw_initial_states(
             wealth_agents[type_mask] = wealth_start_edu
 
             # Generate edu specific informed shares
-            informed_share_edu = specs["initial_informed_shares"][edu]
+            informed_share_edu = specs["informed_shares_in_ages"][
+                specs["start_age"], edu
+            ]
             # Draw informed states according to inital distribution
             dist = np.array([1 - informed_share_edu, informed_share_edu])
             informed_draws_edu = np.random.choice(2, n_agents_edu, p=dist)

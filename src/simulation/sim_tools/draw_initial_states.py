@@ -10,10 +10,11 @@ from sklearn.neighbors import KernelDensity
 from model_code.stochastic_processes.job_offers import job_offer_process_transition
 
 
-def generate_start_states(
-    path_dict, params, model, inital_SRA, n_agents, seed, only_informed=False
+def draw_initial_states(
+    path_dict, params, model, inital_SRA, seed, only_informed=False
 ):
     specs = model["options"]["model_params"]
+    n_agents = specs["n_agents"]
 
     observed_data = pd.read_csv(path_dict["struct_est_sample"])
 
@@ -199,14 +200,6 @@ def generate_start_states(
         "job_offer": jnp.array(job_offer_agents, dtype=jnp.uint8),
         "partner_state": jnp.array(partner_states, dtype=jnp.uint8),
     }
-    # # Code to compare wealth
-    # df = pd.DataFrame(states)
-    # df["wealth"] = wealth_agents
-    # breakpoint()
-    # # Make histogram of wealth
-    # df.groupby(["sex", "education"])["wealth"].hist(bins=30, alpha=0.5, legend=True, density=True)
-    # start_period_data.groupby(["sex", "education"])["adjusted_wealth"].describe().quantiles(np.arange(0, 1, 0.1)).loc[(0, 0)].plot()
-    # plt.show()
 
     return states, wealth_agents
 

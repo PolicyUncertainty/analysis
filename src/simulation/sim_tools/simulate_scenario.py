@@ -5,7 +5,8 @@ from dcegm.simulation.simulate import simulate_all_periods
 from model_code.specify_model import specify_and_solve_model, specify_model
 from model_code.state_space.experience import construct_experience_years
 from set_paths import get_model_resutls_path
-from simulation.sim_tools.initial_conditions_sim import generate_start_states
+from simulation.sim_tools.draw_initial_states import draw_initial_states
+from simulation.sim_tools.start_obs_for_sim import generate_start_states_from_obs
 from specs.derive_specs import read_and_derive_specs
 
 
@@ -96,7 +97,6 @@ def solve_and_simulate_scenario(
         data_sim = simulate_scenario(
             path_dict=path_dict,
             params=params,
-            n_agents=model_params["n_agents"],
             seed=model_params["seed"],
             custom_resolution_age=custom_resolution_age,
             sim_alpha=sim_alpha,
@@ -117,7 +117,6 @@ def solve_and_simulate_scenario(
 
 def simulate_scenario(
     path_dict,
-    n_agents,
     seed,
     params,
     custom_resolution_age,
@@ -144,19 +143,27 @@ def simulate_scenario(
 
     options = model_of_solution["options"]
 
-    initial_states, wealth_agents = generate_start_states(
+    # initial_states, wealth_agents = draw_initial_states(
+    #     path_dict=path_dict,
+    #     params=params,
+    #     model=model_of_solution,
+    #     inital_SRA=initial_SRA,
+    #     seed=seed,
+    #     only_informed=only_informed,
+    # )
+
+    initial_states, initial_wealth = generate_start_states_from_obs(
         path_dict=path_dict,
         params=params,
         model=model_of_solution,
         inital_SRA=initial_SRA,
-        n_agents=n_agents,
         seed=seed,
         only_informed=only_informed,
     )
 
     sim_dict = simulate_all_periods(
         states_initial=initial_states,
-        wealth_initial=wealth_agents,
+        wealth_initial=initial_wealth,
         n_periods=options["model_params"]["n_periods"],
         params=params,
         seed=seed,

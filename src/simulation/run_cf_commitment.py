@@ -24,7 +24,6 @@ from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 
 # %%
 # Set specifications
-n_agents = 10000
 seeed = 123
 model_name = "disability"
 load_base_solution = True  # baseline solution conntainer

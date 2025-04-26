@@ -4,7 +4,7 @@ import pickle
 import jax
 import matplotlib.pyplot as plt
 
-from estimation.struct_estimation.map_params_to_current import new_to_current
+from estimation.struct_estimation.map_params_to_current import map_period_to_age
 from set_paths import create_path_dict
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
@@ -13,7 +13,7 @@ specs = generate_derived_and_data_derived_specs(path_dict)
 
 
 model_name = "disability"
-load_df = True
+load_df = False
 load_solution = True
 load_sim_model = True
 load_sol_model = True
@@ -22,6 +22,7 @@ load_sol_model = True
 params = pickle.load(
     open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
 )
+params = map_period_to_age(params)
 
 # params = new_to_current(path_dict)
 

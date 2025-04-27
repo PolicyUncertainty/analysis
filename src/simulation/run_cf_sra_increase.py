@@ -62,14 +62,14 @@ for i, sra in enumerate(sra_at_63):
         SRA_at_start=67,
         model_name=model_name,
         df_exists=load_df,
-        solution_exists=load_solution,
+        solution_exists=load_unc_solution,
         sol_model_exists=load_sol_model,
         sim_model_exists=load_sim_model,
     )
     # After the first run we can always set models and solutions to True
     load_sol_model = True
     load_sim_model = True
-    load_solution = True
+    load_unc_solution = True
 
     if i == 0:
         df_base_unc = df_unc.reset_index().copy()
@@ -100,14 +100,14 @@ for i, sra in enumerate(sra_at_63):
         SRA_at_start=sra,
         model_name=model_name,
         df_exists=load_df,
-        solution_exists=load_solution,
+        solution_exists=load_no_unc_solution,
         sol_model_exists=load_sol_model,
         sim_model_exists=load_sim_model,
     )
     # After the first run we can always set models and solutions to True
     load_sol_model = True
     load_sim_model = True
-    load_solution = True
+    load_no_unc_solution = True
 
     if i == 0:
         df_base_no_unc = df_no_unc.reset_index().copy()

@@ -93,7 +93,7 @@ for i, sra in enumerate(sra_at_63):
     df_no_unc = solve_and_simulate_scenario(
         path_dict=path_dict,
         params=params,
-        subj_unc=True,
+        subj_unc=False,
         custom_resolution_age=None,
         annoucement_age=None,
         SRA_at_retirement=sra,

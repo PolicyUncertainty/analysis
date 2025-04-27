@@ -67,7 +67,7 @@ def generate_start_states_from_obs(
             key=keys[0], a=2, shape=(n_multiply_start_obs,), p=job_offer_prob
         )
 
-        bool_observed_job_offfer = job_offer_obs > 1
+        bool_observed_job_offfer = job_offer_obs > -1
         # Assign 1 if working is true
         observed_job_offer = jnp.ones_like(job_offers_draw) * job_offer_obs
         job_offers = (
@@ -146,5 +146,9 @@ def generate_start_states_from_obs(
     states_dict["policy_state"] = policy_state_agents
 
     initial_states = jax.tree.map(create_array_with_smallest_int_dtype, states_dict)
+
+    # df = pd.DataFrame(initial_states)
+    # df["wealth"] = initial_wealth
+    # breakpoint()
 
     return initial_states, initial_wealth

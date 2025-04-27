@@ -11,12 +11,6 @@ def new_to_current(path_dict):
     )
     params["mu_men"] = params["mu"]
     params["mu_women"] = params["mu"]
-    params["job_finding_logit_period_men"] = params["job_finding_logit_age_men"]
-    params["job_finding_logit_period_women"] = params["job_finding_logit_age_women"]
-    params["job_finding_logit_const_men"] += params["job_finding_logit_age_men"] * 30
-    params["job_finding_logit_const_women"] += (
-        params["job_finding_logit_age_women"] * 30
-    )
 
     for s in ["men", "women"]:
         for edu in ["low", "high"]:
@@ -35,7 +29,7 @@ def new_to_current(path_dict):
 
     params_start = load_and_set_start_params(path_dict)
     params["disability_logit_const"] = params_start["disability_logit_const"]
-    params["disability_logit_period"] = params_start["disability_logit_period"]
+    params["disability_logit_age"] = params_start["disability_logit_age"]
     params["disability_logit_high_educ"] = params_start["disability_logit_high_educ"]
     return params
 

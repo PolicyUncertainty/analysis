@@ -1,7 +1,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from dcegm.likelihood import create_choice_prob_func_unobserved_states
-from dcegm.likelihood import create_partial_choice_prob_calculation
+from dcegm.likelihood import (
+    create_choice_prob_func_unobserved_states,
+    create_partial_choice_prob_calculation,
+)
+
 from estimation.struct_estimation.scripts.estimate_setup import load_and_prep_data
 from export_results.figures.color_map import JET_COLOR_MAP
 from model_code.specify_model import specify_and_solve_model

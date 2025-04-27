@@ -12,8 +12,8 @@ specs = generate_derived_and_data_derived_specs(path_dict)
 
 # Set run specs
 model_name = "disability"
-load_sol_model = False
-load_solution = False
+load_sol_model = True
+load_solution = True
 
 if model_name == "start":
     from estimation.struct_estimation.start_params_and_bounds.set_start_params import (

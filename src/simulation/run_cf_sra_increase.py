@@ -27,7 +27,8 @@ from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 # Set specifications
 seeed = 123
 model_name = "disability"
-load_solution = True
+load_unc_solution = True
+load_no_unc_solution = True
 load_sol_model = True
 load_sim_model = True
 load_df = None
@@ -42,14 +43,16 @@ params = pkl.load(
 sra_at_63 = np.arange(67, 70 + specs["SRA_grid_size"], specs["SRA_grid_size"])
 
 # Create result df
-result_df = pd.DataFrame(dtype=float)
+result_df_unc = pd.DataFrame(dtype=float)
+result_df_no_unc = pd.DataFrame(dtype=float)
 # Assign sras
-result_df["sra_at_63"] = sra_at_63
+result_df_unc["sra_at_63"] = sra_at_63
+result_df_no_unc["sra_at_63"] = sra_at_63
 for i, sra in enumerate(sra_at_63):
     print("Start simulation for sra: ", sra)
 
     # Create estimated model
-    df = solve_and_simulate_scenario(
+    df_unc = solve_and_simulate_scenario(
         path_dict=path_dict,
         params=params,
         subj_unc=True,
@@ -69,20 +72,65 @@ for i, sra in enumerate(sra_at_63):
     load_solution = True
 
     if i == 0:
-        df_base = df.reset_index().copy()
+        df_base_unc = df_unc.reset_index().copy()
 
     else:
-        results_row = calc_overall_results(df_base=df_base, df_cf=df.reset_index())
+        results_row = calc_overall_results(
+            df_base=df_base_unc, df_cf=df_unc.reset_index()
+        )
 
         for key, value in results_row.items():
-            result_df.loc[i, key] = value
+            result_df_unc.loc[i, key] = value
 
-        result_df.loc[i, "cv"] = calc_compensated_variation(
-            df_base=df_base,
-            df_cf=df.reset_index(),
+        result_df_unc.loc[i, "cv"] = calc_compensated_variation(
+            df_base=df_base_unc,
+            df_cf=df_unc.reset_index(),
+            params=params,
+            specs=specs,
+        )
+
+    # Create estimated model
+    df_no_unc = solve_and_simulate_scenario(
+        path_dict=path_dict,
+        params=params,
+        subj_unc=True,
+        custom_resolution_age=None,
+        annoucement_age=None,
+        SRA_at_retirement=sra,
+        SRA_at_start=sra,
+        model_name=model_name,
+        df_exists=load_df,
+        solution_exists=load_solution,
+        sol_model_exists=load_sol_model,
+        sim_model_exists=load_sim_model,
+    )
+    # After the first run we can always set models and solutions to True
+    load_sol_model = True
+    load_sim_model = True
+    load_solution = True
+
+    if i == 0:
+        df_base_no_unc = df_no_unc.reset_index().copy()
+
+    else:
+        results_row = calc_overall_results(
+            df_base=df_base_no_unc, df_cf=df_no_unc.reset_index()
+        )
+
+        for key, value in results_row.items():
+            result_df_no_unc.loc[i, key] = value
+
+        result_df_no_unc.loc[i, "cv"] = calc_compensated_variation(
+            df_base=df_base_no_unc,
+            df_cf=df_no_unc.reset_index(),
             params=params,
             specs=specs,
         )
 
 # Save results
-result_df.to_csv(path_dict["sim_results"] + f"sra_increase_aggregate_{model_name}.csv")
+result_df_unc.to_csv(
+    path_dict["sim_results"] + f"sra_increase_aggregate_unc_{model_name}.csv"
+)
+result_df_no_unc.to_csv(
+    path_dict["sim_results"] + f"sra_increase_aggregate_no_unc_{model_name}.csv"
+)

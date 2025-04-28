@@ -41,5 +41,6 @@ def announcement_timing_lc_plot(path_dict, model_name):
     for ax in axs:
         ax.axhline(y=0, color="black")
         ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, pos: f"{x:.3f}"))
+    axs[0].legend()
     fig.tight_layout()
-    fig.legend()
+    fig.suptitle("Announcement Timing")

@@ -128,7 +128,7 @@ def generate_start_states_from_obs(
     # Assign job offers, informed agents and health
     # If only informed should be simoulated assign 1 everywhere
     if only_informed:
-        states_dict["informed"] = jnp.ones_like(informed_agents)
+        states_dict["informed"] = jnp.ones_like(states_dict["period"])
     else:
         states_dict["informed"] = informed_agents.flatten()
 

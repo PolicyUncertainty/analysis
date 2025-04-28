@@ -30,7 +30,7 @@ model_name = "disability"
 load_solution = True  # baseline solution conntainer
 load_sol_model = True  # informed state as type
 load_sim_model = True  # informed state stochastic
-load_df_biased = True
+load_df_biased = False
 load_df_unbiased = (
     False  # True = load existing df, False = create new df, None = create but not save
 )

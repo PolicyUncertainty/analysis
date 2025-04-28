@@ -42,55 +42,98 @@ params = pkl.load(
 # Initialize alpha values and replace 0.04 with subjective alpha
 sra_at_63 = np.arange(67, 70 + specs["SRA_grid_size"], specs["SRA_grid_size"])
 
-# Create result df
-result_df_unc = pd.DataFrame(dtype=float)
-result_df_no_unc = pd.DataFrame(dtype=float)
-# Assign sras
-result_df_unc["sra_at_63"] = sra_at_63
-result_df_no_unc["sra_at_63"] = sra_at_63
+# # Create result dfs and assign sra. Uncertainty
+# result_df_unc = pd.DataFrame(dtype=float)
+# result_df_unc["sra_at_63"] = sra_at_63
+
+# No uncertainty
+# result_df_no_unc = pd.DataFrame(dtype=float)
+# result_df_no_unc["sra_at_63"] = sra_at_63
+
+# Debias
+result_df_debias = pd.DataFrame(dtype=float)
+result_df_debias["sra_at_63"] = sra_at_63
 for i, sra in enumerate(sra_at_63):
     print("Start simulation for sra: ", sra)
 
+    # # Create estimated model
+    # df_unc = solve_and_simulate_scenario(
+    #     path_dict=path_dict,
+    #     params=params,
+    #     subj_unc=True,
+    #     custom_resolution_age=None,
+    #     annoucement_age=None,
+    #     SRA_at_retirement=sra,
+    #     SRA_at_start=67,
+    #     model_name=model_name,
+    #     df_exists=load_df,
+    #     solution_exists=load_unc_solution,
+    #     sol_model_exists=load_sol_model,
+    #     sim_model_exists=load_sim_model,
+    # )
+    # # After the first run we can always set models and solutions to True
+    # load_sol_model = True
+    # load_sim_model = True
+    # load_unc_solution = True
+    #
+    # if i == 0:
+    #     df_base_unc = df_unc.reset_index().copy()
+    #
+    # else:
+    #     results_row = calc_overall_results(
+    #         df_base=df_base_unc, df_cf=df_unc.reset_index()
+    #     )
+    #
+    #     for key, value in results_row.items():
+    #         result_df_unc.loc[i, key] = value
+    #
+    #     result_df_unc.loc[i, "cv"] = calc_compensated_variation(
+    #         df_base=df_base_unc,
+    #         df_cf=df_unc.reset_index(),
+    #         params=params,
+    #         specs=specs,
+    #     )
+    #
+    # # Create estimated model
+    # df_no_unc = solve_and_simulate_scenario(
+    #     path_dict=path_dict,
+    #     params=params,
+    #     subj_unc=False,
+    #     custom_resolution_age=None,
+    #     annoucement_age=None,
+    #     SRA_at_retirement=sra,
+    #     SRA_at_start=sra,
+    #     model_name=model_name,
+    #     df_exists=load_df,
+    #     solution_exists=load_no_unc_solution,
+    #     sol_model_exists=load_sol_model,
+    #     sim_model_exists=load_sim_model,
+    # )
+    # # After the first run we can always set models and solutions to True
+    # load_sol_model = True
+    # load_sim_model = True
+    # load_no_unc_solution = True
+    #
+    # if i == 0:
+    #     df_base_no_unc = df_no_unc.reset_index().copy()
+    #
+    # else:
+    #     results_row = calc_overall_results(
+    #         df_base=df_base_no_unc, df_cf=df_no_unc.reset_index()
+    #     )
+    #
+    #     for key, value in results_row.items():
+    #         result_df_no_unc.loc[i, key] = value
+    #
+    #     result_df_no_unc.loc[i, "cv"] = calc_compensated_variation(
+    #         df_base=df_base_no_unc,
+    #         df_cf=df_no_unc.reset_index(),
+    #         params=params,
+    #         specs=specs,
+    #     )
+
     # Create estimated model
-    df_unc = solve_and_simulate_scenario(
-        path_dict=path_dict,
-        params=params,
-        subj_unc=True,
-        custom_resolution_age=None,
-        annoucement_age=None,
-        SRA_at_retirement=sra,
-        SRA_at_start=67,
-        model_name=model_name,
-        df_exists=load_df,
-        solution_exists=load_unc_solution,
-        sol_model_exists=load_sol_model,
-        sim_model_exists=load_sim_model,
-    )
-    # After the first run we can always set models and solutions to True
-    load_sol_model = True
-    load_sim_model = True
-    load_unc_solution = True
-
-    if i == 0:
-        df_base_unc = df_unc.reset_index().copy()
-
-    else:
-        results_row = calc_overall_results(
-            df_base=df_base_unc, df_cf=df_unc.reset_index()
-        )
-
-        for key, value in results_row.items():
-            result_df_unc.loc[i, key] = value
-
-        result_df_unc.loc[i, "cv"] = calc_compensated_variation(
-            df_base=df_base_unc,
-            df_cf=df_unc.reset_index(),
-            params=params,
-            specs=specs,
-        )
-
-    # Create estimated model
-    df_no_unc = solve_and_simulate_scenario(
+    df_debias = solve_and_simulate_scenario(
         path_dict=path_dict,
         params=params,
         subj_unc=False,
@@ -98,6 +141,7 @@ for i, sra in enumerate(sra_at_63):
         annoucement_age=None,
         SRA_at_retirement=sra,
         SRA_at_start=sra,
+        only_informed=True,
         model_name=model_name,
         df_exists=load_df,
         solution_exists=load_no_unc_solution,
@@ -110,27 +154,30 @@ for i, sra in enumerate(sra_at_63):
     load_no_unc_solution = True
 
     if i == 0:
-        df_base_no_unc = df_no_unc.reset_index().copy()
+        df_base_debias = df_debias.reset_index().copy()
 
     else:
         results_row = calc_overall_results(
-            df_base=df_base_no_unc, df_cf=df_no_unc.reset_index()
+            df_base=df_base_debias, df_cf=df_debias.reset_index()
         )
 
         for key, value in results_row.items():
-            result_df_no_unc.loc[i, key] = value
+            result_df_debias.loc[i, key] = value
 
-        result_df_no_unc.loc[i, "cv"] = calc_compensated_variation(
-            df_base=df_base_no_unc,
-            df_cf=df_no_unc.reset_index(),
+        result_df_debias.loc[i, "cv"] = calc_compensated_variation(
+            df_base=df_base_debias,
+            df_cf=df_debias.reset_index(),
             params=params,
             specs=specs,
         )
 
 # Save results
-result_df_unc.to_csv(
-    path_dict["sim_results"] + f"sra_increase_aggregate_unc_{model_name}.csv"
-)
-result_df_no_unc.to_csv(
-    path_dict["sim_results"] + f"sra_increase_aggregate_no_unc_{model_name}.csv"
+# result_df_unc.to_csv(
+#     path_dict["sim_results"] + f"sra_increase_aggregate_unc_{model_name}.csv"
+# )
+# result_df_no_unc.to_csv(
+#     path_dict["sim_results"] + f"sra_increase_aggregate_no_unc_{model_name}.csv"
+# )
+result_df_debias.to_csv(
+    path_dict["sim_results"] + f"sra_increase_aggregate_debias_{model_name}.csv"
 )

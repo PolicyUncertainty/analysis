@@ -14,9 +14,8 @@ model_name = "disability"
 
 # # Exclude the first rpw
 sra_increase_aggregate_plot(path_dict, model_name)
-announcement_timing_lc_plot(path_dict, model_name)
-debias_lc_plot(path_dict, model_name)
-commitment_lc_plot(path_dict, model_name)
-
+# announcement_timing_lc_plot(path_dict, model_name)
+# debias_lc_plot(path_dict, model_name)
+# commitment_lc_plot(path_dict, model_name)
 
 plt.show()

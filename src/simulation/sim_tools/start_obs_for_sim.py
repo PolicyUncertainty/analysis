@@ -88,6 +88,7 @@ def generate_start_states_from_obs(
         # Health
         disability_prob = calc_disability_probability(
             params=params,
+            sex=sex,
             period=jnp.array(-1, dtype=int),
             education=education,
             options=specs,

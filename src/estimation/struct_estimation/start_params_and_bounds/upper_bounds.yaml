@@ -33,19 +33,28 @@ disutil_children_ft_work_low: 5.2
 disutil_children_ft_work_high: 5.2
 
 # Taste shock
-lambda: 5
+taste_shock_scale_men: 5
+taste_shock_scale_women: 5
 
-# taste_shock_scale_men: 2
-# taste_shock_scale_women: 2
+# Bequest
 bequest_scale: 5
+
+# Job finding men
 job_finding_logit_const_men: 5
 job_finding_logit_age_men: 0.5
 job_finding_logit_high_educ_men: 5
+
+# Job finding women
 job_finding_logit_const_women: 5
 job_finding_logit_age_women: 0.5
 job_finding_logit_high_educ_women: 5
 
-# Disability probability
-disability_logit_const: 5
-disability_logit_age: 0.5
-disability_logit_high_educ: 5
+# Disability probability men
+disability_logit_const_men: 5
+disability_logit_age_men: 0.5
+disability_logit_high_educ_men: 5
+
+# Disability probability women
+disability_logit_const_women: 5
+disability_logit_age_women: 0.5
+disability_logit_high_educ_women: 5

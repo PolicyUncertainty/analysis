@@ -21,17 +21,22 @@ def est_disability_prob(paths, specs):
     ]
 
     disability_prob_params = {}
-    logit_model = sm.Logit(logit_df["retirement"], logit_df[logit_vars])
-    logit_fitted = logit_model.fit()
+    for sex_var, sex_append in enumerate(["men", "women"]):
+        logit_df_gender = logit_df[logit_df["sex"] == sex_var]
+        logit_model = sm.Logit(
+            logit_df_gender["retirement"], logit_df_gender[logit_vars]
+        )
+        logit_fitted = logit_model.fit()
 
-    params = logit_fitted.params
+        params = logit_fitted.params
 
-    type_params = {
-        f"disability_logit_const": params["intercept"],
-        f"disability_logit_age": params["age"],
-        f"disability_logit_high_educ": params["education"],
-    }
-    disability_prob_params = {**disability_prob_params, **type_params}
+        gender_params = {
+            f"disability_logit_const_{sex_append}": params["intercept"],
+            f"disability_logit_age_{sex_append}": params["age"],
+            f"disability_logit_high_educ_{sex_append}": params["education"],
+        }
+        disability_prob_params = {**disability_prob_params, **gender_params}
+
     # Plot prediction and data
     # fig, ax = plt.subplots()
     # logit_df["predicted"] = logit_fitted.predict()

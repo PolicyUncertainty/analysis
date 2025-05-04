@@ -42,18 +42,22 @@ def estimate_model(
     if last_estimate is not None:
         print_function(last_estimate)
 
-        for key in last_estimate.keys():
+        for key in last_estimate:
             if key in ["sigma", "interest_rate", "beta"]:
                 continue
-            try:
-                print(
-                    f"Start params value of {key} was {start_params_all[key]} and is "
-                    f"replaced by {last_estimate[key]}",
-                    flush=True,
-                )
-            except:
-                raise ValueError(f"Key {key} not found in last_estimate.")
-            start_params_all[key] = last_estimate[key]
+
+            if key in params_to_estimate_names:
+                continue
+            else:
+                try:
+                    print(
+                        f"Start params value of {key} was {start_params_all[key]} and is "
+                        f"replaced by {last_estimate[key]}",
+                        flush=True,
+                    )
+                except:
+                    raise ValueError(f"Key {key} not found in last_estimate.")
+                start_params_all[key] = last_estimate[key]
 
     start_params = {name: start_params_all[name] for name in params_to_estimate_names}
 

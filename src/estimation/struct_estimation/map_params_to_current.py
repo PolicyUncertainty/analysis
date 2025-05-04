@@ -51,3 +51,23 @@ def map_period_to_age(params):
     params.pop("disability_logit_period")
 
     return params
+
+
+def gender_separate_models(params):
+    params["taste_shock_scale_men"] = params["lambda"]
+    params["taste_shock_scale_women"] = params["lambda"]
+    params.pop("lambda")
+
+    params["disability_logit_const_men"] = params["disability_logit_const"]
+    params["disability_logit_const_women"] = params["disability_logit_const"]
+    params.pop("disability_logit_const")
+
+    params["disability_logit_age_men"] = params["disability_logit_age"]
+    params["disability_logit_age_women"] = params["disability_logit_age"]
+    params.pop("disability_logit_age")
+
+    params["disability_logit_high_educ_men"] = params["disability_logit_high_educ"]
+    params["disability_logit_high_educ_women"] = params["disability_logit_high_educ"]
+    params.pop("disability_logit_high_educ")
+
+    return params

@@ -32,6 +32,7 @@ def create_unobserved_state_specs(data_decision, model):
         # and then select correct case
         disability_prob = calc_disability_probability(
             params=kwargs["params"],
+            sex=kwargs["sex"],
             period=kwargs["period"],
             education=kwargs["education"],
             options=kwargs["options"],

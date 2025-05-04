@@ -49,7 +49,7 @@ def sra_increase_aggregate_plot(path_dict, model_name):
     df_unc = df_unc[df_unc["sra_at_63"].isin(reform_SRA)]
     df_no_unc = df_no_unc[df_no_unc["sra_at_63"].isin(reform_SRA)]
     df_debias = df_debias[df_debias["sra_at_63"].isin(reform_SRA)]
-    fig, axs = plt.subplots(nrows=3, figsize=(6, 8))
+    fig, axs = plt.subplots(ncols=3, figsize=(16, 9))
 
     row_names = {
         "below_sixty_savings": "Perc. Change Savings",
@@ -64,25 +64,26 @@ def sra_increase_aggregate_plot(path_dict, model_name):
         ax.plot(
             df_unc["sra_at_63"],
             change_unc * 100,
-            label="Uncertainty and Misinformation",
+            label="With Uncertainty",
         )
         ax.plot(
             df_no_unc["sra_at_63"],
             change_no_unc * 100,
-            label="No Uncertainty, Misinformation",
+            label="Without Uncertainty",
         )
-        ax.plot(
-            df_debias["sra_at_63"],
-            change_debias * 100,
-            label="No Uncertainty and Misinformation",
-        )
+        # ax.plot(
+        #     df_debias["sra_at_63"],
+        #     change_debias * 100,
+        #     label="No Uncertainty and Misinformation",
+        # )
 
         # ax.plot(df["alpha"], df["cv"], label="Compensated Variation")
         ax.set_ylabel(f"{row_names[var]}")
         ax.legend()
         # ax.set_xticks(reform_SRA)
         # Hide xticks
-        ax.set_xticks([])
+        ax.set_xticks(reform_SRA)
+        ax.set_xlabel("SRA Reform")
 
     ax = axs[2]
     # ax.yaxis.set_visible(False)
@@ -96,13 +97,11 @@ def sra_increase_aggregate_plot(path_dict, model_name):
     change_no_unc = df_no_unc["cf_ret_age"] - df_no_unc["base_ret_age"]
     change_debias = df_debias["cf_ret_age"] - df_debias["base_ret_age"]
 
-    ax.plot(df_unc["sra_at_63"], change_unc, label="Uncertainty and Misinformation")
-    ax.plot(
-        df_no_unc["sra_at_63"], change_no_unc, label="No Uncertainty, Misinformation"
-    )
-    ax.plot(
-        df_debias["sra_at_63"], change_debias, label="No Uncertainty and Misinformation"
-    )
+    ax.plot(df_unc["sra_at_63"], change_unc, label="With Uncertainty")
+    ax.plot(df_no_unc["sra_at_63"], change_no_unc, label="Without Uncertainty")
+    # ax.plot(
+    #     df_debias["sra_at_63"], change_debias, label="No Uncertainty and Misinformation"
+    # )
     # change of SRA
     change_unc = df_unc["cf_sra_at_ret"] - df_unc["base_sra_at_ret"]
     ax.plot(
@@ -132,11 +131,11 @@ def sra_increase_aggregate_plot(path_dict, model_name):
         df_no_unc["cv"] * 100,
         label="No Uncertainty, Misinformation",
     )
-    ax.plot(
-        df_debias["sra_at_63"],
-        df_debias["cv"] * 100,
-        label="No Uncertainty and Misinformation",
-    )
+    # ax.plot(
+    #     df_debias["sra_at_63"],
+    #     df_debias["cv"] * 100,
+    #     label="No Uncertainty and Misinformation",
+    # )
     ax.set_xlabel("SRA Reform")
     ax.set_ylabel("Compensating Variation")
     ax.set_xticks(reform_SRA)

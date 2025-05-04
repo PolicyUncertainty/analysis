@@ -3,8 +3,9 @@ from functools import partial
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from export_results.figures.color_map import JET_COLOR_MAP
 from scipy.optimize import minimize
+
+from export_results.figures.color_map import JET_COLOR_MAP
 
 
 def calibrate_uninformed_hazard_rate(paths, specs):
@@ -26,7 +27,8 @@ def calibrate_uninformed_hazard_rate(paths, specs):
     df["informed"] = df["belief_pens_deduct"] <= specs["informed_threshhold"]
     params = pd.DataFrame(columns=specs["education_labels"])
     uninformed_beliefs = pd.DataFrame(
-        index=["erp_uninformed_belief"], columns=specs["education_labels"]
+        index=["erp_uninformed_belief", "erp_uninformed_belief_sem"],
+        columns=specs["education_labels"],
     )
     predicted_shares = pd.DataFrame(columns=specs["education_labels"])
     edu_moments = pd.DataFrame(columns=specs["education_labels"])
@@ -36,10 +38,11 @@ def calibrate_uninformed_hazard_rate(paths, specs):
         df_restricted = df[df["education"] == edu_val]
 
         # First estimate the average erp belief of the uninformed individuals
-        avg_belief_uninformed = beliefs_of_uninformed(df_restricted)
-        uninformed_beliefs.loc[
-            "erp_uninformed_belief", edu_label
-        ] = avg_belief_uninformed
+        avg_belief_uninformed, sem_uninformed = beliefs_of_uninformed(df_restricted)
+        uninformed_beliefs.loc["erp_uninformed_belief", edu_label] = (
+            avg_belief_uninformed
+        )
+        uninformed_beliefs.loc["erp_uninformed_belief_sem", edu_label] = sem_uninformed
 
         # Then estimate the initial share and hazard rate
         observed_informed_shares, weights = generate_observed_informed_shares(
@@ -96,10 +99,12 @@ def beliefs_of_uninformed(df):
     """This function saves the average ERP belief of the uninformed individuals in the
     dataset."""
     df_u = df[df["informed"] == 0]
-    weighted_belief_uninformed = (
-        df_u["belief_pens_deduct"] * df_u["fweights"]
-    ).sum() / df_u["fweights"].sum()
-    return weighted_belief_uninformed
+    normalized_fweights = (df_u["fweights"] / df_u["fweights"].sum()) * df_u.shape[0]
+    weighted_beliefs = df_u["belief_pens_deduct"] * normalized_fweights
+    weighted_belief_uninformed = weighted_beliefs.mean()
+    sem = weighted_beliefs.sem()
+
+    return weighted_belief_uninformed, sem
 
 
 def generate_observed_informed_shares(df):

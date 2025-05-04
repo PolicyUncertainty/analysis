@@ -35,7 +35,7 @@ def test_job_destruction(
     for append in ["men", "women"]:
         gender_params = {
             f"job_finding_logit_const_{append}": logit_param,
-            f"job_finding_logit_period_{append}": logit_param,
+            f"job_finding_logit_age_{append}": logit_param,
             f"job_finding_logit_high_educ_{append}": logit_param,
         }
         params = {**params, **gender_params}

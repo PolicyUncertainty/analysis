@@ -80,9 +80,21 @@ def interpolate_and_extrapolate_wealth(wealth_data_full):
     mask = wealth_data_full.groupby(["hid", "hh_size_adjusted", "pid"])["wealth"].transform(lambda x: x.notna().any())
     mask &= wealth_data_full["is_par"].notna()
     wealth_data_full = wealth_data_full[mask]
+
+    # extrapolate wealth for each household at the start and end of the panel if there are at least 2 valid observations (by pid too in case household goes from A to AB to B)
+    extrapolated = wealth_data_full.groupby(["hid", "hh_size_adjusted", "pid"]).apply(extrapolate_wealth_linear)
+    # keep only the wealth column to loose index for merging
+    extrapolated = extrapolated.drop(columns=["hid", "hh_size_adjusted", "pid"])
+    extrapolated = extrapolated.reset_index()
+    wealth_data_full = wealth_data_full.reset_index().drop(columns="wealth").merge(
+        extrapolated[["hid", "syear", "wealth"]], on=["hid", "syear"], how="left"
+    ).set_index(["hid", "syear", "pid"])
+
+    # drop duplicates caused by doing the extrapolation twice in hh with 2 people
+    wealth_data_full = wealth_data_full[~wealth_data_full.index.duplicated(keep="first")]
+
     # find mean hh age for each household (rounded to nearest integer)
     wealth_data_full["mean_household_age"] = wealth_data_full.groupby(["hid", "syear"])["float_age"].transform(lambda x: x.mean().round(0))
-
     # create a dataframe with percentiles (1% to 100%) of wealth, grouped by each unique combination of: syear, mean_household_age, hh_size_adjusted
     wealth_data_unique = wealth_data_full.reset_index().drop_duplicates(subset=['hid', 'syear'])
     wealth_percentiles_df = (
@@ -93,73 +105,90 @@ def interpolate_and_extrapolate_wealth(wealth_data_full):
         .set_index(['syear', 'mean_household_age', 'hh_size_adjusted'])
     )
 
-    # extrapolate wealth for each household at the start and end of the panel if there are at least 2 valid observations (by pid too in case household goes from A to AB to B)
-    partial_extrapolate = lambda group: extrapolate_wealth(group, wealth_percentiles_df, wealth_data_full)
-    extrapolated = wealth_data_full.groupby(["hid", "hh_size_adjusted", "pid"]).apply(partial_extrapolate)
+    # impute wealth for households with only one valid observation
+    imputed = (
+        wealth_data_full
+        .groupby(["hid", "hh_size_adjusted", "pid"])
+        .apply(lambda group: impute_wealth_from_percentiles(group, wealth_percentiles_df))
+    )
     # drop the pid column and keep only the wealth column
-    extrapolated = extrapolated.drop(columns=["hid", "hh_size_adjusted", "pid"])
-    extrapolated = extrapolated.reset_index()
+    imputed = imputed.reset_index()
+    imputed = imputed.drop(columns=["hid", "hh_size_adjusted", "pid"])
+    # merge the imputed wealth back into the original dataframe
     wealth_data_full = wealth_data_full.reset_index().drop(columns="wealth").merge(
-        extrapolated[["hid", "syear", "wealth"]], on=["hid", "syear"], how="left"
+        imputed[["hid", "syear", "wealth"]], on=["hid", "syear"], how="left"
     ).set_index(["hid", "syear", "pid"])
 
-    # drop duplicates caused by doing the extrapolation twice in hh with 2 people
+    # drop duplicates caused by doing the imputation twice in hh with 2 people
     wealth_data_full = wealth_data_full[~wealth_data_full.index.duplicated(keep="first")]
 
     return wealth_data_full
 
-
-def extrapolate_wealth(household, wealth_percentiles_df, wealth_data_full):
-    """Linearly extrapolate the wealth column at the beginning and end of each group."""
-    # We use consecutive numbers for easier interpolation
+def extrapolate_wealth_linear(household):
+    """Linearly extrapolate wealth for a household if at least 2 valid observations exist."""
     household_int = household.reset_index()
     wealth = household_int["wealth"].copy()
     syear = household_int["syear"].copy()
+    valid = wealth.dropna()
 
-    # Extrapolate at the start
-    if pd.isnull(wealth.iloc[0]):
-        valid = wealth.dropna()
-        # Get first valid index (recall it is a consecutive integer index)
-        first_valid_index = valid.index[0]
-        # Get the indices that are missing
-        missing_start_idxs = wealth.index[wealth.index < first_valid_index]
-
-        if len(valid) >= 2:
-            # Get the two first valid values
+    if len(valid) >= 2:
+        # Linear extrapolation at start
+        if pd.isnull(wealth.iloc[0]):
+            first_valid_index = valid.index[0]
+            missing_start_idxs = wealth.index[wealth.index < first_valid_index]
             y = valid.iloc[:2].values
             x = syear.iloc[valid.iloc[:2].index].values
-            # Slope is difference in y divided by difference x
-            slope = y[1] - y[0] / (x[1] - x[0])
-            # Fill up missing values
-            wealth.loc[missing_start_idxs] = y[0] - slope * (
-                first_valid_index - missing_start_idxs
-            )
-        elif len(valid) == 1:
-            pass
+            slope = (y[1] - y[0]) / (x[1] - x[0])
+            wealth.loc[missing_start_idxs] = y[0] - slope * (first_valid_index - missing_start_idxs)
 
-    # Extrapolate at the end
-    if pd.isnull(wealth.iloc[-1]):
-        # Only select valid values
-        valid = wealth.dropna()
-        # Get last valid index (recall it is a consecutive integer index)
-        last_valid_index = valid.index[-1]
-        # Get the indices that are missing
-        missing_end_idx = wealth.index[wealth.index > last_valid_index]
-        if len(valid) >= 2:
-            # Now get the last two valid wealth values
+        # Linear extrapolation at end
+        if pd.isnull(wealth.iloc[-1]):
+            last_valid_index = valid.index[-1]
+            missing_end_idxs = wealth.index[wealth.index > last_valid_index]
             y = valid.iloc[-2:].values
             x = syear.iloc[valid.iloc[-2:].index].values
-            # Slope is difference in y divided by difference x
-            slope = y[1] - y[0] / (x[1] - x[0])
-            # Fill up missing values    
-            wealth.loc[missing_end_idx] = y[1] + slope * (
-                missing_end_idx - last_valid_index
-            )
+            slope = (y[1] - y[0]) / (x[1] - x[0])
+            wealth.loc[missing_end_idxs] = y[1] + slope * (missing_end_idxs - last_valid_index)
 
     household_int["wealth"] = wealth
-    household_int.set_index("syear", inplace=True)
-    return household_int
+    return household_int.set_index("syear")
 
+def impute_wealth_from_percentiles(household, wealth_percentiles_df):
+    """Impute missing wealth using percentiles if only one valid observation exists."""
+    household = household.copy()
+    valid = household["wealth"].dropna()
+    
+    if len(valid) != 1:
+        return household
+
+    valid_index = valid.index[0]
+    valid_value = valid.iloc[0]
+    row_valid = household.loc[valid_index]
+    syear_valid = row_valid["syear"]
+    age_valid = row_valid["mean_household_age"]
+    size_valid = row_valid["hh_size_adjusted"]
+
+    # Estimate percentile of the known value
+    try:
+        percentiles = wealth_percentiles_df.loc[(syear_valid, age_valid, size_valid)]
+        percentile_rank = np.searchsorted(percentiles.values, valid_value) + 1
+        percentile_rank = np.clip(percentile_rank, 1, 100)
+    except KeyError:
+        return household
+
+    # Impute for all missing years
+    for idx, row in household.iterrows():
+        if pd.notnull(row["wealth"]):
+            continue
+        try:
+            target_key = (row["syear"], row["mean_household_age"], row["hh_size_adjusted"])
+            target_percentiles = wealth_percentiles_df.loc[target_key]
+            wealth_guess = target_percentiles[f"w_pctl_{percentile_rank}"]
+            household.at[idx, "wealth"] = wealth_guess
+        except KeyError:
+            continue
+
+    return household
 
 def span_full_wealth_panel(wealth_data, specs):
     """Creates additional rows for each household for each year between start_year and

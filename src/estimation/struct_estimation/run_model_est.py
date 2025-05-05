@@ -7,6 +7,9 @@ paths_dict = create_path_dict(define_user=False)
 
 from estimation.struct_estimation.map_params_to_current import new_to_current
 from estimation.struct_estimation.scripts.estimate_setup import estimate_model
+from estimation.struct_estimation.start_params_and_bounds.set_start_params import (
+    load_and_set_start_params,
+)
 
 params_to_estimate_names = [
     # "mu_men",
@@ -19,15 +22,15 @@ params_to_estimate_names = [
     "disutil_unemployed_high_men",
     "disutil_unemployed_low_men",
     # Taste shock men - 1 parameter
-    "taste_shock_scale_men",
+    # "taste_shock_scale_men",
     # Men job finding - 3 parameters
     "job_finding_logit_const_men",
     "job_finding_logit_age_men",
     "job_finding_logit_high_educ_men",
     # Disability probability men - 3 parameters
-    "disability_logit_const_men",
-    "disability_logit_age_men",
-    "disability_logit_high_educ_men",
+    # "disability_logit_const_men",
+    # "disability_logit_age_men",
+    # "disability_logit_high_educ_men",
     # "mu_women",
     # # # Women Full-time - 4 parameters
     # "disutil_ft_work_high_good_women",
@@ -63,10 +66,14 @@ SAVE_RESULTS = True
 USE_WEIGHTS = False
 
 if LOAD_LAST_ESTIMATE:
-    # last_estimate = pkl.load(
-    #     open(paths_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
-    # )
-    last_estimate = new_to_current(paths_dict)
+    last_estimate = pkl.load(
+        open(paths_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
+    )
+    # last_estimate = new_to_current(paths_dict)
+    start_params_all = load_and_set_start_params(paths_dict)
+    for key in last_estimate.keys():
+        if "men" in key:
+            last_estimate[key] = start_params_all[key]
 
 else:
     last_estimate = None

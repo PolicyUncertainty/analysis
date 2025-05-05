@@ -5,7 +5,7 @@ from set_paths import create_path_dict
 
 paths_dict = create_path_dict(define_user=False)
 
-from estimation.struct_estimation.map_params_to_current import gender_separate_models
+from estimation.struct_estimation.map_params_to_current import new_to_current
 from estimation.struct_estimation.scripts.estimate_setup import estimate_model
 
 params_to_estimate_names = [
@@ -63,12 +63,10 @@ SAVE_RESULTS = True
 USE_WEIGHTS = False
 
 if LOAD_LAST_ESTIMATE:
-    last_estimate = pkl.load(
-        open(paths_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
-    )
-    last_estimate = gender_separate_models(last_estimate)
-    last_estimate["mu_men"] = 1.5
-    last_estimate["mu_women"] = 1.5
+    # last_estimate = pkl.load(
+    #     open(paths_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
+    # )
+    last_estimate = new_to_current(paths_dict)
 
 else:
     last_estimate = None

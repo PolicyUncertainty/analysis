@@ -11,6 +11,11 @@ def new_to_current(path_dict):
     )
     params["mu_men"] = params["mu"]
     params["mu_women"] = params["mu"]
+    params.pop("mu")
+
+    params["taste_shock_scale_men"] = params["lambda"]
+    params["taste_shock_scale_women"] = params["lambda"]
+    params.pop("lambda")
 
     for s in ["men", "women"]:
         for edu in ["low", "high"]:
@@ -28,9 +33,13 @@ def new_to_current(path_dict):
             ]
 
     params_start = load_and_set_start_params(path_dict)
-    params["disability_logit_const"] = params_start["disability_logit_const"]
-    params["disability_logit_age"] = params_start["disability_logit_age"]
-    params["disability_logit_high_educ"] = params_start["disability_logit_high_educ"]
+    for param in [
+        "disability_logit_const",
+        "disability_logit_age",
+        "disability_logit_high_educ",
+    ]:
+        for append in ["men", "women"]:
+            params[f"{param}_{append}"] = params_start[f"{param}_{append}"]
     return params
 
 

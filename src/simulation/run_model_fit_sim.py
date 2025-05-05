@@ -16,32 +16,30 @@ path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict)
 
 
-model_name = "disability"
-load_df = True
-load_solution = True
+model_name = "try"
+load_df = None
+load_solution = None
 load_sim_model = True
 load_sol_model = True
 
 
-params = pickle.load(
-    open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
-)
+# params = pickle.load(
+#     open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
+# )
 
-# params = map_period_to_age(params)
-
-# params = new_to_current(path_dict)
+params = new_to_current(path_dict)
 #
-which_plots = input(
-    "Which plots do you want to show?\n \n"
-    " - [a]ll\n"
-    " - [c]hoices\n"
-    " - [w]ealth\n"
-    " - [i]ncome\n"
-    " - [s]tates\n"
-    " - [wc]hoices and wealth\n"
-)
+# which_plots = input(
+#     "Which plots do you want to show?\n \n"
+#     " - [a]ll\n"
+#     " - [c]hoices\n"
+#     " - [w]ealth\n"
+#     " - [i]ncome\n"
+#     " - [s]tates\n"
+#     " - [wc]hoices and wealth\n"
+# )
 print(jax.devices())
-# which_plots = "wc"
+which_plots = "wc"
 
 from simulation.figures.simulated_model_fit import (
     plot_choice_shares_single,

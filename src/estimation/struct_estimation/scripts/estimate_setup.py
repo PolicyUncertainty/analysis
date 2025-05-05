@@ -42,11 +42,8 @@ def estimate_model(
     if last_estimate is not None:
         print_function(last_estimate)
 
-        for key in last_estimate:
+        for key in start_params_all:
             if key in ["sigma", "interest_rate", "beta"]:
-                continue
-
-            if key in params_to_estimate_names:
                 continue
             else:
                 try:
@@ -292,7 +289,7 @@ def generate_print_func(params_to_estimate_names):
                     print(
                         f"{param}: {params[param]} and in probability: {np.exp(-params[param])}"
                     )
-                elif "job_finding" in param:
+                elif "job_finding" in param or "taste_shock" in param:
                     print(f"{param}: {params[param]}")
         print("\nParameters of the women model are:")
         for group_name in women_params.keys():
@@ -302,7 +299,7 @@ def generate_print_func(params_to_estimate_names):
                     print(
                         f"{param}: {params[param]} and in probability: {np.exp(-params[param])}"
                     )
-                elif "job_finding" in param:
+                elif "job_finding" in param or "taste_shock" in param:
                     print(f"{param}: {params[param]}")
 
     return print_function
@@ -329,6 +326,9 @@ def get_gendered_params(params_to_estimate_names, append):
     job_finding_params = [
         param_name for param_name in gender_params if "job_finding_" in param_name
     ]
+    taste_shock_scale_params = [
+        param_name for param_name in gender_params if "taste_shock" in param_name
+    ]
 
     # We do it this weird way for printing order
     params = {}
@@ -343,6 +343,9 @@ def get_gendered_params(params_to_estimate_names, append):
 
     if len(job_finding_params) > 0:
         params["job_finding"] = job_finding_params
+
+    if len(taste_shock_scale_params) > 0:
+        params["taste_shock"] = taste_shock_scale_params
 
     # We drop these directly afterwards
     if len(gender_params) > 0:

@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 
 from process_data.soep_vars.wealth.deflate_wealth import deflate_wealth
-from process_data.aux_and_plots.filter_data import filter_below_age
 from process_data.soep_vars.age import calc_age_at_interview
 
 def add_wealth_interpolate_and_deflate(
@@ -18,20 +17,18 @@ def add_wealth_interpolate_and_deflate(
     else:
         wealth_data = load_wealth_data(path_dict["soep_c38"])
         wealth_data_full = span_full_wealth_panel(wealth_data, specs)
-
         # Merge wealth data with pid/syear information
         wealth_data_full = add_personal_data(path_dict, specs, wealth_data_full, use_processed_pl)
-
-        # Interpolate wealth for each household (consistent hh size)
+        # Interpolate wealth for each household (consistent hh size) 
         wealth_data_full = interpolate_and_extrapolate_wealth(wealth_data_full)
-        # breakpoint()
         # Deflate wealth
         wealth_data_full = deflate_wealth(wealth_data_full, path_dict)
         # We do not allow for negative wealth values
         wealth_data_full.loc[wealth_data_full["wealth"] < 0, "wealth"] = 0
+        # We only keep one wealth obs per household and year
+        wealth_data_full = wealth_data_full[["wealth"]].reset_index().drop_duplicates(subset=["hid", "syear"]).drop("pid", axis=1)
         wealth_data_full.to_pickle(file_name)
     
-    # breakpoint()
     # Now merge with existing dataset on hid and syear
     data = data.reset_index()
     data = data.merge(wealth_data_full, on=["hid", "syear"], how="left")
@@ -41,21 +38,9 @@ def add_wealth_interpolate_and_deflate(
         print(str(len(data)) + " left after dropping people with missing wealth.")
     return data
 
-
+# hid 167, 302, 930, 981, 1031, 2046, 5240, 9474, 3490091, 3503398 show some edge cases and how they are handled
 def interpolate_and_extrapolate_wealth(wealth_data_full):
-
-    # hid 167, 302, 930, 981, 1031, 2046, 5240, 9474, 3490091, 3503398 show some edge cases and how they are handled.
-    # breakpoint()
-    # wealth_data_full.loc[167] 
-    # wealth_data_full.loc[302]
-    # wealth_data_full.loc[930]
-    # wealth_data_full.loc[981]
-    # wealth_data_full.loc[1031]
-    # wealth_data_full.loc[2046]
-    # wealth_data_full.loc[5240]
-    # wealth_data_full.loc[9474]
-    # wealth_data_full.loc[3490091]
-    # wealth_data_full.loc[3503398]
+    """Interpolate wealth for each household (consistent hh size) and extrapolate""" 
 
     # interpolate between existing points with consistent household size (only people specs["start_age"] or older)
     wealth_data_full["hh_size_adjusted"] = wealth_data_full.groupby(["hid", "syear"])["pid"].count() 
@@ -84,7 +69,7 @@ def interpolate_and_extrapolate_wealth(wealth_data_full):
 
     # extrapolate wealth for each household at the start and end of the panel if there are at least 2 valid observations (by pid too in case household goes from A to AB to B)
     extrapolated = wealth_data_full.groupby(["hid", "hh_size_adjusted", "pid"]).apply(extrapolate_wealth_linear)
-    # keep only the wealth column to loose index for merging
+    # merge the extrapolated wealth back into the original dataframe
     extrapolated = extrapolated.drop(columns=["hid", "hh_size_adjusted", "pid"])
     extrapolated = extrapolated.reset_index()
     wealth_data_full = wealth_data_full.reset_index().drop(columns="wealth").merge(
@@ -94,18 +79,19 @@ def interpolate_and_extrapolate_wealth(wealth_data_full):
     # drop duplicates caused by doing the extrapolation twice in hh with 2 people
     wealth_data_full = wealth_data_full[~wealth_data_full.index.duplicated(keep="first")]
 
-    # find mean hh age for each household (rounded to nearest integer)
-    wealth_data_full["mean_household_age"] = wealth_data_full.groupby(["hid", "syear"])["float_age"].transform(lambda x: x.mean().round(0))
-    # create a dataframe with percentiles (1% to 100%) of wealth, grouped by each unique combination of: syear, mean_household_age, hh_size_adjusted
+    # find mean hh age for each household (rounded to nearest 5 years)
+    wealth_data_full["mean_hh_age_rounded"] = wealth_data_full.groupby(["hid", "syear"])["float_age"].transform(lambda x: x.mean().round(0) // 5 * 5)
+
+    # create a dataframe with percentiles (1% to 100%) of wealth, grouped by each unique combination of: syear, mean_hh_age_rounded, hh_size_adjusted
     wealth_data_unique = wealth_data_full.reset_index().drop_duplicates(subset=['hid', 'syear'])
     wealth_deciles_df = (
         wealth_data_unique
-        .groupby(['syear', 'mean_household_age', 'hh_size_adjusted'])
+        .groupby(['syear', 'mean_hh_age_rounded', 'hh_size_adjusted'])
         .apply(compute_deciles)
         .reset_index()
-        .set_index(['syear', 'mean_household_age', 'hh_size_adjusted'])
+        .set_index(['syear', 'mean_hh_age_rounded', 'hh_size_adjusted'])
     )
-
+    wealth_deciles_df = wealth_deciles_df.dropna(how='all')
 
     # impute wealth for households with only one valid observation
     imputed = (
@@ -113,14 +99,11 @@ def interpolate_and_extrapolate_wealth(wealth_data_full):
         .groupby(["hid", "hh_size_adjusted", "pid"])
         .apply(lambda group: impute_wealth_from_deciles(group, wealth_deciles_df))
     )
-    # drop the pid column and keep only the wealth column
-    breakpoint()
+
+    # merge the imputed wealth back into the original dataframe
     imputed = imputed.drop(columns=["hid", "hh_size_adjusted", "pid"])
     imputed = imputed.reset_index()
-    # merge the imputed wealth back into the original dataframe
-    wealth_data_full = wealth_data_full.reset_index().drop(columns="wealth").merge(
-        imputed[["hid", "syear", "wealth"]], on=["hid", "syear"], how="left"
-    ).set_index(["hid", "syear", "pid"])
+    wealth_data_full = wealth_data_full.reset_index().drop(columns="wealth").merge(imputed[["hid", "syear", "wealth"]], on=["hid", "syear"], how="left").set_index(["hid", "syear", "pid"])
 
     # drop duplicates caused by doing the imputation twice in hh with 2 people
     wealth_data_full = wealth_data_full[~wealth_data_full.index.duplicated(keep="first")]
@@ -157,63 +140,71 @@ def extrapolate_wealth_linear(household):
     return household_int.set_index("syear")
 
 def impute_wealth_from_deciles(household, wealth_deciles_df):
+    """Impute wealth for a household with only one valid observation using deciles."""
     household_int = household.reset_index()
     valid = household_int["wealth"].dropna()
     
     if len(valid) != 1:
-        return household
+        return household_int.set_index("syear")
 
     valid_index = valid.index[0]
     row_valid = household_int.loc[valid_index]
     valid_value = row_valid["wealth"]
     syear_valid = row_valid["syear"]
-    age_valid = row_valid["mean_household_age"]
+    age_valid = row_valid["mean_hh_age_rounded"]
     size_valid = row_valid["hh_size_adjusted"]
 
-    try:
+    # find percentile approx via linear interpolation between deciles
+    try: 
         deciles = wealth_deciles_df.loc[(syear_valid, age_valid, size_valid)].values
-        decile_bounds = np.arange(10, 100, 10) / 100  # 0.1 to 0.9
-        # class j, such that F(x_{j_o}) >= p
-        for i in range(len(deciles) - 1):
-            if deciles[i] <= valid_value <= deciles[i + 1]:
-                x_j_u = deciles[i]
-                x_j_o = deciles[i + 1]
-                F_x_j_u = decile_bounds[i]
-                f_x_j = 0.1  # since deciles are 10% intervals
-                break
-        else:
-            return household  # if no valid class is found, return the original household
-
-        # position p of valid_value
-        p = F_x_j_u + f_x_j * (valid_value - x_j_u) / (x_j_o - x_j_u) if x_j_u != x_j_o else F_x_j_u
     except KeyError:
-        return household
+        # if no deciles exist for the valid wealth observation, leave the wealth as NaN everywhere
+        return household_int.set_index("syear")
+    
+    decile_bounds = np.arange(10, 100, 10) / 100  # 0.1 to 0.9
+    f_x_j = 0.1  # since deciles are 10% intervals
+
+    # find first class j, such that F(x_{j_o}) >= p
+    below_10th = True
+    above_90th = False
+    for i in range(len(deciles) - 1):
+        if deciles[i] <= valid_value <= deciles[i + 1]:
+            below_10th = False
+            x_j_u = deciles[i]
+            x_j_o = deciles[i + 1]
+            F_x_j_u = decile_bounds[i]
+            # linear interpolation formula for p of valid_value
+            p = F_x_j_u + f_x_j * (valid_value - x_j_u) / (x_j_o - x_j_u) if x_j_u != x_j_o else F_x_j_u
+            break
+    else: # valid wealth above 9th decile, set p to 0.9
+        above_90th = True
 
     # impute missing values
-    for idx, row in household.iterrows():
+    for idx, row in household_int.iterrows():
         if pd.notnull(row["wealth"]):
             continue
-        try:
-            target_key = (idx[1], row["mean_household_age"], row["hh_size_adjusted"])
-            target_deciles = wealth_deciles_df.loc[target_key].values
-            # class j, such that F(x_{j_o}) >= p
-            for i in range(len(target_deciles) - 1):
-                if decile_bounds[i] <= p <= decile_bounds[i + 1]:
-                    x_j_u = target_deciles[i]
-                    x_j_o = target_deciles[i + 1]
-                    F_x_j_u = decile_bounds[i]
-                    f_x_j = 0.1
-                    break
-            else:
-                continue  # if no valid class is found, skip this row
+        else:
+            target_key = (row["syear"], row["mean_hh_age_rounded"], row["hh_size_adjusted"])
+            try:
+                target_deciles = wealth_deciles_df.loc[target_key].values
+            except KeyError:
+                # if no deciles exist for the that year leave the wealth as NaN
+                continue
+            
+            if below_10th: # if valid wealth was below 10th decile return the 10th decile
+                wealth_guess = target_deciles[0]
+            elif above_90th: # if valid wealth was above 90th decile return the 90th decile
+                wealth_guess = target_deciles[-1]
+            else: 
+                # p and F_x_j_u from previous step
+                x_j_u = target_deciles[int(F_x_j_u*10) - 1] 
+                x_j_o = target_deciles[int(F_x_j_u*10)]
+                # Impute wealth using the linear interpolation formula
+                wealth_guess = x_j_u + ((p - F_x_j_u) / f_x_j) * (x_j_o - x_j_u) 
 
-            # Impute wealth using the linear interpolation formula
-            wealth_guess = x_j_u + ((p - F_x_j_u) / f_x_j) * (x_j_o - x_j_u) 
-            household.at[idx, "wealth"] = wealth_guess
-        except KeyError:
-            continue
+            household_int.loc[idx, "wealth"] = wealth_guess
 
-    return household
+    return household_int.set_index("syear")
 
 def span_full_wealth_panel(wealth_data, specs):
     """Creates additional rows for each household for each year between start_year and
@@ -235,10 +226,16 @@ def span_full_wealth_panel(wealth_data, specs):
     return wealth_data_full
 
 def compute_deciles(group):
-    return pd.Series(
-        np.percentile(group['wealth'], np.arange(10, 100, 10)),  # Dezile 10% bis 90%
-        index=[f'w_dcl_{i}' for i in range(1, 10)]
-    )
+    if group["wealth"].isna().all():
+        return pd.Series(
+            np.full(9, np.nan),  # 10% to 90% deciles
+            index=[f'w_dcl_{i}' for i in range(1, 10)]
+        )
+    else:
+        return pd.Series(
+            np.nanpercentile(group['wealth'], np.arange(10, 100, 10)),  # Dezile 10% bis 90%
+            index=[f'w_dcl_{i}' for i in range(1, 10)]
+        )
 
     
 def load_wealth_data(soep_c38_path):
@@ -289,7 +286,7 @@ def add_personal_data(path_dict, specs, wealth_data_full, use_processed_pl=True)
     # set index to pid and syear, create age and filter by age, drop pids 
     merged_data.set_index(["pid", "syear"], inplace=True)
     merged_data = calc_age_at_interview(merged_data)
-    merged_data = filter_below_age(merged_data, specs["start_age"])
+    merged_data = merged_data[merged_data["age"] >= specs["start_age"]]
     merged_data["is_par"] = np.where(
         merged_data["parid"] == -2, 0, 1
     )

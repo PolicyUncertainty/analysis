@@ -61,10 +61,7 @@ def create_structural_est_sample(
 
     # Load and merge data state data from SOEP core (all but wealth)
     df = load_and_merge_soep_core(path_dict=paths, use_processed_pl=use_processed_pl)
-
-    # Add wealth
-    df = add_wealth_interpolate_and_deflate(df, paths, specs, load_wealth=load_wealth, use_processed_pl=use_processed_pl)
-
+    
     # Create the cohort specific SRA and its enumerated policy state
     df = create_SRA_by_gebjahr(df)
 
@@ -124,6 +121,9 @@ def create_structural_est_sample(
             "age",
         ],
     )
+    
+    # Add wealth
+    df = add_wealth_interpolate_and_deflate(df, paths, specs, load_wealth=load_wealth, use_processed_pl=use_processed_pl)
 
     # Correct policy state
     df = create_policy_state(df, specs)

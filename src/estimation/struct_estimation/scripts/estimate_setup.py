@@ -282,25 +282,16 @@ def generate_print_func(params_to_estimate_names):
         # for param_name in taste_shock_params:
         #     print(f"{param_name}: {params[param_name]}")
         print("\nMen model params are:")
-        for group_name in men_params.keys():
-            print(f"Group: {group_name}")
-            for param in men_params[group_name]:
-                if "disutil" in param:
-                    print(
-                        f"{param}: {params[param]} and in probability: {np.exp(-params[param])}"
-                    )
-                elif "job_finding" in param or "taste_shock" in param:
-                    print(f"{param}: {params[param]}")
-        print("\nParameters of the women model are:")
-        for group_name in women_params.keys():
-            print(f"Group: {group_name}")
-            for param in women_params[group_name]:
-                if "disutil" in param:
-                    print(
-                        f"{param}: {params[param]} and in probability: {np.exp(-params[param])}"
-                    )
-                elif "job_finding" in param or "taste_shock" in param:
-                    print(f"{param}: {params[param]}")
+        for gender_params in [men_params, women_params]:
+            for group_name in gender_params.keys():
+                print(f"Group: {group_name}")
+                for param_name in gender_params[group_name]:
+                    if "disutil" in param_name:
+                        print(
+                            f"{param_name}: {params[param_name]} and in probability: {np.exp(-params[param_name])}"
+                        )
+                    else:
+                        print(f"{param_name}: {params[param_name]}")
 
     return print_function
 
@@ -330,6 +321,9 @@ def get_gendered_params(params_to_estimate_names, append):
         param_name for param_name in gender_params if "taste_shock" in param_name
     ]
 
+    disability_params = [
+        param_name for param_name in gender_params if "disability" in param_name
+    ]
     # We do it this weird way for printing order
     params = {}
     if len(disutil_unemployed_params) > 0:
@@ -346,6 +340,9 @@ def get_gendered_params(params_to_estimate_names, append):
 
     if len(taste_shock_scale_params) > 0:
         params["taste_shock"] = taste_shock_scale_params
+
+    if len(disability_params) > 0:
+        params["disability"] = disability_params
 
     # We drop these directly afterwards
     if len(gender_params) > 0:

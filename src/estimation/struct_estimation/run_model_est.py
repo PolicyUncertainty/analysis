@@ -23,11 +23,11 @@ params_to_estimate_names = [
     "disutil_unemployed_low_men",
     # Taste shock men - 1 parameter
     # "taste_shock_scale_men",
-    # Men job finding - 3 parameters
+    # # Men job finding - 3 parameters
     # "job_finding_logit_const_men",
     # "job_finding_logit_age_men",
     # "job_finding_logit_high_educ_men",
-    # Disability probability men - 3 parameters
+    # # Disability probability men - 3 parameters
     # "disability_logit_const_men",
     # "disability_logit_age_men",
     # "disability_logit_high_educ_men",
@@ -72,7 +72,7 @@ if LOAD_LAST_ESTIMATE:
     last_estimate = gender_separate_models(last_estimate)
     start_params_all = load_and_set_start_params(paths_dict)
     for key in last_estimate.keys():
-        if "men" in key:
+        if ("men" in key) and ("women" not in key):
             last_estimate[key] = start_params_all[key]
 
 else:

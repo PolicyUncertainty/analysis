@@ -114,15 +114,13 @@ def create_structural_est_sample(
     # Create informed state
     df = create_informed_state(df)
 
-    # Generare job separation variable and lag
+    # Generare job separation variable
     df = generate_job_separation_var(df)
-    df["job_sep_this_year"] = df.groupby(["pid"])["job_sep"].shift(-1)
 
     # Now use this information to determine job offer state
-    was_fired_last_period = (df["job_sep"] == 1) | (df["job_sep_this_year"] == 1)
-    df = determine_observed_job_offers(
-        df, working_choices=[2, 3], was_fired_last_period=was_fired_last_period
-    )
+    # df["job_sep_this_year"] = df.groupby(["pid"])["job_sep"].shift(-1)
+    # was_fired_last_period = (df["job_sep"] == 1) | (df["job_sep_this_year"] == 1)
+    df = determine_observed_job_offers(df, working_choices=[2, 3])
 
     # We are done with lagging and leading and drop the buffer years
     df = filter_years(df, specs["start_year"], specs["end_year"])

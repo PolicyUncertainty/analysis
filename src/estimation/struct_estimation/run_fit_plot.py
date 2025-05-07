@@ -11,9 +11,9 @@ path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict)
 
 # Set run specs
-model_name = "try"
+model_name = "disability"
 load_sol_model = True
-load_solution = None
+load_solution = True
 
 if model_name == "start":
     from estimation.struct_estimation.start_params_and_bounds.set_start_params import (
@@ -22,10 +22,9 @@ if model_name == "start":
 
     params = load_and_set_start_params(path_dict)
 else:
-    # params = pickle.load(
-    #     open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
-    # )
-    params = new_to_current(path_dict)
+    params = pickle.load(
+        open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
+    )
 
 from estimation.struct_estimation.scripts.observed_model_fit import observed_model_fit
 

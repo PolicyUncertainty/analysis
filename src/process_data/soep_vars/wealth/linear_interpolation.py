@@ -80,7 +80,7 @@ def interpolate_and_extrapolate_wealth(wealth_data_full):
     wealth_data_full = wealth_data_full[~wealth_data_full.index.duplicated(keep="first")]
 
     # find mean hh age for each household (rounded to nearest 5 years)
-    wealth_data_full["mean_hh_age_rounded"] = wealth_data_full.groupby(["hid", "syear"])["float_age"].transform(lambda x: x.mean().round(0) // 5 * 5)
+    wealth_data_full["mean_hh_age_rounded"] = wealth_data_full.groupby(["hid", "syear"])["float_age"].transform(lambda x: (x.mean()/5.0).round(0) * 5)
 
     # create a dataframe with percentiles (1% to 100%) of wealth, grouped by each unique combination of: syear, mean_hh_age_rounded, hh_size_adjusted
     wealth_data_unique = wealth_data_full.reset_index().drop_duplicates(subset=['hid', 'syear'])

@@ -29,21 +29,22 @@ def health_transition(sex, health, education, period, params, options):
 
 
 def calc_disability_probability(params, sex, education, period, options):
-    age = options["start_age"] + period
+    # age = options["start_age"] + period
+    #
+    # # # Calculate exp value for men and women
+    # # exp_value_men = jnp.exp(
+    # #     params["disability_logit_const_men"]
+    # #     + params["disability_logit_age_men"] * age
+    # #     + params["disability_logit_high_educ_men"] * education
+    # # )
+    # # exp_value_women = jnp.exp(
+    # #     params["disability_logit_const_women"]
+    # #     + params["disability_logit_age_women"] * age
+    # #     + params["disability_logit_high_educ_women"] * education
+    # # )
+    # # # Now select based on sex state
+    # # is_men = sex == 0
+    # # exp_value = jax.lax.select(is_men, on_true=exp_value_men, on_false=exp_value_women)
+    # # prob = exp_value / (1 + exp_value)
 
-    # Calculate exp value for men and women
-    exp_value_men = jnp.exp(
-        params["disability_logit_const_men"]
-        + params["disability_logit_age_men"] * age
-        + params["disability_logit_high_educ_men"] * education
-    )
-    exp_value_women = jnp.exp(
-        params["disability_logit_const_women"]
-        + params["disability_logit_age_women"] * age
-        + params["disability_logit_high_educ_women"] * education
-    )
-    # Now select based on sex state
-    is_men = sex == 0
-    exp_value = jax.lax.select(is_men, on_true=exp_value_men, on_false=exp_value_women)
-    prob = exp_value / (1 + exp_value)
-    return prob
+    return jnp.array(0.0)

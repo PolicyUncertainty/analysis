@@ -21,12 +21,11 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
 )
 
 params_start = load_and_set_start_params(path_dict)
+# params_start["job_finding_logit_const_men"] += 1
 
 data_decision = pd.read_csv(path_dict["struct_est_sample"])
-data_decision = data_decision[data_decision["lagged_choice"] > 1]
-data_unempl = data_decision[data_decision["choice"] == 1]
-d_m = data_decision[data_decision["sex"] == 0]
-
+data_decision = data_decision[data_decision["lagged_choice"] == 1]
+data_decision["start_work"] = data_decision["choice"].isin([2, 3]).astype(int)
 
 data_decision["job_offer_prob_start"] = job_offer_process_transition(
     params=params_start,
@@ -57,7 +56,7 @@ for sex_var, sex_label in enumerate(specs["sex_labels"]):
             ax=ax, label="Start", ls=":"
         )
         df_type.groupby("period")["job_offer_prob_est"].mean().plot(ax=ax, label="Est")
-        df_type.groupby("period")["job_offer"].value_counts(normalize=True).loc[
+        df_type.groupby("period")["start_work"].value_counts(normalize=True).loc[
             (slice(None), 1)
         ].plot(ls="--", ax=ax, label="Observed")
         # Set title

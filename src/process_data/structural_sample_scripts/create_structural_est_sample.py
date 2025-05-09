@@ -151,9 +151,9 @@ def create_structural_est_sample(
     # enforce choice restrictions based on model setup
     df = enforce_model_choice_restriction(df, specs)
 
-    # Modify health state for incorporation of disability pension
-    df["surveyed_health"] = df["health"].copy()
-    df = modify_health_for_disability_pension(df, specs)
+    # # Modify health state for incorporation of disability pension
+    # df["surveyed_health"] = df["health"].copy()
+    # df = modify_health_for_disability_pension(df, specs)
 
     # Rename to monthly wage
     df.rename(
@@ -169,7 +169,7 @@ def create_structural_est_sample(
         "hh_net_income": "float32",
         "working_years": "float32",
         "children": "float32",
-        "surveyed_health": "int8",
+        # "surveyed_health": "int8",
     }
 
     df["hh_net_income"] /= specs["wealth_unit"]

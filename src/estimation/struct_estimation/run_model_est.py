@@ -27,7 +27,7 @@ params_to_estimate_names = [
     # "job_finding_logit_const_men",
     # "job_finding_logit_age_men",
     # "job_finding_logit_high_educ_men",
-    # # Disability probability men - 3 parameters
+    # Disability probability men - 3 parameters
     # "disability_logit_const_men",
     # "disability_logit_age_men",
     # "disability_logit_high_educ_men",
@@ -59,9 +59,9 @@ params_to_estimate_names = [
     # "disability_logit_age_women",
     # "disability_logit_high_educ_women",
 ]
-model_name = "disability"
-LOAD_LAST_ESTIMATE = True
-LOAD_SOL_MODEL = True
+model_name = "wo_disability"
+LOAD_LAST_ESTIMATE = False
+LOAD_SOL_MODEL = False
 SAVE_RESULTS = True
 USE_WEIGHTS = False
 

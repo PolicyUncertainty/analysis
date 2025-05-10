@@ -9,6 +9,8 @@ def calc_age_at_interview(df):
     Calculate the age at interview date. Both float_interview and float_birth
     are created with missing nans for invalid data. So age will be invalid if
     one of them is invalid.
+
+    Vars needed: gebjahr, gebmonat, syear, pmonin, ptagin
     """
     # Create birth and interview date
     df = create_float_interview_date(df)

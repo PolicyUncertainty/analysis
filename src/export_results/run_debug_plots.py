@@ -10,7 +10,7 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 
 path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
-model_name = "disability"
+model_name = "wo_disability"
 
 
 params_est = pickle.load(
@@ -25,7 +25,7 @@ params_start = load_and_set_start_params(path_dict)
 
 data_decision = pd.read_csv(path_dict["struct_est_sample"])
 data_decision = data_decision[data_decision["lagged_choice"] == 1]
-data_decision["start_work"] = data_decision["choice"].isin([2, 3]).astype(int)
+data_decision["work_start"] = data_decision["choice"].isin([2, 3]).astype(int)
 
 data_decision["job_offer_prob_start"] = job_offer_process_transition(
     params=params_start,
@@ -56,7 +56,7 @@ for sex_var, sex_label in enumerate(specs["sex_labels"]):
             ax=ax, label="Start", ls=":"
         )
         df_type.groupby("period")["job_offer_prob_est"].mean().plot(ax=ax, label="Est")
-        df_type.groupby("period")["start_work"].value_counts(normalize=True).loc[
+        df_type.groupby("period")["work_start"].value_counts(normalize=True).loc[
             (slice(None), 1)
         ].plot(ls="--", ax=ax, label="Observed")
         # Set title

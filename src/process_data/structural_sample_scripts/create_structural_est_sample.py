@@ -80,7 +80,7 @@ def create_structural_est_sample(
     df = load_and_merge_soep_core(path_dict=paths, use_processed_pl=use_processed_pl)
 
     # Create the cohort specific SRA and its enumerated policy state
-    df = create_SRA_by_gebjahr(df)
+    df["SRA"] = create_SRA_by_gebjahr(df["gebjahr"])
 
     # First start with partner state, as these could be also out of age range.
     df = create_partner_state(df, filter_missing=False)

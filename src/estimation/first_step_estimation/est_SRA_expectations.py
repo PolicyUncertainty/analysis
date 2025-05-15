@@ -55,7 +55,7 @@ def estimate_truncated_normal(paths, options, load_data=False):
     df_analysis = df_analysis[df_analysis["time_to_ret"] < 48]
 
     df_analysis["sigma_sq"] = df_analysis["var"] / df_analysis["time_to_ret"]
-    df_analysis = create_SRA_by_gebjahr(df_analysis)
+    df_analysis["SRA"] = create_SRA_by_gebjahr(df_analysis["gebjahr"])
     # Rename SRA to current SRA
     df_analysis.rename(columns={"SRA": "current_SRA"}, inplace=True)
     df_analysis.to_pickle(out_file_path)

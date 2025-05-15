@@ -2,20 +2,19 @@ import numpy as np
 import pandas as pd
 
 
-def create_SRA_by_gebjahr(df):
+def create_SRA_by_gebjahr(gebjahr):
     """This function creates the policy state according to the 2007 reform."""
-    gebjahr = df["gebjahr"]
 
     # Default state is 67
-    df["SRA"] = 67.0
+    SRA = pd.Series(67.0, index=gebjahr.index, name="SRA")
     # Create masks for everyone born before 1964
     mask1 = (gebjahr <= 1964) & (gebjahr >= 1958)
     mask2 = (gebjahr <= 1958) & (gebjahr >= 1947)
     mask3 = gebjahr < 1947
-    df.loc[mask1, "SRA"] = 67 - 2 / 12 * (1964 - gebjahr[mask1])
-    df.loc[mask2, "SRA"] = 66 - 1 / 12 * (1958 - gebjahr[mask2])
-    df.loc[mask3, "SRA"] = 65
-    return df
+    SRA.loc[mask1] = 67 - 2 / 12 * (1964 - gebjahr[mask1])
+    SRA.loc[mask2] = 66 - 1 / 12 * (1958 - gebjahr[mask2])
+    SRA.loc[mask3] = 65
+    return SRA
 
 
 def modify_policy_state(df, specs):

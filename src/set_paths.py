@@ -40,7 +40,7 @@ def create_path_dict(define_user=False, user=None):
         paths_dict = {
             "soep_c38": data_path + "soep38",
             "soep_rv": data_path + "soep_rv",
-            "soep_is": data_path + "soep_is_2022/dataset_main_SOEP_IS.dta",
+            "soep_is": data_path + "soep_is/soep-is.2022_stata_de",
         }
     else:
         paths_dict = {}

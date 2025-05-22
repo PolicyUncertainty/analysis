@@ -4,7 +4,7 @@ from process_data.soep_vars.birth import create_float_birth_date
 from process_data.soep_vars.interview_date import create_float_interview_date
 
 
-def calc_age_at_interview(df):
+def calc_age_at_interview(df, drop_missing_month=True):
     """
     Calculate the age at interview date. Both float_interview and float_birth
     are created with missing nans for invalid data. So age will be invalid if
@@ -14,7 +14,7 @@ def calc_age_at_interview(df):
     """
     # Create birth and interview date
     df = create_float_interview_date(df)
-    df = create_float_birth_date(df)
+    df = create_float_birth_date(df, drop_missing_month=drop_missing_month)
 
     # Calculate the age at interview date
     df["float_age"] = df["float_interview"] - df["float_birth_date"]

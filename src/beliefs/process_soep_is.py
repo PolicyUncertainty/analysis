@@ -28,29 +28,40 @@ def load_and_filter_soep_is(paths):
     print(f"{len(df)} observations in SOEP-IS pension beliefs survey.")
     return df
 
-def add_covariates(df, paths):
-    """ Add sex, age, education, and health variables to the dataframe. Df must have pid and syear columns."""
-    # raw data to be added
-        # sex: sex (ppath)
-        # age: gebjahr (ppath), gebmonat (ppath), syear (already in df), pmonin (pl) [soep is: imonth], ptagin (pl) [soep is: iday]
-        # education: pgpsbil (pgen) [soep is: pgsbil]
-        # health: m11126 (soep-core: pequiv, soep-is: pl because no pequiv) [soep-is: ple0025], m11124 (soep-core: pequiv, soep-is: pl because no pequiv) [soep-is: ple0040, different coding!]
+def add_covariates(df, paths, filter_missings=False):
+    """ Add sex, age, education, and health variables to the dataframe. Df must have pid and syear columns.
+
+    raw data to be added
+      - sex: sex (ppath)
+      - age: 
+         - soep-core: gebjahr (ppath), gebmonat (ppath), syear (already in df), pmonin (pl), ptagin (pl)
+         - soep is: gebjahr (ppath), gebmonat (ppath), syear (already in df), imonth (pl), iday (pl)
+      - education: 
+         - soep-core: pgpsbil (pgen) 
+         - soep is: pgsbil (pgen)
+      - health:
+         - soep-core: m11126 (pequiv), m11124 (pequiv)
+         - soep-is: ple0008 (pl), ple0040 (pl), NOTE: different coding!]
+    """
+
     # load data
     soep_path = paths["soep_is"]
     print("Extracting covariates from SOEP data. This may take a while.")
     ppath = pd.read_stata(f"{soep_path}/ppath.dta", convert_categoricals=False, columns=["pid", "sex", "gebjahr", "gebmonat"])
-    pl = pd.read_stata(f"{soep_path}/pl.dta", convert_categoricals=False, columns=["pid", "syear", "imonth", "iday", "ple0025", "ple0040"])
+    pl = pd.read_stata(f"{soep_path}/pl.dta", convert_categoricals=False, columns=["pid", "syear", "imonth", "iday", "ple0008", "ple0040"])
     pgen = pd.read_stata(f"{soep_path}/pgen.dta", convert_categoricals=False, columns=["pid", "syear", "pgsbil"])
     # merge data
     df = pd.merge(df, ppath, how="left", on=["pid"])
     df = pd.merge(df, pl, how="left", on=["pid", "syear"])
     df = pd.merge(df, pgen, how="left", on=["pid", "syear"])
     # modify variables
+    df.set_index(["pid", "syear"], inplace=True)
     df = rename_and_reformat_is_vars(df)
     df = recode_sex(df)
-    df = calc_age_at_interview(df)
-    df = create_education_type(df)
-    df = create_health_var(df)
+    df = calc_age_at_interview(df, drop_missing_month=filter_missings)
+    df = create_education_type(df, filter_missings=filter_missings)
+    df = create_health_var(df, filter_missings=filter_missings)
+    # cleanup
     raw_columns = ["gebjahr", "gebmonat", "pmonin", "ptagin", "pgpsbil", "m11126", "m11124"]
     df = df.drop(columns=raw_columns)
     return df
@@ -61,12 +72,12 @@ def rename_and_reformat_is_vars(df):
     rename_dict = {
         "imonth": "pmonin",
         "iday": "ptagin",
-        "ple0025": "m11126",
+        "ple0008": "m11126",
         "ple0040": "m11124",
-        "pgpsbil": "pgsbil",
+        "pgsbil" : "pgpsbil",
     }
     df = df.rename(columns=rename_dict)
     # recode variables
     # ple0040 (disabled) has 1:yes, 2:no, m11124 (disabled) has 0:no, 1:yes
-    df["m11124"] = df["m11124"].replace({0: 2, 1: 1})
+    df["m11124"] = df["m11124"].replace({2: 0, 1: 1})
     return df

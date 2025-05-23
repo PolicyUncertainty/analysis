@@ -61,7 +61,7 @@ params_to_estimate_names = [
 ]
 model_name = "wo_disability"
 LOAD_LAST_ESTIMATE = False
-LOAD_SOL_MODEL = True
+LOAD_SOL_MODEL = False
 SAVE_RESULTS = True
 USE_WEIGHTS = False
 
@@ -69,12 +69,6 @@ if LOAD_LAST_ESTIMATE:
     last_estimate = pkl.load(
         open(paths_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
     )
-    last_estimate = gender_separate_models(last_estimate)
-    start_params_all = load_and_set_start_params(paths_dict)
-    for key in last_estimate.keys():
-        if ("men" in key) and ("women" not in key):
-            last_estimate[key] = start_params_all[key]
-
 else:
     last_estimate = None
 

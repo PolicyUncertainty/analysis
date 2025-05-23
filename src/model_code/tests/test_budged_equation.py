@@ -56,8 +56,6 @@ def test_budget_unemployed(
 
     specs_internal = copy.deepcopy(specs)
 
-    params = {"interest_rate": specs_internal["interest_rate"]}
-
     max_init_exp_period = period + specs_internal["max_exp_diffs_per_period"][period]
     exp_cont = 2 / max_init_exp_period
 
@@ -68,9 +66,8 @@ def test_budget_unemployed(
         sex=sex,
         lagged_choice=1,
         experience=exp_cont,
-        savings_end_of_previous_period=savings,
+        asset_end_of_previous_period=savings,
         income_shock_previous_period=0,
-        params=params,
         model_specs=specs_internal,
     )
 
@@ -128,7 +125,7 @@ def test_budget_unemployed(
 
     np.testing.assert_almost_equal(
         wealth,
-        (savings_scaled * (1 + params["interest_rate"]) + income)
+        (savings_scaled * (1 + specs["interest_rate"]) + income)
         / specs_internal["wealth_unit"],
     )
 
@@ -175,7 +172,6 @@ def test_budget_worker(
     specs_internal["gamma_0"] = gamma_array
     specs_internal["gamma_1"] = gamma_array
 
-    params = {"interest_rate": specs_internal["interest_rate"]}
     max_init_exp_period = period + specs_internal["max_exp_diffs_per_period"][period]
     exp_cont = experience / max_init_exp_period
 
@@ -186,9 +182,8 @@ def test_budget_worker(
         lagged_choice=working_choice,
         sex=sex,
         experience=exp_cont,
-        savings_end_of_previous_period=savings,
+        asset_end_of_previous_period=savings,
         income_shock_previous_period=income_shock,
-        params=params,
         model_specs=specs_internal,
     )
 
@@ -301,7 +296,6 @@ def test_retiree(
 ):
     path_dict, specs_internal = paths_and_specs
 
-    params = {"interest_rate": specs_internal["interest_rate"]}
     last_period = period - 1
     max_exp_last_period = (
         specs_internal["max_exp_diffs_per_period"][last_period] + last_period
@@ -330,9 +324,8 @@ def test_retiree(
         lagged_choice=0,
         sex=sex,
         experience=exp_cont,
-        savings_end_of_previous_period=savings,
+        asset_end_of_previous_period=savings,
         income_shock_previous_period=0,
-        params=params,
         model_specs=specs_internal,
     )
 
@@ -445,7 +438,6 @@ def test_fresh_retiree(
 
     actual_retirement_age = specs_internal["start_age"] + period - 1
 
-    params = {"interest_rate": specs_internal["interest_rate"]}
     last_period = period - 1
     max_init_exp_prev_period = (
         last_period + specs_internal["max_exp_diffs_per_period"][last_period]
@@ -471,9 +463,8 @@ def test_fresh_retiree(
         lagged_choice=0,
         sex=sex,
         experience=exp_cont,
-        savings_end_of_previous_period=savings,
+        asset_end_of_previous_period=savings,
         income_shock_previous_period=0,
-        params=params,
         model_specs=specs_internal,
     )
 

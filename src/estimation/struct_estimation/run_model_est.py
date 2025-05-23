@@ -61,7 +61,7 @@ params_to_estimate_names = [
 ]
 model_name = "wo_disability"
 LOAD_LAST_ESTIMATE = False
-LOAD_SOL_MODEL = False
+LOAD_SOL_MODEL = True
 SAVE_RESULTS = True
 USE_WEIGHTS = False
 

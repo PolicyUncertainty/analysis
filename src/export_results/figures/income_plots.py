@@ -183,7 +183,7 @@ def plot_total_income(specs):
                             experience=exp_share,
                             sex=sex_var,
                             partner_state=np.array(married_val),
-                            savings_end_of_previous_period=0,
+                            asset_end_of_previous_period=0,
                             income_shock_previous_period=0,
                             params=params,
                             model_specs=specs,

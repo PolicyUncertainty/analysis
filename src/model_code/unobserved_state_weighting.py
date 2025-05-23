@@ -5,8 +5,8 @@ from model_code.stochastic_processes.health_transition import (
 )
 
 
-def create_unobserved_state_specs(data_decision, model):
-    model_funcs = model.model_funcs
+def create_unobserved_state_specs(data_decision, model_class):
+    model_funcs = model_class.model_funcs
 
     def weight_func(**kwargs):
 

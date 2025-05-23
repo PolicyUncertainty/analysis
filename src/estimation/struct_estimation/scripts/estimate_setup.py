@@ -42,18 +42,15 @@ def estimate_model(
         print_function(last_estimate)
 
         for key in start_params_all:
-            if key in ["sigma", "interest_rate", "beta"]:
-                continue
-            else:
-                try:
-                    print(
-                        f"Start params value of {key} was {start_params_all[key]} and is "
-                        f"replaced by {last_estimate[key]}",
-                        flush=True,
-                    )
-                except:
-                    raise ValueError(f"Key {key} not found in last_estimate.")
-                start_params_all[key] = last_estimate[key]
+            try:
+                print(
+                    f"Start params value of {key} was {start_params_all[key]} and is "
+                    f"replaced by {last_estimate[key]}",
+                    flush=True,
+                )
+            except:
+                raise ValueError(f"Key {key} not found in last_estimate.")
+            start_params_all[key] = last_estimate[key]
 
     start_params = {name: start_params_all[name] for name in params_to_estimate_names}
     print_function(start_params)
@@ -138,9 +135,8 @@ class est_class_from_paths:
 
         self.intermediate_est_data = intermediate_est_data
 
-        model, params = specify_model(
+        model = specify_model(
             path_dict=path_dict,
-            params=start_params_all,
             subj_unc=True,
             custom_resolution_age=None,
             sim_alpha=None,
@@ -163,22 +159,23 @@ class est_class_from_paths:
             self.weight_sum = data_decision.shape[0]
 
         # Create specs for unobserved states
-        unobserved_state_specs = create_unobserved_state_specs(data_decision, model)
+        unobserved_state_specs = create_unobserved_state_specs(
+            data_decision=data_decision, model_class=model
+        )
 
         # Create likelihood function
-        individual_likelihood = create_individual_likelihood_function_for_model(
-            model=model,
+        individual_likelihood = model.create_experimental_ll_func(
             observed_states=states_dict,
             observed_choices=data_decision["choice"].values,
             unobserved_state_specs=unobserved_state_specs,
             params_all=start_params_all,
-            return_model_solution=True,
+            return_model_solution=False,
         )
         self.ll_func = individual_likelihood
 
     def crit_func(self, params):
         start = time.time()
-        ll_value_individual, model_solution = self.ll_func(params)
+        ll_value_individual = self.ll_func(params)
         ll_value = jnp.dot(self.weights, ll_value_individual) / self.weight_sum
         if self.save_results:
             alternate_save_count = self.iter_count % 2

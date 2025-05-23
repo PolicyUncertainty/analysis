@@ -17,12 +17,11 @@ def budget_constraint(
     experience,
     sex,
     partner_state,
-    savings_end_of_previous_period,  # A_{t-1}
+    asset_end_of_previous_period,  # A_{t-1}
     income_shock_previous_period,  # epsilon_{t - 1}
-    params,
     model_specs,
 ):
-    savings_scaled = savings_end_of_previous_period * model_specs["wealth_unit"]
+    savings_scaled = asset_end_of_previous_period * model_specs["wealth_unit"]
     # Recalculate experience
     max_exp_period = period + model_specs["max_exp_diffs_per_period"][period]
     experience_years = max_exp_period * experience
@@ -93,6 +92,6 @@ def budget_constraint(
 
     total_income = jnp.maximum(total_net_income + child_benefits, unemployment_benefits)
     # calculate beginning of period wealth M_t
-    wealth = (1 + params["interest_rate"]) * savings_scaled + total_income
+    wealth = (1 + model_specs["interest_rate"]) * savings_scaled + total_income
 
     return wealth / model_specs["wealth_unit"]

@@ -25,7 +25,6 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 
 def specify_model(
     path_dict,
-    params,
     subj_unc,
     custom_resolution_age,
     sim_alpha=None,
@@ -46,11 +45,6 @@ def specify_model(
     # Generate model_specs
     specs = generate_derived_and_data_derived_specs(path_dict)
 
-    # Assign income shock scale to start_params_all
-    params["sigma"] = specs["income_shock_scale"]
-    params["interest_rate"] = specs["interest_rate"]
-    params["beta"] = specs["discount_factor"]
-
     # Execute load first step estimation data
     specs, transition_func_sol = select_transition_func_and_update_specs(
         path_dict=path_dict,
@@ -70,21 +64,22 @@ def specify_model(
     model_config = {
         "min_period_batch_segments": [33, 44],
         "n_periods": specs["n_periods"],
-        "choices": specs["n_choices"],
+        "choices": np.arange(specs["n_choices"], dtype=int),
         "deterministic_states": {
             "education": np.arange(specs["n_education_types"], dtype=int),
             "sex": np.arange(specs["n_sexes"], dtype=int),
         },
         "stochastic_states": {
-            "policy_state": list(range(specs["n_policy_states"])),
-            "job_offer": list(range(2)),
-            "partner_state": list(range(specs["n_partner_states"])),
-            "health": list(range(specs["n_all_health_states"])),
+            "policy_state": np.arange(specs["n_policy_states"], dtype=int),
+            "job_offer": np.arange(2, dtype=int),
+            "partner_state": np.arange(specs["n_partner_states"], dtype=int),
+            "health": np.arange(specs["n_all_health_states"], dtype=int),
         },
         "continuous_states": {
             "assets_end_of_period": savings_grid,
             "experience": experience_grid,
         },
+        "n_quad_points": specs["n_quad_points_stochastic"],
     }
     stochastic_states_transitions = {
         "policy_state": transition_func_sol,
@@ -93,7 +88,7 @@ def specify_model(
         "health": health_transition,
     }
 
-    informed_states = range(2)
+    informed_states = np.arange(2, dtype=int)
     if model_type == "solution":
         # Set informed state as not changing state
         model_config["deterministic_states"]["informed"] = informed_states
@@ -138,7 +133,7 @@ def specify_model(
         )
 
     print("Model specified.")
-    return model, params
+    return model
 
 
 def specify_and_solve_model(

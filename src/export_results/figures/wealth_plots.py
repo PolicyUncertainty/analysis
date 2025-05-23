@@ -29,7 +29,7 @@ def plot_budget_of_unemployed(specs):
                 experience=0.01,
                 sex=sex_var,
                 partner_state=np.array([1]),
-                savings_end_of_previous_period=savings,
+                asset_end_of_previous_period=savings,
                 income_shock_previous_period=0,
                 params=params,
                 model_specs=specs,

@@ -3,6 +3,7 @@ import jax
 from model_code.stochastic_processes.health_transition import (
     calc_disability_probability,
 )
+from model_code.stochastic_processes.job_offers import job_offer_process_transition
 
 
 def create_unobserved_state_specs(data_decision, model_class):
@@ -14,9 +15,14 @@ def create_unobserved_state_specs(data_decision, model_class):
         # We need to weight the unobserved job offer state for each of its possible values
         # The weight function is called with job offer new being the unobserved state
         job_offer_new = kwargs["job_offer_new"]
-        # breakpoint()
-        job_offer_weight = model_funcs["processed_stochastic_funcs"]["job_offer"](
-            **kwargs
+        job_offer_weight = job_offer_process_transition(
+            params=kwargs["params"],
+            sex=kwargs["sex"],
+            health=kwargs["lagged_health"],
+            model_specs=kwargs["model_specs"],
+            education=kwargs["education"],
+            period=kwargs["period"],
+            choice=kwargs["choice"],
         )[job_offer_new]
 
         # For the informed state we use the share of this period. The period in the kwargs is the one from
@@ -50,10 +56,11 @@ def create_unobserved_state_specs(data_decision, model_class):
 
         return job_offer_weight * informed_weight * health_weight
 
-    relevant_prev_period_state_choices_dict = {
+    relevant_prev_period_states_dict = {
         "period": data_decision["period"].values - 1,
         "education": data_decision["education"].values,
         "sex": data_decision["sex"].values,
+        "lagged_health": data_decision["lagged_health"].values,
     }
 
     unobserved_state_specs = {
@@ -64,7 +71,7 @@ def create_unobserved_state_specs(data_decision, model_class):
         },
         "weight_func": weight_func,
         "state_choices_weighing": {
-            "states": relevant_prev_period_state_choices_dict,
+            "states": relevant_prev_period_states_dict,
             "choices": data_decision["lagged_choice"].values,
         },
         # Bad health is unobserved if it is either just bad or even disabled.

@@ -1,3 +1,4 @@
+import jax
 from jax import numpy as jnp
 
 from model_code.wealth_and_budget.partner_income import calc_partner_income_after_ssc
@@ -17,11 +18,12 @@ def budget_constraint(
     experience,
     sex,
     partner_state,
+    health,
     asset_end_of_previous_period,  # A_{t-1}
     income_shock_previous_period,  # epsilon_{t - 1}
     model_specs,
 ):
-    savings_scaled = asset_end_of_previous_period * model_specs["wealth_unit"]
+    assets_scaled = asset_end_of_previous_period * model_specs["wealth_unit"]
     # Recalculate experience
     max_exp_period = period + model_specs["max_exp_diffs_per_period"][period]
     experience_years = max_exp_period * experience
@@ -47,7 +49,7 @@ def budget_constraint(
 
     # Income lagged choice 1
     unemployment_benefits = calc_unemployment_benefits(
-        savings=savings_scaled,
+        assets=assets_scaled,
         education=education,
         sex=sex,
         has_partner_int=has_partner_int,
@@ -92,6 +94,13 @@ def budget_constraint(
 
     total_income = jnp.maximum(total_net_income + child_benefits, unemployment_benefits)
     # calculate beginning of period wealth M_t
-    wealth = (1 + model_specs["interest_rate"]) * savings_scaled + total_income
+    assets_begin_of_period = (
+        1 + model_specs["interest_rate"]
+    ) * assets_scaled + total_income
 
-    return wealth / model_specs["wealth_unit"]
+    death = health == model_specs["death_health_var"]
+    assets_begin_of_period = jax.lax.select(
+        death, on_true=assets_scaled, on_false=assets_begin_of_period
+    )
+
+    return assets_begin_of_period / model_specs["wealth_unit"]

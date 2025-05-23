@@ -77,6 +77,7 @@ def estimate_model(
         use_weights=use_weights,
         save_results=save_results,
     )
+
     result = om.minimize(
         fun=est_class.crit_func,
         params=start_params,

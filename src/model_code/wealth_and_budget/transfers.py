@@ -7,10 +7,10 @@ def calc_child_benefits(sex, education, has_partner_int, period, model_specs):
 
 
 def calc_unemployment_benefits(
-    savings, sex, education, has_partner_int, period, model_specs
+    assets, sex, education, has_partner_int, period, model_specs
 ):
     # Unemployment benefits means test
-    means_test = savings < model_specs["unemployment_wealth_thresh"]
+    means_test = assets < model_specs["unemployment_wealth_thresh"]
 
     # Unemployment benefits for children living in the household
     nb_children = model_specs["children_by_state"][
@@ -41,9 +41,9 @@ def calc_unemployment_benefits(
         model_specs["unemployment_wealth_thresh"] + total_unemployment_benefits
     )
     reduced_benefits_means_test = (1 - means_test) * (
-        savings < reduced_benefits_threshhold
+        assets < reduced_benefits_threshhold
     )
-    reduced_benefits = reduced_benefits_threshhold - savings
+    reduced_benefits = reduced_benefits_threshhold - assets
 
     unemployment_benefits = (
         means_test * total_unemployment_benefits

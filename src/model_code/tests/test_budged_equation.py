@@ -64,6 +64,7 @@ def test_budget_unemployed(
         partner_state=partner_state,
         education=education,
         sex=sex,
+        health=1,
         lagged_choice=1,
         experience=exp_cont,
         asset_end_of_previous_period=savings,
@@ -181,6 +182,7 @@ def test_budget_worker(
         education=education,
         lagged_choice=working_choice,
         sex=sex,
+        health=1,
         experience=exp_cont,
         asset_end_of_previous_period=savings,
         income_shock_previous_period=income_shock,
@@ -216,7 +218,7 @@ def test_budget_worker(
 
     has_partner_int = (partner_state > 0).astype(int)
     unemployment_benefits = calc_unemployment_benefits(
-        savings=savings_scaled,
+        assets=savings_scaled,
         education=education,
         sex=sex,
         has_partner_int=has_partner_int,
@@ -323,6 +325,7 @@ def test_retiree(
         education=education,
         lagged_choice=0,
         sex=sex,
+        health=1,
         experience=exp_cont,
         asset_end_of_previous_period=savings,
         income_shock_previous_period=0,
@@ -342,7 +345,7 @@ def test_retiree(
 
     has_partner_int = (partner_state > 0).astype(int)
     unemployment_benefits = calc_unemployment_benefits(
-        savings=savings_scaled,
+        assets=savings_scaled,
         education=education,
         sex=sex,
         has_partner_int=has_partner_int,
@@ -461,6 +464,7 @@ def test_fresh_retiree(
         partner_state=partner_state,
         education=education,
         lagged_choice=0,
+        health=1,
         sex=sex,
         experience=exp_cont,
         asset_end_of_previous_period=savings,
@@ -518,7 +522,7 @@ def test_fresh_retiree(
 
     has_partner_int = (partner_state > 0).astype(int)
     unemployment_benefits = calc_unemployment_benefits(
-        savings=savings_scaled,
+        assets=savings_scaled,
         education=education,
         sex=sex,
         has_partner_int=has_partner_int,

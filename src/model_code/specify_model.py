@@ -89,20 +89,18 @@ def specify_model(
     }
 
     informed_states = np.arange(2, dtype=int)
+    model_path = path_dict["intermediate_data"] + "model.pkl"
+
     if model_type == "solution":
         # Set informed state as not changing state
         model_config["deterministic_states"]["informed"] = informed_states
         # Determine path
-        model_path = path_dict["intermediate_data"] + "model_spec_solution.pkl"
-        sim_model = False
-
     elif model_type == "simulation":
         # Set informed state as exogenous changing state
         model_config["exogenous_processes"]["informed"] = informed_states
         stochastic_states_transitions["informed"] = informed_transition
         # Determine path
         model_path = path_dict["intermediate_data"] + "model_spec_simulation.pkl"
-        sim_model = True
     else:
         raise ValueError("model_type must be either 'solution' or 'simulation'")
 

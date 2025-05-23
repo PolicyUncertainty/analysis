@@ -57,6 +57,7 @@ def generate_start_states_from_obs(
         job_offer_prob = job_offer_process_transition(
             params=params,
             sex=sex,
+            health=health,
             model_specs=specs,
             education=education,
             period=jnp.array(-1, dtype=int),

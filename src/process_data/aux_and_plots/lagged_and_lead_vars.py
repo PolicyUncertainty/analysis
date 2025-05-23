@@ -19,29 +19,3 @@ def span_dataframe(df, start_year, end_year):
     if "hid" in full_df.columns.values:
         full_df["hid"] = full_df.groupby(["pid"])["hid"].transform("last")
     return full_df
-
-
-def create_lagged_and_lead_variables(
-    data, specs, lead_job_sep=False, filter_missings=True
-):
-    """This function creates the lagged choice variable and drops missing lagged
-    choices."""
-
-    df_full = span_dataframe(data, specs["start_year"] - 1, specs["end_year"] + 1)
-
-    df_full["lagged_choice"] = df_full.groupby(["pid"])["choice"].shift()
-
-    if lead_job_sep:
-        df_full["job_sep_this_year"] = df_full.groupby(["pid"])["job_sep"].shift(-1)
-
-    if filter_missings:
-        if lead_job_sep:
-            df_full = df_full[df_full["job_sep_this_year"].notna()]
-
-        df_full = df_full[df_full["lagged_choice"].notna()]
-        # We now have observations with a valid lagged or lead variable but not with
-        # actual valid state variables. Delete those by looking at the choice variable.
-        df_full = df_full[df_full["choice"].notna()]
-
-        print(str(len(df_full)) + " left after filtering missing lagged choices.")
-    return df_full

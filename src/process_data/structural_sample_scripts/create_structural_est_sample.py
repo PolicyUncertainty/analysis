@@ -13,14 +13,12 @@ from process_data.aux_and_plots.lagged_and_lead_vars import (
     span_dataframe,
 )
 from process_data.soep_vars.age import calc_age_at_interview
-from process_data.soep_vars.birth import create_float_birth_date
 from process_data.soep_vars.choice_from_spell import (
     create_choice_variable_from_artkalen,
 )
 from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.experience import create_experience_and_working_years
 from process_data.soep_vars.health import correct_health_state, create_health_var
-from process_data.soep_vars.interview_date import create_float_interview_date
 from process_data.soep_vars.job_hire_and_fire import (
     determine_observed_job_offers,
     generate_job_separation_var,
@@ -50,11 +48,12 @@ CORE_TYPE_DICT = {
     "lagged_choice": "int8",
     "informed": "int8",
     "policy_state": "int8",
-    "policy_state_value": "float32",
+    "policy_state_value": "float64",
+    "lagged_health": "int8",
     "partner_state": "int8",
     "job_offer": "int8",
     "experience": "int8",
-    "wealth": "float32",
+    "wealth": "float64",
     "education": "int8",
     "sex": "int8",
     "health": "int8",
@@ -132,6 +131,7 @@ def create_structural_est_sample(
             "health",
             "choice",
             "lagged_choice",
+            "lagged_health",
             "education",
             "age",
         ],
@@ -165,10 +165,10 @@ def create_structural_est_sample(
     )
 
     type_dict_add = {
-        "monthly_wage": "float32",
-        "hh_net_income": "float32",
-        "working_years": "float32",
-        "children": "float32",
+        "monthly_wage": "float64",
+        "hh_net_income": "float64",
+        "working_years": "float64",
+        "children": "float64",
         # "surveyed_health": "int8",
     }
 

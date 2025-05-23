@@ -4,14 +4,16 @@ import numpy as np
 import pandas as pd
 
 from process_data.aux_and_plots.filter_data import (
+    drop_missings,
     filter_below_age,
     filter_years,
     recode_sex,
 )
 from process_data.aux_and_plots.lagged_and_lead_vars import (
-    create_lagged_and_lead_variables,
+    span_dataframe,
 )
 from process_data.soep_vars.education import create_education_type
+from process_data.soep_vars.health import correct_health_state, create_health_var
 from process_data.soep_vars.job_hire_and_fire import generate_job_separation_var
 from process_data.soep_vars.work_choices import create_choice_variable
 
@@ -43,7 +45,13 @@ def create_job_sep_sample(paths, specs, load_data=False):
     # create choice and lagged choice variable
     df = create_choice_variable(df)
     # lagged choice
-    df = create_lagged_and_lead_variables(df, specs)
+    df = span_dataframe(df, specs["start_year"] - 1, specs["end_year"] + 1)
+
+    df["lagged_choice"] = df.groupby(["pid"])["choice"].shift()
+
+    # We create the health variable and correct it
+    df = create_health_var(df, filter_missings=False)
+    df = correct_health_state(df)
 
     # Job separation
     df = generate_job_separation_var(df)
@@ -54,7 +62,7 @@ def create_job_sep_sample(paths, specs, load_data=False):
     df = create_education_type(df)
 
     # Now restrict sample to all who worked last period or did loose their job
-    df = df[(df["lagged_choice"] >= 2) | (df["plb0282_h"] == 1)]
+    df = df[(df["lagged_choice"].isin([2, 3])) | (df["plb0282_h"] == 1)]
     # Kick out men that worked part-time last period
     df = df[~((df["lagged_choice"] == 2) & (df["sex"] == 0))]
 
@@ -62,10 +70,17 @@ def create_job_sep_sample(paths, specs, load_data=False):
     df["age_fired"] = df["age"] - 1
     df.reset_index(inplace=True)
 
+    # We also delete now the observations with invalid data, which we left before to have a continuous panel
+    df = drop_missings(
+        df=df,
+        vars_to_check=["lagged_health", "lagged_choice", "age_fired"],
+    )
+
     # Relevant columns and datatype
     columns = {
         "age_fired": np.int32,
         "education": np.uint8,
+        "lagged_health": np.uint8,
         "sex": np.uint8,
         "job_sep": np.uint8,
     }
@@ -98,6 +113,15 @@ def load_and_merge_soep_core(soep_c38_path):
         ],
         convert_categoricals=False,
     )
+    pequiv_data = pd.read_stata(
+        # d11107: number of children in household
+        # d11101: age of individual
+        # m11126: Self-Rated Health Status
+        # m11124: Disability Status of Individual
+        f"{soep_c38_path}/pequiv.dta",
+        columns=["pid", "syear", "d11107", "d11101", "m11126", "m11124"],
+        convert_categoricals=False,
+    )
     pathl_data = pd.read_stata(
         f"{soep_c38_path}/ppathl.dta",
         columns=["pid", "hid", "syear", "sex", "gebjahr"],
@@ -123,6 +147,7 @@ def load_and_merge_soep_core(soep_c38_path):
     merged_data = pd.merge(
         merged_data, pl_data, on=["pid", "hid", "syear"], how="inner"
     )
+    merged_data = pd.merge(merged_data, pequiv_data, on=["pid", "syear"], how="left")
 
     merged_data["age"] = merged_data["syear"] - merged_data["gebjahr"]
     del pgen_data, pathl_data

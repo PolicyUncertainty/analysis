@@ -30,7 +30,7 @@ def est_job_for_sample(df_job, specs):
         names=["sex", "education"],
     )
     # Create solution containers
-    job_sep_params = pd.DataFrame(index=index, columns=["age", "age_sq", "const"])
+    job_sep_params = pd.DataFrame(index=index, columns=["const"])
 
     # Estimate job separation probabilities until max retirement age. We will generate an array starting
     # with age 0 to be able to use age as index
@@ -63,8 +63,8 @@ def est_job_for_sample(df_job, specs):
 
             exp_factor = (
                 job_sep_params.loc[(sex_label, edu_label), "const"]
-                + job_sep_params.loc[(sex_label, edu_label), "age"] * ages
-                + job_sep_params.loc[(sex_label, edu_label), "age_sq"] * ages**2
+                # + job_sep_params.loc[(sex_label, edu_label), "age"] * ages
+                # + job_sep_params.loc[(sex_label, edu_label), "age_sq"] * ages**2
             )
             job_sep_probs_group = 1 / (1 + np.exp(-exp_factor))
             job_sep_probs[sex_var, edu_var, ages] = job_sep_probs_group

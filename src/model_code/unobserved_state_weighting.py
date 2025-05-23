@@ -6,20 +6,22 @@ from model_code.stochastic_processes.health_transition import (
 
 
 def create_unobserved_state_specs(data_decision, model):
+    model_funcs = model.model_funcs
+
     def weight_func(**kwargs):
 
-        options = kwargs["options"]
+        model_specs = kwargs["model_specs"]
         # We need to weight the unobserved job offer state for each of its possible values
         # The weight function is called with job offer new being the unobserved state
         job_offer_new = kwargs["job_offer_new"]
-        job_offer_weight = model["model_funcs"]["processed_exog_funcs"]["job_offer"](
-            **kwargs
-        )[job_offer_new]
+        job_offer_weight = model_funcs["processed_exog_funcs"]["job_offer"](**kwargs)[
+            job_offer_new
+        ]
 
         # For the informed state we use the share of this period. The period in the kwargs is the one from
         # before (see assignment below).
-        current_age = options["start_age"] + kwargs["period"] + 1
-        informed_share = options["informed_shares_in_ages"][
+        current_age = model_specs["start_age"] + kwargs["period"] + 1
+        informed_share = model_specs["informed_shares_in_ages"][
             current_age, kwargs["education"]
         ]
         informed_new = kwargs["informed_new"]
@@ -35,7 +37,7 @@ def create_unobserved_state_specs(data_decision, model):
             sex=kwargs["sex"],
             period=kwargs["period"],
             education=kwargs["education"],
-            options=kwargs["options"],
+            model_specs=kwargs["model_specs"],
         )
         disabled = kwargs["health_new"] == 2
         bad_health = kwargs["health_new"] == 1

@@ -1,9 +1,9 @@
 # %%
 import matplotlib.pyplot as plt
 import numpy as np
+
 from model_code.utility.bequest_utility import utility_final_consume_all
-from model_code.utility.utility_functions import consumption_scale
-from model_code.utility.utility_functions import utility_func
+from model_code.utility.utility_functions import consumption_scale, utility_func
 
 # %%
 
@@ -28,7 +28,7 @@ def plot_utility(params, specs):
                 period=period,
                 choice=choice,
                 params=params,
-                options=specs,
+                model_specs=specs,
             )
         ax.plot(
             utilities,

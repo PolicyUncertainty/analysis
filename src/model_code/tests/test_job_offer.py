@@ -29,7 +29,7 @@ def test_job_destruction(
     education, sex, period, logit_param, work_choice, paths_and_specs
 ):
     # Test job destruction probs.
-    path_dict, options = paths_and_specs
+    path_dict, model_specs = paths_and_specs
 
     params = {}
     for append in ["men", "women"]:
@@ -39,12 +39,12 @@ def test_job_destruction(
             f"job_finding_logit_high_educ_{append}": logit_param,
         }
         params = {**params, **gender_params}
-    job_dest_prob = options["job_sep_probs"][sex, education, period]
+    job_dest_prob = model_specs["job_sep_probs"][sex, education, period]
     full_probs_expec = np.array([job_dest_prob, 1 - job_dest_prob])
 
     probs = job_offer_process_transition(
         params=params,
-        options=options,
+        model_specs=model_specs,
         education=education,
         sex=sex,
         period=period,

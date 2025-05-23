@@ -8,8 +8,7 @@ import numpy as np
 import optimagic as om
 import pandas as pd
 import yaml
-from dcegm.likelihood import create_individual_likelihood_function_for_model
-from dcegm.wealth_correction import adjust_observed_wealth
+from dcegm.asset_correction import adjust_observed_assets
 
 from estimation.struct_estimation.scripts.std_errors import (
     calc_and_save_standard_errors,
@@ -139,8 +138,6 @@ class est_class_from_paths:
 
         self.intermediate_est_data = intermediate_est_data
 
-        from dcegm.interface import get_n_state_choice_period
-
         model, params = specify_model(
             path_dict=path_dict,
             params=start_params_all,
@@ -211,9 +208,9 @@ def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):
     if drop_retirees:
         data_decision = data_decision[data_decision["lagged_choice"] != 0]
 
-    data_decision["age"] = (
-        data_decision["period"] + model["options"]["model_params"]["start_age"]
-    )
+    model_specs = model.model_specs
+
+    data_decision["age"] = data_decision["period"] + model_specs["start_age"]
     data_decision["age_bin"] = np.floor(data_decision["age"] / 10)
     data_decision.loc[data_decision["age_bin"] > 6, "age_bin"] = 6
     age_bin_av_size = data_decision.shape[0] / data_decision["age_bin"].nunique()
@@ -223,7 +220,7 @@ def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):
     )["age_weights"].transform("sum")
 
     # Transform experience
-    max_init_exp = model["options"]["model_params"]["max_exp_diffs_per_period"][
+    max_init_exp = model_specs["max_exp_diffs_per_period"][
         data_decision["period"].values
     ]
     exp_denominator = data_decision["period"].values + max_init_exp
@@ -234,15 +231,15 @@ def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):
     # Now transform for dcegm
     states_dict = {
         name: data_decision[name].values
-        for name in model["model_structure"]["discrete_states_names"]
+        for name in model.model_structure["discrete_states_names"]
     }
     states_dict["experience"] = data_decision["experience"].values
     states_dict["wealth"] = data_decision["wealth"].values / specs["wealth_unit"]
 
-    adjusted_wealth = adjust_observed_wealth(
+    adjusted_wealth = adjust_observed_assets(
         observed_states_dict=states_dict,
         params=start_params,
-        model=model,
+        model_class=model,
     )
     data_decision["adjusted_wealth"] = adjusted_wealth
     states_dict["wealth"] = data_decision["adjusted_wealth"].values

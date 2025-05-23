@@ -19,14 +19,14 @@ def sparsity_condition(
     partner_state,
     policy_state,
     education,
-    options,
+    model_specs,
 ):
-    start_age = options["start_age"]
-    max_ret_age = options["max_ret_age"]
+    start_age = model_specs["start_age"]
+    max_ret_age = model_specs["max_ret_age"]
     # Generate last period, because only here are death states
-    last_period = options["n_periods"] - 1
+    last_period = model_specs["n_periods"] - 1
     # Degenerated policy state
-    degenerate_policy_state = options["n_policy_states"] - 1
+    degenerate_policy_state = model_specs["n_policy_states"] - 1
 
     age = start_age + period
     # Men can't have lagged choice part-time.
@@ -38,13 +38,13 @@ def sparsity_condition(
     if (
         (age > max_ret_age)
         & (lagged_choice != 0)
-        & (health != options["death_health_var"])
+        & (health != model_specs["death_health_var"])
     ):
         return False
     else:
         # Now turn to the states, where it is decided by the value of an exogenous
         # state if it is valid or not. For invalid states we provide a proxy state
-        if health == options["death_health_var"]:
+        if health == model_specs["death_health_var"]:
             # Lead all states with death to last period death states
             # with job offer 0, as dead agent's only get assigned a dummy choice
             # set, only including 0.
@@ -70,10 +70,10 @@ def sparsity_condition(
             # If retirement is already chosen we proxy all states to job offer 0. Also, if you are
             # retired, it does not matter if you are in the bad health state or disabled. We proxy
             # the health state of those two by bad health.
-            if health == options["good_health_var"]:
+            if health == model_specs["good_health_var"]:
                 proxy_health = health
             else:
-                proxy_health = options["bad_health_var"]
+                proxy_health = model_specs["bad_health_var"]
 
             # Until age max_ret_age + 1 the individual could also be freshly retired.
             # Therefore, we check if the agent already is longer retired. If so, we proxy

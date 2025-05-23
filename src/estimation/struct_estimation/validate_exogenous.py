@@ -38,9 +38,8 @@ model, params = specify_model(
     model_type="solution",
 )
 
-from dcegm.interface import validate_exogenous_processes
 
-validate_exogenous_processes(
+model.vali(
     model=model,
     params=params,
 )

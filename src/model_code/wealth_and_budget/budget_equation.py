@@ -20,18 +20,18 @@ def budget_constraint(
     savings_end_of_previous_period,  # A_{t-1}
     income_shock_previous_period,  # epsilon_{t - 1}
     params,
-    options,
+    model_specs,
 ):
-    savings_scaled = savings_end_of_previous_period * options["wealth_unit"]
+    savings_scaled = savings_end_of_previous_period * model_specs["wealth_unit"]
     # Recalculate experience
-    max_exp_period = period + options["max_exp_diffs_per_period"][period]
+    max_exp_period = period + model_specs["max_exp_diffs_per_period"][period]
     experience_years = max_exp_period * experience
 
     # Calculate partner income
     partner_income_after_ssc = calc_partner_income_after_ssc(
         partner_state=partner_state,
         sex=sex,
-        options=options,
+        model_specs=model_specs,
         education=education,
         period=period,
     )
@@ -41,7 +41,7 @@ def budget_constraint(
         experience_years=experience_years,
         sex=sex,
         education=education,
-        options=options,
+        model_specs=model_specs,
     )
 
     has_partner_int = (partner_state > 0).astype(int)
@@ -53,7 +53,7 @@ def budget_constraint(
         sex=sex,
         has_partner_int=has_partner_int,
         period=period,
-        options=options,
+        model_specs=model_specs,
     )
 
     # Income lagged choice 2
@@ -63,7 +63,7 @@ def budget_constraint(
         education=education,
         sex=sex,
         income_shock=income_shock_previous_period,
-        options=options,
+        model_specs=model_specs,
     )
 
     # Select relevant income
@@ -81,18 +81,18 @@ def budget_constraint(
         own_income=own_income_after_ssc,
         partner_income=partner_income_after_ssc,
         has_partner_int=has_partner_int,
-        options=options,
+        model_specs=model_specs,
     )
     child_benefits = calc_child_benefits(
         education=education,
         sex=sex,
         has_partner_int=has_partner_int,
         period=period,
-        options=options,
+        model_specs=model_specs,
     )
 
     total_income = jnp.maximum(total_net_income + child_benefits, unemployment_benefits)
     # calculate beginning of period wealth M_t
     wealth = (1 + params["interest_rate"]) * savings_scaled + total_income
 
-    return wealth / options["wealth_unit"]
+    return wealth / model_specs["wealth_unit"]

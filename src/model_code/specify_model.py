@@ -1,9 +1,8 @@
 import pickle
 
+import dcegm
 import jax.numpy as jnp
 import numpy as np
-from dcegm.pre_processing.setup_model import load_and_setup_model, setup_and_save_model
-from dcegm.solve import get_solve_func_for_model
 
 from model_code.policy_processes.informed_state_transition import (
     informed_transition,
@@ -18,8 +17,8 @@ from model_code.stochastic_processes.partner_transitions import partner_transiti
 from model_code.taste_shocks import shock_function_dict
 from model_code.utility.bequest_utility import create_final_period_utility_functions
 from model_code.utility.utility_functions import create_utility_functions
+from model_code.wealth_and_budget.assets_grid import create_end_of_period_assets
 from model_code.wealth_and_budget.budget_equation import budget_constraint
-from model_code.wealth_and_budget.savings_grid import create_savings_grid
 from set_paths import get_model_resutls_path
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
@@ -35,7 +34,7 @@ def specify_model(
     load_model=False,
     model_type="solution",
 ):
-    """Generate model and options dictionaries."""
+    """Generate model class."""
     check_flags(
         subj_unc,
         model_type,
@@ -62,66 +61,50 @@ def specify_model(
         annoucement_SRA=annoucement_SRA,
         custom_resolution_age=custom_resolution_age,
     )
-
-    # Load specifications
-    n_periods = specs["n_periods"]
-    n_policy_states = specs["n_policy_states"]
-    choices = np.arange(specs["n_choices"], dtype=int)
-
     # Create savings grid
-    savings_grid = create_savings_grid()
+    savings_grid = create_end_of_period_assets()
 
     # Experience grid
     experience_grid = jnp.linspace(0, 1, specs["n_experience_grid_points"])
 
-    options = {
-        "state_space": {
-            "min_period_batch_segments": [33, 44],
-            "n_periods": n_periods,
-            "choices": choices,
-            "endogenous_states": {
-                "education": np.arange(specs["n_education_types"], dtype=int),
-                "sex": np.arange(specs["n_sexes"], dtype=int),
-            },
-            "exogenous_processes": {
-                "policy_state": {
-                    "transition": transition_func_sol,
-                    "states": np.arange(n_policy_states, dtype=int),
-                },
-                "job_offer": {
-                    "transition": job_offer_process_transition,
-                    "states": np.arange(2, dtype=int),
-                },
-                "partner_state": {
-                    "transition": partner_transition,
-                    "states": np.arange(specs["n_partner_states"], dtype=int),
-                },
-                "health": {
-                    "transition": health_transition,
-                    "states": np.arange(specs["n_all_health_states"], dtype=int),
-                },
-            },
-            "continuous_states": {
-                "wealth": savings_grid,
-                "experience": experience_grid,
-            },
+    model_config = {
+        "min_period_batch_segments": [33, 44],
+        "n_periods": specs["n_periods"],
+        "choices": specs["n_choices"],
+        "deterministic_states": {
+            "education": np.arange(specs["n_education_types"], dtype=int),
+            "sex": np.arange(specs["n_sexes"], dtype=int),
         },
-        "model_params": specs,
+        "stochastic_states": {
+            "policy_state": list(range(specs["n_policy_states"])),
+            "job_offer": list(range(2)),
+            "partner_state": list(range(specs["n_partner_states"])),
+            "health": list(range(specs["n_all_health_states"])),
+        },
+        "continuous_states": {
+            "assets_end_of_period": savings_grid,
+            "experience": experience_grid,
+        },
     }
-    informed_states = np.arange(2, dtype=int)
+    stochastic_states_transitions = {
+        "policy_state": transition_func_sol,
+        "job_offer": job_offer_process_transition,
+        "partner_state": partner_transition,
+        "health": health_transition,
+    }
+
+    informed_states = range(2)
     if model_type == "solution":
         # Set informed state as not changing state
-        options["state_space"]["endogenous_states"]["informed"] = informed_states
+        model_config["deterministic_states"]["informed"] = informed_states
         # Determine path
         model_path = path_dict["intermediate_data"] + "model_spec_solution.pkl"
         sim_model = False
 
     elif model_type == "simulation":
         # Set informed state as exogenous changing state
-        options["state_space"]["exogenous_processes"]["informed"] = {
-            "transition": informed_transition,
-            "states": informed_states,
-        }
+        model_config["exogenous_processes"]["informed"] = informed_states
+        stochastic_states_transitions["informed"] = informed_transition
         # Determine path
         model_path = path_dict["intermediate_data"] + "model_spec_simulation.pkl"
         sim_model = True
@@ -129,27 +112,29 @@ def specify_model(
         raise ValueError("model_type must be either 'solution' or 'simulation'")
 
     if load_model:
-        model = load_and_setup_model(
-            options=options,
+        model = dcegm.setup_model(
+            model_specs=specs,
+            model_config=model_config,
             state_space_functions=create_state_space_functions(),
             utility_functions=create_utility_functions(),
             utility_functions_final_period=create_final_period_utility_functions(),
             budget_constraint=budget_constraint,
             shock_functions=shock_function_dict(),
-            path=model_path,
-            sim_model=sim_model,
+            stochastic_states_transitions=stochastic_states_transitions,
+            model_load_path=model_path,
         )
 
     else:
-        model = setup_and_save_model(
-            options=options,
+        model = dcegm.setup_model(
+            model_specs=specs,
+            model_config=model_config,
             state_space_functions=create_state_space_functions(),
             utility_functions=create_utility_functions(),
             utility_functions_final_period=create_final_period_utility_functions(),
             budget_constraint=budget_constraint,
             shock_functions=shock_function_dict(),
-            path=model_path,
-            sim_model=sim_model,
+            stochastic_states_transitions=stochastic_states_transitions,
+            model_save_path=model_path,
         )
 
     print("Model specified.")
@@ -189,7 +174,7 @@ def specify_and_solve_model(
 
     # Generate name of solution
     if subj_unc:
-        resolution_age = model["options"]["model_params"]["resolution_age"]
+        resolution_age = model["model_specs"]["model_params"]["resolution_age"]
         sol_name = f"sol_subj_unc_{resolution_age}.pkl"
     else:
         sol_name = "sol_no_subj_unc.pkl"

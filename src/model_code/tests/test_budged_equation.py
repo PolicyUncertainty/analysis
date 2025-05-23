@@ -71,7 +71,7 @@ def test_budget_unemployed(
         savings_end_of_previous_period=savings,
         income_shock_previous_period=0,
         params=params,
-        options=specs_internal,
+        model_specs=specs_internal,
     )
 
     savings_scaled = savings * specs_internal["wealth_unit"]
@@ -80,13 +80,14 @@ def test_budget_unemployed(
     income_partner = calc_partner_income_after_ssc(
         partner_state=partner_state,
         sex=sex,
-        options=specs_internal,
+        model_specs=specs_internal,
         education=education,
         period=period,
     )
     split_factor = 1 + has_partner
     tax_partner = (
-        calc_inc_tax_for_single_income(income_partner / split_factor, specs_internal) * split_factor
+        calc_inc_tax_for_single_income(income_partner / split_factor, specs_internal)
+        * split_factor
     )
     net_partner = income_partner - tax_partner
     net_partner_plus_child_benefits = (
@@ -188,7 +189,7 @@ def test_budget_worker(
         savings_end_of_previous_period=savings,
         income_shock_previous_period=income_shock,
         params=params,
-        options=specs_internal,
+        model_specs=specs_internal,
     )
 
     savings_scaled = savings * specs_internal["wealth_unit"]
@@ -225,7 +226,7 @@ def test_budget_worker(
         sex=sex,
         has_partner_int=has_partner_int,
         period=period,
-        options=specs_internal,
+        model_specs=specs_internal,
     )
 
     nb_children = specs_internal["children_by_state"][
@@ -259,7 +260,10 @@ def test_budget_worker(
         income_partner = partner_income_year - sscs_partner
         total_income_after_ssc = income_after_ssc + income_partner
 
-        tax_toal = calc_inc_tax_for_single_income(total_income_after_ssc / 2, specs_internal) * 2
+        tax_toal = (
+            calc_inc_tax_for_single_income(total_income_after_ssc / 2, specs_internal)
+            * 2
+        )
         total_net_income = total_income_after_ssc + child_benefits - tax_toal
 
         checked_income = np.maximum(total_net_income, unemployment_benefits)
@@ -313,7 +317,7 @@ def test_retiree(
         experience=exp_cont_last_period,
         informed=0,
         health=2,
-        options=specs_internal,
+        model_specs=specs_internal,
     )
     # Check that experience does not get updated or added any penalty
     max_exp_this_period = period + specs_internal["max_exp_diffs_per_period"][period]
@@ -329,7 +333,7 @@ def test_retiree(
         savings_end_of_previous_period=savings,
         income_shock_previous_period=0,
         params=params,
-        options=specs_internal,
+        model_specs=specs_internal,
     )
 
     savings_scaled = savings * specs_internal["wealth_unit"]
@@ -350,7 +354,7 @@ def test_retiree(
         sex=sex,
         has_partner_int=has_partner_int,
         period=period,
-        options=specs_internal,
+        model_specs=specs_internal,
     )
 
     nb_children = specs_internal["children_by_state"][
@@ -385,7 +389,10 @@ def test_retiree(
         income_partner = partner_income_year - sscs_partner
         total_income_after_ssc = income_after_ssc + income_partner
 
-        tax_toal = calc_inc_tax_for_single_income(total_income_after_ssc / 2, specs_internal) * 2
+        tax_toal = (
+            calc_inc_tax_for_single_income(total_income_after_ssc / 2, specs_internal)
+            * 2
+        )
         total_net_income = total_income_after_ssc + child_benefits - tax_toal
 
         checked_income = np.maximum(total_net_income, unemployment_benefits)
@@ -454,7 +461,7 @@ def test_fresh_retiree(
         experience=exp_cont_prev,
         informed=informed,
         health=health,
-        options=specs_internal,
+        model_specs=specs_internal,
     )
 
     wealth = budget_constraint(
@@ -467,7 +474,7 @@ def test_fresh_retiree(
         savings_end_of_previous_period=savings,
         income_shock_previous_period=0,
         params=params,
-        options=specs_internal,
+        model_specs=specs_internal,
     )
 
     savings_scaled = savings * specs_internal["wealth_unit"]
@@ -525,7 +532,7 @@ def test_fresh_retiree(
         sex=sex,
         has_partner_int=has_partner_int,
         period=period,
-        options=specs_internal,
+        model_specs=specs_internal,
     )
 
     nb_children = specs_internal["children_by_state"][
@@ -561,7 +568,10 @@ def test_fresh_retiree(
         income_partner = partner_income_year - sscs_partner
         total_income_after_ssc = income_after_ssc + income_partner
 
-        tax_toal = calc_inc_tax_for_single_income(total_income_after_ssc / 2, specs_internal) * 2
+        tax_toal = (
+            calc_inc_tax_for_single_income(total_income_after_ssc / 2, specs_internal)
+            * 2
+        )
         total_net_income = total_income_after_ssc + child_benefits - tax_toal
 
         checked_income = np.maximum(total_net_income, unemployment_benefits)

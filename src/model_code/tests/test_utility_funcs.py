@@ -44,16 +44,16 @@ def paths_and_specs():
     list(product(PARTNER_STATE_GRIRD, SEX_GRID, EDUCATION_GRID, PERIOD_GRID)),
 )
 def test_consumption_cale(partner_state, sex, education, period, paths_and_specs):
-    options = paths_and_specs[1]
+    model_specs = paths_and_specs[1]
     cons_scale = consumption_scale(
         partner_state=partner_state,
         sex=sex,
         education=education,
         period=period,
-        options=options,
+        model_specs=model_specs,
     )
     has_partner = int(partner_state > 0)
-    nb_children = options["children_by_state"][sex, education, has_partner, period]
+    nb_children = model_specs["children_by_state"][sex, education, has_partner, period]
     hh_size = 1 + has_partner + nb_children
     np.testing.assert_almost_equal(cons_scale, np.sqrt(hh_size))
 
@@ -115,13 +115,13 @@ def test_utility_func(
     if sex == 0:
         mu += 1
 
-    options = paths_and_specs[1]
+    model_specs = paths_and_specs[1]
     cons_scale = consumption_scale(
         partner_state=partner_state,
         sex=sex,
         education=education,
         period=period,
-        options=options,
+        model_specs=model_specs,
     )
 
     # Read out disutil params
@@ -134,7 +134,7 @@ def test_utility_func(
     exp_factor_ft_work = params[f"disutil_ft_work_{edu_str}_{health_str}_{sex_str}"]
     if sex == 1:
         has_partner_int = int(partner_state > 0)
-        nb_children = options["children_by_state"][
+        nb_children = model_specs["children_by_state"][
             sex, education, has_partner_int, period
         ]
         exp_factor_ft_work += (
@@ -162,7 +162,7 @@ def test_utility_func(
             period=period,
             choice=1,
             params=params,
-            options=options,
+            model_specs=model_specs,
         ),
         utility_lambda(disutil_unemployment),
     )
@@ -180,7 +180,7 @@ def test_utility_func(
                 period=period,
                 choice=2,
                 params=params,
-                options=options,
+                model_specs=model_specs,
             ),
             utility_lambda(disutil_pt_work),
         )
@@ -195,7 +195,7 @@ def test_utility_func(
             period=period,
             choice=3,
             params=params,
-            options=options,
+            model_specs=model_specs,
         ),
         utility_lambda(disutil_ft_work),
     )
@@ -229,7 +229,7 @@ def test_marginal_utility(
     mu,
     paths_and_specs,
 ):
-    options = paths_and_specs[1]
+    model_specs = paths_and_specs[1]
     params = {
         "mu_men": mu + 1,
         "mu_women": mu,
@@ -268,7 +268,7 @@ def test_marginal_utility(
         period,
         random_choice,
         params,
-        options,
+        model_specs,
     )
     marg_util_model = marg_utility(
         consumption=consumption,
@@ -279,7 +279,7 @@ def test_marginal_utility(
         sex=sex,
         choice=random_choice,
         params=params,
-        options=options,
+        model_specs=model_specs,
     )
     np.testing.assert_almost_equal(marg_util_jax, marg_util_model)
 
@@ -340,7 +340,7 @@ def test_inv_marginal_utility(
     if sex == 0:
         mu += 1
 
-    options = paths_and_specs[1]
+    model_specs = paths_and_specs[1]
     random_choice = np.random.choice(np.array([0, 1, 2]))
     marg_util = marg_utility(
         consumption=consumption,
@@ -351,7 +351,7 @@ def test_inv_marginal_utility(
         period=period,
         choice=random_choice,
         params=params,
-        options=options,
+        model_specs=model_specs,
     )
     np.testing.assert_almost_equal(
         inverse_marginal(
@@ -363,7 +363,7 @@ def test_inv_marginal_utility(
             period=period,
             choice=random_choice,
             params=params,
-            options=options,
+            model_specs=model_specs,
         ),
         consumption,
     )

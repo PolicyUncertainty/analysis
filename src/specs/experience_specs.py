@@ -55,7 +55,7 @@ def create_max_experience(path_dict, specs, load_precomputed):
                             policy_state=0,
                             informed=1,
                             health=health,
-                            options=specs,
+                            model_specs=specs,
                         )
                         max_exp_diff_to_periods[sex_var, edu_var, i, health_id] = (
                             new_exp - period

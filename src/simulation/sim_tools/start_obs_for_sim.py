@@ -5,8 +5,8 @@ import numpy as np
 import pandas as pd
 import scipy.stats as stats
 import seaborn as sns
+from dcegm.asset_correction import adjust_observed_wealth
 from dcegm.pre_processing.shared import create_array_with_smallest_int_dtype
-from dcegm.wealth_correction import adjust_observed_wealth
 
 from model_code.stochastic_processes.health_transition import (
     calc_disability_probability,
@@ -57,7 +57,7 @@ def generate_start_states_from_obs(
         job_offer_prob = job_offer_process_transition(
             params=params,
             sex=sex,
-            options=specs,
+            model_specs=specs,
             education=education,
             period=jnp.array(-1, dtype=int),
             choice=lagged_choice,
@@ -91,7 +91,7 @@ def generate_start_states_from_obs(
             sex=sex,
             period=jnp.array(-1, dtype=int),
             education=education,
-            options=specs,
+            model_specs=specs,
         )
         # 2 Disability, 1 is bad health
         prob_vector = jnp.array([1 - disability_prob, disability_prob])

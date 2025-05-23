@@ -2,21 +2,25 @@ import jax
 import jax.numpy as jnp
 
 
-def health_transition(sex, health, education, period, params, options):
-    trans_mat = options["health_trans_mat"]
+def health_transition(sex, health, education, period, params, model_specs):
+    trans_mat = model_specs["health_trans_mat"]
     prob_vector = trans_mat[sex, education, period, health, :]
 
     # Generate conditional probability of being disabled.
     # Start by reading out health state values:
-    bad_health_var = options["bad_health_var"]
-    disabled_health_var = options["disabled_health_var"]
+    bad_health_var = model_specs["bad_health_var"]
+    disabled_health_var = model_specs["disabled_health_var"]
 
     # If the agent is disabled the conditional probability of being in bad health
     # and remaining in disability is 1, i.e. there is no transition from disability
     # to bad health. Only to good.
     # If you are dead, it does not matter, as you are dead(absorbing).
     cond_prob_disabled = calc_disability_probability(
-        params=params, sex=sex, education=education, period=period, options=options
+        params=params,
+        sex=sex,
+        education=education,
+        period=period,
+        model_specs=model_specs,
     )
     bad_health_prob = prob_vector[bad_health_var] * (1 - cond_prob_disabled)
     disabled_health_prob = prob_vector[bad_health_var] * cond_prob_disabled
@@ -28,8 +32,8 @@ def health_transition(sex, health, education, period, params, options):
     return prob_vector
 
 
-def calc_disability_probability(params, sex, education, period, options):
-    # age = options["start_age"] + period
+def calc_disability_probability(params, sex, education, period, model_specs):
+    # age = model_specs["start_age"] + period
     #
     # # # Calculate exp value for men and women
     # # exp_value_men = jnp.exp(

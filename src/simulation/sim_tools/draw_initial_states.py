@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import scipy.stats as stats
 import seaborn as sns
-from dcegm.wealth_correction import adjust_observed_wealth
+from dcegm.asset_correction import adjust_observed_wealth
 from sklearn.neighbors import KernelDensity
 
 from model_code.stochastic_processes.job_offers import job_offer_process_transition
@@ -134,7 +134,7 @@ def draw_initial_states(
             job_offer_probs = job_offer_process_transition(
                 params=params,
                 sex=jnp.ones_like(lagged_choice_edu) * sex_var,
-                options=specs,
+                model_specs=specs,
                 education=jnp.ones_like(lagged_choice_edu) * edu,
                 period=jnp.zeros_like(lagged_choice_edu),
                 choice=lagged_choice_edu,

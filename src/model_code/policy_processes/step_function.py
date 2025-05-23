@@ -3,7 +3,9 @@ import jax.numpy as jnp
 import numpy as np
 
 
-def realized_policy_step_function(policy_state, period, lagged_choice, choice, options):
+def realized_policy_step_function(
+    policy_state, period, lagged_choice, choice, model_specs
+):
     """This function yields the probability distribution of the next period's policy
     state in the simulation. We employ a step function to follow the expected policy
     state path.
@@ -14,7 +16,7 @@ def realized_policy_step_function(policy_state, period, lagged_choice, choice, o
     """
 
     # Check if the current period is a policy step period
-    step_period = jnp.isin(period, options["policy_step_periods"])
+    step_period = jnp.isin(period, model_specs["policy_step_periods"])
 
     # Check if retirement is choosen
     retirement_bool = choice == 0
@@ -30,7 +32,7 @@ def realized_policy_step_function(policy_state, period, lagged_choice, choice, o
 
     # If the individual is already retired, the policy state moves to (or stays in)
     # the degenrate state
-    degenerate_state_id = jnp.array(options["n_policy_states"] - 1, dtype=jnp.uint8)
+    degenerate_state_id = jnp.array(model_specs["n_policy_states"] - 1, dtype=jnp.uint8)
     already_retirement_bool = (lagged_choice == 0) | (
         policy_state == degenerate_state_id
     )
@@ -40,7 +42,7 @@ def realized_policy_step_function(policy_state, period, lagged_choice, choice, o
     )
 
     # Now generate vector
-    trans_vector = jnp.zeros(options["n_policy_states"])
+    trans_vector = jnp.zeros(model_specs["n_policy_states"])
     trans_vector = trans_vector.at[id_next_period].set(1)
     return trans_vector
 

@@ -2,6 +2,7 @@ from itertools import product
 
 import numpy as np
 import pytest
+
 from model_code.stochastic_processes.partner_transitions import partner_transition
 from set_paths import create_path_dict
 from specs.derive_specs import generate_derived_and_data_derived_specs
@@ -30,6 +31,6 @@ def test_vec_shape(education, sex, period, partner_state, paths_and_specs):
         education=education,
         sex=sex,
         partner_state=partner_state,
-        options=specs,
+        model_specs=specs,
     )
     assert res.shape == (specs["n_partner_states"],)

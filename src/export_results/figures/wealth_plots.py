@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+
 from model_code.wealth_and_budget.budget_equation import budget_constraint
 
 
@@ -31,7 +32,7 @@ def plot_budget_of_unemployed(specs):
                 savings_end_of_previous_period=savings,
                 income_shock_previous_period=0,
                 params=params,
-                options=specs,
+                model_specs=specs,
             )
             ax.plot(savings, wealth, label=edu_label)
             ax.set_xlabel("Savings")

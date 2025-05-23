@@ -55,7 +55,7 @@ def plot_incomes(path_dict):
                     education=edu_var,
                     sex=sex_var,
                     income_shock=0,
-                    options=specs,
+                    model_specs=specs,
                 )
                 after_ssc_pt_wages[i] = calc_labor_income_after_ssc(
                     lagged_choice=2,
@@ -63,7 +63,7 @@ def plot_incomes(path_dict):
                     education=edu_var,
                     sex=sex_var,
                     income_shock=0,
-                    options=specs,
+                    model_specs=specs,
                 )
 
                 gross_ft_wages[i] = calculate_gross_labor_income(
@@ -72,7 +72,7 @@ def plot_incomes(path_dict):
                     education=edu_var,
                     sex=sex_var,
                     income_shock=0,
-                    options=specs,
+                    model_specs=specs,
                 )
                 after_ssc_ft_wages[i] = calc_labor_income_after_ssc(
                     lagged_choice=3,
@@ -80,7 +80,7 @@ def plot_incomes(path_dict):
                     education=edu_var,
                     sex=sex_var,
                     income_shock=0,
-                    options=specs,
+                    model_specs=specs,
                 )
 
                 gross_pensions[i] = np.maximum(
@@ -88,7 +88,7 @@ def plot_incomes(path_dict):
                         experience_years=exp,
                         education=edu_var,
                         sex=sex_var,
-                        options=specs,
+                        model_specs=specs,
                     ),
                     annual_unemployment,
                 )
@@ -98,7 +98,7 @@ def plot_incomes(path_dict):
                         experience_years=exp,
                         education=edu_var,
                         sex=sex_var,
-                        options=specs,
+                        model_specs=specs,
                     ),
                     annual_unemployment,
                 )
@@ -186,7 +186,7 @@ def plot_total_income(specs):
                             savings_end_of_previous_period=0,
                             income_shock_previous_period=0,
                             params=params,
-                            options=specs,
+                            model_specs=specs,
                         )
                     axs[edu_val, married_val].plot(
                         exp_levels,
@@ -254,7 +254,7 @@ def plot_child_benefits(specs):
                         sex=sex_var,
                         has_partner_int=partner_val,
                         period=period,
-                        options=specs,
+                        model_specs=specs,
                     )
                 ax.plot(periods, child_benefits, label=f"{edu_label}")
             ax.set_title(f"{sex_label}; {partner_label}")

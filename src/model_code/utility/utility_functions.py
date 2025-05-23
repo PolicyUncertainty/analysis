@@ -13,7 +13,15 @@ def create_utility_functions():
 
 
 def utility_func(
-    consumption, sex, partner_state, education, health, period, choice, params, options
+    consumption,
+    sex,
+    partner_state,
+    education,
+    health,
+    period,
+    choice,
+    params,
+    model_specs,
 ):
     utility_alive = utility_func_alive(
         consumption=consumption,
@@ -24,20 +32,28 @@ def utility_func(
         period=period,
         choice=choice,
         params=params,
-        options=options,
+        model_specs=model_specs,
     )
     utility_death = utility_final_consume_all(
         wealth=consumption,
         sex=sex,
         params=params,
     )
-    death_bool = health == options["death_health_var"]
+    death_bool = health == model_specs["death_health_var"]
     utility = jax.lax.select(death_bool, utility_death, utility_alive)
     return utility
 
 
 def utility_func_alive(
-    consumption, sex, partner_state, education, health, period, choice, params, options
+    consumption,
+    sex,
+    partner_state,
+    education,
+    health,
+    period,
+    choice,
+    params,
+    model_specs,
 ):
     """Calculate the choice specific cobb-douglas utility, i.e. u =
     ((c*eta/consumption_scale)^(1-mu))/(1-mu) ."""
@@ -51,14 +67,14 @@ def utility_func_alive(
         partner_state=partner_state,
         health=health,
         params=params,
-        options=options,
+        model_specs=model_specs,
     )
     cons_scale = consumption_scale(
         partner_state=partner_state,
         sex=sex,
         education=education,
         period=period,
-        options=options,
+        model_specs=model_specs,
     )
     # compute utility
     scaled_consumption = consumption * eta / cons_scale
@@ -73,14 +89,22 @@ def utility_func_alive(
 
 
 def marg_utility(
-    consumption, partner_state, sex, education, health, period, choice, params, options
+    consumption,
+    partner_state,
+    sex,
+    education,
+    health,
+    period,
+    choice,
+    params,
+    model_specs,
 ):
     cons_scale = consumption_scale(
         partner_state=partner_state,
         sex=sex,
         education=education,
         period=period,
-        options=options,
+        model_specs=model_specs,
     )
     mu = jax.lax.select(sex == 0, params["mu_men"], params["mu_women"])
     eta = disutility_work(
@@ -91,7 +115,7 @@ def marg_utility(
         partner_state=partner_state,
         health=health,
         params=params,
-        options=options,
+        model_specs=model_specs,
     )
     marg_util_mu_not_one = ((eta / cons_scale) ** (1 - mu)) * (consumption ** (-mu))
 
@@ -113,14 +137,14 @@ def inverse_marginal(
     period,
     choice,
     params,
-    options,
+    model_specs,
 ):
     cons_scale = consumption_scale(
         partner_state=partner_state,
         sex=sex,
         education=education,
         period=period,
-        options=options,
+        model_specs=model_specs,
     )
     mu = jax.lax.select(sex == 0, params["mu_men"], params["mu_women"])
     eta = disutility_work(
@@ -131,7 +155,7 @@ def inverse_marginal(
         partner_state=partner_state,
         health=health,
         params=params,
-        options=options,
+        model_specs=model_specs,
     )
     consumption_mu_not_one = marginal_utility ** (-1 / mu) * (eta / cons_scale) ** (
         (1 - mu) / mu
@@ -143,7 +167,7 @@ def inverse_marginal(
 
 
 def disutility_work(
-    period, choice, sex, education, partner_state, health, params, options
+    period, choice, sex, education, partner_state, health, params, model_specs
 ):
     # choice booleans
     is_unemployed = choice == 1
@@ -151,7 +175,7 @@ def disutility_work(
     is_working_full_time = choice == 3
     # partner_retired = partner_state == 0
 
-    good_health = health == options["good_health_var"]
+    good_health = health == model_specs["good_health_var"]
 
     # reading parameters
     disutil_ft_work_men = (
@@ -189,7 +213,9 @@ def disutility_work(
     ] * (1 - education)
 
     has_partner_int = (partner_state > 0).astype(int)
-    nb_children = options["children_by_state"][sex, education, has_partner_int, period]
+    nb_children = model_specs["children_by_state"][
+        sex, education, has_partner_int, period
+    ]
     disutil_children_ft = disutil_children * nb_children
 
     disutil_unemployment = params["disutil_unemployed_high_women"] * education + params[
@@ -209,8 +235,8 @@ def disutility_work(
     return disutility
 
 
-def consumption_scale(partner_state, sex, education, period, options):
+def consumption_scale(partner_state, sex, education, period, model_specs):
     has_partner = (partner_state > 0).astype(int)
-    nb_children = options["children_by_state"][sex, education, has_partner, period]
+    nb_children = model_specs["children_by_state"][sex, education, has_partner, period]
     hh_size = 1 + has_partner + nb_children
     return jnp.sqrt(hh_size)

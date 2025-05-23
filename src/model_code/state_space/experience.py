@@ -14,11 +14,11 @@ def get_next_period_experience(
     experience,
     informed,
     health,
-    options,
+    model_specs,
 ):
     """Update experience based on lagged choice and period."""
 
-    max_exp_diffs_per_period = options["max_exp_diffs_per_period"]
+    max_exp_diffs_per_period = model_specs["max_exp_diffs_per_period"]
     exp_years_last_period = construct_experience_years(
         experience=experience,
         period=period - 1,
@@ -26,7 +26,7 @@ def get_next_period_experience(
     )
 
     # Update if working part or full time
-    exp_update = (lagged_choice == 3) + (lagged_choice == 2) * options[
+    exp_update = (lagged_choice == 3) + (lagged_choice == 2) * model_specs[
         "exp_increase_part_time"
     ]
     exp_new_period = exp_years_last_period + exp_update
@@ -42,12 +42,12 @@ def get_next_period_experience(
         policy_state=policy_state,
         informed=informed,
         health=health,
-        options=options,
+        model_specs=model_specs,
     )
 
     # Check for fresh retirement. Not that we degenerate the policy state after the first period of
     # retirement and thus don't need to track when retired.
-    degenerate_state_id = options["n_policy_states"] - 1
+    degenerate_state_id = model_specs["n_policy_states"] - 1
     fresh_retired = (degenerate_state_id != policy_state) & (lagged_choice == 0)
     exp_new_period = jax.lax.select(fresh_retired, adjusted_exp_years, exp_new_period)
 

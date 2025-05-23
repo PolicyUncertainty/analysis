@@ -60,14 +60,14 @@ model_name = "disability"
 # # %%###################################
 # # Family characteristics
 # ######################################
-from export_results.figures.family_params import (
-    plot_children,
-    plot_marriage_and_divorce,
-)
-
-plot_children(path_dict, specs)
-# plot_marriage_and_divorce(path_dict, specs)
-plt.show()
+# from export_results.figures.family_params import (
+#     plot_children,
+#     plot_marriage_and_divorce,
+# )
+#
+# plot_children(path_dict, specs)
+# # plot_marriage_and_divorce(path_dict, specs)
+# plt.show()
 # plt.close("all")
 #
 #
@@ -92,17 +92,17 @@ plt.show()
 # # %% ########################################
 # # Job offer plots
 # # ##########################################
-# # exec_job_offer = input("Show job offer plots? (y/n) ") == "y"
-# from export_results.figures.job_offer_plots import plot_job_transitions
-#
-# # if exec_job_offer:
-# plot_job_transitions(
-#     path_dict=path_dict,
-#     specs=specs,
-#     # params=params
-# )
-# plt.show()
-# plt.close("all")
+# exec_job_offer = input("Show job offer plots? (y/n) ") == "y"
+from export_results.figures.job_offer_plots import plot_job_transitions
+
+# if exec_job_offer:
+plot_job_transitions(
+    path_dict=path_dict,
+    specs=specs,
+    # params=params
+)
+plt.show()
+plt.close("all")
 
 
 # %% ########################################

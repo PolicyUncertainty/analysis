@@ -51,12 +51,13 @@ def test_job_destruction(
         }
         params = {**params, **gender_params}
 
+    good_health = (health == model_specs["good_health_var"]).astype(int)
+
     if choice > 1:
-        job_dest_prob = model_specs["job_sep_probs"][sex, education, age]
+        job_dest_prob = model_specs["job_sep_probs"][sex, education, good_health, age]
         full_probs = np.array([job_dest_prob, 1 - job_dest_prob])
     else:
         append = "men" if sex == 0 else "women"
-        good_health = health == model_specs["good_health_var"]
 
         exp_value = np.exp(
             params[f"job_finding_logit_const_{append}"]
@@ -74,7 +75,7 @@ def test_job_destruction(
         params=params,
         model_specs=model_specs,
         education=education,
-        health=health,
+        health=np.array(health),
         sex=sex,
         period=period,
         choice=choice,

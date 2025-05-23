@@ -17,10 +17,11 @@ def job_offer_process_transition(
     labor_choice = choice >= 2
 
     age = model_specs["start_age"] + period
-    # Probability of job destruction
-    job_sep_prob = model_specs["job_sep_probs"][sex, education, age]
+    good_health = (health == model_specs["good_health_var"]).astype(int)
 
-    good_health = health == model_specs["good_health_var"]
+    # Probability of job destruction
+    job_sep_prob = model_specs["job_sep_probs"][sex, education, good_health, age]
+
     job_finding_prob_men = calc_job_finding_prob_men(
         params, education, good_health, period, model_specs
     )

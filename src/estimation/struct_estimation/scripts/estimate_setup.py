@@ -232,7 +232,9 @@ def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):
         for name in model.model_structure["discrete_states_names"]
     }
     states_dict["experience"] = data_decision["experience"].values
-    states_dict["wealth"] = data_decision["wealth"].values / specs["wealth_unit"]
+    states_dict["assets_begin_of_period"] = (
+        data_decision["wealth"].values / specs["wealth_unit"]
+    )
 
     adjusted_wealth = adjust_observed_assets(
         observed_states_dict=states_dict,

@@ -15,7 +15,7 @@ sex_labels: [Men, Women]
 partner_labels: [Single, Working Partner, Retired Partner]
 
 # mathematical model features
-n_quad_points_stochastic: 5
+n_quad_points: 5
 n_experience_grid_points: 11
 # Fixed structural parameters, we will not estimate
 interest_rate: 0.03

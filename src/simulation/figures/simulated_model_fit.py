@@ -29,7 +29,7 @@ def plot_quantiles(
     load_sim_model=True,
 ):
     # Simulate baseline with subjective belief
-    data_sim = solve_and_simulate_scenario(
+    data_sim, model_solved = solve_and_simulate_scenario(
         annoucement_age=None,
         path_dict=path_dict,
         params=params,
@@ -44,20 +44,9 @@ def plot_quantiles(
         sim_model_exists=load_sim_model,
     ).reset_index()
 
-    # Generate model_specs
-    model, params = specify_model(
-        path_dict=path_dict,
-        subj_unc=False,
-        custom_resolution_age=None,
-        sim_alpha=None,
-        annoucement_age=None,
-        annoucement_SRA=None,
-        params=params,
-        load_model=True,
-        model_type="solution",
+    data_decision, _ = load_and_prep_data(
+        path_dict, params, model_solved, drop_retirees=False
     )
-
-    data_decision, _ = load_and_prep_data(path_dict, params, model, drop_retirees=False)
     data_decision["age"] = data_decision["period"] + specs["start_age"]
 
     data_sim["age"] = data_sim["period"] + specs["start_age"]
@@ -208,7 +197,7 @@ def plot_states(
     load_sim_model=True,
 ):
     # Simulate baseline with subjective belief
-    data_sim = solve_and_simulate_scenario(
+    data_sim, model_solved = solve_and_simulate_scenario(
         path_dict=path_dict,
         params=params,
         subj_unc=True,
@@ -231,17 +220,7 @@ def plot_states(
     data_decision["age"] = data_decision["period"] + specs["start_age"]
     data_sim["age"] = data_sim["period"] + specs["start_age"]
 
-    # Generate model_specs
-    model, params = specify_model(
-        path_dict=path_dict,
-        subj_unc=False,
-        custom_resolution_age=None,
-        annoucement_age=None,
-        annoucement_SRA=None,
-        params=params,
-        load_model=load_sol_model,
-        model_type="solution",
-    )
+    model_structure = model_solved.model_structure
     discrete_state_names = model["model_structure"]["discrete_states_names"]
 
     data_sim = data_sim[data_sim["health"] != 3]

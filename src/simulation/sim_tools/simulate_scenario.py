@@ -1,11 +1,8 @@
 import pandas as pd
-from dcegm.simulation.sim_utils import create_simulation_df
-from dcegm.simulation.simulate import simulate_all_periods
 
-from model_code.specify_model import specify_and_solve_model, specify_model
+from model_code.specify_model import specify_and_solve_model
 from model_code.state_space.experience import construct_experience_years
 from set_paths import get_model_resutls_path
-from simulation.sim_tools.draw_initial_states import draw_initial_states
 from simulation.sim_tools.start_obs_for_sim import generate_start_states_from_obs
 from specs.derive_specs import read_and_derive_specs
 
@@ -23,7 +20,6 @@ def solve_and_simulate_scenario(
     only_informed=False,
     solution_exists=True,
     sol_model_exists=True,
-    sim_model_exists=True,
 ):
     model_out_folder = get_model_resutls_path(path_dict, model_name)
 
@@ -47,7 +43,7 @@ def solve_and_simulate_scenario(
     # First we create the solution. As this is the expectation, the only
     # thing we need to know, if there is subjective uncertainty and if so
     # what the resolution age is (internal check for coherence)
-    sol_container, model, params = specify_and_solve_model(
+    model_solved = specify_and_solve_model(
         path_dict=path_dict,
         params=params,
         file_append=model_name,
@@ -55,40 +51,8 @@ def solve_and_simulate_scenario(
         subj_unc=subj_unc,
         load_model=sol_model_exists,
         load_solution=solution_exists,
+        sim_specs=sim_specs,
     )
-
-    model_params = model["options"]["model_params"]
-
-    # In the simulation, things can be more difficult. First, suppose
-    # agents hold subjective uncertainty. Then in the simulation, there can be two cases:
-    # Smooth change of SRA(including no change) and announcment. Determine the relevant parameters
-    # for this
-    if subj_unc:
-        # If there is no announcment, we have a smooth change with sim_alpha
-        if annoucement_age is None:
-            sim_alpha = (SRA_at_retirement - SRA_at_start) / (
-                model_params["resolution_age"] - model_params["start_age"]
-            )
-            announcment_SRA = None
-        else:
-            sim_alpha = None
-            announcment_SRA = SRA_at_retirement
-    else:
-        # If there is no uncertainty then we SRA at resolution is the same as SRA at start.
-        # We also check that here
-        if SRA_at_start != SRA_at_retirement:
-            raise ValueError(
-                "SRA at start and resolution must be the same when there is no uncertainty"
-            )
-        # Announcment is not allowed to be given
-        if annoucement_age is not None:
-            raise ValueError(
-                "Announcment age can only be given in case of subjective uncertainty"
-            )
-        # We set sim_alpha to 0 for the simulation. (For the solution it is clear if subj_exp is False)
-        sim_alpha = 0.0
-        # We also set the announcment SRA to None
-        announcment_SRA = None
 
     if df_exists:
         data_sim = pd.read_pickle(df_file)
@@ -96,16 +60,8 @@ def solve_and_simulate_scenario(
     else:
         data_sim = simulate_scenario(
             path_dict=path_dict,
-            params=params,
-            seed=model_params["seed"],
-            custom_resolution_age=custom_resolution_age,
-            sim_alpha=sim_alpha,
-            annoucement_age=annoucement_age,
-            annoucement_SRA=announcment_SRA,
             initial_SRA=SRA_at_start,
-            solution=sol_container,
-            model_of_solution=model,
-            sim_model_exists=sim_model_exists,
+            model_solved=model_solved,
             only_informed=only_informed,
         )
         if df_exists is None:
@@ -117,31 +73,10 @@ def solve_and_simulate_scenario(
 
 def simulate_scenario(
     path_dict,
-    seed,
-    params,
-    custom_resolution_age,
-    sim_alpha,
-    annoucement_age,
-    annoucement_SRA,
+    model_solved,
     initial_SRA,
-    solution,
-    model_of_solution,
-    sim_model_exists,
     only_informed=False,
 ):
-    model_sim, params = specify_model(
-        path_dict=path_dict,
-        params=params,
-        subj_unc=False,
-        custom_resolution_age=custom_resolution_age,
-        sim_alpha=sim_alpha,
-        annoucement_age=annoucement_age,
-        annoucement_SRA=annoucement_SRA,
-        load_model=sim_model_exists,
-        model_type="simulation",
-    )
-
-    options = model_of_solution["options"]
 
     # initial_states, wealth_agents = draw_initial_states(
     #     path_dict=path_dict,
@@ -154,59 +89,49 @@ def simulate_scenario(
 
     initial_states, initial_wealth = generate_start_states_from_obs(
         path_dict=path_dict,
-        params=params,
-        model=model_of_solution,
+        params=model_solved.params,
+        model_solved=model_solved,
         inital_SRA=initial_SRA,
-        seed=seed,
         only_informed=only_informed,
     )
+    model_specs = model_solved.model_specs
 
-    sim_dict = simulate_all_periods(
-        states_initial=initial_states,
-        wealth_initial=initial_wealth,
-        n_periods=options["model_params"]["n_periods"],
-        params=params,
-        seed=seed,
-        endog_grid_solved=solution["endog_grid"],
-        value_solved=solution["value"],
-        policy_solved=solution["policy"],
-        model=model_of_solution,
-        model_sim=model_sim,
+    df = model_solved.simulate(
+        initial_states=initial_states,
+        seed=model_specs["seed"],
     )
-    df = create_simulation_df(sim_dict)
 
     # Create additional variables
-    model_params = options["model_params"]
-    df["age"] = df.index.get_level_values("period") + model_params["start_age"]
+    df["age"] = df.index.get_level_values("period") + model_specs["start_age"]
     # Create experience years
     df["exp_years"] = construct_experience_years(
         experience=df["experience"].values,
         period=df.index.get_level_values("period").values,
-        max_exp_diffs_per_period=model_params["max_exp_diffs_per_period"],
+        max_exp_diffs_per_period=model_specs["max_exp_diffs_per_period"],
     )
 
     # Create policy value
     df["policy_state_value"] = (
-        model_params["min_SRA"] + df["policy_state"] * model_params["SRA_grid_size"]
+        model_specs["min_SRA"] + df["policy_state"] * model_specs["SRA_grid_size"]
     )
 
     # Assign working hours for choice 1
     df["working_hours"] = 0.0
-    for sex_var in range(model_params["n_sexes"]):
-        for edu_var in range(model_params["n_education_types"]):
+    for sex_var in range(model_specs["n_sexes"]):
+        for edu_var in range(model_specs["n_education_types"]):
             df.loc[
                 (df["choice"] == 3)
                 & (df["sex"] == sex_var)
                 & (df["education"] == edu_var),
                 "working_hours",
-            ] = model_params["av_annual_hours_ft"][sex_var, edu_var]
+            ] = model_specs["av_annual_hours_ft"][sex_var, edu_var]
 
             df.loc[
                 (df["choice"] == 2)
                 & (df["sex"] == sex_var)
                 & (df["education"] == edu_var),
                 "working_hours",
-            ] = model_params["av_annual_hours_pt"][sex_var, edu_var]
+            ] = model_specs["av_annual_hours_pt"][sex_var, edu_var]
 
     # Create income vars:
     # First wealth at the beginning of period as the sum of savings and consumption

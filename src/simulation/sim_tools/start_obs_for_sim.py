@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import scipy.stats as stats
 import seaborn as sns
-from dcegm.asset_correction import adjust_observed_wealth
+from dcegm.asset_correction import adjust_observed_assets
 from dcegm.pre_processing.shared import create_array_with_smallest_int_dtype
 
 from model_code.stochastic_processes.health_transition import (
@@ -15,9 +15,10 @@ from model_code.stochastic_processes.job_offers import job_offer_process_transit
 
 
 def generate_start_states_from_obs(
-    path_dict, params, model, inital_SRA, seed, only_informed=False
+    path_dict, params, model_solved, inital_SRA, only_informed=False
 ):
-    specs = model["options"]["model_params"]
+    model_specs = model_solved.model_specs
+    model_structure = model_solved.model_structure
 
     observed_data = pd.read_csv(path_dict["struct_est_sample"])
 
@@ -28,24 +29,28 @@ def generate_start_states_from_obs(
     # Read out states for wealth adjustment
     states_dict = {
         name: start_period_data[name].values
-        for name in model["model_structure"]["discrete_states_names"]
+        for name in model_structure["discrete_states_names"]
     }
     # Transform experience for wealth adjustment
     periods = start_period_data["period"].values
-    max_init_exp = model["options"]["model_params"]["max_exp_diffs_per_period"][periods]
+    max_init_exp = model_specs["max_exp_diffs_per_period"][periods]
     exp_denominator = periods + max_init_exp
     states_dict["experience"] = start_period_data["experience"].values / exp_denominator
-    states_dict["wealth"] = start_period_data["wealth"].values / specs["wealth_unit"]
+    states_dict["assets_begin_of_period"] = (
+        start_period_data["wealth"].values / model_specs["wealth_unit"]
+    )
 
-    states_dict["wealth"] = jnp.asarray(
-        adjust_observed_wealth(
+    states_dict["assets_begin_of_period"] = jnp.asarray(
+        adjust_observed_assets(
             observed_states_dict=states_dict,
             params=params,
-            model=model,
+            model_class=model_solved,
         )
     )
     n_individuals = periods.shape[0]
-    n_multiply_start_obs = specs["n_multiply_start_obs"]
+    n_multiply_start_obs = model_specs["n_multiply_start_obs"]
+
+    seed = model_specs["seed"]
     np.random.seed(seed)
 
     # Draw jax keys
@@ -58,7 +63,7 @@ def generate_start_states_from_obs(
             params=params,
             sex=sex,
             health=health,
-            model_specs=specs,
+            model_specs=model_specs,
             education=education,
             period=jnp.array(-1, dtype=int),
             choice=lagged_choice,
@@ -77,8 +82,8 @@ def generate_start_states_from_obs(
         )
 
         # Draw informed state
-        informed_share_edu = specs["informed_shares_in_ages"][
-            specs["start_age"], education
+        informed_share_edu = model_specs["informed_shares_in_ages"][
+            model_specs["start_age"], education
         ]
         # Draw informed states according to inital distribution
         dist = jnp.array([1 - informed_share_edu, informed_share_edu])
@@ -92,7 +97,7 @@ def generate_start_states_from_obs(
             sex=sex,
             period=jnp.array(-1, dtype=int),
             education=education,
-            model_specs=specs,
+            model_specs=model_specs,
         )
         # 2 Disability, 1 is bad health
         prob_vector = jnp.array([1 - disability_prob, disability_prob])
@@ -123,12 +128,9 @@ def generate_start_states_from_obs(
         name: np.repeat(states_dict[name], n_multiply_start_obs)
         for name in states_dict.keys()
     }
-    # Read out wealth
-    initial_wealth = states_dict["wealth"]
-    states_dict.pop("wealth")
 
     # Assign job offers, informed agents and health
-    # If only informed should be simoulated assign 1 everywhere
+    # If only informed should be simulated assign 1 everywhere
     if only_informed:
         states_dict["informed"] = jnp.ones_like(states_dict["period"])
     else:
@@ -139,7 +141,7 @@ def generate_start_states_from_obs(
 
     # Generate start policy state from initial SRA
     initial_policy_state = np.floor(
-        (inital_SRA - specs["min_SRA"]) / specs["SRA_grid_size"]
+        (inital_SRA - model_specs["min_SRA"]) / model_specs["SRA_grid_size"]
     )
 
     policy_state_agents = (
@@ -153,4 +155,4 @@ def generate_start_states_from_obs(
     # df["wealth"] = initial_wealth
     # breakpoint()
 
-    return initial_states, initial_wealth
+    return initial_states

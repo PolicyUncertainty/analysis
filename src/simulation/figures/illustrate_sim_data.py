@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import yaml
+
 from estimation.struct_estimation.scripts.estimate_setup import load_and_prep_data
 from export_results.figures.color_map import JET_COLOR_MAP
 from model_code.policy_processes.policy_states_belief import (
@@ -22,7 +23,6 @@ def plot_sim_vars(
     load_df=True,
     load_solution=True,
     load_sol_model=True,
-    load_sim_model=True,
 ):
     # Simulate baseline with subjective belief
     data_sim = solve_and_simulate_scenario(
@@ -37,7 +37,6 @@ def plot_sim_vars(
         df_exists=load_df,
         solution_exists=load_solution,
         sol_model_exists=load_sol_model,
-        sim_model_exists=load_sim_model,
     ).reset_index()
 
     data_sim["age"] = data_sim["period"] + specs["start_age"]

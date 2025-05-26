@@ -239,9 +239,7 @@ def load_and_prep_data(path_dict, start_params, model_class, drop_retirees=True)
         model_class=model_class,
     )
     data_decision["assets_begin_of_period"] = assets_begin_of_period
-    states_dict["assets_begin_of_period"] = assets_begin_of_period[
-        "assets_begin_of_period"
-    ].values
+    states_dict["assets_begin_of_period"] = assets_begin_of_period
 
     return data_decision, states_dict
 

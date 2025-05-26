@@ -14,8 +14,8 @@ def announcement_timing_lc_plot(path_dict, model_name):
     subset_ages = np.arange(30, 81, 2)
     filtered_df = res_df_life_cycle.loc[subset_ages]
 
-    annoucement_ages = [35, 45, 55]
-    for announcement_age in annoucement_ages:
+    announcement_ages = [35, 45, 55]
+    for announcement_age in announcement_ages:
         savings_rate_diff = filtered_df[f"savings_rate_diff_{announcement_age}"]
         employment_rate_diff = filtered_df[f"employment_rate_diff_{announcement_age}"]
         retirement_rate_diff = filtered_df[f"retirement_rate_diff_{announcement_age}"]

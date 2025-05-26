@@ -26,20 +26,21 @@ def observed_model_fit(
     )
 
     data_decision, states_dict = load_and_prep_data_for_model_fit(
-        paths_dict=paths_dict, specs=specs, params=params, model_class=model
+        paths_dict=paths_dict, specs=specs, params=params, model_class=model_solved
     )
 
-    unobserved_state_specs = create_unobserved_state_specs(data_decision, model)
+    unobserved_state_specs = create_unobserved_state_specs(
+        data_decision, model_class=model_solved
+    )
 
     plot_observed_model_fit_choice_probs(
         paths_dict,
         specs,
         data_decision,
         states_dict,
-        model,
+        model_class,
         unobserved_state_specs,
         params,
-        est_model,
         save_folder=paths_dict["plots"],
     )
 

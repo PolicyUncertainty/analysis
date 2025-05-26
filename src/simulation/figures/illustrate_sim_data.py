@@ -24,7 +24,7 @@ def plot_sim_vars(
     data_sim = solve_and_simulate_scenario(
         path_dict=path_dict,
         params=params,
-        annoucement_age=None,
+        announcement_age=None,
         subj_unc=True,
         custom_resolution_age=None,
         SRA_at_start=67,

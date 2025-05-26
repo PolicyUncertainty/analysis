@@ -8,6 +8,7 @@ from model_code.policy_processes.informed_state_transition import (
     informed_transition,
 )
 from model_code.policy_processes.select_policy_belief import (
+    select_sim_policy_function_and_update_specs,
     select_solution_transition_func_and_update_specs,
 )
 from model_code.state_space.state_space import create_state_space_functions
@@ -88,6 +89,15 @@ def specify_model(
         # Now as stochastic in the sim objects
         model_config_sim["stochastic_states"]["informed"] = informed_states
         stochastic_states_transitions_sim["informed"] = informed_transition
+
+        transition_func_sim, specs = select_sim_policy_function_and_update_specs(
+            specs=specs,
+            subj_unc=subj_unc,
+            announcement_age=sim_specs["announcement_age"],
+            SRA_at_start=sim_specs["SRA_at_start"],
+            SRA_at_retirement=sim_specs["SRA_at_retirement"],
+        )
+        stochastic_states_transitions_sim["policy_state"] = transition_func_sim
 
         # Now specify the dict:
         alternative_sim_specifications = {

@@ -14,7 +14,7 @@ def solve_and_simulate_scenario(
     custom_resolution_age,
     SRA_at_start,
     SRA_at_retirement,
-    annoucement_age,
+    announcement_age,
     model_name,
     df_exists=True,
     only_informed=False,
@@ -29,7 +29,7 @@ def solve_and_simulate_scenario(
         path_dict=path_dict,
         custom_resolution_age=custom_resolution_age,
         only_informed=only_informed,
-        annoucement_age=annoucement_age,
+        announcement_age=announcement_age,
         SRA_at_start=SRA_at_start,
         SRA_at_retirement=SRA_at_retirement,
         subj_unc=subj_unc,
@@ -40,9 +40,12 @@ def solve_and_simulate_scenario(
         data_sim = pd.read_pickle(df_file)
         return data_sim
 
-    # First we create the solution. As this is the expectation, the only
-    # thing we need to know, if there is subjective uncertainty and if so
-    # what the resolution age is (internal check for coherence)
+    # Create model and assign simulation specs.
+    sim_specs = {
+        "announcement_age": announcement_age,
+        "SRA_at_start": SRA_at_start,
+        "SRA_at_retirement": SRA_at_retirement,
+    }
     model_solved = specify_and_solve_model(
         path_dict=path_dict,
         params=params,
@@ -158,7 +161,7 @@ def simulate_scenario(
 def create_df_name(
     path_dict,
     custom_resolution_age,
-    annoucement_age,
+    announcement_age,
     only_informed,
     SRA_at_start,
     SRA_at_retirement,
@@ -177,10 +180,10 @@ def create_df_name(
         resolution_age = custom_resolution_age
 
     if subj_unc:
-        if annoucement_age is None:
+        if announcement_age is None:
             df_name = f"df_subj_unc_{resolution_age}_{SRA_at_start}_{SRA_at_retirement}_{name_append}"
         else:
-            df_name = f"df_subj_unc_{resolution_age}_{SRA_at_start}_{SRA_at_retirement}_{annoucement_age}_{name_append}"
+            df_name = f"df_subj_unc_{resolution_age}_{SRA_at_start}_{SRA_at_retirement}_{announcement_age}_{name_append}"
     else:
         df_name = f"df_no_unc_{SRA_at_retirement}_{name_append}"
     return df_name

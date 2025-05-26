@@ -50,16 +50,16 @@ def select_solution_transition_func_and_update_specs(
 
 
 def select_sim_policy_function_and_update_specs(
-    specs, subj_unc, annoucement_age, SRA_at_start, SRA_at_retirement
+    specs, subj_unc, announcement_age, SRA_at_start, SRA_at_retirement
 ):
 
     # Check if subjective uncertainty is given and if announcment is given.
-    annoucement_given = annoucement_age is not None
-    if ~subj_unc & annoucement_given:
+    announcement_given = announcement_age is not None
+    if ~subj_unc & announcement_given:
         raise ValueError("Announcement can only be given for subjective uncertainty.")
 
     # If there is no announcement, we have a smooth policy change.  (This also nests no policy change)
-    if annoucement_age is None:
+    if announcement_age is None:
         sim_alpha = (SRA_at_retirement - SRA_at_start) / (
             specs["resolution_age"] - specs["start_age"]
         )
@@ -67,13 +67,13 @@ def select_sim_policy_function_and_update_specs(
         specs = update_specs_step_function_with_slope_and_resolution(
             specs=specs, slope=sim_alpha
         )
-        transition_func_sol = realized_policy_step_function
+        transition_func_sim = realized_policy_step_function
     else:
-        transition_func_sol = announce_policy_state
+        transition_func_sim = announce_policy_state
         specs = update_specs_for_policy_announcement(
             specs=specs,
-            announcement_age=annoucement_age,
+            announcement_age=announcement_age,
             announced_SRA=SRA_at_retirement,
         )
 
-    return transition_func_sol, specs
+    return transition_func_sim, specs

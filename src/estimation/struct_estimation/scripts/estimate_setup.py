@@ -8,8 +8,7 @@ import numpy as np
 import optimagic as om
 import pandas as pd
 import yaml
-from dcegm.likelihood import create_individual_likelihood_function_for_model
-from dcegm.wealth_correction import adjust_observed_wealth
+from dcegm.asset_correction import adjust_observed_assets
 
 from estimation.struct_estimation.scripts.std_errors import (
     calc_and_save_standard_errors,
@@ -17,11 +16,11 @@ from estimation.struct_estimation.scripts.std_errors import (
 from estimation.struct_estimation.start_params_and_bounds.set_start_params import (
     load_and_set_start_params,
 )
-from model_code.policy_processes.policy_states_belief import (
-    update_specs_exp_ret_age_trans_mat,
-)
 from model_code.specify_model import specify_model
 from model_code.unobserved_state_weighting import create_unobserved_state_specs
+from process_data.structural_sample_scripts.create_structural_est_sample import (
+    CORE_TYPE_DICT,
+)
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
@@ -29,7 +28,6 @@ def estimate_model(
     path_dict,
     params_to_estimate_names,
     file_append,
-    slope_disutil_method,
     load_model,
     use_weights=True,
     last_estimate=None,
@@ -43,19 +41,19 @@ def estimate_model(
     if last_estimate is not None:
         print_function(last_estimate)
 
-        for key in last_estimate.keys():
-            if key in ["sigma", "interest_rate", "beta"]:
-                continue
+        for key in start_params_all:
             try:
                 print(
-                    f"Start params value of {key} was {start_params_all[key]} and is"
-                    f"replaced by {last_estimate[key]}"
+                    f"Start params value of {key} was {start_params_all[key]} and is "
+                    f"replaced by {last_estimate[key]}",
+                    flush=True,
                 )
             except:
-                raise ValueError(f"Key {key} not found in start params.")
+                raise ValueError(f"Key {key} not found in last_estimate.")
             start_params_all[key] = last_estimate[key]
 
     start_params = {name: start_params_all[name] for name in params_to_estimate_names}
+    print_function(start_params)
 
     lower_bounds_all = yaml.safe_load(
         open(path_dict["start_params_and_bounds"] + "lower_bounds.yaml", "rb")
@@ -73,13 +71,13 @@ def estimate_model(
     est_class = est_class_from_paths(
         path_dict=path_dict,
         start_params_all=start_params_all,
-        slope_disutil_method=slope_disutil_method,
         print_function=print_function,
         file_append=file_append,
         load_model=load_model,
         use_weights=use_weights,
         save_results=save_results,
     )
+
     result = om.minimize(
         fun=est_class.crit_func,
         params=start_params,
@@ -115,7 +113,6 @@ class est_class_from_paths:
         self,
         path_dict,
         start_params_all,
-        slope_disutil_method,
         file_append,
         load_model,
         use_weights,
@@ -123,7 +120,6 @@ class est_class_from_paths:
         save_results=True,
     ):
         self.iter_count = 0
-        self.slope_disutil_method = slope_disutil_method
         self.save_results = save_results
 
         if print_function is None:
@@ -140,18 +136,12 @@ class est_class_from_paths:
 
         self.intermediate_est_data = intermediate_est_data
 
-        from dcegm.interface import get_n_state_choice_period
-
-        model, params = specify_model(
+        model = specify_model(
             path_dict=path_dict,
-            params=start_params_all,
             subj_unc=True,
             custom_resolution_age=None,
-            sim_alpha=None,
-            annoucement_age=None,
-            annoucement_SRA=None,
             load_model=load_model,
-            model_type="solution",
+            sim_specs=None,
         )
 
         # Load data
@@ -167,41 +157,32 @@ class est_class_from_paths:
             self.weight_sum = data_decision.shape[0]
 
         # Create specs for unobserved states
-        unobserved_state_specs = create_unobserved_state_specs(data_decision, model)
+        unobserved_state_specs = create_unobserved_state_specs(
+            data_decision=data_decision, model_class=model
+        )
 
         # Create likelihood function
-        individual_likelihood = create_individual_likelihood_function_for_model(
-            model=model,
+        individual_likelihood = model.create_experimental_ll_func(
             observed_states=states_dict,
             observed_choices=data_decision["choice"].values,
             unobserved_state_specs=unobserved_state_specs,
             params_all=start_params_all,
-            return_model_solution=True,
+            return_model_solution=False,
         )
         self.ll_func = individual_likelihood
-        # specs = generate_derived_and_data_derived_specs(path_dict)
-        # self.pt_ratio_low = (
-        #     specs["av_annual_hours_pt"][0] / specs["av_annual_hours_ft"][0]
-        # )
-        # self.pt_ratio_high = (
-        #     specs["av_annual_hours_pt"][1] / specs["av_annual_hours_ft"][1]
-        # )
 
     def crit_func(self, params):
         start = time.time()
-        # if self.slope_disutil_method:
-        #     params = update_according_to_slope_disutil(
-        #         params, self.pt_ratio_low, self.pt_ratio_high
-        #     )
-        ll_value_individual, model_solution = self.ll_func(params)
+        ll_value_individual = self.ll_func(params)
         ll_value = jnp.dot(self.weights, ll_value_individual) / self.weight_sum
         if self.save_results:
-            save_iter_step(
-                model_solution,
-                ll_value,
+            alternate_save_count = self.iter_count % 2
+            pkl.dump(
                 params,
-                self.intermediate_est_data,
-                self.iter_count,
+                open(
+                    self.intermediate_est_data + f"params_{alternate_save_count}.pkl",
+                    "wb",
+                ),
             )
         end = time.time()
         self.iter_count += 1
@@ -212,52 +193,19 @@ class est_class_from_paths:
         return ll_value
 
 
-# def update_according_to_slope_disutil(params, pt_ratio_bad, pt_ratio_good):
-#     """Use this function to entforce slope condition of disutility parameters."""
-#     params["disutil_unemployed_bad"] = params["disutil_not_retired_low"]
-#     params["disutil_pt_work_bad"] = (
-#         params["disutil_not_retired_bad"]
-#         + pt_ratio_bad * params["disutil_working_bad"]
-#     )
-#     params["disutil_ft_work_bad"] = (
-#         params["disutil_not_retired_bad"] + params["disutil_working_bad"]
-#     )
-#
-#     params["disutil_unemployed"] = params["disutil_not_retired_good"]
-#     params["disutil_pt_work_good"] = (
-#         params["disutil_not_retired_good"]
-#         + pt_ratio_good * params["disutil_working_good"]
-#     )
-#     params["disutil_ft_work_good"] = (
-#         params["disutil_not_retired_good"] + params["disutil_working_good"]
-#     )
-#     return params
-
-
-def save_iter_step(model_sol, ll_value, params, logging_folder, iter_count):
-    alternate_save_count = iter_count % 2
-    saving_object = {"model_sol": model_sol, "ll_value": ll_value}
-    pkl.dump(
-        saving_object,
-        open(logging_folder + f"solving_log_{alternate_save_count}.pkl", "wb"),
-    )
-    pkl.dump(params, open(logging_folder + f"params_{alternate_save_count}.pkl", "wb"))
-
-
-def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):
+def load_and_prep_data(path_dict, start_params, model_class, drop_retirees=True):
     specs = generate_derived_and_data_derived_specs(path_dict)
     # Load data
-    data_decision = pd.read_pickle(path_dict["struct_est_sample"])
+    data_decision = pd.read_csv(path_dict["struct_est_sample"])
+    data_decision = data_decision.astype(CORE_TYPE_DICT)
 
-    # We need to filter observations in period 0 because of job offer weighting from last period
-    data_decision = data_decision[data_decision["period"] > 0]
     # Also already retired individuals hold no identification
     if drop_retirees:
         data_decision = data_decision[data_decision["lagged_choice"] != 0]
 
-    data_decision["age"] = (
-        data_decision["period"] + model["options"]["model_params"]["start_age"]
-    )
+    model_specs = model_class.model_specs
+
+    data_decision["age"] = data_decision["period"] + model_specs["start_age"]
     data_decision["age_bin"] = np.floor(data_decision["age"] / 10)
     data_decision.loc[data_decision["age_bin"] > 6, "age_bin"] = 6
     age_bin_av_size = data_decision.shape[0] / data_decision["age_bin"].nunique()
@@ -267,7 +215,7 @@ def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):
     )["age_weights"].transform("sum")
 
     # Transform experience
-    max_init_exp = model["options"]["model_params"]["max_exp_diffs_per_period"][
+    max_init_exp = model_specs["max_exp_diffs_per_period"][
         data_decision["period"].values
     ]
     exp_denominator = data_decision["period"].values + max_init_exp
@@ -278,18 +226,20 @@ def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):
     # Now transform for dcegm
     states_dict = {
         name: data_decision[name].values
-        for name in model["model_structure"]["discrete_states_names"]
+        for name in model_class.model_structure["discrete_states_names"]
     }
     states_dict["experience"] = data_decision["experience"].values
-    states_dict["wealth"] = data_decision["wealth"].values / specs["wealth_unit"]
+    states_dict["assets_begin_of_period"] = (
+        data_decision["wealth"].values / specs["wealth_unit"]
+    )
 
-    adjusted_wealth = adjust_observed_wealth(
+    assets_begin_of_period = adjust_observed_assets(
         observed_states_dict=states_dict,
         params=start_params,
-        model=model,
+        model_class=model_class,
     )
-    data_decision["adjusted_wealth"] = adjusted_wealth
-    states_dict["wealth"] = data_decision["adjusted_wealth"].values
+    data_decision["assets_begin_of_period"] = assets_begin_of_period
+    states_dict["assets_begin_of_period"] = assets_begin_of_period
 
     return data_decision, states_dict
 
@@ -327,25 +277,16 @@ def generate_print_func(params_to_estimate_names):
         # for param_name in taste_shock_params:
         #     print(f"{param_name}: {params[param_name]}")
         print("\nMen model params are:")
-        for group_name in men_params.keys():
-            print(f"Group: {group_name}")
-            for param in men_params[group_name]:
-                if "disutil" in param:
-                    print(
-                        f"{param}: {params[param]} and in probability: {np.exp(-params[param])}"
-                    )
-                elif "job_finding" in param:
-                    print(f"{param}: {params[param]}")
-        print("\nParameters of the women model are:")
-        for group_name in women_params.keys():
-            print(f"Group: {group_name}")
-            for param in women_params[group_name]:
-                if "disutil" in param:
-                    print(
-                        f"{param}: {params[param]} and in probability: {np.exp(-params[param])}"
-                    )
-                elif "job_finding" in param:
-                    print(f"{param}: {params[param]}")
+        for gender_params in [men_params, women_params]:
+            for group_name in gender_params.keys():
+                print(f"Group: {group_name}")
+                for param_name in gender_params[group_name]:
+                    if "disutil" in param_name:
+                        print(
+                            f"{param_name}: {params[param_name]} and in probability: {np.exp(-params[param_name])}"
+                        )
+                    else:
+                        print(f"{param_name}: {params[param_name]}")
 
     return print_function
 
@@ -371,7 +312,13 @@ def get_gendered_params(params_to_estimate_names, append):
     job_finding_params = [
         param_name for param_name in gender_params if "job_finding_" in param_name
     ]
+    taste_shock_scale_params = [
+        param_name for param_name in gender_params if "taste_shock" in param_name
+    ]
 
+    disability_params = [
+        param_name for param_name in gender_params if "disability" in param_name
+    ]
     # We do it this weird way for printing order
     params = {}
     if len(disutil_unemployed_params) > 0:
@@ -385,6 +332,12 @@ def get_gendered_params(params_to_estimate_names, append):
 
     if len(job_finding_params) > 0:
         params["job_finding"] = job_finding_params
+
+    if len(taste_shock_scale_params) > 0:
+        params["taste_shock"] = taste_shock_scale_params
+
+    if len(disability_params) > 0:
+        params["disability"] = disability_params
 
     # We drop these directly afterwards
     if len(gender_params) > 0:

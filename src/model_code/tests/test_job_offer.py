@@ -10,8 +10,9 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 EDU_GRID = [0, 1]
 PERIOD_GRID = np.arange(0, 20, 2, dtype=int)
 LOGIT_PARAM_GRID = np.arange(0.1, 0.9, 0.2)
-WORK_CHOICE_GRID = [2, 3]
+CHOICE_GRID = [2, 3]
 SEX_GRID = [0, 1]
+HEALTH_GRID = [0, 1]
 
 
 @pytest.fixture(scope="module")
@@ -22,32 +23,61 @@ def paths_and_specs():
 
 
 @pytest.mark.parametrize(
-    "education, sex, period, logit_param, work_choice",
-    list(product(EDU_GRID, SEX_GRID, PERIOD_GRID, LOGIT_PARAM_GRID, WORK_CHOICE_GRID)),
+    "education, sex, health, period, logit_param, choice",
+    list(
+        product(
+            EDU_GRID, SEX_GRID, HEALTH_GRID, PERIOD_GRID, LOGIT_PARAM_GRID, CHOICE_GRID
+        )
+    ),
 )
 def test_job_destruction(
-    education, sex, period, logit_param, work_choice, paths_and_specs
+    education, sex, health, period, logit_param, choice, paths_and_specs
 ):
     # Test job destruction probs.
-    path_dict, options = paths_and_specs
+    path_dict, model_specs = paths_and_specs
+
+    age = model_specs["start_age"] + period
 
     params = {}
     for append in ["men", "women"]:
         gender_params = {
             f"job_finding_logit_const_{append}": logit_param,
-            f"job_finding_logit_period_{append}": logit_param,
+            # f"job_finding_logit_age_{append}": logit_param,
             f"job_finding_logit_high_educ_{append}": logit_param,
+            f"job_finding_logit_good_health_{append}": logit_param,
+            f"job_finding_logit_above_50_{append}": logit_param,
+            f"job_finding_logit_above_55_{append}": logit_param,
+            f"job_finding_logit_above_60_{append}": logit_param,
         }
         params = {**params, **gender_params}
-    job_dest_prob = options["job_sep_probs"][sex, education, period]
-    full_probs_expec = np.array([job_dest_prob, 1 - job_dest_prob])
+
+    good_health = (health == model_specs["good_health_var"]).astype(int)
+
+    if choice > 1:
+        job_dest_prob = model_specs["job_sep_probs"][sex, education, good_health, age]
+        full_probs = np.array([job_dest_prob, 1 - job_dest_prob])
+    else:
+        append = "men" if sex == 0 else "women"
+
+        exp_value = np.exp(
+            params[f"job_finding_logit_const_{append}"]
+            # + params[f"job_finding_logit_age_{str}"] * age
+            + params[f"job_finding_logit_high_educ_{append}"] * education
+            + f"job_finding_logit_good_health_{append}" * good_health
+            + f"job_finding_logit_above_50_{append}" * (age >= 50)
+            + f"job_finding_logit_above_55_{append}" * (age >= 55)
+            + f"job_finding_logit_above_60_{append}" * (age >= 60)
+        )
+        offer_prob = exp_value / (1 + exp_value)
+        full_probs = np.array([1 - offer_prob, offer_prob])
 
     probs = job_offer_process_transition(
         params=params,
-        options=options,
+        model_specs=model_specs,
         education=education,
+        health=np.array(health),
         sex=sex,
         period=period,
-        choice=work_choice,
+        choice=choice,
     )
-    np.testing.assert_almost_equal(probs, full_probs_expec)
+    np.testing.assert_almost_equal(probs, full_probs)

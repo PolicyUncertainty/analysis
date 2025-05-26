@@ -25,13 +25,12 @@ from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 
 # %%
 # Set specifications
-n_agents = 10000
 seeed = 123
-model_name = "partner_est"
+model_name = "disability"
 load_solution = True  # baseline solution conntainer
 load_sol_model = True  # informed state as type
 load_sim_model = True  # informed state stochastic
-load_df_biased = True
+load_df_biased = False
 load_df_unbiased = (
     False  # True = load existing df, False = create new df, None = create but not save
 )
@@ -58,7 +57,7 @@ for i, sra in enumerate(sra_at_63):
         params=params,
         subj_unc=True,
         custom_resolution_age=None,
-        annoucement_age=None,
+        announcement_age=None,
         SRA_at_retirement=sra,
         SRA_at_start=67,
         model_name=model_name,
@@ -80,7 +79,7 @@ for i, sra in enumerate(sra_at_63):
         params=params,
         subj_unc=True,
         custom_resolution_age=None,
-        annoucement_age=None,
+        announcement_age=None,
         SRA_at_retirement=sra,
         SRA_at_start=sra,
         model_name=model_name,

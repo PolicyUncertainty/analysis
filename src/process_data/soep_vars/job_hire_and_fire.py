@@ -10,7 +10,7 @@ def generate_job_separation_var(data):
     return data
 
 
-def determine_observed_job_offers(data, working_choices, was_fired_last_period):
+def determine_observed_job_offers(data, working_choices):
     """Determine if a job offer is observed and if so what it is. The function
     implements the following rule:
 
@@ -22,10 +22,14 @@ def determine_observed_job_offers(data, working_choices, was_fired_last_period):
             - Individual got fired then job offer equal 0
             - Individual was not fired then job offer equal to 1
 
+    WARNING: We exclude the second option here, as the classification of all individuals working last
+    period leads to problems. Too many people have job offers in the data then. In particular fresh retirees
+    have in large shares a job offer. This is not possible to be explained by the model.
+
     Assume lagged choice not working (column "lagged_choice" not in working_choices),
     then the state is partially observed:
         - If choice is in working_choices, then the state is fully observed and there is a job offer
-        - If choice is not in working choices, then one is not observed
+        - If choice is not in working choices, then it is not observed
 
     Lagged choice equal to 0 (retired), will be dropped as only choice equal to 0 is allowed
 
@@ -33,22 +37,22 @@ def determine_observed_job_offers(data, working_choices, was_fired_last_period):
     We mark unobsorved states by a state value of -99
     """
     working_this_period = data["choice"].isin(working_choices)
-    was_working_last_period = data["lagged_choice"].isin(working_choices)
+    # was_working_last_period = data["lagged_choice"].isin(working_choices)
 
     data["job_offer"] = -99
 
     # Individuals working have job offer equal to 1 and are fully observed
     data.loc[working_this_period, "job_offer"] = 1
 
-    # Individuals who are unemployed or retired and are fired this period have job offer
-    # equal to 0. This includes individuals with lagged choice unemployment, as they
-    # might be interviewed after firing.
-    maskfired = (~working_this_period) & was_fired_last_period & was_working_last_period
-    data.loc[maskfired, "job_offer"] = 0
-
-    # Everybody who was not fired is also fully observed an has an job offer
-    mask_not_fired = (
-        (~working_this_period) & (~was_fired_last_period) & was_working_last_period
-    )
-    data.loc[mask_not_fired, "job_offer"] = 1
+    # # Individuals who are unemployed or retired and are fired this period have job offer
+    # # equal to 0. This includes individuals with lagged choice unemployment, as they
+    # # might be interviewed after firing.
+    # maskfired = (~working_this_period) & was_fired_last_period & was_working_last_period
+    # data.loc[maskfired, "job_offer"] = 0
+    #
+    # # Everybody who was not fired is also fully observed an has an job offer
+    # mask_not_fired = (
+    #     (~working_this_period) & (~was_fired_last_period) & was_working_last_period
+    # )
+    # data.loc[mask_not_fired, "job_offer"] = 1
     return data

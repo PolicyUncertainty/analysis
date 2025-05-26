@@ -25,9 +25,8 @@ from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 
 # %%
 # Set specifications
-n_agents = 10000
 seeed = 123
-model_name = "partner_est"
+model_name = "disability"
 load_solution = True  # baseline solution conntainer
 load_sol_model = True  # informed state as types
 load_sim_model = True  # informed state stochastic
@@ -46,8 +45,8 @@ params = pkl.load(
 res_df_life_cycle = None
 
 # initiaize announcement ages
-annoucement_ages = [35, 45, 55]
-for announcement_age in annoucement_ages:
+announcement_ages = [35, 45, 55]
+for announcement_age in announcement_ages:
     if load_df:
         print("Load existing dfs for announcement age: ", announcement_age)
     else:
@@ -59,7 +58,7 @@ for announcement_age in annoucement_ages:
         params=params,
         subj_unc=True,
         custom_resolution_age=None,
-        annoucement_age=63,  # earliest age is 31
+        announcement_age=63,  # earliest age is 31
         SRA_at_retirement=69,
         SRA_at_start=67,
         model_name=model_name,
@@ -82,7 +81,7 @@ for announcement_age in annoucement_ages:
         params=params,
         subj_unc=True,
         custom_resolution_age=None,
-        annoucement_age=announcement_age,  # Let's earliest age is 31
+        announcement_age=announcement_age,  # Let's earliest age is 31
         SRA_at_retirement=69,
         SRA_at_start=67,
         model_name=model_name,

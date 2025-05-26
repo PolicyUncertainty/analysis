@@ -16,7 +16,7 @@ def load_and_set_start_params(path_dict):
     )
 
     # Create start values for job offer probabilities
-    struct_est_sample = pd.read_pickle(path_dict["struct_est_sample"])
+    struct_est_sample = pd.read_csv(path_dict["struct_est_sample"])
     specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
 
     # Estimate start values for job offers
@@ -24,9 +24,9 @@ def load_and_set_start_params(path_dict):
     # Update start values
     start_params_all.update(job_offer_params)
 
-    # Estimate disability probability start params
-    disability_prob_params = est_disability_prob(path_dict, specs)
-    # Update start values
-    start_params_all.update(disability_prob_params)
+    # # Estimate disability probability start params
+    # disability_prob_params = est_disability_prob(path_dict, specs)
+    # # Update start values
+    # start_params_all.update(disability_prob_params)
 
     return start_params_all

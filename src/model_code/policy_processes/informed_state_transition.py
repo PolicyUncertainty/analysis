@@ -2,7 +2,7 @@ import jax
 import jax.numpy as jnp
 
 
-def informed_transition(choice, education, informed, options):
+def informed_transition(choice, education, informed, model_specs):
     """Transition function for informed state. We use this function in the simulation
     and not in the solution of the model, as all individuals don't account for a
     possible change in their information set.
@@ -15,7 +15,7 @@ def informed_transition(choice, education, informed, options):
     # If they are uninformed, there is an education specific hazard rate
     # to become informed
     uninformed = informed == 0
-    hazard_rate_edu = options["informed_hazard_rate"][education]
+    hazard_rate_edu = model_specs["informed_hazard_rate"][education]
     prob_informed = jax.lax.select(uninformed, hazard_rate_edu, 1.0)
     prob_vector = jnp.array([1 - prob_informed, prob_informed])
 

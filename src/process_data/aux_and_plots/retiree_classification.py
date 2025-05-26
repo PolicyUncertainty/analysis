@@ -11,7 +11,7 @@ specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True
 
 
 def classify_retirees(paths):
-    struct_est_sample = pd.read_pickle(paths["struct_est_sample"])
+    struct_est_sample = pd.read_csv(paths["struct_est_sample"])
     struct_est_sample["age"] = struct_est_sample["period"] + specs["start_age"]
 
     fresh_retirees = struct_est_sample[

@@ -51,7 +51,7 @@ def test_choice_set_under_63(
         sex=sex,
         health=health,
         job_offer=job_offer,
-        options=specs,
+        model_specs=specs,
     )
     if health == 2:
         if job_offer == 1:
@@ -103,7 +103,7 @@ def test_choice_set_over_63_under_72(
         sex=sex,
         health=health,
         job_offer=job_offer,
-        options=specs,
+        model_specs=specs,
     )
     SRA = specs["min_SRA"] + policy_state * specs["SRA_grid_size"]
     ret_age_long_insured = retirement_age_long_insured(SRA, specs)
@@ -170,6 +170,6 @@ def test_choice_set_over_72(period, sex, lagged_choice, policy_state, paths_and_
         sex=sex,
         health=1,
         job_offer=0,
-        options=specs,
+        model_specs=specs,
     )
     assert (choice_set == [0]).all()

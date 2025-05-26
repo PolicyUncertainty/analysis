@@ -4,24 +4,24 @@ from model_code.pension_system.early_retirement_paths import retirement_age_long
 
 
 def state_specific_choice_set(
-    period, lagged_choice, sex, policy_state, job_offer, health, options
+    period, lagged_choice, sex, policy_state, job_offer, health, model_specs
 ):
     """This function is called in the model generation. Therefore we do not need to care
     if it is implemented efficiently. Rather we want to make the model restriction on choices
     explicit.
     """
-    age = period + options["start_age"]
-    SRA_pol_state = options["min_SRA"] + policy_state * options["SRA_grid_size"]
-    ret_age_long_insured = retirement_age_long_insured(SRA_pol_state, options)
+    age = period + model_specs["start_age"]
+    SRA_pol_state = model_specs["min_SRA"] + policy_state * model_specs["SRA_grid_size"]
+    ret_age_long_insured = retirement_age_long_insured(SRA_pol_state, model_specs)
 
     # If somebody is death, we assign a dummy choice set of [0]
-    if health == options["death_health_var"]:
+    if health == model_specs["death_health_var"]:
         return np.array([0])
     # retirement is absorbing
     elif lagged_choice == 0:
         return np.array([0])
     # Above the maximum retirement age, also everybody needs to be retired
-    elif age >= options["max_ret_age"]:
+    elif age >= model_specs["max_ret_age"]:
         return np.array([0])
     else:
         # For the rest of the life span, we now check a few rules and delete choices
@@ -32,7 +32,7 @@ def state_specific_choice_set(
         # long insured people. Or if you are disabled. Check first if you are able to retire
         # otherwise delete the retirement choice.
         able_to_retire = (age >= ret_age_long_insured) | (
-            health == options["disabled_health_var"]
+            health == model_specs["disabled_health_var"]
         )
         if not able_to_retire:
             choice_set = choice_set[choice_set != 0]

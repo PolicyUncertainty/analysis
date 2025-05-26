@@ -6,7 +6,7 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
 def plot_data_choices(path_dict, lagged=False):
-    struct_est_sample = pd.read_pickle(path_dict["struct_est_sample"])
+    struct_est_sample = pd.read_csv(path_dict["struct_est_sample"])
     struct_est_sample = struct_est_sample[struct_est_sample["sex"] == 1]
 
     specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
@@ -45,7 +45,7 @@ def plot_data_choices(path_dict, lagged=False):
 
 
 def plot_state_by_age_and_type(path_dict, state_vars):
-    struct_est_sample = pd.read_pickle(path_dict["struct_est_sample"])
+    struct_est_sample = pd.read_csv(path_dict["struct_est_sample"])
     specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
 
     # age restriction

@@ -7,14 +7,14 @@ import numpy as np
 import optimagic as om
 import pandas as pd
 import statsmodels.api as sm
+from statsmodels.discrete.conditional_models import ConditionalLogit
+from statsmodels.discrete.discrete_model import Logit, MNLogit
+
 from export_results.figures.color_map import JET_COLOR_MAP
 from process_data.first_step_sample_scripts.create_partner_transition_sample import (
     create_partner_transition_sample,
 )
 from specs.derive_specs import read_and_derive_specs
-from statsmodels.discrete.conditional_models import ConditionalLogit
-from statsmodels.discrete.discrete_model import Logit
-from statsmodels.discrete.discrete_model import MNLogit
 
 # import warnings
 # warnings.filterwarnings("error")
@@ -267,13 +267,12 @@ def estimate_nb_children(paths_dict, specs):
     )
 
     start_age = specs["start_age"]
-    end_age = specs["end_age"]
 
     df = df[df["age"] >= start_age]
 
     # Filter out individuals below 60 for better estimation(we should set this in specs)
     df = df[df["age"] <= 60]
-    df["period"] = df["age"] - start_age
+    df["period"] = (df["age"] - start_age).astype(float)
     df["period_sq"] = df["period"] ** 2
     df["has_partner"] = (df["partner_state"] > 0).astype(int)
     # estimate OLS for each combination of sex, education and has_partner
@@ -298,8 +297,8 @@ def estimate_nb_children(paths_dict, specs):
                     (df["sex"] == sex)
                     & (df["education"] == education)
                     & (df["has_partner"] == has_partner)
-                ]
-                X = df_reduced[columns[1:]]
+                ].copy()
+                X = df_reduced[columns[1:]].astype(float)
                 X = sm.add_constant(X)
                 Y = df_reduced["children"]
                 model = sm.OLS(Y, X).fit()

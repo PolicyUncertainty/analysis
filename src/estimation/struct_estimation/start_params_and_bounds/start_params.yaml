@@ -1,32 +1,33 @@
+---
 # Utility parameters
 mu_men: 1.5
 mu_women: 1.5
 
 # Full time work dis-utility men
-disutil_ft_work_high_good_men: 1.3
-disutil_ft_work_high_bad_men: 1.3
-disutil_ft_work_low_good_men: 1.3
-disutil_ft_work_low_bad_men: 1.3
+disutil_ft_work_high_good_men: 1.0
+disutil_ft_work_high_bad_men: 1.0
+disutil_ft_work_low_good_men: 1.0
+disutil_ft_work_low_bad_men: 1.0
 
 # Full time work dis-utility women
-disutil_ft_work_high_good_women: 1.3
-disutil_ft_work_high_bad_women: 1.3
-disutil_ft_work_low_good_women: 1.3
-disutil_ft_work_low_bad_women: 1.3
+disutil_ft_work_high_good_women: 1.0
+disutil_ft_work_high_bad_women: 1.0
+disutil_ft_work_low_good_women: 1.0
+disutil_ft_work_low_bad_women: 1.0
 
 # Part time dis-utility men
-disutil_pt_work_high_good_women: 1.3
-disutil_pt_work_high_bad_women: 1.3
-disutil_pt_work_low_good_women: 1.3
-disutil_pt_work_low_bad_women: 1.3
+disutil_pt_work_high_good_women: 1.0
+disutil_pt_work_high_bad_women: 1.0
+disutil_pt_work_low_good_women: 1.0
+disutil_pt_work_low_bad_women: 1.0
 
 # Unemployment dis-utility men
-disutil_unemployed_high_men: 1.0
-disutil_unemployed_low_men: 1.0
+disutil_unemployed_high_men: 0.5
+disutil_unemployed_low_men: 0.5
 
 # Unemployment dis-utility women
-disutil_unemployed_high_women: 1.0
-disutil_unemployed_low_women: 1.0
+disutil_unemployed_high_women: 0.5
+disutil_unemployed_low_women: 0.5
 
 # Children dis-utility
 disutil_children_ft_work_low: 0.2
@@ -38,6 +39,5 @@ bequest_scale: 2.4
 # Job separation params are set internally driven by data
 
 # Taste shock scale
-lambda: 0.29
-#taste_shock_scale_men: 0.29
-#taste_shock_scale_women: 0.29
+taste_shock_scale_men: 0.29
+taste_shock_scale_women: 0.29

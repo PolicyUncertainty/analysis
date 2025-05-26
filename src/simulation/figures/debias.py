@@ -44,5 +44,6 @@ def debias_lc_plot(path_dict, model_name):
     for axis in ax:
         axis.axhline(y=0, color="black")
         axis.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, pos: f"{x:.3f}"))
+    ax[0].legend()
     fig.tight_layout()
-    fig.legend()
+    fig.suptitle("Debias")

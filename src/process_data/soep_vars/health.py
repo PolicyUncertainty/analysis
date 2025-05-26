@@ -42,7 +42,7 @@ def create_health_var(data, filter_missings=True):
     return data
 
 
-def correct_health_state(data):
+def correct_health_state(data, filter_missings=False):
     """This function creates a lagged health state variable in the soep-PEQUIV dataset.
 
     The function replaces the health variable with 1 if both the previous and next
@@ -51,19 +51,26 @@ def correct_health_state(data):
     """
 
     # replace health with 1 if both previous and next health are 1
-    data["lag_health"] = data.groupby(["pid"])["health"].shift(1)
+    data["lagged_health"] = data.groupby(["pid"])["health"].shift(1)
     data["lead_health"] = data.groupby(["pid"])["health"].shift(-1)
 
     # one year bad health in between two years of good health is still considered good health
     data.loc[
-        (data["lag_health"] == 0) & (data["lead_health"] == 0),
+        (data["lagged_health"] == 0) & (data["lead_health"] == 0),
         "health",
     ] = 0
 
     # update lead_health
     data["lead_health"] = data.groupby(["pid"])["health"].shift(-1)
     # update lag_health
-    data["lag_health"] = data.groupby(["pid"])["health"].shift(1)
+    data["lagged_health"] = data.groupby(["pid"])["health"].shift(1)
+
+    if filter_missings:
+        data = data[data["health"].notna()]
+        print(
+            str(len(data))
+            + " observations left after dropping people with missing health data."
+        )
 
     # drop people with missing lead health data
     # print(str(len(data)) + " observations after spanning the dataframe before dropping people with missing health data.")

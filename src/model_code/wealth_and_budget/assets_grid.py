@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def create_savings_grid():
+def create_end_of_period_assets():
     """Create a saving grid with sections."""
     section_1 = np.arange(start=0, stop=20, step=2)  # 10
     section_2 = np.arange(start=20, stop=50, step=5)  # 6

@@ -2,6 +2,7 @@
 import pickle
 
 import matplotlib.pyplot as plt
+
 from set_paths import create_path_dict
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
@@ -12,7 +13,6 @@ specs = generate_derived_and_data_derived_specs(path_dict)
 model_name = "partner_est"
 load_df = True
 load_solution = True
-load_sim_model = True
 load_sol_model = True
 
 
@@ -43,7 +43,6 @@ if which_plots in ["a", "c"]:
         load_df=load_df,
         load_solution=load_solution,
         load_sol_model=load_sol_model,
-        load_sim_model=load_sim_model,
     )
     # After running, we can set all to true
     load_df = True
@@ -62,7 +61,6 @@ if which_plots in ["a", "u"]:
         load_df=load_df,
         load_solution=load_solution,
         load_sol_model=load_sol_model,
-        load_sim_model=load_sim_model,
     )
     # After running, we can set all to true
     load_df = True
@@ -81,7 +79,6 @@ if which_plots in ["a", "w"]:
         load_df=load_df,
         load_solution=load_solution,
         load_sol_model=load_sol_model,
-        load_sim_model=load_sim_model,
     )
     # After running, we can set all to true
     load_df = True
@@ -100,7 +97,6 @@ if which_plots in ["a", "s"]:
         load_df=load_df,
         load_solution=load_solution,
         load_sol_model=load_sol_model,
-        load_sim_model=load_sim_model,
     )
     # After running, we can set all to true
     load_df = True

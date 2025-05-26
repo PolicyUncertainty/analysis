@@ -10,13 +10,13 @@ dependencies:
 
   # Package dependencies
   - numpy
+  - numba
   - pandas
   - scipy
   - pandas
   - linearmodels
   - statsmodels
   - lifelines
-  - optimagic
   - seaborn
   - scikit-learn
 

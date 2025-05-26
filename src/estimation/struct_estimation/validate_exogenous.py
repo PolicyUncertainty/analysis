@@ -10,7 +10,7 @@ path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict)
 
 # Set run specs
-model_name = "disability"
+model_name = "start"
 load_sol_model = True
 
 if model_name == "start":
@@ -26,21 +26,16 @@ else:
     params = map_period_to_age(params)
 
 
-model, params = specify_model(
+model = specify_model(
     path_dict=path_dict,
-    params=params,
     subj_unc=True,
     custom_resolution_age=None,
-    sim_alpha=None,
-    annoucement_age=None,
-    annoucement_SRA=None,
     load_model=load_sol_model,
-    model_type="solution",
+    sim_specs=None,
 )
 
 
-model.vali(
-    model=model,
+model.validate_exogenous(
     params=params,
 )
 #

@@ -9,7 +9,6 @@ from model_code.policy_processes.informed_state_transition import (
 )
 from model_code.policy_processes.select_policy_belief import (
     select_solution_transition_func_and_update_specs,
-    select_transition_func_and_update_specs,
 )
 from model_code.state_space.state_space import create_state_space_functions
 from model_code.stochastic_processes.health_transition import health_transition
@@ -36,7 +35,7 @@ def specify_model(
     # Generate model_specs
     specs = generate_derived_and_data_derived_specs(path_dict)
 
-    specs, SRA_belief_solution = select_solution_transition_func_and_update_specs(
+    SRA_belief_solution, specs = select_solution_transition_func_and_update_specs(
         path_dict=path_dict,
         specs=specs,
         subj_unc=subj_unc,

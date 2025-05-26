@@ -14,7 +14,7 @@ from model_code.unobserved_state_weighting import create_unobserved_state_specs
 def observed_model_fit(
     paths_dict, specs, params, model_name, load_sol_model, load_solution
 ):
-    est_model, model, params = specify_and_solve_model(
+    model_solved = specify_and_solve_model(
         path_dict=paths_dict,
         params=params,
         subj_unc=True,
@@ -22,10 +22,11 @@ def observed_model_fit(
         file_append=model_name,
         load_model=load_sol_model,
         load_solution=load_solution,
+        sim_specs=None,
     )
 
     data_decision, states_dict = load_and_prep_data_for_model_fit(
-        paths_dict, specs, params, model
+        paths_dict=paths_dict, specs=specs, params=params, model_class=model
     )
 
     unobserved_state_specs = create_unobserved_state_specs(data_decision, model)
@@ -129,19 +130,24 @@ def plot_observed_model_fit_choice_probs(
 
 
 def load_and_prep_data_for_model_fit(
-    paths_dict, specs, params, model, drop_retirees=False
+    paths_dict, specs, params, model_class, drop_retirees=False
 ):
     data_decision, _ = load_and_prep_data(
-        paths_dict, params, model, drop_retirees=drop_retirees
+        path_dict=paths_dict,
+        start_params=params,
+        model_class=model_class,
+        drop_retirees=drop_retirees,
     )
     data_decision["age"] = data_decision["period"] + specs["start_age"]
     data_decision = data_decision[data_decision["age"] < 75]
     states_dict = {
         name: data_decision[name].values.copy()
-        for name in model["model_structure"]["discrete_states_names"]
+        for name in model_class.model_structure["discrete_states_names"]
     }
     states_dict["experience"] = data_decision["experience"].values
-    states_dict["wealth"] = data_decision["adjusted_wealth"].values
+    states_dict["assets_begin_of_period"] = data_decision[
+        "assets_begin_of_period"
+    ].values
     return data_decision, states_dict
 
 

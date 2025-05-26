@@ -140,11 +140,8 @@ class est_class_from_paths:
             path_dict=path_dict,
             subj_unc=True,
             custom_resolution_age=None,
-            sim_alpha=None,
-            annoucement_age=None,
-            annoucement_SRA=None,
             load_model=load_model,
-            model_type="solution",
+            sim_specs=None,
         )
 
         # Load data
@@ -196,7 +193,7 @@ class est_class_from_paths:
         return ll_value
 
 
-def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):
+def load_and_prep_data(path_dict, start_params, model_class, drop_retirees=True):
     specs = generate_derived_and_data_derived_specs(path_dict)
     # Load data
     data_decision = pd.read_csv(path_dict["struct_est_sample"])
@@ -206,7 +203,7 @@ def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):
     if drop_retirees:
         data_decision = data_decision[data_decision["lagged_choice"] != 0]
 
-    model_specs = model.model_specs
+    model_specs = model_class.model_specs
 
     data_decision["age"] = data_decision["period"] + model_specs["start_age"]
     data_decision["age_bin"] = np.floor(data_decision["age"] / 10)
@@ -229,20 +226,22 @@ def load_and_prep_data(path_dict, start_params, model, drop_retirees=True):
     # Now transform for dcegm
     states_dict = {
         name: data_decision[name].values
-        for name in model.model_structure["discrete_states_names"]
+        for name in model_class.model_structure["discrete_states_names"]
     }
     states_dict["experience"] = data_decision["experience"].values
     states_dict["assets_begin_of_period"] = (
         data_decision["wealth"].values / specs["wealth_unit"]
     )
 
-    adjusted_wealth = adjust_observed_assets(
+    assets_begin_of_period = adjust_observed_assets(
         observed_states_dict=states_dict,
         params=start_params,
-        model_class=model,
+        model_class=model_class,
     )
-    data_decision["adjusted_wealth"] = adjusted_wealth
-    states_dict["wealth"] = data_decision["adjusted_wealth"].values
+    data_decision["assets_begin_of_period"] = assets_begin_of_period
+    states_dict["assets_begin_of_period"] = assets_begin_of_period[
+        "assets_begin_of_period"
+    ].values
 
     return data_decision, states_dict
 

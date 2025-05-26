@@ -1,16 +1,9 @@
-import pickle
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import yaml
 
 from estimation.struct_estimation.scripts.estimate_setup import load_and_prep_data
 from export_results.figures.color_map import JET_COLOR_MAP
-from model_code.policy_processes.policy_states_belief import (
-    update_specs_exp_ret_age_trans_mat,
-)
-from model_code.specify_model import specify_model
 from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 
 

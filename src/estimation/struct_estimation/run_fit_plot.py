@@ -11,7 +11,7 @@ path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict)
 
 # Set run specs
-model_name = "disability"
+model_name = "start"
 load_sol_model = True
 load_solution = False
 

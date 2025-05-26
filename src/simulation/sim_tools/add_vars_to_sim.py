@@ -1,4 +1,5 @@
 import numpy as np
+
 from estimation.struct_estimation.scripts.observed_model_fit import (
     choice_probs_for_choice_vals,
 )
@@ -27,7 +28,7 @@ def calc_choice_probs_for_df(
         choice_probs_observations = choice_probs_for_choice_vals(
             choice_vals=choice_vals,
             states_dict=states_dict,
-            model=model,
+            model_solved=model,
             unobserved_state_specs=unobserved_state_specs,
             params=params,
             est_model=est_model,

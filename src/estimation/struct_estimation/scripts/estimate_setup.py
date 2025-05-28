@@ -158,7 +158,7 @@ class est_class_from_paths:
 
         # Create specs for unobserved states
         unobserved_state_specs = create_unobserved_state_specs(
-            data_decision=data_decision, model_class=model
+            data_decision=data_decision
         )
 
         # Create likelihood function

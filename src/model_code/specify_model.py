@@ -1,4 +1,5 @@
 import pickle
+from copy import deepcopy
 
 import dcegm
 import jax.numpy as jnp
@@ -79,8 +80,8 @@ def specify_model(
     # Now we use the alternative sim specification to define informed in the solution
     # as deterministic state (type) and in the simulation as stochastic state.
     informed_states = np.arange(2, dtype=int)
-    model_config_sim = model_config.copy()
-    stochastic_states_transitions_sim = stochastic_states_transitions.copy()
+    model_config_sim = deepcopy(model_config)
+    stochastic_states_transitions_sim = deepcopy(stochastic_states_transitions)
 
     # First add it as a deterministic state
     model_config["deterministic_states"]["informed"] = informed_states

@@ -12,5 +12,5 @@ def create_end_of_period_assets():
     section_7 = np.array([10_000, 100_000])
     savings_grid = np.concatenate(
         [section_1, section_2, section_3, section_4, section_5, section_6, section_7]
-    )
+    ).astype(float)
     return savings_grid

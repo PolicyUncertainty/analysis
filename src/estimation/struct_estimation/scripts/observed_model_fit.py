@@ -29,9 +29,7 @@ def observed_model_fit(
         paths_dict=paths_dict, specs=specs, params=params, model_class=model_solved
     )
 
-    unobserved_state_specs = create_unobserved_state_specs(
-        data_decision, model_class=model_solved
-    )
+    unobserved_state_specs = create_unobserved_state_specs(data_decision)
 
     plot_observed_model_fit_choice_probs(
         specs=specs,

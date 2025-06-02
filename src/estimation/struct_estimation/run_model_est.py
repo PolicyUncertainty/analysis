@@ -22,7 +22,7 @@ params_to_estimate_names = [
     "disutil_unemployed_high_men",
     "disutil_unemployed_low_men",
     # Taste shock men - 1 parameter
-    # "taste_shock_scale_men",
+    "taste_shock_scale_men",
     # # Men job finding - 3 parameters
     # "job_finding_logit_const_men",
     # "job_finding_logit_age_men",
@@ -61,7 +61,7 @@ params_to_estimate_names = [
 ]
 model_name = "wo_disability"
 LOAD_LAST_ESTIMATE = False
-LOAD_SOL_MODEL = True
+LOAD_SOL_MODEL = False
 SAVE_RESULTS = True
 USE_WEIGHTS = False
 

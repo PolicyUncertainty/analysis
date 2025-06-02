@@ -31,6 +31,7 @@ def specify_model(
     custom_resolution_age,
     sim_specs=None,
     load_model=False,
+    debug_info=None,
 ):
     """Generate model class."""
 
@@ -126,6 +127,7 @@ def specify_model(
             stochastic_states_transitions=stochastic_states_transitions,
             model_load_path=model_path,
             alternative_sim_specifications=alternative_sim_specifications,
+            debug_info=debug_info,
         )
 
     else:
@@ -140,6 +142,7 @@ def specify_model(
             stochastic_states_transitions=stochastic_states_transitions,
             model_save_path=model_path,
             alternative_sim_specifications=alternative_sim_specifications,
+            debug_info=debug_info,
         )
 
     print("Model specified.")

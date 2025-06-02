@@ -1,4 +1,5 @@
 import jax
+import numpy as np
 from jax import numpy as jnp
 
 from model_code.pension_system.early_retirement_paths import (
@@ -96,7 +97,8 @@ def calc_experience_for_total_pension_points(
     mean_wage_all = model_specs["mean_hourly_ft_wage"][sex, education]
     gamma_0 = model_specs["gamma_0"][sex, education]
     gamma_1_plus_1 = model_specs["gamma_1"][sex, education] + 1
-    return (
+    exp_for_pension_points = (
         (total_pension_points * mean_wage_all * gamma_1_plus_1 / jnp.exp(gamma_0) + 1)
         ** (1 / gamma_1_plus_1)
     ) - 1
+    return exp_for_pension_points

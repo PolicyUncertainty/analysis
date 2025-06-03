@@ -3,14 +3,15 @@ import pandas as pd
 from statsmodels import api as sm
 
 
-def est_SRA_params(paths):
-    alpha_hat = est_expected_SRA(paths)
-    sigma_sq_hat = estimate_expected_SRA_variance(paths)
+def est_SRA_params(paths, df=None):
+    alpha_hat = est_expected_SRA(paths, df)
+    sigma_sq_hat = estimate_expected_SRA_variance(paths, df)
     return alpha_hat, sigma_sq_hat
 
 
-def est_expected_SRA(paths):
-    df = pd.read_pickle(paths["intermediate_data"] + "policy_expect_data.pkl")
+def est_expected_SRA(paths, df=None):
+    if df is None:
+        df = pd.read_pickle(paths["intermediate_data"] + "policy_expect_data.pkl")
     x_var = "time_to_ret"
     weights = "fweights"
 
@@ -40,9 +41,10 @@ def est_expected_SRA(paths):
     return alpha_hat
 
 
-def estimate_expected_SRA_variance(paths):
-    df = pd.read_pickle(paths["intermediate_data"] + "policy_expect_data.pkl")
-
+def estimate_expected_SRA_variance(paths, df=None):
+    if df is None:
+        df = pd.read_pickle(paths["intermediate_data"] + "policy_expect_data.pkl")
+        
     # truncate data: remove birth years outside before 1964
     df = df[df["gebjahr"] >= 1964]
 

@@ -13,15 +13,13 @@ from process_data.structural_sample_scripts.policy_state import (
 )
 
 
-def estimate_truncated_normal(paths, options, load_data=False):
+def estimate_truncated_normal(df, paths, options, load_data=False):
     out_file_path = paths["intermediate_data"] + "policy_expect_data.pkl"
 
     if load_data:
         df_analysis = pd.read_pickle(out_file_path)
         return df_analysis
 
-    # unpack path to SOEP-IS
-    soep_is = paths["soep_is"]
 
     # unpack options, put into new dict
     function_spec = {
@@ -31,33 +29,17 @@ def estimate_truncated_normal(paths, options, load_data=False):
         "second_cdf_point": options["second_cdf_point"],
     }
 
-    # load dataset (policy uncertainty questions from SOEP-IS)
-    relevant_cols = [
-        "pol_unc_stat_ret_age_67",
-        "pol_unc_stat_ret_age_68",
-        "pol_unc_stat_ret_age_69",
-        "exp_pens_uptake",
-        "age",
-        "gebjahr",
-        "fweights",
-    ]
-    df = pd.read_stata(soep_is)[relevant_cols].astype(float)
-
     df["time_to_ret"] = df["exp_pens_uptake"] - df["age"]
 
     # estimate params of truncated normal, as well as mean and var
     df = estimate_truncated_normal_parameters(df, function_spec)
 
-    # exclude people born before 1947 and people born after 2000
-    df_analysis = df[df["pol_unc_stat_ret_age_67"].notnull()]
-    df_analysis = df_analysis[df_analysis["ex_val"].notnull()]
-    df_analysis = df_analysis[df_analysis["time_to_ret"] > 0]
-    df_analysis = df_analysis[df_analysis["time_to_ret"] < 48]
+    # exclude people born before 1947 and people born after 2000, as well as people with missing values in the policy uncertainty questions
+    df_analysis = filter_df(df)
 
-    df_analysis["sigma_sq"] = df_analysis["var"] / df_analysis["time_to_ret"]
-    df_analysis = create_SRA_by_gebjahr(df_analysis)
-    # Rename SRA to current SRA
-    df_analysis.rename(columns={"SRA": "current_SRA"}, inplace=True)
+    #df_analysis["sigma_sq"] = df_analysis["var"] / df_analysis["time_to_ret"]
+    df_analysis["current_SRA"] = create_SRA_by_gebjahr(df_analysis["gebjahr"])
+    #df_analysis.rename(columns={"SRA": "current_SRA"}, inplace=True)
     df_analysis.to_pickle(out_file_path)
     return df_analysis
 
@@ -89,7 +71,7 @@ def estimate_truncated_normal_parameters(df, function_spec):
                 row["pol_unc_stat_ret_age_69"] = 0.25
             elif row["pol_unc_stat_ret_age_69"] == 100:
                 # Assume that there was just enough mass in the last interval that the
-                # respondet rounded up to 100. Assign the rest to 68.
+                # respondent rounded up to 100. Assign the rest to 68.
                 row["pol_unc_stat_ret_age_67"] = 0.1
                 row["pol_unc_stat_ret_age_68"] = 0.4
                 row["pol_unc_stat_ret_age_69"] = 99.5
@@ -143,3 +125,13 @@ def objective(params, function_spec):
     # Sum of squared differences
     # total_error = error_1 + error_2
     return np.array([error_1, error_2])
+
+def filter_df(df):
+    """ Filter the dataframe to only include rows with valid SRA values. """
+    df_analysis = df[df["pol_unc_stat_ret_age_67"].notnull()]
+    df_analysis = df_analysis[df_analysis["ex_val"].notnull()]
+    df_analysis = df_analysis[df_analysis["time_to_ret"] > 0]
+    df_analysis = df_analysis[df_analysis["time_to_ret"] < 48]
+    print(f"{len(df_analysis)} observations in SOEP-IS policy uncertainty survey after filtering people with missing policy uncertainty # questions and people born before 1947 or after 2000.")
+    return df_analysis
+    

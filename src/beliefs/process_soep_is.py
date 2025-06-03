@@ -29,7 +29,7 @@ def load_and_filter_soep_is(paths):
     return df
 
 def add_covariates(df, paths, filter_missings=False):
-    """ Add sex, age, education, and health variables to the dataframe. Df must have pid and syear columns.
+    """ Add sex, age, education, health, and fweight variables to the dataframe. Df must have pid and syear columns.
 
     raw data to be added
       - sex: sex (ppath)
@@ -42,16 +42,20 @@ def add_covariates(df, paths, filter_missings=False):
       - health:
          - soep-core: m11126 (pequiv), m11124 (pequiv)
          - soep-is: ple0008 (pl), ple0040 (pl), NOTE: different coding!]
+      - fweight:
+        - soep is: phrf (ppathl)
     """
 
     # load data
     soep_path = paths["soep_is"]
     print("Extracting covariates from SOEP data. This may take a while.")
     ppath = pd.read_stata(f"{soep_path}/ppath.dta", convert_categoricals=False, columns=["pid", "sex", "gebjahr", "gebmonat"])
+    ppathl = pd.read_stata(f"{soep_path}/ppathl.dta", convert_categoricals=False, columns=["pid", "syear", "phrf"])
     pl = pd.read_stata(f"{soep_path}/pl.dta", convert_categoricals=False, columns=["pid", "syear", "imonth", "iday", "ple0008", "ple0040"])
     pgen = pd.read_stata(f"{soep_path}/pgen.dta", convert_categoricals=False, columns=["pid", "syear", "pgsbil"])
     # merge data
     df = pd.merge(df, ppath, how="left", on=["pid"])
+    df = pd.merge(df, ppathl, how="left", on=["pid", "syear"])
     df = pd.merge(df, pl, how="left", on=["pid", "syear"])
     df = pd.merge(df, pgen, how="left", on=["pid", "syear"])
     # modify variables
@@ -62,22 +66,22 @@ def add_covariates(df, paths, filter_missings=False):
     df = create_education_type(df, filter_missings=filter_missings)
     df = create_health_var(df, filter_missings=filter_missings)
     # cleanup
-    raw_columns = ["gebjahr", "gebmonat", "pmonin", "ptagin", "pgpsbil", "m11126", "m11124"]
+    raw_columns = ["pmonin", "ptagin", "pgpsbil", "m11126", "m11124"]
     df = df.drop(columns=raw_columns)
     return df
 
 def rename_and_reformat_is_vars(df):
-    """ Rename and reformat the variables in the dataframe to match the SOEP-Core data. """
-   # rename variables
+    """ Rename and reformat the variables in the dataframe to match the SOEP-Core data or to make them easier to work with."""
     rename_dict = {
         "imonth": "pmonin",
         "iday": "ptagin",
         "ple0008": "m11126",
         "ple0040": "m11124",
         "pgsbil" : "pgpsbil",
+        "phrf": "fweight",
     }
     df = df.rename(columns=rename_dict)
     # recode variables
     # ple0040 (disabled) has 1:yes, 2:no, m11124 (disabled) has 0:no, 1:yes
     df["m11124"] = df["m11124"].replace({2: 0, 1: 1})
-    return df
+    return df    

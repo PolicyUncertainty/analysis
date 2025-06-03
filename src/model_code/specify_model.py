@@ -158,6 +158,7 @@ def specify_and_solve_model(
     load_model,
     load_solution,
     sim_specs=None,
+    debug_info=None,
 ):
     """Specify and solve model.
 
@@ -172,6 +173,7 @@ def specify_and_solve_model(
         custom_resolution_age=custom_resolution_age,
         load_model=load_model,
         sim_specs=sim_specs,
+        debug_info=debug_info,
     )
 
     # check if folder of model objects exits:

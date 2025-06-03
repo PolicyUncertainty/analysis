@@ -23,6 +23,7 @@ def observed_model_fit(
         load_model=load_sol_model,
         load_solution=load_solution,
         sim_specs=None,
+        debug_info="all",
     )
 
     data_decision, states_dict = load_and_prep_data_for_model_fit(

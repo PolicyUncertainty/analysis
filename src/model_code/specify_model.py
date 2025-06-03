@@ -105,7 +105,7 @@ def specify_model(
         alternative_sim_specifications = {
             "model_config": model_config_sim,
             "stochastic_states_transitions": stochastic_states_transitions_sim,
-            "state_space_functions": create_state_space_functions(),
+            "s tate_space_functions": create_state_space_functions(),
             "budget_constraint": budget_constraint,
             "shock_functions": shock_function_dict(),
         }

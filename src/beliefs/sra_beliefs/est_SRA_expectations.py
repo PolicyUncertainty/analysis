@@ -35,13 +35,11 @@ def estimate_truncated_normal(df, paths, options, load_data=False):
     df = estimate_truncated_normal_parameters(df, function_spec)
 
     # exclude people born before 1947 and people born after 2000, as well as people with missing values in the policy uncertainty questions
-    df_analysis = filter_df(df)
+    # df_analysis = filter_df(df)
 
-    #df_analysis["sigma_sq"] = df_analysis["var"] / df_analysis["time_to_ret"]
-    df_analysis["current_SRA"] = create_SRA_by_gebjahr(df_analysis["gebjahr"])
-    #df_analysis.rename(columns={"SRA": "current_SRA"}, inplace=True)
-    df_analysis.to_pickle(out_file_path)
-    return df_analysis
+    df["current_SRA"] = create_SRA_by_gebjahr(df["gebjahr"])
+    # df_analysis.to_pickle(out_file_path)
+    return df
 
 
 def estimate_truncated_normal_parameters(df, function_spec):
@@ -58,7 +56,6 @@ def estimate_truncated_normal_parameters(df, function_spec):
     # 1&2 special case: if expected ret age is 67 or 68 with 100% certainty, set expected value to 67 or 68, respectively, and variance to 0.
     # 3 special case: if expected ret age is 69 with 100% certainty, set expected value to mean of last interval and variance to variance of uniform distribution in last interval
     # 4 all other cases: use scipy.optimize.root to find the parameters that minimize the squared differences between observed and predicted CDF values
-
     for index, row in df.iterrows():
         if not np.isnan(row["pol_unc_stat_ret_age_67"]):
             if row["pol_unc_stat_ret_age_67"] == 100:

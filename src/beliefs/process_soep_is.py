@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.health import create_health_var
 from process_data.soep_vars.age import calc_age_at_interview
@@ -7,24 +8,16 @@ from process_data.aux_and_plots.filter_data import recode_sex
 
 def load_and_filter_soep_is(paths):
     " Load SOEP-IS data, keep only pension survey questions."
-    # TODO: when SOEP-IS 23 is out, the name of the dataset and variables have to be changed.
     # paths
-    soep_is_path = paths["soep_is"] + "\dataset_main_SOEP_IS.dta"
+    soep_is_path = paths["soep_is"] + "\inno.dta"
     out_file_path = paths["intermediate_data"] + "beliefs\soep_is_pensions.pkl"
-    # relevant columns
-    id_columns = ["pid", "syear", "hid", "cid", "intid"]
-    pension_survey_columns = ['exp_stop_work',
-       'exp_stop_work_rob_plus1', 'exp_stop_work_rob_minus1',
-       'exp_pens_uptake', 'exp_pens_uptake_rob_plus1',
-       'exp_pens_uptake_rob_minus1', 'pol_unc_stat_ret_age_67',
-       'pol_unc_stat_ret_age_68', 'pol_unc_stat_ret_age_69',
-       'belief_pens_deduct', 'belief_pens_deduct_rob_times1_5',
-       'belief_pens_deduct_rob_times0_5', 'scen_age_66_stop_work',
-       'scen_age_68_stop_work', 'scen_age_69_stop_work']
+    # relevant columns (ids and pension survey questions, i.e. i107_1 to i107_15)
+    id_columns = ["pid", "syear", "hid", "cid", "intid", "im_107"]
+    pension_survey_columns = [f"i107_{i}" for i in range(1, 16)]
     # load and filter data.
-    # TODO: when soep_is 23 is out, we need to filter the missing obs (negative values) for the pension beliefs questions.
-    df = pd.read_stata(soep_is_path)[id_columns + pension_survey_columns].astype(float)
-    df = df.dropna(subset=pension_survey_columns, how='all')
+    df = pd.read_stata(soep_is_path, convert_categoricals=False)[id_columns + pension_survey_columns].astype(float)
+    df = rename_survey_columns(df)
+    df = filter_df(df)
     print(f"{len(df)} observations in SOEP-IS pension beliefs survey.")
     return df
 
@@ -48,7 +41,6 @@ def add_covariates(df, paths, filter_missings=False):
 
     # load data
     soep_path = paths["soep_is"]
-    print("Extracting covariates from SOEP data. This may take a while.")
     ppath = pd.read_stata(f"{soep_path}/ppath.dta", convert_categoricals=False, columns=["pid", "sex", "gebjahr", "gebmonat"])
     ppathl = pd.read_stata(f"{soep_path}/ppathl.dta", convert_categoricals=False, columns=["pid", "syear", "phrf"])
     pl = pd.read_stata(f"{soep_path}/pl.dta", convert_categoricals=False, columns=["pid", "syear", "imonth", "iday", "ple0008", "ple0040"])
@@ -60,7 +52,7 @@ def add_covariates(df, paths, filter_missings=False):
     df = pd.merge(df, pgen, how="left", on=["pid", "syear"])
     # modify variables
     df.set_index(["pid", "syear"], inplace=True)
-    df = rename_and_reformat_is_vars(df)
+    df = rename_and_reformat_is_covariates(df)
     df = recode_sex(df)
     df = calc_age_at_interview(df, drop_missing_month=filter_missings)
     df = create_education_type(df, filter_missings=filter_missings)
@@ -70,7 +62,38 @@ def add_covariates(df, paths, filter_missings=False):
     df = df.drop(columns=raw_columns)
     return df
 
-def rename_and_reformat_is_vars(df):
+def rename_survey_columns(df):
+    """ Rename the columns of the pension belief survey."""
+    rename_dict = {
+        "i107_1": "exp_stop_work",
+        "i107_2": "exp_stop_work_rob_plus1",
+        "i107_3": "exp_stop_work_rob_minus1",
+        "i107_4": "exp_pens_uptake",
+        "i107_5": "exp_pens_uptake_rob_plus1",
+        "i107_6": "exp_pens_uptake_rob_minus1",
+        "i107_7": "pol_unc_stat_ret_age_67",
+        "i107_8": "pol_unc_stat_ret_age_68",
+        "i107_9": "pol_unc_stat_ret_age_69",
+        "i107_10": "belief_pens_deduct",
+        "i107_11": "belief_pens_deduct_rob_times1_5",
+        "i107_12": "belief_pens_deduct_rob_times0_5",
+        "i107_13": "scen_age_66_stop_work",
+        "i107_14": "scen_age_68_stop_work",
+        "i107_15": "scen_age_69_stop_work",
+    }
+    df = df.rename(columns=rename_dict)
+    return df
+
+def filter_df(df):
+    """ Filter pension beliefs dataframe to include only relevant observations. Relevant observations are those for which pension questions (e.g. exp_stop_work) are > -2 (= does not apply). These are dropped.
+    
+    All observations with a value of -1 (= no answer) are set to NaN."""
+
+    df = df[df["exp_stop_work"] > -2]
+    df = df.replace(-1, np.nan)  
+    return df
+
+def rename_and_reformat_is_covariates(df):
     """ Rename and reformat the variables in the dataframe to match the SOEP-Core data or to make them easier to work with."""
     rename_dict = {
         "imonth": "pmonin",
@@ -78,7 +101,7 @@ def rename_and_reformat_is_vars(df):
         "ple0008": "m11126",
         "ple0040": "m11124",
         "pgsbil" : "pgpsbil",
-        "phrf": "fweight",
+        "phrf": "fweights",
     }
     df = df.rename(columns=rename_dict)
     # recode variables

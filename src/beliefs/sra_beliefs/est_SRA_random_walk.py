@@ -15,14 +15,17 @@ def est_expected_SRA(paths, df=None):
     x_var = "time_to_ret"
     weights = "fweights"
 
-    # truncate data: remove birth years outside before 1964
-    df = df[df["gebjahr"] >= 1964]
+    # truncate data: remove birth years before 1964
+    df = filter_df(df)
 
     # calculate current policy state for each observation
     df["exp_SRA_increase"] = df["ex_val"] - df["current_SRA"]
 
     y_var = "exp_SRA_increase"
     # y_var = "ex_val"
+
+    # save stata data for regression
+    df.to_stata(paths["intermediate_data"] + "sra_regression_data.dta", write_index=False)
 
     model = sm.WLS(
         exog=df[x_var].values,
@@ -46,7 +49,7 @@ def estimate_expected_SRA_variance(paths, df=None):
         df = pd.read_pickle(paths["intermediate_data"] + "policy_expect_data.pkl")
         
     # truncate data: remove birth years outside before 1964
-    df = df[df["gebjahr"] >= 1964]
+    df = filter_df(df)
 
     # divide estimated variances by time to retirement
     sigma_sq_hat = df["var"] / df["time_to_ret"]
@@ -69,3 +72,10 @@ def estimate_expected_SRA_variance(paths, df=None):
 
     np.savetxt(paths["est_results"] + "var_params.txt", sigma_sq_hat, delimiter=",")
     return sigma_sq_hat
+
+def filter_df(df):
+    """Drop observations of people born before 1964 and drop missing subjective expectation parameters."""
+    df = df[df["gebjahr"] >= 1964]
+    df = df.dropna(subset=["ex_val", "var", "fweights", "time_to_ret"])
+    print(f"Filtered data: {len(df)} observations remaining after dropping birth years before 1964, and people with missing values in subjective expectation parameters.")
+    return df

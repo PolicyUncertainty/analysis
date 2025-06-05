@@ -16,5 +16,6 @@ module add CUDA/12.0.0
 
 source ~/virts/bin/activate
 
-python run_counterfactual_1.py
-python run_counterfactual_2.py
+#python run_counterfactual_1.py
+#python run_counterfactual_2.py
+python run_model_fit_sim.py

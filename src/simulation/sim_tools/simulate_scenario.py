@@ -90,7 +90,7 @@ def simulate_scenario(
     #     only_informed=only_informed,
     # )
 
-    initial_states, initial_wealth = generate_start_states_from_obs(
+    initial_states = generate_start_states_from_obs(
         path_dict=path_dict,
         params=model_solved.params,
         model_solved=model_solved,
@@ -100,7 +100,7 @@ def simulate_scenario(
     model_specs = model_solved.model_specs
 
     df = model_solved.simulate(
-        initial_states=initial_states,
+        states_initial=initial_states,
         seed=model_specs["seed"],
     )
 

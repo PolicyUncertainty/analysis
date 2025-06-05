@@ -19,7 +19,6 @@ def plot_quantiles(
     load_df=True,
     load_solution=True,
     load_sol_model=True,
-    load_sim_model=True,
 ):
     # Simulate baseline with subjective belief
     data_sim, model_solved = solve_and_simulate_scenario(
@@ -34,7 +33,6 @@ def plot_quantiles(
         df_exists=load_df,
         solution_exists=load_solution,
         sol_model_exists=load_sol_model,
-        sim_model_exists=load_sim_model,
     ).reset_index()
 
     data_decision, _ = load_and_prep_data(
@@ -101,7 +99,6 @@ def plot_choice_shares_single(
     load_df=True,
     load_solution=True,
     load_sol_model=True,
-    load_sim_model=True,
 ):
     # alpha_belief = float(np.loadtxt(
     # path_dict["est_results"] + "exp_val_params.txt"))
@@ -119,7 +116,6 @@ def plot_choice_shares_single(
         df_exists=load_df,
         solution_exists=load_solution,
         sol_model_exists=load_sol_model,
-        sim_model_exists=load_sim_model,
     ).reset_index()
 
     data_decision = pd.read_csv(path_dict["struct_est_sample"])
@@ -187,7 +183,6 @@ def plot_states(
     load_df=True,
     load_solution=True,
     load_sol_model=True,
-    load_sim_model=True,
 ):
     # Simulate baseline with subjective belief
     data_sim, model_solved = solve_and_simulate_scenario(
@@ -202,7 +197,6 @@ def plot_states(
         df_exists=load_df,
         solution_exists=load_solution,
         sol_model_exists=load_sol_model,
-        sim_model_exists=load_sim_model,
     ).reset_index()
 
     data_decision = pd.read_csv(path_dict["struct_est_sample"])
@@ -214,7 +208,7 @@ def plot_states(
     data_sim["age"] = data_sim["period"] + specs["start_age"]
 
     model_structure = model_solved.model_structure
-    discrete_state_names = model["model_structure"]["discrete_states_names"]
+    discrete_state_names = model_structure["discrete_states_names"]
 
     data_sim = data_sim[data_sim["health"] != 3]
 

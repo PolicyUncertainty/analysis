@@ -36,10 +36,6 @@ def solve_and_simulate_scenario(
     )
     df_file = model_out_folder["simulation"] + df_name
 
-    if df_exists:
-        data_sim = pd.read_pickle(df_file)
-        return data_sim
-
     # Create model and assign simulation specs.
     sim_specs = {
         "announcement_age": announcement_age,

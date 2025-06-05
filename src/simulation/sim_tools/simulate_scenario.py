@@ -59,7 +59,7 @@ def solve_and_simulate_scenario(
 
     if df_exists:
         data_sim = pd.read_pickle(df_file)
-        return data_sim
+        return data_sim, model_solved
     else:
         data_sim = simulate_scenario(
             path_dict=path_dict,
@@ -68,10 +68,10 @@ def solve_and_simulate_scenario(
             only_informed=only_informed,
         )
         if df_exists is None:
-            return data_sim
+            return data_sim, model_solved
         else:
             data_sim.to_pickle(df_file)
-            return data_sim
+            return data_sim, model_solved
 
 
 def simulate_scenario(

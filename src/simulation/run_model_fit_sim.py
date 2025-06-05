@@ -18,14 +18,13 @@ specs = generate_derived_and_data_derived_specs(path_dict)
 
 model_name = "wo_jo"
 load_df = False
-load_solution = False
+load_solution = True
 load_sol_model = True
 
 
 params = pickle.load(
     open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
 )
-del params["interest_rate"]
 
 #
 # which_plots = input(

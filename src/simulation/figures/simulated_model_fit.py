@@ -104,7 +104,7 @@ def plot_choice_shares_single(
     # path_dict["est_results"] + "exp_val_params.txt"))
 
     # Simulate baseline with subjective belief
-    data_sim = solve_and_simulate_scenario(
+    data_sim, _ = solve_and_simulate_scenario(
         announcement_age=None,
         path_dict=path_dict,
         params=params,

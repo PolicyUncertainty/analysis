@@ -382,9 +382,9 @@ def test_bequest(consumption, mu, sex, bequest_scale):
     if sex == 0:
         mu += 1
     if mu == 1:
-        bequest = bequest_scale * np.log(1 + consumption)
+        bequest = bequest_scale * np.log(consumption)
     else:
-        bequest = bequest_scale * ((((1 + consumption) ** (1 - mu)) - 1) / (1 - mu))
+        bequest = bequest_scale * ((((consumption) ** (1 - mu)) - 1) / (1 - mu))
     np.testing.assert_almost_equal(
         utility_final_consume_all(consumption, sex, params), bequest
     )

@@ -98,9 +98,9 @@ def budget_constraint(
         1 + model_specs["interest_rate"]
     ) * assets_scaled + total_income
 
-    death = health == model_specs["death_health_var"]
-    assets_begin_of_period = jax.lax.select(
-        death, on_true=assets_scaled, on_false=assets_begin_of_period
-    )
+    # death = health == model_specs["death_health_var"]
+    # assets_begin_of_period = jax.lax.select(
+    #     death, on_true=assets_scaled, on_false=assets_begin_of_period
+    # )
 
     return assets_begin_of_period / model_specs["wealth_unit"]

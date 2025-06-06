@@ -13,9 +13,6 @@ from dcegm.asset_correction import adjust_observed_assets
 from estimation.struct_estimation.scripts.std_errors import (
     calc_and_save_standard_errors,
 )
-from estimation.struct_estimation.start_params_and_bounds.set_start_params import (
-    load_and_set_start_params,
-)
 from model_code.specify_model import specify_model
 from model_code.unobserved_state_weighting import create_unobserved_state_specs
 from process_data.structural_sample_scripts.create_structural_est_sample import (
@@ -29,13 +26,12 @@ def estimate_model(
     params_to_estimate_names,
     file_append,
     load_model,
+    start_params_all,
     use_weights=True,
     last_estimate=None,
     save_results=True,
 ):
     print_function = generate_print_func(params_to_estimate_names)
-    # Load start params and bounds
-    start_params_all = load_and_set_start_params(path_dict)
 
     # # Assign start params from before
     if last_estimate is not None:

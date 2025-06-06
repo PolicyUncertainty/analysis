@@ -33,7 +33,9 @@ def plot_quantiles(
         df_exists=load_df,
         solution_exists=load_solution,
         sol_model_exists=load_sol_model,
-    ).reset_index()
+    )
+
+    data_sim = data_sim.reset_index()
 
     data_decision, _ = load_and_prep_data(
         path_dict, params, model_solved, drop_retirees=False
@@ -116,8 +118,9 @@ def plot_choice_shares_single(
         df_exists=load_df,
         solution_exists=load_solution,
         sol_model_exists=load_sol_model,
-    ).reset_index()
+    )
 
+    data_sim = data_sim.reset_index()
     data_decision = pd.read_csv(path_dict["struct_est_sample"])
 
     data_decision["age"] = data_decision["period"] + specs["start_age"]
@@ -197,7 +200,9 @@ def plot_states(
         df_exists=load_df,
         solution_exists=load_solution,
         sol_model_exists=load_sol_model,
-    ).reset_index()
+    )
+
+    data_sim = data_sim.reset_index()
 
     data_decision = pd.read_csv(path_dict["struct_est_sample"])
 

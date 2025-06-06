@@ -18,7 +18,7 @@ def calc_and_save_standard_errors(
     file_append,
 ):
     # Estimate standard errors
-    contributions_base, _ = ll_func(final_params_all)
+    contributions_base = ll_func(final_params_all)
 
     unravel_func = ravel_pytree(final_params_est)[1]
     n_obs = weights.sum()
@@ -30,7 +30,7 @@ def calc_and_save_standard_errors(
         print(param_id)
         params_plus = final_params_all.copy()
         params_plus[param_name] += eps
-        contributions_plus, _ = ll_func(params_plus)
+        contributions_plus = ll_func(params_plus)
 
         scores_param = (contributions_plus - contributions_base) / eps
         scores[:, param_id] = scores_param

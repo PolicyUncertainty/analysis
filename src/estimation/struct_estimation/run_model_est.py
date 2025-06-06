@@ -4,8 +4,6 @@ import pickle as pkl
 from set_paths import create_path_dict
 
 paths_dict = create_path_dict(define_user=False)
-
-from estimation.struct_estimation.map_params_to_current import gender_separate_models
 from estimation.struct_estimation.scripts.estimate_setup import estimate_model
 from estimation.struct_estimation.start_params_and_bounds.set_start_params import (
     load_and_set_start_params,
@@ -61,7 +59,7 @@ params_to_estimate_names = [
 ]
 model_name = "01_lam"
 LOAD_LAST_ESTIMATE = False
-LOAD_SOL_MODEL = False
+LOAD_SOL_MODEL = True
 SAVE_RESULTS = True
 USE_WEIGHTS = False
 
@@ -72,10 +70,15 @@ if LOAD_LAST_ESTIMATE:
 else:
     last_estimate = None
 
+
+# Load start params
+start_params_all = load_and_set_start_params(paths_dict)
+
 estimation_results = estimate_model(
     paths_dict,
     params_to_estimate_names=params_to_estimate_names,
     file_append=model_name,
+    start_params_all=start_params_all,
     load_model=LOAD_SOL_MODEL,
     use_weights=USE_WEIGHTS,
     last_estimate=last_estimate,

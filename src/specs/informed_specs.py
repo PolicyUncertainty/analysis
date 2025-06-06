@@ -41,8 +41,6 @@ def add_informed_process_specs(specs, path_dict):
             predicted_ages, edu_label
         ]
 
-    informed_shares_in_ages[:, :] = 1.0
-
     specs["uninformed_ERP"] = jnp.asarray(uninformed_penalties)
     specs["informed_hazard_rate"] = jnp.asarray(informed_hazard_rate)
     specs["informed_shares_in_ages"] = jnp.asarray(informed_shares_in_ages)

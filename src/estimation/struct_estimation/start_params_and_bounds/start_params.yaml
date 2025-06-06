@@ -39,5 +39,5 @@ bequest_scale: 2.4
 # Job separation params are set internally driven by data
 
 # Taste shock scale
-taste_shock_scale_men: 0.29
+taste_shock_scale_men: 0.1
 taste_shock_scale_women: 0.29

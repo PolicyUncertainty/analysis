@@ -91,12 +91,10 @@ def test_utility_func(
         "mu_men": mu + 1,
         "mu_women": mu,
         # Men
-        "disutil_ft_work_high_good_men": disutil_work + 1,
-        "disutil_ft_work_high_bad_men": disutil_work,
-        "disutil_ft_work_low_good_men": disutil_work + 1,
-        "disutil_ft_work_low_bad_men": disutil_work,
-        "disutil_unemployed_high_men": disutil_unemployed,
-        "disutil_unemployed_low_men": disutil_unemployed,
+        "disutil_ft_work_good_men": disutil_work + 1,
+        "disutil_ft_work_bad_men": disutil_work,
+        "disutil_unemployed_bad_men": disutil_unemployed,
+        "disutil_unemployed_good_men": disutil_unemployed,
         # Women
         "disutil_ft_work_high_good_women": disutil_work + 1,
         "disutil_ft_work_high_bad_women": disutil_work,
@@ -129,9 +127,18 @@ def test_utility_func(
     sex_str = "men" if sex == 0 else "women"
     edu_str = "low" if education == 0 else "high"
 
-    disutil_unemployment = np.exp(-params[f"disutil_unemployed_{edu_str}_{sex_str}"])
+    if sex == 0:
+        disutil_unemployment = np.exp(
+            -params[f"disutil_unemployed_{health_str}_{sex_str}"]
+        )
+        exp_factor_ft_work = params[f"disutil_ft_work_{health_str}_{sex_str}"]
 
-    exp_factor_ft_work = params[f"disutil_ft_work_{edu_str}_{health_str}_{sex_str}"]
+    else:
+        disutil_unemployment = np.exp(
+            -params[f"disutil_unemployed_{edu_str}_{sex_str}"]
+        )
+        exp_factor_ft_work = params[f"disutil_ft_work_{edu_str}_{health_str}_{sex_str}"]
+
     if sex == 1:
         has_partner_int = int(partner_state > 0)
         nb_children = model_specs["children_by_state"][
@@ -234,12 +241,10 @@ def test_marginal_utility(
         "mu_men": mu + 1,
         "mu_women": mu,
         # Men
-        "disutil_ft_work_high_good_men": disutil_work + 1,
-        "disutil_ft_work_high_bad_men": disutil_work,
-        "disutil_ft_work_low_good_men": disutil_work + 1,
-        "disutil_ft_work_low_bad_men": disutil_work,
-        "disutil_unemployed_high_men": disutil_unemployed,
-        "disutil_unemployed_low_men": disutil_unemployed,
+        "disutil_ft_work_good_men": disutil_work + 1,
+        "disutil_ft_work_bad_men": disutil_work,
+        "disutil_unemployed_bad_men": disutil_unemployed,
+        "disutil_unemployed_good_men": disutil_unemployed,
         # Women
         "disutil_ft_work_high_good_women": disutil_work + 1,
         "disutil_ft_work_high_bad_women": disutil_work,
@@ -316,12 +321,10 @@ def test_inv_marginal_utility(
         "mu_men": mu + 1,
         "mu_women": mu,
         # Men
-        "disutil_ft_work_high_good_men": disutil_work + 1,
-        "disutil_ft_work_high_bad_men": disutil_work,
-        "disutil_ft_work_low_good_men": disutil_work + 1,
-        "disutil_ft_work_low_bad_men": disutil_work,
-        "disutil_unemployed_high_men": disutil_unemployed,
-        "disutil_unemployed_low_men": disutil_unemployed,
+        "disutil_ft_work_good_men": disutil_work + 1,
+        "disutil_ft_work_bad_men": disutil_work,
+        "disutil_unemployed_bad_men": disutil_unemployed,
+        "disutil_unemployed_good_men": disutil_unemployed,
         # Women
         "disutil_ft_work_high_good_women": disutil_work + 1,
         "disutil_ft_work_high_bad_women": disutil_work,

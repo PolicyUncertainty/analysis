@@ -80,7 +80,7 @@ wage_trunc_low_perc: 0.01  # lower truncation of wage distribution
 wage_trunc_high_perc: 0.99  # upper truncation of wage distribution
 ###############################################
 # Wealth preparation
-wealth_unit: 1_000  # unit of wealth in data
+wealth_unit: 10_000  # unit of wealth in data
 ###############################################
 # Belief process estimation
 # Limits for truncation of the normal distribution

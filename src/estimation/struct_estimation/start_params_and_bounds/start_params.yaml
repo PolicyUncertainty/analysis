@@ -4,10 +4,8 @@ mu_men: 1.5
 mu_women: 1.5
 
 # Full time work dis-utility men
-disutil_ft_work_high_good_men: 1.0
-disutil_ft_work_high_bad_men: 1.0
-disutil_ft_work_low_good_men: 1.0
-disutil_ft_work_low_bad_men: 1.0
+disutil_ft_work_good_men: 1.0
+disutil_ft_work_bad_men: 1.0
 
 # Full time work dis-utility women
 disutil_ft_work_high_good_women: 1.0
@@ -22,8 +20,8 @@ disutil_pt_work_low_good_women: 1.0
 disutil_pt_work_low_bad_women: 1.0
 
 # Unemployment dis-utility men
-disutil_unemployed_high_men: 0.5
-disutil_unemployed_low_men: 0.5
+disutil_unemployed_good_men: 0.5
+disutil_unemployed_bad_men: 0.5
 
 # Unemployment dis-utility women
 disutil_unemployed_high_women: 0.5

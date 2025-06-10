@@ -3,6 +3,9 @@ import numpy as np
 import pandas as pd
 
 from export_results.figures.color_map import JET_COLOR_MAP
+from model_code.pension_system.experience_stock import (
+    calc_experience_years_for_pension_adjustment,
+)
 from model_code.wealth_and_budget.budget_equation import budget_constraint
 from model_code.wealth_and_budget.pension_payments import (
     calc_gross_pension_income,
@@ -83,9 +86,20 @@ def plot_incomes(path_dict):
                     model_specs=specs,
                 )
 
+                exp_stock_pension = calc_experience_years_for_pension_adjustment(
+                    period=37,
+                    sex=sex_var,
+                    experience_years=exp,
+                    education=edu_var,
+                    policy_state=8,  # Make 67 as well
+                    informed=1,
+                    health=0,
+                    model_specs=specs,
+                )
+
                 gross_pensions[i] = np.maximum(
                     calc_gross_pension_income(
-                        experience_years=exp,
+                        experience_years=exp_stock_pension,
                         education=edu_var,
                         sex=sex_var,
                         model_specs=specs,
@@ -95,7 +109,7 @@ def plot_incomes(path_dict):
 
                 net_pensions[i] = np.maximum(
                     calc_pensions_after_ssc(
-                        experience_years=exp,
+                        experience_years=exp_stock_pension,
                         education=edu_var,
                         sex=sex_var,
                         model_specs=specs,

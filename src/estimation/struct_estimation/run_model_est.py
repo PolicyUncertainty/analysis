@@ -22,9 +22,12 @@ params_to_estimate_names = [
     # Taste shock men - 1 parameter
     # "taste_shock_scale_men",
     # # Men job finding - 3 parameters
-    # "job_finding_logit_const_men",
-    # "job_finding_logit_age_men",
-    # "job_finding_logit_high_educ_men",
+    "job_finding_logit_const_men",
+    "job_finding_logit_high_educ_men",
+    "job_finding_logit_good_health_men",
+    "job_finding_logit_above_50_men",
+    "job_finding_logit_above_55_men",
+    "job_finding_logit_above_60_men",
     # Disability probability men - 3 parameters
     # "disability_logit_const_men",
     # "disability_logit_age_men",

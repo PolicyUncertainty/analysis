@@ -15,10 +15,10 @@ from model_code.stochastic_processes.job_offers import job_offer_process_transit
 
 
 def generate_start_states_from_obs(
-    path_dict, params, model_solved, inital_SRA, only_informed=False
+    path_dict, params, model_class, inital_SRA, only_informed=False
 ):
-    model_specs = model_solved.model_specs
-    model_structure = model_solved.model_structure
+    model_specs = model_class.model_specs
+    model_structure = model_class.model_structure
 
     observed_data = pd.read_csv(path_dict["struct_est_sample"])
 
@@ -44,7 +44,7 @@ def generate_start_states_from_obs(
         adjust_observed_assets(
             observed_states_dict=states_dict,
             params=params,
-            model_class=model_solved,
+            model_class=model_class,
         )
     )
     n_individuals = periods.shape[0]

@@ -89,7 +89,7 @@ def simulate_scenario(
     initial_states = generate_start_states_from_obs(
         path_dict=path_dict,
         params=model_solved.params,
-        model_solved=model_solved,
+        model_class=model_solved,
         inital_SRA=initial_SRA,
         only_informed=only_informed,
     )

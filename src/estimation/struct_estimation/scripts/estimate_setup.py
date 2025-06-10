@@ -12,6 +12,7 @@ from dcegm.asset_correction import adjust_observed_assets
 
 from estimation.struct_estimation.scripts.std_errors import (
     calc_and_save_standard_errors,
+    calc_scores,
 )
 from model_code.specify_model import specify_model
 from model_code.unobserved_state_weighting import create_unobserved_state_specs
@@ -180,6 +181,7 @@ class est_class_from_paths:
                     "wb",
                 ),
             )
+
         end = time.time()
         self.iter_count += 1
         self.print_function(params)
@@ -187,6 +189,17 @@ class est_class_from_paths:
         print("Likelihood evaluation took, ", end - start)
 
         return ll_value
+
+    # if supply_jacobian:
+    #     def jacobian_func(params):
+    #         """Calculate the jacobian of the likelihood function."""
+    #
+    #         scores = calc_scores(
+    #                     ll_func=self.ll_func,
+    #                     est_params=params,
+    #                     params_to_estimate_names=params.keys(),
+    #                 )
+    #         return self.weights @ scores / self.weight_sum
 
 
 def load_and_prep_data(path_dict, start_params, model_class, drop_retirees=True):

@@ -12,22 +12,20 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
 params_to_estimate_names = [
     # "mu_men",
     # Men Full-time - 4 parameters
-    "disutil_ft_work_high_good_men",
-    "disutil_ft_work_high_bad_men",
-    "disutil_ft_work_low_good_men",
-    "disutil_ft_work_low_bad_men",
+    "disutil_ft_work_good_men",
+    "disutil_ft_work_bad_men",
     # Men unemployment - 2 parameters
-    "disutil_unemployed_high_men",
-    "disutil_unemployed_low_men",
+    "disutil_unemployed_good_men",
+    "disutil_unemployed_bad_men",
     # Taste shock men - 1 parameter
     # "taste_shock_scale_men",
     # # Men job finding - 3 parameters
-    "job_finding_logit_const_men",
-    "job_finding_logit_high_educ_men",
-    "job_finding_logit_good_health_men",
-    "job_finding_logit_above_50_men",
-    "job_finding_logit_above_55_men",
-    "job_finding_logit_above_60_men",
+    # "job_finding_logit_const_men",
+    # "job_finding_logit_high_educ_men",
+    # "job_finding_logit_good_health_men",
+    # "job_finding_logit_above_50_men",
+    # "job_finding_logit_above_55_men",
+    # "job_finding_logit_above_60_men",
     # Disability probability men - 3 parameters
     # "disability_logit_const_men",
     # "disability_logit_age_men",

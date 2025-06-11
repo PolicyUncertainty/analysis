@@ -1,5 +1,6 @@
 """Functions for pre and post estimation setup."""
 
+import pickle
 from functools import partial
 from typing import Any, Callable, Dict, Optional
 
@@ -26,6 +27,7 @@ def estimate_model(
     path_dict,
     params_to_estimate_names,
     start_params_all: Dict[str, Any],
+    file_append,
     load_model: bool = False,
     weighting_method: str = "identity",
     last_estimate: Optional[Dict[str, Any]] = None,
@@ -139,6 +141,16 @@ def estimate_model(
     }
 
     result = om.minimize(**minimize_kwargs)
+
+    pickle.dump(
+        result, open(path_dict["struct_results"] + f"em_result_{file_append}.pkl", "wb")
+    )
+    start_params_all.update(result.params)
+
+    pickle.dump(
+        start_params_all,
+        open(path_dict["struct_results"] + f"est_params_{file_append}.pkl", "wb"),
+    )
     return result
 
 

@@ -47,7 +47,7 @@ start_params_all = load_and_set_start_params(paths_dict)
 estimation_results = estimate_model(
     paths_dict,
     params_to_estimate_names=params_to_estimate_names,
-    # file_append=model_name,
+    file_append=model_name,
     start_params_all=start_params_all,
     load_model=LOAD_SOL_MODEL,
     # use_weights=USE_WEIGHTS,

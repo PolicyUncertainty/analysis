@@ -113,6 +113,7 @@ def estimate_model(
 
     criterion_func = get_msm_optimization_function(
         simulate_moments=simulate_moments_for_params,
+        print_function=print_function,
         start_params_all=start_params_all,
         empirical_moments=empirical_moments,
         weights=weights,
@@ -147,6 +148,7 @@ def estimate_model(
 def get_msm_optimization_function(
     simulate_moments: callable,
     start_params_all: Dict[str, Any],
+    print_function: Callable,
     empirical_moments: np.ndarray,
     weights: np.ndarray,
 ) -> np.ndarray:
@@ -157,6 +159,7 @@ def get_msm_optimization_function(
         partial(
             msm_criterion,
             simulate_moments=simulate_moments,
+            print_function=print_function,
             start_params_all=start_params_all,
             flat_empirical_moments=empirical_moments,
             chol_weights=chol_weights,
@@ -169,6 +172,7 @@ def get_msm_optimization_function(
 def msm_criterion(
     params: np.ndarray,
     start_params_all: Dict[str, Any],
+    print_function: Callable,
     simulate_moments: callable,
     flat_empirical_moments: np.ndarray,
     chol_weights: np.ndarray,
@@ -183,11 +187,8 @@ def msm_criterion(
     deviations = simulated_flat - flat_empirical_moments
     residuals = deviations @ chol_weights
     # Print squared sum of residuals
-    print(
-        f"Sum of squared residuals: {np.sum(residuals**2):.4f} "
-        f"for params: {params_int}",
-        flush=True,
-    )
+    print(f"Sum of squared residuals: {np.sum(residuals**2):.4f} ")
+    print_function(params)
     return residuals
 
 

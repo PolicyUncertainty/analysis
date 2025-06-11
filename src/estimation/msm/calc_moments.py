@@ -7,15 +7,15 @@ def calc_all_moments(df):
     Calculate all moments from the given DataFrame.
     """
     labor_supply_moments = calc_labor_supply_choice(df)
-    labor_transitions_moments = calc_labor_transitions_by_age_bins(df)
-    median_wealth_moments = calc_median_wealth_by_age(df)
+    # labor_transitions_moments = calc_labor_transitions_by_age_bins(df)
+    # median_wealth_moments = calc_median_wealth_by_age(df)
 
     # Transform to numpy arrays and concatenate
     moments = np.concatenate(
         [
             labor_supply_moments.values,
-            labor_transitions_moments.values,
-            median_wealth_moments.values,
+            # labor_transitions_moments.values,
+            # median_wealth_moments.values,
         ]
     )
     return moments

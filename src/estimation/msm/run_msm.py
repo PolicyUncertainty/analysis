@@ -27,7 +27,7 @@ params_to_estimate_names = [
     # "job_finding_logit_above_55_men",
     # "job_finding_logit_above_60_men",
 ]
-model_name = "health_only"
+model_name = "msm_first"
 LOAD_LAST_ESTIMATE = False
 LOAD_SOL_MODEL = True
 SAVE_RESULTS = True

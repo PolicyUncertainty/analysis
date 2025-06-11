@@ -63,12 +63,18 @@ def estimate_model(
 
     bounds = om.Bounds(lower=lower_bounds, upper=upper_bounds)
 
+    sim_specs = {
+        "announcement_age": None,
+        "SRA_at_start": 67,
+        "SRA_at_retirement": 67,
+    }
+
     model = specify_model(
         path_dict=path_dict,
         subj_unc=True,
         custom_resolution_age=None,
         load_model=load_model,
-        sim_specs=None,
+        sim_specs=sim_specs,
     )
 
     data_decision = load_and_prep_data(

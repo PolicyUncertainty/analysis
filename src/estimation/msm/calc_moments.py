@@ -33,9 +33,9 @@ def calc_labor_supply_choice(df):
         names=["sex", "education", "period", "choice"],
     )
 
-    choice_shares = df.groupby(["sex", "education", "period"])["choice"].value_counts(
-        normalize=True
-    )
+    choice_shares = df.groupby(["sex", "education", "period"], observed=False)[
+        "choice"
+    ].value_counts(normalize=True)
 
     choice_shares_full = choice_shares.reindex(index, fill_value=0.0)
     return choice_shares_full
@@ -53,9 +53,9 @@ def calc_labor_transitions_by_age_bins(df):
     df["working_choice"] = df["choice"].isin([2, 3]).astype(int)
 
     # Group by age bins and calculate transitions
-    transitions = df.groupby(["sex", "education", "period_bin", "has_worked"])[
-        "working_choice"
-    ].value_counts(normalize=True)
+    transitions = df.groupby(
+        ["sex", "education", "period_bin", "has_worked"], observed=False
+    )["working_choice"].value_counts(normalize=True)
 
     index = pd.MultiIndex.from_product(
         [
@@ -76,7 +76,7 @@ def calc_median_wealth_by_age(df):
     """
     Calculate the median wealth by age.
     """
-    median_wealth = df.groupby(["sex", "education", "period"])[
+    median_wealth = df.groupby(["sex", "education", "period"], observed=False)[
         "assets_begin_of_period"
     ].median()
 

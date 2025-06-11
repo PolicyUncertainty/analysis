@@ -100,9 +100,16 @@ def estimate_model(
         only_informed=False,
     )
 
-    simulate_moments_for_params = model.get_solve_and_simulate_func(
+    sim_func = model.get_solve_and_simulate_func(
         states_initial=initial_states, seed=model.model_specs["seed"]
     )
+
+    def simulate_moments_for_params(params_int):
+        df = sim_func(params_int)
+        df = df.reset_index()
+        moments = calc_all_moments(df)
+
+        return moments
 
     criterion_func = get_msm_optimization_function(
         simulate_moments=simulate_moments_for_params,
@@ -175,7 +182,12 @@ def msm_criterion(
 
     deviations = simulated_flat - flat_empirical_moments
     residuals = deviations @ chol_weights
-
+    # Print squared sum of residuals
+    print(
+        f"Sum of squared residuals: {np.sum(residuals**2):.4f} "
+        f"for params: {params_int}",
+        flush=True,
+    )
     return residuals
 
 

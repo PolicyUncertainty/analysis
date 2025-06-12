@@ -194,6 +194,10 @@ def create_structural_est_sample(
     df.reset_index(drop=True, inplace=True)
     df.to_csv(paths["struct_est_sample"])
 
+    # median wealth by age 
+    # df["median_wealth"] = df.groupby("age")["wealth"].transform("median")
+
+    breakpoint()
     return df
 
 

@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.stats import truncnorm
-from beliefs.sra_beliefs.est_SRA_expectations import estimate_truncated_normal_parameters
+from analysis.src.beliefs.sra_beliefs.truncated_normals import estimate_truncated_normal_parameters
 
 
 def plot_truncated_normal_for_response(

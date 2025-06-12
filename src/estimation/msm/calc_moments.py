@@ -2,20 +2,20 @@ import numpy as np
 import pandas as pd
 
 
-def calc_all_moments(df):
+def calc_all_moments(df, moment_specs):
     """
     Calculate all moments from the given DataFrame.
     """
     labor_supply_moments = calc_labor_supply_choice(df)
-    # labor_transitions_moments = calc_labor_transitions_by_age_bins(df)
-    # median_wealth_moments = calc_median_wealth_by_age(df)
+    labor_transitions_moments = calc_labor_transitions_by_age_bins(df)
+    median_wealth_moments = calc_median_wealth_by_age(df)
 
     # Transform to numpy arrays and concatenate
     moments = np.concatenate(
         [
             labor_supply_moments.values,
-            # labor_transitions_moments.values,
-            # median_wealth_moments.values,
+            labor_transitions_moments.values,
+            median_wealth_moments.values / moment_specs["max_median_wealth"],
         ]
     )
     return moments
@@ -92,3 +92,13 @@ def calc_median_wealth_by_age(df):
     median_wealth_full = median_wealth.reindex(full_index, fill_value=np.nan)
 
     return median_wealth_full
+
+
+def get_moment_specs(df):
+
+    median_wealth_moments = calc_median_wealth_by_age(df)
+    max_median_wealth = median_wealth_moments.max()
+    moment_specs = {
+        "max_median_wealth": max_median_wealth,
+    }
+    return moment_specs

@@ -305,9 +305,18 @@ def get_gendered_params(params_to_estimate_names, append):
         param_name for param_name in params_to_estimate_names if append in param_name
     ]
 
+    job_finding_params = [
+        param_name for param_name in gender_params if "job_finding_" in param_name
+    ]
+
+    disability_params = [
+        param_name for param_name in gender_params if "disability" in param_name
+    ]
+
     disutil_params = [
         param_name for param_name in gender_params if "disutil_" in param_name
     ]
+
     disutil_unemployed_params = [
         param_name for param_name in disutil_params if "unemployed" in param_name
     ]
@@ -318,18 +327,13 @@ def get_gendered_params(params_to_estimate_names, append):
     disutil_params_ft_params = [
         param_name for param_name in disutil_params if "ft_work" in param_name
     ]
-    job_finding_params = [
-        param_name for param_name in gender_params if "job_finding_" in param_name
-    ]
-    taste_shock_scale_params = [
-        param_name for param_name in gender_params if "taste_shock" in param_name
-    ]
-
-    disability_params = [
-        param_name for param_name in gender_params if "disability" in param_name
-    ]
     # We do it this weird way for printing order
     params = {}
+    # Assign all gender params. This will be dropped afterwards
+    if len(gender_params) > 0:
+        params["all"] = gender_params
+
+    # Assign group params
     if len(disutil_unemployed_params) > 0:
         params["unemployed"] = disutil_unemployed_params
 
@@ -342,13 +346,15 @@ def get_gendered_params(params_to_estimate_names, append):
     if len(job_finding_params) > 0:
         params["job_finding"] = job_finding_params
 
-    if len(taste_shock_scale_params) > 0:
-        params["taste_shock"] = taste_shock_scale_params
-
     if len(disability_params) > 0:
         params["disability"] = disability_params
 
-    # We drop these directly afterwards
-    if len(gender_params) > 0:
-        params["all"] = gender_params
+    other_params = []
+    for param in gender_params:
+        if param not in job_finding_params + disability_params + disutil_params:
+            other_params += [param]
+
+    if len(other_params) > 0:
+        params["other_params"] = other_params
+
     return params

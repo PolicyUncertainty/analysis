@@ -10,7 +10,7 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
 )
 
 params_to_estimate_names = [
-    # "mu_men",
+    "mu_men",
     # Men Full-time - 4 parameters
     "disutil_ft_work_good_men",
     "disutil_ft_work_bad_men",
@@ -18,7 +18,7 @@ params_to_estimate_names = [
     "disutil_unemployed_good_men",
     "disutil_unemployed_bad_men",
     # Taste shock men - 1 parameter
-    # "taste_shock_scale_men",
+    "taste_shock_scale_men",
     # # Men job finding - 3 parameters
     # "job_finding_logit_const_men",
     # "job_finding_logit_high_educ_men",
@@ -26,6 +26,7 @@ params_to_estimate_names = [
     # "job_finding_logit_above_50_men",
     # "job_finding_logit_above_55_men",
     # "job_finding_logit_above_60_men",
+    "bequest_scale",
 ]
 model_name = "msm_first"
 LOAD_LAST_ESTIMATE = False

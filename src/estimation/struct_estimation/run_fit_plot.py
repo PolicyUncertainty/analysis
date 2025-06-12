@@ -11,9 +11,9 @@ path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict)
 
 # Set run specs
-model_name = "wo_jo"
+model_name = "msm_first"
 load_sol_model = True
-load_solution = True
+load_solution = None
 
 if model_name == "start":
     from estimation.struct_estimation.start_params_and_bounds.set_start_params import (

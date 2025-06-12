@@ -58,7 +58,7 @@ params_to_estimate_names = [
     # "disability_logit_age_women",
     # "disability_logit_high_educ_women",
 ]
-model_name = "health_only"
+model_name = "msm_first"
 LOAD_LAST_ESTIMATE = False
 LOAD_SOL_MODEL = True
 SAVE_RESULTS = True

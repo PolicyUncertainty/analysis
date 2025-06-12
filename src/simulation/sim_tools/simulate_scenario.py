@@ -133,13 +133,11 @@ def simulate_scenario(
             ] = model_specs["av_annual_hours_pt"][sex_var, edu_var]
 
     # Create income vars:
-    # First wealth at the beginning of period as the sum of savings and consumption
-    df["wealth_at_beginning"] = df["savings"] + df["consumption"]
-    # Then total income as the difference between wealth at the beginning of next period and savings
+    # First, total income as the difference between wealth at the beginning of next period and savings
     df["total_income"] = (
-        df.groupby("agent")["wealth_at_beginning"].shift(-1) - df["savings"]
+        df.groupby("agent")["assets_begin_of_period"].shift(-1) - df["savings"]
     )
-    df["income_wo_interest"] = df.groupby("agent")["wealth_at_beginning"].shift(
+    df["income_wo_interest"] = df.groupby("agent")["assets_begin_of_period"].shift(
         -1
     ) - df["savings"] * (1 + model_specs["interest_rate"])
 

@@ -11,7 +11,7 @@ import pandas as pd
 import yaml
 from dcegm.asset_correction import adjust_observed_assets
 
-from estimation.msm.calc_moments import calc_all_moments, get_moment_specs
+from estimation.msm.calc_moments import calc_all_moments
 from estimation.struct_estimation.scripts.estimate_setup import generate_print_func
 from model_code.specify_model import specify_model
 from process_data.structural_sample_scripts.create_structural_est_sample import (
@@ -83,10 +83,8 @@ def estimate_model(
         path_dict=path_dict, start_params=start_params, model_class=model
     )
 
-    moment_specs = get_moment_specs(data_decision)
-
     # Load empirical data
-    empirical_moments = calc_all_moments(data_decision, moment_specs)
+    empirical_moments = calc_all_moments(data_decision)
 
     if weighting_method == "identity":
         weights = np.identity(empirical_moments.shape[0])
@@ -111,7 +109,7 @@ def estimate_model(
     def simulate_moments_for_params(params_int):
         df = sim_func(params_int)
         df = df.reset_index()
-        moments = calc_all_moments(df, moment_specs)
+        moments = calc_all_moments(df)
 
         return moments
 
@@ -198,7 +196,7 @@ def msm_criterion(
 
     simulated_flat = simulate_moments(params_int)
 
-    deviations = simulated_flat - flat_empirical_moments
+    deviations = (simulated_flat - flat_empirical_moments) / flat_empirical_moments
     residuals = deviations @ chol_weights
     # Print squared sum of residuals
     print(f"Sum of squared residuals: {np.sum(residuals**2):.4f} ")

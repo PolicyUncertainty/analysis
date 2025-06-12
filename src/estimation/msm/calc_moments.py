@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 
-def calc_all_moments(df, moment_specs):
+def calc_all_moments(df):
     """
     Calculate all moments from the given DataFrame.
     """
@@ -15,7 +15,7 @@ def calc_all_moments(df, moment_specs):
         [
             labor_supply_moments.values,
             labor_transitions_moments.values,
-            median_wealth_moments.values / moment_specs["max_median_wealth"],
+            median_wealth_moments.values,
         ]
     )
     return moments
@@ -25,7 +25,7 @@ def calc_labor_supply_choice(df):
 
     index = pd.MultiIndex.from_product(
         [
-            [0, 1],
+            [0],
             [0, 1],
             np.arange(0, 45),
             [0, 1, 2, 3],
@@ -59,7 +59,7 @@ def calc_labor_transitions_by_age_bins(df):
 
     index = pd.MultiIndex.from_product(
         [
-            [0, 1],
+            [0],
             [0, 1],
             age_bins[:-1],
             [0, 1],
@@ -83,7 +83,7 @@ def calc_median_wealth_by_age(df):
     # Create a full index for ages 0 to 79
     full_index = pd.MultiIndex.from_product(
         [
-            [0, 1],
+            [0],
             [0, 1],
             np.arange(0, 50),
         ],
@@ -92,13 +92,3 @@ def calc_median_wealth_by_age(df):
     median_wealth_full = median_wealth.reindex(full_index, fill_value=np.nan)
 
     return median_wealth_full
-
-
-def get_moment_specs(df):
-
-    median_wealth_moments = calc_median_wealth_by_age(df)
-    max_median_wealth = median_wealth_moments.max()
-    moment_specs = {
-        "max_median_wealth": max_median_wealth,
-    }
-    return moment_specs

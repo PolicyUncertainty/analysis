@@ -36,7 +36,7 @@ USE_WEIGHTS = False
 
 if LOAD_LAST_ESTIMATE:
     last_estimate = pkl.load(
-        open(paths_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
+        open(paths_dict["struct_results"] + f"est_params_msm_first_1.pkl", "rb")
     )
 else:
     last_estimate = None

@@ -28,15 +28,15 @@ params_to_estimate_names = [
     # "job_finding_logit_above_60_men",
     "bequest_scale",
 ]
-model_name = "msm_first"
-LOAD_LAST_ESTIMATE = False
+model_name = "msm_free"
+LOAD_LAST_ESTIMATE = True
 LOAD_SOL_MODEL = True
 SAVE_RESULTS = True
 USE_WEIGHTS = False
 
 if LOAD_LAST_ESTIMATE:
     last_estimate = pkl.load(
-        open(paths_dict["struct_results"] + f"est_params_msm_first_1.pkl", "rb")
+        open(paths_dict["struct_results"] + f"est_params_msm_first.pkl", "rb")
     )
 else:
     last_estimate = None
@@ -45,6 +45,17 @@ else:
 # Load start params
 start_params_all = load_and_set_start_params(paths_dict)
 
+job_finding_params = [
+    "job_finding_logit_const_men",
+    "job_finding_logit_high_educ_men",
+    "job_finding_logit_good_health_men",
+    "job_finding_logit_above_50_men",
+    "job_finding_logit_above_55_men",
+    "job_finding_logit_above_60_men",
+]
+for param in job_finding_params:
+    start_params_all[param] = last_estimate[param]
+
 estimation_results = estimate_model(
     paths_dict,
     params_to_estimate_names=params_to_estimate_names,
@@ -52,7 +63,7 @@ estimation_results = estimate_model(
     start_params_all=start_params_all,
     load_model=LOAD_SOL_MODEL,
     # use_weights=USE_WEIGHTS,
-    last_estimate=last_estimate,
+    last_estimate=None,
     # save_results=SAVE_RESULTS,
 )
 print(estimation_results)

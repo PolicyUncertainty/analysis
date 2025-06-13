@@ -196,7 +196,10 @@ def msm_criterion(
 
     simulated_flat = simulate_moments(params_int)
 
-    deviations = (simulated_flat - flat_empirical_moments) / flat_empirical_moments
+    difference = simulated_flat - flat_empirical_moments
+    deviations = difference / flat_empirical_moments
+    mask = ~np.isfinite(deviations)
+    deviations[mask] = difference[mask]
     residuals = deviations @ chol_weights
     # Print squared sum of residuals
     print(f"Sum of squared residuals: {np.sum(residuals**2):.4f} ")

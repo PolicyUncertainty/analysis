@@ -31,8 +31,8 @@ disutil_children_ft_work_low: 1e-12
 disutil_children_ft_work_high: 1e-12
 
 # Taste shocks
-taste_shock_scale_men: 1.0e-12
-taste_shock_scale_women: 1.0e-12
+taste_shock_scale_men: 0.05
+taste_shock_scale_women: 0.05
 # Bequest
 bequest_scale: 1.0e-12
 

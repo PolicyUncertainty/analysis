@@ -35,7 +35,7 @@ taste_shock_scale_men: 5
 taste_shock_scale_women: 5
 
 # Bequest
-bequest_scale: 5
+bequest_scale: 50
 
 # Job finding men
 job_finding_logit_const_men: 5

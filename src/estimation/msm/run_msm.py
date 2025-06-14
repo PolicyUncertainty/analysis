@@ -4,7 +4,7 @@ import pickle as pkl
 from set_paths import create_path_dict
 
 paths_dict = create_path_dict(define_user=False)
-from estimation.msm.msm_estimation_setup import estimate_model
+from estimation.msm.scripts.msm_estimation_setup import estimate_model
 from estimation.struct_estimation.start_params_and_bounds.set_start_params import (
     load_and_set_start_params,
 )

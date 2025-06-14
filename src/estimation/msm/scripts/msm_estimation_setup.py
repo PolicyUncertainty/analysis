@@ -11,7 +11,7 @@ import pandas as pd
 import yaml
 from dcegm.asset_correction import adjust_observed_assets
 
-from estimation.msm.calc_moments import calc_all_moments
+from estimation.msm.scripts.calc_moments import calc_all_moments
 from estimation.struct_estimation.scripts.estimate_setup import generate_print_func
 from model_code.specify_model import specify_model
 from process_data.structural_sample_scripts.create_structural_est_sample import (
@@ -217,8 +217,8 @@ def load_and_prep_data(path_dict, start_params, model_class):
     # Load data
     data_decision = pd.read_csv(path_dict["struct_est_sample"])
     data_decision = data_decision.astype(CORE_TYPE_DICT)
-    #
-    # model_specs = model_class.model_specs
+
+    model_specs = model_class.model_specs
     #
     # data_decision["age"] = data_decision["period"] + model_specs["start_age"]
     # data_decision["age_bin"] = np.floor(data_decision["age"] / 10)
@@ -230,11 +230,11 @@ def load_and_prep_data(path_dict, start_params, model_class):
     # )["age_weights"].transform("sum")
     #
     # # Transform experience
-    # max_init_exp = model_specs["max_exp_diffs_per_period"][
-    #     data_decision["period"].values
-    # ]
-    # exp_denominator = data_decision["period"].values + max_init_exp
-    # data_decision["experience"] = data_decision["experience"] / exp_denominator
+    max_init_exp = model_specs["max_exp_diffs_per_period"][
+        data_decision["period"].values
+    ]
+    exp_denominator = data_decision["period"].values + max_init_exp
+    data_decision["experience"] = data_decision["experience"] / exp_denominator
 
     # We can adjust wealth outside, as it does not depend on estimated parameters
     # (only on interest rate)

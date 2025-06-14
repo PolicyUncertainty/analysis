@@ -16,4 +16,5 @@ module add CUDA/12.0.0
 
 source ~/virts/bin/activate
 
-python run_msm.py
+#python run_msm.py
+python loop_for_param.py

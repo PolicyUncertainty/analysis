@@ -47,6 +47,8 @@ for bequest_scale in [2, 5, 10, 50]:
         sol_model_exists=load_sol_model,
     )
 
+    data_sim = data_sim.reset_index()
+
     iterations[bequest_scale]["choice_moment"] = calc_labor_supply_choice(data_sim)
     iterations[bequest_scale]["transition_moment"] = calc_labor_transitions_by_age_bins(
         data_sim

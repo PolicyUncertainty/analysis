@@ -4,9 +4,14 @@ from statsmodels import api as sm
 
 
 def est_SRA_params(paths, df=None):
+    # load (if df is None) and filter data
+    if df is None:
+        df = pd.read_pickle(paths["intermediate_data"] + "df_soep_is_truncated_normals.pkl")
+    df = filter_df(df)
+    # estimate expected SRA increase and variance
     alpha_hat, alpha_hat_std_err = est_expected_SRA(paths, df)
     sigma_sq_hat, sigma_sq_hat_std_err = estimate_expected_SRA_variance(paths, df)
-    columns = ["parameter", "estimate", "std_err"]
+    columns = ["parameter", "estimate", "std_error"]
     results_df = pd.DataFrame(
         columns=columns,
         data=[
@@ -18,10 +23,6 @@ def est_SRA_params(paths, df=None):
 
 
 def est_expected_SRA(paths, df=None, print_summary=False):
-    if df is None:
-        df = pd.read_pickle(paths["intermediate_data"] + "policy_expect_data.pkl")
-    df = filter_df(df)
-    
     # set up regression
     x_var = "time_to_ret"
     weights = "fweights"
@@ -43,9 +44,6 @@ def est_expected_SRA(paths, df=None, print_summary=False):
     return alpha_hat, alpha_hat_std_err
 
 def estimate_expected_SRA_variance(paths, df=None, print_summary=False):
-    if df is None:
-        df = pd.read_pickle(paths["intermediate_data"] + "policy_expect_data.pkl")
-    df = filter_df(df)
     # set up regression
     x_var = "time_to_ret"
     weights = "fweights"

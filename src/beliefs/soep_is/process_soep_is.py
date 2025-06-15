@@ -4,7 +4,9 @@ from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.health import create_health_var
 from process_data.soep_vars.age import calc_age_at_interview
 from process_data.aux_and_plots.filter_data import recode_sex
-
+from process_data.structural_sample_scripts.policy_state import (
+    create_SRA_by_gebjahr,
+)
 
 def load_and_filter_soep_is(paths):
     " Load SOEP-IS data, keep only pension survey questions."
@@ -21,7 +23,7 @@ def load_and_filter_soep_is(paths):
     print(f"{len(df)} observations in SOEP-IS pension beliefs survey.")
     return df
 
-def add_covariates(df, paths, filter_missings=False):
+def add_covariates(df, paths, specs, filter_missings=False):
     """ Add sex, age, education, health, and fweight variables to the dataframe. Df must have pid and syear columns.
 
     raw data to be added
@@ -57,6 +59,8 @@ def add_covariates(df, paths, filter_missings=False):
     df = calc_age_at_interview(df, drop_missing_month=filter_missings)
     df = create_education_type(df, filter_missings=filter_missings)
     df = create_health_var(df, filter_missings=filter_missings)
+    df = classify_informed(df, specs)
+    df["current_SRA"] = create_SRA_by_gebjahr(df["gebjahr"])
     # cleanup
     raw_columns = ["pmonin", "ptagin", "pgpsbil", "m11126", "m11124"]
     df = df.drop(columns=raw_columns)
@@ -108,3 +112,8 @@ def rename_and_reformat_is_covariates(df):
     # ple0040 (disabled) has 1:yes, 2:no, m11124 (disabled) has 0:no, 1:yes
     df["m11124"] = df["m11124"].replace({2: 0, 1: 1})
     return df    
+
+def classify_informed(df, specs):
+    """Informed means ERP beliefs <= threshhold (e.g. 5)."""
+    df["informed"] = df["belief_pens_deduct"] <= specs["informed_threshhold"]
+    return df

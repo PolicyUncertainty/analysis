@@ -14,11 +14,11 @@ from process_data.structural_sample_scripts.policy_state import (
 
 
 def estimate_truncated_normal(df, paths, options, load_data=False):
-    out_file_path = paths["intermediate_data"] + "policy_expect_data.pkl"
+    out_file_path = paths["intermediate_data"] + "df_soep_is_truncated_normals.pkl"
 
     if load_data:
-        df_analysis = pd.read_pickle(out_file_path)
-        return df_analysis
+        df = pd.read_pickle(out_file_path)
+        return df
 
 
     # unpack options, put into new dict
@@ -31,14 +31,9 @@ def estimate_truncated_normal(df, paths, options, load_data=False):
 
     df["time_to_ret"] = df["exp_pens_uptake"] - df["age"]
 
-    # estimate params of truncated normal, as well as mean and var
+    # estimate loc and scale of truncated normal (as well as mean and var), save
     df = estimate_truncated_normal_parameters(df, function_spec)
-
-    # exclude people born before 1947 and people born after 2000, as well as people with missing values in the policy uncertainty questions
-    # df_analysis = filter_df(df)
-
-    df["current_SRA"] = create_SRA_by_gebjahr(df["gebjahr"])
-    # df_analysis.to_pickle(out_file_path)
+    df.to_pickle(out_file_path)
     return df
 
 
@@ -123,12 +118,3 @@ def objective(params, function_spec):
     # total_error = error_1 + error_2
     return np.array([error_1, error_2])
 
-def filter_df(df):
-    """ Filter the dataframe to only include rows with valid SRA values. """
-    df_analysis = df[df["pol_unc_stat_ret_age_67"].notnull()]
-    df_analysis = df_analysis[df_analysis["ex_val"].notnull()]
-    df_analysis = df_analysis[df_analysis["time_to_ret"] > 0]
-    df_analysis = df_analysis[df_analysis["time_to_ret"] < 48]
-    print(f"{len(df_analysis)} observations in SOEP-IS policy uncertainty survey after filtering people with missing policy uncertainty # questions and people born before 1947 or after 2000.")
-    return df_analysis
-    

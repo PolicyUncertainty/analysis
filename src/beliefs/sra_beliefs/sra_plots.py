@@ -2,7 +2,9 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.stats import truncnorm
-from analysis.src.beliefs.sra_beliefs.truncated_normals import estimate_truncated_normal_parameters
+from beliefs.sra_beliefs.truncated_normals import estimate_truncated_normal_parameters
+from beliefs.sra_beliefs.random_walk import filter_df
+from export_results.figures.color_map import JET_COLOR_MAP 
 
 
 def plot_truncated_normal_for_response(
@@ -11,6 +13,7 @@ def plot_truncated_normal_for_response(
     mu: float = None,
     sigma: float = None,
     upper_trunc_limit: float = None,
+    show: bool = False,
 ) -> None:
     """
     Plot the truncated normal subjective expectation distribution for a given set (triple) of SRA responses. If parameters are not provided, the truncated normal distribution has to be estimated. In that case, there is the possibility to overwrite upper truncation limit.
@@ -62,7 +65,7 @@ def plot_truncated_normal_for_response(
     x = np.linspace(lower, upper, 1000)
     pdf = truncnorm.pdf(x, a, b, loc=mu, scale=sigma)
     plt.figure(figsize=(10, 6))
-    plt.plot(x, pdf, color='blue', label="Truncated Normal PDF")
+    plt.plot(x, pdf, color=JET_COLOR_MAP[0], label="Truncated Normal PDF")
 
     # Divide responses by 100
     # Normalize the probability mass for the range 69+ because the domain is larger than 1 (unlike fot the other two responses)
@@ -75,8 +78,11 @@ def plot_truncated_normal_for_response(
     bar_heights = responses
 
     # Plot the bars
-    for pos, width, height in zip(bar_positions, bar_widths, bar_heights):
-        plt.bar(pos, height, width=width, align='edge', color='orange', alpha=0.6, edgecolor='black', label="Probabilities" if pos == 66.5 else "")
+    for i, (pos, width, height) in enumerate(zip(bar_positions, bar_widths, bar_heights)):
+        plt.bar(pos, height, width=width, align='edge', color=JET_COLOR_MAP[1], alpha=0.6, edgecolor='black', label=f"Response: ({responses[0]*100:.0f}, {responses[1]*100:.0f}, {responses[2]*(upper-68.5)*100:.0f})" if i == 0 else "")
+
+    # Add vertical line at the mean
+    plt.axvline(x=mu, color=JET_COLOR_MAP[3], linestyle='--', linewidth=2, label=f"Mean: {mu:.2f}")
 
     # Add labels and legend
     plt.title("Truncated Normal Distribution with Probabilities")
@@ -84,22 +90,25 @@ def plot_truncated_normal_for_response(
     plt.ylabel("Probability Density")
     plt.xlim(lower, upper)
     plt.ylim(0, max(max(pdf) * 1.1 , max(np.array(bar_heights)) * 1.1))
-    plt.legend()
+    plt.legend(loc='upper right')
 
-    # add the expected value and variance as text on the plot
-    plt.text(
-        x=0.05 * (upper - lower) + lower,  # x position
-        y= 0.8 * max(pdf),  # y position
-        s=f"Expected Value: {expected_sra:.2f}\nVariance: {variance_sra:.2f}",
-        fontsize=10,
-        color="black",
-        bbox=dict(facecolor="white", alpha=0.8, edgecolor="black"),
-    )
-    plt.show()
+    # # add the expected value and variance as text on the plot
+    # plt.text(
+    #     x=0.05 * (upper - lower) + lower,  # x position
+    #     y= 0.8 * max(pdf),  # y position
+    #     s=f"Expected Value: {expected_sra:.2f}\nVariance: {variance_sra:.2f}",
+    #     fontsize=10,
+    #     color="black",
+    #     bbox=dict(facecolor="white", alpha=0.8, edgecolor="black"),
+    # )
+    if show:
+        plt.show()
 
 
 def plot_expected_sra_vs_birth_year(
-    df: pd.DataFrame, 
+    df: pd.DataFrame = None,
+    path_dict: dict = None,
+    show: bool = False
 ) -> None:
     """
     Plot the expected SRA against the birth year with a linear trendline.
@@ -107,15 +116,22 @@ def plot_expected_sra_vs_birth_year(
     Args:
         df (pd.DataFrame): DataFrame containing 'gebjahr' and 'ex_val' columns.
     """
+    if df is None and path_dict is not None:
+        df = pd.read_csv(path_dict["intermediate_data"] + "beliefs/soep_is_truncated_normals.csv")
+    elif df is None and path_dict is None:
+        raise ValueError("Either df or paths_dict must be provided.")
+
+    df = filter_df(df)
+
     plt.figure(figsize=(10, 6))
-    plt.scatter(df["gebjahr"], df["ex_val"], alpha=0.5, s=3, color='blue')
+    plt.scatter(df["gebjahr"], df["ex_val"], alpha=0.5, s=3, color=JET_COLOR_MAP[0])
     plt.title("Expected Value vs Birth Year")
     plt.xlabel("Birth Year")
     plt.ylabel("E[SRA]")
     z = np.polyfit(df["gebjahr"], df["ex_val"], 1)
     p = np.poly1d(z)
-    plt.plot(df["gebjahr"], p(df["gebjahr"]), color='red', linewidth=2, label='OLS fit')
+    plt.plot(df["gebjahr"], p(df["gebjahr"]), color=JET_COLOR_MAP[3], linewidth=2, label='OLS fit')
     plt.grid()
     plt.legend()
-    plt.show()
-
+    if show:
+        plt.show()

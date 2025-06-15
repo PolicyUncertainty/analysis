@@ -7,20 +7,32 @@ from scipy.optimize import minimize
 
 from export_results.figures.color_map import JET_COLOR_MAP
 
-def calibrate_uninformed_hazard_rate(df, specs):
-    """This functions calibrates the hazard rate of becoming informed for the uninformed
+def calibrate_uninformed_hazard_rate_with_se(df, specs, calculate_se=False, n_bootstrap=1000, random_state=42):
+    """
+    This functions calibrates the hazard rate of becoming informed for the uninformed
     individuals with method of (weighted) moments.
 
     Informed (ERP<=5) are classified in "process_soep_is".
-
-    The hazard rate is assumed to be constant but can be changed to be a function of
-    age.
-
+    
+    Parameters:
+    -----------
+    df : pd.DataFrame
+        Full dataset
+    specs : dict
+        Specifications dictionary
+    n_bootstrap : int
+        Number of bootstrap samples (default: 1000)
+    random_state : int
+        Random seed for reproducibility (default: 42)
+    
+    Returns:
+    --------
+    pd.DataFrame : Results with parameter estimates and bootstrapped standard errors
     """
-
+    
     df = filter_dataset(df, specs)
 
-    # Create an empty DataFrame to store results in the desired format
+    # Create empty df 
     results = pd.DataFrame(columns=["parameter", "type", "estimate", "std_error"])
 
     # Calibrate hazard rate for each education group
@@ -30,27 +42,37 @@ def calibrate_uninformed_hazard_rate(df, specs):
         # Estimate the average ERP belief of the uninformed individuals
         avg_belief_uninformed, sem_uninformed = beliefs_of_uninformed(df_restricted)
 
-        # Estimate the initial share and hazard rate
-        observed_informed_shares, weights = generate_observed_informed_shares(
-            df_restricted
-        )
+        # Estimate the initial share and hazard rate (original estimates)
+        observed_informed_shares, weights = generate_observed_informed_shares(df_restricted)
         params = fit_moments(moments=observed_informed_shares, weights=weights)
+        
+        # Calculate bootstrapped standard errors if requested
+        if calculate_se:
+            print(f"Calculating bootstrap standard errors for {edu_label}...")
+            bootstrap_se = bootstrap_standard_errors(
+                df_restricted, 
+                n_bootstrap=n_bootstrap, 
+                random_state=random_state
+            )
+            print(f"  Successful bootstrap samples: {bootstrap_se['n_successful_bootstraps']}/{n_bootstrap}")
+            
+            std_errors = [
+                bootstrap_se['initial_informed_share'], 
+                bootstrap_se['hazard_rate']
+            ]
+        else:
+            std_errors = [pd.NA, pd.NA]
 
         # Append results for each parameter
-        results = pd.concat(
-            [
-                results,
-                pd.DataFrame(
-                    {
-                        "parameter": ["initial_informed_share", "hazard_rate"],
-                        "type": [edu_label, edu_label],
-                        "estimate": params.values,
-                        "std_error": [pd.NA, pd.NA],  # Placeholder for standard errors
-                    }
-                ),
-            ],
-            ignore_index=True,
-        )
+        results = pd.concat([
+            results,
+            pd.DataFrame({
+                "parameter": ["initial_informed_share", "hazard_rate"],
+                "type": [edu_label, edu_label],
+                "estimate": params.values,
+                "std_error": std_errors,
+            })
+        ], ignore_index=True)
 
     return results
 
@@ -207,67 +229,3 @@ def bootstrap_standard_errors(df_restricted, n_bootstrap=1000, random_state=42):
         }
 
 
-def calibrate_uninformed_hazard_rate_with_se(df, specs, n_bootstrap=1000, random_state=42):
-    """
-    This functions calibrates the hazard rate of becoming informed for the uninformed
-    individuals with method of (weighted) moments.
-
-    Informed (ERP<=5) are classified in "process_soep_is".
-    
-    Parameters:
-    -----------
-    df : pd.DataFrame
-        Full dataset
-    specs : dict
-        Specifications dictionary
-    n_bootstrap : int
-        Number of bootstrap samples (default: 1000)
-    random_state : int
-        Random seed for reproducibility (default: 42)
-    
-    Returns:
-    --------
-    pd.DataFrame : Results with parameter estimates and bootstrapped standard errors
-    """
-    
-    df = filter_dataset(df, specs)
-
-    # Create an empty DataFrame to store results in the desired format
-    results = pd.DataFrame(columns=["parameter", "type", "estimate", "std_error"])
-
-    # Calibrate hazard rate for each education group
-    for edu_val, edu_label in enumerate(specs["education_labels"]):
-        df_restricted = df[df["education"] == edu_val]
-
-        # Estimate the average ERP belief of the uninformed individuals
-        avg_belief_uninformed, sem_uninformed = beliefs_of_uninformed(df_restricted)
-
-        # Estimate the initial share and hazard rate (original estimates)
-        observed_informed_shares, weights = generate_observed_informed_shares(df_restricted)
-        params = fit_moments(moments=observed_informed_shares, weights=weights)
-        
-        # Calculate bootstrapped standard errors
-        print(f"Calculating bootstrap standard errors for {edu_label}...")
-        bootstrap_se = bootstrap_standard_errors(
-            df_restricted, 
-            n_bootstrap=n_bootstrap, 
-            random_state=random_state
-        )
-        
-        print(f"  Successful bootstrap samples: {bootstrap_se['n_successful_bootstraps']}/{n_bootstrap}")
-
-        # Append results for each parameter with bootstrapped standard errors
-        results = pd.concat([
-            results,
-            pd.DataFrame({
-                "parameter": ["initial_informed_share", "hazard_rate"],
-                "type": [edu_label, edu_label],
-                "estimate": params.values,
-                "std_error": [
-                    bootstrap_se['initial_informed_share'], 
-                    bootstrap_se['hazard_rate']
-                ],
-            })
-        ], ignore_index=True)
-
-    return results

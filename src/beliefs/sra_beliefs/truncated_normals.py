@@ -14,13 +14,12 @@ from process_data.structural_sample_scripts.policy_state import (
 
 
 def estimate_truncated_normal(df, paths, options, load_data=False):
-    out_file_path = paths["intermediate_data"] + "df_soep_is_truncated_normals.pkl"
-
     if load_data:
-        df = pd.read_pickle(out_file_path)
+        df = pd.read_csv(
+            paths["intermediate_data"] + "beliefs/soep_is_truncated_normals.csv"
+        )
         return df
-
-
+    
     # unpack options, put into new dict
     function_spec = {
         "ll": options["lower_limit"],
@@ -33,7 +32,6 @@ def estimate_truncated_normal(df, paths, options, load_data=False):
 
     # estimate loc and scale of truncated normal (as well as mean and var), save
     df = estimate_truncated_normal_parameters(df, function_spec)
-    df.to_pickle(out_file_path)
     return df
 
 

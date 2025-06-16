@@ -6,7 +6,9 @@ from statsmodels import api as sm
 def est_SRA_params(paths, df=None):
     # load (if df is None) and filter data
     if df is None:
-        df = pd.read_pickle(paths["intermediate_data"] + "df_soep_is_truncated_normals.pkl")
+        df = pd.read_csv(
+            paths["intermediate_data"] + "beliefs/soep_is_truncated_normals.csv"
+        )
     df = filter_df(df)
     # estimate expected SRA increase and variance
     alpha_hat, alpha_hat_std_err = est_expected_SRA(paths, df)
@@ -37,11 +39,13 @@ def est_expected_SRA(paths, df=None, print_summary=False):
     if print_summary:
         print(model.fit().summary())
         print(
-        f"Estimated regression equation: E[ret age change] = "f"{alpha_hat[0]} * (Time to retirement)"
-    )
+            f"Estimated regression equation: E[ret age change] = "
+            f"{alpha_hat[0]} * (Time to retirement)"
+        )
     alpha_hat = model.fit().params
     alpha_hat_std_err = model.fit().bse
     return alpha_hat, alpha_hat_std_err
+
 
 def estimate_expected_SRA_variance(paths, df=None, print_summary=False):
     # set up regression
@@ -67,11 +71,10 @@ def estimate_expected_SRA_variance(paths, df=None, print_summary=False):
     return sigma_sq_hat, sigma_sq_hat_std_err
 
 
-
 def estimate_expected_SRA_variance_by_taking_average(paths, df=None):
     if df is None:
         df = pd.read_pickle(paths["intermediate_data"] + "policy_expect_data.pkl")
-        
+
     # truncate data: remove birth years outside before 1964
     df = filter_df(df)
 
@@ -86,9 +89,12 @@ def estimate_expected_SRA_variance_by_taking_average(paths, df=None):
 
     return sigma_sq_hat, sigma_sq_hat_std_err
 
+
 def filter_df(df):
     """Drop observations of people born before 1964 and drop missing subjective expectation parameters."""
     df = df[df["gebjahr"] >= 1964]
     df = df.dropna(subset=["ex_val", "var", "fweights", "time_to_ret"])
-    print(f"Filtered data: {len(df)} observations remaining after dropping birth years before 1964, and people with missing values in subjective expectation parameters.")
+    print(
+        f"Filtered data: {len(df)} observations remaining after dropping birth years before 1964, and people with missing values in subjective expectation parameters."
+    )
     return df

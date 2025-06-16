@@ -32,7 +32,7 @@ def create_path_dict(define_user=False, user=None):
         paths_dict = {
             "soep_c38": data_path + "soep38",
             "soep_rv": data_path + "soep_rv",
-            "soep_is": data_path + "soep_is/soep-is.2023_stata_de",
+            "soep_is": data_path + "soep_is/soep-is.2023_stata_de/",
         }
     else:
         paths_dict = {}
@@ -72,6 +72,17 @@ def create_path_dict(define_user=False, user=None):
     paths_dict["struct_est_sample"] = (
         paths_dict["intermediate_data"] + "structural_estimation_sample.csv"
     )
+
+    # Set belief folders
+    paths_dict["beliefs_data"] = paths_dict["intermediate_data"] + "beliefs/"
+    paths_dict["belief_plots"] = paths_dict["plots"] + "beliefs/"
+
+    # Create folders that would not exist yet
+    os.makedirs(paths_dict["intermediate_data"], exist_ok=True)
+    os.makedirs(paths_dict["beliefs_data"], exist_ok=True)
+    os.makedirs(paths_dict["plots"], exist_ok=True)
+    os.makedirs(paths_dict["belief_plots"], exist_ok=True)
+    os.makedirs(paths_dict["paper_plots"], exist_ok=True)
 
     return paths_dict
 

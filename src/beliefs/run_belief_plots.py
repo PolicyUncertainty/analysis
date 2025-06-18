@@ -33,3 +33,5 @@ for response in responses:
     plt.savefig(belief_plots_path + f"truncated_normal_for_response_{response_str}.png", bbox_inches='tight')
 plot_expected_sra_vs_birth_year(df=None, path_dict=path_dict, show=show_plots)
 plt.savefig(belief_plots_path + "expected_sra_vs_birth_year.png", bbox_inches='tight')
+
+# erp plots

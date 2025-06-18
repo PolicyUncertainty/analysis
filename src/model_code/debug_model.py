@@ -82,38 +82,24 @@ out_dict_2 = partially_solve(
 def plot_sols(sol_type, max_wealth_id, id_sc, candidate=False, scatter=False):
     append = "_candidates" if candidate else ""
     if scatter:
-        plt.scatter(
-            out_dict_0["endog_grid" + append][id_sc, 5, 1:max_wealth_id],
-            out_dict_0[sol_type + append][id_sc, 5, 1:max_wealth_id],
-            label="bequest scale 2.4",
-        )
-        plt.scatter(
-            out_dict_1["endog_grid" + append][id_sc, 5, 1:max_wealth_id],
-            out_dict_1[sol_type + append][id_sc, 5, 1:max_wealth_id],
-            label="bequest scale 10",
-        )
-        plt.scatter(
-            out_dict_2["endog_grid" + append][id_sc, 5, 1:max_wealth_id],
-            out_dict_2[sol_type + append][id_sc, 5, 1:max_wealth_id],
-            label="bequest scale 50",
-        )
-
+        plot_method = plt.scatter
     else:
-        plt.plot(
-            out_dict_0["endog_grid" + append][id_sc, 5, 1:max_wealth_id],
-            out_dict_0[sol_type + append][id_sc, 5, 1:max_wealth_id],
-            label="bequest scale 2.4",
-        )
-        plt.plot(
-            out_dict_1["endog_grid" + append][id_sc, 5, 1:max_wealth_id],
-            out_dict_1[sol_type + append][id_sc, 5, 1:max_wealth_id],
-            label="bequest scale 10",
-        )
-        plt.plot(
-            out_dict_2["endog_grid" + append][id_sc, 5, 1:max_wealth_id],
-            out_dict_2[sol_type + append][id_sc, 5, 1:max_wealth_id],
-            label="bequest scale 50",
-        )
+        plot_method = plt.plot
+    plot_method(
+        out_dict_0["endog_grid" + append][id_sc, 5, 1:max_wealth_id],
+        out_dict_0[sol_type + append][id_sc, 5, 1:max_wealth_id],
+        label="bequest scale 2.4",
+    )
+    plot_method(
+        out_dict_1["endog_grid" + append][id_sc, 5, 1:max_wealth_id],
+        out_dict_1[sol_type + append][id_sc, 5, 1:max_wealth_id],
+        label="bequest scale 10",
+    )
+    plot_method(
+        out_dict_2["endog_grid" + append][id_sc, 5, 1:max_wealth_id],
+        out_dict_2[sol_type + append][id_sc, 5, 1:max_wealth_id],
+        label="bequest scale 50",
+    )
 
     plt.legend()
     plt.show()

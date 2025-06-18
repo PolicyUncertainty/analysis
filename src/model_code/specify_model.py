@@ -66,7 +66,7 @@ def specify_model(
             "health": np.arange(specs["n_all_health_states"], dtype=int),
         },
         "continuous_states": {
-            "assets_end_of_period": savings_grid,
+            "assets_end_of_period": savings_grid / specs["wealth_unit"],
             "experience": experience_grid,
         },
         "n_quad_points": specs["n_quad_points"],

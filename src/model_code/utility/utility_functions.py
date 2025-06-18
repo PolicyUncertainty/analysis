@@ -1,14 +1,17 @@
 import jax
 import jax.numpy as jnp
 
-from model_code.utility.bequest_utility import utility_final_consume_all
+from model_code.utility.bequest_utility import (
+    marginal_utility_final_consume_all,
+    utility_final_consume_all,
+)
 
 
 def create_utility_functions():
     return {
         "utility": utility_func,
-        "inverse_marginal_utility": inverse_marginal,
-        "marginal_utility": marg_utility,
+        "marginal_utility": marginal_utility_func,
+        "inverse_marginal_utility": inverse_marginal_func,
     }
 
 
@@ -88,7 +91,41 @@ def utility_func_alive(
     return utility
 
 
-def marg_utility(
+def marginal_utility_func(
+    consumption,
+    sex,
+    partner_state,
+    education,
+    health,
+    period,
+    choice,
+    params,
+    model_specs,
+):
+    marginal_utility_alive = marginal_utility_function_alive(
+        consumption=consumption,
+        sex=sex,
+        partner_state=partner_state,
+        education=education,
+        health=health,
+        period=period,
+        choice=choice,
+        params=params,
+        model_specs=model_specs,
+    )
+    marginal_utility_death = marginal_utility_final_consume_all(
+        wealth=consumption,
+        sex=sex,
+        params=params,
+    )
+    death_bool = health == model_specs["death_health_var"]
+    marginal_utility = jax.lax.select(
+        death_bool, marginal_utility_death, marginal_utility_alive
+    )
+    return marginal_utility
+
+
+def marginal_utility_function_alive(
     consumption,
     partner_state,
     sex,
@@ -128,7 +165,7 @@ def marg_utility(
     return marg_util
 
 
-def inverse_marginal(
+def inverse_marginal_func(
     marginal_utility,
     partner_state,
     education,

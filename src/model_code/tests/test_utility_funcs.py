@@ -10,8 +10,8 @@ from model_code.utility.bequest_utility import (
 )
 from model_code.utility.utility_functions import (
     consumption_scale,
-    inverse_marginal,
-    marg_utility,
+    inverse_marginal_func,
+    marginal_utility_function_alive,
     utility_func,
 )
 from set_paths import create_path_dict
@@ -275,7 +275,7 @@ def test_marginal_utility(
         params,
         model_specs,
     )
-    marg_util_model = marg_utility(
+    marg_util_model = marginal_utility_function_alive(
         consumption=consumption,
         partner_state=partner_state,
         education=education,
@@ -345,7 +345,7 @@ def test_inv_marginal_utility(
 
     model_specs = paths_and_specs[1]
     random_choice = np.random.choice(np.array([0, 1, 2]))
-    marg_util = marg_utility(
+    marg_util = marginal_utility_function_alive(
         consumption=consumption,
         partner_state=partner_state,
         education=education,
@@ -357,7 +357,7 @@ def test_inv_marginal_utility(
         model_specs=model_specs,
     )
     np.testing.assert_almost_equal(
-        inverse_marginal(
+        inverse_marginal_func(
             marginal_utility=marg_util,
             partner_state=partner_state,
             education=education,

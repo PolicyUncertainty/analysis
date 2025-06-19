@@ -10,7 +10,7 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
 )
 
 params_to_estimate_names = [
-    "mu_men",
+    # "mu_men",
     # Men Full-time - 4 parameters
     "disutil_ft_work_good_men",
     "disutil_ft_work_bad_men",
@@ -28,7 +28,7 @@ params_to_estimate_names = [
     # "job_finding_logit_above_60_men",
     "bequest_scale",
 ]
-model_name = "msm_free"
+model_name = "msm_mu_fixed"
 LOAD_LAST_ESTIMATE = True
 LOAD_SOL_MODEL = True
 SAVE_RESULTS = True

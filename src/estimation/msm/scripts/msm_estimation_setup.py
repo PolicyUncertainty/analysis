@@ -81,9 +81,7 @@ def estimate_model(
         sim_specs=sim_specs,
     )
 
-    data_decision = load_and_prep_data(
-        path_dict=path_dict, start_params=start_params, model_class=model
-    )
+    data_decision = load_and_prep_data(path_dict=path_dict, start_params=start_params)
 
     # Load empirical data
     empirical_moments = calc_all_moments(data_decision)
@@ -214,13 +212,12 @@ def msm_criterion(
 # =====================================================================================
 
 
-def load_and_prep_data(path_dict, start_params, model_class):
+def load_and_prep_data(path_dict, start_params):
     specs = generate_derived_and_data_derived_specs(path_dict)
     # Load data
     data_decision = pd.read_csv(path_dict["struct_est_sample"])
     data_decision = data_decision.astype(CORE_TYPE_DICT)
 
-    model_specs = model_class.model_specs
     #
     # data_decision["age"] = data_decision["period"] + model_specs["start_age"]
     # data_decision["age_bin"] = np.floor(data_decision["age"] / 10)
@@ -232,18 +229,27 @@ def load_and_prep_data(path_dict, start_params, model_class):
     # )["age_weights"].transform("sum")
     #
     # # Transform experience
-    max_init_exp = model_specs["max_exp_diffs_per_period"][
-        data_decision["period"].values
-    ]
+    max_init_exp = specs["max_exp_diffs_per_period"][data_decision["period"].values]
     exp_denominator = data_decision["period"].values + max_init_exp
     data_decision["experience"] = data_decision["experience"] / exp_denominator
+
+    # Load model
+    model = specify_model(
+        path_dict,
+        specs,
+        subj_unc=True,
+        custom_resolution_age=None,
+        sim_specs=None,
+        load_model=True,
+        debug_info=None,
+    )
 
     # We can adjust wealth outside, as it does not depend on estimated parameters
     # (only on interest rate)
     # Now transform for dcegm
     states_dict = {
         name: data_decision[name].values
-        for name in model_class.model_structure["discrete_states_names"]
+        for name in model.model_structure["discrete_states_names"]
     }
     states_dict["experience"] = data_decision["experience"].values
     states_dict["assets_begin_of_period"] = (
@@ -253,7 +259,7 @@ def load_and_prep_data(path_dict, start_params, model_class):
     assets_begin_of_period = adjust_observed_assets(
         observed_states_dict=states_dict,
         params=start_params,
-        model_class=model_class,
+        model_class=model,
     )
     data_decision["assets_begin_of_period"] = assets_begin_of_period
 

@@ -8,14 +8,14 @@ def calc_all_moments(df):
     """
     labor_supply_moments = calc_labor_supply_choice(df)
     labor_transitions_moments = calc_labor_transitions_by_age_bins(df)
-    median_wealth_moments = calc_median_wealth_by_age(df)
+    # median_wealth_moments = calc_median_wealth_by_age(df)
 
     # Transform to numpy arrays and concatenate
     moments = np.concatenate(
         [
             labor_supply_moments.values,
             labor_transitions_moments.values,
-            median_wealth_moments.values,
+            # median_wealth_moments.values,
         ]
     )
     return moments
@@ -76,7 +76,10 @@ def calc_median_wealth_by_age(df):
     """
     Calculate the median wealth by age.
     """
-    median_wealth = df.groupby(["sex", "education", "period"], observed=False)[
+    age_bins = np.arange(0, 50, 3)
+    df["period_bin"] = pd.cut(df["period"], bins=age_bins, right=False)
+
+    median_wealth = df.groupby(["sex", "education", "period_bin"], observed=False)[
         "assets_begin_of_period"
     ].median()
 
@@ -85,9 +88,9 @@ def calc_median_wealth_by_age(df):
         [
             [0],
             [0, 1],
-            np.arange(0, 50),
+            age_bins[:-1],
         ],
-        names=["sex", "education", "period"],
+        names=["sex", "education", "period_bin"],
     )
     median_wealth_full = median_wealth.reindex(full_index, fill_value=np.nan)
 

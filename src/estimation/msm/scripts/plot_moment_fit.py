@@ -8,24 +8,19 @@ from estimation.msm.scripts.calc_moments import (
 from export_results.figures.color_map import JET_COLOR_MAP, LINE_STYLES
 
 
-def plot_moments_all_moments_for_dfs(data_decision, data_sim, specs):
+def plot_moments_all_moments_for_dfs(df_list, moment_labels, specs):
 
-    empirical_choice_moments = calc_labor_supply_choice(data_decision)
-    simulated_choice_moments = calc_labor_supply_choice(data_sim)
-    choice_moments = [empirical_choice_moments, simulated_choice_moments]
+    labor_supply_moment_list = []
+    labor_transitions_moment_list = []
+    wealth_moment_list = []
+    for df in df_list:
+        labor_supply_moment_list += [calc_labor_supply_choice(df)]
+        labor_transitions_moment_list += [calc_labor_transitions_by_age_bins(df)]
+        wealth_moment_list += [calc_median_wealth_by_age(df)]
 
-    moment_labels = ["Empirical", "Simulated"]
-    plot_choice_moments(choice_moments, moment_labels, specs)
-
-    empirical_transition_moments = calc_labor_transitions_by_age_bins(data_decision)
-    simulated_transition_moments = calc_labor_transitions_by_age_bins(data_sim)
-    transition_moments = [empirical_transition_moments, simulated_transition_moments]
-    plot_transition_moments(transition_moments, moment_labels, specs)
-
-    empirical_wealth_moments = calc_median_wealth_by_age(data_decision)
-    simulated_wealth_moments = calc_median_wealth_by_age(data_sim)
-    wealth_moments = [empirical_wealth_moments, simulated_wealth_moments]
-    plot_wealth_moments(wealth_moments, specs)
+    plot_choice_moments(labor_supply_moment_list, moment_labels, specs)
+    plot_transition_moments(labor_transitions_moment_list, moment_labels, specs)
+    plot_wealth_moments(wealth_moment_list, moment_labels, specs)
 
 
 def plot_choice_moments(moments_list, moment_labels, specs):

@@ -15,16 +15,17 @@ df = load_and_filter_soep_is(paths=path_dict)
 df = add_covariates(df, paths=path_dict, specs=specs)
 df.to_csv(path_dict["beliefs_data"] + "soep_is_clean.csv")
 
-from beliefs.sra_beliefs.random_walk import est_SRA_params
+from beliefs.sra_beliefs.random_walk import est_SRA_params, est_alpha_heterogeneity
 
 # estimate SRA belief parameters (fitting truncated normals takes a while, load_data=True to speed up)
 from beliefs.sra_beliefs.truncated_normals import estimate_truncated_normal
 
 df_truncated_normal = estimate_truncated_normal(
-    df, paths=path_dict, options=specs, load_data=False
+    df, paths=path_dict, options=specs, load_data=True
 )
-df.to_csv(path_dict["beliefs_data"] + "soep_is_truncated_normals.csv")
+df_truncated_normal.to_csv(path_dict["beliefs_data"] + "soep_is_truncated_normals.csv")
 sra_params_df = est_SRA_params(path_dict, df=df_truncated_normal)
+alpha_heterogeneity_df = est_alpha_heterogeneity(path_dict, df=df_truncated_normal)
 
 # estimate ERP belief parameters (bootstrapping SE takes a while, calculate_se=False to speed up)
 from beliefs.erp_beliefs.informed_state_transition import (
@@ -38,3 +39,6 @@ uninformed_params_df = calibrate_uninformed_hazard_rate_with_se(
 # save results
 params_df = pd.concat([sra_params_df, uninformed_params_df], ignore_index=True)
 params_df.to_csv(path_dict["beliefs_data"] + "beliefs_parameters.csv", index=False)
+
+# save heterogeneity results
+alpha_heterogeneity_df.to_csv(path_dict["beliefs_data"] + "alpha_heterogeneity_results.csv", index=False)

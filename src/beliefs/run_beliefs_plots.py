@@ -40,6 +40,8 @@ plt.savefig(
 from beliefs.sra_beliefs.sra_plots import (
     plot_expected_sra_vs_birth_year,
     plot_truncated_normal_for_response,
+    plot_alpha_heterogeneity_coefficients,
+    plot_alpha_heterogeneity_coefficients_combined,
 )
 
 responses = [[30, 40, 30], [20, 50, 30], [10, 60, 30]]
@@ -55,6 +57,12 @@ plt.savefig(
     path_dict["belief_plots"] + "expected_sra_vs_birth_year.png", bbox_inches="tight"
 )
 
+# sra heterogeneity plots
+plot_alpha_heterogeneity_coefficients_combined(path_dict=path_dict, show=show_plots)
+plt.savefig(
+    path_dict["belief_plots"] + "alpha_heterogeneity_coefficients_combined.png", bbox_inches="tight"
+)
+
 # erp plots
 from beliefs.erp_beliefs.erp_plots import plot_predicted_vs_actual_informed_share
 plot_predicted_vs_actual_informed_share(
@@ -63,4 +71,3 @@ plot_predicted_vs_actual_informed_share(
 plt.savefig(
     path_dict["belief_plots"] + "predicted_vs_actual_informed_share.png", bbox_inches="tight",
 )
-

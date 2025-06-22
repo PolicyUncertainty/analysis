@@ -135,3 +135,106 @@ def plot_expected_sra_vs_birth_year(
     plt.legend()
     if show:
         plt.show()
+
+
+def plot_alpha_heterogeneity_coefficients_combined(
+    results_df: pd.DataFrame = None,
+    path_dict: dict = None,
+    show: bool = False
+) -> None:
+    """
+    Create a coefficient plot showing heterogeneity in alpha (expected SRA increase) 
+    by demographic covariates with 95% confidence intervals.
+    
+    Args:
+        results_df (pd.DataFrame): DataFrame with heterogeneity results
+        path_dict (dict): Path dictionary to load results if results_df is None
+        show (bool): Whether to display the plot
+    """
+    # Load data if not provided
+    if results_df is None and path_dict is not None:
+        results_df = pd.read_csv(path_dict["beliefs_data"] + "alpha_heterogeneity_results.csv")
+    elif results_df is None and path_dict is None:
+        raise ValueError("Either results_df or path_dict must be provided.")
+    
+    # Prepare data for plotting
+    covariates = results_df['covariate'].unique()
+    specifications = results_df['specification'].unique()
+    
+    fig, ax = plt.subplots(1, 1, figsize=(12, 8))
+    
+    # Define positions and colors
+    x_positions = np.arange(len(covariates))
+    width = 0.35
+    colors = [JET_COLOR_MAP[0], JET_COLOR_MAP[1]]
+    
+    for i, spec in enumerate(['univariate', 'with_age_control']):
+        spec_data = results_df[results_df['specification'] == spec]
+        
+        coefficients = []
+        errors_lower = []
+        errors_upper = []
+        
+        for covariate in covariates:
+            row = spec_data[spec_data['covariate'] == covariate]
+            if len(row) > 0:
+                coef = row['coefficient'].iloc[0]
+                ci_lower = row['ci_lower'].iloc[0]
+                ci_upper = row['ci_upper'].iloc[0]
+                
+                coefficients.append(coef)
+                errors_lower.append(coef - ci_lower)
+                errors_upper.append(ci_upper - coef)
+            else:
+                coefficients.append(0)
+                errors_lower.append(0)
+                errors_upper.append(0)
+        
+        # Plot bars with error bars
+        bars = ax.bar(
+            x_positions + i * width - width/2,
+            coefficients,
+            width,
+            yerr=[errors_lower, errors_upper],
+            capsize=5,
+            color=colors[i],
+            alpha=0.7,
+            label=spec.replace('_', ' ').title(),
+            edgecolor='black',
+            linewidth=0.5
+        )
+    
+    # Add horizontal line at zero
+    ax.axhline(y=0, color='black', linestyle='--', alpha=0.5, linewidth=1)
+    
+    # Customize plot
+    ax.set_xlabel('Demographic Covariates', fontsize=12)
+    ax.set_ylabel('Coefficient Estimate', fontsize=12)
+    ax.set_title('Heterogeneity in Expected SRA Increase (α) by Demographics\nwith 95% Confidence Intervals', 
+                fontsize=14, fontweight='bold')
+    ax.set_xticks(x_positions)
+    ax.set_xticklabels([cov.capitalize() for cov in covariates])
+    ax.legend(fontsize=11)
+    ax.grid(True, alpha=0.3, axis='y')
+    
+    # Add value labels on bars
+    for i, spec in enumerate(['univariate', 'with_age_control']):
+        spec_data = results_df[results_df['specification'] == spec]
+        for j, covariate in enumerate(covariates):
+            row = spec_data[spec_data['covariate'] == covariate]
+            if len(row) > 0:
+                coef = row['coefficient'].iloc[0]
+                ax.text(
+                    j + i * width - width/2, 
+                    coef + (0.001 if coef >= 0 else -0.001),
+                    f'{coef:.3f}',
+                    ha='center',
+                    va='bottom' if coef >= 0 else 'top',
+                    fontsize=9,
+                    fontweight='bold'
+                )
+    
+    plt.tight_layout()
+    
+    if show:
+        plt.show()

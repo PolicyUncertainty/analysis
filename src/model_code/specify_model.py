@@ -27,6 +27,7 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 
 def specify_model(
     path_dict,
+    specs,
     subj_unc,
     custom_resolution_age,
     sim_specs=None,
@@ -34,9 +35,6 @@ def specify_model(
     debug_info=None,
 ):
     """Generate model class."""
-
-    # Generate model_specs
-    specs = generate_derived_and_data_derived_specs(path_dict)
 
     SRA_belief_solution, specs = select_solution_transition_func_and_update_specs(
         path_dict=path_dict,
@@ -166,9 +164,12 @@ def specify_and_solve_model(
 
     """
 
+    specs = generate_derived_and_data_derived_specs(path_dict)
+
     # Generate model_specs
     model = specify_model(
         path_dict=path_dict,
+        specs=specs,
         subj_unc=subj_unc,
         custom_resolution_age=custom_resolution_age,
         load_model=load_model,

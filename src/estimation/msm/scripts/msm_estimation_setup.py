@@ -70,9 +70,11 @@ def estimate_model(
         "SRA_at_start": 67,
         "SRA_at_retirement": 67,
     }
+    specs = generate_derived_and_data_derived_specs(path_dict)
 
     model = specify_model(
         path_dict=path_dict,
+        specs=specs,
         subj_unc=True,
         custom_resolution_age=None,
         load_model=load_model,

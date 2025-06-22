@@ -1,3 +1,4 @@
+import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -170,7 +171,6 @@ def plot_incomes(path_dict):
 
 
 def plot_total_income(specs):
-    params = {"interest_rate": 0.0}
 
     exp_levels = np.arange(0, 46)
     marriage_labels = ["Single", "Partnered"]
@@ -195,11 +195,11 @@ def plot_total_income(specs):
                             education=edu_val,
                             lagged_choice=choice,
                             experience=exp_share,
+                            health=jnp.array(0),
                             sex=sex_var,
                             partner_state=np.array(married_val),
                             asset_end_of_previous_period=0,
                             income_shock_previous_period=0,
-                            params=params,
                             model_specs=specs,
                         )
                     axs[edu_val, married_val].plot(

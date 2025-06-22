@@ -1,7 +1,8 @@
 ---
 # Utility parameters
-mu_men: 1.5
-mu_women: 1.5
+mu: 0.8
+mu_bequest_high: 0.4
+mu_bequest_low: 0.4
 
 # Full time work dis-utility men
 disutil_ft_work_good_men: 1.0

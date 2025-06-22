@@ -31,6 +31,7 @@ else:
 
 model = specify_model(
     path_dict=path_dict,
+    specs=specs,
     subj_unc=True,
     custom_resolution_age=None,
     load_model=load_sol_model,

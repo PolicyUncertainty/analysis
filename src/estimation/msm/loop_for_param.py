@@ -9,7 +9,11 @@ from estimation.msm.scripts.calc_moments import (
     calc_median_wealth_by_age,
 )
 from estimation.msm.scripts.msm_estimation_setup import load_and_prep_data
-from estimation.msm.scripts.plot_moment_fit import plot_wealth_moments
+from estimation.msm.scripts.plot_moment_fit import (
+    plot_choice_moments,
+    plot_transition_moments,
+    plot_wealth_moments,
+)
 from set_paths import create_path_dict
 from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 from specs.derive_specs import generate_derived_and_data_derived_specs
@@ -24,9 +28,9 @@ load_solution = None
 load_sol_model = True
 
 
-params = pickle.load(
-    open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
-)
+# params = pickle.load(
+#     open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
+# )
 # iterations = {}
 #
 # for bequest_scale in [2, 5, 10, 50]:
@@ -61,14 +65,20 @@ params = pickle.load(
 # )
 
 iterations = pickle.load(
-    open(path_dict["intermediate_data"] + f"msm_bequest_scale_iterations.pkl", "rb")
+    open(path_dict["intermediate_data"] + f"msm_mu_iterations.pkl", "rb")
 )
 
 wealth_moments = []
-wealth_labels = []
-for bequest_scale, moments in iterations.items():
+labor_transition_moments = []
+choice_moments = []
+moment_labels = []
+for mu, moments in iterations.items():
     wealth_moments.append(moments["wealth_moment"])
-    wealth_labels.append(f"Bequest scale: {bequest_scale}")
+    labor_transition_moments.append(moments["transition_moment"])
+    choice_moments.append(moments["choice_moment"])
+    moment_labels.append(f"mu: {mu}")
 
-plot_wealth_moments(wealth_moments, wealth_labels, specs)
+plot_wealth_moments(wealth_moments, moment_labels, specs)
+# plot_transition_moments(labor_transition_moments, moment_labels, specs)
+# plot_choice_moments(choice_moments, moment_labels, specs)
 plt.show()

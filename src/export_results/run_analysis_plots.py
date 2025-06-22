@@ -116,11 +116,11 @@ from export_results.figures.income_plots import (
 )
 from export_results.figures.wealth_plots import plot_budget_of_unemployed
 
-plot_incomes(path_dict)
+# plot_incomes(path_dict)
 # plot_partner_wage(path_dict, specs)
 # plot_total_income(specs)
 # plot_child_benefits(specs)
-# plot_budget_of_unemployed(specs)
+plot_budget_of_unemployed(specs)
 plt.show()
 # plt.close("all")
 

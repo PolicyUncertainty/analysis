@@ -122,8 +122,8 @@ def plot_wealth_moments(moments_list, moment_labels, specs):
 
     # Labor transitions moments
     fig, axs = plt.subplots(nrows=1, ncols=2)
-    axs[0].set_title("Men")
-    axs[1].set_title("Women")
+    axs[0].set_title("Low Educated")
+    axs[1].set_title("High Educated")
 
     sex_vars = moments_list[0].index.get_level_values("sex").unique()
     edu_vars = moments_list[0].index.get_level_values("education")
@@ -133,11 +133,12 @@ def plot_wealth_moments(moments_list, moment_labels, specs):
             for id_moment, moment in enumerate(moments_list):
                 type_wealth_moments = moment.loc[(sex_var, edu_var, slice(None))]
 
-                ax = axs[sex_var]
+                ax = axs[edu_var]
                 ax.plot(
                     type_wealth_moments,
-                    color=JET_COLOR_MAP[edu_var],
-                    ls=LINE_STYLES[id_moment % len(LINE_STYLES)],
+                    color=JET_COLOR_MAP[id_moment],
+                    # ls=LINE_STYLES[id_moment % len(LINE_STYLES)],
+                    # label=moment_labels[id_moment],
                 )
 
                 if sex_var == 0:
@@ -150,8 +151,8 @@ def plot_wealth_moments(moments_list, moment_labels, specs):
             ax.plot(
                 [],
                 [],
-                color=JET_COLOR_MAP[edu_vars[0]],
-                ls=LINE_STYLES[id_moment % len(LINE_STYLES)],
+                color=JET_COLOR_MAP[id_moment],
+                # ls=LINE_STYLES[id_moment % len(LINE_STYLES)],
                 label=moment_labels[id_moment],
             )
         ax.legend()

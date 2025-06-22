@@ -133,8 +133,13 @@ class est_class_from_paths:
 
         self.intermediate_est_data = intermediate_est_data
 
+        from specs.derive_specs import generate_derived_and_data_derived_specs
+
+        specs = generate_derived_and_data_derived_specs(path_dict)
+
         model = specify_model(
             path_dict=path_dict,
+            specs=path_dict,
             subj_unc=True,
             custom_resolution_age=None,
             load_model=load_model,

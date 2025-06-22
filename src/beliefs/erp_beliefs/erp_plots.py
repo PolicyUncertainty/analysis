@@ -4,7 +4,6 @@ import numpy as np
 from export_results.figures.color_map import JET_COLOR_MAP
 
 def plot_predicted_vs_actual_informed_share(path_dict, specs, show = False, df= None, params = None):
-
     """Plot the predicted vs actual informed shares by education level."""
     # Load data
     if df is None:
@@ -19,14 +18,16 @@ def plot_predicted_vs_actual_informed_share(path_dict, specs, show = False, df= 
     # Initialize DataFrame to hold predicted shares
     observed_shares = pd.DataFrame(index=ages_to_predict, columns=specs["education_labels"])
     predicted_shares = pd.DataFrame(columns=specs["education_labels"])
+    # Store raw fweights sums for marker sizing
+    fweights_dict = {}
 
     for edu_val, edu_label in enumerate(specs["education_labels"]):
         # Filter data for the current education level
         df_restricted = df[df["education"] == edu_val]
         params_edu = params[params["type"] == edu_label]
         
-        # Generate observed shares and weights
-        observed_shares_edu, weights = generate_observed_informed_shares(df_restricted)
+        # Generate observed shares, weights, and raw fweights
+        observed_shares_edu, weights, sum_fweights = generate_observed_informed_shares(df_restricted)
         
         # Generate predicted shares
         predicted_shares_edu = predicted_shares_by_age(
@@ -36,6 +37,8 @@ def plot_predicted_vs_actual_informed_share(path_dict, specs, show = False, df= 
         # Update the DataFrames with the results for the current education level
         observed_shares[edu_label] = observed_shares_edu
         predicted_shares[edu_label] = predicted_shares_edu
+        # Store raw fweights sums for this education level
+        fweights_dict[edu_label] = sum_fweights
     
     # Create plot
     plt.rcParams.update(
@@ -50,28 +53,64 @@ def plot_predicted_vs_actual_informed_share(path_dict, specs, show = False, df= 
     # Make lines of plots thicker
     plt.rcParams["lines.linewidth"] = 3
     fig, ax = plt.subplots(figsize=(16, 9))
+    
+    # Calculate marker size scaling parameters using raw fweights
+    all_fweights = pd.concat(fweights_dict.values())
+    min_fweight = all_fweights.min()
+    max_fweight = all_fweights.max()
+    # Scale marker sizes 
+    min_marker_size = 5
+    max_marker_size = 100
+    
     for edu_val, edu_label in enumerate(specs["education_labels"]):
-        ax.plot(
-            observed_shares[edu_label].rolling(window=3).mean(),
+        # Get observed shares (no rolling mean)
+        observed_shares_edu = observed_shares[edu_label]
+        
+        # Calculate marker sizes proportional to raw fweights
+        fweights_edu = fweights_dict[edu_label]
+        # Normalize fweights to marker size range
+        if max_fweight > min_fweight:  # Avoid division by zero
+            normalized_fweights = (fweights_edu - min_fweight) / (max_fweight - min_fweight)
+            marker_sizes = min_marker_size + normalized_fweights * (max_marker_size - min_marker_size)
+        else:
+            marker_sizes = pd.Series(index=fweights_edu.index, data=min_marker_size)
+        
+        # Create scatter plot with variable marker sizes
+        # Only plot points where we have valid observed data
+        valid_idx = observed_shares_edu.notna()
+        valid_ages = observed_shares_edu.index[valid_idx]
+        
+        ax.scatter(
+            valid_ages,
+            observed_shares_edu.loc[valid_ages],
+            s=marker_sizes.reindex(valid_ages, fill_value=min_marker_size).values,
             label=f"Obs. {edu_label}",
-            marker="o",
-            linestyle="None",
-            markersize=4,
             color=JET_COLOR_MAP[edu_val],
+            alpha=0.7,
+            edgecolors='black',
+            linewidth=0.5
         )
+        
+        # Plot predicted line
         ax.plot(
             predicted_shares[edu_label],
             color=JET_COLOR_MAP[edu_val],
             label=f"Est. {edu_label}",
         )
+    
     # Set labels
     ax.set_xlabel("Age")
     ax.set_ylabel("Share Informed")
     ax.legend()
-    fig.savefig(path_dict["paper_plots"] + "informed_shares.png")
+    
+    # Add a note about marker sizes
+    ax.text(0.02, 0.98, 'Marker size ∝ Sample size', 
+            transform=ax.transAxes, fontsize=20, 
+            verticalalignment='top', alpha=0.7)
+    
+    fig.savefig(path_dict["paper_plots"] + "informed_shares.png", dpi=300, bbox_inches='tight')
     if show:
         plt.show()
-
 
 
 def generate_observed_informed_shares(df):
@@ -83,8 +122,7 @@ def generate_observed_informed_shares(df):
     )
     informed_by_age = informed_sum_fweights / sum_fweights
     weights = sum_fweights / sum_fweights.sum()
-    return informed_by_age, weights
-
+    return informed_by_age, weights, sum_fweights
 
 
 def predicted_shares_by_age(params, ages_to_predict):

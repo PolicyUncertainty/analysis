@@ -27,9 +27,9 @@ from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 # Set specifications
 seeed = 123
 model_name = "msm_adjusted_assets"
-load_unc_solution = False
-load_no_unc_solution = False
 load_sol_model = True
+load_unc_solution = None
+load_no_unc_solution = None
 load_df = None
 
 
@@ -73,7 +73,7 @@ for i, sra in enumerate(sra_at_63):
     df_unc = df_unc.reset_index()
     # After the first run we can always set models and solutions to True
     load_sol_model = True
-    load_unc_solution = True
+    load_unc_solution = True if load_unc_solution is not None else load_unc_solution
 
     if i == 0:
         df_base_unc = df_unc.copy()
@@ -110,7 +110,9 @@ for i, sra in enumerate(sra_at_63):
 
     # After the first run we can always set models and solutions to True
     load_sol_model = True
-    load_no_unc_solution = True
+    load_no_unc_solution = (
+        True if load_no_unc_solution is not None else load_no_unc_solution
+    )
 
     if i == 0:
         df_base_no_unc = df_no_unc.copy()
@@ -144,7 +146,9 @@ for i, sra in enumerate(sra_at_63):
     )
     # After the first run we can always set models and solutions to True
     load_sol_model = True
-    load_no_unc_solution = True
+    load_no_unc_solution = (
+        True if load_no_unc_solution is not None else load_no_unc_solution
+    )
 
     df_debias = df_debias.reset_index()
 

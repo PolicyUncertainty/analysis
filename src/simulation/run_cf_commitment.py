@@ -26,8 +26,8 @@ from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 # Set specifications
 seeed = 123
 model_name = "msm_adjusted_assets"
-load_unc_solution = True  # baseline solution conntainer
-load_no_unc_solution = True  # counterfactual solution conntainer
+load_unc_solution = None  # baseline solution conntainer
+load_no_unc_solution = None  # counterfactual solution conntainer
 load_sol_model = True  # informed state as type
 load_df = (
     None  # True = load existing df, False = create new df, None = create but not save
@@ -71,7 +71,7 @@ for i, sra in enumerate(sra_at_63):
 
     df_base = df_base.reset_index()
 
-    load_unc_solution = True
+    load_unc_solution = True if load_unc_solution is not None else load_unc_solution
     load_sol_model = True
 
     # Simulate counterfactual with no uncertainty and expected increase
@@ -92,7 +92,9 @@ for i, sra in enumerate(sra_at_63):
 
     df_cf = df_cf.reset_index()
 
-    load_no_unc_solution = True
+    load_no_unc_solution = (
+        True if load_no_unc_solution is not None else load_no_unc_solution
+    )
 
     res_df_life_cycle = add_new_life_cycle_results(
         df_base=df_base,

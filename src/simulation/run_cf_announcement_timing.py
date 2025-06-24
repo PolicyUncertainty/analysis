@@ -27,7 +27,7 @@ from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 # Set specifications
 seeed = 123
 model_name = "msm_adjusted_assets"
-load_unc_solution = True  # baseline solution container
+load_unc_solution = None  # baseline solution container
 load_sol_model = True  # informed state as types
 load_df = (
     None  # True = load existing df, False = create new df, None = create but not save
@@ -68,12 +68,10 @@ for announcement_age in announcement_ages:
 
     df_base = df_base.reset_index()
 
-    if load_df_base is not None:
-        load_df_base = True
+    load_df_base = True if load_df_base is not None else load_df_base
 
     load_sol_model = True
-    load_sim_model = True
-    load_unc_solution = True
+    load_unc_solution = True if load_unc_solution is not None else load_unc_solution
 
     # Simulate counterfactual
     df_cf, _ = solve_and_simulate_scenario(

@@ -28,10 +28,10 @@ from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 seeed = 123
 model_name = "msm_adjusted_assets"
 load_solution = True  # baseline solution conntainer
-load_sol_model = True  # informed state as type
-load_df_biased = False
+load_unc_model = True  # informed state as type
+load_df_biased = None
 load_df_unbiased = (
-    False  # True = load existing df, False = create new df, None = create but not save
+    None  # True = load existing df, False = create new df, None = create but not save
 )
 
 
@@ -63,13 +63,13 @@ for i, sra in enumerate(sra_at_63):
         df_exists=load_df_biased,
         only_informed=False,
         solution_exists=load_solution,
-        sol_model_exists=load_sol_model,
+        sol_model_exists=load_unc_model,
     )
 
     df_base = df_base.reset_index()
 
     load_base_solution = True
-    load_sol_model = True
+    load_unc_model = True
 
     # Simulate counterfactual with no uncertainty and expected increase
     # same as simulated alpha_sim
@@ -85,7 +85,7 @@ for i, sra in enumerate(sra_at_63):
         df_exists=load_df_unbiased,
         only_informed=True,
         solution_exists=load_solution,
-        sol_model_exists=load_sol_model,
+        sol_model_exists=load_unc_model,
     )
 
     df_cf = df_cf.reset_index()

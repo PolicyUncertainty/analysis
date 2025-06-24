@@ -153,6 +153,5 @@ def generate_start_states_from_obs(
 
     # df = pd.DataFrame(initial_states)
     # df["wealth"] = initial_wealth
-    # breakpoint()
 
     return initial_states

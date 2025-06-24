@@ -27,7 +27,7 @@ from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 # Set specifications
 seeed = 123
 model_name = "msm_adjusted_assets"
-load_solution = True  # baseline solution conntainer
+load_unc_solution = True  # baseline solution container
 load_sol_model = True  # informed state as types
 load_df = (
     None  # True = load existing df, False = create new df, None = create but not save
@@ -62,7 +62,7 @@ for announcement_age in announcement_ages:
         SRA_at_start=67,
         model_name=model_name,
         df_exists=load_df_base,
-        solution_exists=load_solution,
+        solution_exists=load_unc_solution,
         sol_model_exists=load_sol_model,
     )
 
@@ -73,7 +73,7 @@ for announcement_age in announcement_ages:
 
     load_sol_model = True
     load_sim_model = True
-    load_solution = True
+    load_unc_solution = True
 
     # Simulate counterfactual
     df_cf, _ = solve_and_simulate_scenario(
@@ -86,7 +86,7 @@ for announcement_age in announcement_ages:
         SRA_at_start=67,
         model_name=model_name,
         df_exists=load_df,
-        solution_exists=load_solution,
+        solution_exists=load_unc_solution,
         sol_model_exists=load_sol_model,
     )
 

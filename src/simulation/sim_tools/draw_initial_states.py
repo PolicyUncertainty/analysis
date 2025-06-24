@@ -311,5 +311,3 @@ def draw_start_wealth_dist(start_period_data_edu, n_agents_edu, method="uniform"
     # # Adjust layout and show the plot
     # plt.tight_layout()
     # plt.show()
-
-    # breakpoint()

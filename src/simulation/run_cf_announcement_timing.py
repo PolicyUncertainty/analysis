@@ -26,10 +26,9 @@ from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 # %%
 # Set specifications
 seeed = 123
-model_name = "disability"
+model_name = "msm_adjusted_assets"
 load_solution = True  # baseline solution conntainer
 load_sol_model = True  # informed state as types
-load_sim_model = True  # informed state stochastic
 load_df = (
     None  # True = load existing df, False = create new df, None = create but not save
 )
@@ -53,7 +52,7 @@ for announcement_age in announcement_ages:
         print("Start simulation for announcement age: ", announcement_age)
 
     # Simulate baseline with subjective belief
-    df_base = solve_and_simulate_scenario(
+    df_base, _ = solve_and_simulate_scenario(
         path_dict=path_dict,
         params=params,
         subj_unc=True,
@@ -65,8 +64,9 @@ for announcement_age in announcement_ages:
         df_exists=load_df_base,
         solution_exists=load_solution,
         sol_model_exists=load_sol_model,
-        sim_model_exists=load_sim_model,
-    ).reset_index()
+    )
+
+    df_base = df_base.reset_index()
 
     if load_df_base is not None:
         load_df_base = True
@@ -76,7 +76,7 @@ for announcement_age in announcement_ages:
     load_solution = True
 
     # Simulate counterfactual
-    df_cf = solve_and_simulate_scenario(
+    df_cf, _ = solve_and_simulate_scenario(
         path_dict=path_dict,
         params=params,
         subj_unc=True,
@@ -88,8 +88,9 @@ for announcement_age in announcement_ages:
         df_exists=load_df,
         solution_exists=load_solution,
         sol_model_exists=load_sol_model,
-        sim_model_exists=load_sim_model,
-    ).reset_index()
+    )
+
+    df_cf = df_cf.reset_index()
 
     res_df_life_cycle = add_new_life_cycle_results(
         df_base=df_base,

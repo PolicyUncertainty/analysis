@@ -26,11 +26,10 @@ from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 # %%
 # Set specifications
 seeed = 123
-model_name = "disability"
+model_name = "msm_adjusted_assets"
 load_unc_solution = True
 load_no_unc_solution = True
 load_sol_model = True
-load_sim_model = True
 load_df = None
 
 
@@ -69,11 +68,9 @@ for i, sra in enumerate(sra_at_63):
     #     df_exists=load_df,
     #     solution_exists=load_unc_solution,
     #     sol_model_exists=load_sol_model,
-    #     sim_model_exists=load_sim_model,
     # )
     # # After the first run we can always set models and solutions to True
     # load_sol_model = True
-    # load_sim_model = True
     # load_unc_solution = True
     #
     # if i == 0:
@@ -107,11 +104,9 @@ for i, sra in enumerate(sra_at_63):
     #     df_exists=load_df,
     #     solution_exists=load_no_unc_solution,
     #     sol_model_exists=load_sol_model,
-    #     sim_model_exists=load_sim_model,
     # )
     # # After the first run we can always set models and solutions to True
     # load_sol_model = True
-    # load_sim_model = True
     # load_no_unc_solution = True
     #
     # if i == 0:
@@ -133,7 +128,7 @@ for i, sra in enumerate(sra_at_63):
     #     )
 
     # Create estimated model
-    df_debias = solve_and_simulate_scenario(
+    df_debias, _ = solve_and_simulate_scenario(
         path_dict=path_dict,
         params=params,
         subj_unc=False,
@@ -146,27 +141,25 @@ for i, sra in enumerate(sra_at_63):
         df_exists=load_df,
         solution_exists=load_no_unc_solution,
         sol_model_exists=load_sol_model,
-        sim_model_exists=load_sim_model,
     )
     # After the first run we can always set models and solutions to True
     load_sol_model = True
-    load_sim_model = True
     load_no_unc_solution = True
 
+    df_debias = df_debias.reset_index()
+
     if i == 0:
-        df_base_debias = df_debias.reset_index().copy()
+        df_base_debias = df_debias.copy()
 
     else:
-        results_row = calc_overall_results(
-            df_base=df_base_debias, df_cf=df_debias.reset_index()
-        )
+        results_row = calc_overall_results(df_base=df_base_debias, df_cf=df_debias)
 
         for key, value in results_row.items():
             result_df_debias.loc[i, key] = value
 
         result_df_debias.loc[i, "cv"] = calc_compensated_variation(
             df_base=df_base_debias,
-            df_cf=df_debias.reset_index(),
+            df_cf=df_debias,
             params=params,
             specs=specs,
         )

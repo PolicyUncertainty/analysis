@@ -13,7 +13,7 @@ path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict)
 
 
-model_name = "msm_mu_fixed"
+model_name = "msm_first"
 load_df = True
 load_solution = True
 load_sol_model = True
@@ -23,10 +23,11 @@ params = pickle.load(
     open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
 )
 
-plot_empirical_only = input("Plot empirical moments only? (y/n): ") == "y"
-
 data_decision = load_and_prep_data(path_dict, params)
 data_decision["age"] = data_decision["period"] + specs["start_age"]
+
+plot_empirical_only = input("Plot empirical moments only? (y/n): ") == "y"
+
 
 if plot_empirical_only:
     df_list = [data_decision]

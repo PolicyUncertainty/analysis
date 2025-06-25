@@ -10,7 +10,7 @@ from simulation.figures.sra_increase import sra_increase_aggregate_plot
 
 path_dict = create_path_dict()
 
-model_name = "disability"
+model_name = "msm_adjusted_assets"
 
 # # Exclude the first rpw
 sra_increase_aggregate_plot(path_dict, model_name)

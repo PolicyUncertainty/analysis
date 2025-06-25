@@ -20,8 +20,8 @@ params_to_estimate_names = [
     "disutil_unemployed_good_men",
     "disutil_unemployed_bad_men",
     # Taste shock men - 1 parameter
-    "taste_shock_scale_m,en",
-    "bequest_scale"
+    "taste_shock_scale_men",
+    "bequest_scale",
     # # Men job finding - 3 parameters
     "job_finding_logit_const_men",
     "job_finding_logit_high_educ_men",

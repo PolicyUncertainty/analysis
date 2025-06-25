@@ -139,7 +139,7 @@ class est_class_from_paths:
 
         model = specify_model(
             path_dict=path_dict,
-            specs=path_dict,
+            specs=specs,
             subj_unc=True,
             custom_resolution_age=None,
             load_model=load_model,

@@ -28,7 +28,7 @@ from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 seeed = 123
 model_name = "msm_adjusted_assets"
 load_model = True  # informed state as type
-load_unc_solution = None  # baseline solution conntainer
+load_unc_solution = True  # baseline solution conntainer
 load_df_biased = None
 load_df_unbiased = (
     None  # True = load existing df, False = create new df, None = create but not save

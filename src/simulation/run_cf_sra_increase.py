@@ -28,8 +28,8 @@ from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 seeed = 123
 model_name = "msm_adjusted_assets"
 load_sol_model = True
-load_unc_solution = None
-load_no_unc_solution = None
+load_unc_solution = False
+load_no_unc_solution = False
 load_df = None
 
 

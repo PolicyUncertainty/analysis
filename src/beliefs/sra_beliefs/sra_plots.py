@@ -238,3 +238,49 @@ def plot_alpha_heterogeneity_coefficients_combined(
     
     if show:
         plt.show()
+
+def plot_example_sra_evolution(alpha_star, SRA_30, resolution_age, alpha = None, sigma_sq = None, use_estimated_params = False, path_dict= None, show = False):
+    """ Plot the evolution of true policy and SRA expectations over age with confidence intervals."""
+
+    if use_estimated_params:
+        # Load estimated parameters from the beliefs data
+        df = pd.read_csv(path_dict["beliefs_data"] + "beliefs_parameters.csv")
+        alpha = df[df["parameter"] == "alpha"]["estimate"].values[0]
+        sigma_sq = df[df["parameter"] == "sigma_sq"]["estimate"].values[0]
+    
+    if alpha is None or sigma_sq is None:
+        raise ValueError("Alpha and sigma_sq must be provided or estimated from data.")
+
+    ages = np.arange(30, resolution_age + 1, 1)
+    SRA_t = np.ones(ages.shape) * SRA_30
+    SRA_t = SRA_t + (ages - 30) * alpha_star
+    exp_SRA_resolution = SRA_t + (resolution_age - ages) * alpha
+    ci_upper = exp_SRA_resolution + 1.96 * np.sqrt(sigma_sq) * np.sqrt(
+        resolution_age - ages
+    )
+    ci_lower = exp_SRA_resolution - 1.96 * np.sqrt(sigma_sq) * np.sqrt(
+        resolution_age - ages
+    )
+    fig, ax = plt.subplots(figsize=(16, 9))
+    ax.plot(ages, SRA_t, label="$SRA_t$", color="red")
+    ax.plot(
+        ages,
+        exp_SRA_resolution,
+        label=f"$E[SRA_{{{resolution_age}}}|SRA_t]$",
+        color="C0",
+    )
+    ax.plot(ages, ci_upper, label="95% CI", linestyle="--", color="C0")
+    ax.plot(ages, ci_lower, label="", linestyle="--", color="C0")
+    ax.set_xlabel("Age")
+    ax.set_ylabel("SRA")
+    ax.legend()
+
+    #ax.set_title(
+    #    f"Evolution of SRA Expectations with $\\alpha^*={alpha_star}$, $SRA_{{30}}={SRA_30}$, $\\alpha={alpha}$, $\\sigma^2={sigma_sq}$"
+    #)
+    #ax.grid()
+    plt.tight_layout()
+    
+    if show:
+        plt.show()
+

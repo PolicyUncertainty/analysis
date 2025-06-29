@@ -27,7 +27,7 @@ plot_erp_beliefs_by_cohort(path_dict, show=show_plots)
 plt.savefig(
     path_dict["belief_plots"] + "erp_beliefs_by_cohort.png", bbox_inches="tight"
 )
-plot_erp_violin_plots_by_cohort(path_dict, show=show_plots)
+plot_erp_violin_plots_by_cohort(path_dict, censor_above=25, show=show_plots)
 plt.savefig(
     path_dict["belief_plots"] + "erp_violin_plots_by_cohort.png", bbox_inches="tight"
 )
@@ -40,8 +40,8 @@ plt.savefig(
 from beliefs.sra_beliefs.sra_plots import (
     plot_expected_sra_vs_birth_year,
     plot_truncated_normal_for_response,
-    plot_alpha_heterogeneity_coefficients,
     plot_alpha_heterogeneity_coefficients_combined,
+    plot_example_sra_evolution,
 )
 
 responses = [[30, 40, 30], [20, 50, 30], [10, 60, 30]]
@@ -56,6 +56,12 @@ plot_expected_sra_vs_birth_year(df=None, path_dict=path_dict, show=show_plots)
 plt.savefig(
     path_dict["belief_plots"] + "expected_sra_vs_birth_year.png", bbox_inches="tight"
 )
+
+plot_example_sra_evolution(
+    alpha_star=0.0, SRA_30=67, resolution_age=65, use_estimated_params=True, path_dict=path_dict, show=show_plots 
+)
+plt.savefig(
+    path_dict["belief_plots"] + "example_sra_evolution_no_increase.png", bbox_inches="tight")
 
 # sra heterogeneity plots
 plot_alpha_heterogeneity_coefficients_combined(path_dict=path_dict, show=show_plots)

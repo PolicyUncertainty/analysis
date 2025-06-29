@@ -3,11 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from export_results.figures.color_map import JET_COLOR_MAP
 
-
 def plot_sra_beliefs_by_cohort(paths_dict, show=False):
-
-    soep_is_path = paths_dict["intermediate_data"] + "beliefs/soep_is_clean.csv"
-    df_soep_is = pd.read_csv(soep_is_path, dtype={"gebjahr": int})
+    df_soep_is = pd.read_stata(paths_dict["soep_is"], convert_categoricals=False)
 
     df_soep_is.loc[:, "expected_stat_ret_age"] = (
         df_soep_is["pol_unc_stat_ret_age_67"] * 67
@@ -59,7 +56,6 @@ def plot_sra_beliefs_by_cohort(paths_dict, show=False):
         stacked=True,
         ax=ax,
         label=["67", "68", "69+"],
-        color=[JET_COLOR_MAP[0], JET_COLOR_MAP[1], JET_COLOR_MAP[2]]
     )
     # Replace birth cohort integers by two lined strings first row given the start date if cohor and second row the end date of cohort
     ax.set_xticks(range(0, 8))
@@ -89,10 +85,7 @@ def plot_sra_beliefs_by_cohort(paths_dict, show=False):
 
 def plot_erp_beliefs_by_cohort(paths_dict, show=False):
     # Load and prepare the data
-    df_soep_is = pd.read_csv(
-        paths_dict["intermediate_data"] + "beliefs/soep_is_clean.csv",
-        dtype={"gebjahr": int},
-    )
+    df_soep_is = pd.read_stata(paths_dict["soep_is"], convert_categoricals=False)
     relevant_columns = [
         "belief_pens_deduct",
         "belief_pens_deduct_rob_times1_5",
@@ -128,14 +121,13 @@ def plot_erp_beliefs_by_cohort(paths_dict, show=False):
         y="belief_pens_deduct",
         ax=ax,
         label="mean ERP belief",
-        color=JET_COLOR_MAP[0]
     )
     ded_data_edu_median.plot(
         y="belief_pens_deduct",
         ax=ax,
+        #     color="grey",
         ls="--",
         label="median ERP belief",
-        color=JET_COLOR_MAP[1]
     )
     ax.errorbar(
         x=ded_data_edu_mean.index,
@@ -143,10 +135,11 @@ def plot_erp_beliefs_by_cohort(paths_dict, show=False):
         yerr=ded_data_edu_sem,
         fmt="o",
         color="black",
+        ecolor="grey",
         capsize=5,
     )
     # Make horizontal line at 3.6% pension deduction
-    ax.axhline(y=3.6, color=JET_COLOR_MAP[3], linestyle="--", label="true ERP")
+    ax.axhline(y=3.6, color="gray", linestyle="--", label="true ERP")
     ax.set_xticks(range(0, 9))
     # Make the strings above such that they span two lines on x axis
     ax.set_yticks(np.arange(0, 20, 2.5))
@@ -173,108 +166,20 @@ def plot_erp_beliefs_by_cohort(paths_dict, show=False):
     if show:
         plt.show()
 
-def plot_erp_box_plots_by_cohort(paths_dict, show=False):
-    """
-    Plot box plots of ERP beliefs by birth cohort groups.
-    Shows the distribution of beliefs within each cohort.
-    """
-    # Load and prepare the data
-    df_soep_is = pd.read_csv(
-        paths_dict["intermediate_data"] + "beliefs/soep_is_clean.csv",
-        dtype={"gebjahr": int},
-    )
-    relevant_columns = [
-        "belief_pens_deduct",
-        "belief_pens_deduct_rob_times1_5",
-        "belief_pens_deduct_rob_times0_5",
-        "gebjahr",
-    ]
-    data_deduction = df_soep_is[~df_soep_is["belief_pens_deduct"].isnull()][
-        relevant_columns
-    ]
-    age_bins = [-np.inf] + list(range(1957, 2001, 5))
-    data_deduction["gebjahr_group"] = create_gebjahr_groups(
-        data_deduction, age_bins=age_bins
-    )
-    
-    # Set matplotlib fontsizes
-    plt.rcParams.update(
-        {
-            "axes.titlesize": 30,
-            "axes.labelsize": 30,
-            "xtick.labelsize": 30,
-            "ytick.labelsize": 30,
-            "legend.fontsize": 30,
-        }
-    )
-    
-    # Create the box plot
-    fig, ax = plt.subplots(figsize=(16, 9))
-    
-    # Prepare data for box plot
-    box_data = []
-    cohort_labels = [
-        "1956 &\nbefore",
-        "1957-\n1961",
-        "1962-\n1966", 
-        "1967-\n1971",
-        "1972-\n1976",
-        "1977-\n1981",
-        "1982-\n1986",
-        "1987-\n1991",
-        "1992-\n1996"
-    ]
-    
-    # Extract data for each cohort group
-    for group_id in range(len(age_bins) - 1):
-        group_data = data_deduction[data_deduction["gebjahr_group"] == group_id]["belief_pens_deduct"]
-        if not group_data.empty:
-            box_data.append(group_data.values)
-        else:
-            box_data.append([])
-    
-    # Create box plot
-    bp = ax.boxplot(box_data, labels=cohort_labels, patch_artist=True)
-    
-    # Customize box plot appearance
-    for patch in bp['boxes']:
-        patch.set_facecolor(JET_COLOR_MAP[0])
-        patch.set_alpha(0.7)
-        patch.set_edgecolor(JET_COLOR_MAP[7])
-    
-    for whisker in bp['whiskers']:
-        whisker.set_linewidth(2)
-        whisker.set_color(JET_COLOR_MAP[7])
-    
-    for cap in bp['caps']:
-        cap.set_linewidth(2)
-        cap.set_color(JET_COLOR_MAP[7])
-    
-    for median in bp['medians']:
-        median.set_color(JET_COLOR_MAP[3])
-        median.set_linewidth(2)
-    
-    # Add horizontal line at 3.6% pension deduction (true ERP)
-    ax.axhline(y=3.6, color=JET_COLOR_MAP[8], linestyle="--", linewidth=2, label="true ERP")
-    
-    # Customize axes
-    ax.set_xlabel("Birth Cohort")
-    ax.set_ylabel("Penalty in %")
-    ax.set_ylim([0, 50])
-    ax.set_yticks(np.arange(0, 55, 5))
-    ax.legend(loc="upper left", fancybox=True, framealpha=0.5)
-    
-    # Rotate x-axis labels for better readability
-    plt.setp(ax.get_xticklabels(), rotation=0)
-    
-    fig.tight_layout()
-    if show:
-        plt.show()
 
-def plot_erp_violin_plots_by_cohort(paths_dict, show=False):
+def plot_erp_violin_plots_by_cohort(paths_dict, show=False, censor_above=None):
     """
     Plot violin plots of ERP beliefs by birth cohort groups.
     Shows the distribution density of beliefs within each cohort.
+    
+    Parameters:
+    -----------
+    paths_dict : dict
+        Dictionary containing paths to data files
+    show : bool, default False
+        Whether to display the plot
+    censor_above : float or None, default None
+        If specified, values above this threshold will be censored (capped at this value)
     """
     # Load and prepare the data
     df_soep_is = pd.read_csv(
@@ -290,6 +195,12 @@ def plot_erp_violin_plots_by_cohort(paths_dict, show=False):
     data_deduction = df_soep_is[~df_soep_is["belief_pens_deduct"].isnull()][
         relevant_columns
     ]
+    
+    # Apply censoring if specified
+    if censor_above is not None:
+        data_deduction = data_deduction.copy()
+        data_deduction["belief_pens_deduct"] = data_deduction["belief_pens_deduct"].clip(upper=censor_above)
+    
     age_bins = [-np.inf] + list(range(1957, 2001, 5))
     data_deduction["gebjahr_group"] = create_gebjahr_groups(
         data_deduction, age_bins=age_bins
@@ -333,7 +244,7 @@ def plot_erp_violin_plots_by_cohort(paths_dict, show=False):
     
     # Create violin plot
     vp = ax.violinplot(violin_data, positions=range(1, len(cohort_labels) + 1), 
-                       widths=0.8, showmeans=True, showmedians=True)
+                       widths=0.8, showmeans=True, showmedians=True, bw_method='scott')
     
     # Customize violin plot appearance
     for pc in vp['bodies']:
@@ -365,14 +276,22 @@ def plot_erp_violin_plots_by_cohort(paths_dict, show=False):
     # Customize axes
     ax.set_xlabel("Birth Cohort")
     ax.set_ylabel("Penalty in %")
-    ax.set_ylim([0, 50])
-    ax.set_yticks(np.arange(0, 55, 5))
+    
+    # Set y-axis limit based on censoring threshold
+    if censor_above is not None:
+        y_max = censor_above + 2  # 2 units above censoring threshold
+    else:
+        y_max = 50  # original default
+    
+    ax.set_ylim([0, y_max])
+    ax.set_yticks(np.arange(0, y_max + 5, 5))
     ax.set_xticks(range(1, len(cohort_labels) + 1))
     ax.set_xticklabels(cohort_labels)
     
     # Create legend with all elements
     handles = [ax.lines[0], mean_line, median_line]  # true ERP line, mean line, median line
     labels = ['true ERP', 'mean of cohort', 'median of cohort']
+    
     ax.legend(handles=handles, labels=labels, loc="upper left", fancybox=True, framealpha=0.5)
     
     # Rotate x-axis labels for better readability
@@ -381,6 +300,7 @@ def plot_erp_violin_plots_by_cohort(paths_dict, show=False):
     fig.tight_layout()
     if show:
         plt.show()
+
 
 def create_gebjahr_groups(data, age_bins):
     return pd.cut(

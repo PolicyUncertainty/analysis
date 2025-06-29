@@ -262,15 +262,15 @@ def plot_example_sra_evolution(alpha_star, SRA_30, resolution_age, alpha = None,
         resolution_age - ages
     )
     fig, ax = plt.subplots(figsize=(16, 9))
-    ax.plot(ages, SRA_t, label="$SRA_t$", color="red")
+    ax.plot(ages, SRA_t, label="$SRA_t$", color=JET_COLOR_MAP[3])
     ax.plot(
         ages,
         exp_SRA_resolution,
         label=f"$E[SRA_{{{resolution_age}}}|SRA_t]$",
         color="C0",
     )
-    ax.plot(ages, ci_upper, label="95% CI", linestyle="--", color="C0")
-    ax.plot(ages, ci_lower, label="", linestyle="--", color="C0")
+    ax.plot(ages, ci_upper, label="95% CI", linestyle="--", color=JET_COLOR_MAP[0])
+    ax.plot(ages, ci_lower, label="", linestyle="--", color= JET_COLOR_MAP[0])
     ax.set_xlabel("Age")
     ax.set_ylabel("SRA")
     ax.legend()

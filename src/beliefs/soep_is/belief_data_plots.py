@@ -4,7 +4,10 @@ import matplotlib.pyplot as plt
 from export_results.figures.color_map import JET_COLOR_MAP
 
 def plot_sra_beliefs_by_cohort(paths_dict, show=False):
-    df_soep_is = pd.read_stata(paths_dict["soep_is"], convert_categoricals=False)
+    df_soep_is = pd.read_csv(
+        paths_dict["intermediate_data"] + "beliefs/soep_is_clean.csv",
+        dtype={"gebjahr": int},
+    )
 
     df_soep_is.loc[:, "expected_stat_ret_age"] = (
         df_soep_is["pol_unc_stat_ret_age_67"] * 67
@@ -85,7 +88,10 @@ def plot_sra_beliefs_by_cohort(paths_dict, show=False):
 
 def plot_erp_beliefs_by_cohort(paths_dict, show=False):
     # Load and prepare the data
-    df_soep_is = pd.read_stata(paths_dict["soep_is"], convert_categoricals=False)
+    df_soep_is = pd.read_csv(
+        paths_dict["intermediate_data"] + "beliefs/soep_is_clean.csv",
+        dtype={"gebjahr": int},
+    )
     relevant_columns = [
         "belief_pens_deduct",
         "belief_pens_deduct_rob_times1_5",
@@ -244,21 +250,21 @@ def plot_erp_violin_plots_by_cohort(paths_dict, show=False, censor_above=None):
     
     # Create violin plot
     vp = ax.violinplot(violin_data, positions=range(1, len(cohort_labels) + 1), 
-                       widths=0.8, showmeans=True, showmedians=True, bw_method='scott')
+                       widths=0.8, showmeans=True, showmedians=True, bw_method=0.2)
     
     # Customize violin plot appearance
     for pc in vp['bodies']:
-        pc.set_facecolor(JET_COLOR_MAP[0])
+        pc.set_facecolor('white')
         pc.set_alpha(0.7)
-        pc.set_edgecolor(JET_COLOR_MAP[7])
-        pc.set_linewidth(1)
+        pc.set_edgecolor(JET_COLOR_MAP[0])
+        pc.set_linewidth(2)
     
     # Customize the statistical lines
     vp['cmeans'].set_color(JET_COLOR_MAP[3])
-    vp['cmeans'].set_linewidth(2)
+    vp['cmeans'].set_linewidth(3)
     vp['cmedians'].set_color(JET_COLOR_MAP[1])
-    vp['cmedians'].set_linewidth(2)
-    vp['cbars'].set_color(JET_COLOR_MAP[7])
+    vp['cmedians'].set_linewidth(3)
+    vp['cbars'].set_color(JET_COLOR_MAP[7]) 
     vp['cbars'].set_linewidth(1)
     vp['cmins'].set_color(JET_COLOR_MAP[7])
     vp['cmins'].set_linewidth(1)
@@ -284,7 +290,7 @@ def plot_erp_violin_plots_by_cohort(paths_dict, show=False, censor_above=None):
         y_max = 50  # original default
     
     ax.set_ylim([0, y_max])
-    ax.set_yticks(np.arange(0, y_max + 5, 5))
+    ax.set_yticks(np.arange(0, (censor_above//5 + 1) * 5, 5))
     ax.set_xticks(range(1, len(cohort_labels) + 1))
     ax.set_xticklabels(cohort_labels)
     

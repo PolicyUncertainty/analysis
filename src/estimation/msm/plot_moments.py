@@ -13,7 +13,7 @@ path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict)
 
 
-model_name = "msm_first"
+model_name = specs["model_name"]
 load_df = True
 load_solution = True
 load_sol_model = True
@@ -51,8 +51,15 @@ else:
     data_sim = data_sim.reset_index()
 
     df_list = [data_decision, data_sim]
-    label_list = ["Empirical", "Simulated"]
+    label_list = ["empirical", "simulated"]
 
 
 plot_moments_all_moments_for_dfs(df_list, label_list, specs)
-plt.show()
+# Get figure numbers and save
+for i, fig in enumerate(plt.get_fignums()):
+    fig = plt.figure(fig)
+    fig.savefig(
+        path_dict["specs"] + f"msm_moments_{model_name}_{i}.png",
+        bbox_inches="tight",
+    )
+    plt.close(fig)

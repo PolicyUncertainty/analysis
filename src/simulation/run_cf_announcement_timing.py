@@ -25,8 +25,8 @@ from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 
 # %%
 # Set specifications
-seeed = 123
-model_name = "msm_adjusted_assets"
+model_name = specs["model_name"]
+seed = 123
 load_sol_model = True  # informed state as types
 load_unc_solution = True  # baseline solution container
 load_df = (

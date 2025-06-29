@@ -84,7 +84,7 @@ def estimate_model(
     data_decision = load_and_prep_data(path_dict=path_dict, start_params=start_params)
 
     # Load empirical data
-    empirical_moments = calc_all_moments(data_decision)
+    empirical_moments = calc_all_moments(data_decision, empirical=True)
 
     if weighting_method == "identity":
         weights = np.identity(empirical_moments.shape[0])
@@ -109,7 +109,7 @@ def estimate_model(
     def simulate_moments_for_params(params_int):
         df = sim_func(params_int)
         df = df.reset_index()
-        moments = calc_all_moments(df)
+        moments = calc_all_moments(df, empirical=False)
 
         return moments
 

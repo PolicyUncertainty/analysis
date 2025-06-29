@@ -26,7 +26,7 @@ from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 # %%
 # Set specifications
 seeed = 123
-model_name = "msm_adjusted_assets"
+model_name = specs["model_name"]
 load_sol_model = True
 load_unc_solution = False
 load_no_unc_solution = False

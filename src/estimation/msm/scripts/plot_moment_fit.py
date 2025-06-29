@@ -13,10 +13,11 @@ def plot_moments_all_moments_for_dfs(df_list, moment_labels, specs):
     labor_supply_moment_list = []
     labor_transitions_moment_list = []
     wealth_moment_list = []
-    for df in df_list:
+    for i, df in enumerate(df_list):
         labor_supply_moment_list += [calc_labor_supply_choice(df)]
         labor_transitions_moment_list += [calc_labor_transitions_by_age_bins(df)]
-        wealth_moment_list += [calc_median_wealth_by_age(df)]
+        empirical = True if moment_labels[i] == "empirical" else False
+        wealth_moment_list += [calc_median_wealth_by_age(df, empirical=empirical)]
 
     plot_choice_moments(labor_supply_moment_list, moment_labels, specs)
     plot_transition_moments(labor_transitions_moment_list, moment_labels, specs)

@@ -13,5 +13,5 @@
 
 module add cuda/12.4.1
 
-python run_msm.py
+#python run_msm.py
 python plot_moments.py

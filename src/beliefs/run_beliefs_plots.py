@@ -38,13 +38,13 @@ plt.savefig(
 
 # sra plots
 from beliefs.sra_beliefs.sra_plots import (
-    plot_expected_sra_vs_birth_year,
-    plot_truncated_normal_for_response,
     plot_alpha_heterogeneity_coefficients_combined,
     plot_example_sra_evolution,
+    plot_expected_sra_vs_birth_year,
+    plot_truncated_normal_for_response,
 )
 
-responses = [[30, 40, 30], [20, 50, 30], [10, 60, 30]]
+responses = [[30, 40, 30], [20, 50, 30], [100, 0, 0]]
 for response in responses:
     response_str = "_".join(map(str, response))
     plot_truncated_normal_for_response(response, options=specs, show=show_plots)
@@ -58,22 +58,30 @@ plt.savefig(
 )
 
 plot_example_sra_evolution(
-    alpha_star=0.0, SRA_30=67, resolution_age=65, use_estimated_params=True, path_dict=path_dict, show=show_plots 
+    alpha_star=0.0,
+    SRA_30=67,
+    resolution_age=63,
+    use_estimated_params=True,
+    path_dict=path_dict,
+    show=show_plots,
 )
 plt.savefig(
-    path_dict["belief_plots"] + "example_sra_evolution_no_increase.png", bbox_inches="tight")
+    path_dict["belief_plots"] + "example_sra_evolution_no_increase.png",
+    bbox_inches="tight",
+)
 
 # sra heterogeneity plots
 plot_alpha_heterogeneity_coefficients_combined(path_dict=path_dict, show=show_plots)
 plt.savefig(
-    path_dict["belief_plots"] + "alpha_heterogeneity_coefficients_combined.png", bbox_inches="tight"
+    path_dict["belief_plots"] + "alpha_heterogeneity_coefficients_combined.png",
+    bbox_inches="tight",
 )
 
 # erp plots
 from beliefs.erp_beliefs.erp_plots import plot_predicted_vs_actual_informed_share
-plot_predicted_vs_actual_informed_share(
-    path_dict, specs, show=show_plots
-)
+
+plot_predicted_vs_actual_informed_share(path_dict, specs, show=show_plots)
 plt.savefig(
-    path_dict["belief_plots"] + "predicted_vs_actual_informed_share.png", bbox_inches="tight",
+    path_dict["belief_plots"] + "predicted_vs_actual_informed_share.png",
+    bbox_inches="tight",
 )

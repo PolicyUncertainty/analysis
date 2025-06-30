@@ -14,8 +14,8 @@ specs = generate_derived_and_data_derived_specs(path_dict)
 
 
 model_name = specs["model_name"]
-load_df = True
-load_solution = True
+load_df = None
+load_solution = None
 load_sol_model = True
 
 
@@ -59,7 +59,7 @@ plot_moments_all_moments_for_dfs(df_list, label_list, specs)
 for i, fig in enumerate(plt.get_fignums()):
     fig = plt.figure(fig)
     fig.savefig(
-        path_dict["specs"] + f"msm_moments_{model_name}_{i}.png",
+        path_dict["plots"] + f"msm_moments_{model_name}_{i}.png",
         bbox_inches="tight",
     )
     plt.close(fig)

@@ -27,7 +27,8 @@ def estimate_model(
     params_to_estimate_names,
     file_append,
     load_model,
-    start_params_all,
+    start_params_all,  #
+    supply_jacobian=False,
     use_weights=True,
     last_estimate=None,
     save_results=True,
@@ -75,6 +76,11 @@ def estimate_model(
         save_results=save_results,
     )
 
+    if supply_jacobian:
+        add_kwargs = {"jac": est_class.jacobian_func}
+    else:
+        add_kwargs = {}
+
     result = om.minimize(
         fun=est_class.crit_func,
         params=start_params,
@@ -82,6 +88,7 @@ def estimate_model(
         algorithm="scipy_lbfgsb",
         # logging="test_log.db",
         error_handling="continue",
+        **add_kwargs,
     )
     pickle.dump(
         result, open(path_dict["struct_results"] + f"em_result_{file_append}.pkl", "wb")
@@ -195,16 +202,15 @@ class est_class_from_paths:
 
         return ll_value
 
-    # if supply_jacobian:
-    #     def jacobian_func(params):
-    #         """Calculate the jacobian of the likelihood function."""
-    #
-    #         scores = calc_scores(
-    #                     ll_func=self.ll_func,
-    #                     est_params=params,
-    #                     params_to_estimate_names=params.keys(),
-    #                 )
-    #         return self.weights @ scores / self.weight_sum
+    def jacobian_func(self, params):
+        """Calculate the jacobian of the likelihood function."""
+
+        scores = calc_scores(
+            ll_func=self.ll_func,
+            est_params=params,
+            params_to_estimate_names=params.keys(),
+        )
+        return self.weights @ scores / self.weight_sum
 
 
 def load_and_prep_data(path_dict, start_params, model_class, drop_retirees=True):

@@ -11,8 +11,8 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
 
 params_to_estimate_names = [
     # "mu_men",
-    "mu_bequest_high",
-    "mu_bequest_low",
+    # "mu_bequest_high",
+    # "mu_bequest_low",
     # Men Full-time - 4 parameters
     "disutil_ft_work_good_men",
     "disutil_ft_work_bad_men",
@@ -61,7 +61,7 @@ params_to_estimate_names = [
     # "disability_logit_age_women",
     # "disability_logit_high_educ_women",
 ]
-model_name = "ml_struct_est"
+model_name = "ml_no_disability"
 LOAD_LAST_ESTIMATE = False
 LOAD_SOL_MODEL = True
 SAVE_RESULTS = True

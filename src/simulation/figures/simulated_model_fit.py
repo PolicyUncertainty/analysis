@@ -45,6 +45,7 @@ def plot_quantiles(
     data_sim["age"] = data_sim["period"] + specs["start_age"]
 
     fig, axs = plt.subplots(ncols=specs["n_education_types"])
+    max_wealth = 0
     # Also generate an aggregate graph
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
         for edu_var, edu_label in enumerate(specs["education_labels"]):
@@ -67,6 +68,11 @@ def plot_quantiles(
                     .quantile(quant)
                     .loc[ages]
                 )
+                max_wealth = max(
+                    max_wealth,
+                    average_wealth_sim.max(),
+                    average_wealth_obs.max(),
+                )
 
                 if np.allclose(quant, 0.5):
                     name = "Median"
@@ -88,6 +94,8 @@ def plot_quantiles(
                 )
             ax.set_title(f"{edu_label}")
     axs[0].legend()
+    for edu in range(specs["n_education_types"]):
+        axs[edu].set_ylim([0, max_wealth * 1.1])
     if file_name is not None:
         fig.savefig(path_dict["plots"] + f"{file_name}.png", transparent=True, dpi=300)
 

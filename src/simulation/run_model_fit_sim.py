@@ -17,8 +17,8 @@ specs = generate_derived_and_data_derived_specs(path_dict)
 
 
 model_name = specs["model_name"]
-load_df = False
-load_solution = True
+load_df = None
+load_solution = False
 load_sol_model = True
 
 

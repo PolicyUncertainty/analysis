@@ -32,7 +32,7 @@ def create_path_dict(define_user=False, user=None):
         paths_dict = {
             "soep_c38": data_path + "soep38",
             "soep_rv": data_path + "soep_rv",
-            "soep_is": data_path + "soep_is/soep-is.2023_stata_de/",
+            "soep_is": data_path + "soep_is/soep-is.2022_stata_de",
         }
     else:
         paths_dict = {}
@@ -73,17 +73,6 @@ def create_path_dict(define_user=False, user=None):
         paths_dict["intermediate_data"] + "structural_estimation_sample.csv"
     )
 
-    # Set belief folders
-    paths_dict["beliefs_data"] = paths_dict["intermediate_data"] + "beliefs/"
-    paths_dict["belief_plots"] = paths_dict["plots"] + "beliefs/"
-
-    # Create folders that would not exist yet
-    os.makedirs(paths_dict["intermediate_data"], exist_ok=True)
-    os.makedirs(paths_dict["beliefs_data"], exist_ok=True)
-    os.makedirs(paths_dict["plots"], exist_ok=True)
-    os.makedirs(paths_dict["belief_plots"], exist_ok=True)
-    os.makedirs(paths_dict["paper_plots"], exist_ok=True)
-
     return paths_dict
 
 
@@ -108,11 +97,11 @@ def set_standard_matplotlib_specs():
     # Set matplotlib fontsizes
     plt.rcParams.update(
         {
-            "axes.titlesize": 16,
+            "axes.titlesize": 18,
             "axes.labelsize": 14,
-            "xtick.labelsize": 12,
-            "ytick.labelsize": 12,
-            "legend.fontsize": 12,
+            "xtick.labelsize": 14,
+            "ytick.labelsize": 14,
+            "legend.fontsize": 14,
         }
     )
     # Make lines of plots thicker

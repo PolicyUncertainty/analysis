@@ -9,7 +9,10 @@ def announcement_timing_lc_plot(path_dict, model_name):
         path_dict["sim_results"] + f"announcement_lc_{model_name}.csv", index_col=0
     )
 
-    fig, axs = plt.subplots(3, 1, figsize=(10, 10))
+    fig1, ax1 = plt.subplots(figsize=(10, 10))
+    fig2, ax2 = plt.subplots(figsize=(10, 10))
+    fig3, ax3 = plt.subplots(figsize=(10, 10))
+    axs = [ax1, ax2, ax3]
 
     subset_ages = np.arange(30, 81, 2)
     filtered_df = res_df_life_cycle.loc[subset_ages]
@@ -38,9 +41,8 @@ def announcement_timing_lc_plot(path_dict, model_name):
     axs[0].set_title("Savings rate difference")
     axs[1].set_title("Employment rate difference")
     axs[2].set_title("Retirement rate difference")
-    for ax in axs:
-        ax.axhline(y=0, color="black")
-        ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, pos: f"{x:.3f}"))
-    axs[0].legend()
-    fig.tight_layout()
-    fig.suptitle("Announcement Timing")
+    # for ax in axs:
+    #     ax.axhline(y=0, color="black")
+    #     ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, pos: f"{x:.3f}"))
+    for i in range(len(axs)):
+        axs[i].legend()

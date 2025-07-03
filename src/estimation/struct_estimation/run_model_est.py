@@ -35,38 +35,38 @@ params_to_estimate_names = [
     # "disability_logit_high_educ_men",
     # "mu_women",
     # # # Women Full-time - 4 parameters
-    "disutil_ft_work_high_good_women",
-    "disutil_ft_work_high_bad_women",
-    "disutil_ft_work_low_good_women",
-    "disutil_ft_work_low_bad_women",
+    # "disutil_ft_work_high_good_women",
+    # "disutil_ft_work_high_bad_women",
+    # "disutil_ft_work_low_good_women",
+    # "disutil_ft_work_low_bad_women",
     # # # Women Part-time - 4 parameters
-    "disutil_pt_work_high_good_women",
-    "disutil_pt_work_high_bad_women",
-    "disutil_pt_work_low_good_women",
-    "disutil_pt_work_low_bad_women",
+    # "disutil_pt_work_high_good_women",
+    # "disutil_pt_work_high_bad_women",
+    # "disutil_pt_work_low_good_women",
+    # "disutil_pt_work_low_bad_women",
     # # Women Unemployment - 2 parameters
-    "disutil_unemployed_high_women",
-    "disutil_unemployed_low_women",
+    # "disutil_unemployed_high_women",
+    # "disutil_unemployed_low_women",
     # # Children - 2 parameters
-    "disutil_children_ft_work_low",
-    "disutil_children_ft_work_high",
+    # "disutil_children_ft_work_low",
+    # "disutil_children_ft_work_high",
     # # Taste shock women - 1 parameter
     # "taste_shock_scale_women",
     # # Women job finding - 3 parameters
-    "job_finding_logit_const_women",
-    "job_finding_logit_high_educ_women",
-    "job_finding_logit_good_health_women",
-    "job_finding_logit_above_50_women",
-    "job_finding_logit_above_55_women",
-    # "job_finding_logit_above_60_women",
+    # "job_finding_logit_const_women",
+    # "job_finding_logit_high_educ_women",
+    # "job_finding_logit_good_health_women",
+    # "job_finding_logit_above_50_women",
+    # "job_finding_logit_above_55_women",
+    # # "job_finding_logit_above_60_women",
     # # Disability probability women - 3 parameters
     # "disability_logit_const_women",
     # "disability_logit_age_women",
     # "disability_logit_high_educ_women",
 ]
-model_name = "ml_taste_shock_1"
-LOAD_LAST_ESTIMATE = True
-LOAD_SOL_MODEL = True
+model_name = "ml_taste_shock_1_add"
+LOAD_LAST_ESTIMATE = False
+LOAD_SOL_MODEL = False
 SAVE_RESULTS = True
 USE_WEIGHTS = False
 
@@ -80,9 +80,6 @@ else:
 
 # Load start params
 start_params_all = load_and_set_start_params(paths_dict)
-
-del last_estimate["job_finding_logit_above_60_men"]
-del last_estimate["job_finding_logit_above_60_women"]
 
 estimation_results = estimate_model(
     paths_dict,

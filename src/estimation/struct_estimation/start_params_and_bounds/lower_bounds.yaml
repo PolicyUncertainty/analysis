@@ -8,24 +8,20 @@ disutil_ft_work_good_men: 1e-12
 disutil_ft_work_bad_men: 1e-12
 
 # Full time work dis-utility women
-disutil_ft_work_high_good_women: 1e-12
-disutil_ft_work_high_bad_women: 1e-12
-disutil_ft_work_low_good_women: 1e-12
-disutil_ft_work_low_bad_women: 1e-12
+disutil_ft_work_good_women: 1e-12
+disutil_ft_work_bad_women: 1e-12
 
 # Part time dis-utility men
-disutil_pt_work_high_good_women: 1e-12
-disutil_pt_work_high_bad_women: 1e-12
-disutil_pt_work_low_good_women: 1e-12
-disutil_pt_work_low_bad_women: 1e-12
+disutil_pt_work_good_women: 1e-12
+disutil_pt_work_bad_women: 1e-12
 
 # Unemployment dis-utility men
 disutil_unemployed_good_men: 1e-12
 disutil_unemployed_bad_men: 1e-12
 
 # Unemployment dis-utility women
-disutil_unemployed_high_women: 1e-12
-disutil_unemployed_low_women: 1e-12
+disutil_unemployed_good_women: 1e-12
+disutil_unemployed_bad_women: 1e-12
 
 # Children dis-utility
 disutil_children_ft_work_low: 1e-12

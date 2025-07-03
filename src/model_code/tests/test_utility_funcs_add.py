@@ -97,16 +97,12 @@ def test_utility_func(
         "disutil_unemployed_bad_men": disutil_unemployed,
         "disutil_unemployed_good_men": disutil_unemployed,
         # Women
-        "disutil_ft_work_high_good_women": disutil_work + 1,
-        "disutil_ft_work_high_bad_women": disutil_work,
-        "disutil_ft_work_low_good_women": disutil_work + 1,
-        "disutil_ft_work_low_bad_women": disutil_work,
-        "disutil_pt_work_high_good_women": disutil_work + 1,
-        "disutil_pt_work_high_bad_women": disutil_work,
-        "disutil_pt_work_low_good_women": disutil_work + 1,
-        "disutil_pt_work_low_bad_women": disutil_work,
-        "disutil_unemployed_high_women": disutil_unemployed,
-        "disutil_unemployed_low_women": disutil_unemployed,
+        "disutil_ft_work_good_women": disutil_work + 1,
+        "disutil_ft_work_bad_women": disutil_work,
+        "disutil_pt_work_good_women": disutil_work + 1,
+        "disutil_pt_work_bad_women": disutil_work,
+        "disutil_unemployed_good_women": disutil_unemployed,
+        "disutil_unemployed_bad_women": disutil_unemployed,
         "disutil_children_ft_work_low": 0.1,
         "disutil_children_ft_work_high": 0.1,
         "bequest_scale": 2,
@@ -131,10 +127,8 @@ def test_utility_func(
         disutil_factor_ft_work = params[f"disutil_ft_work_{health_str}_{sex_str}"]
 
     else:
-        disutil_unemployment = params[f"disutil_unemployed_{edu_str}_{sex_str}"]
-        disutil_factor_ft_work = params[
-            f"disutil_ft_work_{edu_str}_{health_str}_{sex_str}"
-        ]
+        disutil_unemployment = params[f"disutil_unemployed_{health_str}_{sex_str}"]
+        disutil_factor_ft_work = params[f"disutil_ft_work_{health_str}_{sex_str}"]
 
     if sex == 1:
         has_partner_int = int(partner_state > 0)
@@ -171,9 +165,7 @@ def test_utility_func(
         utility_lambda(disutil_unemployment),
     )
     if sex == 1:
-        disutil_factor_pt_work = params[
-            f"disutil_pt_work_{edu_str}_{health_str}_{sex_str}"
-        ]
+        disutil_factor_pt_work = params[f"disutil_pt_work_{health_str}_{sex_str}"]
 
         np.testing.assert_almost_equal(
             utility_func(
@@ -245,16 +237,12 @@ def test_marginal_utility(
         "disutil_unemployed_bad_men": disutil_unemployed,
         "disutil_unemployed_good_men": disutil_unemployed,
         # Women
-        "disutil_ft_work_high_good_women": disutil_work + 1,
-        "disutil_ft_work_high_bad_women": disutil_work,
-        "disutil_ft_work_low_good_women": disutil_work + 1,
-        "disutil_ft_work_low_bad_women": disutil_work,
-        "disutil_pt_work_high_good_women": disutil_work + 1,
-        "disutil_pt_work_high_bad_women": disutil_work,
-        "disutil_pt_work_low_good_women": disutil_work + 1,
-        "disutil_pt_work_low_bad_women": disutil_work,
-        "disutil_unemployed_high_women": disutil_unemployed,
-        "disutil_unemployed_low_women": disutil_unemployed,
+        "disutil_ft_work_good_women": disutil_work + 1,
+        "disutil_ft_work_bad_women": disutil_work,
+        "disutil_pt_work_good_women": disutil_work + 1,
+        "disutil_pt_work_bad_women": disutil_work,
+        "disutil_unemployed_good_women": disutil_unemployed,
+        "disutil_unemployed_bad_women": disutil_unemployed,
         "disutil_children_ft_work_low": 0.1,
         "disutil_children_ft_work_high": 0.1,
         "bequest_scale": 2,
@@ -322,16 +310,12 @@ def test_inv_marginal_utility(
         "disutil_unemployed_bad_men": disutil_unemployed,
         "disutil_unemployed_good_men": disutil_unemployed,
         # Women
-        "disutil_ft_work_high_good_women": disutil_work + 1,
-        "disutil_ft_work_high_bad_women": disutil_work,
-        "disutil_ft_work_low_good_women": disutil_work + 1,
-        "disutil_ft_work_low_bad_women": disutil_work,
-        "disutil_pt_work_high_good_women": disutil_work + 1,
-        "disutil_pt_work_high_bad_women": disutil_work,
-        "disutil_pt_work_low_good_women": disutil_work + 1,
-        "disutil_pt_work_low_bad_women": disutil_work,
-        "disutil_unemployed_high_women": disutil_unemployed,
-        "disutil_unemployed_low_women": disutil_unemployed,
+        "disutil_ft_work_good_women": disutil_work + 1,
+        "disutil_ft_work_bad_women": disutil_work,
+        "disutil_pt_work_good_women": disutil_work + 1,
+        "disutil_pt_work_bad_women": disutil_work,
+        "disutil_unemployed_good_women": disutil_unemployed,
+        "disutil_unemployed_bad_women": disutil_unemployed,
         "disutil_children_ft_work_low": 0.1,
         "disutil_children_ft_work_high": 0.1,
         "bequest_scale": 2,

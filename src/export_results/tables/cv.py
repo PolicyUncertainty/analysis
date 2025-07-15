@@ -3,6 +3,7 @@ import pickle
 import numpy as np
 import pandas as pd
 import scipy.optimize as opt
+
 from export_results.tools import create_realized_taste_shock
 
 
@@ -15,7 +16,7 @@ def calc_compensated_variation(df_base, df_cf, params, specs):
     df_cf = add_number_cons_scale(df_cf, specs)
 
     n_agents = df_base["agent"].nunique()
-    cv = calc_adjusted_scale(df_base, df_cf, params, n_agents)
+    cv = calc_adjusted_scale(df_base, df_cf, params, specs, n_agents)
     return cv
 
 
@@ -25,21 +26,22 @@ def create_real_utility(df, specs):
     return df
 
 
-def calc_adjusted_scale(df_base, df_count, params, n_agents):
+def calc_adjusted_scale(df_base, df_count, params, specs, n_agents):
     # First construct the discounted sum of utilities for the counterfactual scenario
-    disc_sum_cf = create_disc_sum(df_count, params)
+    disc_sum_cf = create_disc_sum(df_count, specs)
 
     # Then we construct the relevant objects to be able to scale consumption,
     # such that it matches the discounted sum from above
-    mu = params["mu"]
+    sex_values = df_base["sex"].values
+    mu_vector = np.ones_like(sex_values) * params["mu"]
 
     # Generate not scaled utility by substracting from random utility 1 / (1 - mu)
-    not_scaled_utility = df_base["real_taste_shock"].values - 1 / (1 - mu)
+    not_scaled_utility = df_base["real_taste_shock"].values - 1 / (1 - mu_vector)
     # Now scaled utility
     utility_to_scale = df_base["real_util"].values - not_scaled_utility
 
     # Generate the discount factor for the base dataframe
-    disc_factor_base = params["beta"] ** df_base["period"].values
+    disc_factor_base = specs["discount_factor"] ** df_base["period"].values
 
     partial_adjustment = lambda scale_in: create_adjusted_difference(
         utility_to_scale=utility_to_scale,
@@ -47,7 +49,7 @@ def calc_adjusted_scale(df_base, df_count, params, n_agents):
         disc_factor_base=disc_factor_base,
         disc_sum_cf=disc_sum_cf,
         n_agents=n_agents,
-        mu=mu,
+        mu_vector=mu_vector,
         scale=scale_in,
     )
 
@@ -62,10 +64,10 @@ def create_adjusted_difference(
     disc_factor_base,
     disc_sum_cf,
     n_agents,
-    mu,
+    mu_vector,
     scale,
 ):
-    scaled_utility = utility_to_scale * ((1 + scale) ** (1 - mu))
+    scaled_utility = utility_to_scale * ((1 + scale) ** (1 - mu_vector))
 
     adjusted_utility = scaled_utility + not_scaled_utility
     adjusted_disc_sum = (adjusted_utility * disc_factor_base).sum() / n_agents
@@ -73,8 +75,8 @@ def create_adjusted_difference(
     return adjusted_disc_sum - disc_sum_cf
 
 
-def create_disc_sum(df, params):
-    beta = params["beta"]
+def create_disc_sum(df, specs):
+    beta = specs["discount_factor"]
     df.loc[:, "disc_util"] = df["real_util"] * (beta ** df["period"])
 
     return df.groupby("agent")["disc_util"].sum().mean()

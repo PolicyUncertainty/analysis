@@ -8,7 +8,7 @@ def add_income_specs(specs, path_dict):
     (
         specs["gamma_0"],
         specs["gamma_1"],
-        specs["income_shock_scale"],
+        specs["income_shock_std"],
     ) = process_wage_params(path_dict, specs)
 
     # unemployment benefits
@@ -110,8 +110,8 @@ def calc_annual_pension_point_value(specs):
     # Generate average pension point value weighted by east and west
     # pensions
     pension_point_value = (
-        0.75 * specs["monthly_pension_point_value_west_2010"]
-        + 0.25 * specs["monthly_pension_point_value_east_2010"]
+        specs["pop_share_west"] * specs["monthly_pension_point_value_west_2020"]
+        + specs["pop_share_east"] * specs["monthly_pension_point_value_east_2020"]
     )
     return pension_point_value * 12
 

@@ -1,10 +1,12 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from model_code.wealth_and_budget.pensions import calc_net_income_pensions
+
+from model_code.wealth_and_budget.pension_payments import calc_pensions_after_ssc
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
 def plot_pension_npv_by_age(paths, edu=0):
+    raise ValueError("Not maintained right now.")
     # Generate derived specs
     specs = generate_derived_and_data_derived_specs(paths)
     # Select highes pension point value
@@ -17,7 +19,7 @@ def plot_pension_npv_by_age(paths, edu=0):
     pension_factor = 1
     experience = 67 - start_age
     retirement_income_gross = pension_point_value * experience * pension_factor * 12
-    retirement_income_net = calc_net_income_pensions(retirement_income_gross, specs)
+    retirement_income_net = calc_pensions_after_ssc(retirement_income_gross, specs)
 
     # calculate net present value of retirement income at age 67
     npv_67 = retirement_income_net / discount_rate - (

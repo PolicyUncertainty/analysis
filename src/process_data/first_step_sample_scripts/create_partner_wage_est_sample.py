@@ -1,7 +1,12 @@
 import os
 
 import pandas as pd
-from process_data.aux_and_plots.filter_data import filter_data
+
+from process_data.aux_and_plots.filter_data import (
+    filter_below_age,
+    filter_years,
+    recode_sex,
+)
 from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.partner_code import create_partner_state
 
@@ -17,18 +22,22 @@ def create_partner_wage_est_sample(paths, specs, load_data=False):
         return data
 
     df = load_and_merge_soep_core(paths["soep_c38"])
-    df = filter_data(df, specs)
+
+    df = create_education_type(df)
+
     df = create_wages(df.copy())
 
     # Drop singles
     df = df[df["parid"] >= 0]
     print(str(len(df)) + " observations after dropping singles.")
 
-    df = create_education_type(df)
-
     # Create partner state and drop if partner is absent or in non-working age
     df = create_partner_state(df)
     df = df[df["partner_state"] == 1]
+
+    df = filter_below_age(df, specs["start_age"])
+    df = recode_sex(df)
+    df = filter_years(df, specs["start_year"], specs["end_year"])
 
     df.reset_index(inplace=True)
     df.to_pickle(out_file_path)

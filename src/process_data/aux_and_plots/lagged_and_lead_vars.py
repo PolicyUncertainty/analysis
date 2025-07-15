@@ -14,42 +14,8 @@ def span_dataframe(df, start_year, end_year):
         [pid_indexes, range(start_year, end_year + 1)],
         names=["pid", "syear"],
     )
-    full_container = pd.DataFrame(
-        index=full_index, data=np.nan, dtype=float, columns=df.columns
-    )
-    full_container.update(df)
+    full_df = df.reindex(full_index)
 
-    if "hid" in full_container.columns.values:
-        full_container["hid"] = full_container.groupby(["pid"])["hid"].transform("last")
-    return full_container
-
-
-def create_lagged_and_lead_variables(merged_data, specs, lead_job_sep=False):
-    """This function creates the lagged choice variable and drops missing lagged
-    choices."""
-
-    full_container = span_dataframe(
-        merged_data, specs["start_year"] - 1, specs["end_year"] + 1
-    )
-
-    full_container["lagged_choice"] = full_container.groupby(["pid"])["choice"].shift()
-
-    if lead_job_sep:
-        full_container["job_sep_this_year"] = full_container.groupby(["pid"])[
-            "job_sep"
-        ].shift(-1)
-
-    merged_data = full_container[full_container["lagged_choice"].notna()]
-    if lead_job_sep:
-        merged_data = merged_data[merged_data["job_sep_this_year"].notna()]
-
-    # We now have observations with a valid lagged or lead variable but not with
-    # actual valid state variables. Delete those by looking at the choice variable.
-    merged_data = merged_data[merged_data["choice"].notna()]
-
-    # We left too young people in the sample to construct lagged choice. Delete those
-    # now.
-    merged_data = merged_data[merged_data["age"] >= specs["start_age"]]
-
-    print(str(len(merged_data)) + " left after filtering missing lagged choices.")
-    return merged_data
+    if "hid" in full_df.columns.values:
+        full_df["hid"] = full_df.groupby(["pid"])["hid"].transform("last")
+    return full_df

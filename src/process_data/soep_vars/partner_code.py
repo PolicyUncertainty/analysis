@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+
 from process_data.soep_vars.work_choices import create_working_status
 
 
@@ -22,6 +23,7 @@ def create_partner_state(df, filter_missing=False):
     df.loc[:, "partner_state"] = np.where(
         df["work_status_p"] == 0, 2, df["partner_state"]
     )
+
     if filter_missing:
         # drop nans
         df = df[df["partner_state"].notna()]
@@ -30,6 +32,25 @@ def create_partner_state(df, filter_missing=False):
             + " observations after dropping people with a partner whose choice is not observed."
         )
     return df
+
+
+def correct_partner_state(full_df):
+
+    # Lag and lead partner state
+    lead_partner_state = full_df.groupby("pid")["partner_state"].shift(-1)
+    lagged_parner_state = full_df.groupby("pid")["partner_state"].shift(1)
+
+    # Generate masks
+    equal_mask = lead_partner_state == lagged_parner_state
+    nan_mask = full_df["partner_state"].isna()
+    lead_non_nan_mask = lead_partner_state.notna()
+    overwrite_mask = equal_mask & nan_mask & lead_non_nan_mask
+
+    # Overwrite partner state
+    full_df.loc[overwrite_mask, "partner_state"] = lead_partner_state.loc[
+        overwrite_mask
+    ].values
+    return full_df
 
 
 def merge_couples(df):
@@ -56,3 +77,9 @@ def merge_couples(df):
 
     print(str(len(merged_data)) + " observations after merging couples.")
     return merged_data
+
+
+def create_haspartner(df):
+    df["has_partner"] = df["parid"] > 0
+    df["has_partner"] = df["has_partner"].astype("int8")
+    return df

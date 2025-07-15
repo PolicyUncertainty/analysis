@@ -4,14 +4,16 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from process_data.aux_and_plots.filter_data import filter_above_age
-from process_data.aux_and_plots.filter_data import filter_below_age
-from process_data.aux_and_plots.filter_data import filter_years
-from process_data.aux_and_plots.filter_data import recode_sex
+
+from process_data.aux_and_plots.filter_data import (
+    filter_above_age,
+    filter_below_age,
+    filter_years,
+    recode_sex,
+)
 from process_data.aux_and_plots.lagged_and_lead_vars import span_dataframe
 from process_data.soep_vars.education import create_education_type
-from process_data.soep_vars.health import clean_health_create_states
-from process_data.soep_vars.health import create_health_var
+from process_data.soep_vars.health import correct_health_state, create_health_var
 
 
 # %%
@@ -53,12 +55,14 @@ def create_survival_transition_sample(paths, specs, load_data=False):
     # set the dtype of the columns to float
     df = df.astype(float)
 
-    # sum the death events for the entire sample
+    # print out statistics about the sample
+    mask_death = df["death event"] == 1
+    mask_bad_health = df["health"] == 1
     print(
         "Death events in the sample: ",
-        f"{len(df[df['death event'] == 1])} (total) = "
-        f"{len(df[(df['death event'] == 1) & (df['health'] == 1)])} (health 1) + "
-        f"{len(df[(df['death event'] == 1) & (df['health'] == 0)])} (health 0)",
+        f"{len(df[mask_death])} (total) = "
+        f"{len(df[mask_death & mask_bad_health])} (health 1) + "
+        f"{len(df[mask_death & ~mask_bad_health])} (health 0)",
     )
 
     print(
@@ -223,7 +227,7 @@ def load_and_process_soep_health(soep_c38_path, specs):
     pequiv_data = span_dataframe(
         pequiv_data, specs["start_year_mortality"], specs["end_year_mortality"]
     )
-    pequiv_data = clean_health_create_states(pequiv_data)
+    pequiv_data = correct_health_state(pequiv_data)
     # Fill health gaps
     pequiv_data = fill_health_gaps_vectorized(pequiv_data)
     # forward fill health state for every individual

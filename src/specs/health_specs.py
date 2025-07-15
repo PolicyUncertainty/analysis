@@ -12,7 +12,10 @@ def read_in_health_transition_specs(paths_dict, specs):
         paths_dict["est_results"] + "mortality_transition_matrix.csv",
     )
 
-    alive_health_vars = specs["alive_health_vars"]
+    observed_health_vars = specs["observed_health_vars"]
+    good_health_var = specs["good_health_var"]
+    bad_health_var = specs["bad_health_var"]
+    disabled_health_var = specs["disabled_health_var"]
     death_health_var = specs["death_health_var"]
 
     # Transition probalities for health
@@ -21,16 +24,16 @@ def read_in_health_transition_specs(paths_dict, specs):
             specs["n_sexes"],
             specs["n_education_types"],
             specs["n_periods"],
-            specs["n_health_states"],
-            specs["n_health_states"],
+            specs["n_all_health_states"],
+            specs["n_all_health_states"],
         ),
         dtype=float,
     )
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
         for edu_var, edu_label in enumerate(specs["education_labels"]):
             for period in range(specs["n_periods"]):
-                for current_health_var in alive_health_vars:
-                    for lead_health_var in alive_health_vars:
+                for current_health_var in observed_health_vars:
+                    for lead_health_var in observed_health_vars:
                         current_health_label = specs["health_labels"][
                             current_health_var
                         ]
@@ -73,4 +76,36 @@ def read_in_health_transition_specs(paths_dict, specs):
     # transition matrix and a 1 on the diagonal element
     health_trans_mat[:, :, :, death_health_var, death_health_var] = 1
 
+    # Now assign probabilities to disabled state. It will be scaled with the
+    # real probabilities in params later. Here we assign the same probability row
+    # as the bad health state
+    health_trans_mat[:, :, :, disabled_health_var, :] = health_trans_mat[
+        :, :, :, bad_health_var, :
+    ]
+
     return jnp.asarray(health_trans_mat)
+
+
+def process_health_labels(specs):
+    # For health states, get number and var values for alive states
+    specs["n_all_health_states"] = len(specs["health_labels"])
+    specs["n_observed_health_states"] = len(specs["observed_health_labels"])
+    # Read out vars, as we need those also inside the model
+    specs["observed_health_vars"] = np.where(
+        np.isin(specs["health_labels"], specs["observed_health_labels"])
+    )[0]
+
+    specs["good_health_var"] = np.where(
+        np.array(specs["health_labels"]) == "Good Health"
+    )[0][0]
+
+    specs["bad_health_var"] = np.where(
+        np.array(specs["health_labels"]) == "Bad Health"
+    )[0][0]
+    specs["disabled_health_var"] = np.where(
+        np.array(specs["health_labels"]) == "Disabled"
+    )[0][0]
+    specs["death_health_var"] = np.where(np.array(specs["health_labels"]) == "Death")[
+        0
+    ][0]
+    return specs

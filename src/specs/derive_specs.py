@@ -3,10 +3,13 @@ import pickle as pkl
 import jax.numpy as jnp
 import numpy as np
 import yaml
-from specs.experience_specs import create_max_experience
-from specs.family_specs import predict_children_by_state
-from specs.family_specs import read_in_partner_transition_specs
-from specs.health_specs import read_in_health_transition_specs
+
+from specs.experience_specs import add_very_long_insured_specs, create_max_experience
+from specs.family_specs import (
+    predict_children_by_state,
+    read_in_partner_transition_specs,
+)
+from specs.health_specs import process_health_labels, read_in_health_transition_specs
 from specs.income_specs import add_income_specs
 from specs.informed_specs import add_informed_process_specs
 
@@ -37,6 +40,10 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     # Add informed process specs
     specs = add_informed_process_specs(specs, path_dict)
 
+    # Information for checking if individuals are eligible for pension of
+    # very long insured
+    specs = add_very_long_insured_specs(specs, path_dict)
+
     # Set initial experience
     specs["max_exp_diffs_per_period"] = create_max_experience(
         path_dict, specs, load_precomputed
@@ -54,14 +61,8 @@ def read_and_derive_specs(spec_path):
     specs["n_sexes"] = len(specs["sex_labels"])
     specs["n_choices"] = len(specs["choice_labels"])
 
-    # For health states, get number and var values for alive states
-    specs["n_health_states"] = len(specs["health_labels"])
-    specs["alive_health_vars"] = np.where(np.array(specs["health_labels"]) != "Death")[
-        0
-    ]
-    specs["death_health_var"] = np.where(np.array(specs["health_labels"]) == "Death")[
-        0
-    ][0]
+    # Process information from health labels
+    specs = process_health_labels(specs)
 
     # Partner states
     specs["n_partner_states"] = len(specs["partner_labels"])

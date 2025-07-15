@@ -4,8 +4,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from export_results.figures.color_map import JET_COLOR_MAP
 from linearmodels.panel.model import PanelOLS
+
+from export_results.figures.color_map import JET_COLOR_MAP
 
 
 def estimate_wage_parameters(paths_dict, specs):
@@ -14,29 +15,18 @@ def estimate_wage_parameters(paths_dict, specs):
     Also estimate for all individuals.
 
     """
-    # Specs and data
+    # specs, data, and parameter containers
     edu_labels = specs["education_labels"]
     sex_labels = specs["sex_labels"]
     regressors = ["constant", "ln_exp"]
-    coefficents = regressors + [param + "_ser" for param in regressors]
     wage_data = load_and_prepare_wage_data(paths_dict)
-
-    # Initialize empty containers for coefficients
-    index = pd.MultiIndex.from_product(
-        [edu_labels, sex_labels, coefficents], names=["education", "sex", "parameter"]
+    wage_parameters, year_fixed_effects = initialize_coeficient_containers(
+        regressors, specs
     )
-    index_all_types = pd.MultiIndex.from_product(
-        [["all"], ["all"], coefficents], names=["education", "sex", "parameter"]
-    )
-    index = index.append(index_all_types)
-    wage_parameters = pd.DataFrame(index=index, columns=["value"])
-    year_fixed_effects = {}
-    years = list(range(specs["start_year"] + 1, specs["end_year"] + 1))
 
     # Estimate wage equation for each type (sex x education)
-    year_fixed_effects["all", "all"] = {}
     fit_panel_reg_model(
-        wage_data, regressors, years, wage_parameters, year_fixed_effects, "all", "all"
+        wage_data, regressors, wage_parameters, year_fixed_effects, "all", "all", specs
     )
     for sex_val, sex_label in enumerate(sex_labels):
         fig, ax = plt.subplots(figsize=(12, 8))
@@ -48,11 +38,11 @@ def estimate_wage_parameters(paths_dict, specs):
             wage_parameters, year_fixed_effects, wage_data_type = fit_panel_reg_model(
                 wage_data_type,
                 regressors,
-                years,
                 wage_parameters,
                 year_fixed_effects,
                 edu_label,
                 sex_label,
+                specs,
             )
 
             wage_data_type = wage_data_type[
@@ -76,9 +66,14 @@ def estimate_wage_parameters(paths_dict, specs):
         ax.legend(loc="upper left")
         file_appends = ["men", "women"]
         fig.savefig(paths_dict["plots"] + f"wages_{file_appends[sex_val]}.png")
+        # plt.show()
 
     # Save results
     wage_parameters.to_csv(paths_dict["est_results"] + "wage_eq_params.csv")
+    pd.DataFrame(year_fixed_effects).T.to_csv(
+        paths_dict["est_results"] + "wage_eq_year_FE.csv"
+    )
+
     wage_parameters.T.to_latex(
         paths_dict["tables"] + "wage_eq_params.tex", float_format="%.4f"
     )
@@ -104,19 +99,47 @@ def load_and_prepare_wage_data(paths_dict):
     return wage_data
 
 
+def initialize_coeficient_containers(regressors, specs):
+    edu_labels = specs["education_labels"]
+    sex_labels = specs["sex_labels"]
+    coefficents = regressors + [param + "_ser" for param in regressors]
+    index = pd.MultiIndex.from_product(
+        [edu_labels, sex_labels, coefficents], names=["education", "sex", "parameter"]
+    )
+    index_all_types = pd.MultiIndex.from_product(
+        [["all"], ["all"], coefficents], names=["education", "sex", "parameter"]
+    )
+    index = index.append(index_all_types)
+    wage_parameters = pd.DataFrame(index=index, columns=["value"])
+    year_fixed_effects = {}
+    year_fixed_effects["all", "all"] = {}
+    return wage_parameters, year_fixed_effects
+
+
 def fit_panel_reg_model(
     wage_data_type,
     regressors,
-    years,
     wage_parameters,
     year_fixed_effects,
     edu_label,
     sex_label,
+    specs,
 ):
+    # year FE: for every year except reference year, we add a dummy
+    reference_year = specs["reference_year"]
+    years = list(range(specs["start_year"], specs["end_year"] + 1))
+    years.remove(reference_year)
+    year_dummies = pd.get_dummies(
+        wage_data_type["year"], prefix="year", drop_first=False
+    )
+    year_dummies = year_dummies.drop(columns=[f"year_{reference_year}"])
+    wage_data_type = pd.concat([wage_data_type, year_dummies], axis=1)
+    rhs_vars = wage_data_type[regressors + list(year_dummies.columns)]
+
     # estimate parametric regression, save parameters
     model = PanelOLS(
         dependent=wage_data_type["ln_wage"],
-        exog=wage_data_type[regressors + ["year"]],
+        exog=rhs_vars,
         entity_effects=True,
     )
     fitted_model = model.fit(
@@ -128,14 +151,13 @@ def fit_panel_reg_model(
     # Assign estimated parameters (column list corresponds to model params, so only these are assigned)
     for param in regressors:
         wage_parameters.loc[edu_label, sex_label, param] = fitted_model.params[param]
-        wage_parameters.loc[
-            edu_label, sex_label, param + "_ser"
-        ] = fitted_model.std_errors[param]
+        wage_parameters.loc[edu_label, sex_label, param + "_ser"] = (
+            fitted_model.std_errors[param]
+        )
     for year in years:
         year_fixed_effects[(edu_label, sex_label)][year] = fitted_model.params[
-            f"year.{year}"
+            f"year_{year}"
         ]
-
     # Get estimate for income shock std
     (
         wage_parameters.loc[edu_label, sex_label, "income_shock_std"],
@@ -155,11 +177,14 @@ def calc_population_averages(df, year_fixed_effects, specs, paths_dict):
     We do this here (as opposed to model specs) to avoid loading the data twice.
 
     """
-    years = list(range(specs["start_year"] + 1, specs["end_year"] + 1))
+    reference_year = specs["reference_year"]
+    years = list(range(specs["start_year"], specs["end_year"] + 1))
+    years.remove(reference_year)
     edu_labels = specs["education_labels"]
     sex_labels = specs["sex_labels"]
 
-    # annual average wage (deflated by type-specific year fixed effects)
+    # annual average wage (deflated or inflated by type-specific year fixed effects)
+
     df["ln_wage_deflated"] = df["ln_wage"].copy()
     for edu_val, edu_label in enumerate(edu_labels):
         for sex_val, sex_label in enumerate(sex_labels):
@@ -167,6 +192,7 @@ def calc_population_averages(df, year_fixed_effects, specs, paths_dict):
                 edu_mask = df["education"] == edu_val
                 sex_mask = df["sex"] == sex_val
                 year_mask = df["year"] = year
+                # ref year is always the omitted category, so we add the year FE
                 df.loc[
                     edu_mask & sex_mask & year_mask, "ln_wage_deflated"
                 ] -= year_fixed_effects[(edu_label, sex_label)][year]
@@ -176,7 +202,10 @@ def calc_population_averages(df, year_fixed_effects, specs, paths_dict):
     pop_avg_annual_wage = df["annual_wage_deflated"].mean()
     np.save(paths_dict["est_results"] + "pop_avg_annual_wage", pop_avg_annual_wage)
 
-    print("Population average for annual wage (deflated): " + str(pop_avg_annual_wage))
+    print(
+        f"Population average for annual wage (inflated/deflated to {specs['reference_year']}) : "
+        + str(pop_avg_annual_wage)
+    )
 
     # averageannual working hours by type
     avg_hours_by_type_choice = df.groupby(["education", "sex", "choice"])[

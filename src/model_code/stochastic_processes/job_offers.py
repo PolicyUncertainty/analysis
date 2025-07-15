@@ -2,7 +2,9 @@ import jax
 import jax.numpy as jnp
 
 
-def job_offer_process_transition(params, sex, options, education, period, choice):
+def job_offer_process_transition(
+    params, sex, health, model_specs, education, period, choice
+):
     """Transition probability for next period job offer state.
 
     The values of process are the following:
@@ -14,11 +16,18 @@ def job_offer_process_transition(params, sex, options, education, period, choice
     unemployment_choice = choice == 1
     labor_choice = choice >= 2
 
-    # Probability of job destruction
-    job_sep_prob = options["job_sep_probs"][sex, education, period]
+    age = model_specs["start_age"] + period
+    good_health = (health == model_specs["good_health_var"]).astype(int)
 
-    job_finding_prob_men = calc_job_finding_prob_men(params, education, period)
-    job_finding_prob_women = calc_job_finding_prob_women(params, education, period)
+    # Probability of job destruction
+    job_sep_prob = model_specs["job_sep_probs"][sex, education, good_health, age]
+
+    job_finding_prob_men = calc_job_finding_prob_men(
+        params, education, good_health, period, model_specs
+    )
+    job_finding_prob_women = calc_job_finding_prob_women(
+        params, education, good_health, period, model_specs
+    )
     job_finding_prob = jax.lax.select(
         sex == 0, job_finding_prob_men, job_finding_prob_women
     )
@@ -31,21 +40,32 @@ def job_offer_process_transition(params, sex, options, education, period, choice
     return jnp.array([prob_value_0, 1 - prob_value_0])
 
 
-def calc_job_finding_prob_men(params, education, period):
+def calc_job_finding_prob_men(params, education, good_health, period, model_specs):
+    age = model_specs["start_age"] + period
     exp_value = jnp.exp(
         params["job_finding_logit_const_men"]
-        + params["job_finding_logit_period_men"] * period
+        # + params["job_finding_logit_age_men"] * age
         + params["job_finding_logit_high_educ_men"] * education
+        + params["job_finding_logit_good_health_men"] * good_health
+        + params["job_finding_logit_above_50_men"] * (age >= 50)
+        + params["job_finding_logit_above_55_men"] * (age >= 55)
+        # + params["job_finding_logit_above_60_men"] * (age >= 60)
     )
     prob = exp_value / (1 + exp_value)
     return prob
 
 
-def calc_job_finding_prob_women(params, education, period):
+def calc_job_finding_prob_women(params, education, good_health, period, model_specs):
+    age = model_specs["start_age"] + period
+
     exp_value = jnp.exp(
         params["job_finding_logit_const_women"]
-        + params["job_finding_logit_period_women"] * period
+        # + params["job_finding_logit_age_women"] * age
         + params["job_finding_logit_high_educ_women"] * education
+        + params["job_finding_logit_good_health_women"] * good_health
+        + params["job_finding_logit_above_50_women"] * (age >= 50)
+        + params["job_finding_logit_above_55_women"] * (age >= 55)
+        # + params["job_finding_logit_above_60_women"] * (age >= 60)
     )
     prob = exp_value / (1 + exp_value)
     return prob

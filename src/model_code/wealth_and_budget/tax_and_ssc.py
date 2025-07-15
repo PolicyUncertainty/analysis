@@ -1,30 +1,25 @@
 import jax.numpy as jnp
 
 
-def calc_net_household_income(own_income, partner_income, has_partner_int, options):
+def calc_net_household_income(own_income, partner_income, has_partner_int, model_specs):
     """Calculate the income tax for a couple."""
     # Calculate the income tax for the couple
     family_income = own_income + partner_income
 
     # Calculate split factor. 1 if single, 2 if partnered
     split_factor = 1 + has_partner_int
-    income_tax_split = calc_inc_tax_for_single_income(family_income / split_factor)
+    income_tax_split = calc_inc_tax_for_single_income(
+        family_income / split_factor, model_specs
+    )
 
     # Readjust with split factor
     income_tax = income_tax_split * split_factor
     return family_income - income_tax
 
 
-def calc_inc_tax_for_single_income(gross_income):
-    """Parameters from 2010 gettsim params."""
-    thresholds = [
-        8004,
-        13469,
-        52881,
-        250730,
-    ]
-
-    rates = [0.14, 0.2397, 0.42, 0.45]
+def calc_inc_tax_for_single_income(gross_income, model_specs):
+    thresholds = model_specs["income_tax_brackets"]
+    rates = model_specs["income_tax_rates"]
 
     # In bracket 0 no taxes are paid
     poss_tax_bracket_0 = 0.0
@@ -84,18 +79,23 @@ def calc_after_ssc_income_pensioneer(gross_pesnion):
 
 
 def calc_pension_unempl_contr(gross_income):
-    """Calc pension and unemployment social security contribution."""
-    contribution_threshold = 5500 * 12
-    rate = 0.113
+    """Calc pension and unemployment social security contribution.
+    Both from GETTSIM (2020)"""
+    # Threshold weighted with population share west and east
+    contribution_threshold = 6823.5 * 12
+    # Unemployment insurance (1.2 percent) and pension insurance (9.3 percent)
+    rate = 0.105
     # calculate pension contribution
     pension_contr = jnp.minimum(gross_income, contribution_threshold) * rate
     return pension_contr
 
 
 def calc_health_ltc_contr(gross_income):
-    """Calc health and ltc social security contribution."""
-    contribution_threshold = 3750 * 12
-    rate = 0.08
+    """Calc health and ltc social security contribution. Both from GETTSIM (2020)."""
+    contribution_threshold = 4687.5 * 12
+    # Sum of health (7 percent), additional health (1.1 percent),
+    # and long-term (1.525 percent)
+    rate = 0.09625
     # calculate social security contribution
     health_contr = jnp.minimum(gross_income, contribution_threshold) * rate
     return health_contr

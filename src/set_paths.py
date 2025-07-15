@@ -10,16 +10,8 @@ def create_path_dict(define_user=False, user=None):
     # Set jax to 64 bit
     jax.config.update("jax_enable_x64", True)
 
-    # Set matplotlib fontsizes
-    plt.rcParams.update(
-        {
-            "axes.titlesize": 16,
-            "axes.labelsize": 14,
-            "xtick.labelsize": 12,
-            "ytick.labelsize": 12,
-            "legend.fontsize": 12,
-        }
-    )
+    set_standard_matplotlib_specs()
+
     if define_user:
         if user is None:
             user = input("Enter user name ([b]runo / [m]ax / [g]regor): ")
@@ -40,7 +32,7 @@ def create_path_dict(define_user=False, user=None):
         paths_dict = {
             "soep_c38": data_path + "soep38",
             "soep_rv": data_path + "soep_rv",
-            "soep_is": data_path + "soep_is_2022/dataset_main_SOEP_IS.dta",
+            "soep_is": data_path + "soep_is/soep-is.2022_stata_de",
         }
     else:
         paths_dict = {}
@@ -65,7 +57,7 @@ def create_path_dict(define_user=False, user=None):
     paths_dict["plots"] = analysis_path + "output/plots/"
 
     # Assign folders directly in paper
-    paths_dict["paper_plots"] = paper_path + "plots/"
+    paths_dict["paper_plots"] = analysis_path + "output/paper_plots/"
     paths_dict["paper_tables"] = paper_path + "tables/"
 
     # Assign model specification file
@@ -78,7 +70,7 @@ def create_path_dict(define_user=False, user=None):
 
     # Assign name of structural estimation sample
     paths_dict["struct_est_sample"] = (
-        paths_dict["intermediate_data"] + "structural_estimation_sample.pkl"
+        paths_dict["intermediate_data"] + "structural_estimation_sample.csv"
     )
 
     return paths_dict
@@ -99,3 +91,18 @@ def get_model_resutls_path(paths_dict, model_name):
         folder_dict[folder] = folder_name + "/"
 
     return folder_dict
+
+
+def set_standard_matplotlib_specs():
+    # Set matplotlib fontsizes
+    plt.rcParams.update(
+        {
+            "axes.titlesize": 18,
+            "axes.labelsize": 14,
+            "xtick.labelsize": 14,
+            "ytick.labelsize": 14,
+            "legend.fontsize": 14,
+        }
+    )
+    # Make lines of plots thicker
+    plt.rcParams["lines.linewidth"] = 3

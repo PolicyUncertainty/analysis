@@ -23,11 +23,11 @@ def create_disability_pension_sample(paths, specs, load_data=False):
         os.makedirs(paths["intermediate_data"])
 
     out_file_path = (
-        paths["intermediate_data"] + "disability_pension_estimation_sample.pkl"
+        paths["intermediate_data"] + "disability_pension_estimation_sample.csv"
     )
 
     if load_data:
-        data = pd.read_pickle(out_file_path)
+        data = pd.read_csv(out_file_path)
         return data
 
     df = load_and_merge_soep_core(paths["soep_c38"])
@@ -76,7 +76,7 @@ def create_disability_pension_sample(paths, specs, load_data=False):
         + " observations in the final health transition sample.  \n ----------------"
     )
 
-    df.to_pickle(out_file_path)
+    df.to_csv(out_file_path)
     return df
 
 

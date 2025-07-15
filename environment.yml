@@ -10,13 +10,13 @@ dependencies:
 
   # Package dependencies
   - numpy
+  - numba
   - pandas
   - scipy
   - pandas
   - linearmodels
   - statsmodels
   - lifelines
-  - optimagic
   - seaborn
   - scikit-learn
 
@@ -36,3 +36,4 @@ dependencies:
       - -e .
       - -e ./submodules/dcegm/
       - git+https://github.com/OpenSourceEconomics/upper-envelope.git
+      - git+https://github.com/OpenSourceEconomics/tranquilo.git@7c87bdeaba0783fce1310b1ba3b7def99da283b8

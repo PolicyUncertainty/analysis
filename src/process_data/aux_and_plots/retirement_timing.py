@@ -3,7 +3,7 @@ import pandas as pd
 
 
 def plot_retirement_timing_data(paths, specs):
-    struct_est_sample = pd.read_pickle(paths["struct_est_sample"])
+    struct_est_sample = pd.read_csv(paths["struct_est_sample"])
     df_fresh = struct_est_sample[
         (struct_est_sample["choice"] == 0) & (struct_est_sample["lagged_choice"] != 0)
     ]

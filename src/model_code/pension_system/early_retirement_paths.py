@@ -13,7 +13,7 @@ def calc_early_retirement_pension_points(
     education,
     health,
     sex,
-    options,
+    model_specs,
 ):
     """Calculate the pension points for early retirement for different paths. We implemented
     three ways to retire before the SRA:
@@ -33,13 +33,13 @@ def calc_early_retirement_pension_points(
 
     """
     # Check if the individual gets disability pension
-    disability_pension_bool = health == options["disabled_health_var"]
+    disability_pension_bool = health == model_specs["disabled_health_var"]
     # Check if the individual is eligible for very long insured pension
     very_long_insured_bool = check_very_long_insured(
         retirement_age_difference=retirement_age_difference,
         experience_years=experience_years,
         sex=sex,
-        options=options,
+        model_specs=model_specs,
     )
 
     # Additional pension points if disability retired.
@@ -51,16 +51,17 @@ def calc_early_retirement_pension_points(
 
     # Penalty years. If disability pension(then limit to 3 years)
     penalty_years_disability = retirement_age_difference.clip(max=3)
+    max_penalty_years = retirement_age_difference.clip(max=4)
     penalty_years = jax.lax.select(
         disability_pension_bool,
         on_true=penalty_years_disability,
-        on_false=retirement_age_difference,
+        on_false=max_penalty_years,
     )
 
     # Choose deduction factor according to information state
     early_retirement_penalty = (
-        informed * options["ERP"]
-        + (1 - informed) * options["uninformed_ERP"][education]
+        informed * model_specs["ERP"]
+        + (1 - informed) * model_specs["uninformed_ERP"][education]
     )
     early_retirement_factor = 1 - early_retirement_penalty * penalty_years
 
@@ -100,17 +101,19 @@ def calc_disability_pension_points(
     return total_points_disability
 
 
-def check_very_long_insured(retirement_age_difference, experience_years, sex, options):
+def check_very_long_insured(
+    retirement_age_difference, experience_years, sex, model_specs
+):
     """Test if the individual qualifies for pension for very long insured
     (Rente besonders für langjährig Versicherte)."""
 
-    experience_threshold = options["experience_threshold_very_long_insured"][sex]
+    experience_threshold = model_specs["experience_threshold_very_long_insured"][sex]
     enough_years = experience_years >= experience_threshold
     close_enough_to_SRA = retirement_age_difference <= 2
     return enough_years & close_enough_to_SRA
 
 
-def retirement_age_long_insured(SRA, options):
+def retirement_age_long_insured(SRA, model_specs):
     """Everyone can retire 4 years before the SRA but must be at least at 63 y/o.
     That means that we assume 1) everyone qualifies for "Rente für langjährig Versicherte" and 2) that
     the threshhold for "Rente für langjährig Versicherte" moves with the SRA. "Rente für besonders langjährig
@@ -118,5 +121,6 @@ def retirement_age_long_insured(SRA, options):
     lower bound of 63 as this is the current law, even for individuals with SRA below 67.
     """
     return np.maximum(
-        SRA - options["years_before_SRA_long_insured"], options["min_long_insured_age"]
+        SRA - model_specs["years_before_SRA_long_insured"],
+        model_specs["min_long_insured_age"],
     )

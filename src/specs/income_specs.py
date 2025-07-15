@@ -8,7 +8,7 @@ def add_income_specs(specs, path_dict):
     (
         specs["gamma_0"],
         specs["gamma_1"],
-        specs["income_shock_scale"],
+        specs["income_shock_std"],
     ) = process_wage_params(path_dict, specs)
 
     # unemployment benefits

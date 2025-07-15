@@ -1,51 +1,63 @@
 ---
-mu_men: 2
-mu_women: 2
+mu: 2
+mu_bequest_high: 2
+mu_bequest_low: 2
 
 # Full time work dis-utility men
-disutil_ft_work_high_good_men: 5.0
-disutil_ft_work_high_bad_men: 5.0
-disutil_ft_work_low_good_men: 5.0
-disutil_ft_work_low_bad_men: 5.0
+disutil_ft_work_good_men: 5.0
+disutil_ft_work_bad_men: 5.0
 
 # Full time work dis-utility women
-disutil_ft_work_high_good_women: 5.0
-disutil_ft_work_high_bad_women: 5.0
-disutil_ft_work_low_good_women: 5.0
-disutil_ft_work_low_bad_women: 5.0
+disutil_ft_work_good_women: 5.0
+disutil_ft_work_bad_women: 5.0
 
 # Part time dis-utility men
-disutil_pt_work_high_good_women: 5.0
-disutil_pt_work_high_bad_women: 5.0
-disutil_pt_work_low_good_women: 5.0
-disutil_pt_work_low_bad_women: 5.0
+disutil_pt_work_good_women: 5.0
+disutil_pt_work_bad_women: 5.0
 
 # Unemployment dis-utility men
-disutil_unemployed_high_men: 5.0
-disutil_unemployed_low_men: 5.0
+disutil_unemployed_good_men: 5.0
+disutil_unemployed_bad_men: 5.0
 
 # Unemployment dis-utility women
-disutil_unemployed_high_women: 5.0
-disutil_unemployed_low_women: 5.0
+disutil_unemployed_good_women: 5.0
+disutil_unemployed_bad_women: 5.0
 
 # Children dis-utility
 disutil_children_ft_work_low: 5.2
 disutil_children_ft_work_high: 5.2
 
 # Taste shock
-lambda: 2
+taste_shock_scale_men: 5
+taste_shock_scale_women: 5
 
-# taste_shock_scale_men: 2
-# taste_shock_scale_women: 2
-bequest_scale: 5
+# Bequest
+bequest_scale: 50
+
+# Job finding men
 job_finding_logit_const_men: 5
-job_finding_logit_period_men: 0.5
+# job_finding_logit_age_men: 0.5
 job_finding_logit_high_educ_men: 5
-job_finding_logit_const_women: 5
-job_finding_logit_period_women: 0.5
-job_finding_logit_high_educ_women: 5
+job_finding_logit_good_health_men: 5
+job_finding_logit_above_50_men: 5
+job_finding_logit_above_55_men: 5
+job_finding_logit_above_60_men: 5
 
-# Disability probability
-disability_logit_const: 5
-disability_logit_period: 0.5
-disability_logit_high_educ: 5
+# Job finding women
+job_finding_logit_const_women: 5
+job_finding_logit_age_women: 0.5
+job_finding_logit_high_educ_women: 5
+job_finding_logit_good_health_women: 5
+job_finding_logit_above_50_women: 5
+job_finding_logit_above_55_women: 5
+job_finding_logit_above_60_women: 5
+
+# Disability probability men
+disability_logit_const_men: 5
+disability_logit_age_men: 0.5
+disability_logit_high_educ_men: 5
+
+# Disability probability women
+disability_logit_const_women: 5
+disability_logit_age_women: 0.5
+disability_logit_high_educ_women: 5

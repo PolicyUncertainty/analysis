@@ -1,4 +1,5 @@
 import jax
+import numpy as np
 from jax import numpy as jnp
 
 from model_code.pension_system.early_retirement_paths import (
@@ -14,7 +15,7 @@ def calc_experience_years_for_pension_adjustment(
     policy_state,
     informed,
     health,
-    options,
+    model_specs,
 ):
     """Calculate a new experience stock accounting for the pension adjustment.
     This function will only be used if the individual is fresh retired. So we
@@ -26,12 +27,14 @@ def calc_experience_years_for_pension_adjustment(
         education=education,
         experience_years=experience_years,
         sex=sex,
-        options=options,
+        model_specs=model_specs,
     )
     # retirement age is last periods age
-    actual_retirement_age = options["start_age"] + period - 1
+    actual_retirement_age = model_specs["start_age"] + period - 1
     # SRA at retirement, difference to actual retirement age and boolean for early retirement
-    SRA_at_retirement = options["min_SRA"] + policy_state * options["SRA_grid_size"]
+    SRA_at_retirement = (
+        model_specs["min_SRA"] + policy_state * model_specs["SRA_grid_size"]
+    )
     retirement_age_difference = jnp.abs(SRA_at_retirement - actual_retirement_age)
     early_retired_bool = actual_retirement_age < SRA_at_retirement
 
@@ -46,12 +49,12 @@ def calc_experience_years_for_pension_adjustment(
         education=education,
         health=health,
         sex=sex,
-        options=options,
+        model_specs=model_specs,
     )
 
     # Total bonus for late retirement
     pension_points_late_retirement = (
-        1 + (options["late_retirement_bonus"] * retirement_age_difference)
+        1 + (model_specs["late_retirement_bonus"] * retirement_age_difference)
     ) * total_pension_points
 
     # Select bonus or penalty depending on age difference
@@ -65,21 +68,21 @@ def calc_experience_years_for_pension_adjustment(
         total_pension_points=adjusted_pension_points,
         sex=sex,
         education=education,
-        options=options,
+        model_specs=model_specs,
     )
     return adjusted_experience_years
 
 
-def calc_pension_points_form_experience(education, sex, experience_years, options):
+def calc_pension_points_form_experience(education, sex, experience_years, model_specs):
     """Calculate the total pension point for the working live.
 
     We normalize by the mean wage of the whole population. The punishment for early
     retirement is already in the experience.
 
     """
-    mean_wage_all = options["mean_hourly_ft_wage"][sex, education]
-    gamma_0 = options["gamma_0"][sex, education]
-    gamma_1_plus_1 = options["gamma_1"][sex, education] + 1
+    mean_wage_all = model_specs["mean_hourly_ft_wage"][sex, education]
+    gamma_0 = model_specs["gamma_0"][sex, education]
+    gamma_1_plus_1 = model_specs["gamma_1"][sex, education] + 1
     total_pens_points = (
         (jnp.exp(gamma_0) / gamma_1_plus_1)
         * ((experience_years + 1) ** gamma_1_plus_1 - 1)
@@ -88,13 +91,14 @@ def calc_pension_points_form_experience(education, sex, experience_years, option
 
 
 def calc_experience_for_total_pension_points(
-    total_pension_points, sex, education, options
+    total_pension_points, sex, education, model_specs
 ):
     """Calculate the experience for a given total pension points."""
-    mean_wage_all = options["mean_hourly_ft_wage"][sex, education]
-    gamma_0 = options["gamma_0"][sex, education]
-    gamma_1_plus_1 = options["gamma_1"][sex, education] + 1
-    return (
+    mean_wage_all = model_specs["mean_hourly_ft_wage"][sex, education]
+    gamma_0 = model_specs["gamma_0"][sex, education]
+    gamma_1_plus_1 = model_specs["gamma_1"][sex, education] + 1
+    exp_for_pension_points = (
         (total_pension_points * mean_wage_all * gamma_1_plus_1 / jnp.exp(gamma_0) + 1)
         ** (1 / gamma_1_plus_1)
     ) - 1
+    return exp_for_pension_points

@@ -3,7 +3,7 @@ import jax.numpy as jnp
 import numpy as np
 
 
-def announce_policy_state(policy_state, period, lagged_choice, options):
+def announce_policy_state(policy_state, period, lagged_choice, model_specs):
     """This function implements an announcement process, where some policy can be
     announced at a some announcement period.
 
@@ -12,14 +12,14 @@ def announce_policy_state(policy_state, period, lagged_choice, options):
     """
 
     # Check if current period is announcement period. Otherwise policy_state stays
-    bool_announcement = period == options["announcement_period"]
-    id_next_period = options[
+    bool_announcement = period == model_specs["announcement_period"]
+    id_next_period = model_specs[
         "announced_policy_state"
     ] * bool_announcement + policy_state * (1 - bool_announcement)
 
     # If the individual is already retired, the policy state moves to (or stays in)
     # the degenrate state
-    degenerate_state_id = jnp.array(options["n_policy_states"] - 1, dtype=jnp.uint8)
+    degenerate_state_id = jnp.array(model_specs["n_policy_states"] - 1, dtype=jnp.uint8)
     already_retirement_bool = (lagged_choice == 0) | (
         policy_state == degenerate_state_id
     )
@@ -29,7 +29,7 @@ def announce_policy_state(policy_state, period, lagged_choice, options):
     )
 
     # Now generate vector
-    trans_vector = jnp.zeros(options["n_policy_states"])
+    trans_vector = jnp.zeros(model_specs["n_policy_states"])
     trans_vector = trans_vector.at[id_next_period].set(1)
     return trans_vector
 

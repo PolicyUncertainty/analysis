@@ -16,7 +16,7 @@ def load_and_set_start_params(path_dict):
     )
 
     # Create start values for job offer probabilities
-    struct_est_sample = pd.read_pickle(path_dict["struct_est_sample"])
+    struct_est_sample = pd.read_csv(path_dict["struct_est_sample"])
     specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
 
     # Estimate start values for job offers

@@ -11,10 +11,12 @@ def create_final_period_utility_functions():
 
 def utility_final_consume_all(
     wealth,
-    sex,
+    education,
     params,
 ):
-    mu = jax.lax.select(sex == 0, params["mu_men"], params["mu_women"])
+    mu = jax.lax.select(
+        education == 0, params["mu_bequest_low"], params["mu_bequest_high"]
+    )
     unscaled_bequest_mu_not_one = (wealth ** (1 - mu) - 1) / (1 - mu)
     unscaled_bequest = jax.lax.select(
         jnp.allclose(mu, 1),
@@ -26,7 +28,10 @@ def utility_final_consume_all(
     return bequest_scale * unscaled_bequest
 
 
-def marginal_utility_final_consume_all(wealth, sex, params):
-    mu = jax.lax.select(sex == 0, params["mu_men"], params["mu_women"])
+def marginal_utility_final_consume_all(wealth, education, params):
+
+    mu = jax.lax.select(
+        education == 0, params["mu_bequest_low"], params["mu_bequest_high"]
+    )
     bequest_scale = params["bequest_scale"]
     return bequest_scale * (wealth**-mu)

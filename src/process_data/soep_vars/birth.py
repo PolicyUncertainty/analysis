@@ -23,7 +23,7 @@ def create_float_birth_date(df, drop_missing_month=True):
         valid_data = ~invalid_year & ~invalid_month
         df.loc[valid_data, "float_birth_date"] = df["gebjahr"] + df["gebmonat"] / 12
     else:
-        month = df["gebmonat"]
+        month = df["gebmonat"].copy()
         month[invalid_month] = 6
         df.loc[~invalid_year, "float_birth_date"] = df["gebjahr"] + month / 12
     return df

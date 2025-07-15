@@ -10,4 +10,10 @@ JET_COLOR_MAP = [
     "#bcbd22",
     "#17becf",
 ]
+LINE_STYLES = [
+    "-",
+    "--",
+    "-.",
+    ":",
+]
 FIGSIZE = 12

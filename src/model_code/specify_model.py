@@ -1,158 +1,150 @@
 import pickle
+from copy import deepcopy
 
+import dcegm
 import jax.numpy as jnp
 import numpy as np
-from dcegm.pre_processing.setup_model import load_and_setup_model, setup_and_save_model
-from dcegm.solve import get_solve_func_for_model
 
 from model_code.policy_processes.informed_state_transition import (
     informed_transition,
 )
 from model_code.policy_processes.select_policy_belief import (
-    select_transition_func_and_update_specs,
+    select_sim_policy_function_and_update_specs,
+    select_solution_transition_func_and_update_specs,
 )
 from model_code.state_space.state_space import create_state_space_functions
 from model_code.stochastic_processes.health_transition import health_transition
 from model_code.stochastic_processes.job_offers import job_offer_process_transition
 from model_code.stochastic_processes.partner_transitions import partner_transition
+from model_code.taste_shocks import shock_function_dict
 from model_code.utility.bequest_utility import create_final_period_utility_functions
-from model_code.utility.utility_functions import create_utility_functions
+from model_code.utility.utility_functions_add import create_utility_functions
+from model_code.wealth_and_budget.assets_grid import create_end_of_period_assets
 from model_code.wealth_and_budget.budget_equation import budget_constraint
-from model_code.wealth_and_budget.savings_grid import create_savings_grid
 from set_paths import get_model_resutls_path
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
 def specify_model(
     path_dict,
-    params,
+    specs,
     subj_unc,
     custom_resolution_age,
-    sim_alpha=None,
-    annoucement_age=None,
-    annoucement_SRA=None,
+    sim_specs=None,
     load_model=False,
-    model_type="solution",
+    debug_info=None,
 ):
-    """Generate model and options dictionaries."""
-    check_flags(
-        subj_unc,
-        model_type,
-        sim_alpha,
-        annoucement_age,
-        annoucement_SRA,
-    )
+    """Generate model class."""
 
-    # Generate model_specs
-    specs = generate_derived_and_data_derived_specs(path_dict)
-
-    # Assign income shock scale to start_params_all
-    params["sigma"] = specs["income_shock_scale"]
-    params["interest_rate"] = specs["interest_rate"]
-    params["beta"] = specs["discount_factor"]
-
-    # Execute load first step estimation data
-    specs, transition_func_sol = select_transition_func_and_update_specs(
+    SRA_belief_solution, specs = select_solution_transition_func_and_update_specs(
         path_dict=path_dict,
         specs=specs,
         subj_unc=subj_unc,
-        sim_alpha=sim_alpha,
-        annoucement_age=annoucement_age,
-        annoucement_SRA=annoucement_SRA,
         custom_resolution_age=custom_resolution_age,
     )
 
-    # Load specifications
-    n_periods = specs["n_periods"]
-    n_policy_states = specs["n_policy_states"]
-    choices = np.arange(specs["n_choices"], dtype=int)
-
     # Create savings grid
-    savings_grid = create_savings_grid()
+    savings_grid = create_end_of_period_assets()
 
     # Experience grid
     experience_grid = jnp.linspace(0, 1, specs["n_experience_grid_points"])
 
-    options = {
-        "state_space": {
-            "min_period_batch_segments": [33, 44],
-            "n_periods": n_periods,
-            "choices": choices,
-            "endogenous_states": {
-                "education": np.arange(specs["n_education_types"], dtype=int),
-                "sex": np.arange(specs["n_sexes"], dtype=int),
-            },
-            "exogenous_processes": {
-                "policy_state": {
-                    "transition": transition_func_sol,
-                    "states": np.arange(n_policy_states, dtype=int),
-                },
-                "job_offer": {
-                    "transition": job_offer_process_transition,
-                    "states": np.arange(2, dtype=int),
-                },
-                "partner_state": {
-                    "transition": partner_transition,
-                    "states": np.arange(specs["n_partner_states"], dtype=int),
-                },
-                "health": {
-                    "transition": health_transition,
-                    "states": np.arange(specs["n_all_health_states"], dtype=int),
-                },
-            },
-            "continuous_states": {
-                "wealth": savings_grid,
-                "experience": experience_grid,
-            },
+    model_config = {
+        "min_period_batch_segments": [33, 44],
+        "n_periods": specs["n_periods"],
+        "choices": np.arange(specs["n_choices"], dtype=int),
+        "deterministic_states": {
+            "education": np.arange(specs["n_education_types"], dtype=int),
+            "sex": np.arange(specs["n_sexes"], dtype=int),
         },
-        "model_params": specs,
+        "stochastic_states": {
+            "policy_state": np.arange(specs["n_policy_states"], dtype=int),
+            "job_offer": np.arange(2, dtype=int),
+            "partner_state": np.arange(specs["n_partner_states"], dtype=int),
+            "health": np.arange(specs["n_all_health_states"], dtype=int),
+        },
+        "continuous_states": {
+            "assets_end_of_period": savings_grid / specs["wealth_unit"],
+            "experience": experience_grid,
+        },
+        "n_quad_points": specs["n_quad_points"],
     }
-    informed_states = np.arange(2, dtype=int)
-    if model_type == "solution":
-        # Set informed state as not changing state
-        options["state_space"]["endogenous_states"]["informed"] = informed_states
-        # Determine path
-        model_path = path_dict["intermediate_data"] + "model_spec_solution.pkl"
-        sim_model = False
+    stochastic_states_transitions = {
+        "policy_state": SRA_belief_solution,
+        "job_offer": job_offer_process_transition,
+        "partner_state": partner_transition,
+        "health": health_transition,
+    }
 
-    elif model_type == "simulation":
-        # Set informed state as exogenous changing state
-        options["state_space"]["exogenous_processes"]["informed"] = {
-            "transition": informed_transition,
-            "states": informed_states,
+    # Now we use the alternative sim specification to define informed in the solution
+    # as deterministic state (type) and in the simulation as stochastic state.
+    informed_states = np.arange(2, dtype=int)
+    model_config_sim = deepcopy(model_config)
+    stochastic_states_transitions_sim = deepcopy(stochastic_states_transitions)
+
+    # First add it as a deterministic state
+    model_config["deterministic_states"]["informed"] = informed_states
+
+    if sim_specs is not None:
+        # Now as stochastic in the sim objects
+        model_config_sim["stochastic_states"]["informed"] = informed_states
+        stochastic_states_transitions_sim["informed"] = informed_transition
+
+        transition_func_sim, specs = select_sim_policy_function_and_update_specs(
+            specs=specs,
+            subj_unc=subj_unc,
+            announcement_age=sim_specs["announcement_age"],
+            SRA_at_start=sim_specs["SRA_at_start"],
+            SRA_at_retirement=sim_specs["SRA_at_retirement"],
+        )
+        stochastic_states_transitions_sim["policy_state"] = transition_func_sim
+
+        # Now specify the dict:
+        alternative_sim_specifications = {
+            "model_config": model_config_sim,
+            "stochastic_states_transitions": stochastic_states_transitions_sim,
+            "state_space_functions": create_state_space_functions(),
+            "budget_constraint": budget_constraint,
+            "shock_functions": shock_function_dict(),
         }
-        # Determine path
-        model_path = path_dict["intermediate_data"] + "model_spec_simulation.pkl"
-        sim_model = True
+
     else:
-        raise ValueError("model_type must be either 'solution' or 'simulation'")
+        alternative_sim_specifications = None
+
+    model_path = path_dict["intermediate_data"] + "model.pkl"
 
     if load_model:
-        model = load_and_setup_model(
-            options=options,
+        model = dcegm.setup_model(
+            model_specs=specs,
+            model_config=model_config,
             state_space_functions=create_state_space_functions(),
             utility_functions=create_utility_functions(),
             utility_functions_final_period=create_final_period_utility_functions(),
             budget_constraint=budget_constraint,
-            # shock_functions=shock_function_dict(),
-            path=model_path,
-            sim_model=sim_model,
+            shock_functions=shock_function_dict(),
+            stochastic_states_transitions=stochastic_states_transitions,
+            model_load_path=model_path,
+            alternative_sim_specifications=alternative_sim_specifications,
+            debug_info=debug_info,
         )
 
     else:
-        model = setup_and_save_model(
-            options=options,
+        model = dcegm.setup_model(
+            model_specs=specs,
+            model_config=model_config,
             state_space_functions=create_state_space_functions(),
             utility_functions=create_utility_functions(),
             utility_functions_final_period=create_final_period_utility_functions(),
             budget_constraint=budget_constraint,
-            # shock_functions=shock_function_dict(),
-            path=model_path,
-            sim_model=sim_model,
+            shock_functions=shock_function_dict(),
+            stochastic_states_transitions=stochastic_states_transitions,
+            model_save_path=model_path,
+            alternative_sim_specifications=alternative_sim_specifications,
+            debug_info=debug_info,
         )
 
     print("Model specified.")
-    return model, params
+    return model
 
 
 def specify_and_solve_model(
@@ -163,6 +155,8 @@ def specify_and_solve_model(
     custom_resolution_age,
     load_model,
     load_solution,
+    sim_specs=None,
+    debug_info=None,
 ):
     """Specify and solve model.
 
@@ -170,17 +164,17 @@ def specify_and_solve_model(
 
     """
 
+    specs = generate_derived_and_data_derived_specs(path_dict)
+
     # Generate model_specs
-    model, params = specify_model(
+    model = specify_model(
         path_dict=path_dict,
-        params=params,
+        specs=specs,
         subj_unc=subj_unc,
         custom_resolution_age=custom_resolution_age,
-        sim_alpha=None,
-        annoucement_age=None,
-        annoucement_SRA=None,
         load_model=load_model,
-        model_type="solution",
+        sim_specs=sim_specs,
+        debug_info=debug_info,
     )
 
     # check if folder of model objects exits:
@@ -188,7 +182,7 @@ def specify_and_solve_model(
 
     # Generate name of solution
     if subj_unc:
-        resolution_age = model["options"]["model_params"]["resolution_age"]
+        resolution_age = model.model_specs["resolution_age"]
         sol_name = f"sol_subj_unc_{resolution_age}.pkl"
     else:
         sol_name = "sol_no_subj_unc.pkl"
@@ -196,55 +190,11 @@ def specify_and_solve_model(
     solution_file = solve_folder["solution"] + sol_name
 
     if load_solution is None:
-        solution = {}
-        (
-            solution["value"],
-            solution["policy"],
-            solution["endog_grid"],
-        ) = get_solve_func_for_model(model)(params)
-        return solution, model, params
+        model_solved = model.solve(params)
+        return model_solved
     elif load_solution:
-        solution = pickle.load(open(solution_file, "rb"))
-        return solution, model, params
+        model_solved = model.solve(params, load_sol_path=solution_file)
+        return model_solved
     else:
-        solution = {}
-        (
-            solution["value"],
-            solution["policy"],
-            solution["endog_grid"],
-        ) = get_solve_func_for_model(model)(params)
-        pickle.dump(solution, open(solution_file, "wb"))
-        return solution, model, params
-
-
-def check_flags(
-    subj_unc,
-    model_type,
-    sim_alpha,
-    annoucement_age,
-    annoucement_SRA,
-):
-    # Check if subjective uncertainty is not requested in simulation model type
-    if subj_unc and model_type == "simulation":
-        raise ValueError("Subjective uncertainty is not available in simulation model")
-
-    # Check if sim_alpha is given and model type is solution. Then error
-    if sim_alpha is not None and model_type == "solution":
-        raise ValueError("sim_alpha is only available for simulation model")
-
-    # Check if annoucement_age and annoucement_SRA are given and model type is solution.
-    # Then error
-    annoucement_info_given = (annoucement_age is not None) or (
-        annoucement_SRA is not None
-    )
-    if annoucement_info_given and (model_type == "solution"):
-        raise ValueError(
-            "Annoucement age and SRA are only available for simulation model"
-        )
-
-    if annoucement_info_given and (sim_alpha is not None):
-        raise ValueError("Annoucement age and SRA are not compatible with sim_alpha")
-
-    # Check if one announcement info is given, then both must be given
-    if annoucement_info_given and (annoucement_age is None or annoucement_SRA is None):
-        raise ValueError("Both annoucement_age and annoucement_SRA must be given")
+        model_solved = model.solve(params, save_sol_path=solution_file)
+        return model_solved

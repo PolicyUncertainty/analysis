@@ -3,13 +3,13 @@ import numpy as np
 import pandas as pd
 
 from process_data.structural_sample_scripts.policy_state import (
-    create_sra_by_gebjahr,
+    create_SRA_by_gebjahr,
 )
 
 
 def plot_SRA_2007_reform(path_dict):
     gebjahr = pd.Series(data=np.arange(1945, 1966, 1), name="gebjahr")
-    policy_states = create_sra_by_gebjahr(gebjahr)
+    policy_states = create_SRA_by_gebjahr(gebjahr)
     policy_states_pre_reform = 65 * np.ones(gebjahr.shape[0])
     fig, ax = plt.subplots()
     ax.plot(gebjahr, policy_states, color="C0", label="post-reform")

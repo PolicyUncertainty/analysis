@@ -2,83 +2,44 @@ import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import seaborn as sns
-from dcegm.wealth_correction import adjust_observed_wealth
-from model_code.stochastic_processes.job_offers import job_offer_process_transition
 import scipy.stats as stats
+import seaborn as sns
+from dcegm.asset_correction import adjust_observed_wealth
 from sklearn.neighbors import KernelDensity
 
+from model_code.stochastic_processes.job_offers import job_offer_process_transition
 
-def generate_start_states(
-    path_dict, params, model, inital_SRA, n_agents, seed, only_informed=False
+
+def draw_initial_states(
+    path_dict, params, model, inital_SRA, seed, only_informed=False
 ):
     specs = model["options"]["model_params"]
+    n_agents = specs["n_agents"]
 
-    observed_data = pd.read_pickle(
-        path_dict["intermediate_data"] + "structural_estimation_sample.pkl"
-    )
+    observed_data = pd.read_csv(path_dict["struct_est_sample"])
 
     np.random.seed(seed)
     # Define start data and adjust wealth
     min_period = observed_data["period"].min()
     start_period_data = observed_data[observed_data["period"].isin([min_period])].copy()
 
+    # Read out states for wealth adjustment
     states_dict = {
         name: start_period_data[name].values
         for name in model["model_structure"]["discrete_states_names"]
     }
+    # Transform experience for wealth adjustment
+    periods = start_period_data["period"].values
+    max_init_exp = model["options"]["model_params"]["max_exp_diffs_per_period"][periods]
+    exp_denominator = periods + max_init_exp
+    states_dict["experience"] = start_period_data["experience"].values / exp_denominator
     states_dict["wealth"] = start_period_data["wealth"].values / specs["wealth_unit"]
-    states_dict["experience"] = start_period_data["experience"].values
 
     start_period_data.loc[:, "adjusted_wealth"] = adjust_observed_wealth(
         observed_states_dict=states_dict,
         params=params,
         model=model,
     )
-
-    # # Define unique values
-    # education_levels = start_period_data["education"].unique()
-    # sexes = start_period_data["sex"].unique()
-    # periods = sorted(start_period_data["period"].unique())
-
-    # # Compute 99th percentile threshold for adjusted_wealth
-    # wealth_99 = np.percentile(start_period_data["adjusted_wealth"], 99)
-
-    # # Filter out top 1%
-    # filtered_data = start_period_data[start_period_data["adjusted_wealth"] <= wealth_99]
-
-    # # Create a figure with 4 subplots (one for each period)
-    # fig, axes = plt.subplots(2, 2, figsize=(15, 12), sharex=True, sharey=True)
-
-    # # Plot distributions separately for each period
-    # for period, ax in zip(periods, axes.flatten()):
-    #     subset = filtered_data[filtered_data["period"] == period]
-
-    #     for edu in education_levels:
-    #         for sex in sexes:
-    #             sub_subset = subset[(subset["education"] == edu) & (subset["sex"] == sex)]
-
-    #             if not sub_subset.empty:
-    #                 sns.histplot(
-    #                     data=sub_subset,
-    #                     x="adjusted_wealth",
-    #                     bins=30,
-    #                     ax=ax,
-    #                     alpha=0.3,  # Translucent bars
-    #                     kde=True,  # Add KDE
-    #                     label=f"Edu: {edu}, Sex: {sex}"
-    #                 )
-
-    #     ax.set_title(f"Period {period}")
-    #     ax.set_xlabel("Adjusted Wealth")
-    #     ax.set_ylabel("Density / Count")
-    #     ax.legend(title="Groups")
-
-    # # Adjust layout and show the plot
-    # plt.tight_layout()
-    # plt.show()
-
-    # breakpoint()
 
     # Generate container
     sex_agents = np.array([], np.uint8)
@@ -130,12 +91,14 @@ def generate_start_states(
             # Restrict dataset on education level
 
             wealth_start_edu = draw_start_wealth_dist(
-                start_period_data_edu, n_agents_edu
+                start_period_data_edu, n_agents_edu, method="kde"
             )
             wealth_agents[type_mask] = wealth_start_edu
 
             # Generate edu specific informed shares
-            informed_share_edu = specs["initial_informed_shares"][edu]
+            informed_share_edu = specs["informed_shares_in_ages"][
+                specs["start_age"], edu
+            ]
             # Draw informed states according to inital distribution
             dist = np.array([1 - informed_share_edu, informed_share_edu])
             informed_draws_edu = np.random.choice(2, n_agents_edu, p=dist)
@@ -171,7 +134,7 @@ def generate_start_states(
             job_offer_probs = job_offer_process_transition(
                 params=params,
                 sex=jnp.ones_like(lagged_choice_edu) * sex_var,
-                options=specs,
+                model_specs=specs,
                 education=jnp.ones_like(lagged_choice_edu) * edu,
                 period=jnp.zeros_like(lagged_choice_edu),
                 choice=lagged_choice_edu,
@@ -197,15 +160,14 @@ def generate_start_states(
             partner_states[type_mask] = partner_states_edu
 
             # Generate health states
-            empirical_health_probs = start_period_data_edu["health"].value_counts(
-                normalize=True
-            )
-            health_probs = pd.Series(
-                index=np.arange(specs["n_health_states"]), data=0, dtype=float
-            )
+            empirical_health_probs = start_period_data_edu[
+                "surveyed_health"
+            ].value_counts(normalize=True)
+            # We let people start only in good and bad health
+            health_probs = pd.Series(index=np.arange(2), data=0, dtype=float)
             health_probs.update(empirical_health_probs)
             health_states_edu = np.random.choice(
-                specs["n_health_states"], size=n_agents_edu, p=health_probs.values
+                2, size=n_agents_edu, p=health_probs.values
             )
             health_agents[type_mask] = health_states_edu
 
@@ -220,7 +182,7 @@ def generate_start_states(
     initial_policy_state = np.floor(
         (inital_SRA - specs["min_SRA"]) / specs["SRA_grid_size"]
     )
-    
+
     policy_state_agents = (jnp.ones_like(exp_agents) * initial_policy_state).astype(
         jnp.uint8
     )
@@ -240,13 +202,14 @@ def generate_start_states(
         "job_offer": jnp.array(job_offer_agents, dtype=jnp.uint8),
         "partner_state": jnp.array(partner_states, dtype=jnp.uint8),
     }
+
     return states, wealth_agents
 
 
-def draw_start_wealth_dist(start_period_data_edu, n_agents_edu, method="pareto"):
+def draw_start_wealth_dist(start_period_data_edu, n_agents_edu, method="uniform"):
     """
     Draws samples from the starting wealth distribution using different methods.
-    
+
     Methods:
     - "uniform": Uniform sampling between the 30th and 70th percentiles.
     - "lognormal": Fit a shifted lognormal distribution and sample from it.
@@ -261,39 +224,90 @@ def draw_start_wealth_dist(start_period_data_edu, n_agents_edu, method="pareto")
     Returns:
         np.ndarray: Sampled wealth values.
     """
-    
+
     wealth_data = start_period_data_edu["adjusted_wealth"]
-    
+    min_wealth = wealth_data.values.min()
+
     if method == "uniform":
         # Existing uniform sampling between 30th and 70th quantiles
         wealth_start_edu = np.random.uniform(
-            wealth_data.quantile(0.3),
-            wealth_data.quantile(0.7),
-            n_agents_edu
+            wealth_data.quantile(0.3), wealth_data.quantile(0.7), n_agents_edu
         )
 
     elif method == "lognormal":
         # Fit a shifted lognormal distribution
         min_val = wealth_data.min()
         shifted_data = wealth_data - min_val + 1e-6  # Avoid log(0)
-        shape, loc, scale = stats.lognorm.fit(shifted_data, floc=0)  # Fix location at zero
+        shape, loc, scale = stats.lognorm.fit(
+            shifted_data, floc=0
+        )  # Fix location at zero
         samples = stats.lognorm.rvs(shape, loc=loc, scale=scale, size=n_agents_edu)
         wealth_start_edu = samples + min_val - 1e-6  # Shift back
 
     elif method == "kde":
         # Kernel Density Estimation (KDE) sampling
-        kde = KernelDensity(kernel="gaussian", bandwidth=0.1 * wealth_data.std()).fit(wealth_data.values.reshape(-1, 1))
+        kde = KernelDensity(kernel="gaussian", bandwidth=0.1 * wealth_data.std()).fit(
+            wealth_data.values.reshape(-1, 1)
+        )
         wealth_start_edu = kde.sample(n_agents_edu).flatten()
 
     elif method == "pareto":
         # Fit a Pareto-like distribution (Shifted Pareto)
         min_val = wealth_data.min()
         shifted_data = wealth_data - min_val + 1e-6  # Shift data to avoid 0
-        shape, loc, scale = stats.pareto.fit(shifted_data, floc=0)  # Fix location at zero
+        shape, loc, scale = stats.pareto.fit(
+            shifted_data, floc=0
+        )  # Fix location at zero
         samples = stats.pareto.rvs(shape, loc=loc, scale=scale, size=n_agents_edu)
         wealth_start_edu = samples + min_val - 1e-6  # Shift back
 
     else:
-        raise ValueError("Invalid method. Choose 'uniform', 'lognormal', 'kde', or 'pareto'.")
+        raise ValueError(
+            "Invalid method. Choose 'uniform', 'lognormal', 'kde', or 'pareto'."
+        )
+
+    wealth_start_edu[wealth_start_edu < min_wealth] = min_wealth
 
     return wealth_start_edu
+
+    # # Define unique values
+    # education_levels = start_period_data["education"].unique()
+    # sexes = start_period_data["sex"].unique()
+    # periods = sorted(start_period_data["period"].unique())
+
+    # # Compute 99th percentile threshold for adjusted_wealth
+    # wealth_99 = np.percentile(start_period_data["adjusted_wealth"], 99)
+
+    # # Filter out top 1%
+    # filtered_data = start_period_data[start_period_data["adjusted_wealth"] <= wealth_99]
+
+    # # Create a figure with 4 subplots (one for each period)
+    # fig, axes = plt.subplots(2, 2, figsize=(15, 12), sharex=True, sharey=True)
+
+    # # Plot distributions separately for each period
+    # for period, ax in zip(periods, axes.flatten()):
+    #     subset = filtered_data[filtered_data["period"] == period]
+
+    #     for edu in education_levels:
+    #         for sex in sexes:
+    #             sub_subset = subset[(subset["education"] == edu) & (subset["sex"] == sex)]
+
+    #             if not sub_subset.empty:
+    #                 sns.histplot(
+    #                     data=sub_subset,
+    #                     x="adjusted_wealth",
+    #                     bins=30,
+    #                     ax=ax,
+    #                     alpha=0.3,  # Translucent bars
+    #                     kde=True,  # Add KDE
+    #                     label=f"Edu: {edu}, Sex: {sex}"
+    #                 )
+
+    #     ax.set_title(f"Period {period}")
+    #     ax.set_xlabel("Adjusted Wealth")
+    #     ax.set_ylabel("Density / Count")
+    #     ax.legend(title="Groups")
+
+    # # Adjust layout and show the plot
+    # plt.tight_layout()
+    # plt.show()

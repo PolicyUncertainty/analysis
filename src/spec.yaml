@@ -1,4 +1,8 @@
 ---
+################
+# Current model name:
+model_name: msm_free_bump
+
 ###############################################################################
 # Model specification
 ###############################################################################
@@ -15,11 +19,12 @@ sex_labels: [Men, Women]
 partner_labels: [Single, Working Partner, Retired Partner]
 
 # mathematical model features
-quadrature_points_stochastic: 5
+n_quad_points: 5
 n_experience_grid_points: 11
 # Fixed structural parameters, we will not estimate
 interest_rate: 0.03
 discount_factor: 0.97
+income_shock_mean: 0.0
 
 # economic model parameters
 start_age: 30
@@ -43,15 +48,19 @@ exp_increase_part_time: 0.5
 
 # Parameters of the policy environment:
 # Unemployment benefits (Source: GETTSIM)
-monthly_unemployment_benefits: 432 # single adult 
-monthly_child_unemployment_benefits: 304 # weighted average of (250, 308 and 350)
-monthly_unemployment_benefits_housing: 350 
+monthly_unemployment_benefits: 432  # single adult
+monthly_child_unemployment_benefits: 304  # weighted average of (250, 308, 350)
+monthly_unemployment_benefits_housing: 350
 # Wealth threshold (for unemployment benefits, still GETTSIM)
 unemployment_wealth_thresh: 10_050
 # Child benefits (Source: GETTSIM)
-monthly_child_benefits: 184
-# Minimum Wage (Source: Destatis) 
-monthly_min_wage: 1620 # 9.35 * 40 hours * 4.33 weeks = 1620
+monthly_child_benefits: 204
+# Minimum Wage (Source: Destatis)
+monthly_min_wage: 1620  # 9.35 * 40 hours * 4.33 weeks = 1620
+# Tax Brackets (Source: GETTSIM)
+income_tax_brackets: [9408, 14532, 57051, 270500]
+# Tax rates (Source: GETTSIM)
+income_tax_rates: [0.0, 0.14, 0.2397, 0.42, 0.45]
 
 # Retirement system parameters.
 # Start with early retirement penalty (ERP)
@@ -75,7 +84,7 @@ wage_trunc_low_perc: 0.01  # lower truncation of wage distribution
 wage_trunc_high_perc: 0.99  # upper truncation of wage distribution
 ###############################################
 # Wealth preparation
-wealth_unit: 1_000  # unit of wealth in data
+wealth_unit: 10_000  # unit of wealth in data
 ###############################################
 # Belief process estimation
 # Limits for truncation of the normal distribution
@@ -112,4 +121,6 @@ end_age_transition_estimation: 75
 # Simulation parameters
 ###############################################################################
 n_agents: 100_000
+# We have around 500 30-year olds in the data. This yields then 500_000
+n_multiply_start_obs: 100
 seed: 123

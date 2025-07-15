@@ -13,14 +13,12 @@ from process_data.aux_and_plots.lagged_and_lead_vars import (
     span_dataframe,
 )
 from process_data.soep_vars.age import calc_age_at_interview
-from process_data.soep_vars.birth import create_float_birth_date
 from process_data.soep_vars.choice_from_spell import (
     create_choice_variable_from_artkalen,
 )
 from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.experience import create_experience_and_working_years
 from process_data.soep_vars.health import correct_health_state, create_health_var
-from process_data.soep_vars.interview_date import create_float_interview_date
 from process_data.soep_vars.job_hire_and_fire import (
     determine_observed_job_offers,
     generate_job_separation_var,
@@ -32,6 +30,9 @@ from process_data.soep_vars.partner_code import (
 from process_data.soep_vars.wealth.linear_interpolation import (
     add_wealth_interpolate_and_deflate,
 )
+from process_data.structural_sample_scripts.disability_pension_health import (
+    modify_health_for_disability_pension,
+)
 from process_data.structural_sample_scripts.informed_state import create_informed_state
 from process_data.structural_sample_scripts.model_restrictions import (
     enforce_model_choice_restriction,
@@ -40,6 +41,23 @@ from process_data.structural_sample_scripts.policy_state import (
     create_policy_state,
     create_SRA_by_gebjahr,
 )
+
+CORE_TYPE_DICT = {
+    "period": "int8",
+    "choice": "int8",
+    "lagged_choice": "int8",
+    "informed": "int8",
+    "policy_state": "int8",
+    "policy_state_value": "float64",
+    "lagged_health": "int8",
+    "partner_state": "int8",
+    "job_offer": "int8",
+    "experience": "int8",
+    "wealth": "float64",
+    "education": "int8",
+    "sex": "int8",
+    "health": "int8",
+}
 
 
 def create_structural_est_sample(
@@ -53,17 +71,15 @@ def create_structural_est_sample(
     if not os.path.exists(paths["intermediate_data"]):
         os.makedirs(paths["intermediate_data"])
 
-    out_file_path = paths["intermediate_data"] + "structural_estimation_sample.pkl"
-
     if load_data:
-        df = pd.read_pickle(out_file_path)
+        df = pd.read_csv(paths["struct_est_sample"])
         return df
 
     # Load and merge data state data from SOEP core (all but wealth)
     df = load_and_merge_soep_core(path_dict=paths, use_processed_pl=use_processed_pl)
-    
+
     # Create the cohort specific SRA and its enumerated policy state
-    df = create_SRA_by_gebjahr(df)
+    df["SRA"] = create_SRA_by_gebjahr(df["gebjahr"])
 
     # First start with partner state, as these could be also out of age range.
     df = create_partner_state(df, filter_missing=False)
@@ -97,15 +113,13 @@ def create_structural_est_sample(
     # Create informed state
     df = create_informed_state(df)
 
-    # Generare job separation variable and lag
+    # Generare job separation variable
     df = generate_job_separation_var(df)
-    df["job_sep_this_year"] = df.groupby(["pid"])["job_sep"].shift(-1)
 
     # Now use this information to determine job offer state
-    was_fired_last_period = (df["job_sep"] == 1) | (df["job_sep_this_year"] == 1)
-    df = determine_observed_job_offers(
-        df, working_choices=[2, 3], was_fired_last_period=was_fired_last_period
-    )
+    # df["job_sep_this_year"] = df.groupby(["pid"])["job_sep"].shift(-1)
+    # was_fired_last_period = (df["job_sep"] == 1) | (df["job_sep_this_year"] == 1)
+    df = determine_observed_job_offers(df, working_choices=[2, 3])
 
     # We are done with lagging and leading and drop the buffer years
     df = filter_years(df, specs["start_year"], specs["end_year"])
@@ -117,13 +131,16 @@ def create_structural_est_sample(
             "health",
             "choice",
             "lagged_choice",
+            "lagged_health",
             "education",
             "age",
         ],
     )
-    
+
     # Add wealth
-    df = add_wealth_interpolate_and_deflate(df, paths, specs, load_wealth=load_wealth, use_processed_pl=use_processed_pl)
+    df = add_wealth_interpolate_and_deflate(
+        df, paths, specs, load_wealth=load_wealth, use_processed_pl=use_processed_pl
+    )
 
     # Correct policy state
     df = create_policy_state(df, specs)
@@ -137,6 +154,10 @@ def create_structural_est_sample(
     # enforce choice restrictions based on model setup
     df = enforce_model_choice_restriction(df, specs)
 
+    # # Modify health state for incorporation of disability pension
+    df["surveyed_health"] = df["health"].copy()
+    df = modify_health_for_disability_pension(df, specs)
+
     # Rename to monthly wage
     df.rename(
         columns={
@@ -147,40 +168,24 @@ def create_structural_est_sample(
     )
 
     type_dict_add = {
-        "monthly_wage": "float32",
-        "hh_net_income": "float32",
-        "working_years": "float32",
-        "children": "float32",
+        "monthly_wage": "float64",
+        "hh_net_income": "float64",
+        "working_years": "float64",
+        "children": "float64",
+        # "surveyed_health": "int8",
     }
 
     df["hh_net_income"] /= specs["wealth_unit"]
-
-    # Keep relevant columns (i.e. state variables) and set their minimal datatype
-    core_type_dict = {
-        "period": "int8",
-        "choice": "int8",
-        "lagged_choice": "int8",
-        "informed": "int8",
-        "policy_state": "int8",
-        "policy_state_value": "float32",
-        "partner_state": "int8",
-        "job_offer": "int8",
-        "experience": "int8",
-        "wealth": "float32",
-        "education": "int8",
-        "sex": "int8",
-        "health": "int8",
-    }
 
     # Drop observations if any of core variables are nan
     # We also delete now the observations with invalid data, which we left before to have a continuous panel
     df = drop_missings(
         df=df,
-        vars_to_check=list(core_type_dict.keys()),
+        vars_to_check=list(CORE_TYPE_DICT.keys()),
     )
 
     all_type_dict = {
-        **core_type_dict,
+        **CORE_TYPE_DICT,
         **type_dict_add,
     }
     df = df[list(all_type_dict.keys())]
@@ -190,7 +195,10 @@ def create_structural_est_sample(
 
     # Anonymize and save data
     df.reset_index(drop=True, inplace=True)
-    df.to_pickle(out_file_path)
+    df.to_csv(paths["struct_est_sample"])
+
+    # median wealth by age
+    # df["median_wealth"] = df.groupby("age")["wealth"].transform("median")
 
     return df
 

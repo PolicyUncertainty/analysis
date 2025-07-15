@@ -1,8 +1,12 @@
+import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
 from export_results.figures.color_map import JET_COLOR_MAP
+from model_code.pension_system.experience_stock import (
+    calc_experience_years_for_pension_adjustment,
+)
 from model_code.wealth_and_budget.budget_equation import budget_constraint
 from model_code.wealth_and_budget.pension_payments import (
     calc_gross_pension_income,
@@ -55,7 +59,7 @@ def plot_incomes(path_dict):
                     education=edu_var,
                     sex=sex_var,
                     income_shock=0,
-                    options=specs,
+                    model_specs=specs,
                 )
                 after_ssc_pt_wages[i] = calc_labor_income_after_ssc(
                     lagged_choice=2,
@@ -63,7 +67,7 @@ def plot_incomes(path_dict):
                     education=edu_var,
                     sex=sex_var,
                     income_shock=0,
-                    options=specs,
+                    model_specs=specs,
                 )
 
                 gross_ft_wages[i] = calculate_gross_labor_income(
@@ -72,7 +76,7 @@ def plot_incomes(path_dict):
                     education=edu_var,
                     sex=sex_var,
                     income_shock=0,
-                    options=specs,
+                    model_specs=specs,
                 )
                 after_ssc_ft_wages[i] = calc_labor_income_after_ssc(
                     lagged_choice=3,
@@ -80,25 +84,36 @@ def plot_incomes(path_dict):
                     education=edu_var,
                     sex=sex_var,
                     income_shock=0,
-                    options=specs,
+                    model_specs=specs,
+                )
+
+                exp_stock_pension = calc_experience_years_for_pension_adjustment(
+                    period=37,
+                    sex=sex_var,
+                    experience_years=exp,
+                    education=edu_var,
+                    policy_state=8,  # Make 67 as well
+                    informed=1,
+                    health=0,
+                    model_specs=specs,
                 )
 
                 gross_pensions[i] = np.maximum(
                     calc_gross_pension_income(
-                        experience_years=exp,
+                        experience_years=exp_stock_pension,
                         education=edu_var,
                         sex=sex_var,
-                        options=specs,
+                        model_specs=specs,
                     ),
                     annual_unemployment,
                 )
 
                 net_pensions[i] = np.maximum(
                     calc_pensions_after_ssc(
-                        experience_years=exp,
+                        experience_years=exp_stock_pension,
                         education=edu_var,
                         sex=sex_var,
-                        options=specs,
+                        model_specs=specs,
                     ),
                     annual_unemployment,
                 )
@@ -156,8 +171,8 @@ def plot_incomes(path_dict):
 
 
 def plot_total_income(specs):
-    params = {"interest_rate": 0.0}
-    exp_levels = np.arange(0, specs["max_experience"] + 1)
+
+    exp_levels = np.arange(0, 46)
     marriage_labels = ["Single", "Partnered"]
     edu_labels = specs["education_labels"]
 
@@ -180,12 +195,12 @@ def plot_total_income(specs):
                             education=edu_val,
                             lagged_choice=choice,
                             experience=exp_share,
+                            health=jnp.array(0),
                             sex=sex_var,
                             partner_state=np.array(married_val),
-                            savings_end_of_previous_period=0,
+                            asset_end_of_previous_period=0,
                             income_shock_previous_period=0,
-                            params=params,
-                            options=specs,
+                            model_specs=specs,
                         )
                     axs[edu_val, married_val].plot(
                         exp_levels,
@@ -253,7 +268,7 @@ def plot_child_benefits(specs):
                         sex=sex_var,
                         has_partner_int=partner_val,
                         period=period,
-                        options=specs,
+                        model_specs=specs,
                     )
                 ax.plot(periods, child_benefits, label=f"{edu_label}")
             ax.set_title(f"{sex_label}; {partner_label}")

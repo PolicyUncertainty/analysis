@@ -16,10 +16,7 @@ probs_*.txt
 data_mort_estim.dta
 
 # Ignore intermediate data pickle files
-output/intermediate_data/*.pkl
-!output/intermediate_data/temp_params_*.pkl
-output/intermediate_data/estimation_*/
-output/intermediate_data/model_*/
+output/intermediate_data/
 
 # Ignore estimation log files, but not the md files
 src/estimation/struct_estimation/scripts/log/

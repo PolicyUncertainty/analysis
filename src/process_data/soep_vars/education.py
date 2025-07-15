@@ -15,4 +15,6 @@ def create_education_type(data, filter_missings=False):
             + " left after dropping people with missing education values."
         )
         data = data[data["pgpsbil"].notna()]
+    else:
+        data.loc[data["pgpsbil"] < 0, "education"] = None
     return data

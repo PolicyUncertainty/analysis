@@ -18,7 +18,7 @@ from model_code.stochastic_processes.job_offers import job_offer_process_transit
 from model_code.stochastic_processes.partner_transitions import partner_transition
 from model_code.taste_shocks import shock_function_dict
 from model_code.utility.bequest_utility import create_final_period_utility_functions
-from model_code.utility.utility_functions import create_utility_functions
+from model_code.utility.utility_functions_add import create_utility_functions
 from model_code.wealth_and_budget.assets_grid import create_end_of_period_assets
 from model_code.wealth_and_budget.budget_equation import budget_constraint
 from set_paths import get_model_resutls_path

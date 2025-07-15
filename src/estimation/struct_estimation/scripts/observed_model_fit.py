@@ -23,37 +23,33 @@ def observed_model_fit(
         load_model=load_sol_model,
         load_solution=load_solution,
         sim_specs=None,
+        debug_info="all",
     )
 
     data_decision, states_dict = load_and_prep_data_for_model_fit(
         paths_dict=paths_dict, specs=specs, params=params, model_class=model_solved
     )
 
-    unobserved_state_specs = create_unobserved_state_specs(
-        data_decision, model_class=model_solved
-    )
+    unobserved_state_specs = create_unobserved_state_specs(data_decision)
 
     plot_observed_model_fit_choice_probs(
-        paths_dict,
-        specs,
-        data_decision,
-        states_dict,
-        model_class,
-        unobserved_state_specs,
-        params,
+        specs=specs,
+        data_decision=data_decision,
+        states_dict=states_dict,
+        model_solved=model_solved,
+        unobserved_state_specs=unobserved_state_specs,
+        params=params,
         save_folder=paths_dict["plots"],
     )
 
 
 def plot_observed_model_fit_choice_probs(
-    paths_dict,
     specs,
     data_decision,
     states_dict,
-    model,
+    model_solved,
     unobserved_state_specs,
     params,
-    est_model,
     save_folder,
 ):
     for choice in range(specs["n_choices"]):
@@ -62,10 +58,9 @@ def plot_observed_model_fit_choice_probs(
         choice_probs_observations = choice_probs_for_choice_vals(
             choice_vals=choice_vals,
             states_dict=states_dict,
-            model=model,
+            model_solved=model_solved,
             unobserved_state_specs=unobserved_state_specs,
             params=params,
-            est_model=est_model,
             use_probability_of_observed_states=False,
         )
 
@@ -155,9 +150,8 @@ def load_and_prep_data_for_model_fit(
 def choice_probs_for_choice_vals(
     choice_vals,
     states_dict,
-    model,
+    model_solved,
     params,
-    est_model,
     unobserved_state_specs=None,
     use_probability_of_observed_states=False,
 ):
@@ -165,11 +159,16 @@ def choice_probs_for_choice_vals(
         choice_prob_func = create_partial_choice_prob_calculation(
             observed_states=states_dict,
             observed_choices=choice_vals,
-            model=model,
+            model_structure=model_solved.model_structure,
+            model_config=model_solved.model_config,
+            model_funcs=model_solved.model_funcs,
         )
     else:
         choice_prob_func = create_choice_prob_func_unobserved_states(
-            model=model,
+            model_structure=model_solved.model_structure,
+            model_specs=model_solved.model_specs,
+            model_funcs=model_solved.model_funcs,
+            model_config=model_solved.model_config,
             observed_states=states_dict,
             observed_choices=choice_vals,
             unobserved_state_specs=unobserved_state_specs,
@@ -177,8 +176,8 @@ def choice_probs_for_choice_vals(
         )
 
     choice_probs_observations = choice_prob_func(
-        value_in=est_model["value"],
-        endog_grid_in=est_model["endog_grid"],
+        value_in=model_solved.value,
+        endog_grid_in=model_solved.endog_grid,
         params_in=params,
     )
     return choice_probs_observations

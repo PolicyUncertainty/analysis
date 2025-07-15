@@ -152,8 +152,8 @@ def create_structural_est_sample(
     df = enforce_model_choice_restriction(df, specs)
 
     # # Modify health state for incorporation of disability pension
-    # df["surveyed_health"] = df["health"].copy()
-    # df = modify_health_for_disability_pension(df, specs)
+    df["surveyed_health"] = df["health"].copy()
+    df = modify_health_for_disability_pension(df, specs)
 
     # Rename to monthly wage
     df.rename(

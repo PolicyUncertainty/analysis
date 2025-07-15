@@ -51,10 +51,11 @@ def calc_early_retirement_pension_points(
 
     # Penalty years. If disability pension(then limit to 3 years)
     penalty_years_disability = retirement_age_difference.clip(max=3)
+    max_penalty_years = retirement_age_difference.clip(max=4)
     penalty_years = jax.lax.select(
         disability_pension_bool,
         on_true=penalty_years_disability,
-        on_false=retirement_age_difference,
+        on_false=max_penalty_years,
     )
 
     # Choose deduction factor according to information state

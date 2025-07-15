@@ -25,11 +25,10 @@ from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 
 # %%
 # Set specifications
-seeed = 123
-model_name = "disability"
-load_solution = True  # baseline solution conntainer
+model_name = specs["model_name"]
+seed = 123
 load_sol_model = True  # informed state as types
-load_sim_model = True  # informed state stochastic
+load_unc_solution = True  # baseline solution container
 load_df = (
     None  # True = load existing df, False = create new df, None = create but not save
 )
@@ -53,7 +52,7 @@ for announcement_age in announcement_ages:
         print("Start simulation for announcement age: ", announcement_age)
 
     # Simulate baseline with subjective belief
-    df_base = solve_and_simulate_scenario(
+    df_base, _ = solve_and_simulate_scenario(
         path_dict=path_dict,
         params=params,
         subj_unc=True,
@@ -63,20 +62,19 @@ for announcement_age in announcement_ages:
         SRA_at_start=67,
         model_name=model_name,
         df_exists=load_df_base,
-        solution_exists=load_solution,
+        solution_exists=load_unc_solution,
         sol_model_exists=load_sol_model,
-        sim_model_exists=load_sim_model,
-    ).reset_index()
+    )
 
-    if load_df_base is not None:
-        load_df_base = True
+    df_base = df_base.reset_index()
+
+    load_df_base = True if load_df_base is not None else load_df_base
 
     load_sol_model = True
-    load_sim_model = True
-    load_solution = True
+    load_unc_solution = True if load_unc_solution is not None else load_unc_solution
 
     # Simulate counterfactual
-    df_cf = solve_and_simulate_scenario(
+    df_cf, _ = solve_and_simulate_scenario(
         path_dict=path_dict,
         params=params,
         subj_unc=True,
@@ -86,10 +84,11 @@ for announcement_age in announcement_ages:
         SRA_at_start=67,
         model_name=model_name,
         df_exists=load_df,
-        solution_exists=load_solution,
+        solution_exists=load_unc_solution,
         sol_model_exists=load_sol_model,
-        sim_model_exists=load_sim_model,
-    ).reset_index()
+    )
+
+    df_cf = df_cf.reset_index()
 
     res_df_life_cycle = add_new_life_cycle_results(
         df_base=df_base,

@@ -62,7 +62,7 @@ def utility_func_alive(
     ((c*eta/consumption_scale)^(1-mu))/(1-mu) ."""
     # gather params
     mu = params["mu"]
-    eta = disutility_work(
+    disutil_work = disutility_work(
         period=period,
         choice=choice,
         sex=sex,
@@ -80,15 +80,15 @@ def utility_func_alive(
         model_specs=model_specs,
     )
     # compute utility
-    scaled_consumption = consumption * eta / cons_scale
-    utility_mu_not_one = (scaled_consumption ** (1 - mu) - 1) / (1 - mu)
+    scaled_consumption = consumption / cons_scale
+    utility_cons_not_one = (scaled_consumption ** (1 - mu) - 1) / (1 - mu)
 
-    utility = jax.lax.select(
+    utility_cons = jax.lax.select(
         jnp.allclose(mu, 1),
-        jnp.log(consumption * eta / cons_scale),
-        utility_mu_not_one,
+        jnp.log(consumption / cons_scale),
+        utility_cons_not_one,
     )
-    return utility
+    return utility_cons - disutil_work
 
 
 def marginal_utility_func(
@@ -98,7 +98,6 @@ def marginal_utility_func(
     education,
     health,
     period,
-    choice,
     params,
     model_specs,
 ):
@@ -107,9 +106,7 @@ def marginal_utility_func(
         sex=sex,
         partner_state=partner_state,
         education=education,
-        health=health,
         period=period,
-        choice=choice,
         params=params,
         model_specs=model_specs,
     )
@@ -130,9 +127,7 @@ def marginal_utility_function_alive(
     partner_state,
     sex,
     education,
-    health,
     period,
-    choice,
     params,
     model_specs,
 ):
@@ -144,17 +139,7 @@ def marginal_utility_function_alive(
         model_specs=model_specs,
     )
     mu = params["mu"]
-    eta = disutility_work(
-        period=period,
-        choice=choice,
-        sex=sex,
-        education=education,
-        partner_state=partner_state,
-        health=health,
-        params=params,
-        model_specs=model_specs,
-    )
-    marg_util_mu_not_one = ((eta / cons_scale) ** (1 - mu)) * (consumption ** (-mu))
+    marg_util_mu_not_one = ((1 / cons_scale) ** (1 - mu)) * (consumption ** (-mu))
 
     marg_util = jax.lax.select(
         jnp.allclose(mu, 1),
@@ -170,9 +155,7 @@ def inverse_marginal_func(
     partner_state,
     education,
     sex,
-    health,
     period,
-    choice,
     params,
     model_specs,
 ):
@@ -184,17 +167,7 @@ def inverse_marginal_func(
         model_specs=model_specs,
     )
     mu = params["mu"]
-    eta = disutility_work(
-        period=period,
-        choice=choice,
-        sex=sex,
-        education=education,
-        partner_state=partner_state,
-        health=health,
-        params=params,
-        model_specs=model_specs,
-    )
-    consumption_mu_not_one = marginal_utility ** (-1 / mu) * (eta / cons_scale) ** (
+    consumption_mu_not_one = marginal_utility ** (-1 / mu) * (1 / cons_scale) ** (
         (1 - mu) / mu
     )
     consumption = jax.lax.select(
@@ -223,7 +196,7 @@ def disutility_work(
         "disutil_unemployed_good_men"
     ] * good_health + params["disutil_unemployed_bad_men"] * (1 - good_health)
 
-    exp_factor_men = (
+    disutil_sum_men = (
         disutil_unemployment_men * is_unemployed
         # + disutil_pt_work * is_working_part_time
         + disutil_ft_work_men * is_working_full_time
@@ -231,16 +204,12 @@ def disutility_work(
     )
 
     disutil_ft_work_women = (
-        params["disutil_ft_work_high_bad_women"] * (1 - good_health) * education
-        + params["disutil_ft_work_low_bad_women"] * (1 - good_health) * (1 - education)
-        + params["disutil_ft_work_high_good_women"] * good_health * education
-        + params["disutil_ft_work_low_good_women"] * good_health * (1 - education)
+        params["disutil_ft_work_bad_women"] * (1 - good_health)
+        + params["disutil_ft_work_good_women"] * good_health
     )
     disutil_pt_work_women = (
-        params["disutil_pt_work_high_bad_women"] * (1 - good_health) * education
-        + params["disutil_pt_work_low_bad_women"] * (1 - good_health) * (1 - education)
-        + params["disutil_pt_work_high_good_women"] * good_health * education
-        + params["disutil_pt_work_low_good_women"] * good_health * (1 - education)
+        params["disutil_pt_work_bad_women"] * (1 - good_health)
+        + params["disutil_pt_work_good_women"] * good_health
     )
 
     disutil_children = params["disutil_children_ft_work_high"] * education + params[
@@ -253,20 +222,18 @@ def disutility_work(
     ]
     disutil_children_ft = disutil_children * nb_children
 
-    disutil_unemployment = params["disutil_unemployed_high_women"] * education + params[
-        "disutil_unemployed_low_women"
-    ] * (1 - education)
+    disutil_unemployment = params[
+        "disutil_unemployed_good_women"
+    ] * good_health + params["disutil_unemployed_bad_women"] * (1 - good_health)
 
-    exp_factor_women = (
+    disutil_sum_women = (
         disutil_unemployment * is_unemployed
         + disutil_pt_work_women * is_working_part_time
         + (disutil_ft_work_women + disutil_children_ft) * is_working_full_time
     )
 
     # Select exponential factor by sex
-    exp_factor = jax.lax.select(sex == 0, exp_factor_men, exp_factor_women)
-    # compute eta
-    disutility = jnp.exp(-exp_factor)
+    disutility = jax.lax.select(sex == 0, disutil_sum_men, disutil_sum_women)
     return disutility
 
 

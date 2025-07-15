@@ -36,10 +36,6 @@ def solve_and_simulate_scenario(
     )
     df_file = model_out_folder["simulation"] + df_name
 
-    if df_exists:
-        data_sim = pd.read_pickle(df_file)
-        return data_sim
-
     # Create model and assign simulation specs.
     sim_specs = {
         "announcement_age": announcement_age,
@@ -59,7 +55,7 @@ def solve_and_simulate_scenario(
 
     if df_exists:
         data_sim = pd.read_pickle(df_file)
-        return data_sim
+        return data_sim, model_solved
     else:
         data_sim = simulate_scenario(
             path_dict=path_dict,
@@ -68,10 +64,10 @@ def solve_and_simulate_scenario(
             only_informed=only_informed,
         )
         if df_exists is None:
-            return data_sim
+            return data_sim, model_solved
         else:
             data_sim.to_pickle(df_file)
-            return data_sim
+            return data_sim, model_solved
 
 
 def simulate_scenario(
@@ -90,17 +86,17 @@ def simulate_scenario(
     #     only_informed=only_informed,
     # )
 
-    initial_states, initial_wealth = generate_start_states_from_obs(
+    initial_states = generate_start_states_from_obs(
         path_dict=path_dict,
         params=model_solved.params,
-        model_solved=model_solved,
+        model_class=model_solved,
         inital_SRA=initial_SRA,
         only_informed=only_informed,
     )
     model_specs = model_solved.model_specs
 
     df = model_solved.simulate(
-        initial_states=initial_states,
+        states_initial=initial_states,
         seed=model_specs["seed"],
     )
 
@@ -137,15 +133,13 @@ def simulate_scenario(
             ] = model_specs["av_annual_hours_pt"][sex_var, edu_var]
 
     # Create income vars:
-    # First wealth at the beginning of period as the sum of savings and consumption
-    df["wealth_at_beginning"] = df["savings"] + df["consumption"]
-    # Then total income as the difference between wealth at the beginning of next period and savings
+    # First, total income as the difference between wealth at the beginning of next period and savings
     df["total_income"] = (
-        df.groupby("agent")["wealth_at_beginning"].shift(-1) - df["savings"]
+        df.groupby("agent")["assets_begin_of_period"].shift(-1) - df["savings"]
     )
-    df["income_wo_interest"] = df.groupby("agent")["wealth_at_beginning"].shift(
+    df["income_wo_interest"] = df.groupby("agent")["assets_begin_of_period"].shift(
         -1
-    ) - df["savings"] * (1 + params["interest_rate"])
+    ) - df["savings"] * (1 + model_specs["interest_rate"])
 
     # periodic savings and savings rate
     df["savings_dec"] = df["total_income"] - df["consumption"]

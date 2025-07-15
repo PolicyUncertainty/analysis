@@ -26,13 +26,12 @@ from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 # %%
 # Set specifications
 seeed = 123
-model_name = "disability"
-load_solution = True  # baseline solution conntainer
-load_sol_model = True  # informed state as type
-load_sim_model = True  # informed state stochastic
-load_df_biased = False
+model_name = specs["model_name"]
+load_model = True  # informed state as type
+load_unc_solution = True  # baseline solution conntainer
+load_df_biased = None
 load_df_unbiased = (
-    False  # True = load existing df, False = create new df, None = create but not save
+    None  # True = load existing df, False = create new df, None = create but not save
 )
 
 
@@ -52,7 +51,7 @@ sra_at_63 = [67.0, 68.0, 69.0, 70.0]
 for i, sra in enumerate(sra_at_63):
 
     # Simulate baseline with subjective belief
-    df_base = solve_and_simulate_scenario(
+    df_base, _ = solve_and_simulate_scenario(
         path_dict=path_dict,
         params=params,
         subj_unc=True,
@@ -63,18 +62,18 @@ for i, sra in enumerate(sra_at_63):
         model_name=model_name,
         df_exists=load_df_biased,
         only_informed=False,
-        solution_exists=load_solution,
-        sol_model_exists=load_sol_model,
-        sim_model_exists=load_sim_model,
-    ).reset_index()
+        solution_exists=load_unc_solution,
+        sol_model_exists=load_model,
+    )
 
-    load_sim_model = True
-    load_base_solution = True
-    load_sol_model = True
+    df_base = df_base.reset_index()
+
+    load_unc_solution = True if load_unc_solution is not None else load_unc_solution
+    load_model = True
 
     # Simulate counterfactual with no uncertainty and expected increase
     # same as simulated alpha_sim
-    df_cf = solve_and_simulate_scenario(
+    df_cf, _ = solve_and_simulate_scenario(
         path_dict=path_dict,
         params=params,
         subj_unc=True,
@@ -85,10 +84,11 @@ for i, sra in enumerate(sra_at_63):
         model_name=model_name,
         df_exists=load_df_unbiased,
         only_informed=True,
-        solution_exists=load_solution,
-        sol_model_exists=load_sol_model,
-        sim_model_exists=load_sim_model,
-    ).reset_index()
+        solution_exists=load_unc_solution,
+        sol_model_exists=load_model,
+    )
+
+    df_cf = df_cf.reset_index()
 
     res_df_life_cycle = add_new_life_cycle_results(
         df_base=df_base,

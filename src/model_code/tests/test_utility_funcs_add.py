@@ -8,7 +8,7 @@ from model_code.utility.bequest_utility import (
     marginal_utility_final_consume_all,
     utility_final_consume_all,
 )
-from model_code.utility.utility_functions import (
+from model_code.utility.utility_functions_add import (
     consumption_scale,
     inverse_marginal_func,
     marginal_utility_function_alive,
@@ -97,16 +97,12 @@ def test_utility_func(
         "disutil_unemployed_bad_men": disutil_unemployed,
         "disutil_unemployed_good_men": disutil_unemployed,
         # Women
-        "disutil_ft_work_high_good_women": disutil_work + 1,
-        "disutil_ft_work_high_bad_women": disutil_work,
-        "disutil_ft_work_low_good_women": disutil_work + 1,
-        "disutil_ft_work_low_bad_women": disutil_work,
-        "disutil_pt_work_high_good_women": disutil_work + 1,
-        "disutil_pt_work_high_bad_women": disutil_work,
-        "disutil_pt_work_low_good_women": disutil_work + 1,
-        "disutil_pt_work_low_bad_women": disutil_work,
-        "disutil_unemployed_high_women": disutil_unemployed,
-        "disutil_unemployed_low_women": disutil_unemployed,
+        "disutil_ft_work_good_women": disutil_work + 1,
+        "disutil_ft_work_bad_women": disutil_work,
+        "disutil_pt_work_good_women": disutil_work + 1,
+        "disutil_pt_work_bad_women": disutil_work,
+        "disutil_unemployed_good_women": disutil_unemployed,
+        "disutil_unemployed_bad_women": disutil_unemployed,
         "disutil_children_ft_work_low": 0.1,
         "disutil_children_ft_work_high": 0.1,
         "bequest_scale": 2,
@@ -127,36 +123,32 @@ def test_utility_func(
     edu_str = "low" if education == 0 else "high"
 
     if sex == 0:
-        disutil_unemployment = np.exp(
-            -params[f"disutil_unemployed_{health_str}_{sex_str}"]
-        )
-        exp_factor_ft_work = params[f"disutil_ft_work_{health_str}_{sex_str}"]
+        disutil_unemployment = params[f"disutil_unemployed_{health_str}_{sex_str}"]
+        disutil_factor_ft_work = params[f"disutil_ft_work_{health_str}_{sex_str}"]
 
     else:
-        disutil_unemployment = np.exp(
-            -params[f"disutil_unemployed_{edu_str}_{sex_str}"]
-        )
-        exp_factor_ft_work = params[f"disutil_ft_work_{edu_str}_{health_str}_{sex_str}"]
+        disutil_unemployment = params[f"disutil_unemployed_{health_str}_{sex_str}"]
+        disutil_factor_ft_work = params[f"disutil_ft_work_{health_str}_{sex_str}"]
 
     if sex == 1:
         has_partner_int = int(partner_state > 0)
         nb_children = model_specs["children_by_state"][
             sex, education, has_partner_int, period
         ]
-        exp_factor_ft_work += (
+        disutil_factor_ft_work += (
             params["disutil_children_ft_work_high"] * nb_children * education
         )
-        exp_factor_ft_work += (
+        disutil_factor_ft_work += (
             params["disutil_children_ft_work_low"] * nb_children * (1 - education)
         )
 
-    disutil_ft_work = np.exp(-exp_factor_ft_work)
     if mu == 1:
-        utility_lambda = lambda disutil: np.log(consumption * disutil / cons_scale)
+        utility_lambda = lambda disutil: np.log(consumption / cons_scale) - disutil
     else:
-        utility_lambda = lambda disutil: (
-            (consumption * disutil / cons_scale) ** (1 - mu) - 1
-        ) / (1 - mu)
+        utility_lambda = (
+            lambda disutil: ((consumption / cons_scale) ** (1 - mu) - 1) / (1 - mu)
+            - disutil
+        )
 
     np.testing.assert_almost_equal(
         utility_func(
@@ -173,8 +165,7 @@ def test_utility_func(
         utility_lambda(disutil_unemployment),
     )
     if sex == 1:
-        exp_factor_pt_work = params[f"disutil_pt_work_{edu_str}_{health_str}_{sex_str}"]
-        disutil_pt_work = np.exp(-exp_factor_pt_work)
+        disutil_factor_pt_work = params[f"disutil_pt_work_{health_str}_{sex_str}"]
 
         np.testing.assert_almost_equal(
             utility_func(
@@ -188,7 +179,7 @@ def test_utility_func(
                 params=params,
                 model_specs=model_specs,
             ),
-            utility_lambda(disutil_pt_work),
+            utility_lambda(disutil_factor_pt_work),
         )
 
     np.testing.assert_almost_equal(
@@ -203,7 +194,7 @@ def test_utility_func(
             params=params,
             model_specs=model_specs,
         ),
-        utility_lambda(disutil_ft_work),
+        utility_lambda(disutil_factor_ft_work),
     )
 
 
@@ -246,16 +237,12 @@ def test_marginal_utility(
         "disutil_unemployed_bad_men": disutil_unemployed,
         "disutil_unemployed_good_men": disutil_unemployed,
         # Women
-        "disutil_ft_work_high_good_women": disutil_work + 1,
-        "disutil_ft_work_high_bad_women": disutil_work,
-        "disutil_ft_work_low_good_women": disutil_work + 1,
-        "disutil_ft_work_low_bad_women": disutil_work,
-        "disutil_pt_work_high_good_women": disutil_work + 1,
-        "disutil_pt_work_high_bad_women": disutil_work,
-        "disutil_pt_work_low_good_women": disutil_work + 1,
-        "disutil_pt_work_low_bad_women": disutil_work,
-        "disutil_unemployed_high_women": disutil_unemployed,
-        "disutil_unemployed_low_women": disutil_unemployed,
+        "disutil_ft_work_good_women": disutil_work + 1,
+        "disutil_ft_work_bad_women": disutil_work,
+        "disutil_pt_work_good_women": disutil_work + 1,
+        "disutil_pt_work_bad_women": disutil_work,
+        "disutil_unemployed_good_women": disutil_unemployed,
+        "disutil_unemployed_bad_women": disutil_unemployed,
         "disutil_children_ft_work_low": 0.1,
         "disutil_children_ft_work_high": 0.1,
         "bequest_scale": 2,
@@ -277,10 +264,8 @@ def test_marginal_utility(
         consumption=consumption,
         partner_state=partner_state,
         education=education,
-        health=health,
         period=period,
         sex=sex,
-        choice=random_choice,
         params=params,
         model_specs=model_specs,
     )
@@ -325,31 +310,24 @@ def test_inv_marginal_utility(
         "disutil_unemployed_bad_men": disutil_unemployed,
         "disutil_unemployed_good_men": disutil_unemployed,
         # Women
-        "disutil_ft_work_high_good_women": disutil_work + 1,
-        "disutil_ft_work_high_bad_women": disutil_work,
-        "disutil_ft_work_low_good_women": disutil_work + 1,
-        "disutil_ft_work_low_bad_women": disutil_work,
-        "disutil_pt_work_high_good_women": disutil_work + 1,
-        "disutil_pt_work_high_bad_women": disutil_work,
-        "disutil_pt_work_low_good_women": disutil_work + 1,
-        "disutil_pt_work_low_bad_women": disutil_work,
-        "disutil_unemployed_high_women": disutil_unemployed,
-        "disutil_unemployed_low_women": disutil_unemployed,
+        "disutil_ft_work_good_women": disutil_work + 1,
+        "disutil_ft_work_bad_women": disutil_work,
+        "disutil_pt_work_good_women": disutil_work + 1,
+        "disutil_pt_work_bad_women": disutil_work,
+        "disutil_unemployed_good_women": disutil_unemployed,
+        "disutil_unemployed_bad_women": disutil_unemployed,
         "disutil_children_ft_work_low": 0.1,
         "disutil_children_ft_work_high": 0.1,
         "bequest_scale": 2,
     }
 
     model_specs = paths_and_specs[1]
-    random_choice = np.random.choice(np.array([0, 1, 2]))
     marg_util = marginal_utility_function_alive(
         consumption=consumption,
         partner_state=partner_state,
         education=education,
-        health=health,
         sex=sex,
         period=period,
-        choice=random_choice,
         params=params,
         model_specs=model_specs,
     )
@@ -358,10 +336,8 @@ def test_inv_marginal_utility(
             marginal_utility=marg_util,
             partner_state=partner_state,
             education=education,
-            health=health,
             sex=sex,
             period=period,
-            choice=random_choice,
             params=params,
             model_specs=model_specs,
         ),

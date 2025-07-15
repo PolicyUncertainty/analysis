@@ -1,4 +1,5 @@
 import pickle
+from copy import deepcopy
 
 import dcegm
 import jax.numpy as jnp
@@ -17,7 +18,7 @@ from model_code.stochastic_processes.job_offers import job_offer_process_transit
 from model_code.stochastic_processes.partner_transitions import partner_transition
 from model_code.taste_shocks import shock_function_dict
 from model_code.utility.bequest_utility import create_final_period_utility_functions
-from model_code.utility.utility_functions import create_utility_functions
+from model_code.utility.utility_functions_add import create_utility_functions
 from model_code.wealth_and_budget.assets_grid import create_end_of_period_assets
 from model_code.wealth_and_budget.budget_equation import budget_constraint
 from set_paths import get_model_resutls_path
@@ -26,15 +27,14 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 
 def specify_model(
     path_dict,
+    specs,
     subj_unc,
     custom_resolution_age,
     sim_specs=None,
     load_model=False,
+    debug_info=None,
 ):
     """Generate model class."""
-
-    # Generate model_specs
-    specs = generate_derived_and_data_derived_specs(path_dict)
 
     SRA_belief_solution, specs = select_solution_transition_func_and_update_specs(
         path_dict=path_dict,
@@ -64,7 +64,7 @@ def specify_model(
             "health": np.arange(specs["n_all_health_states"], dtype=int),
         },
         "continuous_states": {
-            "assets_end_of_period": savings_grid,
+            "assets_end_of_period": savings_grid / specs["wealth_unit"],
             "experience": experience_grid,
         },
         "n_quad_points": specs["n_quad_points"],
@@ -79,8 +79,8 @@ def specify_model(
     # Now we use the alternative sim specification to define informed in the solution
     # as deterministic state (type) and in the simulation as stochastic state.
     informed_states = np.arange(2, dtype=int)
-    model_config_sim = model_config.copy()
-    stochastic_states_transitions_sim = stochastic_states_transitions.copy()
+    model_config_sim = deepcopy(model_config)
+    stochastic_states_transitions_sim = deepcopy(stochastic_states_transitions)
 
     # First add it as a deterministic state
     model_config["deterministic_states"]["informed"] = informed_states
@@ -125,6 +125,7 @@ def specify_model(
             stochastic_states_transitions=stochastic_states_transitions,
             model_load_path=model_path,
             alternative_sim_specifications=alternative_sim_specifications,
+            debug_info=debug_info,
         )
 
     else:
@@ -139,6 +140,7 @@ def specify_model(
             stochastic_states_transitions=stochastic_states_transitions,
             model_save_path=model_path,
             alternative_sim_specifications=alternative_sim_specifications,
+            debug_info=debug_info,
         )
 
     print("Model specified.")
@@ -154,6 +156,7 @@ def specify_and_solve_model(
     load_model,
     load_solution,
     sim_specs=None,
+    debug_info=None,
 ):
     """Specify and solve model.
 
@@ -161,13 +164,17 @@ def specify_and_solve_model(
 
     """
 
+    specs = generate_derived_and_data_derived_specs(path_dict)
+
     # Generate model_specs
     model = specify_model(
         path_dict=path_dict,
+        specs=specs,
         subj_unc=subj_unc,
         custom_resolution_age=custom_resolution_age,
         load_model=load_model,
         sim_specs=sim_specs,
+        debug_info=debug_info,
     )
 
     # check if folder of model objects exits:

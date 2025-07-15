@@ -12,9 +12,7 @@ from dcegm.asset_correction import adjust_observed_assets
 
 from estimation.struct_estimation.scripts.std_errors import (
     calc_and_save_standard_errors,
-)
-from estimation.struct_estimation.start_params_and_bounds.set_start_params import (
-    load_and_set_start_params,
+    calc_scores,
 )
 from model_code.specify_model import specify_model
 from model_code.unobserved_state_weighting import create_unobserved_state_specs
@@ -29,13 +27,13 @@ def estimate_model(
     params_to_estimate_names,
     file_append,
     load_model,
+    start_params_all,  #
+    supply_jacobian=False,
     use_weights=True,
     last_estimate=None,
     save_results=True,
 ):
     print_function = generate_print_func(params_to_estimate_names)
-    # Load start params and bounds
-    start_params_all = load_and_set_start_params(path_dict)
 
     # # Assign start params from before
     if last_estimate is not None:
@@ -78,6 +76,11 @@ def estimate_model(
         save_results=save_results,
     )
 
+    if supply_jacobian:
+        add_kwargs = {"jac": est_class.jacobian_func}
+    else:
+        add_kwargs = {}
+
     result = om.minimize(
         fun=est_class.crit_func,
         params=start_params,
@@ -85,6 +88,7 @@ def estimate_model(
         algorithm="scipy_lbfgsb",
         # logging="test_log.db",
         error_handling="continue",
+        **add_kwargs,
     )
     pickle.dump(
         result, open(path_dict["struct_results"] + f"em_result_{file_append}.pkl", "wb")
@@ -136,8 +140,13 @@ class est_class_from_paths:
 
         self.intermediate_est_data = intermediate_est_data
 
+        from specs.derive_specs import generate_derived_and_data_derived_specs
+
+        specs = generate_derived_and_data_derived_specs(path_dict)
+
         model = specify_model(
             path_dict=path_dict,
+            specs=specs,
             subj_unc=True,
             custom_resolution_age=None,
             load_model=load_model,
@@ -158,7 +167,7 @@ class est_class_from_paths:
 
         # Create specs for unobserved states
         unobserved_state_specs = create_unobserved_state_specs(
-            data_decision=data_decision, model_class=model
+            data_decision=data_decision
         )
 
         # Create likelihood function
@@ -184,6 +193,7 @@ class est_class_from_paths:
                     "wb",
                 ),
             )
+
         end = time.time()
         self.iter_count += 1
         self.print_function(params)
@@ -191,6 +201,16 @@ class est_class_from_paths:
         print("Likelihood evaluation took, ", end - start)
 
         return ll_value
+
+    def jacobian_func(self, params):
+        """Calculate the jacobian of the likelihood function."""
+
+        scores = calc_scores(
+            ll_func=self.ll_func,
+            est_params=params,
+            params_to_estimate_names=params.keys(),
+        )
+        return self.weights @ scores / self.weight_sum
 
 
 def load_and_prep_data(path_dict, start_params, model_class, drop_retirees=True):
@@ -296,9 +316,18 @@ def get_gendered_params(params_to_estimate_names, append):
         param_name for param_name in params_to_estimate_names if append in param_name
     ]
 
+    job_finding_params = [
+        param_name for param_name in gender_params if "job_finding_" in param_name
+    ]
+
+    disability_params = [
+        param_name for param_name in gender_params if "disability" in param_name
+    ]
+
     disutil_params = [
         param_name for param_name in gender_params if "disutil_" in param_name
     ]
+
     disutil_unemployed_params = [
         param_name for param_name in disutil_params if "unemployed" in param_name
     ]
@@ -309,18 +338,13 @@ def get_gendered_params(params_to_estimate_names, append):
     disutil_params_ft_params = [
         param_name for param_name in disutil_params if "ft_work" in param_name
     ]
-    job_finding_params = [
-        param_name for param_name in gender_params if "job_finding_" in param_name
-    ]
-    taste_shock_scale_params = [
-        param_name for param_name in gender_params if "taste_shock" in param_name
-    ]
-
-    disability_params = [
-        param_name for param_name in gender_params if "disability" in param_name
-    ]
     # We do it this weird way for printing order
     params = {}
+    # Assign all gender params. This will be dropped afterwards
+    if len(gender_params) > 0:
+        params["all"] = gender_params
+
+    # Assign group params
     if len(disutil_unemployed_params) > 0:
         params["unemployed"] = disutil_unemployed_params
 
@@ -333,13 +357,15 @@ def get_gendered_params(params_to_estimate_names, append):
     if len(job_finding_params) > 0:
         params["job_finding"] = job_finding_params
 
-    if len(taste_shock_scale_params) > 0:
-        params["taste_shock"] = taste_shock_scale_params
-
     if len(disability_params) > 0:
         params["disability"] = disability_params
 
-    # We drop these directly afterwards
-    if len(gender_params) > 0:
-        params["all"] = gender_params
+    other_params = []
+    for param in gender_params:
+        if param not in job_finding_params + disability_params + disutil_params:
+            other_params += [param]
+
+    if len(other_params) > 0:
+        params["other_params"] = other_params
+
     return params

@@ -6,8 +6,7 @@ from model_code.stochastic_processes.health_transition import (
 from model_code.stochastic_processes.job_offers import job_offer_process_transition
 
 
-def create_unobserved_state_specs(data_decision, model_class):
-    model_funcs = model_class.model_funcs
+def create_unobserved_state_specs(data_decision):
 
     def weight_func(**kwargs):
 

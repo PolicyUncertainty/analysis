@@ -16,10 +16,9 @@ path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict)
 
 
-model_name = "disability"
-load_df = False
-load_solution = True
-load_sim_model = True
+model_name = specs["model_name"]
+load_df = None
+load_solution = False
 load_sol_model = True
 
 
@@ -28,17 +27,17 @@ params = pickle.load(
 )
 
 #
-which_plots = input(
-    "Which plots do you want to show?\n \n"
-    " - [a]ll\n"
-    " - [c]hoices\n"
-    " - [w]ealth\n"
-    " - [i]ncome\n"
-    " - [s]tates\n"
-    " - [wc]hoices and wealth\n"
-)
+# which_plots = input(
+#     "Which plots do you want to show?\n \n"
+#     " - [a]ll\n"
+#     " - [c]hoices\n"
+#     " - [w]ealth\n"
+#     " - [i]ncome\n"
+#     " - [s]tates\n"
+#     " - [wc]hoices and wealth\n"
+# )
 print(jax.devices())
-# which_plots = "wc"
+which_plots = "wc"
 
 from simulation.figures.simulated_model_fit import (
     plot_choice_shares_single,
@@ -56,7 +55,6 @@ if which_plots in ["a", "c", "wc"]:
         load_df=load_df,
         load_solution=load_solution,
         load_sol_model=load_sol_model,
-        load_sim_model=load_sim_model,
     )
     # After running, we can set all to true
     load_df = True if load_df is not None else load_df
@@ -71,13 +69,12 @@ if which_plots in ["a", "w", "wc"]:
         params=params,
         model_name=model_name,
         quantiles=[0.5],
-        sim_col_name="wealth_at_beginning",
-        obs_col_name="adjusted_wealth",
+        sim_col_name="assets_begin_of_period",
+        obs_col_name="assets_begin_of_period",
         file_name="average_wealth",
         load_df=load_df,
         load_solution=load_solution,
         load_sol_model=load_sol_model,
-        load_sim_model=load_sim_model,
     )
     # After running, we can set all to true
     load_df = True if load_df is not None else load_df
@@ -95,7 +92,6 @@ if which_plots in ["a", "s"]:
         load_df=load_df,
         load_solution=load_solution,
         load_sol_model=load_sol_model,
-        load_sim_model=load_sim_model,
     )
     # After running, we can set all to true
     load_df = True if load_df is not None else load_df
@@ -116,7 +112,6 @@ if which_plots in ["a", "i"]:
         load_df=load_df,
         load_solution=load_solution,
         load_sol_model=load_sol_model,
-        load_sim_model=load_sim_model,
     )
 
 

@@ -16,7 +16,7 @@ def est_job_offer_params_full_obs(df, specs):
     logit_df["age"] = logit_df["period"] + specs["start_age"]
     logit_df["above_50"] = (logit_df["age"] >= 50).astype(float)
     logit_df["above_55"] = (logit_df["age"] >= 55).astype(float)
-    logit_df["above_60"] = (logit_df["age"] >= 60).astype(float)
+    # logit_df["above_60"] = (logit_df["age"] >= 60).astype(float)
     logit_df["good_health"] = (logit_df["health"] == 0).astype(float)
 
     logit_df = logit_df[logit_df["age"] < 65]
@@ -29,7 +29,7 @@ def est_job_offer_params_full_obs(df, specs):
         "good_health",
         "above_50",
         "above_55",
-        "above_60",
+        # "above_60",
     ]
 
     job_offer_params = {}
@@ -49,7 +49,7 @@ def est_job_offer_params_full_obs(df, specs):
             f"job_finding_logit_good_health_{sex_append}": params["good_health"],
             f"job_finding_logit_above_50_{sex_append}": params["above_50"],
             f"job_finding_logit_above_55_{sex_append}": params["above_55"],
-            f"job_finding_logit_above_60_{sex_append}": params["above_60"],
+            # f"job_finding_logit_above_60_{sex_append}": params["above_60"],
         }
         job_offer_params = {**job_offer_params, **gender_params}
 

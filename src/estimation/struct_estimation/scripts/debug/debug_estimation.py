@@ -102,7 +102,6 @@
 # # # df_full.reset_index(inplace=True, drop=True)
 # # df_full_working = df_full[df_full["choice"] == 1]
 # # from model_code.utility_functions import utility_func
-# # breakpoint()
 #
 # from dcegm.interface import (
 #     policy_and_value_for_state_choice_vec,

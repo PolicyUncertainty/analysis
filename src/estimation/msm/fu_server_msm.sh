@@ -5,8 +5,8 @@
 #SBATCH --mail-type=end
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --time=1:00:00
-#SBATCH --mem=50GB
+#SBATCH --time=7:00:00
+#SBATCH --mem=40GB
 #SBATCH --partition=scavenger
 #SBATCH --gres=gpu:h100:1
 #SBATCH --qos=standard
@@ -16,5 +16,5 @@ module add CUDA/12.0.0
 
 source ~/virts/bin/activate
 
-python run_counterfactual_1.py
-python run_counterfactual_2.py
+python run_msm.py
+#python loop_for_param.py

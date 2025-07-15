@@ -2,7 +2,9 @@ import jax
 import jax.numpy as jnp
 
 
-def health_transition(sex, health, education, period, params, model_specs):
+def health_transition(
+    sex, health, education, period, params, choice, lagged_choice, model_specs
+):
     trans_mat = model_specs["health_trans_mat"]
     prob_vector = trans_mat[sex, education, period, health, :]
 
@@ -29,26 +31,58 @@ def health_transition(sex, health, education, period, params, model_specs):
     prob_vector = prob_vector.at[disabled_health_var].set(disabled_health_prob)
     prob_vector = prob_vector.at[bad_health_var].set(bad_health_prob)
 
+    # We need to ensure, that if the agent is disabled and chooses retirement, she has to stay one period disabled
+    # and cannot transition to good/bad health. The agent can still die.
+    fresh_disability_pension = (
+        (lagged_choice != 0) & (health == disabled_health_var) & (choice == 0)
+    )
+    fresh_disability_pension_prob = construct_fresh_disability_pension_prob_vector(
+        prob_vector=prob_vector, model_specs=model_specs
+    )
+    prob_vector = jax.lax.select(
+        fresh_disability_pension,
+        on_true=fresh_disability_pension_prob,
+        on_false=prob_vector,
+    )
+
     return prob_vector
 
 
 def calc_disability_probability(params, sex, education, period, model_specs):
-    # age = model_specs["start_age"] + period
-    #
-    # # # Calculate exp value for men and women
-    # # exp_value_men = jnp.exp(
-    # #     params["disability_logit_const_men"]
-    # #     + params["disability_logit_age_men"] * age
-    # #     + params["disability_logit_high_educ_men"] * education
-    # # )
-    # # exp_value_women = jnp.exp(
-    # #     params["disability_logit_const_women"]
-    # #     + params["disability_logit_age_women"] * age
-    # #     + params["disability_logit_high_educ_women"] * education
-    # # )
-    # # # Now select based on sex state
-    # # is_men = sex == 0
-    # # exp_value = jax.lax.select(is_men, on_true=exp_value_men, on_false=exp_value_women)
-    # # prob = exp_value / (1 + exp_value)
+    age = model_specs["start_age"] + period
 
-    return jnp.array(0.0)
+    # Calculate exp value for men and women
+    exp_value_men = jnp.exp(
+        params["disability_logit_const_men"]
+        + params["disability_logit_age_men"] * age
+        + params["disability_logit_high_educ_men"] * education
+    )
+    exp_value_women = jnp.exp(
+        params["disability_logit_const_women"]
+        + params["disability_logit_age_women"] * age
+        + params["disability_logit_high_educ_women"] * education
+    )
+    # Now select based on sex state
+    is_men = sex == 0
+    exp_value = jax.lax.select(is_men, on_true=exp_value_men, on_false=exp_value_women)
+    prob = exp_value / (1 + exp_value)
+
+    return prob
+
+
+def construct_fresh_disability_pension_prob_vector(prob_vector, model_specs):
+    """We need to construct the probability vector for disabled individuals which choose retirement. If, they stay alive
+    they need to stay with certainty in the disabled state, to be able to adapt their experience stock correctly in the
+    next period.
+    """
+    death_health_var = model_specs["death_health_var"]
+    disabled_health_var = model_specs["disabled_health_var"]
+    survival_prob = 1 - prob_vector[death_health_var]
+    fresh_disability_pension_prob = jnp.zeros_like(prob_vector)
+    fresh_disability_pension_prob = fresh_disability_pension_prob.at[
+        disabled_health_var
+    ].set(survival_prob)
+    fresh_disability_pension_prob = fresh_disability_pension_prob.at[
+        death_health_var
+    ].set(prob_vector[death_health_var])
+    return fresh_disability_pension_prob

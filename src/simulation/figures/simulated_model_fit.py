@@ -19,7 +19,6 @@ def plot_quantiles(
     load_df=True,
     load_solution=True,
     load_sol_model=True,
-    load_sim_model=True,
 ):
     # Simulate baseline with subjective belief
     data_sim, model_solved = solve_and_simulate_scenario(
@@ -34,8 +33,9 @@ def plot_quantiles(
         df_exists=load_df,
         solution_exists=load_solution,
         sol_model_exists=load_sol_model,
-        sim_model_exists=load_sim_model,
-    ).reset_index()
+    )
+
+    data_sim = data_sim.reset_index()
 
     data_decision, _ = load_and_prep_data(
         path_dict, params, model_solved, drop_retirees=False
@@ -45,6 +45,7 @@ def plot_quantiles(
     data_sim["age"] = data_sim["period"] + specs["start_age"]
 
     fig, axs = plt.subplots(ncols=specs["n_education_types"])
+    max_wealth = 0
     # Also generate an aggregate graph
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
         for edu_var, edu_label in enumerate(specs["education_labels"]):
@@ -67,6 +68,11 @@ def plot_quantiles(
                     .quantile(quant)
                     .loc[ages]
                 )
+                max_wealth = max(
+                    max_wealth,
+                    average_wealth_sim.max(),
+                    average_wealth_obs.max(),
+                )
 
                 if np.allclose(quant, 0.5):
                     name = "Median"
@@ -88,6 +94,8 @@ def plot_quantiles(
                 )
             ax.set_title(f"{edu_label}")
     axs[0].legend()
+    for edu in range(specs["n_education_types"]):
+        axs[edu].set_ylim([0, max_wealth * 1.1])
     if file_name is not None:
         fig.savefig(path_dict["plots"] + f"{file_name}.png", transparent=True, dpi=300)
 
@@ -101,13 +109,12 @@ def plot_choice_shares_single(
     load_df=True,
     load_solution=True,
     load_sol_model=True,
-    load_sim_model=True,
 ):
     # alpha_belief = float(np.loadtxt(
     # path_dict["est_results"] + "exp_val_params.txt"))
 
     # Simulate baseline with subjective belief
-    data_sim = solve_and_simulate_scenario(
+    data_sim, _ = solve_and_simulate_scenario(
         announcement_age=None,
         path_dict=path_dict,
         params=params,
@@ -119,9 +126,9 @@ def plot_choice_shares_single(
         df_exists=load_df,
         solution_exists=load_solution,
         sol_model_exists=load_sol_model,
-        sim_model_exists=load_sim_model,
-    ).reset_index()
+    )
 
+    data_sim = data_sim.reset_index()
     data_decision = pd.read_csv(path_dict["struct_est_sample"])
 
     data_decision["age"] = data_decision["period"] + specs["start_age"]
@@ -187,7 +194,6 @@ def plot_states(
     load_df=True,
     load_solution=True,
     load_sol_model=True,
-    load_sim_model=True,
 ):
     # Simulate baseline with subjective belief
     data_sim, model_solved = solve_and_simulate_scenario(
@@ -202,8 +208,9 @@ def plot_states(
         df_exists=load_df,
         solution_exists=load_solution,
         sol_model_exists=load_sol_model,
-        sim_model_exists=load_sim_model,
-    ).reset_index()
+    )
+
+    data_sim = data_sim.reset_index()
 
     data_decision = pd.read_csv(path_dict["struct_est_sample"])
 
@@ -214,7 +221,7 @@ def plot_states(
     data_sim["age"] = data_sim["period"] + specs["start_age"]
 
     model_structure = model_solved.model_structure
-    discrete_state_names = model["model_structure"]["discrete_states_names"]
+    discrete_state_names = model_structure["discrete_states_names"]
 
     data_sim = data_sim[data_sim["health"] != 3]
 

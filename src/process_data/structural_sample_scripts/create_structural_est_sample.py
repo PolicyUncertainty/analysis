@@ -136,8 +136,11 @@ def create_structural_est_sample(
             "age",
         ],
     )
+
     # Add wealth
-    df = add_wealth_interpolate_and_deflate(df, paths, specs, load_wealth=load_wealth)
+    df = add_wealth_interpolate_and_deflate(
+        df, paths, specs, load_wealth=load_wealth, use_processed_pl=use_processed_pl
+    )
 
     # Correct policy state
     df = create_policy_state(df, specs)
@@ -194,10 +197,9 @@ def create_structural_est_sample(
     df.reset_index(drop=True, inplace=True)
     df.to_csv(paths["struct_est_sample"])
 
-    # median wealth by age 
+    # median wealth by age
     # df["median_wealth"] = df.groupby("age")["wealth"].transform("median")
 
-    breakpoint()
     return df
 
 

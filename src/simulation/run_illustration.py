@@ -10,7 +10,7 @@ path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict)
 
 
-model_name = "new"
+model_name = specs["model_name"]
 load_df = True
 load_solution = True
 load_sol_model = True

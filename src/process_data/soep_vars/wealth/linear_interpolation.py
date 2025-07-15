@@ -78,7 +78,8 @@ def interpolate_and_extrapolate_wealth(wealth_data_full):
     wealth_data_full["hh_size_adjusted"] = wealth_data_full.groupby(["hid", "syear"])[
         "pid"
     ].count()
-    # drop households with more than 2 people above start age left. This happens e.g. if two or more couples live together or a married person moves in with their parents doing care work etc.
+    # drop households with more than 2 people above start age left. This happens e.g. if two or more couples live
+    # together or a married person moves in with their parents doing care work etc.
     # this happens in around 80 households with 700 observations being dropped
     wealth_data_full = wealth_data_full[wealth_data_full["hh_size_adjusted"] <= 2]
 
@@ -89,14 +90,16 @@ def interpolate_and_extrapolate_wealth(wealth_data_full):
         lambda group: group.interpolate(method="linear", limit_area="inside")
     )
 
-    # Keep hh if the hh (by size and pid) has at least one non-NaN wealth value for a syear, mask == NaN if is_par == NaN => drop rows, since they are not in the panel
+    # Keep hh if the hh (by size and pid) has at least one non-NaN wealth value for a syear, mask == NaN
+    # if is_par == NaN => drop rows, since they are not in the panel
     mask = wealth_data_full.groupby(["hid", "hh_size_adjusted", "pid"])[
         "wealth"
     ].transform(lambda x: x.notna().any())
     mask &= wealth_data_full["is_par"].notna()
     wealth_data_full = wealth_data_full[mask]
 
-    # extrapolate wealth for each household at the start and end of the panel if there are at least 2 valid observations (by pid too in case household goes from A to AB to B)
+    # extrapolate wealth for each household at the start and end of the panel if there are at least 2 valid observations
+    # (by pid too in case household goes from A to AB to B)
     extrapolated = wealth_data_full.groupby(["hid", "hh_size_adjusted", "pid"]).apply(
         extrapolate_wealth_linear
     )

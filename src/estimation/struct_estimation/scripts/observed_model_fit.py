@@ -95,7 +95,11 @@ def plot_observed_model_fit_choice_probs(
                 # Only plot if we are not in men and part-time
                 men_and_part_time = (sex_var == 0) and (choice == 2)
                 if not men_and_part_time:
-                    ax = axes[choice]
+                    men_and_full_time = (sex_var == 0) and (choice == 3)
+                    if men_and_full_time:
+                        ax = axes[choice - 1]
+                    else:
+                        ax = axes[choice]
 
                     ax.plot(
                         choice_shares_predicted,
@@ -113,7 +117,7 @@ def plot_observed_model_fit_choice_probs(
                     ax.set_title(f"{labels[choice]}")
                     ax.set_xlabel("Age")
 
-        axes[0].legend(loc="upper left")
+        axes[1].legend(loc="upper left")
         axes[0].set_ylabel(choice_share_labels[sex_var])
         # Fig title
         fig.tight_layout()

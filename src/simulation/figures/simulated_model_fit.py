@@ -41,14 +41,7 @@ def plot_quantiles(
         path_dict, params, model_solved, drop_retirees=False
     )
     data_decision["age"] = data_decision["period"] + specs["start_age"]
-    data_decision = data_decision[data_decision["partner_state"] == 0]
-    data_decision = data_decision[
-        (data_decision["lagged_choice"] == 3) & (data_decision["choice"] == 3)
-    ]
-
     data_sim["age"] = data_sim["period"] + specs["start_age"]
-    data_sim = data_sim[data_sim["partner_state"] == 0]
-    data_sim = data_sim[(data_sim["lagged_choice"] == 3) & (data_sim["choice"] == 3)]
 
     fig, axs = plt.subplots(ncols=specs["n_education_types"])
     max_wealth = 5
@@ -63,7 +56,7 @@ def plot_quantiles(
             )
             data_decision_edu = data_decision[mask_obs]
 
-            ages = np.arange(specs["start_age"] + 1, 60)
+            ages = np.arange(specs["start_age"] + 1, 90)
 
             for quant in quantiles:
                 average_wealth_sim = (
@@ -225,6 +218,14 @@ def plot_states(
 
     data_decision["age"] = data_decision["period"] + specs["start_age"]
     data_sim["age"] = data_sim["period"] + specs["start_age"]
+
+    grouped_obs = data_decision.groupby(["sex", "education", "age"])
+    grouped_sim = data_sim.groupby(["sex", "education", "age"])
+
+    grouped_obs["experience"].mean().loc[(0, 1, slice(None))].plot()
+    grouped_sim["exp_years"].mean().loc[(0, 1, slice(None))].plot()
+    plt.legend()
+    plt.show()
 
     model_structure = model_solved.model_structure
     discrete_state_names = model_structure["discrete_states_names"]

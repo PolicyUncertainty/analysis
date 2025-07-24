@@ -19,4 +19,7 @@ def calc_partner_income_after_ssc(partner_state, sex, model_specs, education, pe
         working_age_partner * partner_wage_after_ssc
         + retired_partner * partner_pension_after_ssc
     )
-    return partner_income
+    gross_partner_income = (
+        working_age_partner * partner_wage_year + retired_partner * partner_pension_year
+    )
+    return partner_income, gross_partner_income

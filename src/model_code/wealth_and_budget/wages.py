@@ -16,7 +16,7 @@ def calc_labor_income_after_ssc(
         model_specs=model_specs,
     )
     labor_income_after_ssc = calc_after_ssc_income_worker(gross_labor_income)
-    return labor_income_after_ssc
+    return labor_income_after_ssc, gross_labor_income
 
 
 def calculate_gross_labor_income(

@@ -17,7 +17,7 @@ specs = generate_derived_and_data_derived_specs(path_dict)
 
 
 model_name = specs["model_name"]
-load_df = False
+load_df = True
 load_solution = True
 load_sol_model = True
 
@@ -37,7 +37,7 @@ params = pickle.load(
 #     " - [wc]hoices and wealth\n"
 # )
 # print(jax.devices())
-which_plots = "i"
+which_plots = "w"
 
 from simulation.figures.simulated_model_fit import (
     plot_choice_shares_single,

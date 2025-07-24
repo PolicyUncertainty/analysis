@@ -61,7 +61,7 @@ def plot_incomes(path_dict):
                     income_shock=0,
                     model_specs=specs,
                 )
-                after_ssc_pt_wages[i] = calc_labor_income_after_ssc(
+                after_ssc_pt_wages[i], _ = calc_labor_income_after_ssc(
                     lagged_choice=2,
                     experience_years=exp,
                     education=edu_var,
@@ -78,7 +78,7 @@ def plot_incomes(path_dict):
                     income_shock=0,
                     model_specs=specs,
                 )
-                after_ssc_ft_wages[i] = calc_labor_income_after_ssc(
+                after_ssc_ft_wages[i], _ = calc_labor_income_after_ssc(
                     lagged_choice=3,
                     experience_years=exp,
                     education=edu_var,

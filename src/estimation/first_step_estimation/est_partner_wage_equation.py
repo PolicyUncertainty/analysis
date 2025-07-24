@@ -18,9 +18,11 @@ def estimate_partner_wage_parameters(paths_dict, specs):
 
     """
     edu_labels = specs["education_labels"]
-    covs = ["constant", "period", "period_sq"]
+    covs = ["constant", "ln_period"]
     wage_data = prepare_estimation_data(paths_dict, specs)
     wage_data = sm.add_constant(wage_data)
+
+    wage_data["ln_period"] = np.log(wage_data["period"] + 1)
 
     # Deflate wages with FEs from wage estimaten
     wage_fe = pd.read_csv(
@@ -35,6 +37,8 @@ def estimate_partner_wage_parameters(paths_dict, specs):
     wage_data["deflate_factor"] = wage_data["year"].map(deflate_factor)
     wage_data["wage_p"] /= wage_data["deflate_factor"]
 
+    # wage_data["ln_wage_p"] = np.log(wage_data["wage_p"] + 1)
+
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
         wage_data_sex = wage_data[wage_data["sex"] == sex_var]
 
@@ -48,6 +52,7 @@ def estimate_partner_wage_parameters(paths_dict, specs):
             # Filter df
             wage_data_edu = wage_data_sex[wage_data_sex["education"] == edu_val].copy()
 
+            covs = ["constant", "ln_period"]
             # make ols regression
             model = sm.OLS(
                 endog=wage_data_edu["wage_p"],
@@ -58,6 +63,17 @@ def estimate_partner_wage_parameters(paths_dict, specs):
             fitted_model = model.fit()
             # Assign prediction
             wage_data_edu["wage_pred"] = fitted_model.predict()
+
+            # # Residuals in logs
+            # resid_ln = wage_data_edu["ln_wage_p"] - wage_data_edu["wage_pred_ln"]
+            #
+            # # Smearing factor
+            # max = np.max(resid_ln)
+            # smearing_factor = np.mean(max + np.exp(resid_ln - max))
+            #
+            # # Corrected level prediction
+            # wage_data_edu["wage_pred"] = np.exp(wage_data_edu["wage_pred_ln"])
+
             # Plot wage and prediction
             ax.plot(
                 wage_data_edu.groupby("age")["wage_p"].mean(),
@@ -79,6 +95,7 @@ def estimate_partner_wage_parameters(paths_dict, specs):
         ax.set_title(f"Partner Wages of {sex_label}")
         ax.set_xlabel("Age")
         ax.set_ylabel("Monthly Wage")
+        plt.show()
         fig.savefig(paths_dict["plots"] + f"partner_wages_{append}.png")
 
         out_file_path = (
@@ -90,9 +107,11 @@ def estimate_partner_wage_parameters(paths_dict, specs):
 def prepare_estimation_data(paths_dict, specs):
     """Prepare the data for the wage estimation."""
     # load and modify data
-    wage_data = pd.read_pickle(
-        paths_dict["intermediate_data"] + "partner_wage_estimation_sample.pkl"
+    wage_data = pd.read_csv(
+        paths_dict["intermediate_data"] + "partner_wage_estimation_sample.csv"
     )
+
+    wage_data = wage_data[wage_data["age"] < 63]
 
     # Add period
     wage_data["period"] = wage_data["age"] - specs["start_age"]

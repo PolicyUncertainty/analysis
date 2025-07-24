@@ -15,7 +15,7 @@ def create_partner_wage_est_sample(paths, specs, load_data=False):
     if not os.path.exists(paths["intermediate_data"]):
         os.makedirs(paths["intermediate_data"])
 
-    out_file_path = paths["intermediate_data"] + "partner_wage_estimation_sample.pkl"
+    out_file_path = paths["intermediate_data"] + "partner_wage_estimation_sample.csv"
 
     if load_data:
         data = pd.read_pickle(out_file_path)
@@ -40,7 +40,7 @@ def create_partner_wage_est_sample(paths, specs, load_data=False):
     df = filter_years(df, specs["start_year"], specs["end_year"])
 
     df.reset_index(inplace=True)
-    df.to_pickle(out_file_path)
+    df.to_csv(out_file_path)
     return df
 
 

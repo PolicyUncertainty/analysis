@@ -17,8 +17,8 @@ def net_incomes(
     load_solution=True,
     load_sol_model=True,
 ):
-    sim_col_name = "hh_income"
-    obs_col_name = "hh_net_income"
+    sim_col_name = "gross_labor_income"
+    obs_col_name = "yearly_wage"
 
     # Simulate baseline with subjective belief
     data_sim, model_solved = solve_and_simulate_scenario(
@@ -41,14 +41,11 @@ def net_incomes(
         path_dict, params, model_solved, drop_retirees=False
     )
     data_decision["age"] = data_decision["period"] + specs["start_age"]
-    data_decision = data_decision[data_decision["partner_state"] == 0]
-    data_decision = data_decision[
-        (data_decision["lagged_choice"] == 3) & (data_decision["choice"] == 3)
-    ]
+    data_decision = data_decision[(data_decision["choice"] == 3)]
+    data_decision["yearly_wage"] = data_decision["monthly_wage"] * 12
 
     data_sim["age"] = data_sim["period"] + specs["start_age"]
-    data_sim = data_sim[data_sim["partner_state"] == 0]
-    data_sim = data_sim[(data_sim["lagged_choice"] == 3) & (data_sim["choice"] == 3)]
+    data_sim = data_sim[(data_sim["lagged_choice"] == 3)]
 
     fig, axs = plt.subplots(ncols=specs["n_education_types"])
     max_wealth = 5

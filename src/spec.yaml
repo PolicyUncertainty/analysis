@@ -18,7 +18,7 @@ observed_health_labels: [Good Health, Bad Health]
 sex_labels: [Men, Women]
 partner_labels: [Single, Working Partner, Retired Partner]
 
-# mathematical model features
+# Number continuous grid points
 n_quad_points: 5
 n_experience_grid_points: 11
 # Fixed structural parameters, we will not estimate

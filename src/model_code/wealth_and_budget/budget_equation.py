@@ -29,7 +29,7 @@ def budget_constraint(
     experience_years = max_exp_period * experience
 
     # Calculate partner income
-    partner_income_after_ssc = calc_partner_income_after_ssc(
+    partner_income_after_ssc, gross_partner_income = calc_partner_income_after_ssc(
         partner_state=partner_state,
         sex=sex,
         model_specs=model_specs,
@@ -58,7 +58,7 @@ def budget_constraint(
     )
 
     # Income lagged choice 2
-    labor_income_after_ssc = calc_labor_income_after_ssc(
+    labor_income_after_ssc, gross_labor_income = calc_labor_income_after_ssc(
         lagged_choice=lagged_choice,
         experience_years=experience_years,
         education=education,
@@ -104,7 +104,10 @@ def budget_constraint(
     # )
 
     aux = {
-        "hh_income": total_income / model_specs["wealth_unit"],
+        "net_hh_income": total_income / model_specs["wealth_unit"],
+        "gross_hh_income": (gross_labor_income + gross_partner_income)
+        / model_specs["wealth_unit"],
+        "gross_own_income": gross_labor_income / model_specs["wealth_unit"],
     }
 
     return assets_begin_of_period / model_specs["wealth_unit"], aux

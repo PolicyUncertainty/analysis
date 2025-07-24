@@ -162,7 +162,6 @@ def load_and_process_soep_yearly_survey_data(soep_c38_path, specs):
     df = recode_sex(merged_data)
     # create education type variable
     df = create_education_type(df)
-
     # keep only the one observation for each individual
     # with the highest education level + invariant variables
     df = df.groupby("pid")[["sex", "education", "gebjahr"]].max()

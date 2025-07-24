@@ -32,6 +32,7 @@ def create_credited_periods_est_sample(paths, load_data=False, plot_data=False):
     df = create_credited_periods(df)
     df = df.sort_values(by=["rv_id", "syear"])
     df = df.drop_duplicates(subset="rv_id", keep="last")
+    df = df.dropna(subset=["education"])
     print(f"Created credited periods variable with {df.shape[0]} observations.")
 
     if plot_data:

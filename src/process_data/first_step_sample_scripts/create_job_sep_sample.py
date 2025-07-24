@@ -73,7 +73,7 @@ def create_job_sep_sample(paths, specs, load_data=False):
     # We also delete now the observations with invalid data, which we left before to have a continuous panel
     df = drop_missings(
         df=df,
-        vars_to_check=["lagged_health", "lagged_choice", "age_fired"],
+        vars_to_check=["lagged_health", "lagged_choice", "age_fired", "education"],
     )
 
     # Relevant columns and datatype

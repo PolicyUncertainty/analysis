@@ -1,12 +1,10 @@
 import os
 
-import numpy as np
 import pandas as pd
 
 from process_data.aux_and_plots.filter_data import filter_data
 from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.experience import sum_experience_variables
-from process_data.soep_vars.hours import generate_working_hours
 from process_data.soep_vars.work_choices import create_choice_variable
 
 
@@ -14,7 +12,7 @@ def create_wage_est_sample(paths, specs, load_data=False):
     if not os.path.exists(paths["intermediate_data"]):
         os.makedirs(paths["intermediate_data"])
 
-    out_file_path = paths["intermediate_data"] + "wage_estimation_sample.pkl"
+    out_file_path = paths["intermediate_data"] + "wage_estimation_sample.csv"
 
     if load_data:
         data = pd.read_pickle(out_file_path)
@@ -30,10 +28,13 @@ def create_wage_est_sample(paths, specs, load_data=False):
     df = create_choice_variable(df)
 
     # education
-    df = create_education_type(df)
+    df = create_education_type(df, filter_missings=True)
 
-    # weekly working hours
-    df = generate_working_hours(df)
+    # weekly working hours. We will impute missing values later
+    df.rename(columns={"pgvebzeit": "weekly_hours"}, inplace=True)
+    # Also annual and monthly working hours
+    df["annual_hours"] = df["weekly_hours"] * 52
+    df["monthly_hours"] = df["annual_hours"] / 12
 
     # experience, where we use the sum of part and full time (note: unlike in
     # structural estimation, we do not round or enforce a cap on experience here)
@@ -44,39 +45,37 @@ def create_wage_est_sample(paths, specs, load_data=False):
     df = df[df["monthly_wage"] > 0]
     print(str(len(df)) + " observations after dropping invalid wage values.")
 
-    # Drop retirees with wages
+    # Drop unemployed(wage shoudl be zero) and retired individuals
     df = df[df["choice"].isin([2, 3])]
     print(str(len(df)) + " observations after dropping non-working individuals.")
 
-    # Hourly wage
-    df["monthly_hours"] = df["working_hours"] * 52 / 12
-    df["hourly_wage"] = df["monthly_wage"] / df["monthly_hours"]
+    # Filter out men who work part-time
+    men_and_part_time = (df["sex"] == 0) & (df["choice"] == 2)
+    df = df[~men_and_part_time]
+    print(str(len(df)) + " observations after dropping men who work part-time.")
 
     # bring back indeces (pid, syear)
     df = df.reset_index()
 
-    type_dict = {
-        "pid": np.int32,
-        "syear": np.int32,
-        "age": np.int32,
-        "choice": np.int32,
-        "experience": np.int32,
-        "monthly_wage": np.float64,
-        "hourly_wage": np.float64,
-        "monthly_hours": np.float64,
-        "working_hours": np.float64,
-        "education": np.int32,
-        "sex": np.int8,
-    }
+    relevant_cols = [
+        "pid",
+        "syear",
+        "age",
+        "choice",
+        "experience",
+        "monthly_wage",
+        "weekly_hours",
+        "annual_hours",
+        "monthly_hours",
+        "education",
+        "sex",
+    ]
 
     # Keep relevant columns
-    df = df[type_dict.keys()]
-    # Drop missings
-    df = df.dropna()
+    df = df[relevant_cols]
     print(str(len(df)) + " observations in final wage estimation dataset.")
-    df = df.astype(type_dict)
     # save data
-    df.to_pickle(out_file_path)
+    df.to_csv(out_file_path)
 
     return df
 

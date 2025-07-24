@@ -20,13 +20,36 @@ def estimate_wage_parameters(paths_dict, specs):
     sex_labels = specs["sex_labels"]
     regressors = ["constant", "ln_exp"]
     wage_data = load_and_prepare_wage_data(paths_dict)
+
+    # Calculate average working hours by type and choice
+    average_working_hours = calc_population_working_hours(wage_data, paths_dict)
+    # # Map annual hours to data, for hours smaller and equal than 0
+    # wage_data = add_missing_hours(wage_data, average_working_hours)
+    wage_data = wage_data[wage_data["monthly_hours"] > 0].copy()
+
+    # Now everyone has correct monthly hours. We can define hourly wage
+    wage_data["hourly_wage"] = wage_data["monthly_wage"] / wage_data["monthly_hours"]
+    # We are 2013 onwards, so everybody must at least earn 8.5
+    # wage_data = wage_data[wage_data["hourly_wage"] > 8.5]
+    wage_data["ln_wage"] = np.log(wage_data["hourly_wage"])
+
+    # Restrict to relevant ages
+    wage_data = wage_data[wage_data["age"] < specs["max_est_age_labor"]]
+
+    # Initialize containers for wage parameters and year fixed effects
     wage_parameters, year_fixed_effects = initialize_coeficient_containers(
         regressors, specs
     )
 
     # Estimate wage equation for each type (sex x education)
     fit_panel_reg_model(
-        wage_data, regressors, wage_parameters, year_fixed_effects, "all", "all", specs
+        wage_data_type=wage_data,
+        regressors=regressors,
+        wage_parameters=wage_parameters,
+        year_fixed_effects=year_fixed_effects,
+        edu_label="all",
+        sex_label="all",
+        specs=specs,
     )
     for sex_val, sex_label in enumerate(sex_labels):
         fig, ax = plt.subplots(figsize=(12, 8))
@@ -35,19 +58,17 @@ def estimate_wage_parameters(paths_dict, specs):
                 (wage_data["education"] == edu_val) & (wage_data["sex"] == sex_val)
             ].copy()
             year_fixed_effects[edu_label, sex_label] = {}
+
             wage_parameters, year_fixed_effects, wage_data_type = fit_panel_reg_model(
-                wage_data_type,
-                regressors,
-                wage_parameters,
-                year_fixed_effects,
-                edu_label,
-                sex_label,
-                specs,
+                wage_data_type=wage_data_type,
+                regressors=regressors,
+                wage_parameters=wage_parameters,
+                year_fixed_effects=year_fixed_effects,
+                edu_label=edu_label,
+                sex_label=sex_label,
+                specs=specs,
             )
 
-            wage_data_type = wage_data_type[
-                wage_data_type["age"] < specs["max_est_age_labor"]
-            ]
             # Plot
             ax.plot(
                 wage_data_type.groupby("age")["ln_wage"].mean(),
@@ -56,7 +77,7 @@ def estimate_wage_parameters(paths_dict, specs):
                 label=f"Obs. {edu_label}",
             )
             ax.plot(
-                wage_data_type.groupby("age")["predicted_ln_wage"].mean(),
+                wage_data_type.groupby("age")["predicted_wage"].mean(),
                 color=JET_COLOR_MAP[edu_val],
                 label=f"Est. {edu_label}",
             )
@@ -66,7 +87,7 @@ def estimate_wage_parameters(paths_dict, specs):
         ax.legend(loc="upper left")
         file_appends = ["men", "women"]
         fig.savefig(paths_dict["plots"] + f"wages_{file_appends[sex_val]}.png")
-        # plt.show()
+    plt.show()
 
     # Save results
     wage_parameters.to_csv(paths_dict["est_results"] + "wage_eq_params.csv")
@@ -79,32 +100,48 @@ def estimate_wage_parameters(paths_dict, specs):
     )
     # After estimation print some summary statistics
     print_wage_equation(wage_parameters, edu_labels, sex_labels)
-    calc_population_averages(wage_data, year_fixed_effects, specs, paths_dict)
+    calc_wage_population_averages(wage_data, year_fixed_effects, specs, paths_dict)
 
     return wage_parameters
 
 
 def load_and_prepare_wage_data(paths_dict):
     # Load wage data
-    wage_data = pd.read_pickle(
-        paths_dict["intermediate_data"] + "wage_estimation_sample.pkl"
+    wage_data = pd.read_csv(
+        paths_dict["intermediate_data"] + "wage_estimation_sample.csv", index_col=0
     )
-    # Modify
-    wage_data["ln_wage"] = np.log(wage_data["hourly_wage"])
     wage_data["ln_exp"] = np.log(wage_data["experience"] + 1)
+    wage_data["exp"] = wage_data["experience"]
+    wage_data["exp_squared"] = wage_data["experience"] ** 2
     wage_data["constant"] = np.ones(len(wage_data))
     # Format & Index
-    wage_data["year"] = wage_data["syear"].astype("category")
+    wage_data["year"] = wage_data["syear"].astype(int).astype("category")
     wage_data = wage_data.set_index(["pid", "syear"])
     return wage_data
 
 
+def add_missing_hours(wage_data, average_working_hours):
+    # Identify missing annual_hours
+    missing_mask = wage_data["annual_hours"] < 0
+    # Set index for mapping
+    index_cols = ["education", "sex", "choice"]
+    wage_data.loc[missing_mask, "annual_hours"] = wage_data.loc[
+        missing_mask, index_cols
+    ].apply(lambda row: average_working_hours.loc[tuple(row)], axis=1)
+    wage_data.loc[missing_mask, "monthly_hours"] = (
+        wage_data.loc[missing_mask, "annual_hours"] / 12
+    )
+    wage_data.loc[missing_mask, "weekly_hours"] = (
+        wage_data.loc[missing_mask, "annual_hours"] / 52
+    )
+    return wage_data
+
+
 def initialize_coeficient_containers(regressors, specs):
-    edu_labels = specs["education_labels"]
-    sex_labels = specs["sex_labels"]
     coefficents = regressors + [param + "_ser" for param in regressors]
     index = pd.MultiIndex.from_product(
-        [edu_labels, sex_labels, coefficents], names=["education", "sex", "parameter"]
+        [specs["education_labels"], specs["sex_labels"], coefficents],
+        names=["education", "sex", "parameter"],
     )
     index_all_types = pd.MultiIndex.from_product(
         [["all"], ["all"], coefficents], names=["education", "sex", "parameter"]
@@ -129,13 +166,13 @@ def fit_panel_reg_model(
     reference_year = specs["reference_year"]
     years = list(range(specs["start_year"], specs["end_year"] + 1))
     years.remove(reference_year)
+
     year_dummies = pd.get_dummies(
         wage_data_type["year"], prefix="year", drop_first=False
     )
     year_dummies = year_dummies.drop(columns=[f"year_{reference_year}"])
     wage_data_type = pd.concat([wage_data_type, year_dummies], axis=1)
     rhs_vars = wage_data_type[regressors + list(year_dummies.columns)]
-
     # estimate parametric regression, save parameters
     model = PanelOLS(
         dependent=wage_data_type["ln_wage"],
@@ -146,7 +183,7 @@ def fit_panel_reg_model(
         cov_type="clustered", cluster_entity=True, cluster_time=True
     )
     # Add prediction to data
-    wage_data_type["predicted_ln_wage"] = fitted_model.predict()
+    wage_data_type["predicted_wage"] = fitted_model.predict()
 
     # Assign estimated parameters (column list corresponds to model params, so only these are assigned)
     for param in regressors:
@@ -170,7 +207,7 @@ def fit_panel_reg_model(
     return wage_parameters, year_fixed_effects, wage_data_type
 
 
-def calc_population_averages(df, year_fixed_effects, specs, paths_dict):
+def calc_wage_population_averages(df, year_fixed_effects, specs, paths_dict):
     """Save population average of annual wage (for pension calculation) and working
     hours by education (to compute annual wages).
 
@@ -197,18 +234,20 @@ def calc_population_averages(df, year_fixed_effects, specs, paths_dict):
                     edu_mask & sex_mask & year_mask, "ln_wage_deflated"
                 ] -= year_fixed_effects[(edu_label, sex_label)][year]
 
-    df["annual_hours"] = df["monthly_hours"] * 12
     df["annual_wage_deflated"] = np.exp(df["ln_wage_deflated"]) * df["annual_hours"]
     pop_avg_annual_wage = df["annual_wage_deflated"].mean()
     np.save(paths_dict["est_results"] + "pop_avg_annual_wage", pop_avg_annual_wage)
 
     print(
-        f"Population average for annual wage (inflated/deflated to {specs['reference_year']}) : "
+        f"Population average for annual wage (inflated/deflated to {specs["reference_year"]}) : "
         + str(pop_avg_annual_wage)
     )
 
-    # averageannual working hours by type
-    avg_hours_by_type_choice = df.groupby(["education", "sex", "choice"])[
+
+def calc_population_working_hours(df, paths_dict):
+    df_hours = df[df["annual_hours"] > 0].copy()
+    # average working hours by type
+    avg_hours_by_type_choice = df_hours.groupby(["education", "sex", "choice"])[
         "annual_hours"
     ].mean()
     avg_hours_by_type_choice.to_csv(

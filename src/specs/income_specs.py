@@ -70,9 +70,11 @@ def add_population_averages(specs, path_dict):
             mask = (pop_averages["education"] == edu_var) & (
                 pop_averages["sex"] == sex_var
             )
-            av_annual_hours_pt[sex_var, edu_var] = pop_averages.loc[
-                mask & (pop_averages["choice"] == 2), "annual_hours"
-            ].values[0]
+            # Men don't work part-time, so we skip
+            if sex_var != 0:
+                av_annual_hours_pt[sex_var, edu_var] = pop_averages.loc[
+                    mask & (pop_averages["choice"] == 2), "annual_hours"
+                ].values[0]
 
             av_annual_hours_ft[sex_var, edu_var] = pop_averages.loc[
                 mask & (pop_averages["choice"] == 3), "annual_hours"

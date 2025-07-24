@@ -8,7 +8,7 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 
 path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
-model_name = "disability"
+model_name = "ucl"
 
 # kind_string = input("Execute [pre]- or [post]-estimation plots? (pre/post)\n")
 
@@ -116,10 +116,10 @@ from export_results.figures.income_plots import (
 )
 from export_results.figures.wealth_plots import plot_budget_of_unemployed
 
-# plot_incomes(path_dict)
-# plot_partner_wage(path_dict, specs)
-# plot_total_income(specs)
-# plot_child_benefits(specs)
+plot_incomes(path_dict)
+plot_partner_wage(path_dict, specs)
+plot_total_income(specs)
+plot_child_benefits(specs)
 plot_budget_of_unemployed(specs)
 plt.show()
 # plt.close("all")

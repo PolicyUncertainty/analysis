@@ -17,8 +17,8 @@ specs = generate_derived_and_data_derived_specs(path_dict)
 
 
 model_name = specs["model_name"]
-load_df = None
-load_solution = False
+load_df = False
+load_solution = True
 load_sol_model = True
 
 
@@ -26,7 +26,7 @@ params = pickle.load(
     open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
 )
 
-#
+
 # which_plots = input(
 #     "Which plots do you want to show?\n \n"
 #     " - [a]ll\n"
@@ -36,8 +36,8 @@ params = pickle.load(
 #     " - [s]tates\n"
 #     " - [wc]hoices and wealth\n"
 # )
-print(jax.devices())
-which_plots = "wc"
+# print(jax.devices())
+which_plots = "i"
 
 from simulation.figures.simulated_model_fit import (
     plot_choice_shares_single,
@@ -100,14 +100,13 @@ if which_plots in ["a", "s"]:
     load_sol_model = True
 
 if which_plots in ["a", "i"]:
-    plot_quantiles(
+    from simulation.figures.net_incomes import net_incomes
+
+    net_incomes(
         path_dict=path_dict,
         specs=specs,
         params=params,
         model_name=model_name,
-        quantiles=[0.5],
-        sim_col_name="total_income",
-        obs_col_name="hh_net_income",
         file_name=None,
         load_df=load_df,
         load_solution=load_solution,

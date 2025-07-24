@@ -176,6 +176,8 @@ def plot_total_income(specs):
     marriage_labels = ["Single", "Partnered"]
     edu_labels = specs["education_labels"]
 
+    max_inc = 100_000
+
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
         fig, axs = plt.subplots(ncols=2, nrows=2, figsize=(10, 10))
         for married_val, married_label in enumerate(marriage_labels):
@@ -209,7 +211,7 @@ def plot_total_income(specs):
                     )
                 axs[edu_val, married_val].set_title(f"{edu_label} and {married_label}")
                 axs[edu_val, married_val].set_xlabel("Period equals experience")
-                # axs[edu_val, married_val].set_ylim([0, 80])
+                axs[edu_val, married_val].set_ylim([0, max_inc])
                 axs[edu_val, married_val].legend()
 
         fig.suptitle(f"Total income; {sex_label}")

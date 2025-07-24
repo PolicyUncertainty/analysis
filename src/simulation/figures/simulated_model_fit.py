@@ -41,11 +41,17 @@ def plot_quantiles(
         path_dict, params, model_solved, drop_retirees=False
     )
     data_decision["age"] = data_decision["period"] + specs["start_age"]
+    data_decision = data_decision[data_decision["partner_state"] == 0]
+    data_decision = data_decision[
+        (data_decision["lagged_choice"] == 3) & (data_decision["choice"] == 3)
+    ]
 
     data_sim["age"] = data_sim["period"] + specs["start_age"]
+    data_sim = data_sim[data_sim["partner_state"] == 0]
+    data_sim = data_sim[(data_sim["lagged_choice"] == 3) & (data_sim["choice"] == 3)]
 
     fig, axs = plt.subplots(ncols=specs["n_education_types"])
-    max_wealth = 0
+    max_wealth = 5
     # Also generate an aggregate graph
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
         for edu_var, edu_label in enumerate(specs["education_labels"]):
@@ -57,7 +63,7 @@ def plot_quantiles(
             )
             data_decision_edu = data_decision[mask_obs]
 
-            ages = np.arange(specs["start_age"] + 1, 90)
+            ages = np.arange(specs["start_age"] + 1, 60)
 
             for quant in quantiles:
                 average_wealth_sim = (

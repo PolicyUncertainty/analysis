@@ -103,4 +103,8 @@ def budget_constraint(
     #     death, on_true=assets_scaled, on_false=assets_begin_of_period
     # )
 
-    return assets_begin_of_period / model_specs["wealth_unit"]
+    aux = {
+        "hh_income": total_income / model_specs["wealth_unit"],
+    }
+
+    return assets_begin_of_period / model_specs["wealth_unit"], aux

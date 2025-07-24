@@ -7,9 +7,9 @@ def plot_predicted_vs_actual_informed_share(path_dict, specs, show = False, df= 
     """Plot the predicted vs actual informed shares by education level."""
     # Load data
     if df is None:
-        df = pd.read_csv(path_dict["beliefs_data"] + "soep_is_clean.csv")
+        df = pd.read_csv(path_dict["intermediate_data"] + "beliefs/soep_is_clean.csv")
     if params is None:
-        params = pd.read_csv(path_dict["beliefs_data"] + "beliefs_parameters.csv")
+        params = pd.read_csv(path_dict["intermediate_data"] + "beliefs/beliefs_parameters.csv")
     
     # Generate predicted and actual informed shares
     initial_age = df["age"].min()

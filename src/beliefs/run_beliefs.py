@@ -11,7 +11,7 @@ specs = read_and_derive_specs(path_dict["specs"])
 beliefs_data_path = path_dict["intermediate_data"] + "beliefs/"
 beliefs_est_results_path = path_dict["est_results"] + "beliefs/"
 os.makedirs(beliefs_data_path, exist_ok=True)
-os.makedirs(path_dict["est_results"] + "beliefs/", exist_ok=True)
+os.makedirs(beliefs_est_results_path, exist_ok=True)
 
 
 # create pension belief dataset

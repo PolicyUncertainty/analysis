@@ -290,7 +290,7 @@ def plot_example_sra_evolution(
 
     if use_estimated_params:
         # Load estimated parameters from the beliefs data
-        df = pd.read_csv(path_dict["beliefs_data"] + "beliefs_parameters.csv")
+        df = pd.read_csv(path_dict["est_results"] + "beliefs/beliefs_parameters.csv")
         alpha = df[df["parameter"] == "alpha"]["estimate"].values[0]
         sigma_sq = df[df["parameter"] == "sigma_sq"]["estimate"].values[0]
 

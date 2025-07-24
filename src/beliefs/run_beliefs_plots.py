@@ -37,7 +37,7 @@ plt.savefig(
 )
 
 # sra plots
-from beliefs.sra_beliefs.sra_plots import (
+from beliefs.belief_formalization.sra_plots import (
     plot_alpha_heterogeneity_coefficients_combined,
     plot_example_sra_evolution,
     plot_expected_sra_vs_birth_year,
@@ -78,7 +78,7 @@ plt.savefig(
 )
 
 # erp plots
-from beliefs.erp_beliefs.erp_plots import plot_predicted_vs_actual_informed_share
+from beliefs.belief_formalization.erp_plots import plot_predicted_vs_actual_informed_share
 
 plot_predicted_vs_actual_informed_share(path_dict, specs, show=show_plots)
 plt.savefig(

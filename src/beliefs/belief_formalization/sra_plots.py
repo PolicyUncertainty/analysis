@@ -3,8 +3,8 @@ import numpy as np
 import pandas as pd
 from scipy.stats import truncnorm
 
-from beliefs.sra_beliefs.random_walk import filter_df
-from beliefs.sra_beliefs.truncated_normals import estimate_truncated_normal_parameters
+from beliefs.belief_formalization.random_walk import filter_df
+from beliefs.belief_formalization.truncated_normals import estimate_truncated_normal_parameters
 from export_results.figures.color_map import JET_COLOR_MAP
 
 

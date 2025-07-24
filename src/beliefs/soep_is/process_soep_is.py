@@ -18,9 +18,7 @@ def load_and_filter_soep_is(paths):
     id_columns = ["pid", "syear", "hid", "cid", "intid", "im_107"]
     pension_survey_columns = [f"i107_{i}" for i in range(1, 16)]
     # load and filter data.
-    df = pd.read_stata(soep_is_path, convert_categoricals=False)[
-        id_columns + pension_survey_columns
-    ].astype(float)
+    df = pd.read_stata(soep_is_path, convert_categoricals=False)[id_columns + pension_survey_columns].astype(float)
     df = rename_survey_columns(df)
     df = filter_df(df)
     print(f"{len(df)} observations in SOEP-IS pension beliefs survey.")
@@ -138,6 +136,6 @@ def rename_and_reformat_is_covariates(df):
 
 
 def classify_informed(df, specs):
-    """Informed means ERP beliefs <= threshhold (e.g. 5)."""
+    """Informed means ERP beliefs <= threshhold (e.g. 5). Nans are considered uninformed."""
     df["informed"] = df["belief_pens_deduct"] <= specs["informed_threshhold"]
     return df

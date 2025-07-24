@@ -67,8 +67,13 @@ def plot_observed_model_fit_choice_probs(
         choice_probs_observations = np.nan_to_num(choice_probs_observations, nan=0.0)
         data_decision[f"choice_{choice}"] = choice_probs_observations
 
-    fig, axes = plt.subplots(specs["n_sexes"], specs["n_choices"], figsize=(14, 8))
+    choice_share_labels = ["Choice Share Men", "Choice Share Women"]
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
+        if sex_var == 0:
+            n_choices = 3
+        else:
+            n_choices = 4
+        fig, axes = plt.subplots(ncols=n_choices, figsize=(14, 8))
         for edu_var, edu_label in enumerate(specs["education_labels"]):
             data_subset = data_decision[
                 (data_decision["education"] == edu_var)
@@ -82,7 +87,6 @@ def plot_observed_model_fit_choice_probs(
 
             labels = specs["choice_labels"]
             for choice in range(specs["n_choices"]):
-                ax = axes[sex_var, choice]
 
                 choice_shares_predicted = data_subset.groupby(["age"])[
                     f"choice_{choice}"
@@ -91,6 +95,12 @@ def plot_observed_model_fit_choice_probs(
                 # Only plot if we are not in men and part-time
                 men_and_part_time = (sex_var == 0) and (choice == 2)
                 if not men_and_part_time:
+                    men_and_full_time = (sex_var == 0) and (choice == 3)
+                    if men_and_full_time:
+                        ax = axes[choice - 1]
+                    else:
+                        ax = axes[choice]
+
                     ax.plot(
                         choice_shares_predicted,
                         label=f"Pred. {edu_label}",
@@ -103,26 +113,20 @@ def plot_observed_model_fit_choice_probs(
                         linestyle="--",
                     )
 
-                ax.set_ylim([-0.05, 1.05])
-                if sex_var == 0:
+                    ax.set_ylim([-0.05, 1.05])
                     ax.set_title(f"{labels[choice]}")
-                    if choice == 1:
-                        ax.legend(loc="upper left")
-                elif sex_var == 1:
                     ax.set_xlabel("Age")
 
-    axes[0, 0].set_ylabel("Choice Share Men")
-    axes[1, 0].set_ylabel("Choice Share Women")
+        axes[1].legend(loc="upper left")
+        axes[0].set_ylabel(choice_share_labels[sex_var])
+        # Fig title
+        fig.tight_layout()
 
-    # Fig title
-    fig.tight_layout()
-
-    fig.savefig(  # fig.suptitle(f"Choice shares {specs['education_labels'][edu]}")
-        save_folder + f"observed_model_fit.png",
-        transparent=True,
-        dpi=300,
-    )
-    # fig.suptitle(f"Choice shares {specs['education_labels'][edu]}")
+        fig.savefig(  # fig.suptitle(f"Choice shares {specs['education_labels'][edu]}")
+            save_folder + f"observed_model_fit_{sex_label}.png",
+            transparent=True,
+            dpi=300,
+        )
 
 
 def load_and_prep_data_for_model_fit(

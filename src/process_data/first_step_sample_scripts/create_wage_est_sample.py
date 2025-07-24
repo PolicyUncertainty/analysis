@@ -2,6 +2,7 @@ import os
 
 import numpy as np
 import pandas as pd
+
 from process_data.aux_and_plots.filter_data import filter_data
 from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.experience import sum_experience_variables
@@ -53,7 +54,6 @@ def create_wage_est_sample(paths, specs, load_data=False):
 
     # bring back indeces (pid, syear)
     df = df.reset_index()
-    print(str(len(df)) + " observations in final wage estimation dataset.")
 
     type_dict = {
         "pid": np.int32,
@@ -68,8 +68,12 @@ def create_wage_est_sample(paths, specs, load_data=False):
         "education": np.int32,
         "sex": np.int8,
     }
+
     # Keep relevant columns
     df = df[type_dict.keys()]
+    # Drop missings
+    df = df.dropna()
+    print(str(len(df)) + " observations in final wage estimation dataset.")
     df = df.astype(type_dict)
     # save data
     df.to_pickle(out_file_path)

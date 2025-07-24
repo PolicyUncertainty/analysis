@@ -62,6 +62,10 @@ from process_data.structural_sample_scripts.create_structural_est_sample import 
 )
 
 if string_in == "a" or string_in == "s":
+    print(
+        "Start creating structural estimation sample.\n"
+        "-------------------------------------------"
+    )
     create_structural_est_sample(
         paths_dict,
         specs=specs,
@@ -72,26 +76,58 @@ if string_in == "a" or string_in == "s":
     )
 
 if string_in == "a" or string_in == "w":
+    print(
+        "Start creating wage estimation sample.\n"
+        "-------------------------------------"
+    )
     create_wage_est_sample(paths_dict, specs=specs, load_data=False)
 
 if string_in == "a" or string_in == "p":
+    print(
+        "Start creating partner wage estimation sample.\n"
+        "---------------------------------------------"
+    )
     create_partner_wage_est_sample(paths_dict, specs=specs, load_data=False)
 
 if string_in == "a" or string_in == "j":
+    print(
+        "Start creating job separation sample.\n"
+        "-------------------------------------"
+    )
     create_job_sep_sample(paths_dict, specs=specs, load_data=False)
 
 if string_in == "a" or string_in == "f":
+    print(
+        "Start creating family transition sample.\n"
+        "-----------------------------------------"
+    )
     create_partner_transition_sample(paths_dict, specs=specs, load_data=False)
 
 if string_in == "a" or string_in == "h":
+    print(
+        "Start creating health transition sample.\n"
+        "-----------------------------------------"
+    )
     create_health_transition_sample(paths_dict, specs=specs, load_data=False)
 
 if string_in == "a" or string_in == "m":
+    print(
+        "Start creating survival transition sample.\n"
+        "-------------------------------------------"
+    )
     create_survival_transition_sample(paths_dict, specs=specs, load_data=False)
 
-if string_in == "a" or string_in == "c":
-    create_credited_periods_est_sample(paths_dict, load_data=False)
-
 if string_in == "a" or string_in == "d":
+    print(
+        "Start creating disability pension sample.\n"
+        "-----------------------------------------"
+    )
     create_disability_pension_sample(paths_dict, specs=specs, load_data=False)
+
+if string_in == "a" or string_in == "c":
+    print(
+        "Start creating credited periods estimation sample.\n"
+        "--------------------------------------------------"
+    )
+    create_credited_periods_est_sample(paths_dict, load_data=False)
 # %%

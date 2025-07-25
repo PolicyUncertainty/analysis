@@ -13,7 +13,7 @@ which_plots = input(
     "Which plots do you want to show?\n \n"
     " - [a]ll\n"
     " - [r]etirement timing\n"
-    " - [f]resh retiree classificiation\n"
+    # " - [f]resh retiree classificiation\n"
     " - [c]hoices\n"
     " - [s]tates\n"
     " - [w]ealth\n"
@@ -21,20 +21,20 @@ which_plots = input(
 
 # %% ########################################
 # Retirement timing relative to SRA
-from process_data.aux_and_plots.retirement_timing import plot_retirement_timing_data
+from process_data.data_plots.retirement_timing import plot_retirement_timing_data
 
 if which_plots in ["a", "r"]:
     plot_retirement_timing_data(path_dict, specs)
 
 
 # %%
-from process_data.aux_and_plots.data_plots import plot_data_choices
+from process_data.data_plots.choices import plot_data_choices
 
 if which_plots in ["a", "c"]:
     plot_data_choices(path_dict)
     plot_data_choices(path_dict, lagged=True)
 # %%
-from process_data.aux_and_plots.data_plots import plot_state_by_age_and_type
+from process_data.data_plots.states import plot_state_by_age_and_type
 
 if which_plots in ["a", "s"]:
     state_vars = [
@@ -45,7 +45,7 @@ if which_plots in ["a", "s"]:
     ]
     plot_state_by_age_and_type(path_dict, state_vars=state_vars)
 
-from process_data.aux_and_plots.wealth import plot_average_wealth_by_type
+from process_data.data_plots.wealth import plot_average_wealth_by_type
 
 if which_plots in ["a", "w"]:
     plot_average_wealth_by_type(path_dict)
@@ -53,11 +53,11 @@ if which_plots in ["a", "w"]:
 plt.show()
 plt.close("all")
 
-if which_plots in ["a", "f"]:
-    from process_data.aux_and_plots.retiree_classification import (
-        plot_retiree_classification,
-    )
-
-    plot_retiree_classification(path_dict)
-    plt.show()
-    plt.close("all")
+# if which_plots in ["a", "f"]:
+#     from process_data.aux_and_plots.retiree_classification import (
+#         plot_retiree_classification,
+#     )
+#
+#     plot_retiree_classification(path_dict)
+#     plt.show()
+#     plt.close("all")

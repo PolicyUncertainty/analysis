@@ -3,7 +3,7 @@ import os
 import pandas as pd
 
 from process_data.aux_and_plots.filter_data import recode_sex
-from process_data.aux_and_plots.plot_credited_periods_vs_exp import (
+from process_data.data_plots.plot_credited_periods_vs_exp import (
     plot_credited_periods_vs_exp,
 )
 from process_data.soep_rv_vars.credited_periods import create_credited_periods

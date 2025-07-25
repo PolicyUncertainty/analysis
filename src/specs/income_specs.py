@@ -178,8 +178,8 @@ def calculate_partner_incomes(path_dict, specs):
             mask = params["education"] == edu_label
             partner_wages[sex_var, edu_var, :] = (
                 params.loc[mask, "constant"].values[0]
-                + params.loc[mask, "ln_period"].values[0] * np.log(periods + 1)
-                # + params.loc[mask, "period_sq"].values[0] * periods**2
+                + params.loc[mask, "period"].values[0] * periods
+                + params.loc[mask, "period_sq"].values[0] * periods**2
             )
     # annual partner wage
     annual_partner_wages = partner_wages * 12

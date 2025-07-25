@@ -11,7 +11,7 @@ specs = generate_derived_and_data_derived_specs(path_dict)
 
 
 model_name = specs["model_name"]
-load_df = False
+load_df = True
 load_solution = True
 load_sol_model = True
 
@@ -93,7 +93,7 @@ if which_plots in ["a", "s"]:
         params,
         model_name,
         plot_dead=False,
-        sim_var="hh_income",
+        sim_var="net_hh_income",
         load_df=load_df,
         load_solution=load_solution,
         load_sol_model=load_sol_model,

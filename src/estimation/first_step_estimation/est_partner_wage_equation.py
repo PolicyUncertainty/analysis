@@ -18,7 +18,7 @@ def estimate_partner_wage_parameters(paths_dict, specs):
 
     """
     edu_labels = specs["education_labels"]
-    covs = ["constant", "ln_period"]
+    covs = ["constant", "period", "period_sq"]
     wage_data = prepare_estimation_data(paths_dict, specs)
     wage_data = sm.add_constant(wage_data)
 
@@ -52,7 +52,6 @@ def estimate_partner_wage_parameters(paths_dict, specs):
             # Filter df
             wage_data_edu = wage_data_sex[wage_data_sex["education"] == edu_val].copy()
 
-            covs = ["constant", "ln_period"]
             # make ols regression
             model = sm.OLS(
                 endog=wage_data_edu["wage_p"],
@@ -63,16 +62,6 @@ def estimate_partner_wage_parameters(paths_dict, specs):
             fitted_model = model.fit()
             # Assign prediction
             wage_data_edu["wage_pred"] = fitted_model.predict()
-
-            # # Residuals in logs
-            # resid_ln = wage_data_edu["ln_wage_p"] - wage_data_edu["wage_pred_ln"]
-            #
-            # # Smearing factor
-            # max = np.max(resid_ln)
-            # smearing_factor = np.mean(max + np.exp(resid_ln - max))
-            #
-            # # Corrected level prediction
-            # wage_data_edu["wage_pred"] = np.exp(wage_data_edu["wage_pred_ln"])
 
             # Plot wage and prediction
             ax.plot(
@@ -95,13 +84,13 @@ def estimate_partner_wage_parameters(paths_dict, specs):
         ax.set_title(f"Partner Wages of {sex_label}")
         ax.set_xlabel("Age")
         ax.set_ylabel("Monthly Wage")
-        plt.show()
         fig.savefig(paths_dict["plots"] + f"partner_wages_{append}.png")
 
         out_file_path = (
             paths_dict["est_results"] + f"partner_wage_eq_params_{append}.csv"
         )
         wage_parameters.to_csv(out_file_path)
+    plt.show()
 
 
 def prepare_estimation_data(paths_dict, specs):

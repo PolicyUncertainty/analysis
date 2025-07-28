@@ -63,7 +63,11 @@ def calc_inc_tax_for_single_income(gross_income, model_specs):
         + in_bracket_3 * poss_tax_bracket_3
         + in_bracket_4 * poss_tax_bracket_4
     )
-    return income_tax
+    # Soli is five percent of income tax
+    soli = income_tax * 0.05
+    # Church tax is nine percent of income tax, but only if the person is a member (50% of population in 2020)
+    church_tax = income_tax * (0.09 * 0.5)
+    return income_tax + soli + church_tax
 
 
 def calc_after_ssc_income_worker(gross_wage):

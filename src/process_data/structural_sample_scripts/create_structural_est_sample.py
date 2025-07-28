@@ -163,14 +163,18 @@ def create_structural_est_sample(
     df.rename(
         columns={
             "pglabgro": "monthly_wage",
+            "pglabgro_p": "monthly_wage_partner",
             "hlc0005_v2": "hh_net_income",
+            "i11102": "last_year_hh_net_income",
         },
         inplace=True,
     )
 
     type_dict_add = {
         "monthly_wage": "float64",
+        "monthly_wage_partner": "float64",
         "hh_net_income": "float64",
+        "last_year_hh_net_income": "float64",
         "working_years": "float64",
         "children": "float64",
         # "surveyed_health": "int8",
@@ -271,7 +275,16 @@ def load_and_merge_soep_core(path_dict, use_processed_pl):
         # m11126: Self-Rated Health Status
         # m11124: Disability Status of Individual
         f"{soep_c38_path}/pequiv.dta",
-        columns=["pid", "syear", "d11107", "d11101", "m11126", "m11124", "igrv1"],
+        columns=[
+            "pid",
+            "syear",
+            "d11107",
+            "d11101",
+            "m11126",
+            "m11124",
+            "igrv1",
+            "i11102",
+        ],
         convert_categoricals=False,
     )
     merged_data = pd.merge(merged_data, pequiv_data, on=["pid", "syear"], how="left")

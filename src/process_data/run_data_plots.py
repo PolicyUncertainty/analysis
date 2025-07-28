@@ -17,6 +17,7 @@ which_plots = input(
     " - [c]hoices\n"
     " - [s]tates\n"
     " - [w]ealth\n"
+    " - [i]ncome\n"
 )
 
 # %% ########################################
@@ -50,8 +51,15 @@ from process_data.data_plots.wealth import plot_average_wealth_by_type
 if which_plots in ["a", "w"]:
     plot_average_wealth_by_type(path_dict)
 
-plt.show()
-plt.close("all")
+    plt.show()
+    plt.close("all")
+
+if which_plots in ["a", "i"]:
+    from process_data.data_plots.income import plot_income
+
+    plot_income(path_dict, specs)
+    plt.show()
+    plt.close("all")
 
 # if which_plots in ["a", "f"]:
 #     from process_data.aux_and_plots.retiree_classification import (

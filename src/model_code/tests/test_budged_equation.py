@@ -16,10 +16,10 @@ from model_code.wealth_and_budget.transfers import calc_unemployment_benefits
 from set_paths import create_path_dict
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
-SAVINGS_GRID_UNEMPLOYED = np.linspace(10, 25, 5)
+SAVINGS_GRID_UNEMPLOYED = np.linspace(10, 25, 7)
 PARTNER_STATES = np.array([0, 1, 2], dtype=int)
 PERIOD_GRID = np.arange(0, 65, 15, dtype=int)
-OLD_AGE_PERIOD_GRID = np.arange(25, 43, 5, dtype=int)
+OLD_AGE_PERIOD_GRID = np.arange(25, 43, 8, dtype=int)
 VERY_OLD_AGE_PERIOD_GRID = np.arange(35, 43, 3, dtype=int)
 EDUCATION_GRID = [0, 1]
 SEX_GRID = [0, 1]
@@ -59,7 +59,7 @@ def test_budget_unemployed(
     max_init_exp_period = period + specs_internal["max_exp_diffs_per_period"][period]
     exp_cont = 2 / max_init_exp_period
 
-    wealth = budget_constraint(
+    wealth, _ = budget_constraint(
         period=period,
         partner_state=partner_state,
         education=education,
@@ -75,7 +75,7 @@ def test_budget_unemployed(
     savings_scaled = savings * specs_internal["wealth_unit"]
     has_partner = int(partner_state > 0)
     nb_children = specs["children_by_state"][sex, education, has_partner, period]
-    income_partner = calc_partner_income_after_ssc(
+    income_partner, _ = calc_partner_income_after_ssc(
         partner_state=partner_state,
         sex=sex,
         model_specs=specs_internal,
@@ -131,9 +131,9 @@ def test_budget_unemployed(
     )
 
 
-SAVINGS_GRID = np.linspace(8, 25, 3)
+SAVINGS_GRID = np.linspace(8, 25, 4)
 GAMMA_GRID = np.linspace(0.1, 0.9, 3)
-EXP_GRID = np.linspace(10, 60, 10, dtype=int)
+EXP_GRID = np.linspace(10, 60, 5, dtype=int)
 INCOME_SHOCK_GRID = np.linspace(-0.5, 0.5, 2)
 WORKER_CHOICES = [2, 3]
 
@@ -176,7 +176,7 @@ def test_budget_worker(
     max_init_exp_period = period + specs_internal["max_exp_diffs_per_period"][period]
     exp_cont = experience / max_init_exp_period
 
-    wealth = budget_constraint(
+    wealth, _ = budget_constraint(
         period=period,
         partner_state=partner_state,
         education=education,
@@ -319,7 +319,7 @@ def test_retiree(
     max_exp_this_period = period + specs_internal["max_exp_diffs_per_period"][period]
     np.testing.assert_allclose(exp_cont * max_exp_this_period, exp)
 
-    wealth = budget_constraint(
+    wealth, _ = budget_constraint(
         period=period,
         partner_state=partner_state,
         education=education,
@@ -459,7 +459,7 @@ def test_fresh_retiree(
         model_specs=specs_internal,
     )
 
-    wealth = budget_constraint(
+    wealth, _ = budget_constraint(
         period=period,
         partner_state=partner_state,
         education=education,

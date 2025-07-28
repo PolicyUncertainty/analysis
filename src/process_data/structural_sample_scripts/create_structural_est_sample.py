@@ -125,6 +125,26 @@ def create_structural_est_sample(
     # We are done with lagging and leading and drop the buffer years
     df = filter_years(df, specs["start_year"], specs["end_year"])
 
+    # Add wealth
+    df = add_wealth_interpolate_and_deflate(
+        df,
+        paths,
+        specs,
+        load_wealth=load_wealth,
+        use_processed_pl=use_processed_pl,
+        filter_missings=True,
+    )
+
+    df["savings_dec"] = df["wealth"] - df.groupby("pid")["wealth"].shift(
+        -1, fill_value=np.nan
+    )
+
+    df = create_experience_and_working_years(df.copy(), filter_missings=True)
+
+    # Now we can also kick out the buffer age for lagging
+    df = filter_below_age(df, specs["start_age"])
+    df["period"] = df["age"] - specs["start_age"]
+
     # We also delete now the observations with invalid data, which we left before to have a continuous panel
     df = drop_missings(
         df=df,
@@ -135,22 +155,12 @@ def create_structural_est_sample(
             "lagged_health",
             "education",
             "age",
+            "wealth",
         ],
-    )
-
-    # Add wealth
-    df = add_wealth_interpolate_and_deflate(
-        df, paths, specs, load_wealth=load_wealth, use_processed_pl=use_processed_pl
     )
 
     # Correct policy state
     df = create_policy_state(df, specs)
-
-    df = create_experience_and_working_years(df.copy(), filter_missings=True)
-
-    # Now we can also kick out the buffer age for lagging
-    df = filter_below_age(df, specs["start_age"])
-    df["period"] = df["age"] - specs["start_age"]
 
     # enforce choice restrictions based on model setup
     df = enforce_model_choice_restriction(df, specs)
@@ -175,6 +185,7 @@ def create_structural_est_sample(
         "monthly_wage_partner": "float64",
         "hh_net_income": "float64",
         "last_year_hh_net_income": "float64",
+        # "savings_dec": "float64",
         "working_years": "float64",
         "children": "float64",
         # "surveyed_health": "int8",

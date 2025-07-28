@@ -47,7 +47,7 @@ def add_wealth_interpolate_and_deflate(
     data = data.merge(wealth_data_full, on=["hid", "syear"], how="left")
     data.set_index(["pid", "syear"], inplace=True)
     if filter_missings:
-        data = data[(data["wealth"].notna())]
+        data = data[data["wealth"].notna()]
         print(str(len(data)) + " left after dropping people with missing wealth.")
     return data
 

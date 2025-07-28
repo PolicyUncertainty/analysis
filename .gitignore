@@ -31,3 +31,6 @@ ll*.txt
 
 # Debug files
 src/*/debug/
+
+# european map files
+output/open_access_data/map_data/*

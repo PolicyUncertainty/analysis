@@ -58,7 +58,7 @@ def download_europe_shapefile(data_path):
     
     return True
 
-def color_europe_map(country_colors, paths_dict, figsize=(12, 8), title="European Map"):
+def color_europe_map(country_colors, paths_dict, figsize=(12, 8), title=None):
     """
     Color a map of Europe based on a dictionary of countries and colors.
     
@@ -130,11 +130,12 @@ def color_europe_map(country_colors, paths_dict, figsize=(12, 8), title="Europea
     europe.plot(ax=ax, color=europe['color'], edgecolor='black', linewidth=0.5)
     
     # Set the map bounds to focus on Europe
-    ax.set_xlim(-10, 35)  # Longitude bounds
+    ax.set_xlim(-10, 31)  # Longitude bounds
     ax.set_ylim(35, 72)   # Latitude bounds
     
     # Set title and remove axes
-    ax.set_title(title, fontsize=16, fontweight='bold')
+    if title is not None:
+        ax.set_title(title, fontsize=16, fontweight='bold')
     ax.set_xlabel('')
     ax.set_ylabel('')
     ax.set_xticks([])
@@ -189,7 +190,7 @@ def color_europe_map_ongoing_ret_age_increases(paths_dict, figsize=(12, 8)):
         country_colors=country_colors,
         paths_dict=paths_dict,
         figsize=figsize,
-        title="Countries with Ongoing Reforms of the Retirement Age as of 2024"
+        title=None
     )
     
     if fig is None:
@@ -211,14 +212,15 @@ def color_europe_map_ongoing_ret_age_increases(paths_dict, figsize=(12, 8)):
     
     return fig
 
-# Example usage
+# Minimal working example to run the map creation and display/save it
 if __name__ == "__main__":
     # Create paths dictionary
     path_dict = create_path_dict(define_user=False)
     
     # Create and display the map using defaults
     fig = color_europe_map_ongoing_ret_age_increases(path_dict)
-    if fig:
-        plt.show()
     
-    # fig.savefig('europe_map.png', dpi=300, bbox_inches='tight')
+    # Save
+    import os
+    os.makedirs(path_dict['plots'] + 'introduction', exist_ok=True)
+    fig.savefig(path_dict['plots'] + 'introduction/ret_age_increase_europe.png', transparent=True, dpi=300, bbox_inches='tight')

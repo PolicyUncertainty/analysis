@@ -23,19 +23,19 @@ from beliefs.soep_is.belief_data_plots import (
 
 plot_sra_beliefs_by_cohort(path_dict, show=show_plots)
 plt.savefig(
-    beliefs_plots_path + "sra_beliefs_by_cohort.png", bbox_inches="tight"
+    beliefs_plots_path + "sra_beliefs_by_cohort.png", bbox_inches="tight", transparent=True, dpi=300,
 )
 plot_erp_beliefs_by_cohort(path_dict, show=show_plots)
 plt.savefig(
-    beliefs_plots_path + "erp_beliefs_by_cohort.png", bbox_inches="tight"
+    beliefs_plots_path + "erp_beliefs_by_cohort.png", bbox_inches="tight", transparent=True, dpi=300,
 )
 plot_erp_violin_plots_by_cohort(path_dict, censor_above=25, show=show_plots)
 plt.savefig(
-    beliefs_plots_path + "erp_violin_plots_by_cohort.png", bbox_inches="tight"
+    beliefs_plots_path + "erp_violin_plots_by_cohort.png", bbox_inches="tight", transparent=True, dpi=300,
 )
 plot_informed_share_by_cohort(path_dict, show=show_plots)
 plt.savefig(
-    beliefs_plots_path + "informed_share_by_cohort.png", bbox_inches="tight"
+    beliefs_plots_path + "informed_share_by_cohort.png", bbox_inches="tight", transparent=True, dpi=300,
 )
 
 # sra plots
@@ -45,17 +45,17 @@ from beliefs.belief_formalization.sra_plots import (
     plot_truncated_normal_for_response,
 )
 
-responses = [[30, 40, 30], [20, 50, 30], [100, 0, 0]]
+responses = [[10, 60, 30],[30, 40, 30], [20, 50, 30]]
 for response in responses:
     response_str = "_".join(map(str, response))
     plot_truncated_normal_for_response(response, options=specs, show=show_plots)
     plt.savefig(
-        beliefs_plots_path + f"truncated_normal_for_response_{response_str}.png",
+        beliefs_plots_path + f"truncated_normal_for_response_{response_str}.png", transparent=True, dpi=300,
         bbox_inches="tight",
     )
 plot_expected_sra_vs_birth_year(df=None, path_dict=path_dict, show=show_plots)
 plt.savefig(
-    beliefs_plots_path + "expected_sra_vs_birth_year.png", bbox_inches="tight"
+    beliefs_plots_path + "expected_sra_vs_birth_year.png", bbox_inches="tight", transparent=True, dpi=300,
 )
 
 plot_example_sra_evolution(
@@ -67,7 +67,7 @@ plot_example_sra_evolution(
     show=show_plots,
 )
 plt.savefig(
-    beliefs_plots_path + "example_sra_evolution_no_increase.png",
+    beliefs_plots_path + "example_sra_evolution_no_increase.png", transparent=True, dpi=300,
     bbox_inches="tight",
 )
 
@@ -77,6 +77,6 @@ from beliefs.belief_formalization.erp_plots import plot_predicted_vs_actual_info
 
 plot_predicted_vs_actual_informed_share(path_dict, specs, show=show_plots)
 plt.savefig(
-    beliefs_plots_path + "predicted_vs_actual_informed_share.png",
+    beliefs_plots_path + "predicted_vs_actual_informed_share.png", transparent=True, dpi=300,
     bbox_inches="tight",
 )

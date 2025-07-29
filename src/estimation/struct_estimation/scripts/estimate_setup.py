@@ -303,10 +303,11 @@ def generate_print_func(params_to_estimate_names):
                 for param_name in gender_params[group_name]:
                     if "disutil" in param_name:
                         print(
-                            f"{param_name}: {params[param_name]} and in probability: {np.exp(-params[param_name])}"
+                            f"{param_name}: {params[param_name]} and in probability: {np.exp(-params[param_name])}",
+                            flush=True,
                         )
                     else:
-                        print(f"{param_name}: {params[param_name]}")
+                        print(f"{param_name}: {params[param_name]}", flush=True)
 
     return print_function
 

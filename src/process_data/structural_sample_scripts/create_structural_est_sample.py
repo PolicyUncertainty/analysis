@@ -135,9 +135,9 @@ def create_structural_est_sample(
         filter_missings=True,
     )
 
-    df["savings_dec"] = df["wealth"] - df.groupby("pid")["wealth"].shift(
-        -1, fill_value=np.nan
-    )
+    # df["savings_dec"] = df["wealth"] - df.groupby("pid")["wealth"].shift(
+    #     1, fill_value=np.nan
+    # )
 
     df = create_experience_and_working_years(df.copy(), filter_missings=True)
 

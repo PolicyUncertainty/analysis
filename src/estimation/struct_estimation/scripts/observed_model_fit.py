@@ -27,7 +27,11 @@ def observed_model_fit(
     )
 
     data_decision, states_dict = load_and_prep_data_for_model_fit(
-        paths_dict=paths_dict, specs=specs, params=params, model_class=model_solved
+        paths_dict=paths_dict,
+        specs=specs,
+        params=params,
+        model_class=model_solved,
+        drop_retirees=False,
     )
 
     unobserved_state_specs = create_unobserved_state_specs(data_decision)
@@ -127,6 +131,60 @@ def plot_observed_model_fit_choice_probs(
             transparent=True,
             dpi=300,
         )
+
+    # Create a second figure just for the retirement phase of 60 to 75 years
+    ages = np.arange(60, 72)
+    fig, axs = plt.subplots(ncols=2, nrows=2, figsize=(14, 8))
+    for sex_var, sex_label in enumerate(specs["sex_labels"]):
+        for edu_var, edu_label in enumerate(specs["education_labels"]):
+            data_subset = data_decision[
+                (data_decision["education"] == edu_var)
+                & (data_decision["sex"] == sex_var)
+            ]
+            ret_choice_shares_obs = (
+                data_subset.groupby(["age"])["choice"]
+                .value_counts(normalize=True)
+                .loc[(ages, 0)]
+            )
+            ret_choice_shares_est = (
+                data_subset.groupby(["age"])[f"choice_0"].mean().loc[ages]
+            )
+
+            # Plotting the retirement choice shares as bars
+            ax = axs[sex_var, edu_var]
+            ax.bar(
+                ages - 0.4,
+                ret_choice_shares_obs,
+                color=JET_COLOR_MAP[0],
+                label="Observed",
+                width=0.4,
+            )
+            ax.bar(
+                ages,
+                ret_choice_shares_est,
+                color=JET_COLOR_MAP[1],
+                label="Predicted",
+                width=0.4,
+            )
+
+    axs[0, 1].legend(loc="upper left")
+
+    # Make x ticks invisible in the first row
+    axs[0, 0].set_xticks([])
+    axs[0, 1].set_xticks([])
+    axs[1, 0].set_xlabel("Age")
+    axs[1, 1].set_xlabel("Age")
+
+    axs[0, 0].set_title("Low Education")
+    axs[0, 1].set_title("High Education")
+    axs[0, 0].set_ylabel("Choice Share Men")
+    axs[1, 0].set_ylabel("Choice Share Women")
+    fig.tight_layout()
+    fig.savefig(  # fig.suptitle(f"Choice shares {specs['education_labels'][edu]}")
+        save_folder + f"retirement_fit.png",
+        transparent=True,
+        dpi=300,
+    )
 
 
 def load_and_prep_data_for_model_fit(

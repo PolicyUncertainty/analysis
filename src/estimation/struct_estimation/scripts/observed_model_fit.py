@@ -134,34 +134,39 @@ def plot_observed_model_fit_choice_probs(
 
     data_decision["SRA_diff"] = (
         data_decision["age"] - data_decision["policy_state_value"]
-    ).round()
+    )
 
+    diffs = np.arange(-2, 2.25, 0.25)
+    pos = np.arange(0, len(diffs))
     fig, axs = plt.subplots(nrows=2, figsize=(14, 8))
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
         data_subset = data_decision[
-            (data_decision["sex"] == sex_var)
-            & (data_decision["lagged_choice"] != 0)
-            & (data_decision["age"] > 63)
+            (data_decision["sex"] == sex_var) & (data_decision["lagged_choice"] != 0)
         ]
-        ret_choice_shares_est = data_subset.groupby(["SRA_diff"])[f"choice_0"].mean()
+        ret_choice_shares_est = (
+            data_subset.groupby(["SRA_diff"])[f"choice_0"]
+            .sum()
+            .reindex(diffs, fill_value=0)
+        )
 
         ret_choice_shares_obs = (
             data_subset.groupby(["SRA_diff"])["choice"]
-            .value_counts(normalize=True)
+            .value_counts()
             .loc[(slice(None), 0)]
-        ).reindex(ret_choice_shares_est.index, fill_value=0)
+            .reindex(diffs, fill_value=0)
+        )
 
         # Plotting the retirement choice shares as bars
         ax = axs[sex_var]
         ax.bar(
-            ret_choice_shares_obs.index - 0.4,
+            pos - 0.2,
             ret_choice_shares_obs,
             color=JET_COLOR_MAP[0],
             label="Observed",
             width=0.4,
         )
         ax.bar(
-            ret_choice_shares_obs.index,
+            pos + 0.2,
             ret_choice_shares_est,
             color=JET_COLOR_MAP[1],
             label="Predicted",
@@ -170,8 +175,14 @@ def plot_observed_model_fit_choice_probs(
 
     axs[0].legend(loc="upper left")
 
-    # Make x ticks invisible in the first row
+    # Set x-axis labels and ticks
+    axs[0].set_xlabel("Difference to SRA")
+    axs[0].set_xticks(pos)
+    axs[0].set_xticklabels(diffs)
     axs[1].set_xlabel("Difference to SRA")
+    axs[1].set_xticks(pos)
+    axs[1].set_xticklabels(diffs)
+
     axs[0].set_title("Men")
     axs[1].set_title("Women")
     axs[0].set_ylabel("Choice Share")

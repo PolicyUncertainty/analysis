@@ -140,6 +140,7 @@ def plot_observed_model_fit_choice_probs(
             data_subset = data_decision[
                 (data_decision["education"] == edu_var)
                 & (data_decision["sex"] == sex_var)
+                & (data_decision["lagged_choice"] != 0)
             ]
             ret_choice_shares_obs = (
                 data_subset.groupby(["age"])["choice"]

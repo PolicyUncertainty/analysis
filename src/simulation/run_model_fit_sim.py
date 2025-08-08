@@ -37,7 +37,7 @@ params = pickle.load(
 #     " - [wc]hoices and wealth\n"
 # )
 # print(jax.devices())
-which_plots = "i"
+which_plots = "wc"
 
 from simulation.figures.simulated_model_fit import (
     plot_choice_shares_single,

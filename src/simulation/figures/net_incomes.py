@@ -17,7 +17,7 @@ def net_incomes(
     load_solution=True,
     load_sol_model=True,
 ):
-    sim_col_name = "gross_labor_income"
+    sim_col_name = "gross_hh_income"
     obs_col_name = "yearly_wage"
 
     # Simulate baseline with subjective belief

@@ -12,7 +12,7 @@ path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict)
 
 # Set run specs
-model_name = "start"
+model_name = "ucl"
 load_sol_model = True
 
 if model_name == "start":
@@ -25,7 +25,6 @@ else:
     params = pickle.load(
         open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
     )
-    params = map_period_to_age(params)
 
 model = specify_model(
     path_dict=path_dict,

@@ -31,6 +31,9 @@ from process_data.soep_vars.partner_code import (
 from process_data.soep_vars.wealth.linear_interpolation import (
     add_wealth_interpolate_and_deflate,
 )
+from process_data.structural_sample_scripts.classify_reitrees import (
+    add_very_long_insured_classification,
+)
 from process_data.structural_sample_scripts.disability_pension_health import (
     modify_health_for_disability_pension,
 )
@@ -168,6 +171,13 @@ def create_structural_est_sample(
     # # Modify health state for incorporation of disability pension
     df["surveyed_health"] = df["health"].copy()
     df = modify_health_for_disability_pension(df, specs)
+
+    # Add very long insured classification
+    df = add_very_long_insured_classification(
+        df=df,
+        path_dict=paths,
+        specs=specs,
+    )
 
     # Rename to monthly wage
     df.rename(

@@ -1,3 +1,31 @@
+from process_data.first_step_sample_scripts.create_credited_periods_est_sample import (
+    create_credited_periods_est_sample,
+)
+from process_data.first_step_sample_scripts.create_disability_pension_sample import (
+    create_disability_pension_sample,
+)
+from process_data.first_step_sample_scripts.create_health_transition_sample import (
+    create_health_transition_sample,
+)
+from process_data.first_step_sample_scripts.create_job_sep_sample import (
+    create_job_sep_sample,
+)
+from process_data.first_step_sample_scripts.create_partner_transition_sample import (
+    create_partner_transition_sample,
+)
+from process_data.first_step_sample_scripts.create_partner_wage_est_sample import (
+    create_partner_wage_est_sample,
+)
+from process_data.first_step_sample_scripts.create_survival_transition_sample import (
+    create_survival_transition_sample,
+)
+from process_data.first_step_sample_scripts.create_wage_est_sample import (
+    create_wage_est_sample,
+)
+from process_data.structural_sample_scripts.create_structural_est_sample import (
+    create_structural_est_sample,
+)
+
 # %%
 # set paths and parameters
 # --------------------------------------------------------------------------------------
@@ -29,37 +57,9 @@ LOAD_WEALTH = True
 LOAD_ARTKALEN_CHOICE = True
 
 
-from process_data.first_step_sample_scripts.create_credited_periods_est_sample import (
-    create_credited_periods_est_sample,
-)
-from process_data.first_step_sample_scripts.create_disability_pension_sample import (
-    create_disability_pension_sample,
-)
-from process_data.first_step_sample_scripts.create_health_transition_sample import (
-    create_health_transition_sample,
-)
-from process_data.first_step_sample_scripts.create_job_sep_sample import (
-    create_job_sep_sample,
-)
-from process_data.first_step_sample_scripts.create_partner_transition_sample import (
-    create_partner_transition_sample,
-)
-from process_data.first_step_sample_scripts.create_partner_wage_est_sample import (
-    create_partner_wage_est_sample,
-)
-from process_data.first_step_sample_scripts.create_survival_transition_sample import (
-    create_survival_transition_sample,
-)
-from process_data.first_step_sample_scripts.create_wage_est_sample import (
-    create_wage_est_sample,
-)
-
 # %%
 # Create relevant datasets.
 # --------------------------------------------------------------------------------------
-from process_data.structural_sample_scripts.create_structural_est_sample import (
-    create_structural_est_sample,
-)
 
 if string_in == "a" or string_in == "s":
     print(

@@ -29,7 +29,7 @@ def get_next_period_experience(
     exp_update = (lagged_choice == 3) + (lagged_choice == 2) * model_specs[
         "exp_increase_part_time"
     ]
-    exp_new_period = exp_years_last_period + exp_update
+    exp_years_this_period = exp_years_last_period + exp_update
 
     # Calculate experience in the case of fresh retirement
     # We track all deductions and bonuses of the retirement decision through an adjusted
@@ -49,11 +49,13 @@ def get_next_period_experience(
     # retirement and thus don't need to track when retired.
     degenerate_state_id = model_specs["n_policy_states"] - 1
     fresh_retired = (degenerate_state_id != policy_state) & (lagged_choice == 0)
-    exp_new_period = jax.lax.select(fresh_retired, adjusted_exp_years, exp_new_period)
+    exp_years_this_period = jax.lax.select(
+        fresh_retired, adjusted_exp_years, exp_years_this_period
+    )
 
     # Now scale between 0 and 1
     exp_scaled = scale_experience_years(
-        experience=exp_new_period,
+        experience_years=exp_years_this_period,
         period=period,
         max_exp_diffs_per_period=max_exp_diffs_per_period,
     )
@@ -65,6 +67,6 @@ def construct_experience_years(experience, period, max_exp_diffs_per_period):
     return experience * (period + max_exp_diffs_per_period[period])
 
 
-def scale_experience_years(experience, period, max_exp_diffs_per_period):
+def scale_experience_years(experience_years, period, max_exp_diffs_per_period):
     """Scale experience between 0 and 1."""
-    return (1 / (period + max_exp_diffs_per_period[period])) * experience
+    return (1 / (period + max_exp_diffs_per_period[period])) * experience_years

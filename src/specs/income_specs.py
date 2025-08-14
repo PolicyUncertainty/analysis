@@ -56,7 +56,7 @@ def calc_annual_unemployment_benefits(specs):
 def add_population_averages(specs, path_dict):
     # Assign population averages
     pop_averages = pd.read_csv(
-        path_dict["est_results"] + "population_averages_working_hours.csv"
+        path_dict["first_step_incomes"] + "population_averages_working_hours.csv"
     )
     av_annual_hours_pt = np.zeros(
         (specs["n_sexes"], specs["n_education_types"]), dtype=float

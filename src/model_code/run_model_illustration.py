@@ -26,8 +26,7 @@ params = pickle.load(
 )
 
 
-which_plots = "l"
-plot_ret_experience(specs)
+which_plots = "r"
 
 model_solved = specify_and_solve_simple_model(
     path_dict=path_dict,
@@ -39,3 +38,6 @@ model_solved = specify_and_solve_simple_model(
 
 if which_plots == "r":
     plot_ret_probs_for_asset_level(model_solved=model_solved, specs=specs, assets=9)
+
+elif which_plots == "l":
+    plot_ret_experience(specs)

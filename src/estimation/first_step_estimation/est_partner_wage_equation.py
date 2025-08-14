@@ -10,7 +10,7 @@ from export_results.figures.color_map import JET_COLOR_MAP
 from specs.derive_specs import read_and_derive_specs
 
 
-def estimate_partner_wage_parameters(paths_dict, specs):
+def estimate_partner_wage_parameters(paths_dict, specs, show_plots):
     """Estimate the wage parameters partners by education group in the sample.
 
     Est_men is a boolean that determines whether the estimation is done for men or for
@@ -26,7 +26,7 @@ def estimate_partner_wage_parameters(paths_dict, specs):
 
     # Deflate wages with FEs from wage estimaten
     wage_fe = pd.read_csv(
-        paths_dict["est_results"] + "wage_eq_year_FE.csv", index_col=[0, 1]
+        paths_dict["first_step_incomes"] + "wage_eq_year_FE.csv", index_col=[0, 1]
     )
     fe_all = wage_fe.loc[("all", "all"), :]
     # Set index to int
@@ -87,10 +87,11 @@ def estimate_partner_wage_parameters(paths_dict, specs):
         fig.savefig(paths_dict["plots"] + f"partner_wages_{append}.png")
 
         out_file_path = (
-            paths_dict["est_results"] + f"partner_wage_eq_params_{append}.csv"
+            paths_dict["first_step_incomes"] + f"partner_wage_eq_params_{append}.csv"
         )
         wage_parameters.to_csv(out_file_path)
-    plt.show()
+    if show_plots:
+        plt.show()
 
 
 def prepare_estimation_data(paths_dict, specs):
@@ -139,6 +140,6 @@ def calculate_partner_hours(path_dict):
     partner_hours = df.groupby(cov_list)["working_hours_p"].mean()
 
     # save to csv
-    out_file_path = path_dict["est_results"] + f"partner_hours.csv"
+    out_file_path = path_dict["first_step_incomes"] + f"partner_hours.csv"
     partner_hours.to_csv(out_file_path)
     return partner_hours

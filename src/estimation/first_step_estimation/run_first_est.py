@@ -17,6 +17,11 @@ input_str = input(
     "\n"
 )
 
+if input_str in ["w", "a", "p"]:
+    show_plots = input("\n Do you want to show plots? [y/n] ") == "y"
+else:
+    show_plots = False
+
 LOAD_DATA = True
 # Set define user only to true if estimate SRA process as we need raw soep data there
 define_user = True if (input_str in ["s", "i", "a"]) or (not LOAD_DATA) else False
@@ -46,7 +51,7 @@ if input_str in ["a", "w"]:
         estimate_wage_parameters,
     )
 
-    estimate_wage_parameters(paths_dict, specs)
+    estimate_wage_parameters(paths_dict, specs, show_plots=show_plots)
 
 if input_str in ["a", "p"]:
     # Estimate partner wage parameters for men and womenlead_partner_state

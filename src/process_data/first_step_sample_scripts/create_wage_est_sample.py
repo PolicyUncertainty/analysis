@@ -45,14 +45,9 @@ def create_wage_est_sample(paths, specs, load_data=False):
     df = df[df["monthly_wage"] > 0]
     print(str(len(df)) + " observations after dropping invalid wage values.")
 
-    # Drop unemployed(wage shoudl be zero) and retired individuals
+    # Drop unemployed(wage should be zero) and retired individuals
     df = df[df["choice"].isin([2, 3])]
     print(str(len(df)) + " observations after dropping non-working individuals.")
-
-    # Filter out men who work part-time
-    men_and_part_time = (df["sex"] == 0) & (df["choice"] == 2)
-    df = df[~men_and_part_time]
-    print(str(len(df)) + " observations after dropping men who work part-time.")
 
     # bring back indeces (pid, syear)
     df = df.reset_index()

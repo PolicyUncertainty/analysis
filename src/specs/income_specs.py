@@ -70,11 +70,10 @@ def add_population_averages(specs, path_dict):
             mask = (pop_averages["education"] == edu_var) & (
                 pop_averages["sex"] == sex_var
             )
-            # Men don't work part-time, so we skip
-            if sex_var != 0:
-                av_annual_hours_pt[sex_var, edu_var] = pop_averages.loc[
-                    mask & (pop_averages["choice"] == 2), "annual_hours"
-                ].values[0]
+            # We assign for men and women, but men-part-time is never used.
+            av_annual_hours_pt[sex_var, edu_var] = pop_averages.loc[
+                mask & (pop_averages["choice"] == 2), "annual_hours"
+            ].values[0]
 
             av_annual_hours_ft[sex_var, edu_var] = pop_averages.loc[
                 mask & (pop_averages["choice"] == 3), "annual_hours"
@@ -84,7 +83,9 @@ def add_population_averages(specs, path_dict):
     specs["av_annual_hours_ft"] = jnp.asarray(av_annual_hours_ft)
 
     # Create auxiliary mean hourly full time wage for pension calculation (see appendix)
-    mean_annual_wage = np.load(path_dict["est_results"] + "pop_avg_annual_wage.npy")
+    mean_annual_wage = np.loadtxt(
+        path_dict["first_step_incomes"] + "pop_avg_annual_wage.txt"
+    )
     specs["mean_hourly_ft_wage"] = jnp.asarray(mean_annual_wage / av_annual_hours_ft)
     return specs
 
@@ -121,7 +122,7 @@ def calc_annual_pension_point_value(specs):
 def process_wage_params(path_dict, specs):
     # wages
     wage_params = pd.read_csv(
-        path_dict["est_results"] + "wage_eq_params.csv", index_col=0
+        path_dict["first_step_incomes"] + "wage_eq_params.csv", index_col=0
     )
 
     wage_params.reset_index(inplace=True)
@@ -161,10 +162,10 @@ def calculate_partner_incomes(path_dict, specs):
 
     # Only do this for men now
     partner_wage_params_men = pd.read_csv(
-        path_dict["est_results"] + "partner_wage_eq_params_men.csv"
+        path_dict["first_step_incomes"] + "partner_wage_eq_params_men.csv"
     )
     partner_wage_params_women = pd.read_csv(
-        path_dict["est_results"] + "partner_wage_eq_params_women.csv"
+        path_dict["first_step_incomes"] + "partner_wage_eq_params_women.csv"
     )
     partner_wages = np.zeros(
         (specs["n_sexes"], specs["n_education_types"], specs["n_periods"]), dtype=float

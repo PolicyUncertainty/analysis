@@ -9,7 +9,7 @@ from linearmodels.panel.model import PanelOLS
 from export_results.figures.color_map import JET_COLOR_MAP
 
 
-def estimate_wage_parameters(paths_dict, specs):
+def estimate_wage_parameters(paths_dict, specs, show_plots):
     """Estimate the wage parameters for each education group in the sample.
 
     Also estimate for all individuals.
@@ -29,8 +29,8 @@ def estimate_wage_parameters(paths_dict, specs):
 
     # Now everyone has correct monthly hours. We can define hourly wage
     wage_data["hourly_wage"] = wage_data["monthly_wage"] / wage_data["monthly_hours"]
-    # We are 2013 onwards, so everybody must at least earn 8.5
-    # wage_data = wage_data[wage_data["hourly_wage"] > 8.5]
+    # We are 2013 onwards, so everybody must at least earn 8.5. This is to filter out false reporting.
+    wage_data = wage_data[wage_data["hourly_wage"] > 8.5]
     wage_data["ln_wage"] = np.log(wage_data["hourly_wage"])
 
     # Restrict to relevant ages
@@ -51,6 +51,7 @@ def estimate_wage_parameters(paths_dict, specs):
         sex_label="all",
         specs=specs,
     )
+
     for sex_val, sex_label in enumerate(sex_labels):
         fig, ax = plt.subplots(figsize=(12, 8))
         for edu_val, edu_label in enumerate(edu_labels):
@@ -87,12 +88,13 @@ def estimate_wage_parameters(paths_dict, specs):
         ax.legend(loc="upper left")
         file_appends = ["men", "women"]
         fig.savefig(paths_dict["plots"] + f"wages_{file_appends[sex_val]}.png")
-    plt.show()
+    if show_plots:
+        plt.show()
 
     # Save results
-    wage_parameters.to_csv(paths_dict["est_results"] + "wage_eq_params.csv")
+    wage_parameters.to_csv(paths_dict["first_step_incomes"] + "wage_eq_params.csv")
     pd.DataFrame(year_fixed_effects).T.to_csv(
-        paths_dict["est_results"] + "wage_eq_year_FE.csv"
+        paths_dict["first_step_incomes"] + "wage_eq_year_FE.csv"
     )
 
     wage_parameters.T.to_latex(
@@ -236,7 +238,10 @@ def calc_wage_population_averages(df, year_fixed_effects, specs, paths_dict):
 
     df["annual_wage_deflated"] = np.exp(df["ln_wage_deflated"]) * df["annual_hours"]
     pop_avg_annual_wage = df["annual_wage_deflated"].mean()
-    np.save(paths_dict["est_results"] + "pop_avg_annual_wage", pop_avg_annual_wage)
+    np.savetxt(
+        paths_dict["first_step_incomes"] + "pop_avg_annual_wage.txt",
+        np.array([pop_avg_annual_wage]),
+    )
 
     print(
         f"Population average for annual wage (inflated/deflated to {specs["reference_year"]}) : "
@@ -251,7 +256,8 @@ def calc_population_working_hours(df, paths_dict):
         "annual_hours"
     ].mean()
     avg_hours_by_type_choice.to_csv(
-        paths_dict["est_results"] + "population_averages_working_hours.csv", index=True
+        paths_dict["first_step_incomes"] + "population_averages_working_hours.csv",
+        index=True,
     )
     print("Population averages for working hours: \n")
     print(avg_hours_by_type_choice)

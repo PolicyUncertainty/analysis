@@ -49,6 +49,8 @@ def create_path_dict(define_user=False, user=None):
     # Assign result folders
     paths_dict["est_results"] = analysis_path + "output/est_results/"
     paths_dict["first_step_results"] = analysis_path + "output/est_results/first_step/"
+    paths_dict["first_step_incomes"] = analysis_path + "output/est_results/incomes/"
+
     paths_dict["struct_results"] = analysis_path + "output/est_results/struct_results/"
     paths_dict["sim_results"] = analysis_path + "output/sim_results/"
 
@@ -72,7 +74,10 @@ def create_path_dict(define_user=False, user=None):
     paths_dict["struct_est_sample"] = (
         paths_dict["intermediate_data"] + "structural_estimation_sample.csv"
     )
-
+    # Check if entries of paths_dict exist, if not create them
+    for key, path in paths_dict.items():
+        if not os.path.exists(path):
+            os.makedirs(path)
     return paths_dict
 
 
@@ -106,3 +111,6 @@ def set_standard_matplotlib_specs():
     )
     # Make lines of plots thicker
     plt.rcParams["lines.linewidth"] = 3
+
+    # Set defult figure size to (12, 8)
+    plt.rcParams["figure.figsize"] = (12, 8)

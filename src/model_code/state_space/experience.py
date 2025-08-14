@@ -59,6 +59,7 @@ def get_next_period_experience(
         period=period,
         max_exp_diffs_per_period=max_exp_diffs_per_period,
     )
+
     return exp_scaled
 
 

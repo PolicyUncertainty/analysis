@@ -15,6 +15,7 @@ from estimation.struct_estimation.scripts.std_errors import (
     calc_scores,
 )
 from model_code.specify_model import specify_model
+from model_code.state_space.experience import scale_experience_years
 from model_code.unobserved_state_weighting import create_unobserved_state_specs
 from process_data.structural_sample_scripts.create_structural_est_sample import (
     CORE_TYPE_DICT,
@@ -235,11 +236,12 @@ def load_and_prep_data(path_dict, start_params, model_class, drop_retirees=True)
     )["age_weights"].transform("sum")
 
     # Transform experience
-    max_init_exp = model_specs["max_exp_diffs_per_period"][
-        data_decision["period"].values
-    ]
-    exp_denominator = data_decision["period"].values + max_init_exp
-    data_decision["experience"] = data_decision["experience"] / exp_denominator
+    data_decision["experience"] = scale_experience_years(
+        experience_years=data_decision["experience"].values,
+        period=data_decision["period"].values,
+        is_retired=data_decision["lagged_choice"].values == 0,
+        model_specs=model_specs,
+    )
 
     # We can adjust wealth outside, as it does not depend on estimated parameters
     # (only on interest rate)

@@ -106,7 +106,8 @@ def simulate_scenario(
     df["exp_years"] = construct_experience_years(
         float_experience=df["experience"].values,
         period=df.index.get_level_values("period").values,
-        max_exp_diffs_per_period=model_specs["max_exp_diffs_per_period"],
+        is_retired=df["lagged_choice"].values == 0,
+        model_specs=model_specs,
     )
 
     # Create policy value

@@ -8,6 +8,7 @@ import seaborn as sns
 from dcegm.asset_correction import adjust_observed_assets
 from dcegm.pre_processing.shared import create_array_with_smallest_int_dtype
 
+from model_code.state_space.experience import scale_experience_years
 from model_code.stochastic_processes.health_transition import (
     calc_disability_probability,
 )
@@ -32,10 +33,14 @@ def generate_start_states_from_obs(
         for name in model_structure["discrete_states_names"]
     }
     # Transform experience for wealth adjustment
-    periods = start_period_data["period"].values
-    max_init_exp = model_specs["max_exp_diffs_per_period"][periods]
-    exp_denominator = periods + max_init_exp
-    states_dict["experience"] = start_period_data["experience"].values / exp_denominator
+
+    states_dict["experience"] = scale_experience_years(
+        period=start_period_data["period"].values,
+        experience_years=start_period_data["experience"].values,
+        is_retired=start_period_data["lagged_choice"].values == 0,
+        model_specs=model_specs,
+    )
+
     states_dict["assets_begin_of_period"] = (
         start_period_data["wealth"].values / model_specs["wealth_unit"]
     )

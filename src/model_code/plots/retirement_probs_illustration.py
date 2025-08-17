@@ -43,11 +43,6 @@ def plot_solution(model_solved, specs, path_dict):
             model_specs=specs,
         )
 
-        # exp_grid_float = scale_experience_years(
-        #     exp_years, period_fixed, specs["max_exp_diffs_per_period"]
-        # )
-        # states["experience"] = exp_grid_float
-
         endog_grid, value_grid, policy_grid = (
             model_solved.get_solution_for_discrete_state_choice(
                 states=states, choices=np.ones_like(prototype_array) * 3

@@ -14,6 +14,7 @@ from dcegm.asset_correction import adjust_observed_assets
 from estimation.msm.scripts.calc_moments import calc_all_moments
 from estimation.struct_estimation.scripts.estimate_setup import generate_print_func
 from model_code.specify_model import specify_model
+from model_code.state_space.experience import scale_experience_years
 from process_data.structural_sample_scripts.create_structural_est_sample import (
     CORE_TYPE_DICT,
 )
@@ -229,9 +230,12 @@ def load_and_prep_data(path_dict, start_params):
     # )["age_weights"].transform("sum")
     #
     # # Transform experience
-    max_init_exp = specs["max_exp_diffs_per_period"][data_decision["period"].values]
-    exp_denominator = data_decision["period"].values + max_init_exp
-    data_decision["experience"] = data_decision["experience"] / exp_denominator
+    data_decision["experience"] = scale_experience_years(
+        period=data_decision["period"].values,
+        experience_years=data_decision["experience"].values,
+        is_retired=data_decision["lagged_choice"].values == 0,
+        model_specs=specs,
+    )
 
     # Load model
     model = specify_model(

@@ -7,6 +7,7 @@ from export_results.figures.color_map import JET_COLOR_MAP
 from model_code.pension_system.experience_stock import (
     calc_experience_years_for_pension_adjustment,
 )
+from model_code.state_space.experience import scale_experience_years
 from model_code.wealth_and_budget.budget_equation import budget_constraint
 from model_code.wealth_and_budget.pension_payments import (
     calc_gross_pension_income,
@@ -189,8 +190,11 @@ def plot_total_income(specs):
                             period = 45
                         else:
                             period = exp
-                        exp_share = exp / (
-                            exp + specs["max_exp_diffs_per_period"][period]
+                        exp_share = scale_experience_years(
+                            experience_years=exp,
+                            period=period,
+                            is_retired=choice == 0,
+                            model_specs=specs,
                         )
                         total_income[i] = budget_constraint(
                             period=period,

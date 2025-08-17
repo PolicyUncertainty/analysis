@@ -33,7 +33,10 @@ def plot_ret_experience(specs):
             model_specs=specs,
         )
         exp_years_next = construct_experience_years(
-            exp_next, periods, specs["max_exp_diffs_per_period"]
+            float_experience=exp_next,
+            period=periods,
+            is_retired=np.zeros_like(periods, dtype=bool),
+            model_specs=specs,
         )
         ax.plot(periods + 30, exp_years_next, label=f"Exp {exp_years}")
 

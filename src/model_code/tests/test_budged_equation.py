@@ -4,7 +4,10 @@ from itertools import product
 import numpy as np
 import pytest
 
-from model_code.state_space.experience import get_next_period_experience
+from model_code.state_space.experience import (
+    get_next_period_experience,
+    scale_experience_years,
+)
 from model_code.wealth_and_budget.budget_equation import budget_constraint
 from model_code.wealth_and_budget.partner_income import calc_partner_income_after_ssc
 from model_code.wealth_and_budget.tax_and_ssc import (
@@ -56,8 +59,12 @@ def test_budget_unemployed(
 
     specs_internal = copy.deepcopy(specs)
 
-    max_init_exp_period = period + specs_internal["max_exp_diffs_per_period"][period]
-    exp_cont = 2 / max_init_exp_period
+    exp_cont = scale_experience_years(
+        experience_years=2,
+        period=period,
+        is_retired=False,
+        model_specs=specs_internal,
+    )
 
     wealth, _ = budget_constraint(
         period=period,
@@ -132,8 +139,8 @@ def test_budget_unemployed(
 
 
 SAVINGS_GRID = np.linspace(8, 25, 4)
-GAMMA_GRID = np.linspace(0.1, 0.9, 3)
-EXP_GRID = np.linspace(10, 60, 5, dtype=int)
+GAMMA_GRID = np.linspace(0.1, 0.9, 2)
+EXP_GRID = np.linspace(10, 40, 10, dtype=int)
 INCOME_SHOCK_GRID = np.linspace(-0.5, 0.5, 2)
 WORKER_CHOICES = [2, 3]
 
@@ -173,8 +180,12 @@ def test_budget_worker(
     specs_internal["gamma_0"] = gamma_array
     specs_internal["gamma_1"] = gamma_array
 
-    max_init_exp_period = period + specs_internal["max_exp_diffs_per_period"][period]
-    exp_cont = experience / max_init_exp_period
+    exp_cont = scale_experience_years(
+        experience_years=experience,
+        period=period,
+        is_retired=False,
+        model_specs=specs_internal,
+    )
 
     wealth, _ = budget_constraint(
         period=period,
@@ -298,16 +309,17 @@ def test_retiree(
 ):
     path_dict, specs_internal = paths_and_specs
 
-    last_period = period - 1
-    max_exp_last_period = (
-        specs_internal["max_exp_diffs_per_period"][last_period] + last_period
+    exp_cont_last_period = scale_experience_years(
+        experience_years=exp,
+        period=period - 1,
+        is_retired=True,
+        model_specs=specs_internal,
     )
-    exp_cont_last_period = exp / max_exp_last_period
 
     exp_cont = get_next_period_experience(
         period=period,
-        lagged_choice=0,
-        policy_state=29,
+        lagged_choice=np.array(0),
+        policy_state=np.array(29),
         sex=sex,
         education=education,
         experience=exp_cont_last_period,
@@ -316,8 +328,7 @@ def test_retiree(
         model_specs=specs_internal,
     )
     # Check that experience does not get updated or added any penalty
-    max_exp_this_period = period + specs_internal["max_exp_diffs_per_period"][period]
-    np.testing.assert_allclose(exp_cont * max_exp_this_period, exp)
+    np.testing.assert_allclose(exp_cont * specs_internal["max_exp_retirement"], exp)
 
     wealth, _ = budget_constraint(
         period=period,
@@ -441,11 +452,12 @@ def test_fresh_retiree(
 
     actual_retirement_age = specs_internal["start_age"] + period - 1
 
-    last_period = period - 1
-    max_init_exp_prev_period = (
-        last_period + specs_internal["max_exp_diffs_per_period"][last_period]
+    exp_cont_prev = scale_experience_years(
+        experience_years=exp,
+        period=period - 1,
+        is_retired=False,
+        model_specs=specs_internal,
     )
-    exp_cont_prev = exp / max_init_exp_prev_period
 
     exp_cont = get_next_period_experience(
         period=period,

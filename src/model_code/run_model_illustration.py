@@ -27,7 +27,7 @@ params = pickle.load(
 )
 
 
-which_plots = "r"
+which_plots = "s"
 
 model_solved = specify_and_solve_simple_model(
     path_dict=path_dict,
@@ -37,7 +37,7 @@ model_solved = specify_and_solve_simple_model(
     load_solution=load_solution,
 )
 
-if which_plots == "r":
+if which_plots == "s":
     plot_solution(model_solved=model_solved, specs=specs, path_dict=path_dict)
 
 elif which_plots == "l":

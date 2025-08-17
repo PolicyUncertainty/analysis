@@ -13,6 +13,7 @@ from matplotlib import pyplot as plt
 
 from export_results.figures.color_map import JET_COLOR_MAP
 from model_code.specify_model import specify_model
+from model_code.state_space.experience import scale_experience_years
 from process_data.structural_sample_scripts.create_structural_est_sample import (
     CORE_TYPE_DICT,
 )
@@ -37,9 +38,12 @@ def plot_income(paths_dict, specs):
     )
 
     # Transform experience
-    max_init_exp = specs["max_exp_diffs_per_period"][data_decision["period"].values]
-    exp_denominator = data_decision["period"].values + max_init_exp
-    data_decision["experience"] = data_decision["experience"] / exp_denominator
+    max_init_exp = scale_experience_years(
+        period=data_decision["period"].values,
+        experience_years=data_decision["experience"].values,
+        is_retired=data_decision["lagged_choice"].values == 0,
+        model_specs=model_class.model_specs,
+    )
 
     # We can adjust wealth outside, as it does not depend on estimated parameters
     # (only on interest rate)

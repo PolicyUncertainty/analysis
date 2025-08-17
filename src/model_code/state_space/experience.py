@@ -20,13 +20,17 @@ def get_next_period_experience(
     # Check if already longer retired. If it is not degenerated you could have not been
     # retired last period.
     degenerate_state_id = model_specs["n_policy_states"] - 1
-    not_retired_last_period = degenerate_state_id != policy_state
+    retired_last_period = degenerate_state_id == policy_state
+    retired_this_period = lagged_choice == 0
+    # Fresh retirement means not retired last period and retired this period.
+    fresh_retired = ~retired_last_period & retired_this_period
+
     last_period = period - 1
 
     exp_years_last_period = construct_experience_years(
         float_experience=experience,
         period=last_period,
-        is_retired=not_retired_last_period,
+        is_retired=retired_last_period,
         model_specs=model_specs,
     )
 
@@ -50,9 +54,6 @@ def get_next_period_experience(
         model_specs=model_specs,
     )
 
-    is_retired = lagged_choice == 0
-    # Fresh retirement means not retired last period and retired this period.
-    fresh_retired = not_retired_last_period & is_retired
     exp_years_this_period = jax.lax.select(
         fresh_retired, adjusted_exp_years, exp_years_this_period
     )
@@ -61,7 +62,7 @@ def get_next_period_experience(
     exp_scaled = scale_experience_years(
         experience_years=exp_years_this_period,
         period=period,
-        is_retired=is_retired,
+        is_retired=retired_this_period,
         model_specs=model_specs,
     )
 

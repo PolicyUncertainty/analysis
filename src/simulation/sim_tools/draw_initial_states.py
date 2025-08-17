@@ -4,9 +4,10 @@ import numpy as np
 import pandas as pd
 import scipy.stats as stats
 import seaborn as sns
-from dcegm.asset_correction import adjust_observed_wealth
+from dcegm.asset_correction import adjust_observed_assets
 from sklearn.neighbors import KernelDensity
 
+from model_code.state_space.experience import scale_experience_years
 from model_code.stochastic_processes.job_offers import job_offer_process_transition
 
 
@@ -29,13 +30,16 @@ def draw_initial_states(
         for name in model["model_structure"]["discrete_states_names"]
     }
     # Transform experience for wealth adjustment
-    periods = start_period_data["period"].values
-    max_init_exp = model["options"]["model_params"]["max_exp_diffs_per_period"][periods]
-    exp_denominator = periods + max_init_exp
-    states_dict["experience"] = start_period_data["experience"].values / exp_denominator
+    states_dict["experience"] = scale_experience_years(
+        period=start_period_data["period"].values,
+        experience_years=start_period_data["experience"].values,
+        is_retired=start_period_data["lagged_choice"].values == 0,
+        model_specs=specs,
+    )
+
     states_dict["wealth"] = start_period_data["wealth"].values / specs["wealth_unit"]
 
-    start_period_data.loc[:, "adjusted_wealth"] = adjust_observed_wealth(
+    start_period_data.loc[:, "adjusted_wealth"] = adjust_observed_assets(
         observed_states_dict=states_dict,
         params=params,
         model=model,
@@ -172,7 +176,12 @@ def draw_initial_states(
             health_agents[type_mask] = health_states_edu
 
     # Transform it to be between 0 and 1
-    exp_agents /= specs["max_exp_diffs_per_period"][0]
+    exp_agents = scale_experience_years(
+        experience_years=exp_agents,
+        period=jnp.zeros_like(exp_agents, dtype=int),
+        is_retired=lagged_choice == 0,
+        model_specs=specs,
+    )
 
     # Set lagged choice to 1(unemployment) if experience is 0
     exp_zero_mask = exp_agents == 0

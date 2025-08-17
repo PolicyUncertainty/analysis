@@ -43,7 +43,7 @@ def specify_simple_model(
     savings_grid = create_end_of_period_assets()
 
     # Experience grid
-    experience_grid = jnp.linspace(0, 1, specs["n_experience_grid_points"])
+    experience_grid = jnp.linspace(0, 1, 11)
 
     model_config = {
         "min_period_batch_segments": [33, 44],

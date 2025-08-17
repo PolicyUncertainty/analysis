@@ -1,6 +1,7 @@
 import jax
 from jax import numpy as jnp
 
+from model_code.state_space.experience import construct_experience_years
 from model_code.wealth_and_budget.partner_income import calc_partner_income_after_ssc
 from model_code.wealth_and_budget.pension_payments import calc_pensions_after_ssc
 from model_code.wealth_and_budget.tax_and_ssc import calc_net_household_income
@@ -25,8 +26,12 @@ def budget_constraint(
 ):
     assets_scaled = asset_end_of_previous_period * model_specs["wealth_unit"]
     # Recalculate experience
-    max_exp_period = period + model_specs["max_exp_diffs_per_period"][period]
-    experience_years = max_exp_period * experience
+    experience_years = construct_experience_years(
+        float_experience=experience,
+        period=period,
+        is_retired=lagged_choice == 0,
+        model_specs=model_specs,
+    )
 
     # Calculate partner income
     partner_income_after_ssc, gross_partner_income = calc_partner_income_after_ssc(

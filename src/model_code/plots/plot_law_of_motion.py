@@ -13,8 +13,12 @@ def plot_ret_experience(specs):
     fig, ax = plt.subplots()
     for exp_years in np.arange(40, 60, 10):
 
+        # We scale the experience for a not retired person last period (policy state 8 is below)
         exp = scale_experience_years(
-            exp_years, periods - 1, specs["max_exp_diffs_per_period"]
+            experience_years=exp_years,
+            period=periods - 1,
+            is_retired=np.zeros_like(periods, dtype=bool),
+            model_specs=specs,
         )
 
         exp_next = get_next_period_experience(

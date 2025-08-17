@@ -104,7 +104,7 @@ def simulate_scenario(
     df["age"] = df.index.get_level_values("period") + model_specs["start_age"]
     # Create experience years
     df["exp_years"] = construct_experience_years(
-        experience=df["experience"].values,
+        float_experience=df["experience"].values,
         period=df.index.get_level_values("period").values,
         max_exp_diffs_per_period=model_specs["max_exp_diffs_per_period"],
     )

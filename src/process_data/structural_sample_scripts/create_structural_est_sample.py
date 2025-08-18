@@ -143,10 +143,8 @@ def create_structural_est_sample(
     # )
 
     df = create_experience_and_working_years(df.copy(), filter_missings=True)
-
     # Now we can also kick out the buffer age for lagging
     df = filter_below_age(df, specs["start_age"])
-    df["period"] = df["age"] - specs["start_age"]
 
     # We also delete now the observations with invalid data, which we left before to have a continuous panel
     df = drop_missings(
@@ -164,6 +162,8 @@ def create_structural_est_sample(
 
     # Correct policy state
     df = create_policy_state(df, specs)
+    # Now all age manipulations are done, we can also create the period
+    df["period"] = df["age"] - specs["start_age"]
 
     # enforce choice restrictions based on model setup
     df = enforce_model_choice_restriction(df, specs)

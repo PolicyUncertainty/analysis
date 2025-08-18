@@ -18,16 +18,16 @@ path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict)
 
 # Set run specs
-model_name = "ucl"
-load_model = False
-load_solution = False
+model_name = "stable"
+load_model = True
+load_solution = True
 
 params = pickle.load(
     open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
 )
 
 
-which_plots = "s"
+which_plots = "l"
 
 model_solved = specify_and_solve_simple_model(
     path_dict=path_dict,

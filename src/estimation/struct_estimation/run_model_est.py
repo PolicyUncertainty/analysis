@@ -61,7 +61,7 @@ params_to_estimate_names = [
 model_name = "ucl"
 
 LOAD_LAST_ESTIMATE = True
-LOAD_SOL_MODEL = True
+LOAD_SOL_MODEL = False
 SAVE_RESULTS = True
 USE_WEIGHTS = False
 

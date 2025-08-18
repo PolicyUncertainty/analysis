@@ -12,7 +12,7 @@ path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict)
 
 # Set run specs
-model_name = "ucl"
+model_name = "stable"
 load_sol_model = True
 
 if model_name == "start":
@@ -35,35 +35,37 @@ model = specify_model(
     sim_specs=None,
 )
 
-# First validate all exogenous processes
-model.validate_exogenous(
-    params=params,
-)
-
+# # First validate all exogenous processes
+# model.validate_exogenous(
+#     params=params,
+# )
+#
 # Now the law of motions for the continuous states
 continuous_grids_state_space = model.compute_law_of_motions(
     params=params,
 )
-assert (~np.isnan(continuous_grids_state_space["second_continuous"])).all()
-assert (~np.isnan(continuous_grids_state_space["assets_begin_of_period"])).all()
+# assert (~np.isnan(continuous_grids_state_space["second_continuous"])).all()
+# assert (~np.isnan(continuous_grids_state_space["assets_begin_of_period"])).all()
 
-# last_nan_idx = np.where(nan_grid)[0][-1]
-# state_space_dict = model.model_structure["state_space_dict"]
-# nan_state = {
-#     key: state_space_dict[key][last_nan_idx] for key in state_space_dict.keys()
-# }
-# exp = model.model_config["continuous_states_info"]["second_continuous_grid"][5]
-# from model_code.state_space.experience import get_next_period_experience
-#
-#
-# exp_new = get_next_period_experience(
-#     period=nan_state["period"],
-#     lagged_choice=nan_state["lagged_choice"],
-#     policy_state=nan_state["policy_state"],
-#     sex=nan_state["sex"],
-#     education=nan_state["education"],
-#     experience=exp,
-#     informed=nan_state["informed"],
-#     health=nan_state["health"],
-#     model_specs=model.model_specs,
-# )
+state_idx_to_inspect = 174
+exp_id_last_period = 10
+state_space_dict = model.model_structure["state_space_dict"]
+state_to_inspect = {
+    key: state_space_dict[key][state_idx_to_inspect] for key in state_space_dict.keys()
+}
+exp = model.model_config["continuous_states_info"]["second_continuous_grid"][
+    exp_id_last_period
+]
+from model_code.state_space.experience import get_next_period_experience
+
+exp_new = get_next_period_experience(
+    period=state_to_inspect["period"],
+    lagged_choice=state_to_inspect["lagged_choice"],
+    policy_state=state_to_inspect["policy_state"],
+    sex=state_to_inspect["sex"],
+    education=state_to_inspect["education"],
+    experience=exp,
+    informed=state_to_inspect["informed"],
+    health=state_to_inspect["health"],
+    model_specs=model.model_specs,
+)

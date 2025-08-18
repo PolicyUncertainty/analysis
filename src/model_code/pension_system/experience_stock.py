@@ -30,7 +30,7 @@ def calc_experience_years_for_pension_adjustment(
         model_specs=model_specs,
     )
     # retirement age is last periods age
-    actual_retirement_age = model_specs["start_age"] + period - 1
+    actual_retirement_age = jnp.minimum(model_specs["start_age"] + period - 1, 72)
     # SRA at retirement, difference to actual retirement age and boolean for early retirement
     SRA_at_retirement = (
         model_specs["min_SRA"] + policy_state * model_specs["SRA_grid_size"]

@@ -235,6 +235,8 @@ def load_and_prep_data(path_dict, start_params, model_class, drop_retirees=True)
         "age_bin"
     )["age_weights"].transform("sum")
 
+    data_decision["experience_years"] = data_decision["experience"].values
+
     # Transform experience
     data_decision["experience"] = scale_experience_years(
         experience_years=data_decision["experience"].values,

@@ -51,7 +51,7 @@ def specify_simple_model(
         "choices": np.arange(specs["n_choices"], dtype=int),
         "deterministic_states": {
             "education": [0],
-            "sex": [0],
+            "sex": [0, 1],
             "partner_state": [0],
             "health": [0],
             "informed": [0, 1],

@@ -16,23 +16,23 @@ def plot_solution(model_solved, specs, path_dict):
     n_obs = 1
     prototype_array = np.arange(n_obs)
     # exp_years_grid = np.linspace(10, 50, 5)
-    period = 33
-    choice = 0
-    lagged_choice = 3
-    policy_state = 1
+    period = 34
+    choice = 3
+    lagged_choice = 1
+    policy_state = 2
+    job_offer = 1
     sex = 0
-    informed = 0
+    informed = 1
 
-    for exp_id in range(0, 8):
-        period_fixed = np.ones_like(prototype_array) * period
+    for exp_id in range(4, 8):
         states = {
-            "period": period_fixed,
+            "period": np.ones_like(prototype_array) * period,
             "lagged_choice": np.ones_like(prototype_array) * lagged_choice,
             "education": np.zeros_like(prototype_array),
             "sex": np.ones_like(prototype_array) * sex,
             "informed": np.ones_like(prototype_array) * informed,
             "policy_state": np.ones_like(prototype_array) * policy_state,
-            "job_offer": np.ones_like(prototype_array),
+            "job_offer": np.ones_like(prototype_array) * job_offer,
             "partner_state": np.zeros_like(prototype_array),
             "health": np.zeros_like(prototype_array),
         }
@@ -45,6 +45,7 @@ def plot_solution(model_solved, specs, path_dict):
             is_retired=states["lagged_choice"] == 0,
             model_specs=specs,
         )
+        print(exp_float)
 
         endog_grid, value_grid, policy_grid = (
             model_solved.get_solution_for_discrete_state_choice(

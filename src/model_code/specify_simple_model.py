@@ -51,7 +51,7 @@ def specify_simple_model(
         "choices": np.arange(specs["n_choices"], dtype=int),
         "deterministic_states": {
             "education": [0],
-            "sex": [0, 1],
+            "sex": [0],
             "partner_state": [0],
             "health": [0],
             "informed": [0, 1],
@@ -59,6 +59,8 @@ def specify_simple_model(
         "stochastic_states": {
             "policy_state": np.arange(specs["n_policy_states"], dtype=int),
             "job_offer": np.arange(2, dtype=int),
+            # "partner_state": np.arange(specs["n_partner_states"], dtype=int),
+            # "health": np.arange(specs["n_all_health_states"], dtype=int),
         },
         "continuous_states": {
             "assets_end_of_period": savings_grid / specs["wealth_unit"],

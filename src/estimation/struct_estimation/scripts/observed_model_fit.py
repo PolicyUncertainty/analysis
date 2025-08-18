@@ -75,37 +75,6 @@ def plot_observed_model_fit_choice_probs(
             choice_probs_observations[data_decision["choice"] == choice]
         )
 
-    for job_offer in range(2):
-        for informed in range(2):
-            for health in [1, 2]:
-                bad_health_mask = states_dict["health"] == -99
-                states_dict["health"] = np.where(
-                    bad_health_mask, health, states_dict["health"]
-                )
-                states_dict["informed"] = (
-                    np.ones_like(states_dict["informed"]) * informed
-                )
-                states_dict["job_offer"] = (
-                    np.ones_like(states_dict["job_offer"]) * job_offer
-                )
-                choice_probs = model_solved.choice_probabilities_for_states(
-                    states=states_dict
-                )
-                choice_vals = model_solved.choice_values_for_states(states=states_dict)
-                for choice in range(specs["n_choices"]):
-                    data_decision[
-                        f"choice_{choice}_jo_{job_offer}_i_{informed}_h_{health}"
-                    ] = choice_probs[:, choice]
-                    data_decision[
-                        f"choice_vals_{choice}_jo_{job_offer}_i_{informed}_h_{health}"
-                    ] = choice_vals[:, choice]
-
-    data_decision.to_csv("model_fit.csv")
-    # mask = data_decision["prob_choice"] == 0
-    # # Get all columns with choice_vals_1
-    # choice_val_cols = [col for col in data_decision.columns if col.startswith("choice_vals_1")]
-    # choice_probs_0 = [col for col in data_decision.columns if col.startswith("choice_0")]
-
     choice_share_labels = ["Choice Share Men", "Choice Share Women"]
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
         if sex_var == 0:

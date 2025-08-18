@@ -27,7 +27,7 @@ params = pickle.load(
 )
 
 
-which_plots = "l"
+which_plots = "s"
 
 model_solved = specify_and_solve_simple_model(
     path_dict=path_dict,

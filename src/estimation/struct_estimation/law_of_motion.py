@@ -3,7 +3,6 @@ import pickle
 
 import numpy as np
 
-from estimation.struct_estimation.map_params_to_current import map_period_to_age
 from model_code.specify_model import specify_model
 from set_paths import create_path_dict
 from specs.derive_specs import generate_derived_and_data_derived_specs

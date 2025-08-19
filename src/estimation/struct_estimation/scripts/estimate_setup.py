@@ -16,6 +16,10 @@ from estimation.struct_estimation.scripts.std_errors import (
 )
 from model_code.specify_model import specify_model
 from model_code.state_space.experience import scale_experience_years
+from model_code.stochastic_processes.job_offers import (
+    calc_job_finding_prob_men,
+    calc_job_finding_prob_women,
+)
 from model_code.unobserved_state_weighting import create_unobserved_state_specs
 from process_data.structural_sample_scripts.create_structural_est_sample import (
     CORE_TYPE_DICT,
@@ -122,10 +126,15 @@ class est_class_from_paths:
         load_model,
         use_weights,
         print_function=None,
+        print_men_examples=True,
+        print_women_examples=True,
         save_results=True,
     ):
         self.iter_count = 0
         self.save_results = save_results
+        self.print_men_examples = print_men_examples
+        self.print_women_examples = print_women_examples
+        self.start_params_all = start_params_all
 
         if print_function is None:
             self.print_function = lambda params: print("Params, ", pd.Series(params))
@@ -144,6 +153,7 @@ class est_class_from_paths:
         from specs.derive_specs import generate_derived_and_data_derived_specs
 
         specs = generate_derived_and_data_derived_specs(path_dict)
+        self.specs = specs
 
         model = specify_model(
             path_dict=path_dict,
@@ -185,10 +195,12 @@ class est_class_from_paths:
         start = time.time()
         ll_value_individual = self.ll_func(params)
         ll_value = jnp.dot(self.weights, ll_value_individual) / self.weight_sum
+        full_params = self.start_params_all.copy()
+        full_params.update(params)
         if self.save_results:
             alternate_save_count = self.iter_count % 2
             pkl.dump(
-                params,
+                full_params,
                 open(
                     self.intermediate_est_data + f"params_{alternate_save_count}.pkl",
                     "wb",
@@ -198,6 +210,31 @@ class est_class_from_paths:
         end = time.time()
         self.iter_count += 1
         self.print_function(params)
+        if self.print_men_examples:
+            job_offer_prob_60_high_good = calc_job_finding_prob_men(
+                params=full_params,
+                education=1,
+                good_health=0,
+                period=30,
+                model_specs=self.specs,
+            )
+            print(
+                f"Job offer prob for 60 year old high educated men in good health: {job_offer_prob_60_high_good}",
+                flush=True,
+            )
+        if self.print_women_examples:
+            job_offer_prob_60_high_good = calc_job_finding_prob_women(
+                params=full_params,
+                education=1,
+                good_health=0,
+                period=30,
+                model_specs=self.specs,
+            )
+            print(
+                f"Job offer prob for 60 year old high educated women in good health: {job_offer_prob_60_high_good}",
+                flush=True,
+            )
+
         print("Likelihood value: ", ll_value)
         print("Likelihood evaluation took, ", end - start)
 
@@ -306,13 +343,10 @@ def generate_print_func(params_to_estimate_names):
             for group_name in gender_params.keys():
                 print(f"Group: {group_name}")
                 for param_name in gender_params[group_name]:
-                    if "disutil" in param_name:
-                        print(
-                            f"{param_name}: {params[param_name]} and in probability: {np.exp(-params[param_name])}",
-                            flush=True,
-                        )
-                    else:
-                        print(f"{param_name}: {params[param_name]}", flush=True)
+                    print(
+                        f"{param_name}: {params[param_name]}",
+                        flush=True,
+                    )
 
     return print_function
 

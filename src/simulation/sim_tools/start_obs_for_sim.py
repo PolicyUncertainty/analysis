@@ -32,10 +32,10 @@ def generate_start_states_from_obs(
         name: start_period_data[name].values
         for name in model_structure["discrete_states_names"]
     }
+    periods = start_period_data["period"].values
     # Transform experience for wealth adjustment
-
     states_dict["experience"] = scale_experience_years(
-        period=start_period_data["period"].values,
+        period=periods,
         experience_years=start_period_data["experience"].values,
         is_retired=start_period_data["lagged_choice"].values == 0,
         model_specs=model_specs,

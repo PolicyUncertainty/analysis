@@ -5,10 +5,6 @@ import jax
 import matplotlib.pyplot as plt
 import numpy as np
 
-from estimation.struct_estimation.map_params_to_current import (
-    map_period_to_age,
-    new_to_current,
-)
 from set_paths import create_path_dict
 from specs.derive_specs import generate_derived_and_data_derived_specs
 

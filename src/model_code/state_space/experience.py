@@ -75,8 +75,9 @@ def get_next_period_experience(
 def construct_experience_years(float_experience, period, is_retired, model_specs):
     """Experience and period can also be arrays. We have to distinguish between the phases where individals are already
     longer retired or not."""
-    scale_not_retired = jnp.minimum(
-        period + model_specs["max_exp_diff_period_working"], 58.0
+    # If period is past the last working period, then we take the maximum experience
+    scale_not_retired = jnp.take(
+        model_specs["max_exps_period_working"], period, mode="clip"
     )
     scale_retired = model_specs["max_exp_retirement"]
     scale = is_retired * scale_retired + (1 - is_retired) * scale_not_retired
@@ -85,7 +86,10 @@ def construct_experience_years(float_experience, period, is_retired, model_specs
 
 def scale_experience_years(experience_years, period, is_retired, model_specs):
     """Scale experience between 0 and 1."""
-    scale_not_retired = period + model_specs["max_exp_diff_period_working"]
+    # If period is past the last working period, then we take the maximum experience
+    scale_not_retired = jnp.take(
+        model_specs["max_exps_period_working"], period, mode="clip"
+    )
     scale_retired = model_specs["max_exp_retirement"]
     scale = is_retired * scale_retired + (1 - is_retired) * scale_not_retired
     return experience_years / scale

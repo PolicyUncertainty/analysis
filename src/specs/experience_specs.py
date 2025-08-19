@@ -71,7 +71,16 @@ def create_max_experience(path_dict, specs, load_precomputed):
             [max_exp_retirement],
         )
 
-    specs["max_exp_diff_period_working"] = max_exp_diff_period_working
+    # Calculate the maximum experience one can have in a working state.
+    max_exp_working = (
+        specs["max_ret_age"] - specs["start_age"] + max_exp_diff_period_working
+    )
+    # Now span for each period the maximum experience for working periods.
+    max_exps_period_working = jnp.arange(
+        max_exp_diff_period_working, max_exp_working + 1
+    )
+
+    specs["max_exps_period_working"] = max_exps_period_working
     specs["max_exp_retirement"] = max_exp_retirement
 
     return specs

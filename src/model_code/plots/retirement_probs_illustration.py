@@ -2,6 +2,7 @@ import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import numpy as np
 
+from model_code.pension_system.early_retirement_paths import check_very_long_insured
 from model_code.state_space.experience import (
     construct_experience_years,
     scale_experience_years,
@@ -64,48 +65,85 @@ def plot_solution(model_solved, specs, path_dict):
     plt.show()
 
 
-def plot_ret_probs_for_asset_level(model_solved, specs, path_dict):
-    fig, ax = plt.subplots(figsize=(10, 6))
+def plot_ret_probs_for_state(model_solved, specs, path_dict):
 
-    # asset_grid = np.arange(1, 5)
-    # n_obs = len(asset_grid)
-    # exp_years_grid = np.linspace(10, 50, 5)
-    # period = 40
-    # n_exp = model_solved.value.shape[1]
-    periods = np.arange(30, 40)
-    n_obs = len(periods)
-    prototype_array = np.arange(n_obs)
+    policy_states = np.arange(specs["n_policy_states"] - 1, dtype=int)
+    policy_state_values = specs["min_SRA"] + policy_states * specs["SRA_grid_size"]
+    # Vary periods, but fix SRA to 67 (policy state 8)
+    period = 37
 
-    for exp_years in range(0, 50, 10):
-        states = {
-            "period": periods,
-            "lagged_choice": np.ones_like(prototype_array) * 3,
-            "education": np.zeros_like(prototype_array),
-            "sex": np.zeros_like(prototype_array),
-            "informed": np.ones_like(prototype_array),
-            "policy_state": np.ones_like(prototype_array) * 8,
-            "job_offer": np.ones_like(prototype_array),
-            "partner_state": np.zeros_like(prototype_array),
-            "health": np.zeros_like(prototype_array),
-            "assets_begin_of_period": np.ones_like(prototype_array) * 9,
-        }
+    # Low educated men not retired
+    education = 0
+    sex = 0
+    lagged_choice = 3
+    # Job offer and single
+    job_offer = 1
+    partner_state = 0
+    exp_years = 45
+    assets = 10
 
-        exp_grid_float = scale_experience_years(
-            experience_years=np.ones_like(prototype_array) * exp_years,
-            period=periods,
-            is_retired=states["lagged_choice"] == 0,
-            model_specs=specs,
-        )
-        states["experience"] = exp_grid_float * np.ones_like(prototype_array)
+    very_long_insured_bool = check_very_long_insured(
+        retirement_age_difference=1,
+        experience_years=exp_years,
+        sex=sex,
+        model_specs=specs,
+    )
 
-        choice_probs = model_solved.choice_probabilities_for_states(states=states)
+    n_obs = len(policy_states)
+    int_array = np.ones(n_obs, dtype=int)
+    float_array = np.ones(n_obs, dtype=float)
 
-        ax.plot(
-            periods,
-            choice_probs[:, 0],
-            label=f"Exp years {exp_years}",
-        )
+    periods = int_array * period
 
-    ax.legend()
+    exp_grid_float = scale_experience_years(
+        experience_years=exp_years,
+        period=periods,
+        is_retired=False,
+        model_specs=specs,
+    )
+
+    states = {
+        "period": periods,
+        "policy_state": policy_states,
+        "lagged_choice": int_array * lagged_choice,
+        "education": int_array * education,
+        "sex": int_array * sex,
+        "job_offer": int_array * job_offer,
+        "partner_state": int_array * partner_state,
+        "assets_begin_of_period": float_array * assets,
+        "experience": float_array * exp_grid_float,
+    }
+
+    fig, axs = plt.subplots(
+        nrows=2,
+        ncols=1,
+        figsize=(10, 12),
+    )
+    if very_long_insured_bool:
+        very_str = "Very Long Insured"
+    else:
+        very_str = "Not Very Long Insured"
+
+    title_labels = [f"Good Health - {very_str}", f"Disability eligible - {very_str}"]
+    inform_labels = ["Not Informed", "Informed"]
+    for id, health in enumerate([0, 2]):
+        ax = axs[id]
+        for informed in [0, 1]:
+            states["health"] = int_array * health
+            states["informed"] = int_array * informed
+
+            choice_probs = model_solved.choice_probabilities_for_states(states=states)
+
+            ax.plot(
+                specs["start_age"] + period - policy_state_values,
+                np.nan_to_num(choice_probs[:, 0], nan=0.0),
+                label=f"{inform_labels[informed]}",
+            )
+            ax.set_ylabel("Probability of retirement")
+
+        ax.set_title(title_labels[id])
+
+    axs[1].set_xlabel("SRA difference")
+    axs[0].legend()
 
     plt.show()

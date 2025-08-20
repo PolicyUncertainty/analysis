@@ -6,6 +6,7 @@ import pandas as pd
 
 from process_data.aux_and_plots.filter_data import (
     drop_missings,
+    filter_above_age,
     filter_below_age,
     filter_years,
     recode_sex,
@@ -164,6 +165,8 @@ def create_structural_est_sample(
     df = create_policy_state(df, specs)
     # Now all age manipulations are done, we can also create the period
     df["period"] = df["age"] - specs["start_age"]
+
+    df = filter_above_age(df, specs["end_age"])
 
     # enforce choice restrictions based on model setup
     df = enforce_model_choice_restriction(df, specs)

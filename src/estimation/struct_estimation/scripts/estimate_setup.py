@@ -8,23 +8,21 @@ import numpy as np
 import optimagic as om
 import pandas as pd
 import yaml
-from dcegm.asset_correction import adjust_observed_assets
 
 from estimation.struct_estimation.scripts.std_errors import (
     calc_and_save_standard_errors,
     calc_scores,
 )
 from model_code.specify_model import specify_model
-from model_code.state_space.experience import scale_experience_years
 from model_code.stochastic_processes.job_offers import (
     calc_job_finding_prob_men,
     calc_job_finding_prob_women,
 )
-from model_code.unobserved_state_weighting import create_unobserved_state_specs
-from process_data.structural_sample_scripts.create_structural_est_sample import (
-    CORE_TYPE_DICT,
+from model_code.transform_data_from_model import (
+    create_states_dict,
+    load_scale_and_correct_data,
 )
-from specs.derive_specs import generate_derived_and_data_derived_specs
+from model_code.unobserved_state_weighting import create_unobserved_state_specs
 
 
 def estimate_model(
@@ -252,18 +250,17 @@ class est_class_from_paths:
 
 
 def load_and_prep_data(path_dict, start_params, model_class, drop_retirees=True):
-    specs = generate_derived_and_data_derived_specs(path_dict)
-    # Load data
-    data_decision = pd.read_csv(path_dict["struct_est_sample"])
-    data_decision = data_decision.astype(CORE_TYPE_DICT)
+
+    data_decision = load_scale_and_correct_data(
+        path_dict=path_dict,
+        params=start_params,
+        model_class=model_class,
+    )
 
     # Also already retired individuals hold no identification
     if drop_retirees:
         data_decision = data_decision[data_decision["lagged_choice"] != 0]
 
-    model_specs = model_class.model_specs
-
-    data_decision["age"] = data_decision["period"] + model_specs["start_age"]
     data_decision["age_bin"] = np.floor(data_decision["age"] / 10)
     data_decision.loc[data_decision["age_bin"] > 6, "age_bin"] = 6
     age_bin_av_size = data_decision.shape[0] / data_decision["age_bin"].nunique()
@@ -272,35 +269,7 @@ def load_and_prep_data(path_dict, start_params, model_class, drop_retirees=True)
         "age_bin"
     )["age_weights"].transform("sum")
 
-    data_decision["experience_years"] = data_decision["experience"].values
-
-    # Transform experience
-    data_decision["experience"] = scale_experience_years(
-        experience_years=data_decision["experience"].values,
-        period=data_decision["period"].values,
-        is_retired=data_decision["lagged_choice"].values == 0,
-        model_specs=model_specs,
-    )
-
-    # We can adjust wealth outside, as it does not depend on estimated parameters
-    # (only on interest rate)
-    # Now transform for dcegm
-    states_dict = {
-        name: data_decision[name].values
-        for name in model_class.model_structure["discrete_states_names"]
-    }
-    states_dict["experience"] = data_decision["experience"].values
-    states_dict["assets_begin_of_period"] = (
-        data_decision["wealth"].values / specs["wealth_unit"]
-    )
-
-    assets_begin_of_period = adjust_observed_assets(
-        observed_states_dict=states_dict,
-        params=start_params,
-        model_class=model_class,
-    )
-    data_decision["assets_begin_of_period"] = assets_begin_of_period
-    states_dict["assets_begin_of_period"] = assets_begin_of_period
+    states_dict = create_states_dict(data_decision)
 
     return data_decision, states_dict
 

@@ -6,7 +6,7 @@ import numpy as np
 
 from model_code.plots.plot_law_of_motion import plot_ret_experience
 from model_code.plots.retirement_probs_illustration import (
-    plot_ret_probs_for_asset_level,
+    plot_ret_probs_for_state,
     plot_solution,
 )
 from model_code.specify_model import specify_and_solve_model
@@ -27,7 +27,7 @@ params = pickle.load(
 )
 
 
-which_plots = "s"
+which_plots = "p"
 
 model_solved = specify_and_solve_simple_model(
     path_dict=path_dict,
@@ -44,6 +44,6 @@ elif which_plots == "l":
     plot_ret_experience(specs)
 
 elif which_plots == "p":
-    plot_ret_probs_for_asset_level(
+    plot_ret_probs_for_state(
         model_solved=model_solved, specs=specs, path_dict=path_dict
     )

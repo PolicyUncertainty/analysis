@@ -2,8 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from estimation.struct_estimation.scripts.estimate_setup import load_and_prep_data
 from export_results.figures.color_map import JET_COLOR_MAP
+from model_code.transform_data_from_model import load_scale_and_correct_data
 from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 
 
@@ -37,10 +37,10 @@ def plot_quantiles(
 
     data_sim = data_sim.reset_index()
 
-    data_decision, _ = load_and_prep_data(
-        path_dict, params, model_solved, drop_retirees=False
+    data_decision, _ = load_scale_and_correct_data(
+        path_dict=path_dict, params=params, model_class=model_solved
     )
-    data_decision["age"] = data_decision["period"] + specs["start_age"]
+
     data_sim["age"] = data_sim["period"] + specs["start_age"]
 
     fig, axs = plt.subplots(ncols=specs["n_education_types"])

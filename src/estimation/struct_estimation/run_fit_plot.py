@@ -69,17 +69,17 @@ else:
     )
     data_decision.to_csv(model_folder["model_results"] + "data_with_probs.csv")
 
-# plot_life_cycle_choice_probs(
-#     specs=specs,
-#     data_decision=data_decision,
-#     save_folder=path_dict["plots"],
-# )
-#
-# plot_retirement_fit(
-#     specs=specs,
-#     data_decision=data_decision,
-#     save_folder=path_dict["plots"],
-# )
+plot_life_cycle_choice_probs(
+    specs=specs,
+    data_decision=data_decision,
+    save_folder=path_dict["plots"],
+)
+
+plot_retirement_fit(
+    specs=specs,
+    data_decision=data_decision,
+    save_folder=path_dict["plots"],
+)
 
 print_choice_probs_by_group(df=data_decision, specs=specs)
 

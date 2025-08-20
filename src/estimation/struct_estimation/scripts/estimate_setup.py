@@ -214,7 +214,7 @@ class est_class_from_paths:
             job_offer_prob_60_high_good = calc_job_finding_prob_men(
                 params=full_params,
                 education=1,
-                good_health=0,
+                good_health=1,
                 period=30,
                 model_specs=self.specs,
             )
@@ -226,7 +226,7 @@ class est_class_from_paths:
             job_offer_prob_60_high_good = calc_job_finding_prob_women(
                 params=full_params,
                 education=1,
-                good_health=0,
+                good_health=1,
                 period=30,
                 model_specs=self.specs,
             )

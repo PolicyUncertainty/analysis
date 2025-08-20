@@ -142,42 +142,51 @@ def plot_observed_model_fit_choice_probs(
 
     diffs = np.arange(-2, 2.25, 0.25)
     pos = np.arange(0, len(diffs))
-    fig, axs = plt.subplots(nrows=2, figsize=(14, 8))
-    for sex_var, sex_label in enumerate(specs["sex_labels"]):
-        data_subset = data_decision[
-            (data_decision["sex"] == sex_var) & (data_decision["lagged_choice"] != 0)
-        ]
-        ret_choice_shares_est = (
-            data_subset.groupby(["SRA_diff"])[f"choice_0"]
-            .sum()
-            .reindex(diffs, fill_value=0)
-        )
 
-        ret_choice_shares_obs = (
-            data_subset.groupby(["SRA_diff"])["choice"]
-            .value_counts()
-            .loc[(slice(None), 0)]
-            .reindex(diffs, fill_value=0)
-        )
+    not_retired_mask = data_decision["lagged_choice"] != 0
+    data_subset = data_decision[not_retired_mask].copy()
+
+    choices_shares_obs = (
+        data_subset.groupby(["sex", "SRA_diff"])["choice"]
+        .value_counts()
+        .unstack()
+        .fillna(0.0)
+    )
+    choices_shares_obs.columns = specs["choice_labels"]
+
+    # Create a stacked bar plot with each choice sum on top of each other
+    choice_shares_est = data_subset.groupby(["sex", "SRA_diff"])[
+        [f"choice_{choice}" for choice in range(specs["n_choices"])]
+    ].sum()
+    choice_shares_est.columns = specs["choice_labels"]
+
+    fig, axs = plt.subplots(nrows=2, figsize=(14, 8))
+
+    for sex_var, sex_label in enumerate(specs["sex_labels"]):
+
+        choice_shares_est_to_plot = choice_shares_est.loc[sex_var].reindex(diffs)
+        choices_shares_obs_to_plot = choices_shares_obs.loc[sex_var].reindex(diffs)
 
         # Plotting the retirement choice shares as bars
         ax = axs[sex_var]
-        ax.bar(
-            pos - 0.2,
-            ret_choice_shares_obs,
-            color=JET_COLOR_MAP[0],
+        choice_shares_est_to_plot.plot(
+            kind="bar",
+            stacked=True,
+            ax=ax,
+            color=JET_COLOR_MAP[: specs["n_choices"]],
+            width=0.4,
+            position=0,
+            edgecolor="black",
+        )
+        choices_shares_obs_to_plot.plot(
+            kind="bar",
+            stacked=True,
+            ax=ax,
+            color=JET_COLOR_MAP[: specs["n_choices"]],
+            width=0.4,
+            position=1,
             label="Observed",
-            width=0.4,
         )
-        ax.bar(
-            pos + 0.2,
-            ret_choice_shares_est,
-            color=JET_COLOR_MAP[1],
-            label="Predicted",
-            width=0.4,
-        )
-
-    axs[0].legend(loc="upper left")
 
     # Set x-axis labels and ticks
     axs[0].set_xlabel("Difference to SRA")

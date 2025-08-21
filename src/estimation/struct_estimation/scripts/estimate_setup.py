@@ -163,8 +163,8 @@ class est_class_from_paths:
         )
 
         # Load data
-        data_decision, states_dict = load_and_prep_data(
-            path_dict, start_params_all, model, drop_retirees=True
+        data_decision, states_dict = load_and_prep_data_estimation(
+            path_dict=path_dict, start_params=start_params_all, model_class=model
         )
 
         if use_weights:
@@ -249,7 +249,7 @@ class est_class_from_paths:
         return self.weights @ scores / self.weight_sum
 
 
-def load_and_prep_data(path_dict, start_params, model_class, drop_retirees=True):
+def load_and_prep_data_estimation(path_dict, start_params, model_class):
 
     data_decision = load_scale_and_correct_data(
         path_dict=path_dict,
@@ -257,19 +257,20 @@ def load_and_prep_data(path_dict, start_params, model_class, drop_retirees=True)
         model_class=model_class,
     )
 
-    # Also already retired individuals hold no identification
-    if drop_retirees:
-        data_decision = data_decision[data_decision["lagged_choice"] != 0]
+    # Already retired individuals hold no identification
+    data_decision = data_decision[data_decision["lagged_choice"] != 0]
 
-    data_decision["age_bin"] = np.floor(data_decision["age"] / 10)
-    data_decision.loc[data_decision["age_bin"] > 6, "age_bin"] = 6
-    age_bin_av_size = data_decision.shape[0] / data_decision["age_bin"].nunique()
-    data_decision.loc[:, "age_weights"] = 1.0
-    data_decision.loc[:, "age_weights"] = age_bin_av_size / data_decision.groupby(
-        "age_bin"
-    )["age_weights"].transform("sum")
+    # data_decision["age_bin"] = np.floor(data_decision["age"] / 10)
+    # data_decision.loc[data_decision["age_bin"] > 6, "age_bin"] = 6
+    # age_bin_av_size = data_decision.shape[0] / data_decision["age_bin"].nunique()
+    # data_decision.loc[:, "age_weights"] = 1.0
+    # data_decision.loc[:, "age_weights"] = age_bin_av_size / data_decision.groupby(
+    #     "age_bin"
+    # )["age_weights"].transform("sum")
 
-    states_dict = create_states_dict(data_decision)
+    data_decision = data_decision[data_decision["age"] >= 55]
+
+    states_dict = create_states_dict(data_decision, model_class=model_class)
 
     return data_decision, states_dict
 

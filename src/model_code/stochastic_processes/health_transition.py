@@ -50,16 +50,19 @@ def health_transition(
 
 def calc_disability_probability(params, sex, education, period, model_specs):
     age = model_specs["start_age"] + period
+    above_55 = age >= 55
 
     # Calculate exp value for men and women
     exp_value_men = jnp.exp(
         params["disability_logit_const_men"]
-        + params["disability_logit_age_men"] * age
+        + params["disability_logit_above_55_men"] * age * above_55
+        + params["disability_logit_below_55_men"] * age * (1 - above_55)
         + params["disability_logit_high_educ_men"] * education
     )
     exp_value_women = jnp.exp(
         params["disability_logit_const_women"]
-        + params["disability_logit_age_women"] * age
+        + params["disability_logit_above_55_women"] * age * above_55
+        + params["disability_logit_below_55_women"] * age * (1 - above_55)
         + params["disability_logit_high_educ_women"] * education
     )
     # Now select based on sex state

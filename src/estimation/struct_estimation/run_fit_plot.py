@@ -29,7 +29,7 @@ specs = generate_derived_and_data_derived_specs(path_dict)
 model_name = specs["model_name"]
 load_sol_model = True
 load_solution = None
-load_data_from_sol = False
+load_data_from_sol = True
 
 
 # check if folder of model objects exits:
@@ -58,7 +58,7 @@ else:
     data_decision = load_scale_and_correct_data(
         path_dict=path_dict,
         params=params,
-        model_class=None,
+        model_class=model_solved,
     )
 
     data_decision = calc_choice_probs_for_df(
@@ -66,19 +66,19 @@ else:
     )
     data_decision.to_csv(model_folder["model_results"] + "data_with_probs.csv")
 
-plot_life_cycle_choice_probs(
-    specs=specs,
-    data_decision=data_decision,
-    save_folder=path_dict["plots"],
-)
+# plot_life_cycle_choice_probs(
+#     specs=specs,
+#     data_decision=data_decision,
+#     save_folder=path_dict["plots"],
+# )
+#
+# plot_retirement_fit(
+#     specs=specs,
+#     data_decision=data_decision,
+#     save_folder=path_dict["plots"],
+# )
 
-plot_retirement_fit(
-    specs=specs,
-    data_decision=data_decision,
-    save_folder=path_dict["plots"],
-)
-
-# print_choice_probs_by_group(df=data_decision, specs=specs)
+print_choice_probs_by_group(df=data_decision, specs=specs)
 
 plt.show()
 plt.close("all")

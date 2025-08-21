@@ -42,12 +42,13 @@ def job_offer_process_transition(
 
 def calc_job_finding_prob_men(params, education, good_health, period, model_specs):
     age = model_specs["start_age"] + period
+    above_55 = age >= 55
     exp_value = jnp.exp(
         params["job_finding_logit_const_men"]
         + params["job_finding_logit_high_educ_men"] * education
         + params["job_finding_logit_good_health_men"] * good_health
-        + params["job_finding_logit_above_50_men"] * (age >= 50)
-        + params["job_finding_logit_above_55_men"] * (age >= 55)
+        + params["job_finding_logit_above_55_men"] * age * above_55
+        + params["job_finding_logit_below_55_men"] * age * (1 - above_55)
     )
     prob = exp_value / (1 + exp_value)
     return prob
@@ -55,13 +56,14 @@ def calc_job_finding_prob_men(params, education, good_health, period, model_spec
 
 def calc_job_finding_prob_women(params, education, good_health, period, model_specs):
     age = model_specs["start_age"] + period
+    above_55 = age >= 55
 
     exp_value = jnp.exp(
         params["job_finding_logit_const_women"]
         + params["job_finding_logit_high_educ_women"] * education
         + params["job_finding_logit_good_health_women"] * good_health
-        + params["job_finding_logit_above_50_women"] * (age >= 50)
-        + params["job_finding_logit_above_55_women"] * (age >= 55)
+        + params["job_finding_logit_above_55_women"] * age * above_55
+        + params["job_finding_logit_below_55_women"] * age * (1 - above_55)
     )
     prob = exp_value / (1 + exp_value)
     return prob

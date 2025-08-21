@@ -28,24 +28,21 @@ specs = generate_derived_and_data_derived_specs(path_dict)
 # Set run specs
 model_name = specs["model_name"]
 load_sol_model = True
-load_solution = True
+load_solution = None
 load_data_from_sol = False
 
-if model_name == "start":
 
-    params = load_and_set_start_params(path_dict)
+# check if folder of model objects exits:
+model_folder = get_model_resutls_path(path_dict, model_name)
+
+if load_data_from_sol:
+    data_decision = pd.read_csv(model_folder["model_results"] + "data_with_probs.csv")
+
 else:
     params = pickle.load(
         open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
     )
 
-
-# check if folder of model objects exits:
-model_folder = get_model_resutls_path(path_dict, model_name)
-if load_data_from_sol:
-    data_decision = pd.read_csv(model_folder["model_results"] + "data_with_probs.csv")
-
-else:
     model_solved = specify_and_solve_model(
         path_dict=path_dict,
         params=params,
@@ -61,7 +58,7 @@ else:
     data_decision = load_scale_and_correct_data(
         path_dict=path_dict,
         params=params,
-        model_class=model_solved,
+        model_class=None,
     )
 
     data_decision = calc_choice_probs_for_df(
@@ -81,7 +78,7 @@ plot_retirement_fit(
     save_folder=path_dict["plots"],
 )
 
-print_choice_probs_by_group(df=data_decision, specs=specs)
+# print_choice_probs_by_group(df=data_decision, specs=specs)
 
 plt.show()
 plt.close("all")

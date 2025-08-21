@@ -106,7 +106,7 @@ def create_states_dict(df, model_class):
     Create a dictionary of states from a DataFrame.
     """
     states_dict = {
-        name: df[name].values
+        name: df[name].values.copy()
         for name in model_class.model_structure["discrete_states_names"]
     }
     states_dict["experience"] = df["experience"].values

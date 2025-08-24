@@ -45,9 +45,8 @@ def test_job_destruction(
             # f"job_finding_logit_age_{append}": logit_param,
             f"job_finding_logit_high_educ_{append}": logit_param,
             f"job_finding_logit_good_health_{append}": logit_param,
-            f"job_finding_logit_above_50_{append}": logit_param,
             f"job_finding_logit_above_55_{append}": logit_param,
-            f"job_finding_logit_above_60_{append}": logit_param,
+            f"job_finding_logit_below_55_{append}": logit_param,
         }
         params = {**params, **gender_params}
 
@@ -64,9 +63,8 @@ def test_job_destruction(
             # + params[f"job_finding_logit_age_{str}"] * age
             + params[f"job_finding_logit_high_educ_{append}"] * education
             + f"job_finding_logit_good_health_{append}" * good_health
-            + f"job_finding_logit_above_50_{append}" * (age >= 50)
-            + f"job_finding_logit_above_55_{append}" * (age >= 55)
-            + f"job_finding_logit_above_60_{append}" * (age >= 60)
+            + params[f"job_finding_logit_above_55_{append}"] * (age > 55) * age
+            + params[f"job_finding_logit_below_55_{append}"] * (age < 55) * age
         )
         offer_prob = exp_value / (1 + exp_value)
         full_probs = np.array([1 - offer_prob, offer_prob])

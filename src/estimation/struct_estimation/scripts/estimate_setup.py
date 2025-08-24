@@ -268,8 +268,6 @@ def load_and_prep_data_estimation(path_dict, start_params, model_class):
     #     "age_bin"
     # )["age_weights"].transform("sum")
 
-    data_decision = data_decision[data_decision["age"] >= 55]
-
     states_dict = create_states_dict(data_decision, model_class=model_class)
 
     return data_decision, states_dict

@@ -26,14 +26,13 @@ def est_job_offer_params_full_obs(df, specs):
 
     logit_vars = [
         "intercept",
-        "age",
         "education",
         "good_health",
-        # "above_50",
+        "age",
         # "above_55",
         # "above_60",
         "age_above_55",
-        "age_below_55",
+        # "age_below_55",
     ]
 
     job_offer_params = {}
@@ -48,13 +47,11 @@ def est_job_offer_params_full_obs(df, specs):
 
         gender_params = {
             f"job_finding_logit_const_{sex_append}": params["intercept"],
-            # f"job_finding_logit_age_{sex_append}": params["age"],
+            f"job_finding_logit_age_{sex_append}": params["age"],
             f"job_finding_logit_high_educ_{sex_append}": params["education"],
             f"job_finding_logit_good_health_{sex_append}": params["good_health"],
-            # f"job_finding_logit_above_50_{sex_append}": params["above_50"],
-            f"job_finding_logit_above_55_{sex_append}": params["age_above_55"],
-            f"job_finding_logit_below_55_{sex_append}": params["age_below_55"],
-            # f"job_finding_logit_above_60_{sex_append}": params["above_60"],
+            f"job_finding_logit_age_above_55_{sex_append}": params["age_above_55"],
+            # f"job_finding_logit_below_55_{sex_append}": params["age_below_55"],
         }
         job_offer_params = {**job_offer_params, **gender_params}
 

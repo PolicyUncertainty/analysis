@@ -25,11 +25,13 @@ params_to_estimate_names = [
     "job_finding_logit_const_men",
     "job_finding_logit_high_educ_men",
     "job_finding_logit_good_health_men",
-    "job_finding_logit_above_55_men",
+    "job_finding_logit_age_men",
+    "job_finding_logit_age_above_55_men",
     # Disability probability men - 3 parameters
     "disability_logit_const_men",
-    "disability_logit_above_55_men",
     "disability_logit_high_educ_men",
+    "disability_logit_age_men",
+    "disability_logit_age_above_55_men",
     # # "mu_women",
     # # Women Full-time - 4 parameters
     # "disutil_ft_work_good_women",
@@ -49,15 +51,18 @@ params_to_estimate_names = [
     # "job_finding_logit_const_women",
     # "job_finding_logit_high_educ_women",
     # "job_finding_logit_good_health_women",
-    # "job_finding_logit_above_50_women",
-    # "job_finding_logit_above_55_women",
+    # "job_finding_logit_age_women",
+    # "job_finding_logit_age_above_55_women",
     # # Disability probability women - 3 parameters
     # "disability_logit_const_women",
     # "disability_logit_age_women",
+    # "disability_logit_age_above_55_women",
     # "disability_logit_high_educ_women",
 ]
 
 model_name = "sep_men"
+
+print(f"Running estimation for model: {model_name}", flush=True)
 
 LOAD_LAST_ESTIMATE = False
 LOAD_SOL_MODEL = True

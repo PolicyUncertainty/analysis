@@ -35,28 +35,26 @@ bequest_scale: 1.0e-12
 
 # Job finding probability - men
 job_finding_logit_const_men: -5
-# job_finding_logit_age_men: -0.5
 job_finding_logit_high_educ_men: -5
 job_finding_logit_good_health_men: -5
-job_finding_logit_above_55_men: -5
-job_finding_logit_below_55_men: -5
+job_finding_logit_age_men: -5
+job_finding_logit_age_above_55_men: -5
 
 # Job finding probability - women
 job_finding_logit_const_women: -5
-job_finding_logit_age_women: -0.5
 job_finding_logit_high_educ_women: -5
 job_finding_logit_good_health_women: -5
-job_finding_logit_above_55_women: -5
-job_finding_logit_below_55_women: -5
+job_finding_logit_age_women: -5
+job_finding_logit_age_above_55_women: -5
 
 # Disability probability men
 disability_logit_const_men: -30
-disability_logit_above_55_men: -0.5
-disability_logit_below_55_men: -0.5
+disability_logit_age_men: -5
+disability_logit_age_above_55_men: -5
 disability_logit_high_educ_men: -5
 
 # Disability probability women
 disability_logit_const_women: -30
-disability_logit_above_55_women: -0.5
-disability_logit_below_55_women: -0.5
+disability_logit_age_women: -5
+disability_logit_age_above_55_women: -5
 disability_logit_high_educ_women: -5

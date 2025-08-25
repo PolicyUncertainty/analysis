@@ -19,11 +19,13 @@ load_solution = None
 load_sol_model = True
 
 
-params = pickle.load(
-    open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
-)
+# params = pickle.load(
+#     open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
+# )
 
-data_decision = load_and_prep_data(path_dict, params)
+params_money = {}
+
+data_decision = load_and_prep_data(path_dict, params_money)
 data_decision["age"] = data_decision["period"] + specs["start_age"]
 
 plot_empirical_only = input("Plot empirical moments only? (y/n): ") == "y"
@@ -55,11 +57,12 @@ else:
 
 
 plot_moments_all_moments_for_dfs(df_list, label_list, specs)
+plt.show()
 # Get figure numbers and save
 for i, fig in enumerate(plt.get_fignums()):
     fig = plt.figure(fig)
-    fig.savefig(
-        path_dict["plots"] + f"msm_moments_{model_name}_{i}.png",
-        bbox_inches="tight",
-    )
+    # fig.savefig(
+    #     path_dict["plots"] + f"msm_moments_{model_name}_{i}.png",
+    #     bbox_inches="tight",
+    # )
     plt.close(fig)

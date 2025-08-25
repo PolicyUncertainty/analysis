@@ -6,15 +6,15 @@ def calc_all_moments(df, empirical=False):
     """
     Calculate all moments from the given DataFrame.
     """
-    labor_supply_moments = calc_labor_supply_choice(df)
-    labor_transitions_moments = calc_labor_transitions_by_age_bins(df)
+    # labor_supply_moments = calc_labor_supply_choice(df)
+    # labor_transitions_moments = calc_labor_transitions_by_age_bins(df)
     median_wealth_moments = calc_median_wealth_by_age(df, empirical=empirical)
 
     # Transform to numpy arrays and concatenate
     moments = np.concatenate(
         [
-            labor_supply_moments.values,
-            labor_transitions_moments.values,
+            # labor_supply_moments.values,
+            # labor_transitions_moments.values,
             median_wealth_moments.values,
         ]
     )
@@ -77,11 +77,11 @@ def calc_median_wealth_by_age(df, empirical):
     Calculate the median wealth by age.
     """
 
-    periods = np.arange(0, 71)
+    periods = np.arange(0, 60)
     # Create a full index for ages 0 to 79
     full_index = pd.MultiIndex.from_product(
         [
-            [0],
+            [0, 1],
             [0, 1],
             periods,
         ],
@@ -93,26 +93,26 @@ def calc_median_wealth_by_age(df, empirical):
         wealth_mask = df["assets_begin_of_period"] < df[
             "assets_begin_of_period"
         ].quantile(0.95)
-        rolling_three = (
-            df[wealth_mask]
-            .groupby(["sex", "education", "period"], observed=False)[
-                "assets_begin_of_period"
-            ]
-            .mean()
-            .rolling(3)
-            .mean()
-            .reindex(full_index, fill_value=np.nan)
-        )
-        rolling_five = (
-            df[wealth_mask]
-            .groupby(["sex", "education", "period"], observed=False)[
-                "assets_begin_of_period"
-            ]
-            .mean()
-            .rolling(5)
-            .mean()
-            .reindex(full_index, fill_value=np.nan)
-        )
+        # rolling_three = (
+        #     df[wealth_mask]
+        #     .groupby(["sex", "education", "period"], observed=False)[
+        #         "assets_begin_of_period"
+        #     ]
+        #     .mean()
+        #     .rolling(3)
+        #     .mean()
+        #     .reindex(full_index, fill_value=np.nan)
+        # )
+        # rolling_five = (
+        #     df[wealth_mask]
+        #     .groupby(["sex", "education", "period"], observed=False)[
+        #         "assets_begin_of_period"
+        #     ]
+        #     .mean()
+        #     .rolling(5)
+        #     .mean()
+        #     .reindex(full_index, fill_value=np.nan)
+        # )
         mean = (
             df[wealth_mask]
             .groupby(["sex", "education", "period"], observed=False)[
@@ -121,14 +121,15 @@ def calc_median_wealth_by_age(df, empirical):
             .mean()
             .reindex(full_index, fill_value=np.nan)
         )
-        # Take rolling three as default. Assign for the first two the mean
-        first_two = (slice(None), slice(None), [0, 1])
-        rolling_three.loc[first_two] = mean.loc[first_two]
-
-        # Assign for the last ten periods the rolling five
-        last_twenty = (slice(None), slice(None), np.arange(50, 71))
-        rolling_three.loc[last_twenty] = rolling_five.loc[last_twenty]
-        wealth_mom = rolling_three
+        # # Take rolling three as default. Assign for the first two the mean
+        # first_two = (slice(None), slice(None), [0, 1])
+        # rolling_three.loc[first_two] = mean.loc[first_two]
+        #
+        # # Assign for the last ten periods the rolling five
+        # last_twenty = (slice(None), slice(None), np.arange(50, 60))
+        # rolling_three.loc[last_twenty] = rolling_five.loc[last_twenty]
+        # wealth_mom = rolling_three
+        wealth_mom = mean
     else:
         wealth_mom = df.groupby(["sex", "education", "period"], observed=False)[
             "assets_begin_of_period"

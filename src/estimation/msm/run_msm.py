@@ -9,34 +9,23 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
     load_and_set_start_params,
 )
 
-params_to_estimate_names = [
-    # "mu_men",
-    # Men Full-time - 4 parameters
-    "disutil_ft_work_good_men",
-    "disutil_ft_work_bad_men",
-    # Men unemployment - 2 parameters
-    "disutil_unemployed_good_men",
-    "disutil_unemployed_bad_men",
-    # Taste shock men - 1 parameter
-    "taste_shock_scale_men",
-    # # Men job finding - 3 parameters
-    # "job_finding_logit_const_men",
-    # "job_finding_logit_high_educ_men",
-    # "job_finding_logit_good_health_men",
-    # "job_finding_logit_above_50_men",
-    # "job_finding_logit_above_55_men",
-    # "job_finding_logit_above_60_men",
-    "bequest_scale",
-]
-model_name = "msm_mu_fixed"
+params_to_estimate_names = ["bequest_scale", "mu_bequest_high", "mu_bequest_low", "mu"]
+model_name = "whole"
 LOAD_LAST_ESTIMATE = True
 LOAD_SOL_MODEL = True
 SAVE_RESULTS = True
 USE_WEIGHTS = False
 
 if LOAD_LAST_ESTIMATE:
-    last_estimate = pkl.load(
-        open(paths_dict["struct_results"] + f"est_params_msm_first.pkl", "rb")
+    # last_estimate = pkl.load(
+    #     open(paths_dict["struct_results"] + f"est_params_msm_first.pkl", "rb")
+    # )
+    from estimation.struct_estimation.map_params_to_current import (
+        merge_men_and_women_params,
+    )
+
+    last_estimate = merge_men_and_women_params(
+        path_dict=paths_dict, ungendered_model_name=model_name
     )
 else:
     last_estimate = None
@@ -44,17 +33,6 @@ else:
 
 # Load start params
 start_params_all = load_and_set_start_params(paths_dict)
-
-job_finding_params = [
-    "job_finding_logit_const_men",
-    "job_finding_logit_high_educ_men",
-    "job_finding_logit_good_health_men",
-    "job_finding_logit_above_50_men",
-    "job_finding_logit_above_55_men",
-    "job_finding_logit_above_60_men",
-]
-for param in job_finding_params:
-    start_params_all[param] = last_estimate[param]
 
 estimation_results = estimate_model(
     paths_dict,

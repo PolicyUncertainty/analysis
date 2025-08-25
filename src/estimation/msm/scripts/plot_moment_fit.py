@@ -132,23 +132,22 @@ def plot_wealth_moments(moments_list, moment_labels, specs):
                 ax = axs[edu_var]
                 ax.plot(
                     type_wealth_moments,
-                    color=JET_COLOR_MAP[id_moment],
-                    # ls=LINE_STYLES[id_moment % len(LINE_STYLES)],
+                    color=JET_COLOR_MAP[sex_var],
+                    ls=LINE_STYLES[id_moment],
                     # label=moment_labels[id_moment],
                 )
 
-                if sex_var == 0:
-                    # Set y label
-                    ax.set_ylabel(f"Median Wealth")
-
-        ax = axs[sex_var]
-        # Addlabels for each linestyle and moment name
-        for id_moment, moment in enumerate(moments_list):
+    ax = axs[0]
+    # Addlabels for each linestyle and moment name
+    for id_moment, moment in enumerate(moments_list):
+        for sex_var, sex_label in enumerate(specs["sex_labels"]):
             ax.plot(
                 [],
                 [],
-                color=JET_COLOR_MAP[id_moment],
-                # ls=LINE_STYLES[id_moment % len(LINE_STYLES)],
-                label=moment_labels[id_moment],
+                color=JET_COLOR_MAP[sex_var],
+                ls=LINE_STYLES[id_moment],
+                label=f"{moment_labels[id_moment]} - {sex_label}",
             )
-        ax.legend()
+    axs[0].legend()
+    axs[1].legend()
+    axs[0].set_ylabel(f"Median Wealth")

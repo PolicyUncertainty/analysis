@@ -37,7 +37,7 @@ def plot_quantiles(
 
     data_sim = data_sim.reset_index()
 
-    data_decision, _ = load_scale_and_correct_data(
+    data_decision = load_scale_and_correct_data(
         path_dict=path_dict, params=params, model_class=model_solved
     )
 

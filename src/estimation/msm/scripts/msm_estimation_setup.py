@@ -11,7 +11,10 @@ import pandas as pd
 import yaml
 from dcegm.asset_correction import adjust_observed_assets
 
-from estimation.msm.scripts.calc_moments import calc_all_moments
+from estimation.msm.scripts.calc_moments import (
+    calc_all_moments,
+    calc_variance_of_moments,
+)
 from estimation.struct_estimation.scripts.estimate_setup import generate_print_func
 from model_code.specify_model import specify_model
 from model_code.state_space.experience import scale_experience_years
@@ -89,9 +92,9 @@ def estimate_model(
 
     if weighting_method == "identity":
         weights = np.identity(empirical_moments.shape[0])
-    # elif weighting_method == "diagonal":
-    #     empirical_variances_reg = np.maximum(empirical_variances, 1e-4)
-    #     weights = np.diag(1 / empirical_variances_reg)
+    elif weighting_method == "diagonal":
+        empirical_variances_reg = calc_variance_of_moments(data_decision)
+        weights = np.diag(1 / empirical_variances_reg)
     else:
         raise ValueError(f"Unknown weighting method: {weighting_method}")
 

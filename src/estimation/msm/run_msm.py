@@ -42,6 +42,7 @@ estimation_results = estimate_model(
     load_model=LOAD_SOL_MODEL,
     # use_weights=USE_WEIGHTS,
     last_estimate=None,
+    weighting_method="diagonal",
     # save_results=SAVE_RESULTS,
 )
 print(estimation_results)

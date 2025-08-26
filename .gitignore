@@ -31,3 +31,5 @@ ll*.txt
 
 # Debug files
 src/*/debug/
+
+*.out

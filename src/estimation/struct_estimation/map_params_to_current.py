@@ -5,11 +5,27 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
 )
 
 
-def merge_men_and_women_params(params_men, params_women):
+def merge_men_and_women_params(path_dict, ungendered_model_name):
     """Merge two parameter dictionaries for men and women into one."""
+    params_men = pickle.load(
+        open(
+            path_dict["struct_results"] + f"est_params_{ungendered_model_name}_men.pkl",
+            "rb",
+        )
+    )
+    params_women = pickle.load(
+        open(
+            path_dict["struct_results"]
+            + f"est_params_{ungendered_model_name}_women.pkl",
+            "rb",
+        )
+    )
+
     params = params_men.copy()
     for key in params.keys():
         if key.endswith("_women"):
+            params[key] = params_women[key]
+        elif "children" in key:
             params[key] = params_women[key]
 
     return params

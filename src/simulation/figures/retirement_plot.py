@@ -27,7 +27,7 @@ def plot_retirement_difference(
     inflow_shares_cf = df_cf_plot["SRA_diff"].value_counts(normalize=True).sort_index()
 
     # Make barplot with SRA diff on x-axis and inflow shares on y-axis
-    fig, ax = plt.figure(figsize=(10, 6))
+    fig, ax = plt.subplots(figsize=(10, 6))
     ax.bar(
         inflow_shares_base.index - 0.1,
         inflow_shares_base.values,

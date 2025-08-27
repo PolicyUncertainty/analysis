@@ -58,6 +58,7 @@ res_df_life_cycle = None
 # sra_at_63 = np.arange(67, 70 + specs["SRA_grid_size"], 1)
 sra_at_63 = [67.0, 68.0, 69.0, 70.0]
 for i, sra in enumerate(sra_at_63):
+    print(sra)
 
     # Simulate baseline with subjective belief
     df_base, _ = solve_and_simulate_scenario(
@@ -97,7 +98,7 @@ for i, sra in enumerate(sra_at_63):
         sol_model_exists=load_model,
     )
 
-    plot_retirement_difference(
+    fig = plot_retirement_difference(
         df_base=df_base,
         df_cf=df_cf,
         final_SRA=sra,
@@ -105,6 +106,9 @@ for i, sra in enumerate(sra_at_63):
         right_difference=2,
         base_label="With Uninformed",
         cf_label="Only Informed",
+    )
+    fig.savefig(
+        path_dict["plots"] + f"retirement_inflow_comparison_sra_{sra}_{model_name}.png"
     )
 
     df_cf = df_cf.reset_index()

@@ -1,9 +1,9 @@
 from matplotlib import pyplot as plt
 
 from estimation.msm.scripts.calc_moments import (
-    calc_labor_supply_choice,
     calc_labor_transitions_by_age_bins,
 )
+from estimation.msm.scripts.labor_supply_moments import calc_labor_supply_choice
 from estimation.msm.scripts.wealth_moments import calc_wealth_moment
 from export_results.figures.color_map import JET_COLOR_MAP, LINE_STYLES
 

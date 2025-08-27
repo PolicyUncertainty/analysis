@@ -4,9 +4,9 @@ import pickle
 import matplotlib.pyplot as plt
 
 from estimation.msm.scripts.calc_moments import (
-    calc_labor_supply_choice,
     calc_labor_transitions_by_age_bins,
 )
+from estimation.msm.scripts.labor_supply_moments import calc_labor_supply_choice
 from estimation.msm.scripts.msm_estimation_setup import load_and_prep_data
 from estimation.msm.scripts.plot_moment_fit import (
     plot_choice_moments,

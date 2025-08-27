@@ -1,6 +1,10 @@
 import numpy as np
 import pandas as pd
 
+from estimation.msm.scripts.labor_supply_moments import (
+    calc_labor_supply_choice,
+    calc_labor_supply_variance,
+)
 from estimation.msm.scripts.wealth_moments import (
     calc_variance_of_the_empirical_mean,
     calc_wealth_moment,
@@ -11,14 +15,14 @@ def calc_all_moments(df, empirical=False):
     """
     Calculate all moments from the given DataFrame.
     """
-    # labor_supply_moments = calc_labor_supply_choice(df)
+    labor_supply_moments = calc_labor_supply_choice(df)
     # labor_transitions_moments = calc_labor_transitions_by_age_bins(df)
     median_wealth_moments = calc_wealth_moment(df, empirical=empirical)
 
     # Transform to numpy arrays and concatenate
     moments = np.concatenate(
         [
-            # labor_supply_moments.values,
+            labor_supply_moments.values,
             # labor_transitions_moments.values,
             median_wealth_moments.values,
         ]
@@ -30,28 +34,18 @@ def calc_variance_of_moments(df):
     """
     Calculate the variance of all moments from the given DataFrame.
     """
+
+    labor_supply_variance = calc_labor_supply_variance(df)
     wealth_mom_vars = calc_variance_of_the_empirical_mean(df)
-    return wealth_mom_vars.values
 
-
-def calc_labor_supply_choice(df):
-
-    index = pd.MultiIndex.from_product(
+    variances = np.concatenate(
         [
-            [0],
-            [0, 1],
-            np.arange(0, 45),
-            [0, 1, 2, 3],
-        ],
-        names=["sex", "education", "period", "choice"],
+            labor_supply_variance.values,
+            wealth_mom_vars.values,
+        ]
     )
 
-    choice_shares = df.groupby(["sex", "education", "period"], observed=False)[
-        "choice"
-    ].value_counts(normalize=True)
-
-    choice_shares_full = choice_shares.reindex(index, fill_value=0.0)
-    return choice_shares_full
+    return variances
 
 
 def calc_labor_transitions_by_age_bins(df):

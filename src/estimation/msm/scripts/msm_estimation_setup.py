@@ -94,7 +94,10 @@ def estimate_model(
         weights = np.identity(empirical_moments.shape[0])
     elif weighting_method == "diagonal":
         empirical_variances_reg = calc_variance_of_moments(data_decision)
-        weights = np.diag(1 / empirical_variances_reg)
+        close_to_zero = empirical_variances_reg < 1e-12
+        weight_elements = 1 / empirical_variances_reg
+        weight_elements[close_to_zero] = 0.0
+        weights = np.diag(weight_elements)
     else:
         raise ValueError(f"Unknown weighting method: {weighting_method}")
 

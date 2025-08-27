@@ -28,7 +28,7 @@ from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 model_name = specs["model_name"]
 seed = 123
 load_sol_model = True  # informed state as types
-load_unc_solution = True  # baseline solution container
+load_unc_solution = None  # baseline solution container
 load_df = (
     None  # True = load existing df, False = create new df, None = create but not save
 )

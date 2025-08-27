@@ -29,11 +29,17 @@ def debias_lc_plot(path_dict, model_name):
     savings_base = filtered_df[f"savings_rate_67.0_base"]
     ax.plot(
         filtered_df.index,
-        savings_base,
+        savings_base * 100,
         label=f"SRA at 67 baseline",
         color="black",
     )
-    ax.set_title("Savings rate baseline")
+    ax.set_title("Savings Rate baseline")
+    ax.set_ylabel("Savings Rate (%)")
+    fig.savefig(
+        path_dict["plots"] + f"debias_life_cycle_baseline_{model_name}.png",
+        bbox_inches="tight",
+        transparent=True,
+    )
 
     fig, ax = plt.subplots(3, 1, figsize=(10, 10))
     for i, sra in enumerate(sra_at_63):
@@ -41,24 +47,43 @@ def debias_lc_plot(path_dict, model_name):
         labor_supply_diff = filtered_df[f"employment_rate_diff_{sra}"]
         retirement_diff = filtered_df[f"retirement_rate_diff_{sra}"]
         ax[0].plot(
-            filtered_df.index, savings_diff, label=f"SRA at {sra}", color=colors[sra]
+            filtered_df.index,
+            savings_diff * 100,
+            label=f"SRA at {sra}",
+            color=colors[sra],
         )
         ax[1].plot(
             filtered_df.index,
-            labor_supply_diff,
+            labor_supply_diff * 100,
             label=f"SRA at {sra}",
             color=colors[sra],
         )
         ax[2].plot(
-            filtered_df.index, retirement_diff, label=f"SRA at {sra}", color=colors[sra]
+            filtered_df.index,
+            retirement_diff * 100,
+            label=f"SRA at {sra}",
+            color=colors[sra],
         )
     ax[0].set_title("Difference in savings rate")
     ax[1].set_title("Difference in employment rate")
     ax[2].set_title("Difference in retirement rate")
+    ax[0].set_ylabel("Percentage points difference")
+    ax[1].set_ylabel("Percentage points difference")
+    ax[2].set_ylabel("Percentage points difference")
+
+    # # Set y ticks to be integers
+    # ax[0].set_yticks(np.arange(-3, 3, 1))
+    # # Dont show decimal points in y axis
+    # ax[1].set_yticks(np.arange(-3, 3, 1))
+    # ax[2].set_yticks(np.arange(-1, 1.5, 0.5))
+
     plt.legend()
     for axis in ax:
         axis.axhline(y=0, color="black")
-        axis.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, pos: f"{x:.3f}"))
     ax[0].legend()
     fig.tight_layout()
-    fig.suptitle("Debias")
+    fig.savefig(
+        path_dict["plots"] + f"debias_life_cycle_{model_name}.png",
+        bbox_inches="tight",
+        transparent=True,
+    )

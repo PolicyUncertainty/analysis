@@ -82,13 +82,6 @@ def plot_ret_probs_for_state(model_solved, specs, path_dict):
     exp_years = 45
     assets = 10
 
-    very_long_insured_bool = check_very_long_insured(
-        retirement_age_difference=1,
-        experience_years=exp_years,
-        sex=sex,
-        model_specs=specs,
-    )
-
     n_obs = len(policy_states)
     int_array = np.ones(n_obs, dtype=int)
     float_array = np.ones(n_obs, dtype=float)
@@ -116,34 +109,40 @@ def plot_ret_probs_for_state(model_solved, specs, path_dict):
 
     fig, axs = plt.subplots(
         nrows=2,
-        ncols=1,
+        ncols=2,
         figsize=(10, 12),
     )
-    if very_long_insured_bool:
-        very_str = "Very Long Insured"
-    else:
-        very_str = "Not Very Long Insured"
 
-    title_labels = [f"Good Health - {very_str}", f"Disability eligible - {very_str}"]
-    inform_labels = ["Not Informed", "Informed"]
-    for id, health in enumerate([0, 2]):
-        ax = axs[id]
-        for informed in [0, 1]:
-            states["health"] = int_array * health
-            states["informed"] = int_array * informed
+    for id_very, very_str in enumerate(["Very Long Insured", "Long Insured"]):
 
-            choice_probs = model_solved.choice_probabilities_for_states(states=states)
+        title_labels = [
+            f"Good Health - {very_str}",
+            f"Disability eligible - {very_str}",
+        ]
+        inform_labels = ["Not Informed", "Informed"]
+        for id, health in enumerate([0, 2]):
+            ax = axs[id, id_very]
+            for informed in [0, 1]:
+                states["health"] = int_array * health
+                states["informed"] = int_array * informed
 
-            ax.plot(
-                specs["start_age"] + period - policy_state_values,
-                np.nan_to_num(choice_probs[:, 0], nan=0.0),
-                label=f"{inform_labels[informed]}",
-            )
-            ax.set_ylabel("Probability of retirement")
+                choice_probs = model_solved.choice_probabilities_for_states(
+                    states=states
+                )
 
-        ax.set_title(title_labels[id])
+                ax.plot(
+                    specs["start_age"] + period - policy_state_values,
+                    np.nan_to_num(choice_probs[:, 0], nan=0.0),
+                    label=f"{inform_labels[informed]}",
+                )
+                ax.set_ylabel("Probability of retirement")
 
-    axs[1].set_xlabel("SRA difference")
-    axs[0].legend()
+            ax.set_title(title_labels[id])
+
+    axs[1, 0].set_xlabel("SRA difference")
+    axs[1, 1].set_xlabel("SRA difference")
+
+    axs[0, 0].legend()
+    fig.savefig(path_dict["plots"] + f"retirement_probs_state_period_.png")
 
     plt.show()

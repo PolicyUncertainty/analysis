@@ -9,18 +9,33 @@ def debias_lc_plot(path_dict, model_name):
         path_dict["sim_results"] + f"debias_lc_{model_name}.csv", index_col=0
     )
 
-    fig, ax = plt.subplots(3, 1, figsize=(10, 10))
     subset_ages = np.arange(30, 81, 2)
     filtered_df = res_df_life_cycle.loc[subset_ages]
 
     colors = {
-        67.0: "darkblue",
-        68.0: "lightblue",
+        # 67.0: "darkblue",
+        # 68.0: "lightblue",
         69.0: "lightcoral",  # light red
-        70.0: "darkred",
+        # 70.0: "darkred",
     }
-    sra_at_63 = [67.0, 68.0, 69.0, 70.0]
+    sra_at_63 = [
+        # 67.0, 68.0,
+        69.0,
+        # 70.0
+    ]
 
+    # plot the baseline
+    fig, ax = plt.subplots()
+    savings_base = filtered_df[f"savings_rate_67.0_base"]
+    ax.plot(
+        filtered_df.index,
+        savings_base,
+        label=f"SRA at 67 baseline",
+        color="black",
+    )
+    ax.set_title("Savings rate baseline")
+
+    fig, ax = plt.subplots(3, 1, figsize=(10, 10))
     for i, sra in enumerate(sra_at_63):
         savings_diff = filtered_df[f"savings_rate_diff_{sra}"]
         labor_supply_diff = filtered_df[f"employment_rate_diff_{sra}"]

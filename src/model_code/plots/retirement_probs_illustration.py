@@ -124,6 +124,9 @@ def plot_ret_probs_for_state(model_solved, specs, path_dict):
         if very_long_insured_bool:
             if very_str != "Very Long Insured":
                 raise ValueError("Inconsistent very long insured status.")
+        else:
+            if very_str != "Long Insured":
+                raise ValueError("Inconsistent very long insured status.")
 
         states["experience"] = float_array * exp_grid_float
 

@@ -20,6 +20,7 @@ import pickle as pkl
 import numpy as np
 
 from export_results.tables.cv import calc_compensated_variation
+from simulation.figures.retirement_plot import plot_retirement_difference
 from simulation.sim_tools.calc_life_time_results import add_new_life_cycle_results
 from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 
@@ -28,7 +29,7 @@ from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 seeed = 123
 model_name = specs["model_name"]
 load_model = True  # informed state as type
-load_unc_solution = True  # baseline solution conntainer
+load_unc_solution = None  # baseline solution conntainer
 load_df_biased = None
 load_df_unbiased = (
     None  # True = load existing df, False = create new df, None = create but not save
@@ -36,8 +37,16 @@ load_df_unbiased = (
 
 
 # Load params
-params = pkl.load(
-    open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
+# params = pkl.load(
+#     open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
+# )
+
+from estimation.struct_estimation.map_params_to_current import (
+    merge_men_and_women_params,
+)
+
+params = merge_men_and_women_params(
+    path_dict=path_dict, ungendered_model_name=model_name
 )
 
 # Create life cylce df object which is None.
@@ -80,12 +89,22 @@ for i, sra in enumerate(sra_at_63):
         custom_resolution_age=None,
         announcement_age=None,
         SRA_at_retirement=sra,
-        SRA_at_start=sra,
+        SRA_at_start=67,
         model_name=model_name,
         df_exists=load_df_unbiased,
         only_informed=True,
         solution_exists=load_unc_solution,
         sol_model_exists=load_model,
+    )
+
+    plot_retirement_difference(
+        df_base=df_base,
+        df_cf=df_cf,
+        final_SRA=sra,
+        left_difference=-4,
+        right_difference=2,
+        base_label="With Uninformed",
+        cf_label="Only Informed",
     )
 
     df_cf = df_cf.reset_index()

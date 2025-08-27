@@ -97,6 +97,7 @@ def estimate_model(
         close_to_zero = empirical_variances_reg < 1e-12
         weight_elements = 1 / empirical_variances_reg
         weight_elements[close_to_zero] = 0.0
+        weight_elements = np.sqrt(weight_elements)
         weights = np.diag(weight_elements)
     else:
         raise ValueError(f"Unknown weighting method: {weighting_method}")
@@ -172,8 +173,6 @@ def get_msm_optimization_function(
     weights: np.ndarray,
 ) -> np.ndarray:
 
-    chol_weights = np.linalg.cholesky(weights)
-
     criterion = om.mark.least_squares(
         partial(
             msm_criterion,
@@ -181,7 +180,7 @@ def get_msm_optimization_function(
             print_function=print_function,
             start_params_all=start_params_all,
             flat_empirical_moments=empirical_moments,
-            chol_weights=chol_weights,
+            weights=weights,
         )
     )
 
@@ -194,7 +193,7 @@ def msm_criterion(
     print_function: Callable,
     simulate_moments: callable,
     flat_empirical_moments: np.ndarray,
-    chol_weights: np.ndarray,
+    weights: np.ndarray,
 ) -> np.ndarray:
     """Calculate the raw criterion based on simulated and empirical moments."""
 
@@ -207,7 +206,7 @@ def msm_criterion(
     deviations = difference / flat_empirical_moments
     mask = ~np.isfinite(deviations)
     deviations[mask] = difference[mask]
-    residuals = deviations @ chol_weights
+    residuals = deviations @ weights
     # Print squared sum of residuals
     print(f"Sum of squared residuals: {np.sum(residuals**2):.4f} ")
     print_function(params)

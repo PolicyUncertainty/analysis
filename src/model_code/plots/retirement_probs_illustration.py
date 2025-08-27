@@ -79,7 +79,6 @@ def plot_ret_probs_for_state(model_solved, specs, path_dict):
     # Job offer and single
     job_offer = 1
     partner_state = 0
-    exp_years = 45
     assets = 10
 
     n_obs = len(policy_states)
@@ -87,13 +86,6 @@ def plot_ret_probs_for_state(model_solved, specs, path_dict):
     float_array = np.ones(n_obs, dtype=float)
 
     periods = int_array * period
-
-    exp_grid_float = scale_experience_years(
-        experience_years=exp_years,
-        period=periods,
-        is_retired=False,
-        model_specs=specs,
-    )
 
     states = {
         "period": periods,
@@ -104,7 +96,6 @@ def plot_ret_probs_for_state(model_solved, specs, path_dict):
         "job_offer": int_array * job_offer,
         "partner_state": int_array * partner_state,
         "assets_begin_of_period": float_array * assets,
-        "experience": float_array * exp_grid_float,
     }
 
     fig, axs = plt.subplots(
@@ -113,7 +104,28 @@ def plot_ret_probs_for_state(model_solved, specs, path_dict):
         figsize=(10, 12),
     )
 
-    for id_very, very_str in enumerate(["Very Long Insured", "Long Insured"]):
+    for id_exp, very_str in enumerate(["Very Long Insured", "Long Insured"]):
+
+        exp_years = [45, 40][id_exp]
+
+        exp_grid_float = scale_experience_years(
+            experience_years=exp_years,
+            period=periods,
+            is_retired=False,
+            model_specs=specs,
+        )
+
+        very_long_insured_bool = check_very_long_insured(
+            retirement_age_difference=1,
+            experience_years=exp_years,
+            sex=sex,
+            model_specs=specs,
+        )
+        if very_long_insured_bool:
+            if very_str != "Very Long Insured":
+                raise ValueError("Inconsistent very long insured status.")
+
+        states["experience"] = float_array * exp_grid_float
 
         title_labels = [
             f"Good Health - {very_str}",
@@ -121,7 +133,7 @@ def plot_ret_probs_for_state(model_solved, specs, path_dict):
         ]
         inform_labels = ["Not Informed", "Informed"]
         for id, health in enumerate([0, 2]):
-            ax = axs[id, id_very]
+            ax = axs[id, id_exp]
             for informed in [0, 1]:
                 states["health"] = int_array * health
                 states["informed"] = int_array * informed

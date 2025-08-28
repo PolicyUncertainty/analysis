@@ -38,7 +38,7 @@ def debias_lc_plot(path_dict, model_name):
     fig.savefig(
         path_dict["plots"] + f"debias_life_cycle_baseline_{model_name}.png",
         bbox_inches="tight",
-        transparent=True,
+        # transparent=True,
     )
 
     fig, ax = plt.subplots(3, 1, figsize=(10, 10))
@@ -85,5 +85,5 @@ def debias_lc_plot(path_dict, model_name):
     fig.savefig(
         path_dict["plots"] + f"debias_life_cycle_{model_name}.png",
         bbox_inches="tight",
-        transparent=True,
+        # transparent=True,
     )

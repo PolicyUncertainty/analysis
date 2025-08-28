@@ -4,11 +4,14 @@ import numpy as np
 import pandas as pd
 
 
-def calc_labor_supply_choice(df):
-
+def calc_labor_supply_choice(df, men_only=False):
+    if men_only:
+        index_col_first = [0]
+    else:
+        index_col_first = [0, 1]
     index = pd.MultiIndex.from_product(
         [
-            [0, 1],
+            index_col_first,
             [0, 1],
             np.arange(0, 45),
             [0, 1, 2, 3],
@@ -24,14 +27,18 @@ def calc_labor_supply_choice(df):
     return choice_shares_full
 
 
-def calc_labor_supply_variance(df):
+def calc_labor_supply_variance(df, men_only=False):
 
     state_cond = ["sex", "education", "period"]
     columns = state_cond + ["choice"]
+    if men_only:
+        index_col_first = [0]
+    else:
+        index_col_first = [0, 1]
 
     index = pd.MultiIndex.from_product(
         [
-            [0, 1],
+            index_col_first,
             [0, 1],
             np.arange(0, 45),
             [0, 1, 2, 3],

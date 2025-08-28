@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 
-def calc_wealth_moment(df, empirical):
+def calc_wealth_moment(df, empirical, men_only=False):
     """
     Calculate the median wealth by age.
     """
@@ -17,10 +17,15 @@ def calc_wealth_moment(df, empirical):
 
     columns = ["sex", "education", "has_partner", "period_bin"]
 
+    if men_only:
+        index_col_first = [0]
+    else:
+        index_col_first = [0, 1]
+
     # Create a full index for ages 0 to 79
     full_index = pd.MultiIndex.from_product(
         [
-            [0, 1],
+            index_col_first,
             [0, 1],
             [0, 1],
             period_bin_idx,
@@ -78,7 +83,7 @@ def calc_wealth_moment(df, empirical):
     return wealth_mom
 
 
-def calc_wealth_mean_variance(df):
+def calc_wealth_mean_variance(df, men_only=False):
     """
     Calculate the variance of the mean wealth by age.
     """
@@ -93,10 +98,15 @@ def calc_wealth_mean_variance(df):
 
     columns = ["sex", "education", "has_partner", "period_bin"]
 
+    if men_only:
+        index_col_first = [0]
+    else:
+        index_col_first = [0, 1]
+
     # Create a full index for ages 0 to 79
     full_index = pd.MultiIndex.from_product(
         [
-            [0, 1],
+            index_col_first,
             [0, 1],
             [0, 1],
             period_bin_idx,

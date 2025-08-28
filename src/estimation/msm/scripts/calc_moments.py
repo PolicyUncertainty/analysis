@@ -14,13 +14,15 @@ from estimation.msm.scripts.wealth_moments import (
 )
 
 
-def calc_all_moments(df, empirical=False):
+def calc_all_moments(df, empirical=False, men_only=True):
     """
     Calculate all moments from the given DataFrame.
     """
-    labor_supply_moments = calc_labor_supply_choice(df)
-    labor_transitions_moments = calc_transition_to_work(df)
-    median_wealth_moments = calc_wealth_moment(df, empirical=empirical)
+    labor_supply_moments = calc_labor_supply_choice(df, men_only=men_only)
+    labor_transitions_moments = calc_transition_to_work(df, men_only=men_only)
+    median_wealth_moments = calc_wealth_moment(
+        df, empirical=empirical, men_only=men_only
+    )
 
     # Transform to numpy arrays and concatenate
     moments = np.concatenate(
@@ -33,14 +35,14 @@ def calc_all_moments(df, empirical=False):
     return moments
 
 
-def calc_variance_of_moments(df):
+def calc_variance_of_moments(df, men_only=True):
     """
     Calculate the variance of all moments from the given DataFrame.
     """
 
-    labor_supply_variance = calc_labor_supply_variance(df)
-    labor_transition_variance = calc_variance_labor_transitions(df)
-    wealth_mom_vars = calc_wealth_mean_variance(df)
+    labor_supply_variance = calc_labor_supply_variance(df, men_only=men_only)
+    labor_transition_variance = calc_variance_labor_transitions(df, men_only=men_only)
+    wealth_mom_vars = calc_wealth_mean_variance(df, men_only=men_only)
 
     variances = np.concatenate(
         [

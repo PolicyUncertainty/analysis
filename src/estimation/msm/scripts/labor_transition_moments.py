@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 
-def calc_transition_to_work(df):
+def calc_transition_to_work(df, men_only=False):
     """
     Calculate the labor transitions by age bins.
     """
@@ -12,10 +12,13 @@ def calc_transition_to_work(df):
 
     df["has_worked"] = df["lagged_choice"].isin([2, 3]).astype(int)
     df["working_choice"] = df["choice"].isin([2, 3]).astype(int)
-
+    if men_only:
+        index_col_first = [0]
+    else:
+        index_col_first = [0, 1]
     index_full = pd.MultiIndex.from_product(
         [
-            [0, 1],
+            index_col_first,
             [0, 1],
             period_bins[:-1],
             [0, 1],
@@ -33,7 +36,7 @@ def calc_transition_to_work(df):
     return transitions_full
 
 
-def calc_variance_labor_transitions(df):
+def calc_variance_labor_transitions(df, men_only=False):
     """
     Calculate the variance of the mean wealth by age.
     """
@@ -45,10 +48,13 @@ def calc_variance_labor_transitions(df):
     df["working_choice"] = df["choice"].isin([2, 3]).astype(int)
 
     columns = ["sex", "education", "period_bin", "has_worked"]
-
+    if men_only:
+        index_col_first = [0]
+    else:
+        index_col_first = [0, 1]
     full_index = pd.MultiIndex.from_product(
         [
-            [0, 1],
+            index_col_first,
             [0, 1],
             period_bins[:-1],
             [0, 1],

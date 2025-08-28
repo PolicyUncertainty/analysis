@@ -1,7 +1,7 @@
 ---
-mu: 2
-mu_bequest_high: 2
-mu_bequest_low: 2
+mu: 5
+mu_bequest_high: 5
+mu_bequest_low: 5
 
 # Full time work dis-utility men
 disutil_ft_work_good_men: 5.0

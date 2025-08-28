@@ -99,9 +99,9 @@ def estimate_model(
         close_to_zero = np.isnan(empirical_variances_reg) | close_to_zero
         weight_elements = 1 / empirical_variances_reg
         weight_elements[close_to_zero] = 0.0
-        weight_elements = np.sqrt(weight_elements)
         weights_sum = np.sum(weight_elements)
-        weights = np.diag(weight_elements) / weights_sum
+        weight_elements = np.sqrt(weight_elements / weights_sum)
+        weights = np.diag(weight_elements)
     else:
         raise ValueError(f"Unknown weighting method: {weighting_method}")
 

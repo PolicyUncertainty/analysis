@@ -61,7 +61,9 @@ def utility_func_alive(
     """Calculate the choice specific cobb-douglas utility, i.e. u =
     ((c*eta/consumption_scale)^(1-mu))/(1-mu) ."""
     # gather params
-    mu = params["mu"]
+    mu = jax.lax.select(
+        education == 1, on_true=params["mu_high"], on_false=params["mu_low"]
+    )
     eta = disutility_work(
         period=period,
         choice=choice,
@@ -143,7 +145,9 @@ def marginal_utility_function_alive(
         period=period,
         model_specs=model_specs,
     )
-    mu = params["mu"]
+    mu = jax.lax.select(
+        education == 1, on_true=params["mu_high"], on_false=params["mu_low"]
+    )
     eta = disutility_work(
         period=period,
         choice=choice,
@@ -183,7 +187,9 @@ def inverse_marginal_func(
         period=period,
         model_specs=model_specs,
     )
-    mu = params["mu"]
+    mu = jax.lax.select(
+        education == 1, on_true=params["mu_high"], on_false=params["mu_low"]
+    )
     eta = disutility_work(
         period=period,
         choice=choice,

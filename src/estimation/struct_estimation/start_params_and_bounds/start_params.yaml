@@ -1,6 +1,7 @@
 ---
 # Utility parameters
-mu: 1.5
+mu_low: 1.5
+mu_high: 1.5
 mu_bequest_high: 1.5
 mu_bequest_low: 1.5
 

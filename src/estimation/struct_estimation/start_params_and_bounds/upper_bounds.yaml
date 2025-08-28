@@ -1,5 +1,6 @@
 ---
-mu: 5
+mu_low: 5
+mu_high: 5
 mu_bequest_high: 5
 mu_bequest_low: 5
 

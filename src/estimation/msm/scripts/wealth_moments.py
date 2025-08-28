@@ -78,7 +78,7 @@ def calc_wealth_moment(df, empirical):
     return wealth_mom
 
 
-def calc_variance_of_the_empirical_mean(df):
+def calc_wealth_mean_variance(df):
     """
     Calculate the variance of the mean wealth by age.
     """
@@ -123,4 +123,6 @@ def calc_variance_of_the_empirical_mean(df):
     )
 
     wealth_variance /= n_obs
+    # Replace all nans with zeros
+    wealth_variance = wealth_variance.fillna(0.0)
     return wealth_variance

@@ -1,9 +1,7 @@
 from matplotlib import pyplot as plt
 
-from estimation.msm.scripts.calc_moments import (
-    calc_labor_transitions_by_age_bins,
-)
 from estimation.msm.scripts.labor_supply_moments import calc_labor_supply_choice
+from estimation.msm.scripts.labor_transition_moments import calc_transition_to_work
 from estimation.msm.scripts.wealth_moments import calc_wealth_moment
 from export_results.figures.color_map import JET_COLOR_MAP, LINE_STYLES
 
@@ -15,7 +13,7 @@ def plot_moments_all_moments_for_dfs(df_list, moment_labels, specs):
     wealth_moment_list = []
     for i, df in enumerate(df_list):
         labor_supply_moment_list += [calc_labor_supply_choice(df)]
-        labor_transitions_moment_list += [calc_labor_transitions_by_age_bins(df)]
+        labor_transitions_moment_list += [calc_transition_to_work(df)]
         empirical = True if moment_labels[i] == "empirical" else False
         wealth_moment_list += [calc_wealth_moment(df, empirical=empirical)]
 

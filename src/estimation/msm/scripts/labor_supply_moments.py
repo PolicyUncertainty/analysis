@@ -55,7 +55,7 @@ def calc_labor_supply_variance(df, men_only=False):
     state_counts = df.groupby(state_cond).size()
 
     variance = choice_shares * (1 - choice_shares)
-    for sex_var in [0, 1]:
+    for sex_var in index_col_first:
         for edu_var in [0, 1]:
             for period in range(0, 45):
                 variance.loc[(sex_var, edu_var, period)] = (

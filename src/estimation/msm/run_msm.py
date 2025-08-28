@@ -63,8 +63,8 @@ params_to_estimate_names = [
     # "disability_logit_age_above_55_women",
     # "disability_logit_high_educ_women",
 ]
-model_name = "whole"
-LOAD_LAST_ESTIMATE = True
+model_name = "msm"
+LOAD_LAST_ESTIMATE = False
 LOAD_SOL_MODEL = True
 SAVE_RESULTS = True
 USE_WEIGHTS = False

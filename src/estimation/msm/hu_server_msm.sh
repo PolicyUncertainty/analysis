@@ -11,7 +11,7 @@
 #SBATCH --gres=gpu:h100nvl:1
 #SBATCH --qos=standard
 
-module add cuda/12.4.1
+module add cuda/12.8.1
 
 #python run_msm.py
 #python plot_moments.py

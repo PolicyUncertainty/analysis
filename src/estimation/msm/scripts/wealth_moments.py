@@ -80,6 +80,8 @@ def calc_wealth_moment(df, empirical, men_only=False):
         ].mean()
 
         wealth_mom = wealth_mom.reindex(full_index, fill_value=np.nan)
+
+    wealth_mom = wealth_mom.fillna(0.0)
     return wealth_mom
 
 

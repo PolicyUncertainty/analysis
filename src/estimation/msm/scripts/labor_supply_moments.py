@@ -23,7 +23,7 @@ def calc_labor_supply_choice(df, men_only=False):
         "choice"
     ].value_counts(normalize=True)
 
-    choice_shares_full = choice_shares.reindex(index, fill_value=0.0)
+    choice_shares_full = choice_shares.reindex(index, fill_value=0.0).fillna(0.0)
     return choice_shares_full
 
 

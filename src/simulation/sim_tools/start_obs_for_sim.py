@@ -48,7 +48,7 @@ def generate_start_states_from_obs(
     states_dict["assets_begin_of_period"] = jnp.asarray(
         adjust_observed_assets(
             observed_states_dict=states_dict,
-            params=params,
+            params={},
             model_class=model_class,
         )
     )
@@ -155,8 +155,5 @@ def generate_start_states_from_obs(
     states_dict["policy_state"] = policy_state_agents
 
     initial_states = jax.tree.map(create_array_with_smallest_int_dtype, states_dict)
-
-    # df = pd.DataFrame(initial_states)
-    # df["wealth"] = initial_wealth
 
     return initial_states

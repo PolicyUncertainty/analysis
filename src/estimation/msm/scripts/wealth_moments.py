@@ -35,9 +35,9 @@ def calc_wealth_moment(df, empirical, men_only=False):
 
     if empirical:
         # Create mask for wealth smaller than the 95th percentile
-        wealth_mask = df["assets_begin_of_period"] < df[
-            "assets_begin_of_period"
-        ].quantile(0.95)
+        # wealth_mask = df["assets_begin_of_period"] < df[
+        #     "assets_begin_of_period"
+        # ].quantile(0.95)
         # rolling_three = (
         #     df[wealth_mask]
         #     .groupby(["sex", "education", "period"], observed=False)[
@@ -59,8 +59,7 @@ def calc_wealth_moment(df, empirical, men_only=False):
         #     .reindex(full_index, fill_value=np.nan)
         # )
         mean = (
-            df[wealth_mask]
-            .groupby(columns, observed=False)["assets_begin_of_period"]
+            df.groupby(columns, observed=False)["assets_begin_of_period"]
             .mean()
             .reindex(full_index, fill_value=np.nan)
         )

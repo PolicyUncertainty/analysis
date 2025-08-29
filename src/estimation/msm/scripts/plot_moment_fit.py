@@ -24,6 +24,11 @@ def plot_moments_all_moments_for_dfs(df_list, moment_labels, specs):
 
 def plot_choice_moments(moments_list, moment_labels, specs):
 
+    max_val = 0.0
+    for id_moment, moment in enumerate(moments_list):
+        max_val = max(max_val, moment.max().max())
+
+    max_val *= 1.1
     # Choice moments
     fig, axs = plt.subplots(nrows=4, ncols=2)
     axs[0, 0].set_title("Men")
@@ -43,7 +48,7 @@ def plot_choice_moments(moments_list, moment_labels, specs):
                     if (sex_var == 0) & (choice_var == 2):
                         continue
                     ax = axs[choice_var, sex_var]
-                    ax.set_ylim([0, 1])
+                    ax.set_ylim([0, max_val])
                     ax.plot(
                         type_choice_moments,
                         color=JET_COLOR_MAP[edu_var],
@@ -68,6 +73,12 @@ def plot_choice_moments(moments_list, moment_labels, specs):
 
 
 def plot_transition_moments(moments_list, moment_labels, specs):
+    max_val = 0.0
+    for id_moment, moment in enumerate(moments_list):
+        max_val = max(max_val, moment.max().max())
+
+    max_val *= 1.1
+
     # Labor transitions moments
     sex_vars = moments_list[0].index.get_level_values("sex").unique()
     edu_vars = moments_list[0].index.get_level_values("education").unique()
@@ -84,7 +95,7 @@ def plot_transition_moments(moments_list, moment_labels, specs):
         for sex_var in sex_vars:
             for edu_var in edu_vars:
                 ax = axs[current_state, count]
-                ax.set_ylim([0, 1])
+                ax.set_ylim([0, max_val])
                 for id_moment, moment in enumerate(moments_list):
                     type_transition_moments = moment.loc[
                         (sex_var, edu_var, slice(None), current_state)
@@ -116,7 +127,11 @@ def plot_transition_moments(moments_list, moment_labels, specs):
 
 
 def plot_wealth_moments(moments_list, moment_labels, specs):
+    max_val = 0.0
+    for id_moment, moment in enumerate(moments_list):
+        max_val = max(max_val, moment.max().max())
 
+    max_val *= 1.1
     # Labor transitions moments
     fig, axs = plt.subplots(nrows=2, ncols=2)
     axs[0, 0].set_title("Low Educated")
@@ -135,7 +150,7 @@ def plot_wealth_moments(moments_list, moment_labels, specs):
                     ]
 
                     ax = axs[id_partner, edu_var]
-                    ax.set_ylim([0, 40])
+                    ax.set_ylim([0, max_val])
                     ax.plot(
                         type_wealth_moments,
                         color=JET_COLOR_MAP[sex_var],

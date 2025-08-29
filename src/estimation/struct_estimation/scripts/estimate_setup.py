@@ -252,9 +252,7 @@ class est_class_from_paths:
 def load_and_prep_data_estimation(path_dict, start_params, model_class):
 
     data_decision = load_scale_and_correct_data(
-        path_dict=path_dict,
-        params=start_params,
-        model_class=model_class,
+        path_dict=path_dict, model_class=model_class
     )
 
     # Already retired individuals hold no identification

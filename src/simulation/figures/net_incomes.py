@@ -38,7 +38,7 @@ def net_incomes(
     data_sim = data_sim.reset_index()
 
     data_decision, _ = load_scale_and_correct_data(
-        path_dict=path_dict, params=params, model_class=model_solved
+        path_dict=path_dict, model_class=model_solved
     )
     data_decision = data_decision[(data_decision["choice"] == 3)]
     data_decision["yearly_wage"] = data_decision["monthly_wage"] * 12

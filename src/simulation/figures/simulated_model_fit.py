@@ -38,7 +38,7 @@ def plot_quantiles(
     data_sim = data_sim.reset_index()
 
     data_decision = load_scale_and_correct_data(
-        path_dict=path_dict, params=params, model_class=model_solved
+        path_dict=path_dict, model_class=model_solved
     )
 
     data_sim["age"] = data_sim["period"] + specs["start_age"]

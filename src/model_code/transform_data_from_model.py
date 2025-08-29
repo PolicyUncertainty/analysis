@@ -67,7 +67,7 @@ def choice_probs_for_choice_vals(
     return choice_probs_observations
 
 
-def load_scale_and_correct_data(path_dict, params, model_class):
+def load_scale_and_correct_data(path_dict, model_class):
     # Load data
     data_decision = pd.read_csv(path_dict["struct_est_sample"])
     data_decision = data_decision.astype(CORE_TYPE_DICT)
@@ -95,7 +95,7 @@ def load_scale_and_correct_data(path_dict, params, model_class):
 
     data_decision["assets_begin_of_period"] = adjust_observed_assets(
         observed_states_dict=states_dict,
-        params=params,
+        params={},
         model_class=model_class,
     )
     return data_decision

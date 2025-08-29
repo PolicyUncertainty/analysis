@@ -1,7 +1,7 @@
 ---
 ################
 # Current model name:
-model_name: whole
+model_name: msm
 
 ###############################################################################
 # Model specification

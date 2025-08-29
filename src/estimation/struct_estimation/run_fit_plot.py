@@ -60,9 +60,7 @@ else:
     )
 
     data_decision = load_scale_and_correct_data(
-        path_dict=path_dict,
-        params=params,
-        model_class=model_solved,
+        path_dict=path_dict, model_class=model_solved
     )
 
     data_decision = calc_choice_probs_for_df(

@@ -85,7 +85,7 @@ def estimate_model(
         sim_specs=sim_specs,
     )
 
-    data_decision = load_and_prep_data(path_dict=path_dict, start_params=start_params)
+    data_decision = load_and_prep_data(path_dict=path_dict)
 
     # Load empirical data
     empirical_moments = calc_all_moments(data_decision, empirical=True)
@@ -221,7 +221,7 @@ def msm_criterion(
 # =====================================================================================
 
 
-def load_and_prep_data(path_dict, start_params):
+def load_and_prep_data(path_dict):
     specs = generate_derived_and_data_derived_specs(path_dict)
     # Load data
     data_decision = pd.read_csv(path_dict["struct_est_sample"])
@@ -270,7 +270,7 @@ def load_and_prep_data(path_dict, start_params):
 
     assets_begin_of_period = adjust_observed_assets(
         observed_states_dict=states_dict,
-        params=start_params,
+        params={},
         model_class=model,
     )
     data_decision["assets_begin_of_period"] = assets_begin_of_period

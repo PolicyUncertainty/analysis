@@ -88,7 +88,8 @@ def test_utility_func(
     paths_and_specs,
 ):
     params = {
-        "mu": mu,
+        "mu_low": mu,
+        "mu_high": mu + 1,
         "mu_bequest_low": mu + 1,
         "mu_bequest_high": mu,
         # Men
@@ -142,11 +143,14 @@ def test_utility_func(
             params["disutil_children_ft_work_low"] * nb_children * (1 - education)
         )
 
-    if mu == 1:
+    mu_edu = mu + education
+
+    if mu_edu == 1:
         utility_lambda = lambda disutil: np.log(consumption / cons_scale) - disutil
     else:
         utility_lambda = (
-            lambda disutil: ((consumption / cons_scale) ** (1 - mu) - 1) / (1 - mu)
+            lambda disutil: ((consumption / cons_scale) ** (1 - mu_edu) - 1)
+            / (1 - mu_edu)
             - disutil
         )
 
@@ -228,7 +232,8 @@ def test_marginal_utility(
 ):
     model_specs = paths_and_specs[1]
     params = {
-        "mu": mu,
+        "mu_low": mu,
+        "mu_high": mu + 1,
         "mu_bequest_low": mu + 1,
         "mu_bequest_high": mu,
         # Men
@@ -301,7 +306,8 @@ def test_inv_marginal_utility(
     paths_and_specs,
 ):
     params = {
-        "mu": mu,
+        "mu_low": mu,
+        "mu_high": mu + 1,
         "mu_bequest_low": mu + 1,
         "mu_bequest_high": mu,
         # Men

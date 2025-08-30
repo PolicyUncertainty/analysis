@@ -106,7 +106,7 @@ def plot_ret_probs_for_state(model_solved, specs, path_dict):
 
     for id_exp, very_str in enumerate(["Very Long Insured", "Long Insured"]):
 
-        exp_years = [45, 40][id_exp]
+        exp_years = [44.5, 44][id_exp]
 
         exp_grid_float = scale_experience_years(
             experience_years=exp_years,
@@ -159,5 +159,71 @@ def plot_ret_probs_for_state(model_solved, specs, path_dict):
 
     axs[0, 0].legend()
     fig.savefig(path_dict["plots"] + f"retirement_probs_state_period_.png")
+
+    plt.show()
+
+
+def plot_work_probs_for_state(model_solved, specs):
+
+    # Vary periods, but fix SRA to 67 (policy state 8)
+    period = 30
+
+    # Low educated men not retired
+    education = 0
+    sex = 0
+    lagged_choice = 3
+    # Job offer and single
+    job_offer = 1
+    partner_state = 0
+    health = 0
+    assets = 10
+    exp_grid = jnp.arange(40, specs["max_exps_period_working"][period] + 1)
+
+    n_obs = len(exp_grid)
+    int_array = np.ones(n_obs, dtype=int)
+    float_array = np.ones(n_obs, dtype=float)
+
+    periods = int_array * period
+    exp_grid_float = scale_experience_years(
+        experience_years=exp_grid,
+        period=periods,
+        is_retired=False,
+        model_specs=specs,
+    )
+
+    states = {
+        "period": periods,
+        "policy_state": int_array * 0,
+        "lagged_choice": int_array * lagged_choice,
+        "education": int_array * education,
+        "sex": int_array * sex,
+        "job_offer": int_array * job_offer,
+        "partner_state": int_array * partner_state,
+        "assets_begin_of_period": float_array * assets,
+        "experience": exp_grid_float,
+        "health": int_array * health,
+    }
+
+    fig, axs = plt.subplots(
+        nrows=1,
+        ncols=2,
+        figsize=(10, 12),
+    )
+
+    for informed, informed_label in enumerate(["Not Informed", "Informed"]):
+        states["informed"] = int_array * informed
+
+        choice_probs = model_solved.choice_probabilities_for_states(states=states)
+        ax = axs[informed]
+        ax.plot(
+            exp_grid,
+            np.nan_to_num(choice_probs[:, 3], nan=0.0),
+            # label=f"{inform_labels[informed]}",
+        )
+        ax.set_ylabel("Probability of working")
+
+        ax.set_title(informed_label)
+
+        ax.set_xlabel("Experience years")
 
     plt.show()

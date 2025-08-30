@@ -4,6 +4,7 @@ from copy import deepcopy
 import dcegm
 import jax.numpy as jnp
 import numpy as np
+from state_space.experience import define_experience_grid
 
 from model_code.policy_processes.informed_state_transition import (
     informed_transition,
@@ -47,7 +48,7 @@ def specify_model(
     savings_grid = create_end_of_period_assets()
 
     # Experience grid
-    experience_grid = jnp.linspace(0, 1, specs["n_experience_grid_points"])
+    experience_grid = define_experience_grid(specs)
 
     model_config = {
         "min_period_batch_segments": [33, 44],

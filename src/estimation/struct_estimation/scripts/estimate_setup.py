@@ -257,6 +257,7 @@ def load_and_prep_data_estimation(path_dict, start_params, model_class):
 
     # Already retired individuals hold no identification
     data_decision = data_decision[data_decision["lagged_choice"] != 0]
+    data_decision = data_decision[data_decision["age"] >= 55]
 
     # data_decision["age_bin"] = np.floor(data_decision["age"] / 10)
     # data_decision.loc[data_decision["age_bin"] > 6, "age_bin"] = 6

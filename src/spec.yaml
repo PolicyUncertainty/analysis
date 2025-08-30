@@ -1,7 +1,7 @@
 ---
 ################
 # Current model name:
-model_name: stable
+model_name: sep_men
 
 ###############################################################################
 # Model specification

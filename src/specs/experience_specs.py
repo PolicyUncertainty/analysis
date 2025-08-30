@@ -97,6 +97,7 @@ def create_max_experience(path_dict, specs, load_precomputed=False):
         exp_thresholds_very_long_insured,
         exp_thresholds_not_very_long_insured,
     )
+
     specs["very_long_insured_grid_points"] = (
         all_exp_thresholds_very_long_insured / max_exps_period_working[-1]
     )

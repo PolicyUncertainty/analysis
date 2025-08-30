@@ -6,7 +6,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --time=9:00:00
-#SBATCH --mem=50GB
+#SBATCH --mem=80GB
 #SBATCH --partition=gpu_h100
 #SBATCH --gres=gpu:h100nvl:2
 #SBATCH --qos=standard

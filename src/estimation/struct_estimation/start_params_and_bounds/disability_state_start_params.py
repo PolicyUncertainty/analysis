@@ -21,7 +21,7 @@ def est_disability_prob(paths, specs):
         "age_above_55",
     ]
 
-    logit_df["age_above_55"] = (logit_df["age"] >= 55) * logit_df["age"]
+    logit_df["age_above_55"] = (logit_df["age"] >= 55) * (logit_df["age"] - 55)
 
     disability_prob_params = {}
     for sex_var, sex_append in enumerate(["men", "women"]):

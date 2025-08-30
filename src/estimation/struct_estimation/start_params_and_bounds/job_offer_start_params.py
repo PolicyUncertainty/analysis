@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 from statsmodels import api as sm
 
 
@@ -18,7 +19,7 @@ def est_job_offer_params_full_obs(df, specs):
     # logit_df["above_55"] = (logit_df["age"] >= 55).astype(float)
     # logit_df["above_60"] = (logit_df["age"] >= 60).astype(float)
     logit_df["good_health"] = (logit_df["health"] == 0).astype(float)
-    logit_df["age_above_55"] = (logit_df["age"] >= 55) * logit_df["age"]
+    logit_df["age_above_55"] = (logit_df["age"] >= 55) * (logit_df["age"] - 55)
     logit_df["age_below_55"] = (logit_df["age"] < 55) * logit_df["age"]
 
     logit_df = logit_df[logit_df["age"] < 65]

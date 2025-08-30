@@ -58,7 +58,7 @@ def check_for_longer_retirement_and_degenerate_vector(
     already_retired = (choice == 0) & (lagged_choice == 0)
     # Set to degenerate if already retired
     trans_vector = jax.lax.select(
-        already_retired, on_true=degenerate_probs, on_false=vtrans_vector
+        already_retired, on_true=degenerate_probs, on_false=trans_vector
     )
     return trans_vector
 

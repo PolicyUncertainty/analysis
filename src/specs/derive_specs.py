@@ -4,7 +4,7 @@ import jax.numpy as jnp
 import numpy as np
 import yaml
 
-from specs.experience_specs import add_very_long_insured_specs, create_max_experience
+from specs.experience_specs import add_experience_specs
 from specs.family_specs import (
     predict_children_by_state,
     read_in_partner_transition_specs,
@@ -40,12 +40,9 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     # Add informed process specs
     specs = add_informed_process_specs(specs, path_dict)
 
-    # Information for checking if individuals are eligible for pension of
-    # very long insured
-    specs = add_very_long_insured_specs(specs, path_dict)
+    # Add experience specs
+    specs = add_experience_specs(specs, path_dict, load_precomputed)
 
-    # Set initial experience
-    specs = create_max_experience(path_dict, specs, load_precomputed)
     return specs
 
 

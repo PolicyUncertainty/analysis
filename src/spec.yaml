@@ -1,7 +1,7 @@
 ---
 ################
 # Current model name:
-model_name: msm
+model_name: stable
 
 ###############################################################################
 # Model specification

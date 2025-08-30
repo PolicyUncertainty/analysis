@@ -31,5 +31,7 @@ ll*.txt
 
 # Debug files
 src/*/debug/
+est_params_stable.pkl
 
+# Server files
 *.out

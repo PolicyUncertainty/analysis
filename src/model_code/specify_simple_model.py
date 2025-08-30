@@ -43,7 +43,10 @@ def specify_simple_model(
     savings_grid = create_end_of_period_assets()
 
     # Experience grid
-    experience_grid = jnp.linspace(0, 1, 11)
+    experience_grid = np.linspace(0, 1, 11)
+    # Add very long insured threshold to experience grid and sort
+    experience_grid = np.append(experience_grid, specs["very_long_insured_grid_points"])
+    experience_grid = jnp.sort(experience_grid)
 
     model_config = {
         "min_period_batch_segments": [33, 44],
@@ -53,7 +56,7 @@ def specify_simple_model(
             "education": [0],
             "sex": [0],
             "partner_state": [0],
-            "health": [0],
+            "health": [0, 1, 2],
             "informed": [0, 1],
         },
         "stochastic_states": {

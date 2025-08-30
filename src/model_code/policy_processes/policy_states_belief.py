@@ -42,7 +42,7 @@ def select_no_policy_change(
 
     # Aggregate the two transition vectors
     trans_vector = jax.lax.select(
-        no_change_bool, no_policy_change, trans_vector_policy_change
+        no_change_bool, on_true=no_policy_change, on_false=trans_vector_policy_change
     )
     return trans_vector
 
@@ -57,7 +57,9 @@ def check_for_longer_retirement_and_degenerate_vector(
     # probabilities for degenerate state
     already_retired = (choice == 0) & (lagged_choice == 0)
     # Set to degenerate if already retired
-    trans_vector = jax.lax.select(already_retired, degenerate_probs, trans_vector)
+    trans_vector = jax.lax.select(
+        already_retired, on_true=degenerate_probs, on_false=vtrans_vector
+    )
     return trans_vector
 
 

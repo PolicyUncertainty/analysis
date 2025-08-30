@@ -591,3 +591,46 @@ def test_fresh_retiree(
             np.testing.assert_almost_equal(
                 wealth, scaled_wealth / specs_internal["wealth_unit"]
             )
+
+
+def test_informed(
+    paths_and_specs,
+):
+
+    path_dict, specs_internal = paths_and_specs
+
+    period = 36
+
+    exp_cont_prev = scale_experience_years(
+        experience_years=45,
+        period=period - 1,
+        is_retired=False,
+        model_specs=specs_internal,
+    )
+
+    exp_cont_uninf = get_next_period_experience(
+        period=period,
+        lagged_choice=np.array(0),
+        policy_state=np.array(8),
+        sex=0,
+        education=0,
+        experience=exp_cont_prev,
+        informed=0,
+        health=2,
+        model_specs=specs_internal,
+    )
+
+    exp_cont_inf = get_next_period_experience(
+        period=period,
+        lagged_choice=np.array(0),
+        policy_state=np.array(8),
+        sex=0,
+        education=0,
+        experience=exp_cont_prev,
+        informed=1,
+        health=2,
+        model_specs=specs_internal,
+    )
+
+    # Test if experience is the same
+    np.testing.assert_allclose(exp_cont_inf, exp_cont_uninf)

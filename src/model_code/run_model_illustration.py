@@ -19,29 +19,41 @@ specs = generate_derived_and_data_derived_specs(path_dict)
 
 # Set run specs
 model_name = specs["model_name"]
-load_model = True
+load_model = False
 load_solution = None
 
-# params = pickle.load(
-#     open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
+params = pickle.load(
+    open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
+)
+params["mu_high"] = params["mu"]
+params["mu_low"] = params["mu"]
+
+
+# from estimation.struct_estimation.map_params_to_current import (
+#     merge_men_and_women_params,
 # )
-
-
-from estimation.struct_estimation.map_params_to_current import (
-    merge_men_and_women_params,
-)
-
-params = merge_men_and_women_params(
-    path_dict=path_dict, ungendered_model_name=model_name
-)
+#
+# params = merge_men_and_women_params(
+#     path_dict=path_dict, ungendered_model_name=model_name
+# )
 
 which_plots = "p"
 
-model_solved = specify_and_solve_model(
+# model_solved = specify_and_solve_model(
+#     path_dict=path_dict,
+#     file_append=model_name,
+#     subj_unc=True,
+#     custom_resolution_age=None,
+#     params=params,
+#     load_model=load_model,
+#     load_solution=load_solution,
+# )
+
+model_solved = specify_and_solve_simple_model(
     path_dict=path_dict,
     file_append=model_name,
-    subj_unc=True,
-    custom_resolution_age=None,
+    # subj_unc=True,
+    # custom_resolution_age=None,
     params=params,
     load_model=load_model,
     load_solution=load_solution,

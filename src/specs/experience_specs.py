@@ -7,8 +7,13 @@ from model_code.pension_system.experience_stock import (
 )
 
 
-def create_max_experience(path_dict, specs, load_precomputed):
-    load_precomputed = True
+def add_experience_specs(specs, path_dict, load_precomputed):
+    specs = add_very_long_insured_specs(specs, path_dict)
+    specs = create_max_experience(path_dict, specs, load_precomputed)
+    return specs
+
+
+def create_max_experience(path_dict, specs, load_precomputed=False):
     # Initial experience
     if load_precomputed:
         max_exp_diff_period_working = np.loadtxt(
@@ -76,11 +81,27 @@ def create_max_experience(path_dict, specs, load_precomputed):
         specs["max_ret_age"] - specs["start_age"] + max_exp_diff_period_working
     )
     # Now span for each period the maximum experience for working periods.
-    max_exps_period_working = jnp.arange(
+    max_exps_period_working = np.arange(
         max_exp_diff_period_working, max_exp_working + 1
     )
+    # Lowest period very long insured
+    min_period_very_long_insured = specs["min_SRA"] - 2 - specs["start_age"]
+    # Assign the maximum experience for all the periods one can choose very long insured
+    max_exps_period_working[min_period_very_long_insured:] = max_exps_period_working[-1]
 
-    specs["max_exps_period_working"] = max_exps_period_working
+    # And now create sex specific interpolation grid points for experience exact at very long insured threshold
+    exp_thresholds_very_long_insured = specs["experience_threshold_very_long_insured"]
+    exp_thresholds_not_very_long_insured = exp_thresholds_very_long_insured - 0.5
+    # Now duplicate the grid point
+    all_exp_thresholds_very_long_insured = np.append(
+        exp_thresholds_very_long_insured,
+        exp_thresholds_not_very_long_insured,
+    )
+    specs["very_long_insured_grid_points"] = (
+        all_exp_thresholds_very_long_insured / max_exps_period_working[-1]
+    )
+
+    specs["max_exps_period_working"] = jnp.asarray(max_exps_period_working)
     specs["max_exp_retirement"] = max_exp_retirement
 
     return specs
@@ -101,6 +122,8 @@ def add_very_long_insured_specs(specs, path_dict):
             45
             / exp_factor_for_credited_periods.loc[f"experience_{sex_label}", "estimate"]
         )
+        # We count experience in half years, so round up to next 0.5
+        exp_thresholds[sex_var] = np.ceil(exp_thresholds[sex_var] * 2) / 2
 
     specs["experience_threshold_very_long_insured"] = jnp.asarray(exp_thresholds)
     return specs

@@ -4,7 +4,6 @@ from copy import deepcopy
 import dcegm
 import jax.numpy as jnp
 import numpy as np
-from state_space.experience import define_experience_grid
 
 from model_code.policy_processes.informed_state_transition import (
     informed_transition,
@@ -13,6 +12,7 @@ from model_code.policy_processes.select_policy_belief import (
     select_sim_policy_function_and_update_specs,
     select_solution_transition_func_and_update_specs,
 )
+from model_code.state_space.experience import define_experience_grid
 from model_code.state_space.state_space import create_state_space_functions
 from model_code.stochastic_processes.health_transition import health_transition
 from model_code.stochastic_processes.job_offers import job_offer_process_transition

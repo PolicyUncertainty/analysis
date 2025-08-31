@@ -18,7 +18,7 @@ def estimate_wage_parameters(paths_dict, specs, show_plots):
     # specs, data, and parameter containers
     edu_labels = specs["education_labels"]
     sex_labels = specs["sex_labels"]
-    regressors = ["constant", "ln_exp"]
+    regressors = ["constant", "exp", "exp_squared"]
     wage_data = load_and_prepare_wage_data(paths_dict)
 
     # Calculate average working hours by type and choice
@@ -284,13 +284,20 @@ def print_wage_equation(wage_parameters, edu_labels, sex_labels):
                 "ln(hrly_wage) = "
                 + str(wage_parameters.loc[(edu_label, sex_label, "constant"), "value"])
                 + " + "
-                + str(wage_parameters.loc[(edu_label, sex_label, "ln_exp"), "value"])
-                + " * ln(exp+1) + epsilon"
+                + str(wage_parameters.loc[(edu_label, sex_label, "exp"), "value"])
+                + " * exp "
+                + str(
+                    wage_parameters.loc[(edu_label, sex_label, "exp_squared"), "value"]
+                )
+                + " * exp^2 "
+                + "+ epsilon"
             )
+            exp = 20
             hrly_wage_with_20_exp = np.exp(
                 wage_parameters.loc[(edu_label, sex_label, "constant"), "value"]
-                + wage_parameters.loc[(edu_label, sex_label, "ln_exp"), "value"]
-                * np.log(20)
+                + wage_parameters.loc[(edu_label, sex_label, "exp"), "value"] * exp
+                + wage_parameters.loc[(edu_label, sex_label, "exp_squared"), "value"]
+                * exp
             )
             print(
                 "Example: hourly wage with 20 years of experience: "

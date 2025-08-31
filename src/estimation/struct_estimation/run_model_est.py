@@ -81,7 +81,7 @@ start_params_all = load_and_set_start_params(paths_dict)
 start_params_all["disability_logit_const_men"] *= 0.8
 start_params_all["job_finding_logit_const_men"] *= 0.8
 
-
+# Run estimation
 estimation_results = estimate_model(
     paths_dict,
     params_to_estimate_names=params_to_estimate_names,

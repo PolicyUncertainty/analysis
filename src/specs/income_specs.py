@@ -129,6 +129,7 @@ def process_wage_params(path_dict, specs):
 
     gamma_0 = np.zeros((specs["n_sexes"], specs["n_education_types"]), dtype=float)
     gamma_1 = np.zeros((specs["n_sexes"], specs["n_education_types"]), dtype=float)
+    gamma_2 = np.zeros((specs["n_sexes"], specs["n_education_types"]), dtype=float)
 
     for edu_id, edu_label in enumerate(specs["education_labels"]):
         for sex_var, sex in enumerate(specs["sex_labels"]):
@@ -137,7 +138,10 @@ def process_wage_params(path_dict, specs):
                 mask & (wage_params["parameter"] == "constant"), "value"
             ].values[0]
             gamma_1[sex_var, edu_id] = wage_params.loc[
-                mask & (wage_params["parameter"] == "ln_exp"), "value"
+                mask & (wage_params["parameter"] == "exp"), "value"
+            ].values[0]
+            gamma_2[sex_var, edu_id] = wage_params.loc[
+                mask & (wage_params["parameter"] == "exp_squared"), "value"
             ].values[0]
 
     mask = (

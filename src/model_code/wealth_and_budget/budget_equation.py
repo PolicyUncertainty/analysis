@@ -19,7 +19,6 @@ def budget_constraint(
     experience,
     sex,
     partner_state,
-    health,
     asset_end_of_previous_period,  # A_{t-1}
     income_shock_previous_period,  # epsilon_{t - 1}
     model_specs,
@@ -42,11 +41,10 @@ def budget_constraint(
         period=period,
     )
 
-    # Income from lagged choice 0
+    # Income from lagged choice 0. Here the experience is already transformed into pension points,
+    # as we only track those in retirement.
     retirement_income_after_ssc = calc_pensions_after_ssc(
-        experience_years=experience_years,
-        sex=sex,
-        education=education,
+        pension_points=experience_years,
         model_specs=model_specs,
     )
 

@@ -7,7 +7,7 @@ from model_code.pension_system.early_retirement_paths import (
 )
 
 
-def calc_experience_years_for_pension_adjustment(
+def calc_pension_points_for_experience(
     period,
     sex,
     experience_years,
@@ -21,6 +21,8 @@ def calc_experience_years_for_pension_adjustment(
     This function will only be used if the individual is fresh retired. So we
     can take this as a given here. Note, you can only retire if you are disabled or
     if you reached the long insured age.
+
+    This function returns pension points adjusted for early or late retirement.
     """
     # Start by calculating the type specific pension points(Endgeltpunkte)
     total_pension_points = calc_pension_points_form_experience(
@@ -64,13 +66,13 @@ def calc_experience_years_for_pension_adjustment(
         on_false=pension_points_late_retirement,
     )
 
-    adjusted_experience_years = calc_experience_for_total_pension_points(
-        total_pension_points=adjusted_pension_points,
-        sex=sex,
-        education=education,
-        model_specs=model_specs,
-    )
-    return adjusted_experience_years
+    # adjusted_experience_years = calc_experience_for_total_pension_points(
+    #     total_pension_points=adjusted_pension_points,
+    #     sex=sex,
+    #     education=education,
+    #     model_specs=model_specs,
+    # )
+    return adjusted_pension_points
 
 
 def calc_pension_points_form_experience(education, sex, experience_years, model_specs):
@@ -80,25 +82,32 @@ def calc_pension_points_form_experience(education, sex, experience_years, model_
     retirement is already in the experience.
 
     """
-    mean_wage_all = model_specs["mean_hourly_ft_wage"][sex, education]
-    gamma_0 = model_specs["gamma_0"][sex, education]
-    gamma_1_plus_1 = model_specs["gamma_1"][sex, education] + 1
-    total_pens_points = (
-        (jnp.exp(gamma_0) / gamma_1_plus_1)
-        * ((experience_years + 1) ** gamma_1_plus_1 - 1)
-    ) / mean_wage_all
-    return total_pens_points
+    # mean_wage_all = model_specs["mean_hourly_ft_wage"][sex, education]
+    # gamma_0 = model_specs["gamma_0"][sex, education]
+    # gamma_1_plus_1 = model_specs["gamma_1"][sex, education] + 1
+    # total_pens_points = (
+    #     (jnp.exp(gamma_0) / gamma_1_plus_1)
+    #     * ((experience_years + 1) ** gamma_1_plus_1 - 1)
+    # ) / mean_wage_all
+    exp_int = experience_years.astype(int)
+    exp_frac = experience_years - exp_int
+    total_pension_points = (
+        model_specs["pp_for_exp_by_sex_edu"][sex, education, exp_int]
+        + exp_frac * model_specs["pp_for_exp_by_sex_edu"][sex, education, exp_int + 1]
+    )
+
+    return total_pension_points
 
 
-def calc_experience_for_total_pension_points(
-    total_pension_points, sex, education, model_specs
-):
-    """Calculate the experience for a given total pension points."""
-    mean_wage_all = model_specs["mean_hourly_ft_wage"][sex, education]
-    gamma_0 = model_specs["gamma_0"][sex, education]
-    gamma_1_plus_1 = model_specs["gamma_1"][sex, education] + 1
-    exp_for_pension_points = (
-        (total_pension_points * mean_wage_all * gamma_1_plus_1 / jnp.exp(gamma_0) + 1)
-        ** (1 / gamma_1_plus_1)
-    ) - 1
-    return exp_for_pension_points
+# def calc_experience_for_total_pension_points(
+#     total_pension_points, sex, education, model_specs
+# ):
+#     """Calculate the experience for a given total pension points."""
+#     mean_wage_all = model_specs["mean_hourly_ft_wage"][sex, education]
+#     gamma_0 = model_specs["gamma_0"][sex, education]
+#     gamma_1_plus_1 = model_specs["gamma_1"][sex, education] + 1
+#     exp_for_pension_points = (
+#         (total_pension_points * mean_wage_all * gamma_1_plus_1 / jnp.exp(gamma_0) + 1)
+#         ** (1 / gamma_1_plus_1)
+#     ) - 1
+#     return exp_for_pension_points

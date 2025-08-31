@@ -44,6 +44,9 @@ model_folder = get_model_resutls_path(path_dict, model_name)
 
 if load_data_from_sol:
     data_decision = pd.read_csv(model_folder["model_results"] + "data_with_probs.csv")
+    # df = data_decision[
+    #     (data_decision["lagged_choice"] != 0) & (data_decision["sex"] == 0)
+    # ]
 
 else:
 

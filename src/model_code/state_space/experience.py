@@ -3,7 +3,7 @@ import jax.numpy as jnp
 import numpy as np
 
 from model_code.pension_system.experience_stock import (
-    calc_experience_years_for_pension_adjustment,
+    calc_pension_points_for_experience,
 )
 
 
@@ -66,7 +66,7 @@ def get_next_period_experience(
     # Calculate experience in the case of fresh retirement
     # We track all deductions and bonuses of the retirement decision through an adjusted
     # experience stock
-    adjusted_exp_years = calc_experience_years_for_pension_adjustment(
+    pension_points = calc_pension_points_for_experience(
         period=period,
         experience_years=exp_years_last_period,
         sex=sex,
@@ -77,8 +77,10 @@ def get_next_period_experience(
         model_specs=model_specs,
     )
 
+    # If fresh retired, the experience function returns pension points. Now the value and policy function
+    # are calculated on a pension point grid. We do not need experience any more.
     exp_years_this_period = jax.lax.select(
-        fresh_retired, adjusted_exp_years, exp_years_this_period
+        fresh_retired, on_true=pension_points, on_false=exp_years_this_period
     )
 
     # Now scale between 0 and 1

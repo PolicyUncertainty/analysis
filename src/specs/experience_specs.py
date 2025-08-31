@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 from model_code.pension_system.experience_stock import (
-    calc_experience_years_for_pension_adjustment,
+    calc_pension_points_for_experience,
 )
 
 
@@ -43,7 +43,7 @@ def create_max_experience(path_dict, specs, load_precomputed=False):
             np.arange(specs["min_SRA"] + 1, specs["max_ret_age"] + 2)
             - specs["start_age"]
         )
-        max_exp_across_periods = np.zeros(
+        max_pension_points_retirement = np.zeros(
             (specs["n_sexes"], specs["n_education_types"], len(ret_periods), 2),
             dtype=float,
         )
@@ -56,7 +56,7 @@ def create_max_experience(path_dict, specs, load_precomputed=False):
 
                         # The largest bonus can be obtained by being informed and working after the
                         # longest after the SRA.
-                        new_exp = calc_experience_years_for_pension_adjustment(
+                        pension_points = calc_pension_points_for_experience(
                             period=period,
                             sex=sex_var,
                             experience_years=max_exp_period,
@@ -66,10 +66,12 @@ def create_max_experience(path_dict, specs, load_precomputed=False):
                             health=health,
                             model_specs=specs,
                         )
-                        max_exp_across_periods[sex_var, edu_var, i, health_id] = new_exp
+                        max_pension_points_retirement[
+                            sex_var, edu_var, i, health_id
+                        ] = pension_points
 
         # Get the maximum experience diff across periods
-        max_exp_retirement = max_exp_across_periods.max()
+        max_exp_retirement = max_pension_points_retirement.max()
 
         np.savetxt(
             path_dict["first_step_incomes"] + "max_exp_retirement.txt",

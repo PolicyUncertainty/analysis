@@ -101,7 +101,7 @@ def construct_experience_years(float_experience, period, is_retired, model_specs
     scale_not_retired = jnp.take(
         model_specs["max_exps_period_working"], period, mode="clip"
     )
-    scale_retired = model_specs["max_exp_retirement"]
+    scale_retired = model_specs["max_pp_retirement"]
     scale = is_retired * scale_retired + (1 - is_retired) * scale_not_retired
     return float_experience * scale
 
@@ -112,6 +112,6 @@ def scale_experience_years(experience_years, period, is_retired, model_specs):
     scale_not_retired = jnp.take(
         model_specs["max_exps_period_working"], period, mode="clip"
     )
-    scale_retired = model_specs["max_exp_retirement"]
+    scale_retired = model_specs["max_pp_retirement"]
     scale = is_retired * scale_retired + (1 - is_retired) * scale_not_retired
     return experience_years / scale

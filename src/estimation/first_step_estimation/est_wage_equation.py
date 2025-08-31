@@ -78,7 +78,7 @@ def estimate_wage_parameters(paths_dict, specs, show_plots):
                 label=f"Obs. {edu_label}",
             )
             ax.plot(
-                wage_data_type.groupby("age")["predicted_wage"].mean(),
+                wage_data_type.groupby("age")["predicted_ln_wage"].mean(),
                 color=JET_COLOR_MAP[edu_val],
                 label=f"Est. {edu_label}",
             )
@@ -114,6 +114,7 @@ def load_and_prepare_wage_data(paths_dict):
     )
     wage_data["ln_exp"] = np.log(wage_data["experience"] + 1)
     wage_data["exp"] = wage_data["experience"]
+    wage_data["exp_int"] = wage_data["experience"].astype(int)
     wage_data["exp_squared"] = wage_data["experience"] ** 2
     wage_data["constant"] = np.ones(len(wage_data))
     # Format & Index
@@ -185,7 +186,8 @@ def fit_panel_reg_model(
         cov_type="clustered", cluster_entity=True, cluster_time=True
     )
     # Add prediction to data
-    wage_data_type["predicted_wage"] = fitted_model.predict()
+    wage_data_type["predicted_ln_wage"] = fitted_model.predict()
+    wage_data_type["predicted_wage"] = np.exp(wage_data_type["predicted_ln_wage"])
 
     # Assign estimated parameters (column list corresponds to model params, so only these are assigned)
     for param in regressors:

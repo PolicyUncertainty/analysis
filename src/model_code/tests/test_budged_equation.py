@@ -328,7 +328,7 @@ def test_retiree(
         model_specs=specs_internal,
     )
     # Check that experience does not get updated or added any penalty
-    np.testing.assert_allclose(exp_cont * specs_internal["max_exp_retirement"], exp)
+    np.testing.assert_allclose(exp_cont * specs_internal["max_pp_retirement"], exp)
 
     wealth, _ = budget_constraint(
         period=period,

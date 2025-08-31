@@ -5,11 +5,9 @@ from jax import numpy as jnp
 
 def add_income_specs(specs, path_dict):
     # wages
-    (
-        specs["gamma_0"],
-        specs["gamma_1"],
-        specs["income_shock_std"],
-    ) = process_wage_params(path_dict, specs)
+    specs = add_wage_specs(path_dict, specs)
+
+    specs = add_population_averages(specs, path_dict)
 
     # unemployment benefits
     (
@@ -28,8 +26,6 @@ def add_income_specs(specs, path_dict):
         specs["annual_partner_wage"],
         specs["annual_partner_pension"],
     ) = calculate_partner_incomes(path_dict, specs)
-
-    specs = add_population_averages(specs, path_dict)
 
     # Add minimum wage
     specs["annual_min_wage_pt"], specs["annual_min_wage_ft"] = add_pt_and_ft_min_wage(
@@ -119,7 +115,7 @@ def calc_annual_pension_point_value(specs):
     return pension_point_value * 12
 
 
-def process_wage_params(path_dict, specs):
+def add_wage_specs(path_dict, specs):
     # wages
     wage_params = pd.read_csv(
         path_dict["first_step_incomes"] + "wage_eq_params.csv", index_col=0
@@ -151,7 +147,11 @@ def process_wage_params(path_dict, specs):
     )
     income_shock_scale = wage_params.loc[mask, "value"].values[0]
 
-    return jnp.asarray(gamma_0), jnp.asarray(gamma_1), income_shock_scale
+    specs["gamma_0"] = jnp.asarray(gamma_0)
+    specs["gamma_1"] = jnp.asarray(gamma_1)
+    specs["gamma_2"] = jnp.asarray(gamma_2)
+    specs["income_shock_std"] = income_shock_scale
+    return specs
 
 
 def calculate_partner_incomes(path_dict, specs):

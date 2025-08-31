@@ -18,7 +18,6 @@ def prepare_artkalen_data(path_dict, relevant_pids, start_year, end_year):
     # np.equal(art_pids, ret_pids)
     # # check if all ret_pids are in art_pids
     # ret_pids[~np.isin(ret_pids, art_pids)]
-    # breakpoint()
 
     artkalen_data = calc_begin_or_end_year_and_mont(artkalen_data, "begin")
     artkalen_data = calc_begin_or_end_year_and_mont(artkalen_data, "end")
@@ -48,7 +47,6 @@ def prepare_artkalen_data(path_dict, relevant_pids, start_year, end_year):
     #             span_df.loc[(pids, year), f"float_end_{spelltype}"] = year_spells["float_end"].values
     #         except:
     #             breakpoint()
-    # breakpoint()
     return artkalen_data
 
 

@@ -90,11 +90,13 @@ def calc_pension_points_form_experience(education, sex, experience_years, model_
     #     * ((experience_years + 1) ** gamma_1_plus_1 - 1)
     # ) / mean_wage_all
     exp_int = experience_years.astype(int)
+    pp_exp_int = model_specs["pp_for_exp_by_sex_edu"][sex, education, exp_int]
+
     exp_frac = experience_years - exp_int
-    total_pension_points = (
-        model_specs["pp_for_exp_by_sex_edu"][sex, education, exp_int]
-        + exp_frac * model_specs["pp_for_exp_by_sex_edu"][sex, education, exp_int + 1]
+    pp_difference = (
+        model_specs["pp_for_exp_by_sex_edu"][sex, education, exp_int + 1] - pp_exp_int
     )
+    total_pension_points = pp_exp_int + exp_frac * pp_difference
 
     return total_pension_points
 

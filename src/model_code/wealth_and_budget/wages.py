@@ -28,11 +28,6 @@ def calculate_gross_labor_income(
     returns from model_specs.
 
     """
-    gamma_0 = model_specs["gamma_0"][sex, education]
-    gamma_1 = model_specs["gamma_1"][sex, education]
-    hourly_wage = jnp.exp(
-        gamma_0 + gamma_1 * jnp.log(experience_years + 1) + income_shock
-    )
 
     # Part time choice
     pt_work = lagged_choice == 2
@@ -41,6 +36,14 @@ def calculate_gross_labor_income(
     average_hours = (
         model_specs["av_annual_hours_pt"][sex, education] * pt_work
         + model_specs["av_annual_hours_ft"][sex, education] * ft_work
+    )
+
+    hourly_wage = calc_hourly_wage(
+        sex=sex,
+        education=education,
+        experience_years=experience_years,
+        income_shock=income_shock,
+        model_specs=model_specs,
     )
     labour_income = hourly_wage * average_hours
 
@@ -51,3 +54,14 @@ def calculate_gross_labor_income(
 
     labor_income_min_checked = jnp.maximum(labour_income, annual_min_wage)
     return labor_income_min_checked
+
+
+def calc_hourly_wage(sex, education, experience_years, income_shock, model_specs):
+    gamma_0 = model_specs["gamma_0"][sex, education]
+    gamma_1 = model_specs["gamma_1"][sex, education]
+    gamma_2 = model_specs["gamma_2"][sex, education]
+    exp_squared = experience_years**2
+    hourly_wage = jnp.exp(
+        gamma_0 + gamma_1 * experience_years + gamma_2 * exp_squared + income_shock
+    )
+    return hourly_wage

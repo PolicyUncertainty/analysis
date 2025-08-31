@@ -1,5 +1,5 @@
 from model_code.pension_system.early_retirement_paths import check_very_long_insured
-from specs.experience_specs import add_very_long_insured_specs
+from specs.experience_pp_specs import add_very_long_insured_specs
 
 
 def add_very_long_insured_classification(df, path_dict, specs):

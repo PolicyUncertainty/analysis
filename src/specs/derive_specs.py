@@ -4,7 +4,7 @@ import jax.numpy as jnp
 import numpy as np
 import yaml
 
-from specs.experience_specs import add_experience_specs
+from specs.experience_pp_specs import add_experience_and_pp_specs
 from specs.family_specs import (
     predict_children_by_state,
     read_in_partner_transition_specs,
@@ -17,9 +17,14 @@ from specs.informed_specs import add_informed_process_specs
 def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     """This function reads in specs and adds derived and data estimated specs."""
     specs = read_and_derive_specs(path_dict["specs"])
+    # Add informed process specs
+    specs = add_informed_process_specs(specs, path_dict)
 
     # Add income specs
     specs = add_income_specs(specs, path_dict)
+
+    # Add experience specs
+    specs = add_experience_and_pp_specs(specs, path_dict, load_precomputed)
 
     # family transitions
     specs["children_by_state"] = predict_children_by_state(path_dict, specs)
@@ -36,12 +41,6 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     specs["job_sep_probs"] = jnp.asarray(
         pkl.load(open(path_dict["est_results"] + "job_sep_probs.pkl", "rb"))
     )
-
-    # Add informed process specs
-    specs = add_informed_process_specs(specs, path_dict)
-
-    # Add experience specs
-    specs = add_experience_specs(specs, path_dict, load_precomputed)
 
     return specs
 

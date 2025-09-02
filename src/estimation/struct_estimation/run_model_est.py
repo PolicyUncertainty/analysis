@@ -20,6 +20,9 @@ params_to_estimate_names = [
     "disutil_unemployed_good_men",
     "disutil_unemployed_bad_men",
     "disutil_unemployed_disability_men",
+    "disutil_partner_retired_men",
+    "SRA_firing_logit_intercept_men_low",
+    "SRA_firing_logit_intercept_men_high",
     # Taste shock men - 1 parameter
     # "taste_shock_scale_men",
     # "bequest_scale",

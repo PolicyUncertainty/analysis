@@ -17,15 +17,16 @@ def plot_solution(model_solved, specs, path_dict):
     n_obs = 1
     prototype_array = np.arange(n_obs)
     # exp_years_grid = np.linspace(10, 50, 5)
-    period = 34
+    period = 35
     choice = 3
-    lagged_choice = 1
-    policy_state = 2
+    choice_2 = 0
+    lagged_choice = 3
+    policy_state = 0
     job_offer = 1
     sex = 0
     informed = 1
 
-    for exp_id in range(4, 8):
+    for exp_id in range(8, 9):
         states = {
             "period": np.ones_like(prototype_array) * period,
             "lagged_choice": np.ones_like(prototype_array) * lagged_choice,
@@ -55,14 +56,26 @@ def plot_solution(model_solved, specs, path_dict):
         )
 
         ax.plot(
-            endog_grid[0, exp_id, 1:],
-            value_grid[0, exp_id, 1:],
+            endog_grid[0, exp_id, 26:30],
+            value_grid[0, exp_id, 26:30],
             label=f"Exp years {exp_years}",
+        )
+
+        endog_grid, value_grid, policy_grid = (
+            model_solved.get_solution_for_discrete_state_choice(
+                states=states, choices=np.ones_like(prototype_array) * choice_2
+            )
+        )
+
+        ax.plot(
+            endog_grid[0, exp_id, 26:30],
+            value_grid[0, exp_id, 26:30],
+            label=f"Exp years {exp_years} ret",
         )
 
     ax.legend()
 
-    plt.show()
+    fig.savefig(path_dict["plots"] + f"solution_value_func_period_{period}.png")
 
 
 def plot_ret_probs_for_state(model_solved, specs, path_dict):
@@ -163,21 +176,21 @@ def plot_ret_probs_for_state(model_solved, specs, path_dict):
     plt.show()
 
 
-def plot_work_probs_for_state(model_solved, specs):
+def plot_work_probs_for_state(model_solved, specs, path_dict):
 
     # Vary periods, but fix SRA to 67 (policy state 8)
-    period = 30
+    period = 36
+    policy_state = 4
 
     # Low educated men not retired
     education = 0
     sex = 0
-    lagged_choice = 3
+    lagged_choice = 1
     # Job offer and single
     job_offer = 1
-    partner_state = 0
     health = 0
-    assets = 10
-    exp_grid = jnp.arange(40, specs["max_exps_period_working"][period] + 1)
+    exp_grid = np.arange(30, 50, 2, dtype=float)
+    informed = 0
 
     n_obs = len(exp_grid)
     int_array = np.ones(n_obs, dtype=int)
@@ -193,37 +206,41 @@ def plot_work_probs_for_state(model_solved, specs):
 
     states = {
         "period": periods,
-        "policy_state": int_array * 0,
+        "policy_state": int_array * policy_state,
         "lagged_choice": int_array * lagged_choice,
         "education": int_array * education,
         "sex": int_array * sex,
         "job_offer": int_array * job_offer,
-        "partner_state": int_array * partner_state,
-        "assets_begin_of_period": float_array * assets,
         "experience": exp_grid_float,
         "health": int_array * health,
+        "informed": int_array * informed,
     }
 
     fig, axs = plt.subplots(
         nrows=1,
-        ncols=2,
+        ncols=3,
         figsize=(10, 12),
     )
 
-    for informed, informed_label in enumerate(["Not Informed", "Informed"]):
-        states["informed"] = int_array * informed
+    for partner_state, partner_label in enumerate(specs["partner_labels"]):
+        for assets in range(3, 18, 3):
+            states["partner_state"] = int_array * partner_state
+            states["assets_begin_of_period"] = float_array * assets
 
-        choice_probs = model_solved.choice_probabilities_for_states(states=states)
-        ax = axs[informed]
-        ax.plot(
-            exp_grid,
-            np.nan_to_num(choice_probs[:, 3], nan=0.0),
-            # label=f"{inform_labels[informed]}",
-        )
+            choice_probs = model_solved.choice_probabilities_for_states(states=states)
+            ax = axs[partner_state]
+            ax.plot(
+                exp_grid,
+                np.nan_to_num(choice_probs[:, 3], nan=0.0),
+                label=f"Assets {assets}",
+            )
         ax.set_ylabel("Probability of working")
+        ax.set_ylim([0, 1])
 
-        ax.set_title(informed_label)
+        ax.set_title(partner_label)
+        ax.legend()
 
         ax.set_xlabel("Experience years")
 
     plt.show()
+    fig.savefig(path_dict["plots"] + f"work_probs_state_period_{period}.png")

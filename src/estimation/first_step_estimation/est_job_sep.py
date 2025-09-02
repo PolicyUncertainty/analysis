@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 
+from model_code.stochastic_processes.math_funcs import logit_formula
 from process_data.first_step_sample_scripts.create_job_sep_sample import (
     create_job_sep_sample,
 )
@@ -84,9 +85,15 @@ def est_job_for_sample(df_job, specs):
                     + params.loc["above_55"] * above_55
                     + params.loc["above_60"] * above_60
                 )
-                job_sep_probs_group = 1 / (1 + np.exp(-exp_factor))
+                job_sep_probs_group = logit_formula(exp_factor)
                 job_sep_probs[sex_var, edu_var, good_health, predicted_ages] = (
                     job_sep_probs_group
+                )
+                start_prob = job_sep_probs[
+                    sex_var, edu_var, good_health, specs["start_age"]
+                ]
+                job_sep_probs[sex_var, edu_var, good_health, : specs["start_age"]] = (
+                    start_prob
                 )
                 job_sep_probs[
                     sex_var, edu_var, good_health, specs["max_est_age_labor"] + 1 :

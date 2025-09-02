@@ -20,6 +20,7 @@ def create_unobserved_state_specs(data_decision):
             health=kwargs["lagged_health"],
             model_specs=kwargs["model_specs"],
             education=kwargs["education"],
+            policy_state=kwargs["policy_state"],
             period=kwargs["period"],
             choice=kwargs["choice"],
         )[job_offer_new]
@@ -59,6 +60,7 @@ def create_unobserved_state_specs(data_decision):
         "period": data_decision["period"].values - 1,
         "education": data_decision["education"].values,
         "sex": data_decision["sex"].values,
+        "policy_state": data_decision["policy_state"].values,
         "lagged_health": data_decision["lagged_health"].values,
     }
 

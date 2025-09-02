@@ -44,3 +44,9 @@ bequest_scale: 2.4
 # Taste shock scale
 taste_shock_scale_men: 0.3
 taste_shock_scale_women: 1.0
+
+# SRA firing params
+SRA_firing_logit_intercept_men_low: 6
+SRA_firing_logit_intercept_men_high: 6
+SRA_firing_logit_intercept_women_low: 6
+SRA_firing_logit_intercept_women_high: 6

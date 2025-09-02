@@ -20,14 +20,12 @@ specs = generate_derived_and_data_derived_specs(path_dict)
 
 # Set run specs
 model_name = specs["model_name"]
-load_model = False
-load_solution = False
+load_model = True
+load_solution = True
 
 params = pickle.load(
     open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
 )
-params["mu_high"] = params["mu"]
-params["mu_low"] = params["mu"]
 
 
 # from estimation.struct_estimation.map_params_to_current import (
@@ -40,25 +38,25 @@ params["mu_low"] = params["mu"]
 
 which_plots = "w"
 
-# model_solved = specify_and_solve_model(
-#     path_dict=path_dict,
-#     file_append=model_name,
-#     subj_unc=True,
-#     custom_resolution_age=None,
-#     params=params,
-#     load_model=load_model,
-#     load_solution=load_solution,
-# )
-
-model_solved = specify_and_solve_simple_model(
+model_solved = specify_and_solve_model(
     path_dict=path_dict,
     file_append=model_name,
-    # subj_unc=True,
-    # custom_resolution_age=None,
+    subj_unc=True,
+    custom_resolution_age=None,
     params=params,
     load_model=load_model,
     load_solution=load_solution,
 )
+
+# model_solved = specify_and_solve_simple_model(
+#     path_dict=path_dict,
+#     file_append=model_name,
+#     # subj_unc=True,
+#     # custom_resolution_age=None,
+#     params=params,
+#     load_model=load_model,
+#     load_solution=load_solution,
+# )
 
 if which_plots == "s":
     plot_solution(model_solved=model_solved, specs=specs, path_dict=path_dict)
@@ -73,4 +71,6 @@ elif which_plots == "p":
 
 elif which_plots == "w":
 
-    plot_work_probs_for_state(model_solved=model_solved, specs=specs)
+    plot_work_probs_for_state(
+        model_solved=model_solved, specs=specs, path_dict=path_dict
+    )

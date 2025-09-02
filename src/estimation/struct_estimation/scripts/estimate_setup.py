@@ -151,7 +151,6 @@ class est_class_from_paths:
         from specs.derive_specs import generate_derived_and_data_derived_specs
 
         specs = generate_derived_and_data_derived_specs(path_dict)
-        self.specs = specs
 
         model = specify_model(
             path_dict=path_dict,
@@ -213,8 +212,7 @@ class est_class_from_paths:
                 params=full_params,
                 education=1,
                 good_health=1,
-                period=30,
-                model_specs=self.specs,
+                age=60,
             )
             print(
                 f"Job offer prob for 60 year old high educated men in good health: {job_offer_prob_60_high_good}",
@@ -225,8 +223,7 @@ class est_class_from_paths:
                 params=full_params,
                 education=1,
                 good_health=1,
-                period=30,
-                model_specs=self.specs,
+                age=60,
             )
             print(
                 f"Job offer prob for 60 year old high educated women in good health: {job_offer_prob_60_high_good}",
@@ -345,6 +342,13 @@ def get_gendered_params(params_to_estimate_names, append):
     disutil_params_ft_params = [
         param_name for param_name in disutil_params if "ft_work" in param_name
     ]
+    disutil_params_partner = [
+        param_name for param_name in disutil_params if "partner" in param_name
+    ]
+    SRA_firing_params = [
+        param_name for param_name in gender_params if "SRA_firing" in param_name
+    ]
+
     # We do it this weird way for printing order
     params = {}
     # Assign all gender params. This will be dropped afterwards
@@ -366,6 +370,12 @@ def get_gendered_params(params_to_estimate_names, append):
 
     if len(disability_params) > 0:
         params["disability"] = disability_params
+
+    if len(disutil_params_partner) > 0:
+        params["partner"] = disutil_params_partner
+
+    if len(SRA_firing_params) > 0:
+        params["SRA_firing"] = SRA_firing_params
 
     other_params = []
     for param in gender_params:

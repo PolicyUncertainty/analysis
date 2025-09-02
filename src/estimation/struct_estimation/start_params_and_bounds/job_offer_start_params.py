@@ -38,11 +38,21 @@ def est_job_offer_params_full_obs(df, specs):
 
     job_offer_params = {}
     for sex_var, sex_append in enumerate(["men", "women"]):
-        logit_df_gender = logit_df[logit_df["sex"] == sex_var]
+        logit_df_gender = logit_df[logit_df["sex"] == sex_var].copy()
         logit_model = sm.Logit(
             logit_df_gender["work_start"], logit_df_gender[logit_vars]
         )
         logit_fitted = logit_model.fit()
+        # logit_df_gender["predicted_probs"] = logit_fitted.predict(
+        #     logit_df_gender[logit_vars]
+        # )
+        # fig, ax = plt.subplots(figsize=(8, 6))
+        # predicted_probs = logit_df_gender.groupby("age")["predicted_probs"].mean()
+        # observed_probs = logit_df_gender.groupby("age")["work_start"].mean()
+        # ax.plot(predicted_probs, label="Predicted", color="blue")
+        # ax.plot(observed_probs, label="Observed", color="orange", linestyle="--")
+        # ax.legend()
+        # plt.show()
 
         params = logit_fitted.params
 

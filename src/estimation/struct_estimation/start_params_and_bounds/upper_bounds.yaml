@@ -67,3 +67,9 @@ disability_logit_const_women: 5
 disability_logit_high_educ_women: 5
 disability_logit_age_women: 5
 disability_logit_age_above_55_women: 5
+
+# SRA firing params
+SRA_firing_logit_intercept_men_low: 20
+SRA_firing_logit_intercept_men_high: 20
+SRA_firing_logit_intercept_women_low: 20
+SRA_firing_logit_intercept_women_high: 20

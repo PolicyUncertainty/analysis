@@ -33,7 +33,8 @@ def calc_adjusted_scale(df_base, df_count, params, specs, n_agents):
     # Then we construct the relevant objects to be able to scale consumption,
     # such that it matches the discounted sum from above
     sex_values = df_base["sex"].values
-    mu_vector = np.ones_like(sex_values) * params["mu"]
+    education = df_base["education"].values
+    mu_vector = education * params["mu_high"] + (1 - education) * params["mu_low"]
 
     # Generate not scaled utility by substracting from random utility 1 / (1 - mu)
     not_scaled_utility = df_base["real_taste_shock"].values - 1 / (1 - mu_vector)

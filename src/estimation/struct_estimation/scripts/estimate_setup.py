@@ -17,6 +17,7 @@ from model_code.specify_model import specify_model
 from model_code.stochastic_processes.job_offers import (
     calc_job_finding_prob_men,
     calc_job_finding_prob_women,
+    job_sep_probability,
 )
 from model_code.transform_data_from_model import (
     create_states_dict,
@@ -151,6 +152,7 @@ class est_class_from_paths:
         from specs.derive_specs import generate_derived_and_data_derived_specs
 
         specs = generate_derived_and_data_derived_specs(path_dict)
+        self.specs = specs
 
         model = specify_model(
             path_dict=path_dict,
@@ -218,6 +220,20 @@ class est_class_from_paths:
                 f"Job offer prob for 60 year old high educated men in good health: {job_offer_prob_60_high_good}",
                 flush=True,
             )
+            job_sep = job_sep_probability(
+                params=full_params,
+                policy_state=8,
+                education=0,
+                sex=0,
+                age=66,
+                good_health=1,
+                model_specs=self.specs,
+            )
+            print(
+                f"Job separation prob for 66 year old next year at SRA 67: {job_sep}",
+                flush=True,
+            )
+
         if self.print_women_examples:
             job_offer_prob_60_high_good = calc_job_finding_prob_women(
                 params=full_params,

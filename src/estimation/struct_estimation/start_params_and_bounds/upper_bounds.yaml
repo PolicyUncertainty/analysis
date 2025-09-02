@@ -12,9 +12,9 @@ disutil_ft_work_disability_men: 5.0
 # Full time work dis-utility women
 disutil_ft_work_good_women: 5.0
 disutil_ft_work_bad_women: 5.0
-disutil_ft_work_disability_women: 5.0
-disutil_partner_retired_men: 5.0
-disutil_partner_retired_women: 5.0
+disutil_ft_work_disability_women: 15.0
+disutil_partner_retired_men: 15.0
+disutil_partner_retired_women: 15.0
 
 # Part time dis-utility men
 disutil_pt_work_good_women: 5.0
@@ -27,9 +27,9 @@ disutil_unemployed_bad_men: 5.0
 disutil_unemployed_disability_men: 5.0
 
 # Unemployment dis-utility women
-disutil_unemployed_good_women: 5.0
-disutil_unemployed_bad_women: 5.0
-disutil_unemployed_disability_women: 5.0
+disutil_unemployed_good_women: 15.0
+disutil_unemployed_bad_women: 15.0
+disutil_unemployed_disability_women: 15.0
 
 # Children dis-utility
 disutil_children_ft_work_low: 5.2

@@ -73,8 +73,13 @@ def job_sep_probability(
     policy_state_value = (
         model_specs["min_SRA"] + policy_state * model_specs["SRA_grid_size"]
     )
-    at_policy_state = jnp.isclose(age, policy_state_value)
-    logit_intercept = log_job_sep_prob + SRA_interecpt * at_policy_state
+    # Check if next period (when age increases by 1) the agent is at the policy state or above. So this period policy
+    # state value -1 should be <= age and policy state value > age
+    policy_state_next_period = ((policy_state_value - 1) <= age) & (
+        policy_state_value > age
+    )
+
+    logit_intercept = log_job_sep_prob + SRA_interecpt * policy_state_next_period
     job_sep_prob = logit_formula(logit_intercept)
     return job_sep_prob
 

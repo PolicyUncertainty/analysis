@@ -1,6 +1,5 @@
 import jax
 import jax.numpy as jnp
-import numpy as np
 
 from model_code.stochastic_processes.math_funcs import logit_formula
 
@@ -74,7 +73,7 @@ def job_sep_probability(
     policy_state_value = (
         model_specs["min_SRA"] + policy_state * model_specs["SRA_grid_size"]
     )
-    at_policy_state = np.isclose(age, policy_state_value)
+    at_policy_state = jnp.isclose(age, policy_state_value)
     logit_intercept = log_job_sep_prob + SRA_interecpt * at_policy_state
     job_sep_prob = logit_formula(logit_intercept)
     return job_sep_prob

@@ -1,16 +1,13 @@
 # Set data paths according to user.
 import os
 from pathlib import Path
-
 import jax
-import matplotlib.pyplot as plt
 
 
 def create_path_dict(define_user=False, user=None):
     # Set jax to 64 bit
     jax.config.update("jax_enable_x64", True)
 
-    set_standard_matplotlib_specs()
 
     if define_user:
         if user is None:
@@ -38,7 +35,6 @@ def create_path_dict(define_user=False, user=None):
         paths_dict = {}
 
     analysis_path = str(Path(__file__).resolve().parents[1]) + "/"
-    paper_path = str(Path(__file__).resolve().parents[2]) + "/paper/"
 
     # Assign input folders
     paths_dict = {
@@ -58,9 +54,17 @@ def create_path_dict(define_user=False, user=None):
     paths_dict["tables"] = analysis_path + "output/tables/"
     paths_dict["plots"] = analysis_path + "output/plots/"
 
-    # Assign folders directly in paper
-    paths_dict["paper_plots"] = analysis_path + "output/paper_plots/"
-    paths_dict["paper_tables"] = paper_path + "tables/"
+    # Assign output subdolders
+    for subfolder in ["beliefs", "data", "model", "first_step", "struct", "validation", "simulation", "other"]:
+        folder_name_plots = paths_dict["plots"] + subfolder
+        folder_name_tables = paths_dict["tables"] + subfolder
+        if not os.path.exists(folder_name_plots):
+            os.makedirs(folder_name_plots)
+        if not os.path.exists(folder_name_tables):
+            os.makedirs(folder_name_tables)
+        paths_dict[subfolder + "_plots"] = folder_name_plots + "/"
+        paths_dict[subfolder + "_tables"] = folder_name_tables + "/"
+                   
 
     # Assign model specification file
     paths_dict["specs"] = analysis_path + "src/spec.yaml"
@@ -98,19 +102,4 @@ def get_model_resutls_path(paths_dict, model_name):
     return folder_dict
 
 
-def set_standard_matplotlib_specs():
-    # Set matplotlib fontsizes
-    plt.rcParams.update(
-        {
-            "axes.titlesize": 18,
-            "axes.labelsize": 14,
-            "xtick.labelsize": 14,
-            "ytick.labelsize": 14,
-            "legend.fontsize": 14,
-        }
-    )
-    # Make lines of plots thicker
-    plt.rcParams["lines.linewidth"] = 3
 
-    # Set defult figure size to (12, 8)
-    plt.rcParams["figure.figsize"] = (12, 8)

@@ -1,15 +1,16 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-from export_results.figures.color_map import JET_COLOR_MAP
+from set_styles import set_colors
 
-def plot_predicted_vs_actual_informed_share(path_dict, specs, show = False, df= None, params = None):
+def plot_predicted_vs_actual_informed_share(path_dict, specs, show = False, save=False, df= None, params = None):
+    JET_COLOR_MAP, LINE_STYLES = set_colors()
     """Plot the predicted vs actual informed shares by education level."""
     # Load data
     if df is None:
-        df = pd.read_csv(path_dict["beliefs_data"] + "soep_is_clean.csv")
+        df = pd.read_csv(path_dict["intermediate_data"] + "beliefs/soep_is_clean.csv")
     if params is None:
-        params = pd.read_csv(path_dict["beliefs_data"] + "beliefs_parameters.csv")
+        params = pd.read_csv(path_dict["intermediate_data"] + "beliefs/beliefs_parameters.csv")
     
     # Generate predicted and actual informed shares
     initial_age = df["age"].min()
@@ -41,18 +42,7 @@ def plot_predicted_vs_actual_informed_share(path_dict, specs, show = False, df= 
         fweights_dict[edu_label] = sum_fweights
     
     # Create plot
-    plt.rcParams.update(
-        {
-            "axes.titlesize": 30,
-            "axes.labelsize": 30,
-            "xtick.labelsize": 30,
-            "ytick.labelsize": 30,
-            "legend.fontsize": 30,
-        }
-    )
-    # Make lines of plots thicker
-    plt.rcParams["lines.linewidth"] = 3
-    fig, ax = plt.subplots(figsize=(16, 9))
+    fig, ax = plt.subplots()
     
     # Calculate marker size scaling parameters using raw fweights
     all_fweights = pd.concat(fweights_dict.values())
@@ -108,7 +98,8 @@ def plot_predicted_vs_actual_informed_share(path_dict, specs, show = False, df= 
             transform=ax.transAxes, fontsize=20, 
             verticalalignment='top', alpha=0.7)
     
-    fig.savefig(path_dict["paper_plots"] + "informed_shares.png", dpi=300, bbox_inches='tight')
+    if save:
+        plt.savefig(path_dict["beliefs_plots"] + "predicted_vs_actual_informed_share.png", bbox_inches="tight")
     if show:
         plt.show()
 

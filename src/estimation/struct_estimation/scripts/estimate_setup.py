@@ -59,7 +59,7 @@ def estimate_model(
             start_params_all[key] = last_estimate[key]
 
     start_params = {name: start_params_all[name] for name in params_to_estimate_names}
-    print_function(start_params)
+    print_function(start_params_all)
 
     lower_bounds_all = yaml.safe_load(
         open(path_dict["start_params_and_bounds"] + "lower_bounds.yaml", "rb")

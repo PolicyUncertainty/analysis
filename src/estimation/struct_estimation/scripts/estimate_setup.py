@@ -210,7 +210,7 @@ class est_class_from_paths:
 
         end = time.time()
         self.iter_count += 1
-        self.print_function(params)
+        self.print_function(full_params)
 
         print("Likelihood value: ", ll_value)
         print("Likelihood evaluation took, ", end - start)

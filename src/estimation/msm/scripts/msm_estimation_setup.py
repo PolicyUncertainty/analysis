@@ -37,7 +37,9 @@ def estimate_model(
     last_estimate: Optional[Dict[str, Any]] = None,
 ):
     """Estimate the model based on empirical data and starting parameters."""
-    print_function = generate_print_func(params_to_estimate_names)
+    specs = generate_derived_and_data_derived_specs(path_dict)
+
+    print_function = generate_print_func(params_to_estimate_names, specs)
 
     # # Assign start params from before
     if last_estimate is not None:
@@ -74,7 +76,6 @@ def estimate_model(
         "SRA_at_start": 67,
         "SRA_at_retirement": 67,
     }
-    specs = generate_derived_and_data_derived_specs(path_dict)
 
     model = specify_model(
         path_dict=path_dict,

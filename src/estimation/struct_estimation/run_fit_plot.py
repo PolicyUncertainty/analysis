@@ -49,7 +49,7 @@ else:
     params = pickle.load(
         open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
     )
-    generate_print_func(params.keys())(params)
+    generate_print_func(params.keys(), specs)(params)
 
     model_solved = specify_and_solve_model(
         path_dict=path_dict,

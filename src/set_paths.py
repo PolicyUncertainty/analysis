@@ -56,7 +56,7 @@ def create_path_dict(define_user=False, user=None):
     paths_dict["plots"] = analysis_path + "output/plots/"
 
     # Assign plot and table subdolders
-    for subfolder in ["beliefs", "data", "model", "first_step", "struct", "validation", "simulation", "other"]:
+    for subfolder in ["beliefs", "data", "model", "first_step", "struct", "validation", "simulation", "misc"]:
         folder_name_plots = paths_dict["plots"] + subfolder
         folder_name_tables = paths_dict["tables"] + subfolder
         paths_dict[subfolder + "_plots"] = folder_name_plots + "/"

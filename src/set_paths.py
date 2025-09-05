@@ -70,14 +70,15 @@ def create_path_dict(define_user=False, user=None):
         analysis_path + "src/estimation/struct_estimation/start_params_and_bounds/"
     )
 
-    # Assign name of structural estimation sample
-    paths_dict["struct_est_sample"] = (
-        paths_dict["intermediate_data"] + "structural_estimation_sample.csv"
-    )
     # Check if entries of paths_dict exist, if not create them
     for key, path in paths_dict.items():
         if not os.path.exists(path):
             os.makedirs(path)
+
+    # Assign name of structural estimation sample
+    paths_dict["struct_est_sample"] = (
+        paths_dict["intermediate_data"] + "structural_estimation_sample.csv"
+    )
     return paths_dict
 
 

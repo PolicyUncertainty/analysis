@@ -5,11 +5,11 @@ import pandas as pd
 
 from set_paths import create_path_dict
 from set_styles import set_plot_defaults
-from specs.derive_specs import read_and_derive_specs
+from specs.derive_specs import generate_derived_and_data_derived_specs
 
 # paths, specs, create directories
 path_dict = create_path_dict(define_user=True)
-specs = read_and_derive_specs(path_dict["specs"])
+specs = generate_derived_and_data_derived_specs(path_dict)
 show_plots = False
 save_plots = True
 
@@ -30,6 +30,25 @@ plot_partner_wage_results(path_dict, specs, show=show_plots, save=save_plots)
 from first_step_estimation.plots.family_plots import plot_family_transition_results
 plot_family_transition_results(path_dict, specs, show=show_plots, save=save_plots)
 
-# credited periods plots (requires SOEP data access)
+# credited periods plots (CREATES ITS OWN DATA; TODO: FIX)
 from first_step_estimation.plots.credited_periods_plots import plot_credited_periods_results
 plot_credited_periods_results(path_dict, specs, show=show_plots, save=save_plots)
+
+# family parameter plots (requires partner_transition_estimation_sample.pkl)
+from first_step_estimation.plots.family_plots import plot_children, plot_marriage_and_divorce
+plot_children(path_dict, specs, show=show_plots, save=save_plots)
+plot_marriage_and_divorce(path_dict, specs, show=show_plots, save=save_plots)
+
+# health state plots (requires health_transition_estimation_sample.pkl)
+from first_step_estimation.plots.health_states_plots import plot_healthy_unhealthy, plot_health_transition_prob
+plot_healthy_unhealthy(path_dict, specs, show=show_plots, save=save_plots)
+plot_health_transition_prob(path_dict, specs, show=show_plots, save=save_plots)
+
+# job separation plots (requires job separation sample)
+from first_step_estimation.plots.job_separation_plots import plot_job_separations
+plot_job_separations(path_dict, specs, show=show_plots, save=save_plots)
+
+# mortality plots (requires mortality estimation results)
+from first_step_estimation.plots.mortality_plots import plot_mortality, plot_mortality_hazard_ratios
+plot_mortality(path_dict, specs, show=show_plots, save=save_plots)
+plot_mortality_hazard_ratios(path_dict, specs, show=show_plots, save=save_plots)

@@ -1,13 +1,30 @@
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
-
+from set_styles import set_colors
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
-def plot_state_by_age_and_type(path_dict, state_vars):
+def plot_state_by_age_and_type(path_dict, state_vars, specs=None, show=False, save=False):
+    """Plot state variables by age and education type.
+    
+    Parameters
+    ----------
+    path_dict : dict
+        Dictionary containing paths to data and output directories
+    state_vars : list
+        List of state variables to plot
+    specs : dict, optional
+        Model specifications. If None, will be loaded from file.
+    show : bool, default False
+        Whether to display plots
+    save : bool, default False  
+        Whether to save plots to disk
+    """
+    colors, _ = set_colors()
     struct_est_sample = pd.read_csv(path_dict["struct_est_sample"])
-    specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
+    if specs is None:
+        specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
 
     # age restriction
     struct_est_sample["age"] = struct_est_sample["period"] + specs["start_age"]
@@ -45,7 +62,7 @@ def plot_state_by_age_and_type(path_dict, state_vars):
             else:
                 raise ValueError("Only median and mean are supported")
             ax = axs[edu, idx] if n_education_types > 1 else axs[idx]
-            ax.plot(plot_ages, state_values, label=state_var)
+            ax.plot(plot_ages, state_values, label=state_var, color=colors[edu])
             ax.legend()
             ax.set_title(f"{specs['education_labels'][edu]}: {state_var}")
             ax.set_xlabel("Age")
@@ -53,3 +70,12 @@ def plot_state_by_age_and_type(path_dict, state_vars):
             ax.set_ylim(bottom=0)  # Adjust as needed
 
     plt.tight_layout()
+    
+    if save:
+        fig.savefig(path_dict["data_plots"] + "states_by_age_and_type.pdf", bbox_inches="tight")
+        fig.savefig(path_dict["data_plots"] + "states_by_age_and_type.png", bbox_inches="tight", dpi=300)
+        
+    if show:
+        plt.show()
+    else:
+        plt.close(fig)

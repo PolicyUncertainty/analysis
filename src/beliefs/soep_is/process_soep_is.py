@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from process_data.aux_and_plots.filter_data import recode_sex
+from process_data.auxiliary.filter_data import recode_sex
 from process_data.soep_vars.age import calc_age_at_interview
 from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.health import create_health_var

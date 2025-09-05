@@ -10,8 +10,7 @@ import pandas as pd
 import yaml
 from dcegm.asset_correction import adjust_observed_assets
 from matplotlib import pyplot as plt
-
-from export_results.figures.color_map import JET_COLOR_MAP
+from set_styles import set_colors
 from model_code.specify_model import specify_model
 from model_code.state_space.experience import scale_experience_years
 from process_data.structural_sample_scripts.create_structural_est_sample import (
@@ -19,16 +18,30 @@ from process_data.structural_sample_scripts.create_structural_est_sample import 
 )
 
 
-def plot_income(paths_dict, specs):
+def plot_income(path_dict, specs, show=False, save=False):
+    """Plot simulated vs observed income by sex and education.
+    
+    Parameters
+    ----------
+    path_dict : dict
+        Dictionary containing paths to data and output directories
+    specs : dict
+        Dictionary containing model specifications
+    show : bool, default False
+        Whether to display plots
+    save : bool, default False  
+        Whether to save plots to disk
+    """
+    colors, _ = set_colors()
     # Load data
-    data_decision = pd.read_csv(paths_dict["struct_est_sample"])
+    data_decision = pd.read_csv(path_dict["struct_est_sample"])
     data_decision = data_decision.astype(CORE_TYPE_DICT)
 
     # old people
     data_decision = data_decision[data_decision["period"] < 50]
 
     model_class = specify_model(
-        paths_dict,
+        path_dict,
         specs,
         subj_unc=True,
         custom_resolution_age=None,
@@ -60,7 +73,7 @@ def plot_income(paths_dict, specs):
     model_name = specs["model_name"]
 
     params = pickle.load(
-        open(paths_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
+        open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
     )
 
     assets_begin_of_period, aux = adjust_observed_assets(
@@ -105,12 +118,14 @@ def plot_income(paths_dict, specs):
             ax = axs[edu_var]
             ax.plot(
                 sim_inc.loc[(sex_var, edu_var, slice(None))],
-                color=JET_COLOR_MAP[sex_var],
+                color=colors[sex_var],
+                label=f"Sim {sex_label}",
             )
             ax.plot(
                 obs_inc.loc[(sex_var, edu_var, slice(None))],
-                color=JET_COLOR_MAP[sex_var],
+                color=colors[sex_var],
                 ls="--",
+                label=f"Obs {sex_label}",
             )
             # ax.plot(obs_inc_net.loc[(sex_var, edu_var, slice(None))], color=JET_COLOR_MAP[sex_var], ls=":")
             # ax.plot(sim_inc_net.loc[(sex_var, edu_var, slice(None))], color=JET_COLOR_MAP[sex_var], ls="-.", label=sex_label)
@@ -120,4 +135,13 @@ def plot_income(paths_dict, specs):
             ax.set_ylabel("Income")
             ax.legend()
 
-    plt.show()
+    plt.tight_layout()
+    
+    if save:
+        fig.savefig(path_dict["data_plots"] + "income_comparison.pdf", bbox_inches="tight")
+        fig.savefig(path_dict["data_plots"] + "income_comparison.png", bbox_inches="tight", dpi=300)
+        
+    if show:
+        plt.show()
+    else:
+        plt.close(fig)

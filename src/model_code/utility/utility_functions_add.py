@@ -192,19 +192,19 @@ def disutility_work(
     partner_retired = partner_state == 2
 
     good_health = health == model_specs["good_health_var"]
-    bad_health = health == model_specs["bad_health_var"]
-    disability_health = health == model_specs["disabled_health_var"]
+    # bad_health = health == model_specs["bad_health_var"]
+    # disability_health = health == model_specs["disabled_health_var"]
 
     # reading parameters
     disutil_ft_work_men = (
         params["disutil_ft_work_good_men"] * good_health
-        + params["disutil_ft_work_bad_men"] * bad_health
-        + params["disutil_ft_work_disability_men"] * disability_health
+        + params["disutil_ft_work_bad_men"] * (1 - good_health)
+        # + params["disutil_ft_work_disability_men"] * disability_health
     )
     disutil_unemployment_men = (
         params["disutil_unemployed_good_men"] * good_health
-        + params["disutil_unemployed_bad_men"] * bad_health
-        + params["disutil_unemployed_disability_men"] * disability_health
+        + params["disutil_unemployed_bad_men"] * (1 - good_health)
+        # + params["disutil_unemployed_disability_men"] * disability_health
     )
 
     disutil_sum_men = (
@@ -215,13 +215,13 @@ def disutility_work(
 
     disutil_ft_work_women = (
         params["disutil_ft_work_good_women"] * good_health
-        + params["disutil_ft_work_bad_women"] * bad_health
-        + params["disutil_ft_work_disability_women"] * disability_health
+        + params["disutil_ft_work_bad_women"] * (1 - good_health)
+        # + params["disutil_ft_work_disability_women"] * disability_health
     )
     disutil_pt_work_women = (
         params["disutil_pt_work_good_women"] * good_health
-        + params["disutil_pt_work_bad_women"] * bad_health
-        + params["disutil_pt_work_disability_women"] * disability_health
+        + params["disutil_pt_work_bad_women"] * (1 - good_health)
+        # + params["disutil_pt_work_disability_women"] * disability_health
     )
 
     disutil_children = params["disutil_children_ft_work_high"] * education + params[
@@ -236,8 +236,8 @@ def disutility_work(
 
     disutil_unemployment = (
         params["disutil_unemployed_good_women"] * good_health
-        + params["disutil_unemployed_bad_women"] * bad_health
-        + params["disutil_unemployed_disability_women"] * disability_health
+        + params["disutil_unemployed_bad_women"] * (1 - good_health)
+        # + params["disutil_unemployed_disability_women"] * disability_health
     )
 
     disutil_sum_women = (

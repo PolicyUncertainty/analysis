@@ -14,8 +14,8 @@ disutil_ft_work_disability_men: 1.0
 disutil_ft_work_good_women: 1.0
 disutil_ft_work_bad_women: 1.0
 disutil_ft_work_disability_women: 1.0
-disutil_partner_retired_men: -0.5
-disutil_partner_retired_women: -0.5
+disutil_partner_retired_men: -2
+disutil_partner_retired_women: -2
 
 # Part time dis-utility men
 disutil_pt_work_good_women: 1.0

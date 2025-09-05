@@ -402,7 +402,7 @@ def get_gendered_params(params_to_estimate_names, append):
         params["job_finding"] = job_finding_params
 
     if len(disability_params) > 0:
-        params["disability"] = disability_params
+        params["disability_logit"] = disability_params
 
     if len(disutil_params_partner) > 0:
         params["partner"] = disutil_params_partner

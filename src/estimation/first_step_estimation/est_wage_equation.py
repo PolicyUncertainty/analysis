@@ -1,3 +1,9 @@
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# THIS IS THE LEGACY VERSION - DELETE SOON!
+# NEW HOME: src/first_step_estimation/estimation/wage_estimation.py
+# NEW PLOTTING: src/first_step_estimation/plots/wage_plots.py
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 # Description: This file estimates the parameters of the HOURLY wage equation using the SOEP panel data.
 # We estimate the following equation for each education level:
 # ln_wage = beta_0 + beta_1 * ln_(exp+1) + individual_FE + time_FE + epsilon

@@ -1,6 +1,7 @@
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import numpy as np
+from set_styles import set_colors
 
 from model_code.pension_system.early_retirement_paths import check_very_long_insured
 from model_code.state_space.experience import (

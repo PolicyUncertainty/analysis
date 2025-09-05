@@ -21,7 +21,6 @@ def create_credited_periods_est_sample(paths, load_data=False, plot_data=False):
     if load_data:
         df = pd.read_pickle(out_file_path)
         return df
-
     df = load_and_merge_soep_core(
         soep_c38_path=paths["soep_c38"], soep_rv_path=paths["soep_rv"]
     )

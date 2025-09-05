@@ -8,7 +8,7 @@ def create_path_dict(define_user=False, user=None):
     # Set jax to 64 bit
     jax.config.update("jax_enable_x64", True)
 
-
+    # Assign raw data paths (only if define_user is True)
     if define_user:
         if user is None:
             user = input("Enter user name ([b]runo / [m]ax / [g]regor): ")
@@ -42,30 +42,26 @@ def create_path_dict(define_user=False, user=None):
         "intermediate_data": analysis_path + "output/intermediate_data/",
         "open_data": analysis_path + "output/open_access_data/",
     }
-    # Assign result folders
+    # Assign est result folders
     paths_dict["est_results"] = analysis_path + "output/est_results/"
-    paths_dict["first_step_results"] = analysis_path + "output/est_results/first_step/"
-    paths_dict["first_step_incomes"] = analysis_path + "output/est_results/incomes/"
-
+    paths_dict["first_step_results"] = analysis_path + "output/est_results/first_step/" # legacxy path
+    paths_dict["first_step_incomes"] = analysis_path + "output/est_results/incomes/"    # legacy path
     paths_dict["struct_results"] = analysis_path + "output/est_results/struct_results/"
+
+
     paths_dict["sim_results"] = analysis_path + "output/sim_results/"
 
-    # Assign output folders
+    # Assign plot and table folders
     paths_dict["tables"] = analysis_path + "output/tables/"
     paths_dict["plots"] = analysis_path + "output/plots/"
 
-    # Assign output subdolders
+    # Assign plot and table subdolders
     for subfolder in ["beliefs", "data", "model", "first_step", "struct", "validation", "simulation", "other"]:
         folder_name_plots = paths_dict["plots"] + subfolder
         folder_name_tables = paths_dict["tables"] + subfolder
-        if not os.path.exists(folder_name_plots):
-            os.makedirs(folder_name_plots)
-        if not os.path.exists(folder_name_tables):
-            os.makedirs(folder_name_tables)
         paths_dict[subfolder + "_plots"] = folder_name_plots + "/"
         paths_dict[subfolder + "_tables"] = folder_name_tables + "/"
                    
-
     # Assign model specification file
     paths_dict["specs"] = analysis_path + "src/spec.yaml"
 

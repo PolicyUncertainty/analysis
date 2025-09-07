@@ -21,7 +21,7 @@ def create_path_dict(define_user=False, user=None):
         if user == "b":
             data_path = "C:/Users/bruno/papers/soep/"
         elif user == "m":
-            data_path = "/home/maxbl/Uni/pol_uncertainty/data/"
+            data_path = "/home/maxbl/Uni/data/"
         elif user == "g":
             data_path = "/Users/gregorschuler/GitProjects/soep/"
         else:

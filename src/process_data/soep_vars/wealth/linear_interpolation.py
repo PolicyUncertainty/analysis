@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 
 from process_data.soep_vars.age import calc_age_at_interview
+from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.wealth.deflate_wealth import deflate_wealth
 
 
@@ -27,6 +28,10 @@ def add_wealth_interpolate_and_deflate(
         wealth_data_full = add_personal_data(
             path_dict, specs, wealth_data_full, use_processed_pl
         )
+        df = create_education_type(wealth_data_full, filter_missings=False)
+        import matplotlib.pyplot as plt
+
+        breakpoint()
         # Interpolate wealth for each household (consistent hh size)
         wealth_data_full = interpolate_and_extrapolate_wealth(wealth_data_full)
         # Deflate wealth
@@ -343,6 +348,28 @@ def add_personal_data(path_dict, specs, wealth_data_full, use_processed_pl=True)
     ppathl_data.dropna(inplace=True)  # drop if most basic data is missing
     ppathl_data["hid"] = ppathl_data["hid"].astype(int)
 
+    # Load SOEP core data
+    pgen_data = pd.read_stata(
+        f"{soep_c38_path}/pgen.dta",
+        columns=[
+            "syear",
+            "pid",
+            "hid",
+            "pgemplst",
+            "pgexpft",
+            "pgexppt",
+            "pgstib",
+            "pgpartz",
+            "pglabgro",
+            "pgpsbil",
+        ],
+        convert_categoricals=False,
+    )
+    # Merge pgen data with pathl data and hl data
+    merged_data = pd.merge(
+        ppathl_data, pgen_data, on=["pid", "hid", "syear"], how="left"
+    )
+
     pl_intermediate_file = path_dict["intermediate_data"] + "pl_structural_w.pkl"
     if use_processed_pl:
         pl_data = pd.read_pickle(pl_intermediate_file)
@@ -367,7 +394,7 @@ def add_personal_data(path_dict, specs, wealth_data_full, use_processed_pl=True)
         pl_data["hid"] = pl_data["hid"].astype(int)
         pl_data.to_pickle(pl_intermediate_file)
 
-    merged_data = pd.merge(ppathl_data, pl_data, on=["pid", "syear", "hid"], how="left")
+    merged_data = pd.merge(merged_data, pl_data, on=["pid", "syear", "hid"], how="left")
 
     # set index to pid and syear, create age and filter by age, drop pids
     merged_data.set_index(["pid", "syear"], inplace=True)

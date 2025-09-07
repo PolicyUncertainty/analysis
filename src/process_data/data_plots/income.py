@@ -10,17 +10,18 @@ import pandas as pd
 import yaml
 from dcegm.asset_correction import adjust_observed_assets
 from matplotlib import pyplot as plt
-from set_styles import set_colors
+
 from model_code.specify_model import specify_model
 from model_code.state_space.experience import scale_experience_years
 from process_data.structural_sample_scripts.create_structural_est_sample import (
     CORE_TYPE_DICT,
 )
+from set_styles import set_colors
 
 
 def plot_income(path_dict, specs, show=False, save=False):
     """Plot simulated vs observed income by sex and education.
-    
+
     Parameters
     ----------
     path_dict : dict
@@ -29,7 +30,7 @@ def plot_income(path_dict, specs, show=False, save=False):
         Dictionary containing model specifications
     show : bool, default False
         Whether to display plots
-    save : bool, default False  
+    save : bool, default False
         Whether to save plots to disk
     """
     colors, _ = set_colors()
@@ -72,13 +73,9 @@ def plot_income(path_dict, specs, show=False, save=False):
 
     model_name = specs["model_name"]
 
-    params = pickle.load(
-        open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
-    )
-
     assets_begin_of_period, aux = adjust_observed_assets(
         observed_states_dict=states_dict,
-        params=params,
+        params={},
         model_class=model_class,
         aux_outs=True,
     )
@@ -136,11 +133,17 @@ def plot_income(path_dict, specs, show=False, save=False):
             ax.legend()
 
     plt.tight_layout()
-    
+
     if save:
-        fig.savefig(path_dict["data_plots"] + "income_comparison.pdf", bbox_inches="tight")
-        fig.savefig(path_dict["data_plots"] + "income_comparison.png", bbox_inches="tight", dpi=300)
-        
+        fig.savefig(
+            path_dict["data_plots"] + "income_comparison.pdf", bbox_inches="tight"
+        )
+        fig.savefig(
+            path_dict["data_plots"] + "income_comparison.png",
+            bbox_inches="tight",
+            dpi=300,
+        )
+
     if show:
         plt.show()
     else:

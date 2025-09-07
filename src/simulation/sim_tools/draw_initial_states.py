@@ -17,6 +17,11 @@ def draw_initial_states(
     specs = model["options"]["model_params"]
     n_agents = specs["n_agents"]
 
+    # Generate start policy state from initial SRA
+    initial_policy_state = np.floor(
+        (inital_SRA - specs["min_SRA"]) / specs["SRA_grid_size"]
+    )
+
     observed_data = pd.read_csv(path_dict["struct_est_sample"])
 
     np.random.seed(seed)
@@ -42,7 +47,7 @@ def draw_initial_states(
     start_period_data.loc[:, "adjusted_wealth"] = adjust_observed_assets(
         observed_states_dict=states_dict,
         params=params,
-        model=model,
+        model_class=model,
     )
 
     # Generate container
@@ -140,6 +145,7 @@ def draw_initial_states(
                 sex=jnp.ones_like(lagged_choice_edu) * sex_var,
                 model_specs=specs,
                 education=jnp.ones_like(lagged_choice_edu) * edu,
+                policy_state=jnp.ones_like(lagged_choice_edu) * initial_policy_state,
                 period=jnp.zeros_like(lagged_choice_edu),
                 choice=lagged_choice_edu,
             ).T
@@ -186,11 +192,6 @@ def draw_initial_states(
     # Set lagged choice to 1(unemployment) if experience is 0
     exp_zero_mask = exp_agents == 0
     lagged_choice[exp_zero_mask] = 1
-
-    # Generate start policy state from initial SRA
-    initial_policy_state = np.floor(
-        (inital_SRA - specs["min_SRA"]) / specs["SRA_grid_size"]
-    )
 
     policy_state_agents = (jnp.ones_like(exp_agents) * initial_policy_state).astype(
         jnp.uint8

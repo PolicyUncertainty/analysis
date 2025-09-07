@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 
 from export_results.figures.color_map import JET_COLOR_MAP
+from model_code.stochastic_processes.math_funcs import logit_formula
 from process_data.first_step_sample_scripts.create_job_sep_sample import (
     create_job_sep_sample,
 )
@@ -27,12 +28,14 @@ def plot_job_separations(path_dict, specs):
     df_job["good_health"] = (
         df_job["lagged_health"] == specs["good_health_var"]
     ).astype(int)
-    df_job["predicted_probs"] = specs["job_sep_probs"][
-        df_job["sex"].values,
-        df_job["education"].values,
-        df_job["good_health"].values,
-        df_job["age"].values,
-    ]
+    df_job["predicted_probs"] = logit_formula(
+        specs["log_job_sep_probs"][
+            df_job["sex"].values,
+            df_job["education"].values,
+            df_job["good_health"].values,
+            df_job["age"].values,
+        ]
+    )
 
     fig, axs = plt.subplots(ncols=2, figsize=(12, 8))
     predicted_probs = df_job.groupby(["sex", "education", "age"])[

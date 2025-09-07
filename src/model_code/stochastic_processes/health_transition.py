@@ -1,6 +1,8 @@
 import jax
 import jax.numpy as jnp
 
+from model_code.stochastic_processes.math_funcs import logit_formula
+
 
 def health_transition(
     sex, health, education, period, params, choice, lagged_choice, model_specs
@@ -53,13 +55,13 @@ def calc_disability_probability(params, sex, education, period, model_specs):
     above_55 = age >= 55
 
     # Calculate exp value for men and women
-    exp_value_men = jnp.exp(
+    logit_factor_men = (
         params["disability_logit_const_men"]
         + params["disability_logit_age_men"] * age
         + params["disability_logit_age_above_55_men"] * (age - 55) * above_55
         + params["disability_logit_high_educ_men"] * education
     )
-    exp_value_women = jnp.exp(
+    logit_factor_women = (
         params["disability_logit_const_women"]
         + params["disability_logit_age_women"] * age
         + params["disability_logit_age_above_55_women"] * (age - 55) * above_55
@@ -67,8 +69,10 @@ def calc_disability_probability(params, sex, education, period, model_specs):
     )
     # Now select based on sex state
     is_men = sex == 0
-    exp_value = jax.lax.select(is_men, on_true=exp_value_men, on_false=exp_value_women)
-    prob = exp_value / (1 + exp_value)
+    logit_factor = jax.lax.select(
+        is_men, on_true=logit_factor_men, on_false=logit_factor_women
+    )
+    prob = logit_formula(logit_factor)
 
     return prob
 

@@ -4,6 +4,7 @@ import jax.numpy as jnp
 import numpy as np
 import yaml
 
+from model_code.stochastic_processes.math_funcs import inv_logit_formula, logit_formula
 from specs.experience_pp_specs import add_experience_and_pp_specs
 from specs.family_specs import (
     predict_children_by_state,
@@ -38,10 +39,8 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     # Read in health transition matrix
     specs["health_trans_mat"] = read_in_health_transition_specs(path_dict, specs)
 
-    specs["job_sep_probs"] = jnp.asarray(
-        pkl.load(open(path_dict["est_results"] + "job_sep_probs.pkl", "rb"))
-    )
-
+    job_sep_probs = pkl.load(open(path_dict["est_results"] + "job_sep_probs.pkl", "rb"))
+    specs["log_job_sep_probs"] = inv_logit_formula(job_sep_probs)
     return specs
 
 

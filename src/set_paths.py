@@ -1,6 +1,7 @@
 # Set data paths according to user.
 import os
 from pathlib import Path
+
 import jax
 
 
@@ -18,7 +19,7 @@ def create_path_dict(define_user=False, user=None):
         if user == "b":
             data_path = "C:/Users/bruno/papers/soep/"
         elif user == "m":
-            data_path = "/home/maxbl/Uni/pol_uncertainty/data/"
+            data_path = "/home/maxbl/Uni/data/"
         elif user == "g":
             data_path = "/Users/gregorschuler/GitProjects/soep/"
         else:
@@ -44,10 +45,13 @@ def create_path_dict(define_user=False, user=None):
     }
     # Assign est result folders
     paths_dict["est_results"] = analysis_path + "output/est_results/"
-    paths_dict["first_step_results"] = analysis_path + "output/est_results/first_step/" # legacxy path
-    paths_dict["first_step_incomes"] = analysis_path + "output/est_results/incomes/"    # legacy path
+    paths_dict["first_step_results"] = (
+        analysis_path + "output/est_results/first_step/"
+    )  # legacxy path
+    paths_dict["first_step_incomes"] = (
+        analysis_path + "output/est_results/incomes/"
+    )  # legacy path
     paths_dict["struct_results"] = analysis_path + "output/est_results/struct_results/"
-
 
     paths_dict["sim_results"] = analysis_path + "output/sim_results/"
 
@@ -56,12 +60,21 @@ def create_path_dict(define_user=False, user=None):
     paths_dict["plots"] = analysis_path + "output/plots/"
 
     # Assign plot and table subdolders
-    for subfolder in ["beliefs", "data", "model", "first_step", "struct", "validation", "simulation", "misc"]:
+    for subfolder in [
+        "beliefs",
+        "data",
+        "model",
+        "first_step",
+        "struct",
+        "validation",
+        "simulation",
+        "misc",
+    ]:
         folder_name_plots = paths_dict["plots"] + subfolder
         folder_name_tables = paths_dict["tables"] + subfolder
         paths_dict[subfolder + "_plots"] = folder_name_plots + "/"
         paths_dict[subfolder + "_tables"] = folder_name_tables + "/"
-                   
+
     # Assign model specification file
     paths_dict["specs"] = analysis_path + "src/spec.yaml"
 
@@ -97,6 +110,3 @@ def get_model_resutls_path(paths_dict, model_name):
         folder_dict[folder] = folder_name + "/"
 
     return folder_dict
-
-
-

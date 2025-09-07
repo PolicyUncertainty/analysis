@@ -1,3 +1,9 @@
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# THIS IS THE LEGACY VERSION - DELETE SOON!
+# NEW HOME: src/first_step_estimation/estimation/family_estimation.py
+# NEW PLOTTING: src/first_step_estimation/plots/family_plots.py
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 # Description: This file estimates the parameters of the partner transition matrix using the SOEP panel data.
 # For each sex, education level and age bin (10 years), we estimate P(partner_state | lagged_partner_state) non-parametrically.
 import pickle as pkl

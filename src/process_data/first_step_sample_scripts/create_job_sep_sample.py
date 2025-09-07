@@ -3,13 +3,13 @@ import os
 import numpy as np
 import pandas as pd
 
-from process_data.aux_and_plots.filter_data import (
+from process_data.auxiliary.filter_data import (
     drop_missings,
     filter_below_age,
     filter_years,
     recode_sex,
 )
-from process_data.aux_and_plots.lagged_and_lead_vars import (
+from process_data.auxiliary.lagged_and_lead_vars import (
     span_dataframe,
 )
 from process_data.soep_vars.education import create_education_type

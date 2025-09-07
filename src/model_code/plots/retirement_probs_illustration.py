@@ -7,6 +7,7 @@ from model_code.state_space.experience import (
     construct_experience_years,
     scale_experience_years,
 )
+from set_styles import set_colors
 
 
 def plot_solution(model_solved, specs, path_dict):

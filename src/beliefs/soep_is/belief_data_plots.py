@@ -1,9 +1,10 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from export_results.figures.color_map import JET_COLOR_MAP
+from set_styles import set_colors
 
-def plot_sra_beliefs_by_cohort(paths_dict, show=False):
+def plot_sra_beliefs_by_cohort(paths_dict, show=False, save=False):
+    JET_COLOR_MAP, LINE_STYLES = set_colors()
     df_soep_is = pd.read_csv(
         paths_dict["intermediate_data"] + "beliefs/soep_is_clean.csv",
         dtype={"gebjahr": int},
@@ -38,17 +39,7 @@ def plot_sra_beliefs_by_cohort(paths_dict, show=False):
         ]
     ].mean()
 
-    plt.rcParams.update(
-        {
-            "axes.titlesize": 30,
-            "axes.labelsize": 30,
-            "xtick.labelsize": 30,
-            "ytick.labelsize": 30,
-            "legend.fontsize": 30,
-        }
-    )
-
-    fig, ax = plt.subplots(figsize=(16, 9))
+    fig, ax = plt.subplots()
     exp_ret_data_mean.plot(
         y=[
             "pol_unc_stat_ret_age_67",
@@ -82,11 +73,14 @@ def plot_sra_beliefs_by_cohort(paths_dict, show=False):
     ax.set_ylim([0, 100])
     ax.set_yticks(range(0, 100, 20))
     fig.tight_layout()
+    if save:
+        plt.savefig(paths_dict["beliefs_plots"] + "sra_beliefs_by_cohort.png", bbox_inches="tight")
     if show:
         plt.show()
 
 
-def plot_erp_beliefs_by_cohort(paths_dict, show=False):
+def plot_erp_beliefs_by_cohort(paths_dict, show=False, save=False):
+    JET_COLOR_MAP, LINE_STYLES = set_colors()
     # Load and prepare the data
     df_soep_is = pd.read_csv(
         paths_dict["intermediate_data"] + "beliefs/soep_is_clean.csv",
@@ -109,20 +103,8 @@ def plot_erp_beliefs_by_cohort(paths_dict, show=False):
     ded_data_edu_mean = ded_data_edu_grouped["belief_pens_deduct"].mean()
     ded_data_edu_sem = ded_data_edu_grouped["belief_pens_deduct"].sem()
     ded_data_edu_median = ded_data_edu_grouped["belief_pens_deduct"].median()
-    # Set matplotlib fontsizes
-    plt.rcParams.update(
-        {
-            "axes.titlesize": 30,
-            "axes.labelsize": 30,
-            "xtick.labelsize": 30,
-            "ytick.labelsize": 30,
-            "legend.fontsize": 30,
-        }
-    )
-    # Make lines of plots thicker
-    plt.rcParams["lines.linewidth"] = 3
     # Plot the results
-    fig, ax = plt.subplots(figsize=(16, 9))
+    fig, ax = plt.subplots()
     ded_data_edu_mean.plot(
         y="belief_pens_deduct",
         ax=ax,
@@ -164,16 +146,19 @@ def plot_erp_beliefs_by_cohort(paths_dict, show=False):
         ],
         rotation=0,
     )
-    ax.legend(loc="upper left", fancybox=True, framealpha=0.5)
+    ax.legend(loc="upper left")
     ax.set_xlabel("Birth Cohort")
     ax.set_ylabel("Penalty in %")
     ax.set_ylim([0, 20])
     fig.tight_layout()
+    if save:
+        plt.savefig(paths_dict["beliefs_plots"] + "erp_beliefs_by_cohort.png", bbox_inches="tight")
     if show:
         plt.show()
 
 
-def plot_erp_violin_plots_by_cohort(paths_dict, show=False, censor_above=None):
+def plot_erp_violin_plots_by_cohort(paths_dict, show=False, save=False, censor_above=None):
+    JET_COLOR_MAP, LINE_STYLES = set_colors()
     """
     Plot violin plots of ERP beliefs by birth cohort groups.
     Shows the distribution density of beliefs within each cohort.
@@ -212,19 +197,8 @@ def plot_erp_violin_plots_by_cohort(paths_dict, show=False, censor_above=None):
         data_deduction, age_bins=age_bins
     )
     
-    # Set matplotlib fontsizes
-    plt.rcParams.update(
-        {
-            "axes.titlesize": 30,
-            "axes.labelsize": 30,
-            "xtick.labelsize": 30,
-            "ytick.labelsize": 30,
-            "legend.fontsize": 30,
-        }
-    )
-    
     # Create the violin plot
-    fig, ax = plt.subplots(figsize=(16, 9))
+    fig, ax = plt.subplots()
     
     # Prepare data for violin plot
     violin_data = []
@@ -297,13 +271,15 @@ def plot_erp_violin_plots_by_cohort(paths_dict, show=False, censor_above=None):
     # Create legend with all elements
     handles = [ax.lines[0], mean_line, median_line]  # true ERP line, mean line, median line
     labels = ['true ERP', 'mean of cohort', 'median of cohort']
-    
-    ax.legend(handles=handles, labels=labels, loc="upper left", fancybox=True, framealpha=0.5)
-    
+
+    ax.legend(handles=handles, labels=labels, loc="upper left")
+
     # Rotate x-axis labels for better readability
     plt.setp(ax.get_xticklabels(), rotation=0)
     
     fig.tight_layout()
+    if save:
+        plt.savefig(paths_dict["beliefs_plots"] + "erp_violin_plots_by_cohort.png", bbox_inches="tight")
     if show:
         plt.show()
 
@@ -313,7 +289,8 @@ def create_gebjahr_groups(data, age_bins):
         data["gebjahr"], bins=age_bins, labels=range(len(age_bins) - 1), right=False
     )
 
-def plot_informed_share_by_cohort(paths_dict, show=False):
+def plot_informed_share_by_cohort(paths_dict, show=False, save=False):
+    JET_COLOR_MAP, LINE_STYLES = set_colors()
     """
     Plot the share of informed individuals by birth cohort groups.
     Shows the proportion of each cohort that is informed.
@@ -345,22 +322,8 @@ def plot_informed_share_by_cohort(paths_dict, show=False):
     # Convert to percentage
     informed_by_cohort['informed_share_pct'] = informed_by_cohort['informed_share'] * 100
     
-    # Set matplotlib fontsizes
-    plt.rcParams.update(
-        {
-            "axes.titlesize": 30,
-            "axes.labelsize": 30,
-            "xtick.labelsize": 30,
-            "ytick.labelsize": 30,
-            "legend.fontsize": 30,
-        }
-    )
-    
-    # Set line width
-    plt.rcParams["lines.linewidth"] = 3
-    
     # Create the plot
-    fig, ax = plt.subplots(figsize=(16, 9))
+    fig, ax = plt.subplots()
     
     # Cohort labels
     cohort_labels = [
@@ -395,12 +358,14 @@ def plot_informed_share_by_cohort(paths_dict, show=False):
     ax.set_xticklabels(cohort_labels)
     
     # Add grid for better readability
-    ax.grid(True, alpha=0.3, axis='y', color=JET_COLOR_MAP[8])
-    ax.set_axisbelow(True)
+    # ax.grid(axis='y', color=JET_COLOR_MAP[8])
+    # ax.set_axisbelow(True)
     
     # Rotate x-axis labels for better readability
     plt.setp(ax.get_xticklabels(), rotation=0)
     
     fig.tight_layout()
+    if save:
+        plt.savefig(paths_dict["beliefs_plots"] + "informed_share_by_cohort.png", bbox_inches="tight")
     if show:
         plt.show()

@@ -2,7 +2,7 @@ import os
 
 import pandas as pd
 
-from process_data.aux_and_plots.filter_data import filter_data
+from process_data.auxiliary.filter_data import filter_data
 from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.experience import sum_experience_variables
 from process_data.soep_vars.work_choices import create_choice_variable

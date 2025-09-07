@@ -14,7 +14,7 @@ specs = read_and_derive_specs(paths_dict["specs"])
 # plt.savefig(paths_dict["paper_plots"] + "pension_rates.png", transparent=True, dpi=300)
 
 # chart: 2007 reform
-from export_results.figures.policy_states import plot_SRA_2007_reform
+from misc.plots.reform_2007_plot import plot_SRA_2007_reform
 
 plot_SRA_2007_reform(paths_dict)
 plt.savefig(

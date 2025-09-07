@@ -17,6 +17,7 @@ data_mort_estim.dta
 
 # Ignore intermediate data pickle files
 output/intermediate_data/
+output/plots/
 
 # Ignore estimation log files, but not the md files
 src/estimation/struct_estimation/scripts/log/

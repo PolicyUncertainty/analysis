@@ -1,5 +1,6 @@
 import numpy as np
 from matplotlib import pyplot as plt
+from set_styles import set_colors
 
 from model_code.state_space.experience import (
     construct_experience_years,
@@ -8,11 +9,25 @@ from model_code.state_space.experience import (
 )
 
 
-def plot_ret_experience(specs):
+def plot_ret_experience(path_dict, specs, show=False, save=False):
+    """Plot retirement experience law of motion.
+    
+    Parameters
+    ----------
+    path_dict : dict
+        Dictionary containing paths to data and output directories
+    specs : dict
+        Dictionary containing model specifications
+    show : bool, default False
+        Whether to display plots
+    save : bool, default False  
+        Whether to save plots to disk
+    """
+    colors, _ = set_colors()
     periods = np.arange(30, 40)
     fig, ax = plt.subplots()
-    for exp_years in np.arange(30, 50, 10):
-
+    
+    for i, exp_years in enumerate(np.arange(30, 50, 10)):
         # We scale the experience for a not retired person last period (policy state 8 is below)
         exp = scale_experience_years(
             experience_years=exp_years,
@@ -38,8 +53,20 @@ def plot_ret_experience(specs):
             is_retired=np.ones_like(periods, dtype=bool),
             model_specs=specs,
         )
-        ax.plot(periods + 30, exp_years_next, label=f"Exp {exp_years}")
+        ax.plot(periods + 30, exp_years_next, label=f"Exp {exp_years}", color=colors[i % len(colors)])
 
     ax.legend()
-
-    plt.show()
+    ax.set_xlabel("Period")
+    ax.set_ylabel("Experience Years")
+    ax.set_title("Retirement Experience Law of Motion")
+    
+    plt.tight_layout()
+    
+    if save:
+        fig.savefig(path_dict["model_plots"] + "retirement_experience_law_of_motion.pdf", bbox_inches="tight")
+        fig.savefig(path_dict["model_plots"] + "retirement_experience_law_of_motion.png", bbox_inches="tight", dpi=300)
+        
+    if show:
+        plt.show()
+    else:
+        plt.close(fig)

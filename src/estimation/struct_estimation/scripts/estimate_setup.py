@@ -37,6 +37,8 @@ def estimate_model(
     use_weights=True,
     last_estimate=None,
     save_results=True,
+    use_observed_data=True,
+    sim_data=None,
 ):
 
     specs = generate_derived_and_data_derived_specs(path_dict)
@@ -83,6 +85,8 @@ def estimate_model(
         load_model=load_model,
         use_weights=use_weights,
         save_results=save_results,
+        use_observed_data=use_observed_data,
+        sim_data=sim_data,
     )
 
     if supply_jacobian:
@@ -134,6 +138,8 @@ class est_class_from_paths:
         print_men_examples=True,
         print_women_examples=True,
         save_results=True,
+        sim_data=None,
+        use_observed_data=True,
     ):
         self.iter_count = 0
         self.save_results = save_results
@@ -165,10 +171,17 @@ class est_class_from_paths:
             sim_specs=None,
         )
 
-        # Load data
-        data_decision, states_dict = load_and_prep_data_estimation(
-            path_dict=path_dict, start_params=start_params_all, model_class=model
-        )
+        if use_observed_data:
+            # Load data
+            data_decision, states_dict = load_and_prep_data_estimation(
+                path_dict=path_dict, model_class=model
+            )
+        else:
+            if not isinstance(sim_data, pd.DataFrame):
+                raise ValueError("If not using observed data, sim_data must be given.")
+            data_decision = sim_data.copy()
+            data_decision = data_decision[data_decision["lagged_choice"] != 0]
+            states_dict = create_states_dict(df=data_decision, model_class=model)
 
         if use_weights:
             self.weights = data_decision["age_weights"].values
@@ -228,7 +241,7 @@ class est_class_from_paths:
         return self.weights @ scores / self.weight_sum
 
 
-def load_and_prep_data_estimation(path_dict, start_params, model_class):
+def load_and_prep_data_estimation(path_dict, model_class):
 
     data_decision = load_scale_and_correct_data(
         path_dict=path_dict, model_class=model_class

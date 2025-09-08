@@ -8,6 +8,7 @@ from estimation.struct_estimation.scripts.estimate_setup import estimate_model
 from estimation.struct_estimation.start_params_and_bounds.set_start_params import (
     load_and_set_start_params,
 )
+from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 
 params_to_estimate_names = [
     # "mu_men",
@@ -25,16 +26,16 @@ params_to_estimate_names = [
     # "taste_shock_scale_men",
     # "bequest_scale",
     # # Men job finding - 3 parameters
-    # "job_finding_logit_const_men",
-    # "job_finding_logit_high_educ_men",
-    # "job_finding_logit_good_health_men",
-    # "job_finding_logit_age_men",
-    # "job_finding_logit_age_above_55_men",
+    "job_finding_logit_const_men",
+    "job_finding_logit_high_educ_men",
+    "job_finding_logit_good_health_men",
+    "job_finding_logit_age_men",
+    "job_finding_logit_age_above_55_men",
     # Disability probability men - 3 parameters
-    # "disability_logit_const_men",
-    # "disability_logit_high_educ_men",
-    # "disability_logit_age_men",
-    # "disability_logit_age_above_55_men",
+    "disability_logit_const_men",
+    "disability_logit_high_educ_men",
+    "disability_logit_age_men",
+    "disability_logit_age_above_55_men",
     # # "mu_women",
     # # Women Full-time - 4 parameters
     # "disutil_ft_work_good_women",
@@ -63,24 +64,43 @@ params_to_estimate_names = [
     # "disability_logit_high_educ_women",
 ]
 
-model_name = "sep_men_3"
+model_name = "women_3_it_fake"
 
 print(f"Running estimation for model: {model_name}", flush=True)
 
-LOAD_LAST_ESTIMATE = False
-LOAD_SOL_MODEL = False
-SAVE_RESULTS = True
-USE_WEIGHTS = False
+LOAD_SOL_MODEL = True
+LOAD_SOLUTION = None
+LOAD_DF = None
+SAVE_RESULTS = False
 
-if LOAD_LAST_ESTIMATE:
-    last_estimate = pkl.load(
-        open(paths_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
-    )
-else:
-    last_estimate = None
+params = pkl.load(
+    open(paths_dict["struct_results"] + f"est_params_women_3_it.pkl", "rb")
+)
 
 # Load start params
 start_params_all = load_and_set_start_params(paths_dict)
+
+# Simulate baseline with subjective belief
+data_sim, _ = solve_and_simulate_scenario(
+    announcement_age=None,
+    path_dict=paths_dict,
+    params=params,
+    subj_unc=True,
+    custom_resolution_age=None,
+    SRA_at_retirement=67,
+    SRA_at_start=67,
+    model_name=model_name,
+    df_exists=LOAD_DF,
+    solution_exists=LOAD_SOLUTION,
+    sol_model_exists=LOAD_SOL_MODEL,
+)
+data_fake = data_sim.copy()
+data_fake["informed"] = -99
+data_fake.loc[data_fake["health"].isin([1, 2]), "health"] = -99
+data_fake.loc[(data_fake["choice"] == 0) & (data_fake["period"] < 33), "health"] = 2
+
+data_fake["job_offer"] = -99
+data_fake.loc[data_fake["choice"].isin([2, 3]), "job_offer"] = 1
 
 # Run estimation
 estimation_results = estimate_model(
@@ -89,9 +109,11 @@ estimation_results = estimate_model(
     file_append=model_name,
     start_params_all=start_params_all,
     load_model=LOAD_SOL_MODEL,
-    use_weights=USE_WEIGHTS,
-    last_estimate=last_estimate,
+    use_weights=False,
+    last_estimate=None,
     save_results=SAVE_RESULTS,
+    use_observed_data=False,
+    sim_data=data_fake,
 )
 print(estimation_results)
 

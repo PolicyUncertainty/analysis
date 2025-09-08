@@ -82,6 +82,7 @@ SAVE_RESULTS = False
 params = pkl.load(
     open(paths_dict["struct_results"] + f"est_params_women_3_it.pkl", "rb")
 )
+params["kappa"] = 21
 
 specs = generate_derived_and_data_derived_specs(paths_dict)
 print_function = generate_print_func(params_to_estimate_names, specs)

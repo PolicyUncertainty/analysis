@@ -79,6 +79,9 @@ LOAD_SOLUTION = None
 LOAD_DF = None
 SAVE_RESULTS = False
 
+# Load start params
+start_params_all = load_and_set_start_params(paths_dict)
+# params =start_params_all
 params = pkl.load(
     open(paths_dict["struct_results"] + f"est_params_women_3_it.pkl", "rb")
 )
@@ -89,9 +92,6 @@ print_function = generate_print_func(params_to_estimate_names, specs)
 
 print("True parameters are:", flush=True)
 print_function(params)
-
-# Load start params
-start_params_all = load_and_set_start_params(paths_dict)
 
 # Simulate baseline with subjective belief
 data_sim, _ = solve_and_simulate_scenario(
@@ -109,6 +109,8 @@ data_sim, _ = solve_and_simulate_scenario(
 )
 # Assume unobserved informed, health and job offers
 data_fake = data_sim.copy()
+data_fake.reset_index(inplace=True)
+
 data_fake["informed"] = -99
 data_fake.loc[data_fake["health"].isin([1, 2]), "health"] = -99
 data_fake.loc[(data_fake["choice"] == 0) & (data_fake["period"] < 33), "health"] = 2
@@ -116,7 +118,6 @@ data_fake.loc[(data_fake["choice"] == 0) & (data_fake["period"] < 33), "health"]
 data_fake["job_offer"] = -99
 data_fake.loc[data_fake["choice"].isin([2, 3]), "job_offer"] = 1
 
-data_fake.reset_index(inplace=True)
 
 # Run estimation
 estimation_results = estimate_model(

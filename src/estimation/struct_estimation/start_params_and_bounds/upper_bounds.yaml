@@ -41,6 +41,7 @@ taste_shock_scale_women: 5
 
 # Bequest
 bequest_scale: 50
+kappa: 50
 
 # Job finding men
 job_finding_logit_const_men: 5

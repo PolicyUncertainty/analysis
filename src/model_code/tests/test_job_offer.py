@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 
 from model_code.stochastic_processes.job_offers import job_offer_process_transition
+from model_code.stochastic_processes.math_funcs import logit_formula
 from set_paths import create_path_dict
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
@@ -47,13 +48,18 @@ def test_job_destruction(
             f"job_finding_logit_good_health_{append}": logit_param,
             f"job_finding_logit_age_{append}": logit_param,
             f"job_finding_logit_age_above_55_{append}": logit_param,
+            f"SRA_firing_logit_intercept_{append}_low": logit_param,
+            f"SRA_firing_logit_intercept_{append}_high": logit_param,
         }
         params = {**params, **gender_params}
 
     good_health = (health == model_specs["good_health_var"]).astype(int)
 
     if choice > 1:
-        job_dest_prob = model_specs["job_sep_probs"][sex, education, good_health, age]
+        job_dest_prob_log = model_specs["log_job_sep_probs"][
+            sex, education, good_health, age
+        ]
+        job_dest_prob = logit_formula(job_dest_prob_log)
         full_probs = np.array([job_dest_prob, 1 - job_dest_prob])
     else:
         append = "men" if sex == 0 else "women"
@@ -74,6 +80,7 @@ def test_job_destruction(
         model_specs=model_specs,
         education=education,
         health=np.array(health),
+        policy_state=np.array(8),
         sex=sex,
         period=period,
         choice=choice,

@@ -36,8 +36,9 @@ disutil_unemployed_bad_women: 0.5
 disutil_children_ft_work_low: 0.2
 disutil_children_ft_work_high: 0.2
 
-# Bequest scale
+# Bequest
 bequest_scale: 2.4
+kappa: 21
 
 # Job separation params are set internally driven by data
 

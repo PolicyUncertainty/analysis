@@ -116,6 +116,8 @@ data_fake.loc[(data_fake["choice"] == 0) & (data_fake["period"] < 33), "health"]
 data_fake["job_offer"] = -99
 data_fake.loc[data_fake["choice"].isin([2, 3]), "job_offer"] = 1
 
+data_fake.reset_index(inplace=True)
+
 # Run estimation
 estimation_results = estimate_model(
     paths_dict,

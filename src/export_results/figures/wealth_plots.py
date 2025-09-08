@@ -1,3 +1,9 @@
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# THIS IS THE LEGACY VERSION - DELETE SOON!
+# NEW HOME: src/model_code/plots/wealth_plots.py
+# FUNCTIONS: plot_budget_of_unemployed() migrated
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd

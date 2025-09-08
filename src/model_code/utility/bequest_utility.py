@@ -14,13 +14,12 @@ def utility_final_consume_all(
     education,
     params,
 ):
-    mu = jax.lax.select(
-        education == 0, params["mu_bequest_low"], params["mu_bequest_high"]
-    )
-    unscaled_bequest_mu_not_one = (wealth ** (1 - mu) - 1) / (1 - mu)
+    mu = jax.lax.select(education == 0, params["mu_low"], params["mu_high"])
+    kappa = params["kappa"]
+    unscaled_bequest_mu_not_one = ((wealth + kappa) ** (1 - mu) - 1) / (1 - mu)
     unscaled_bequest = jax.lax.select(
         jnp.allclose(mu, 1),
-        jnp.log(wealth),
+        jnp.log(wealth + kappa),
         unscaled_bequest_mu_not_one,
     )
 
@@ -30,8 +29,7 @@ def utility_final_consume_all(
 
 def marginal_utility_final_consume_all(wealth, education, params):
 
-    mu = jax.lax.select(
-        education == 0, params["mu_bequest_low"], params["mu_bequest_high"]
-    )
+    mu = jax.lax.select(education == 0, params["mu_low"], params["mu_high"])
     bequest_scale = params["bequest_scale"]
-    return bequest_scale * (wealth**-mu)
+    kappa = params["kappa"]
+    return bequest_scale * ((wealth + kappa) ** -mu)

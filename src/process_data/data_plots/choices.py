@@ -1,15 +1,31 @@
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
-
-from export_results.figures.color_map import JET_COLOR_MAP
+from set_styles import set_colors
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
-def plot_data_choices(path_dict, lagged=False):
+def plot_data_choices(path_dict, specs=None, lagged=False, show=False, save=False):
+    """Plot choice distribution by age, education and sex.
+    
+    Parameters
+    ----------
+    path_dict : dict
+        Dictionary containing paths to data and output directories
+    specs : dict, optional
+        Model specifications. If None, will be loaded from file.
+    lagged : bool, default False
+        Whether to plot lagged choices instead of current choices
+    show : bool, default False
+        Whether to display plots
+    save : bool, default False  
+        Whether to save plots to disk
+    """
+    colors, _ = set_colors()
     struct_est_sample = pd.read_csv(path_dict["struct_est_sample"])
 
-    specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
+    if specs is None:
+        specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=True)
     struct_est_sample["age"] = struct_est_sample["period"] + specs["start_age"]
     struct_est_sample = struct_est_sample[struct_est_sample["age"] < 75]
 
@@ -50,7 +66,7 @@ def plot_data_choices(path_dict, lagged=False):
                 axs[sex_var, choice].plot(
                     plot_ages,
                     choice_shares,
-                    color=JET_COLOR_MAP[edu_var],
+                    color=colors[edu_var],
                     label=edu_label,
                 )
                 axs[sex_var, choice].set_ylim(-0.05, 1.05)
@@ -58,3 +74,14 @@ def plot_data_choices(path_dict, lagged=False):
                 axs[0, choice].set_title(f"{choice_labels[choice]}")
 
     axs[0, 1].legend()
+    plt.tight_layout()
+    
+    if save:
+        suffix = "_lagged" if lagged else ""
+        fig.savefig(path_dict["data_plots"] + f"choices{suffix}.pdf", bbox_inches="tight")
+        fig.savefig(path_dict["data_plots"] + f"choices{suffix}.png", bbox_inches="tight", dpi=300)
+        
+    if show:
+        plt.show()
+    else:
+        plt.close(fig)

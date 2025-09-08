@@ -1,3 +1,9 @@
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# THIS IS THE LEGACY VERSION - DELETE SOON!
+# NEW HOME: src/model_code/plots/utility_plots.py
+# FUNCTIONS: plot_utility(), plot_bequest(), plot_cons_scale() migrated
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 # %%
 import matplotlib.pyplot as plt
 import numpy as np

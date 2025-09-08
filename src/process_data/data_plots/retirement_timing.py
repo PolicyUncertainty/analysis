@@ -1,12 +1,27 @@
 import matplotlib.pyplot as plt
 import pandas as pd
+from set_styles import set_colors
 
 
-def plot_retirement_timing_data(paths, specs):
-    struct_est_sample = pd.read_csv(paths["struct_est_sample"])
+def plot_retirement_timing_data(path_dict, specs, show=False, save=False):
+    """Plot retirement timing relative to statutory retirement age.
+    
+    Parameters
+    ----------
+    path_dict : dict
+        Dictionary containing paths to data and output directories
+    specs : dict
+        Dictionary containing model specifications
+    show : bool, default False
+        Whether to display plots
+    save : bool, default False  
+        Whether to save plots to disk
+    """
+    colors, _ = set_colors()
+    struct_est_sample = pd.read_csv(path_dict["struct_est_sample"])
     df_fresh = struct_est_sample[
         (struct_est_sample["choice"] == 0) & (struct_est_sample["lagged_choice"] != 0)
-    ]
+    ].copy()
 
     # Calculate actual retirement age vs SRA
     df_fresh["age"] = df_fresh["period"] + specs["start_age"]
@@ -23,12 +38,19 @@ def plot_retirement_timing_data(paths, specs):
         counts_distance = df_sex["actual_ret_age_vs_SRA"].value_counts().sort_index()
         counts_age = df_sex["age"].value_counts().sort_index()
 
-        axs[sex, 0].plot(counts_distance)
+        axs[sex, 0].plot(counts_distance, color=colors[sex])
         axs[sex, 0].set_title(f"Actual Retirement Age vs SRA; {sex_label}")
 
-        axs[sex, 1].plot(counts_age)
+        axs[sex, 1].plot(counts_age, color=colors[sex])
         axs[sex, 1].set_title(f"Retirement Age; {sex_label}")
 
-        axs[sex, 1].plot()
-
-    plt.show()
+    plt.tight_layout()
+    
+    if save:
+        fig.savefig(path_dict["data_plots"] + "retirement_timing.pdf", bbox_inches="tight")
+        fig.savefig(path_dict["data_plots"] + "retirement_timing.png", bbox_inches="tight", dpi=300)
+        
+    if show:
+        plt.show()
+    else:
+        plt.close(fig)

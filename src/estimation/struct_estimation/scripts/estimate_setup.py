@@ -17,12 +17,14 @@ from model_code.specify_model import specify_model
 from model_code.stochastic_processes.job_offers import (
     calc_job_finding_prob_men,
     calc_job_finding_prob_women,
+    job_sep_probability,
 )
 from model_code.transform_data_from_model import (
     create_states_dict,
     load_scale_and_correct_data,
 )
 from model_code.unobserved_state_weighting import create_unobserved_state_specs
+from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
 def estimate_model(
@@ -35,8 +37,13 @@ def estimate_model(
     use_weights=True,
     last_estimate=None,
     save_results=True,
+    use_observed_data=True,
+    sim_data=None,
 ):
-    print_function = generate_print_func(params_to_estimate_names)
+
+    specs = generate_derived_and_data_derived_specs(path_dict)
+
+    print_function = generate_print_func(params_to_estimate_names, specs)
 
     # # Assign start params from before
     if last_estimate is not None:
@@ -54,7 +61,7 @@ def estimate_model(
             start_params_all[key] = last_estimate[key]
 
     start_params = {name: start_params_all[name] for name in params_to_estimate_names}
-    print_function(start_params)
+    print_function(start_params_all)
 
     lower_bounds_all = yaml.safe_load(
         open(path_dict["start_params_and_bounds"] + "lower_bounds.yaml", "rb")
@@ -71,12 +78,15 @@ def estimate_model(
     # Initialize estimation class
     est_class = est_class_from_paths(
         path_dict=path_dict,
+        specs=specs,
         start_params_all=start_params_all,
         print_function=print_function,
         file_append=file_append,
         load_model=load_model,
         use_weights=use_weights,
         save_results=save_results,
+        use_observed_data=use_observed_data,
+        sim_data=sim_data,
     )
 
     if supply_jacobian:
@@ -119,6 +129,7 @@ class est_class_from_paths:
     def __init__(
         self,
         path_dict,
+        specs,
         start_params_all,
         file_append,
         load_model,
@@ -127,6 +138,8 @@ class est_class_from_paths:
         print_men_examples=True,
         print_women_examples=True,
         save_results=True,
+        sim_data=None,
+        use_observed_data=True,
     ):
         self.iter_count = 0
         self.save_results = save_results
@@ -147,10 +160,6 @@ class est_class_from_paths:
                 os.makedirs(intermediate_est_data)
 
         self.intermediate_est_data = intermediate_est_data
-
-        from specs.derive_specs import generate_derived_and_data_derived_specs
-
-        specs = generate_derived_and_data_derived_specs(path_dict)
         self.specs = specs
 
         model = specify_model(
@@ -162,10 +171,17 @@ class est_class_from_paths:
             sim_specs=None,
         )
 
-        # Load data
-        data_decision, states_dict = load_and_prep_data_estimation(
-            path_dict=path_dict, start_params=start_params_all, model_class=model
-        )
+        if use_observed_data:
+            # Load data
+            data_decision, states_dict = load_and_prep_data_estimation(
+                path_dict=path_dict, model_class=model
+            )
+        else:
+            if not isinstance(sim_data, pd.DataFrame):
+                raise ValueError("If not using observed data, sim_data must be given.")
+            data_decision = sim_data.copy()
+            data_decision = data_decision[data_decision["lagged_choice"] != 0]
+            states_dict = create_states_dict(df=data_decision, model_class=model)
 
         if use_weights:
             self.weights = data_decision["age_weights"].values
@@ -207,31 +223,7 @@ class est_class_from_paths:
 
         end = time.time()
         self.iter_count += 1
-        self.print_function(params)
-        if self.print_men_examples:
-            job_offer_prob_60_high_good = calc_job_finding_prob_men(
-                params=full_params,
-                education=1,
-                good_health=1,
-                period=30,
-                model_specs=self.specs,
-            )
-            print(
-                f"Job offer prob for 60 year old high educated men in good health: {job_offer_prob_60_high_good}",
-                flush=True,
-            )
-        if self.print_women_examples:
-            job_offer_prob_60_high_good = calc_job_finding_prob_women(
-                params=full_params,
-                education=1,
-                good_health=1,
-                period=30,
-                model_specs=self.specs,
-            )
-            print(
-                f"Job offer prob for 60 year old high educated women in good health: {job_offer_prob_60_high_good}",
-                flush=True,
-            )
+        self.print_function(full_params)
 
         print("Likelihood value: ", ll_value)
         print("Likelihood evaluation took, ", end - start)
@@ -249,7 +241,7 @@ class est_class_from_paths:
         return self.weights @ scores / self.weight_sum
 
 
-def load_and_prep_data_estimation(path_dict, start_params, model_class):
+def load_and_prep_data_estimation(path_dict, model_class):
 
     data_decision = load_scale_and_correct_data(
         path_dict=path_dict, model_class=model_class
@@ -257,7 +249,6 @@ def load_and_prep_data_estimation(path_dict, start_params, model_class):
 
     # Already retired individuals hold no identification
     data_decision = data_decision[data_decision["lagged_choice"] != 0]
-    data_decision = data_decision[data_decision["age"] >= 55]
 
     # data_decision["age_bin"] = np.floor(data_decision["age"] / 10)
     # data_decision.loc[data_decision["age_bin"] > 6, "age_bin"] = 6
@@ -272,7 +263,9 @@ def load_and_prep_data_estimation(path_dict, start_params, model_class):
     return data_decision, states_dict
 
 
-def generate_print_func(params_to_estimate_names):
+def generate_print_func(
+    params_to_estimate_names, specs, print_men_examples=True, print_women_examples=True
+):
     men_params = get_gendered_params(params_to_estimate_names, "_men")
     women_params = get_gendered_params(params_to_estimate_names, "_women")
     for param_dict in [men_params, women_params]:
@@ -315,6 +308,56 @@ def generate_print_func(params_to_estimate_names):
                         flush=True,
                     )
 
+        if print_men_examples:
+            job_offer_prob_60_high_good = calc_job_finding_prob_men(
+                params=params,
+                education=1,
+                good_health=1,
+                age=60,
+            )
+            print(
+                f"Job offer prob for 60 year old high educated men in good health: {job_offer_prob_60_high_good}",
+                flush=True,
+            )
+            job_sep = job_sep_probability(
+                params=params,
+                policy_state=8,
+                education=0,
+                sex=0,
+                age=66,
+                good_health=1,
+                model_specs=specs,
+            )
+            print(
+                f"Job separation prob for 66 year old low educated men next year at SRA 67: {job_sep}",
+                flush=True,
+            )
+
+        if print_women_examples:
+            job_offer_prob_60_high_good = calc_job_finding_prob_women(
+                params=params,
+                education=1,
+                good_health=1,
+                age=60,
+            )
+            print(
+                f"Job offer prob for 60 year old high educated women in good health: {job_offer_prob_60_high_good}",
+                flush=True,
+            )
+            job_sep = job_sep_probability(
+                params=params,
+                policy_state=8,
+                education=0,
+                sex=1,
+                age=66,
+                good_health=1,
+                model_specs=specs,
+            )
+            print(
+                f"Job separation prob for 66 year old low educated women next year at SRA 67: {job_sep}",
+                flush=True,
+            )
+
     return print_function
 
 
@@ -345,6 +388,13 @@ def get_gendered_params(params_to_estimate_names, append):
     disutil_params_ft_params = [
         param_name for param_name in disutil_params if "ft_work" in param_name
     ]
+    disutil_params_partner = [
+        param_name for param_name in disutil_params if "partner" in param_name
+    ]
+    SRA_firing_params = [
+        param_name for param_name in gender_params if "SRA_firing" in param_name
+    ]
+
     # We do it this weird way for printing order
     params = {}
     # Assign all gender params. This will be dropped afterwards
@@ -365,11 +415,24 @@ def get_gendered_params(params_to_estimate_names, append):
         params["job_finding"] = job_finding_params
 
     if len(disability_params) > 0:
-        params["disability"] = disability_params
+        params["disability_logit"] = disability_params
+
+    if len(disutil_params_partner) > 0:
+        params["partner"] = disutil_params_partner
+
+    if len(SRA_firing_params) > 0:
+        params["SRA_firing"] = SRA_firing_params
 
     other_params = []
     for param in gender_params:
-        if param not in job_finding_params + disability_params + disutil_params:
+        if (
+            param
+            not in job_finding_params
+            + disability_params
+            + disutil_params
+            + SRA_firing_params
+            + disutil_params_partner
+        ):
             other_params += [param]
 
     if len(other_params) > 0:

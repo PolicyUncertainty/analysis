@@ -1,3 +1,9 @@
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# THIS IS THE LEGACY VERSION - DELETE SOON!
+# NEW HOME: src/first_step_estimation/estimation/health_estimation.py
+# NEW PLOTTING: src/first_step_estimation/plots/health_states_plots.py
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 import numpy as np
 import pandas as pd
 import statsmodels.formula.api as smf

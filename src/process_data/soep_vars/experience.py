@@ -77,6 +77,7 @@ def raw_working_years(data, filter_missings=True):
     experience.
 
     """
+    data = data.copy()
     invalid_ft_exp = data["pgexpft"] < 0
     invalid_pt_exp = data["pgexppt"] < 0
 

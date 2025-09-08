@@ -1,3 +1,9 @@
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# THIS IS THE LEGACY VERSION - DELETE SOON!
+# NEW HOME: src/first_step_estimation/estimation/mortality_estimation.py
+# NEW PLOTTING: src/first_step_estimation/plots/mortality_plots.py
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 import itertools
 
 import matplotlib.pyplot as plt

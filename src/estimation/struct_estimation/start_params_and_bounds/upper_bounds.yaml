@@ -7,29 +7,29 @@ mu_bequest_low: 5
 # Full time work dis-utility men
 disutil_ft_work_good_men: 5.0
 disutil_ft_work_bad_men: 5.0
-disutil_ft_work_disability_men: 5.0
+disutil_ft_work_disability_men: 15.0
+disutil_partner_retired_men: 5.0
 
 # Full time work dis-utility women
 disutil_ft_work_good_women: 5.0
 disutil_ft_work_bad_women: 5.0
-disutil_ft_work_disability_women: 5.0
-disutil_partner_retired_men: 5.0
+disutil_ft_work_disability_women: 15.0
 disutil_partner_retired_women: 5.0
 
 # Part time dis-utility men
 disutil_pt_work_good_women: 5.0
 disutil_pt_work_bad_women: 5.0
-disutil_pt_work_disability_women: 5.0
+disutil_pt_work_disability_women: 15.0
 
 # Unemployment dis-utility men
 disutil_unemployed_good_men: 5.0
 disutil_unemployed_bad_men: 5.0
-disutil_unemployed_disability_men: 5.0
+disutil_unemployed_disability_men: 15.0
 
 # Unemployment dis-utility women
 disutil_unemployed_good_women: 5.0
 disutil_unemployed_bad_women: 5.0
-disutil_unemployed_disability_women: 5.0
+disutil_unemployed_disability_women: 15.0
 
 # Children dis-utility
 disutil_children_ft_work_low: 5.2
@@ -41,6 +41,7 @@ taste_shock_scale_women: 5
 
 # Bequest
 bequest_scale: 50
+kappa: 50
 
 # Job finding men
 job_finding_logit_const_men: 5
@@ -67,3 +68,9 @@ disability_logit_const_women: 5
 disability_logit_high_educ_women: 5
 disability_logit_age_women: 5
 disability_logit_age_above_55_women: 5
+
+# SRA firing params
+SRA_firing_logit_intercept_men_low: 20
+SRA_firing_logit_intercept_men_high: 20
+SRA_firing_logit_intercept_women_low: 20
+SRA_firing_logit_intercept_women_high: 20

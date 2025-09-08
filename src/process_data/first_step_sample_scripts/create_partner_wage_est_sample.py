@@ -2,7 +2,7 @@ import os
 
 import pandas as pd
 
-from process_data.aux_and_plots.filter_data import (
+from process_data.auxiliary.filter_data import (
     filter_below_age,
     filter_years,
     recode_sex,

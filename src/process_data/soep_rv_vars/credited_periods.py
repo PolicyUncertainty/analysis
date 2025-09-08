@@ -4,7 +4,7 @@ def create_credited_periods(df):
     """ credited periods for pension of 'particularly long insurance period' (besonders langjährig Versicherte)"""
     # credited periods: VSMO - AZ
     # drop all observations with missing VSMO, set all missing AZ / EZ to 0 (nan coded as 999)
-    df = df[df["VSMO"] != 999]
+    df = df[df["VSMO"] != 999].copy()
     df.loc[df["AZ"] == 999, "AZ"] = 0
     df.loc[df["AUAZ"] == 999, "AUAZ"] = 0
     #df.loc[df["EZ"] == 999, "EZ"] = 0

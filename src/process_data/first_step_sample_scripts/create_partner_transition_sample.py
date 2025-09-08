@@ -4,13 +4,13 @@ import os
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from process_data.aux_and_plots.filter_data import (
+from process_data.auxiliary.filter_data import (
     drop_missings,
     filter_below_age,
     filter_years,
     recode_sex,
 )
-from process_data.aux_and_plots.lagged_and_lead_vars import span_dataframe
+from process_data.auxiliary.lagged_and_lead_vars import span_dataframe
 from process_data.soep_vars.age import calc_age_at_interview
 from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.partner_code import create_partner_state

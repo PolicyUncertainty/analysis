@@ -23,6 +23,11 @@ def generate_start_states_from_obs(
 
     observed_data = pd.read_csv(path_dict["struct_est_sample"])
 
+    # Generate start policy state from initial SRA
+    initial_policy_state = np.floor(
+        (inital_SRA - model_specs["min_SRA"]) / model_specs["SRA_grid_size"]
+    )
+
     # Define start data and adjust wealth
     min_period = observed_data["period"].min()
     start_period_data = observed_data[observed_data["period"].isin([min_period])].copy()
@@ -69,6 +74,7 @@ def generate_start_states_from_obs(
             sex=sex,
             health=health,
             model_specs=model_specs,
+            policy_state=initial_policy_state,
             education=education,
             period=jnp.array(-1, dtype=int),
             choice=lagged_choice,
@@ -143,11 +149,6 @@ def generate_start_states_from_obs(
 
     states_dict["job_offer"] = job_offers.flatten()
     states_dict["health"] = health_agents.flatten()
-
-    # Generate start policy state from initial SRA
-    initial_policy_state = np.floor(
-        (inital_SRA - model_specs["min_SRA"]) / model_specs["SRA_grid_size"]
-    )
 
     policy_state_agents = (
         jnp.ones_like(states_dict["health"]) * initial_policy_state

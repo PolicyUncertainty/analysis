@@ -16,24 +16,25 @@ params_to_estimate_names = [
     # Men Full-time - 4 parameters
     "disutil_ft_work_good_men",
     "disutil_ft_work_bad_men",
-    "disutil_ft_work_disability_men",
     "disutil_unemployed_good_men",
     "disutil_unemployed_bad_men",
-    "disutil_unemployed_disability_men",
+    "disutil_partner_retired_men",
+    "SRA_firing_logit_intercept_men_low",
+    "SRA_firing_logit_intercept_men_high",
     # Taste shock men - 1 parameter
     # "taste_shock_scale_men",
     # "bequest_scale",
     # # Men job finding - 3 parameters
-    # "job_finding_logit_const_men",
-    # "job_finding_logit_high_educ_men",
-    # "job_finding_logit_good_health_men",
-    # "job_finding_logit_age_men",
-    # "job_finding_logit_age_above_55_men",
+    "job_finding_logit_const_men",
+    "job_finding_logit_high_educ_men",
+    "job_finding_logit_good_health_men",
+    "job_finding_logit_age_men",
+    "job_finding_logit_age_above_55_men",
     # Disability probability men - 3 parameters
-    # "disability_logit_const_men",
-    # "disability_logit_high_educ_men",
-    # "disability_logit_age_men",
-    # "disability_logit_age_above_55_men",
+    "disability_logit_const_men",
+    "disability_logit_high_educ_men",
+    "disability_logit_age_men",
+    "disability_logit_age_above_55_men",
     # # "mu_women",
     # # Women Full-time - 4 parameters
     # "disutil_ft_work_good_women",
@@ -62,7 +63,7 @@ params_to_estimate_names = [
     # "disability_logit_high_educ_women",
 ]
 
-model_name = "sep_men_3"
+model_name = "men_3"
 
 print(f"Running estimation for model: {model_name}", flush=True)
 

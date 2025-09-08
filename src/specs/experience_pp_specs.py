@@ -83,8 +83,8 @@ def create_max_experience_working(path_dict, specs, load_precomputed=False):
         # max initial experience
         data_decision = pd.read_csv(path_dict["struct_est_sample"])
         df_working = data_decision[data_decision["lagged_choice"] != 0]
-        max_exp_diff_period_working = (
-            (df_working["experience"] - df_working["period"]).max().astype(float)
+        max_exp_diff_period_working = float(
+            (df_working["experience"] - df_working["period"]).max()
         )
 
         np.savetxt(

@@ -4,11 +4,17 @@ import pickle as pkl
 from set_paths import create_path_dict
 
 paths_dict = create_path_dict(define_user=False)
-from estimation.struct_estimation.scripts.estimate_setup import estimate_model
+import pickle as pkl
+
+from estimation.struct_estimation.scripts.estimate_setup import (
+    estimate_model,
+    generate_print_func,
+)
 from estimation.struct_estimation.start_params_and_bounds.set_start_params import (
     load_and_set_start_params,
 )
 from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
+from specs.derive_specs import generate_derived_and_data_derived_specs
 
 params_to_estimate_names = [
     # "mu_men",
@@ -66,7 +72,7 @@ params_to_estimate_names = [
 
 model_name = "women_3_it_fake"
 
-print(f"Running estimation for model: {model_name}", flush=True)
+print(f"Running fake estimation for params: {model_name}", flush=True)
 
 LOAD_SOL_MODEL = True
 LOAD_SOLUTION = None
@@ -76,6 +82,12 @@ SAVE_RESULTS = False
 params = pkl.load(
     open(paths_dict["struct_results"] + f"est_params_women_3_it.pkl", "rb")
 )
+
+specs = generate_derived_and_data_derived_specs(paths_dict)
+print_function = generate_print_func(params_to_estimate_names, specs)
+
+print("True parameters are:", flush=True)
+print_function(params)
 
 # Load start params
 start_params_all = load_and_set_start_params(paths_dict)
@@ -94,6 +106,7 @@ data_sim, _ = solve_and_simulate_scenario(
     solution_exists=LOAD_SOLUTION,
     sol_model_exists=LOAD_SOL_MODEL,
 )
+# Assume unobserved informed, health and job offers
 data_fake = data_sim.copy()
 data_fake["informed"] = -99
 data_fake.loc[data_fake["health"].isin([1, 2]), "health"] = -99

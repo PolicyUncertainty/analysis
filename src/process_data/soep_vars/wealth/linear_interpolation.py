@@ -31,7 +31,6 @@ def add_wealth_interpolate_and_deflate(
         df = create_education_type(wealth_data_full, filter_missings=False)
         import matplotlib.pyplot as plt
 
-        breakpoint()
         # Interpolate wealth for each household (consistent hh size)
         wealth_data_full = interpolate_and_extrapolate_wealth(wealth_data_full)
         # Deflate wealth

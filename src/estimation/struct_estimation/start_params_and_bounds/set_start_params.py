@@ -19,7 +19,7 @@ def load_and_set_start_params(path_dict):
     struct_est_sample = pd.read_csv(path_dict["struct_est_sample"])
 
     specs = generate_derived_and_data_derived_specs(path_dict, load_precomputed=False)
-    breakpoint()
+
     # Estimate start values for job offers
     job_offer_params = est_job_offer_params_full_obs(struct_est_sample, specs)
     # Update start values

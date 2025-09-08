@@ -114,6 +114,7 @@ data_fake.reset_index(inplace=True)
 data_fake["informed"] = -99
 data_fake.loc[data_fake["health"].isin([1, 2]), "health"] = -99
 data_fake.loc[(data_fake["choice"] == 0) & (data_fake["period"] < 33), "health"] = 2
+data_fake.loc[data_fake["period"] == 0, "lagged_health"] = data_fake["health"]
 
 data_fake["job_offer"] = -99
 data_fake.loc[data_fake["choice"].isin([2, 3]), "job_offer"] = 1

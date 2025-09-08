@@ -147,8 +147,8 @@ def simulate_scenario(
     df["savings_rate"] = df["savings_dec"] / df["total_income"]
 
     # Create lagged health state to filter out already dead people
-    df["health_lag"] = df.groupby("agent")["health"].shift(1)
-    df = df[(df["health"] != 3) | ((df["health"] == 3) & (df["health_lag"] != 3))]
+    df["lagged_health"] = df.groupby("agent")["health"].shift(1)
+    df = df[(df["health"] != 3) | ((df["health"] == 3) & (df["lagged_health"] != 3))]
 
     return df
 

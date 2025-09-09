@@ -1,10 +1,12 @@
 import matplotlib.pyplot as plt
 
+
 def set_plot_defaults():
     """wrapper to set standard matplotlib specifications for plots."""
     set_standard_matplotlib_specs()
     set_colors()
     return
+
 
 def set_standard_matplotlib_specs(plot_type="paper"):
     """Set standard matplotlib specifications for plots.
@@ -16,11 +18,11 @@ def set_standard_matplotlib_specs(plot_type="paper"):
     # Set matplotlib fontsizes
     plt.rcParams.update(
         {
-            "axes.titlesize": 30,
-            "axes.labelsize": 24,
-            "xtick.labelsize": 24,
-            "ytick.labelsize": 24,
-            "legend.fontsize": 24,
+            "axes.titlesize": 22,
+            "axes.labelsize": 18,
+            "xtick.labelsize": 18,
+            "ytick.labelsize": 18,
+            "legend.fontsize": 18,
         }
     )
     # Make lines of plots thicker
@@ -34,18 +36,18 @@ def set_standard_matplotlib_specs(plot_type="paper"):
 
     # set resolution
     plt.rcParams["figure.dpi"] = 300
-    
+
     # set transparent background
     plt.rcParams["figure.facecolor"] = "none"
     plt.rcParams["axes.facecolor"] = "none"
-    
+
     # set common alpha values
     plt.rcParams["grid.alpha"] = 0.3
     plt.rcParams["legend.framealpha"] = 1
 
     # set grid and legend defaults
     plt.rcParams["legend.fancybox"] = True
-    
+
     # set common line width for specific elements (overrides global when needed)
     plt.rcParams["grid.linewidth"] = 2
     return

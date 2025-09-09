@@ -15,6 +15,9 @@ probs_*.txt
 # Maxis survival probability model
 data_mort_estim.dta
 
+# pension data
+output/open_access_data/rentenzugaenge
+
 # Ignore intermediate data pickle files
 output/intermediate_data/
 output/plots/

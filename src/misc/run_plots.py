@@ -17,4 +17,8 @@ plot_pension_rates(path_dict, show=show_plots, save=save_plots)
 from misc.plots.reform_2007_plot import plot_SRA_2007_reform
 plot_SRA_2007_reform(path_dict, show=show_plots, save=save_plots)
 
-print("Misc plotting completed.")
+# Pension claims plot
+from misc.plots.pension_claims import plot_pension_claims
+plot_pension_claims(path_dict, show=show_plots, save=save_plots)
+
+print("Miscellaneous plotting completed.")

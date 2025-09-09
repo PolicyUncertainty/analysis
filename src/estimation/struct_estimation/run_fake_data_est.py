@@ -6,10 +6,13 @@ from set_paths import create_path_dict
 paths_dict = create_path_dict(define_user=False)
 import pickle as pkl
 
+import yaml
+
 from estimation.struct_estimation.scripts.estimate_setup import (
     estimate_model,
     generate_print_func,
 )
+from estimation.struct_estimation.scripts.observed_model_fit import create_fit_plots
 from estimation.struct_estimation.start_params_and_bounds.set_start_params import (
     load_and_set_start_params,
 )
@@ -32,16 +35,16 @@ params_to_estimate_names = [
     # "taste_shock_scale_men",
     # "bequest_scale",
     # # Men job finding - 3 parameters
-    "job_finding_logit_const_men",
-    "job_finding_logit_high_educ_men",
-    "job_finding_logit_good_health_men",
-    "job_finding_logit_age_men",
-    "job_finding_logit_age_above_55_men",
-    # Disability probability men - 3 parameters
-    "disability_logit_const_men",
-    "disability_logit_high_educ_men",
-    "disability_logit_age_men",
-    "disability_logit_age_above_55_men",
+    # "job_finding_logit_const_men",
+    # "job_finding_logit_high_educ_men",
+    # "job_finding_logit_good_health_men",
+    # "job_finding_logit_age_men",
+    # "job_finding_logit_age_above_55_men",
+    # # Disability probability men - 3 parameters
+    # "disability_logit_const_men",
+    # "disability_logit_high_educ_men",
+    # "disability_logit_age_men",
+    # "disability_logit_age_above_55_men",
     # # "mu_women",
     # # Women Full-time - 4 parameters
     # "disutil_ft_work_good_women",
@@ -70,7 +73,7 @@ params_to_estimate_names = [
     # "disability_logit_high_educ_women",
 ]
 
-model_name = "women_3_it_fake"
+model_name = "start_lower_fake"
 
 print(f"Running fake estimation for params: {model_name}", flush=True)
 
@@ -81,11 +84,10 @@ SAVE_RESULTS = False
 
 # Load start params
 start_params_all = load_and_set_start_params(paths_dict)
-# params =start_params_all
-params = pkl.load(
-    open(paths_dict["struct_results"] + f"est_params_women_3_it.pkl", "rb")
-)
-params["kappa"] = 21
+params = start_params_all
+# params = pkl.load(
+#     open(paths_dict["struct_results"] + f"est_params_women_3_it.pkl", "rb")
+# )
 
 specs = generate_derived_and_data_derived_specs(paths_dict)
 print_function = generate_print_func(params_to_estimate_names, specs)
@@ -111,16 +113,22 @@ data_sim, _ = solve_and_simulate_scenario(
 data_fake = data_sim.copy()
 data_fake.reset_index(inplace=True)
 
-data_fake["informed"] = -99
-data_fake.loc[data_fake["health"].isin([1, 2]), "health"] = -99
-data_fake.loc[(data_fake["choice"] == 0) & (data_fake["period"] < 33), "health"] = 2
-data_fake.loc[data_fake["period"] == 0, "lagged_health"] = data_fake.loc[
-    data_fake["period"] == 0, "health"
-]
+# data_fake["informed"] = -99
+# data_fake.loc[data_fake["health"].isin([1, 2]), "health"] = -99
+# data_fake.loc[(data_fake["choice"] == 0) & (data_fake["period"] < 33), "health"] = 2
+# data_fake.loc[data_fake["period"] == 0, "lagged_health"] = data_fake.loc[
+#     data_fake["period"] == 0, "health"
+# ]
+#
+# data_fake["job_offer"] = -99
+# data_fake.loc[data_fake["choice"].isin([2, 3]), "job_offer"] = 1
 
-data_fake["job_offer"] = -99
-data_fake.loc[data_fake["choice"].isin([2, 3]), "job_offer"] = 1
-
+# Alter params by setting start values to lower bounds
+lower_bounds_all = yaml.safe_load(
+    open(paths_dict["start_params_and_bounds"] + "lower_bounds.yaml", "rb")
+)
+for name in params_to_estimate_names:
+    params[name] = lower_bounds_all[name]
 
 # Run estimation
 estimation_results = estimate_model(
@@ -134,8 +142,25 @@ estimation_results = estimate_model(
     save_results=SAVE_RESULTS,
     use_observed_data=False,
     sim_data=data_fake,
+    men_only=True,
 )
 print(estimation_results)
+
+# %% Set paths of project
+from specs.derive_specs import generate_derived_and_data_derived_specs
+
+path_dict = create_path_dict()
+specs = generate_derived_and_data_derived_specs(path_dict)
+
+
+create_fit_plots(
+    path_dict=paths_dict,
+    specs=specs,
+    model_name=model_name,
+    load_sol_model=True,
+    load_solution=None,
+    load_data_from_sol=False,
+)
 
 
 # %%

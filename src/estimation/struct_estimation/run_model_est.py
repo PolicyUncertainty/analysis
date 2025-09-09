@@ -5,6 +5,7 @@ from set_paths import create_path_dict
 
 paths_dict = create_path_dict(define_user=False)
 from estimation.struct_estimation.scripts.estimate_setup import estimate_model
+from estimation.struct_estimation.scripts.observed_model_fit import create_fit_plots
 from estimation.struct_estimation.start_params_and_bounds.set_start_params import (
     load_and_set_start_params,
 )
@@ -94,6 +95,22 @@ estimation_results = estimate_model(
     save_results=SAVE_RESULTS,
 )
 print(estimation_results)
+
+# %% Set paths of project
+from specs.derive_specs import generate_derived_and_data_derived_specs
+
+path_dict = create_path_dict()
+specs = generate_derived_and_data_derived_specs(path_dict)
+
+
+create_fit_plots(
+    path_dict=paths_dict,
+    specs=specs,
+    model_name=model_name,
+    load_sol_model=True,
+    load_solution=None,
+    load_data_from_sol=False,
+)
 
 
 # %%

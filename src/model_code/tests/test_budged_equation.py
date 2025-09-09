@@ -71,7 +71,6 @@ def test_budget_unemployed(
         partner_state=partner_state,
         education=education,
         sex=sex,
-        health=1,
         lagged_choice=1,
         experience=exp_cont,
         asset_end_of_previous_period=savings,
@@ -179,6 +178,7 @@ def test_budget_worker(
     gamma_array = np.array([[gamma, gamma - 0.01], [gamma / 2, gamma / 2 - 0.01]])
     specs_internal["gamma_0"] = gamma_array
     specs_internal["gamma_1"] = gamma_array
+    specs_internal["gamma_2"] = gamma_array - 1
 
     exp_cont = scale_experience_years(
         experience_years=experience,
@@ -193,7 +193,6 @@ def test_budget_worker(
         education=education,
         lagged_choice=working_choice,
         sex=sex,
-        health=1,
         experience=exp_cont,
         asset_end_of_previous_period=savings,
         income_shock_previous_period=income_shock,
@@ -203,7 +202,8 @@ def test_budget_worker(
     savings_scaled = savings * specs_internal["wealth_unit"]
     hourly_wage = np.exp(
         gamma_array[sex, education]
-        + gamma_array[sex, education] * np.log(experience + 1)
+        + gamma_array[sex, education] * experience
+        + (gamma_array[sex, education] - 1) * experience**2
         + income_shock
     )
     if working_choice == 2:
@@ -336,7 +336,6 @@ def test_retiree(
         education=education,
         lagged_choice=0,
         sex=sex,
-        health=1,
         experience=exp_cont,
         asset_end_of_previous_period=savings,
         income_shock_previous_period=0,
@@ -476,7 +475,6 @@ def test_fresh_retiree(
         partner_state=partner_state,
         education=education,
         lagged_choice=0,
-        health=1,
         sex=sex,
         experience=exp_cont,
         asset_end_of_previous_period=savings,

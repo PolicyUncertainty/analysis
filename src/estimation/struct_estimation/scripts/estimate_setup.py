@@ -39,6 +39,7 @@ def estimate_model(
     save_results=True,
     use_observed_data=True,
     sim_data=None,
+    men_only=False,
 ):
 
     specs = generate_derived_and_data_derived_specs(path_dict)
@@ -87,6 +88,7 @@ def estimate_model(
         save_results=save_results,
         use_observed_data=use_observed_data,
         sim_data=sim_data,
+        men_only=men_only,
     )
 
     if supply_jacobian:
@@ -140,6 +142,7 @@ class est_class_from_paths:
         save_results=True,
         sim_data=None,
         use_observed_data=True,
+        men_only=False,
     ):
         self.iter_count = 0
         self.save_results = save_results
@@ -169,21 +172,31 @@ class est_class_from_paths:
             custom_resolution_age=None,
             load_model=load_model,
             sim_specs=None,
+            men_only=men_only,
         )
 
         if use_observed_data:
             # Load data
-            data_decision, states_dict = load_and_prep_data_estimation(
+            data_decision = load_and_prep_data_estimation(
                 path_dict=path_dict, model_class=model
             )
         else:
             if not isinstance(sim_data, pd.DataFrame):
                 raise ValueError("If not using observed data, sim_data must be given.")
             data_decision = sim_data.copy()
-            data_decision = data_decision[data_decision["lagged_choice"] != 0]
-            states_dict = create_states_dict(df=data_decision, model_class=model)
+
+        if men_only:
+            data_decision = data_decision[data_decision["sex"] == 0]
+        else:
+            pass
+
+        # Already retired individuals hold no identification
+        data_decision = data_decision[data_decision["lagged_choice"] != 0]
+        # Create states dict
+        states_dict = create_states_dict(data_decision, model_class=model)
 
         if use_weights:
+            raise ValueError("Weights currently not supported.")
             self.weights = data_decision["age_weights"].values
             self.weight_sum = np.sum(self.weights)
         else:
@@ -247,9 +260,6 @@ def load_and_prep_data_estimation(path_dict, model_class):
         path_dict=path_dict, model_class=model_class
     )
 
-    # Already retired individuals hold no identification
-    data_decision = data_decision[data_decision["lagged_choice"] != 0]
-
     # data_decision["age_bin"] = np.floor(data_decision["age"] / 10)
     # data_decision.loc[data_decision["age_bin"] > 6, "age_bin"] = 6
     # age_bin_av_size = data_decision.shape[0] / data_decision["age_bin"].nunique()
@@ -258,9 +268,7 @@ def load_and_prep_data_estimation(path_dict, model_class):
     #     "age_bin"
     # )["age_weights"].transform("sum")
 
-    states_dict = create_states_dict(data_decision, model_class=model_class)
-
-    return data_decision, states_dict
+    return data_decision
 
 
 def generate_print_func(

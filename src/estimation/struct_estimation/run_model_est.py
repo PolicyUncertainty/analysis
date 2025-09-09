@@ -68,7 +68,7 @@ model_name = "men_3"
 print(f"Running estimation for model: {model_name}", flush=True)
 
 LOAD_LAST_ESTIMATE = False
-LOAD_SOL_MODEL = False
+LOAD_SOL_MODEL = True
 SAVE_RESULTS = True
 USE_WEIGHTS = False
 

@@ -29,17 +29,7 @@ def estimate_partner_wage_parameters(paths_dict, specs):
 
     wage_data["ln_period"] = np.log(wage_data["period"] + 1)
 
-    # Deflate wages with FEs from wage estimation
-    wage_fe = pd.read_csv(
-        paths_dict["first_step_incomes"] + "wage_eq_year_FE.csv", index_col=[0, 1]
-    )
-    fe_all = wage_fe.loc[("all", "all"), :]
-    # Set index to int
-    fe_all.index = fe_all.index.astype(int)
-    deflate_factor = np.exp(fe_all).rename("deflate_factor")
-    # Reference year is missing. Fill up
-    deflate_factor.loc[specs["reference_year"]] = 1.0
-    wage_data["deflate_factor"] = wage_data["year"].map(deflate_factor)
+    wage_data = create_deflate_factor(paths_dict, specs, wage_data)
     wage_data["wage_p"] /= wage_data["deflate_factor"]
 
     # Store all wage data with predictions for plotting
@@ -53,7 +43,7 @@ def estimate_partner_wage_parameters(paths_dict, specs):
             index=pd.Index(data=edu_labels, name="education"),
             columns=covs,
         )
-        
+
         for edu_val, edu_label in enumerate(edu_labels):
             # Filter df
             wage_data_edu = wage_data_sex[wage_data_sex["education"] == edu_val].copy()
@@ -74,7 +64,7 @@ def estimate_partner_wage_parameters(paths_dict, specs):
 
             # Assign estimated parameters (column list corresponds to model params, so only these are assigned)
             wage_parameters.loc[edu_label] = fitted_model.params
-            
+
             # Store this data for plotting
             all_wage_data_with_predictions.append(wage_data_edu)
 
@@ -86,11 +76,29 @@ def estimate_partner_wage_parameters(paths_dict, specs):
 
     # Combine all wage data with predictions for plotting
     if all_wage_data_with_predictions:
-        combined_wage_data = pd.concat(all_wage_data_with_predictions, ignore_index=True)
+        combined_wage_data = pd.concat(
+            all_wage_data_with_predictions, ignore_index=True
+        )
         # Save wage data with predictions for plotting
         combined_wage_data.to_csv(
-            paths_dict["intermediate_data"] + "partner_wage_estimation_sample_with_predictions.csv"
+            paths_dict["intermediate_data"]
+            + "partner_wage_estimation_sample_with_predictions.csv"
         )
+
+
+def create_deflate_factor(paths_dict, specs, df):
+    # Deflate wages with FEs from wage estimation
+    wage_fe = pd.read_csv(
+        paths_dict["first_step_incomes"] + "wage_eq_year_FE.csv", index_col=[0, 1]
+    )
+    fe_all = wage_fe.loc[("all", "all"), :]
+    # Set index to int
+    fe_all.index = fe_all.index.astype(int)
+    deflate_factor = np.exp(fe_all).rename("deflate_factor")
+    # Reference year is missing. Fill up
+    deflate_factor.loc[specs["reference_year"]] = 1.0
+    df["deflate_factor"] = df["year"].map(deflate_factor)
+    return df
 
 
 def prepare_estimation_data(paths_dict, specs):
@@ -121,7 +129,7 @@ def calculate_partner_hours(path_dict):
     """Calculates average hours worked by working partners (i.e. conditional on working
     hours > 0)"""
     from specs.derive_specs import read_and_derive_specs
-    
+
     specs = read_and_derive_specs(path_dict["specs"])
     start_age = specs["start_age"]
     end_age = specs["max_ret_age"]

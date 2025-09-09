@@ -729,7 +729,7 @@ Men,High Education,40,Retired Partner,Single,0.0
 Men,High Education,40,Retired Partner,Working Partner,0.0
 Men,High Education,40,Retired Partner,Retired Partner,1.0
 Men,High Education,41,Single,Single,0.9428591531500801
-Men,High Education,41,Single,Working Partner,0.05714084684991989
+Men,High Education,41,Single,Working Partner,0.05714084684991988
 Men,High Education,41,Single,Retired Partner,1.2321674478009166e-89
 Men,High Education,41,Working Partner,Single,0.006669802104396277
 Men,High Education,41,Working Partner,Working Partner,0.9930061831834776
@@ -1497,7 +1497,7 @@ Women,Low Education,56,Single,Single,0.031405823767419266
 Women,Low Education,56,Single,Working Partner,0.8664972137476519
 Women,Low Education,56,Single,Retired Partner,0.10209696248492892
 Women,Low Education,56,Working Partner,Single,0.5154618240419999
-Women,Low Education,56,Working Partner,Working Partner,0.48453817595800014
+Women,Low Education,56,Working Partner,Working Partner,0.4845381759580001
 Women,Low Education,56,Working Partner,Retired Partner,2.074723994002626e-135
 Women,Low Education,56,Retired Partner,Single,0.0
 Women,Low Education,56,Retired Partner,Working Partner,0.0

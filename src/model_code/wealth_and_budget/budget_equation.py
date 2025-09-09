@@ -43,7 +43,7 @@ def budget_constraint(
 
     # Income from lagged choice 0. Here the experience is already transformed into pension points,
     # as we only track those in retirement.
-    retirement_income_after_ssc = calc_pensions_after_ssc(
+    retirement_income_after_ssc, gross_retirement_income = calc_pensions_after_ssc(
         pension_points=experience_years,
         model_specs=model_specs,
     )
@@ -110,7 +110,8 @@ def budget_constraint(
         "net_hh_income": total_income / model_specs["wealth_unit"],
         "gross_hh_income": (gross_labor_income + gross_partner_income)
         / model_specs["wealth_unit"],
-        "gross_own_income": gross_labor_income / model_specs["wealth_unit"],
+        "gross_labor_income": gross_labor_income / model_specs["wealth_unit"],
+        "gross_retirement_income": gross_retirement_income / model_specs["wealth_unit"],
     }
 
     return assets_begin_of_period / model_specs["wealth_unit"], aux

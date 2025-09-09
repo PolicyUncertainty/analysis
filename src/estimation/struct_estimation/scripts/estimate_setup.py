@@ -40,6 +40,8 @@ def estimate_model(
     use_observed_data=True,
     sim_data=None,
     men_only=False,
+    scale_opt=False,
+    multistart=False,
 ):
 
     specs = generate_derived_and_data_derived_specs(path_dict)
@@ -95,6 +97,12 @@ def estimate_model(
         add_kwargs = {"jac": est_class.jacobian_func}
     else:
         add_kwargs = {}
+
+    if scale_opt:
+        add_kwargs["scaling"] = om.ScalingOptions(method="bounds", clipping_value=0.0)
+
+    if multistart:
+        add_kwargs["multistart"] = (om.MultistartOptions(n_samples=10, seed=0),)
 
     result = om.minimize(
         fun=est_class.crit_func,

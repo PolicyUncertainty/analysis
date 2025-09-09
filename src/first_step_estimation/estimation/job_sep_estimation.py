@@ -4,6 +4,7 @@ This module contains the estimation logic for job separation probabilities
 for different demographic groups. The estimation uses logit regression
 with age, education, and health controls.
 """
+
 import pickle as pkl
 
 import numpy as np
@@ -68,12 +69,12 @@ def est_job_for_sample(df_job, specs):
 
     # We will generate an array starting with age 0 to be able to use age as index
 
-    all_ages = np.arange(0, specs["max_ret_age"])
+    all_ages = np.arange(0, specs["max_ret_age"] + 1)
 
     job_sep_probs = np.zeros(
         (specs["n_sexes"], specs["n_education_types"], 2, len(all_ages)), dtype=float
     )
-    predicted_ages = np.arange(specs["start_age"], specs["max_est_age_labor"] + 1)
+    predicted_ages = np.arange(specs["start_age"], specs["max_ret_age"] + 1)
     above_50 = predicted_ages >= 50
     above_55 = predicted_ages >= 55
     above_60 = predicted_ages >= 60

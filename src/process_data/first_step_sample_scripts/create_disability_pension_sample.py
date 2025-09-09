@@ -66,7 +66,7 @@ def create_disability_pension_sample(paths, specs, load_data=False):
 
     df["retirement"] = (df["choice"] == 0).astype(float)
 
-    out_cols = ["age", "education", "sex", "retirement"]
+    out_cols = ["age", "education", "sex", "retirement", "health"]
 
     df = drop_missings(df, out_cols)
     df = df[out_cols]

@@ -189,6 +189,7 @@ def create_structural_est_sample(
             "pglabgro_p": "monthly_wage_partner",
             "hlc0005_v2": "hh_net_income",
             "i11102": "last_year_hh_net_income",
+            "igrv1": "last_year_pension",
         },
         inplace=True,
     )
@@ -202,6 +203,7 @@ def create_structural_est_sample(
         "working_years": "float64",
         "children": "float64",
         # "surveyed_health": "int8",
+        "last_year_pension": "float64",
     }
 
     df["hh_net_income"] /= specs["wealth_unit"]
@@ -223,6 +225,7 @@ def create_structural_est_sample(
     print_data_description(df)
 
     # Anonymize and save data
+    df["year"] = df.index.get_level_values("syear").values
     df.reset_index(drop=True, inplace=True)
     df.to_csv(paths["struct_est_sample"])
 

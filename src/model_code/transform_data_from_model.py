@@ -5,6 +5,9 @@ from dcegm.likelihood import (
     create_choice_prob_function,
 )
 
+from first_step_estimation.estimation.partner_wage_estimation import (
+    create_deflate_factor,
+)
 from model_code.state_space.experience import scale_experience_years
 from model_code.unobserved_state_weighting import create_unobserved_state_specs
 from process_data.structural_sample_scripts.create_structural_est_sample import (
@@ -93,11 +96,25 @@ def load_scale_and_correct_data(path_dict, model_class):
     )
     states_dict = create_states_dict(df=data_decision, model_class=model_class)
 
-    data_decision["assets_begin_of_period"] = adjust_observed_assets(
+    out = adjust_observed_assets(
         observed_states_dict=states_dict,
         params={},
         model_class=model_class,
+        aux_outs=True,
     )
+    # data_decision = create_deflate_factor(path_dict, model_specs, data_decision)
+    # data_decision["gross_retirement_income"] = (
+    #     out[1]["gross_retirement_income"]
+    #     * model_class.model_specs["wealth_unit"]
+    #     / data_decision["deflate_factor"]
+    # )
+    #
+    # import matplotlib.pyplot as plt
+    #
+    # data_decision.groupby("age")["gross_retirement_income"].mean().plot()
+    # data_decision.groupby("age")["last_year_pension"].mean().plot()
+    # plt.show()
+    data_decision["assets_begin_of_period"] = out[1]
     return data_decision
 
 

@@ -34,6 +34,7 @@ def specify_model(
     sim_specs=None,
     load_model=False,
     debug_info=None,
+    men_only=False,
 ):
     """Generate model class."""
 
@@ -50,13 +51,18 @@ def specify_model(
     # Experience grid
     experience_grid = define_experience_grid(specs)
 
+    if men_only:
+        sex_grid = [0]
+    else:
+        sex_grid = [0, 1]
+
     model_config = {
         "min_period_batch_segments": [33, 44],
         "n_periods": specs["n_periods"],
         "choices": np.arange(specs["n_choices"], dtype=int),
         "deterministic_states": {
             "education": np.arange(specs["n_education_types"], dtype=int),
-            "sex": np.arange(specs["n_sexes"], dtype=int),
+            "sex": sex_grid,
         },
         "stochastic_states": {
             "policy_state": np.arange(specs["n_policy_states"], dtype=int),

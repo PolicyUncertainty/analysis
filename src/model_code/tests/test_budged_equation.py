@@ -178,6 +178,7 @@ def test_budget_worker(
     gamma_array = np.array([[gamma, gamma - 0.01], [gamma / 2, gamma / 2 - 0.01]])
     specs_internal["gamma_0"] = gamma_array
     specs_internal["gamma_1"] = gamma_array
+    specs_internal["gamma_2"] = gamma_array - 1
 
     exp_cont = scale_experience_years(
         experience_years=experience,
@@ -201,7 +202,8 @@ def test_budget_worker(
     savings_scaled = savings * specs_internal["wealth_unit"]
     hourly_wage = np.exp(
         gamma_array[sex, education]
-        + gamma_array[sex, education] * np.log(experience + 1)
+        + gamma_array[sex, education] * experience
+        + (gamma_array[sex, education] - 1) * experience**2
         + income_shock
     )
     if working_choice == 2:

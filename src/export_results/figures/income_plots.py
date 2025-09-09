@@ -117,7 +117,7 @@ def plot_incomes(path_dict):
                     calc_pensions_after_ssc(
                         pension_points=pension_points,
                         model_specs=specs,
-                    ),
+                    )[0],
                     annual_unemployment,
                 )
 

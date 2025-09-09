@@ -3,7 +3,7 @@ import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from set_styles import set_colors
+
 from model_code.pension_system.experience_stock import (
     calc_pension_points_for_experience,
 )
@@ -18,24 +18,25 @@ from model_code.wealth_and_budget.wages import (
     calc_labor_income_after_ssc,
     calculate_gross_labor_income,
 )
+from set_styles import set_colors
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
 def plot_incomes(path_dict, show=False, save=False):
     """Plots incomes by experience level for men and women.
-    
+
     Parameters
     ----------
     path_dict : dict
         Dictionary containing paths to data and output directories
     show : bool, default False
         Whether to display plots
-    save : bool, default False  
+    save : bool, default False
         Whether to save plots to disk
     """
     specs = generate_derived_and_data_derived_specs(path_dict)
     colors, _ = set_colors()
-    
+
     exp_levels = np.arange(0, 50)
 
     annual_unemployment = specs["annual_unemployment_benefits"]
@@ -114,32 +115,44 @@ def plot_incomes(path_dict, show=False, save=False):
                 gross_pensions[exp_idx] = calc_gross_pension_income(
                     exp_stock_pension, specs
                 )
-                after_ssc_pensions[exp_idx] = calc_pensions_after_ssc(
+                after_ssc_pensions[exp_idx], _ = calc_pensions_after_ssc(
                     gross_pensions[exp_idx], specs
                 )
 
             # Plot wages and pensions
             ax.plot(exp_levels, gross_pt_wages, label="Gross PT wages", color=colors[1])
-            ax.plot(exp_levels, after_ssc_pt_wages, label="Net PT wages", color=colors[2])
+            ax.plot(
+                exp_levels, after_ssc_pt_wages, label="Net PT wages", color=colors[2]
+            )
             ax.plot(exp_levels, gross_ft_wages, label="Gross FT wages", color=colors[3])
-            ax.plot(exp_levels, after_ssc_ft_wages, label="Net FT wages", color=colors[4])
+            ax.plot(
+                exp_levels, after_ssc_ft_wages, label="Net FT wages", color=colors[4]
+            )
             ax.plot(exp_levels, gross_pensions, label="Gross pensions", color=colors[5])
-            ax.plot(exp_levels, after_ssc_pensions, label="Net pensions", color=colors[6])
+            ax.plot(
+                exp_levels, after_ssc_pensions, label="Net pensions", color=colors[6]
+            )
 
             ax.set_title(f"{sex_label}, {edu_label}")
             ax.set_xlabel("Experience (years)")
             ax.set_ylabel("Annual Income (€)")
-            
+
             # Only show legend on first subplot
             if sex_var == 0 and edu_var == 0:
-                ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+                ax.legend(bbox_to_anchor=(1.05, 1), loc="upper left")
 
     plt.tight_layout()
-    
+
     if save:
-        fig.savefig(path_dict["model_plots"] + "income_by_experience.pdf", bbox_inches="tight")
-        fig.savefig(path_dict["model_plots"] + "income_by_experience.png", bbox_inches="tight", dpi=300)
-        
+        fig.savefig(
+            path_dict["model_plots"] + "income_by_experience.pdf", bbox_inches="tight"
+        )
+        fig.savefig(
+            path_dict["model_plots"] + "income_by_experience.png",
+            bbox_inches="tight",
+            dpi=300,
+        )
+
     if show:
         plt.show()
     else:

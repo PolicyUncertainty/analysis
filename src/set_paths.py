@@ -51,6 +51,9 @@ def create_path_dict(define_user=False, user=None):
     }
     # Assign est result folders
     paths_dict["est_results"] = analysis_path + "output/est_results/"
+    paths_dict["beliefs_est_results"] = (
+        analysis_path + "output/est_results/beliefs/"
+    )
     paths_dict["first_step_results"] = (
         analysis_path + "output/est_results/first_step/"
     )  # legacxy path

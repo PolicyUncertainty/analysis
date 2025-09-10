@@ -63,10 +63,22 @@ def check_for_longer_retirement_and_degenerate_vector(
     return trans_vector
 
 
-def update_specs_exp_ret_age_trans_mat(specs, path_dict):
-    # Load parameters
-    alpha_hat = np.loadtxt(path_dict["est_results"] + "exp_val_params.txt")
-    sigma_sq_hat = np.loadtxt(path_dict["est_results"] + "var_params.txt")
+def update_specs_exp_ret_age_trans_mat(specs, path_dict=None):
+    """Update specs with SRA expectation transition matrix.
+    
+    Args:
+        specs: Specification dictionary (should contain SRA belief parameters)
+        path_dict: Path dictionary (kept for backward compatibility, not used)
+    """
+    # Get parameters from specs instead of loading files directly
+    if "sra_belief_alpha" not in specs or "sra_belief_sigma_sq" not in specs:
+        raise ValueError(
+            "SRA belief parameters not found in specs. "
+            "Make sure add_belief_process_specs() has been called."
+        )
+    
+    alpha_hat = specs["sra_belief_alpha"]
+    sigma_sq_hat = specs["sra_belief_sigma_sq"]
 
     # Read out specs
     step_size = specs["SRA_grid_size"]

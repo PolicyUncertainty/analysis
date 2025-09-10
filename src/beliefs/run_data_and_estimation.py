@@ -36,9 +36,9 @@ uninformed_params_df = calibrate_uninformed_hazard_rate_with_se(
     df, specs, calculate_se=False
 )
 
-# save results
+# save results to beliefs_est_results
 params_df = pd.concat([sra_params_df, uninformed_params_df], ignore_index=True)
-params_df.to_csv(path_dict["intermediate_data"] + "beliefs/" + "beliefs_parameters.csv", index=False)
+params_df.to_csv(path_dict["beliefs_est_results"] + "beliefs_parameters.csv", index=False)
 
 # save heterogeneity results
-alpha_heterogeneity_df.to_csv(path_dict["intermediate_data"] + "beliefs/" + "alpha_heterogeneity_results.csv", index=False)
+alpha_heterogeneity_df.to_csv(path_dict["beliefs_est_results"] + "alpha_heterogeneity_results.csv", index=False)

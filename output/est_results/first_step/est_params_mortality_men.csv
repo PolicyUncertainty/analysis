@@ -1,0 +1,7 @@
+,value,lower_bound,upper_bound,soft_lower_bound,soft_upper_bound,hazard_ratio
+intercept,-13.207048542474928,-inf,inf,-15.0,15.0,1.8376030193567837e-06
+age,0.10831500924916,1e-08,inf,0.0001,1.0,1.114398736010014
+Good Health High Education,-0.7853426643763675,-inf,inf,-2.5,2.5,0.45596343258795063
+Good Health Low Education,-0.333140062028778,-inf,inf,-2.5,2.5,0.7166698088983834
+Bad Health High Education,0.003293433703174383,-inf,inf,-2.5,2.5,1.003298863014676
+Bad Health Low Education,0.3419600914340366,-inf,inf,-2.5,2.5,1.4077041169404592

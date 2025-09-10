@@ -91,7 +91,7 @@ def create_path_dict(define_user=False, user=None):
         paths_dict[subfolder + "_tables"] = folder_name_tables + "/"
 
     # Assign model specification file
-    paths_dict["specs"] = analysis_path + "src/spec.yaml"
+    paths_dict["specs"] = analysis_path + "src/specs/spec.yaml"
 
     # Assign start params and bounds folder for structural estimation
     paths_dict["start_params_and_bounds"] = (

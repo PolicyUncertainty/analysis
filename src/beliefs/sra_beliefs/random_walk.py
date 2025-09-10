@@ -3,7 +3,7 @@ import pandas as pd
 from statsmodels import api as sm
 
 
-def est_SRA_params(paths, df=None):
+def est_SRA_params(paths, df=None, print_summary=False):
     # load (if df is None) and filter data
     if df is None:
         df = pd.read_csv(
@@ -11,7 +11,7 @@ def est_SRA_params(paths, df=None):
         )
     df = filter_df(df)
     # estimate expected SRA increase and variance
-    alpha_hat, alpha_hat_std_err = est_expected_SRA(paths, df)
+    alpha_hat, alpha_hat_std_err = est_expected_SRA(paths, df, print_summary=print_summary)
     sigma_sq_hat, sigma_sq_hat_std_err = estimate_expected_SRA_variance(paths, df)
     columns = ["parameter", "estimate", "std_error"]
     results_df = pd.DataFrame(
@@ -53,7 +53,7 @@ def est_expected_SRA(paths, df=None, print_summary=False, covariates=None, inclu
     if covariates is not None:
         X_vars.extend(covariates)
     
-    # Use the cleaned dataframe directly (assumes it's already been cleaned)
+    # Use the cleaned dataframe 
     X = df[X_vars].values
     y = df[y_var].values
     w = df[weights].values
@@ -80,6 +80,13 @@ def est_expected_SRA(paths, df=None, print_summary=False, covariates=None, inclu
     fitted_model = model.fit()
     
     if print_summary:
+
+        # summarize distributions of dependent and independent variables
+        print("\nDescriptive statistics:")
+        desc_stats = df[[y_var] + X_vars].describe()
+        print(desc_stats)
+
+        # print model summary
         print(fitted_model.summary())
         coef_str = " + ".join([f"{coef:.4f} * {var}" for coef, var in zip(fitted_model.params, var_names)])
         print(f"Estimated regression equation: E[ret age change] = {coef_str}")
@@ -220,8 +227,6 @@ def estimate_expected_SRA_variance(paths, df=None, print_summary=False):
     x_var = "time_to_ret"
     weights = "fweights"
     y_var = "var"
-    # save dataset to stata
-    df.to_stata(paths["intermediate_data"] + "temp_bruno.dta", write_index=False)
     # regress estimated variance on time to retirement without constant
     model = sm.WLS(
         exog=df[x_var].values,

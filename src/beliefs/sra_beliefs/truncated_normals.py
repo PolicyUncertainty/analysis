@@ -28,8 +28,6 @@ def estimate_truncated_normal(df, paths, options, load_data=False):
         "second_cdf_point": options["second_cdf_point"],
     }
 
-    df["time_to_ret"] = df["exp_pens_uptake"] - df["age"]
-
     # estimate loc and scale of truncated normal (as well as mean and var), save
     df = estimate_truncated_normal_parameters(df, function_spec)
     return df

@@ -30,7 +30,7 @@ def create_path_dict(define_user=False, user=None):
             data_path = "/Users/gregorschuler/GitProjects/soep/"
         else:
             raise ValueError(
-                "Please specify valid USER in " "MASTER_prepare_structural_model.py."
+                "Please specify valid user or add data path to set_paths.py"
             )
         # Set user specified paths
         paths_dict = {

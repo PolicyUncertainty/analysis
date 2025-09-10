@@ -3,6 +3,7 @@ from matplotlib import pyplot as plt
 from statsmodels import api as sm
 
 from set_styles import set_colors
+
 JET_COLOR_MAP, LINE_STYLES = set_colors()
 from process_data.first_step_sample_scripts.create_disability_pension_sample import (
     create_disability_pension_sample,
@@ -45,25 +46,25 @@ def est_disability_prob(paths, specs):
         disability_prob_params = {**disability_prob_params, **gender_params}
         logit_df.loc[sex_mask, "predicted"] = logit_fitted.predict()
 
-    # Plot prediction and data
-    fig, axs = plt.subplots(ncols=2)
-    for sex in range(2):
-        ax = axs[sex]
-        for edu in range(2):
-            mask = (logit_df["education"] == edu) & (logit_df["sex"] == sex)
-
-            df_edu_age_grouped = logit_df[mask].groupby("age")
-            ax.plot(
-                df_edu_age_grouped["retirement"].mean(),
-                label=f"Data {edu}",
-                color=JET_COLOR_MAP[edu],
-                ls="--",
-            )
-            ax.plot(
-                df_edu_age_grouped["predicted"].mean(),
-                label=f"Predicted {edu}",
-                color=JET_COLOR_MAP[edu],
-            )
-        ax.legend()
-    plt.show()
+    # # Plot prediction and data
+    # fig, axs = plt.subplots(ncols=2)
+    # for sex in range(2):
+    #     ax = axs[sex]
+    #     for edu in range(2):
+    #         mask = (logit_df["education"] == edu) & (logit_df["sex"] == sex)
+    #
+    #         df_edu_age_grouped = logit_df[mask].groupby("age")
+    #         ax.plot(
+    #             df_edu_age_grouped["retirement"].mean(),
+    #             label=f"Data {edu}",
+    #             color=JET_COLOR_MAP[edu],
+    #             ls="--",
+    #         )
+    #         ax.plot(
+    #             df_edu_age_grouped["predicted"].mean(),
+    #             label=f"Predicted {edu}",
+    #             color=JET_COLOR_MAP[edu],
+    #         )
+    #     ax.legend()
+    # plt.show()
     return disability_prob_params

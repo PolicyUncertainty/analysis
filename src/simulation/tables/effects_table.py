@@ -1,6 +1,11 @@
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# NOTE: This file has been moved from export_results to simulation. Check if still needed
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
 import numpy as np
 import pandas as pd
-from export_results.tables.cv import calc_compensated_variation
+from simulation.tables.cv import calc_compensated_variation
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 """TODO: ROunding everywhere instead of cutting off decimals"""

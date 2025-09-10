@@ -48,13 +48,13 @@ def calibrate_credited_periods(paths_dict, load_data=False):
     estimates = pd.DataFrame(model.params, columns=['estimate'])
     
     # Save estimates to CSV
-    out_file_path = paths_dict["est_results"] + "credited_periods_estimates.csv"
+    out_file_path = paths_dict["first_step_results"] + "credited_periods_estimates.csv"
     estimates.to_csv(out_file_path)
     
     # Save additional data for plotting if needed
     df_with_predictions = df.copy()
     df_with_predictions["predicted_credited_periods"] = model.predict(X)
-    plot_data_path = paths_dict["est_results"] + "credited_periods_plot_data.csv"
+    plot_data_path = paths_dict["first_step_results"] + "credited_periods_plot_data.csv"
     df_with_predictions.to_csv(plot_data_path, index=False)
     
     return estimates

@@ -59,11 +59,11 @@ load_sol_model = True
 #
 # pickle.dump(
 #     iterations,
-#     open(path_dict["intermediate_data"] + f"msm_bequest_scale_iterations.pkl", "wb"),
+#     open(path_dict["struct_data"] + f"msm_bequest_scale_iterations.pkl", "wb"),
 # )
 
 iterations = pickle.load(
-    open(path_dict["intermediate_data"] + f"msm_mu_iterations.pkl", "rb")
+    open(path_dict["struct_data"] + f"msm_mu_iterations.pkl", "rb")
 )
 
 wealth_moments = []

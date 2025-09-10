@@ -21,7 +21,7 @@ def select_solution_transition_func_and_update_specs(
     custom_resolution_age,
 ):
     """Select the solution SRA belief transition function and update the model specs accordingly.
-    There are only two cases weather subjective uncertainty exists or not.
+    There are only two cases: either subjective uncertainty exists or it does not.
     """
 
     # There can be two cases. Either subjective uncertainty exists or there is no uncertainty.

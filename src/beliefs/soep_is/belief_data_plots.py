@@ -6,7 +6,7 @@ from set_styles import set_colors
 def plot_sra_beliefs_by_cohort(paths_dict, show=False, save=False):
     JET_COLOR_MAP, LINE_STYLES = set_colors()
     df_soep_is = pd.read_csv(
-        paths_dict["intermediate_data"] + "beliefs/soep_is_clean.csv",
+        paths_dict["beliefs_data"] + "soep_is_clean.csv",
         dtype={"gebjahr": int},
     )
 
@@ -83,7 +83,7 @@ def plot_erp_beliefs_by_cohort(paths_dict, show=False, save=False):
     JET_COLOR_MAP, LINE_STYLES = set_colors()
     # Load and prepare the data
     df_soep_is = pd.read_csv(
-        paths_dict["intermediate_data"] + "beliefs/soep_is_clean.csv",
+        paths_dict["beliefs_data"] + "soep_is_clean.csv",
         dtype={"gebjahr": int},
     )
     relevant_columns = [
@@ -174,7 +174,7 @@ def plot_erp_violin_plots_by_cohort(paths_dict, show=False, save=False, censor_a
     """
     # Load and prepare the data
     df_soep_is = pd.read_csv(
-        paths_dict["intermediate_data"] + "beliefs/soep_is_clean.csv",
+        paths_dict["beliefs_data"] + "soep_is_clean.csv",
         dtype={"gebjahr": int},
     )
     relevant_columns = [
@@ -297,7 +297,7 @@ def plot_informed_share_by_cohort(paths_dict, show=False, save=False):
     """
     # Load and prepare the data
     df_soep_is = pd.read_csv(
-        paths_dict["intermediate_data"] + "beliefs/soep_is_clean.csv",
+        paths_dict["beliefs_data"] + "soep_is_clean.csv",
         dtype={"gebjahr": int},
     )
     

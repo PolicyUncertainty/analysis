@@ -12,14 +12,14 @@ from specs.family_specs import (
 )
 from specs.health_specs import process_health_labels, read_in_health_transition_specs
 from specs.income_specs import add_income_specs
-from specs.informed_specs import add_informed_process_specs
+from specs.belief_specs import add_belief_process_specs
 
 
 def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     """This function reads in specs and adds derived and data estimated specs."""
     specs = read_and_derive_specs(path_dict["specs"])
-    # Add informed process specs
-    specs = add_informed_process_specs(specs, path_dict)
+    # Add belief process specs (both SRA and ERP parameters)
+    specs = add_belief_process_specs(specs, path_dict)
 
     # Add income specs
     specs = add_income_specs(specs, path_dict)
@@ -39,7 +39,7 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     # Read in health transition matrix
     specs["health_trans_mat"] = read_in_health_transition_specs(path_dict, specs)
 
-    job_sep_probs = pkl.load(open(path_dict["est_results"] + "job_sep_probs.pkl", "rb"))
+    job_sep_probs = pkl.load(open(path_dict["first_step_results"] + "job_sep_probs.pkl", "rb"))
     specs["job_sep_probs"] = job_sep_probs
     specs["log_job_sep_probs"] = inv_logit_formula(job_sep_probs)
     return specs

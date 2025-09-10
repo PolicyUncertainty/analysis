@@ -28,7 +28,7 @@ def plot_partner_wage_results(path_dict, specs, show=False, save=False):
     
     # Load partner wage data with predictions (this should be saved by estimation module)
     wage_data = pd.read_csv(
-        path_dict["intermediate_data"] + "partner_wage_estimation_sample_with_predictions.csv", 
+        path_dict["first_step_data"] + "partner_wage_estimation_sample_with_predictions.csv", 
         index_col=0
     )
     

@@ -77,7 +77,7 @@ def estimate_wage_parameters(paths_dict, specs):
         combined_wage_data = pd.concat(all_wage_data_with_predictions, ignore_index=True)
         # Save wage data with predictions for plotting
         combined_wage_data.to_csv(
-            paths_dict["intermediate_data"] + "wage_estimation_sample_with_predictions.csv"
+            paths_dict["first_step_data"] + "wage_estimation_sample_with_predictions.csv"
         )
 
     # Save results
@@ -99,7 +99,7 @@ def estimate_wage_parameters(paths_dict, specs):
 def load_and_prepare_wage_data(paths_dict):
     # Load wage data
     wage_data = pd.read_csv(
-        paths_dict["intermediate_data"] + "wage_estimation_sample.csv", index_col=0
+        paths_dict["first_step_data"] + "wage_estimation_sample.csv", index_col=0
     )
     wage_data["ln_exp"] = np.log(wage_data["experience"] + 1)
     wage_data["exp"] = wage_data["experience"]

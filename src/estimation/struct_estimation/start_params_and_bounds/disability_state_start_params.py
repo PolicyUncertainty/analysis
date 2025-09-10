@@ -2,7 +2,9 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from statsmodels import api as sm
 
-from export_results.figures.color_map import JET_COLOR_MAP
+from set_styles import set_colors
+
+JET_COLOR_MAP, LINE_STYLES = set_colors()
 from process_data.first_step_sample_scripts.create_disability_pension_sample import (
     create_disability_pension_sample,
 )

@@ -22,7 +22,7 @@ from model_code.utility.bequest_utility import create_final_period_utility_funct
 from model_code.utility.utility_functions_add import create_utility_functions
 from model_code.wealth_and_budget.assets_grid import create_end_of_period_assets
 from model_code.wealth_and_budget.budget_equation import budget_constraint
-from set_paths import get_model_resutls_path
+from set_paths import get_model_results_path
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
@@ -139,7 +139,7 @@ def specify_and_solve_simple_model(
     )
 
     # check if folder of model objects exits:
-    solve_folder = get_model_resutls_path(path_dict, file_append)
+    solve_folder = get_model_results_path(path_dict, file_append)
     sol_name = f"sol_simple.pkl"
 
     solution_file = solve_folder["solution"] + sol_name

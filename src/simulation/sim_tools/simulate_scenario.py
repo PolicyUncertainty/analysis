@@ -2,7 +2,7 @@ import pandas as pd
 
 from model_code.specify_model import specify_and_solve_model
 from model_code.state_space.experience import construct_experience_years
-from set_paths import get_model_resutls_path
+from set_paths import get_model_results_path
 from simulation.sim_tools.start_obs_for_sim import generate_start_states_from_obs
 from specs.derive_specs import read_and_derive_specs
 
@@ -22,7 +22,7 @@ def solve_and_simulate_scenario(
     sol_model_exists=True,
     men_only=False,
 ):
-    model_out_folder = get_model_resutls_path(path_dict, model_name)
+    model_out_folder = get_model_results_path(path_dict, model_name)
 
     # Make intitial SRA only two digits after point
 

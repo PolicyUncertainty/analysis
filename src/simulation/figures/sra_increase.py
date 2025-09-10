@@ -2,7 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from export_results.figures.color_map import JET_COLOR_MAP
+from set_styles import set_colors
+JET_COLOR_MAP, LINE_STYLES = set_colors()
 
 
 def sra_increase_aggregate_plot(path_dict, model_name):

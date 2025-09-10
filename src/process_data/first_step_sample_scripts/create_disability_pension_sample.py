@@ -23,7 +23,7 @@ def create_disability_pension_sample(paths, specs, load_data=False):
         os.makedirs(paths["intermediate_data"])
 
     out_file_path = (
-        paths["intermediate_data"] + "disability_pension_estimation_sample.csv"
+        paths["first_step_data"] + "disability_pension_estimation_sample.csv"
     )
 
     if load_data:

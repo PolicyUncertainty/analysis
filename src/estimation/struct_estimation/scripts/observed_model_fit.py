@@ -4,21 +4,23 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from set_styles import set_colors
+
+JET_COLOR_MAP, LINE_STYLES = set_colors()
 from estimation.struct_estimation.scripts.estimate_setup import generate_print_func
-from export_results.figures.color_map import JET_COLOR_MAP
 from model_code.specify_model import specify_and_solve_model
 from model_code.transform_data_from_model import (
     calc_choice_probs_for_df,
     load_scale_and_correct_data,
 )
-from set_paths import get_model_resutls_path
+from set_paths import get_model_results_path
 
 
 def create_fit_plots(
     path_dict, specs, model_name, load_sol_model, load_solution, load_data_from_sol
 ):
     # check if folder of model objects exits:
-    model_folder = get_model_resutls_path(path_dict, model_name)
+    model_folder = get_model_results_path(path_dict, model_name)
 
     if load_data_from_sol:
         data_decision = pd.read_csv(

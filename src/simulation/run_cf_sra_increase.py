@@ -19,7 +19,7 @@ import pickle as pkl
 
 import numpy as np
 
-from export_results.tables.cv import calc_compensated_variation
+from simulation.tables.cv import calc_compensated_variation
 from simulation.sim_tools.calc_aggregate_results import calc_overall_results
 from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 

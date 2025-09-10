@@ -16,7 +16,7 @@ from process_data.structural_sample_scripts.policy_state import (
 def estimate_truncated_normal(df, paths, options, load_data=False):
     if load_data:
         df = pd.read_csv(
-            paths["intermediate_data"] + "beliefs/soep_is_truncated_normals.csv"
+            paths["beliefs_data"] + "soep_is_truncated_normals.csv"
         )
         return df
     
@@ -27,8 +27,6 @@ def estimate_truncated_normal(df, paths, options, load_data=False):
         "first_cdf_point": options["first_cdf_point"],
         "second_cdf_point": options["second_cdf_point"],
     }
-
-    df["time_to_ret"] = df["exp_pens_uptake"] - df["age"]
 
     # estimate loc and scale of truncated normal (as well as mean and var), save
     df = estimate_truncated_normal_parameters(df, function_spec)

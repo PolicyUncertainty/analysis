@@ -1,0 +1,7 @@
+parameter,estimate,std_error,type
+alpha,0.03953351979053024,0.0013316644127089475,
+sigma_sq,0.029536921752850134,0.0009636551085504335,
+initial_informed_share,0.06620802300127678,,Low Education
+hazard_rate,0.011299536074403715,,Low Education
+initial_informed_share,0.2822958789497842,,High Education
+hazard_rate,0.0075044337321271805,,High Education

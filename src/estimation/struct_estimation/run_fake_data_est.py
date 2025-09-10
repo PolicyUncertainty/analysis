@@ -77,7 +77,7 @@ model_name = "start_lower_fake"
 
 print(f"Running fake estimation for params: {model_name}", flush=True)
 
-LOAD_SOL_MODEL = True
+LOAD_SOL_MODEL = False
 LOAD_SOLUTION = None
 LOAD_DF = None
 SAVE_RESULTS = False
@@ -144,6 +144,7 @@ estimation_results = estimate_model(
     save_results=SAVE_RESULTS,
     use_observed_data=False,
     sim_data=data_fake,
+    print_women_examples=False,
     men_only=True,
     scale_opt=True,
     multistart=True,

@@ -118,7 +118,10 @@ def specify_model(
     else:
         alternative_sim_specifications = None
 
-    model_path = path_dict["intermediate_data"] + "model.pkl"
+    if men_only:
+        model_path = path_dict["intermediate_data"] + "model_men.pkl"
+    else:
+        model_path = path_dict["intermediate_data"] + "model.pkl"
 
     if load_model:
         model = dcegm.setup_model(

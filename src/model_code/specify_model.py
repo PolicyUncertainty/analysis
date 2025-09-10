@@ -165,7 +165,6 @@ def specify_and_solve_model(
     sim_specs=None,
     men_only=False,
     debug_info=None,
-    men_only=False,
 ):
     """Specify and solve model.
 

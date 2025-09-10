@@ -1,7 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from export_results.figures.color_map import JET_COLOR_MAP
+from set_styles import set_colors
+JET_COLOR_MAP, LINE_STYLES = set_colors()
 
 
 def plot_life_cycle_choice_probs(

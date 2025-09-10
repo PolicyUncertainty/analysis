@@ -1,3 +1,8 @@
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# NOTE: This file has been moved from export_results to simulation. Check if still needed
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
 # Set paths of project
 import pickle
 
@@ -6,7 +11,7 @@ from set_paths import create_path_dict
 
 path_dict = create_path_dict()
 params = pickle.load(open(path_dict["est_results"] + "est_params.pkl", "rb"))
-from export_results.tables.effects_table import create_effects_table
+from simulation.tables.effects_table import create_effects_table
 
 sim_dir = path_dict["intermediate_data"] + "sim_data/"
 ###############################################

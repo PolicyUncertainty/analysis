@@ -1,10 +1,15 @@
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# NOTE: This file has been moved from export_results to simulation. Check if still needed
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
 import pickle
 
 import numpy as np
 import pandas as pd
 import scipy.optimize as opt
 
-from export_results.tools import create_realized_taste_shock
+from simulation.tables.tools import create_realized_taste_shock
 
 
 def calc_compensated_variation(df_base, df_cf, params, specs):

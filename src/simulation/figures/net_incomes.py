@@ -2,7 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from export_results.figures.color_map import JET_COLOR_MAP
+from set_styles import set_colors
+JET_COLOR_MAP, LINE_STYLES = set_colors()
 from model_code.transform_data_from_model import load_scale_and_correct_data
 from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 

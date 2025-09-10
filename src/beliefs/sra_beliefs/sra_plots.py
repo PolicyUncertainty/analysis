@@ -5,7 +5,8 @@ from scipy.stats import truncnorm
 
 from beliefs.sra_beliefs.random_walk import filter_df
 from beliefs.sra_beliefs.truncated_normals import estimate_truncated_normal_parameters
-from export_results.figures.color_map import JET_COLOR_MAP
+from set_styles import set_colors
+JET_COLOR_MAP, LINE_STYLES = set_colors()
 
 
 def plot_truncated_normal_for_response(

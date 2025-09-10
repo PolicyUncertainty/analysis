@@ -62,7 +62,6 @@ def job_sep_probability(
     log_job_sep_prob = model_specs["log_job_sep_probs"][
         sex, education, good_health, age
     ]
-
     SRA_interecpt = (
         params["SRA_firing_logit_intercept_men_low"] * (1 - education) * (1 - sex)
         + params["SRA_firing_logit_intercept_men_high"] * education * (1 - sex)

@@ -29,7 +29,7 @@ def plot_healthy_unhealthy(path_dict, specs, show=False, save=False):
 
     # Load the health transition sample
     df = pd.read_pickle(
-        path_dict["intermediate_data"] + "health_transition_estimation_sample.pkl"
+        path_dict["first_step_data"] + "health_transition_estimation_sample.pkl"
     )
 
     good_health_var = specs["good_health_var"]

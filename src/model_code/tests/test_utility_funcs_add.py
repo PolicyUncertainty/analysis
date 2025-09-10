@@ -90,8 +90,6 @@ def test_utility_func(
     params = {
         "mu_low": mu,
         "mu_high": mu + 1,
-        "mu_bequest_low": mu + 1,
-        "mu_bequest_high": mu,
         # Men
         "disutil_ft_work_good_men": disutil_work + 1,
         "disutil_ft_work_bad_men": disutil_work,
@@ -156,6 +154,20 @@ def test_utility_func(
             / (1 - mu_edu)
             - disutil
         )
+    np.testing.assert_almost_equal(
+        utility_func(
+            consumption=consumption,
+            partner_state=partner_state,
+            education=education,
+            health=health,
+            sex=sex,
+            period=period,
+            choice=0,
+            params=params,
+            model_specs=model_specs,
+        ),
+        utility_lambda((partner_state == 2) * (-disutil_unemployed)),
+    )
 
     np.testing.assert_almost_equal(
         utility_func(
@@ -237,8 +249,6 @@ def test_marginal_utility(
     params = {
         "mu_low": mu,
         "mu_high": mu + 1,
-        "mu_bequest_low": mu + 1,
-        "mu_bequest_high": mu,
         # Men
         "disutil_ft_work_good_men": disutil_work + 1,
         "disutil_ft_work_bad_men": disutil_work,
@@ -314,8 +324,6 @@ def test_inv_marginal_utility(
     params = {
         "mu_low": mu,
         "mu_high": mu + 1,
-        "mu_bequest_low": mu + 1,
-        "mu_bequest_high": mu,
         # Men
         "disutil_ft_work_good_men": disutil_work + 1,
         "disutil_ft_work_bad_men": disutil_work,
@@ -371,8 +379,7 @@ def test_bequest(consumption, mu, education, bequest_scale):
         "bequest_scale": bequest_scale,
         "kappa": 21,
     }
-    if education == 0:
-        mu += 1
+    mu += 1 - education
     if mu == 1:
         bequest = bequest_scale * np.log(consumption + 21)
     else:

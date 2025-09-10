@@ -115,7 +115,7 @@ from process_data.first_step_sample_scripts.create_health_transition_sample impo
 #     )
 #
 #     # Save the results to a CSV file
-#     out_file_path = paths_dict["est_results"] + "health_transition_matrix.csv"
+#     out_file_path = paths_dict["first_step_results"] + "health_transition_matrix.csv"
 #     health_transition_matrix.to_csv(out_file_path, index=False)
 #
 #     return health_transition_matrix
@@ -199,7 +199,7 @@ def estimate_health_transitions_parametric(paths_dict, specs):
                 ] = transition_probabilities
 
     # Save the results to a CSV file
-    out_file_path = paths_dict["est_results"] + "health_transition_matrix.csv"
+    out_file_path = paths_dict["first_step_results"] + "health_transition_matrix.csv"
     health_transition_matrix.to_csv(out_file_path)
 
     return health_transition_matrix

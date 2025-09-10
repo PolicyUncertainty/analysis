@@ -110,7 +110,7 @@ def plot_children(path_dict, specs, show=False, save=False):
     # Calculate the number of children in the household for each individual conditional
     # on sex, education and age bin.
     df = pd.read_pickle(
-        path_dict["intermediate_data"] + "partner_transition_estimation_sample.pkl"
+        path_dict["first_step_data"] + "partner_transition_estimation_sample.pkl"
     )
 
     start_age = specs["start_age"]
@@ -194,7 +194,7 @@ def plot_marriage_and_divorce(path_dict, specs, show=False, save=False):
     start_age = specs["start_age"]
     end_age = specs["end_age"]
     df = pd.read_pickle(
-        path_dict["intermediate_data"] + "partner_transition_estimation_sample.pkl"
+        path_dict["first_step_data"] + "partner_transition_estimation_sample.pkl"
     )
     grouped_shares = df.groupby(["sex", "education", "age"])[
         "partner_state"
@@ -382,7 +382,7 @@ def plot_children(path_dict, specs, show=False, save=False):
     # Calculate the number of children in the household for each individual conditional
     # on sex, education and age bin.
     df = pd.read_pickle(
-        path_dict["intermediate_data"] + "partner_transition_estimation_sample.pkl"
+        path_dict["first_step_data"] + "partner_transition_estimation_sample.pkl"
     )
 
     start_age = specs["start_age"]
@@ -466,7 +466,7 @@ def plot_marriage_and_divorce(path_dict, specs, show=False, save=False):
     start_age = specs["start_age"]
     end_age = specs["end_age"]
     df = pd.read_pickle(
-        path_dict["intermediate_data"] + "partner_transition_estimation_sample.pkl"
+        path_dict["first_step_data"] + "partner_transition_estimation_sample.pkl"
     )
     grouped_shares = df.groupby(["sex", "education", "age"])[
         "partner_state"

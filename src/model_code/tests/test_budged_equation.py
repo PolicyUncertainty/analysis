@@ -187,7 +187,7 @@ def test_budget_worker(
         model_specs=specs_internal,
     )
 
-    wealth, _ = budget_constraint(
+    wealth, aux_budget = budget_constraint(
         period=period,
         partner_state=partner_state,
         education=education,
@@ -309,48 +309,43 @@ def test_retiree(
 ):
     path_dict, specs_internal = paths_and_specs
 
-    exp_cont_last_period = scale_experience_years(
+    # exp is the pension points here
+    scaled_pension_point_last_period = scale_experience_years(
         experience_years=exp,
         period=period - 1,
         is_retired=True,
         model_specs=specs_internal,
     )
 
-    exp_cont = get_next_period_experience(
+    scaled_pension_points = get_next_period_experience(
         period=period,
         lagged_choice=np.array(0),
         policy_state=np.array(29),
         sex=sex,
         education=education,
-        experience=exp_cont_last_period,
+        experience=scaled_pension_point_last_period,
         informed=0,
         health=2,
         model_specs=specs_internal,
     )
     # Check that experience does not get updated or added any penalty
-    np.testing.assert_allclose(exp_cont * specs_internal["max_pp_retirement"], exp)
+    pension_points = scaled_pension_points * specs_internal["max_pp_retirement"]
+    np.testing.assert_allclose(pension_points, exp)
 
-    wealth, _ = budget_constraint(
+    wealth, aux_budget = budget_constraint(
         period=period,
         partner_state=partner_state,
         education=education,
         lagged_choice=0,
         sex=sex,
-        experience=exp_cont,
+        experience=scaled_pension_points,
         asset_end_of_previous_period=savings,
         income_shock_previous_period=0,
         model_specs=specs_internal,
     )
 
     savings_scaled = savings * specs_internal["wealth_unit"]
-
-    mean_wage_all = specs_internal["mean_hourly_ft_wage"][sex, education]
-    gamma_0 = specs_internal["gamma_0"][sex, education]
-    gamma_1_plus_1 = specs_internal["gamma_1"][sex, education] + 1
-    total_pens_points = (
-        (np.exp(gamma_0) / gamma_1_plus_1) * ((exp + 1) ** gamma_1_plus_1 - 1)
-    ) / mean_wage_all
-    pension_year = specs_internal["annual_pension_point_value"] * total_pens_points
+    pension_year = specs_internal["annual_pension_point_value"] * pension_points
     income_after_ssc = pension_year - calc_health_ltc_contr(pension_year)
 
     has_partner_int = (partner_state > 0).astype(int)
@@ -451,6 +446,7 @@ def test_fresh_retiree(
 
     actual_retirement_age = specs_internal["start_age"] + period - 1
 
+    # Last the person was not retired. So exp is here really experience years
     exp_cont_prev = scale_experience_years(
         experience_years=exp,
         period=period - 1,
@@ -458,7 +454,9 @@ def test_fresh_retiree(
         model_specs=specs_internal,
     )
 
-    exp_cont = get_next_period_experience(
+    # This period the person retires, so lagged choice is 0. So this function returns
+    # scaled pension points
+    pension_points_scaled = get_next_period_experience(
         period=period,
         lagged_choice=0,
         policy_state=policy_state,
@@ -470,13 +468,13 @@ def test_fresh_retiree(
         model_specs=specs_internal,
     )
 
-    wealth, _ = budget_constraint(
+    wealth, aux_budget = budget_constraint(
         period=period,
         partner_state=partner_state,
         education=education,
         lagged_choice=0,
         sex=sex,
-        experience=exp_cont,
+        experience=pension_points_scaled,
         asset_end_of_previous_period=savings,
         income_shock_previous_period=0,
         model_specs=specs_internal,
@@ -489,12 +487,24 @@ def test_fresh_retiree(
     retirement_age_difference = SRA_at_retirement - actual_retirement_age
     early_retirement = retirement_age_difference > 0
 
-    mean_wage_all = specs_internal["mean_hourly_ft_wage"][sex, education]
-    gamma_0 = specs_internal["gamma_0"][sex, education]
-    gamma_1_plus_1 = specs_internal["gamma_1"][sex, education] + 1
-    total_pens_points = (
-        (np.exp(gamma_0) / gamma_1_plus_1) * ((exp + 1) ** gamma_1_plus_1 - 1)
-    ) / mean_wage_all
+    # mean_wage_all = specs_internal["mean_hourly_ft_wage"][sex, education]
+    # gamma_0 = specs_internal["gamma_0"][sex, education]
+    # gamma_1_plus_1 = specs_internal["gamma_1"][sex, education] + 1
+    # total_pens_points = (
+    #     (np.exp(gamma_0) / gamma_1_plus_1) * ((exp + 1) ** gamma_1_plus_1 - 1)
+    # ) / mean_wage_all
+
+    exp_int = exp.astype(int)
+    pp_exp_int = specs_internal["pp_for_exp_by_sex_edu"][sex, education, exp_int]
+
+    exp_frac = exp - exp_int
+    pp_difference = (
+        specs_internal["pp_for_exp_by_sex_edu"][sex, education, exp_int + 1]
+        - pp_exp_int
+    )
+    total_pens_points = pp_exp_int + exp_frac * pp_difference
+    # We have only integer experience. So total_pension points should be equal to pp_exp_int
+    np.testing.assert_array_almost_equal(total_pens_points, pp_exp_int)
 
     if early_retirement:
         if informed == 1:

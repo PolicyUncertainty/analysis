@@ -268,7 +268,7 @@ def load_and_merge_soep_core(path_dict, use_processed_pl):
         ppathl_data, pgen_data, on=["pid", "hid", "syear"], how="left"
     )
 
-    pl_intermediate_file = path_dict["intermediate_data"] + "pl_structural.pkl"
+    pl_intermediate_file = path_dict["struct_data"] + "pl_structural.pkl"
     if use_processed_pl:
         pl_data = pd.read_pickle(pl_intermediate_file)
     else:

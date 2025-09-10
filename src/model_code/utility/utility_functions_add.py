@@ -186,6 +186,7 @@ def disutility_work(
     period, choice, sex, education, partner_state, health, params, model_specs
 ):
     # choice booleans
+    retired = choice == 0
     is_unemployed = choice == 1
     is_working_part_time = choice == 2
     is_working_full_time = choice == 3
@@ -204,7 +205,7 @@ def disutility_work(
     disutil_sum_men = (
         disutil_unemployment_men * is_unemployed
         + disutil_ft_work_men * is_working_full_time
-        + partner_retired * params["disutil_partner_retired_men"]
+        + partner_retired * params["disutil_partner_retired_men"] * retired
     )
 
     disutil_ft_work_women = params["disutil_ft_work_good_women"] * good_health + params[
@@ -232,7 +233,7 @@ def disutility_work(
         disutil_unemployment * is_unemployed
         + disutil_pt_work_women * is_working_part_time
         + (disutil_ft_work_women + disutil_children_ft) * is_working_full_time
-        + partner_retired * params["disutil_partner_retired_women"]
+        + partner_retired * params["disutil_partner_retired_women"] * retired
     )
 
     # Select exponential factor by sex

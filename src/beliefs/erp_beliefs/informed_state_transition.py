@@ -5,7 +5,8 @@ import numpy as np
 import pandas as pd
 from scipy.optimize import minimize
 
-from export_results.figures.color_map import JET_COLOR_MAP
+from set_styles import set_colors
+JET_COLOR_MAP, LINE_STYLES = set_colors()
 
 def calibrate_uninformed_hazard_rate_with_se(df, specs, calculate_se=False, n_bootstrap=1000, random_state=42):
     """

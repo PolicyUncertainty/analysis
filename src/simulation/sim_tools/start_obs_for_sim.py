@@ -16,12 +16,14 @@ from model_code.stochastic_processes.job_offers import job_offer_process_transit
 
 
 def generate_start_states_from_obs(
-    path_dict, params, model_class, inital_SRA, only_informed=False
+    path_dict, params, model_class, inital_SRA, only_informed=False, men_only=False
 ):
     model_specs = model_class.model_specs
     model_structure = model_class.model_structure
 
     observed_data = pd.read_csv(path_dict["struct_est_sample"])
+    if men_only:
+        observed_data = observed_data[observed_data["sex"] == 0]
 
     # Generate start policy state from initial SRA
     initial_policy_state = np.floor(

@@ -2,7 +2,7 @@ import pandas as pd
 
 from model_code.specify_model import specify_and_solve_model
 from model_code.state_space.experience import construct_experience_years
-from set_paths import get_model_resutls_path
+from set_paths import get_model_results_path
 from simulation.sim_tools.start_obs_for_sim import generate_start_states_from_obs
 from specs.derive_specs import read_and_derive_specs
 
@@ -20,8 +20,9 @@ def solve_and_simulate_scenario(
     only_informed=False,
     solution_exists=True,
     sol_model_exists=True,
+    men_only=False,
 ):
-    model_out_folder = get_model_resutls_path(path_dict, model_name)
+    model_out_folder = get_model_results_path(path_dict, model_name)
 
     # Make intitial SRA only two digits after point
 
@@ -51,6 +52,7 @@ def solve_and_simulate_scenario(
         load_model=sol_model_exists,
         load_solution=solution_exists,
         sim_specs=sim_specs,
+        men_only=men_only,
     )
 
     if df_exists:
@@ -62,6 +64,7 @@ def solve_and_simulate_scenario(
             initial_SRA=SRA_at_start,
             model_solved=model_solved,
             only_informed=only_informed,
+            men_only=men_only,
         )
         if df_exists is None:
             return data_sim, model_solved
@@ -75,6 +78,7 @@ def simulate_scenario(
     model_solved,
     initial_SRA,
     only_informed=False,
+    men_only=False,
 ):
 
     # initial_states, wealth_agents = draw_initial_states(
@@ -92,6 +96,7 @@ def simulate_scenario(
         model_class=model_solved,
         inital_SRA=initial_SRA,
         only_informed=only_informed,
+        men_only=men_only,
     )
     model_specs = model_solved.model_specs
 
@@ -114,10 +119,14 @@ def simulate_scenario(
     df["policy_state_value"] = (
         model_specs["min_SRA"] + df["policy_state"] * model_specs["SRA_grid_size"]
     )
+    if men_only:
+        sexes = [0]
+    else:
+        sexes = range(model_specs["n_sexes"])
 
     # Assign working hours for choice 1
     df["working_hours"] = 0.0
-    for sex_var in range(model_specs["n_sexes"]):
+    for sex_var in sexes:
         for edu_var in range(model_specs["n_education_types"]):
             df.loc[
                 (df["choice"] == 3)

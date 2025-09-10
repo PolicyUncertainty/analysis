@@ -18,11 +18,11 @@ def set_standard_matplotlib_specs(plot_type="paper"):
     # Set matplotlib fontsizes
     plt.rcParams.update(
         {
-            "axes.titlesize": 22,
-            "axes.labelsize": 18,
-            "xtick.labelsize": 18,
-            "ytick.labelsize": 18,
-            "legend.fontsize": 18,
+            "axes.titlesize": 24,
+            "axes.labelsize": 24,
+            "xtick.labelsize": 24,
+            "ytick.labelsize": 24,
+            "legend.fontsize": 24,
         }
     )
     # Make lines of plots thicker
@@ -42,8 +42,8 @@ def set_standard_matplotlib_specs(plot_type="paper"):
     plt.rcParams["axes.facecolor"] = "none"
 
     # set common alpha values
-    plt.rcParams["grid.alpha"] = 0.3
-    plt.rcParams["legend.framealpha"] = 1
+    # plt.rcParams["grid.alpha"] = 0.3
+    # plt.rcParams["legend.framealpha"] = 1
 
     # set grid and legend defaults
     plt.rcParams["legend.fancybox"] = True
@@ -55,16 +55,16 @@ def set_standard_matplotlib_specs(plot_type="paper"):
 
 def set_colors():
     JET_COLOR_MAP = [
-        "#1f77b4",
-        "#ff7f0e",
-        "#2ca02c",
-        "#d62728",
-        "#9467bd",
-        "#8c564b",
-        "#e377c2",
-        "#7f7f7f",
-        "#bcbd22",
-        "#17becf",
+        "#1f77b4", #0
+        "#ff7f0e", #1
+        "#2ca02c", #2
+        "#d62728", #3
+        "#9467bd", #4
+        "#8c564b", #5
+        "#e377c2", #6
+        "#7f7f7f", #7
+        "#bcbd22", #8
+        "#17becf", #9
     ]
     LINE_STYLES = [
         "-",

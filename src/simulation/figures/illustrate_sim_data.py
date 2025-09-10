@@ -5,7 +5,8 @@ import numpy as np
 import pandas as pd
 import yaml
 
-from export_results.figures.color_map import JET_COLOR_MAP
+from set_styles import set_colors
+JET_COLOR_MAP, LINE_STYLES = set_colors()
 from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 
 

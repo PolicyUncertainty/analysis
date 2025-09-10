@@ -16,7 +16,7 @@ def create_credited_periods_est_sample(paths, load_data=False, plot_data=False):
     if not os.path.exists(paths["intermediate_data"]):
         os.makedirs(paths["intermediate_data"])
 
-    out_file_path = paths["intermediate_data"] + "credited_periods_est_sample.pkl"
+    out_file_path = paths["first_step_data"] + "credited_periods_est_sample.pkl"
 
     if load_data:
         df = pd.read_pickle(out_file_path)

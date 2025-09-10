@@ -3,7 +3,8 @@ from matplotlib import pyplot as plt
 from estimation.msm.scripts.labor_supply_moments import calc_labor_supply_choice
 from estimation.msm.scripts.labor_transition_moments import calc_transition_to_work
 from estimation.msm.scripts.wealth_moments import calc_wealth_moment
-from export_results.figures.color_map import JET_COLOR_MAP, LINE_STYLES
+from set_styles import set_colors
+JET_COLOR_MAP, LINE_STYLES = set_colors()
 
 
 def plot_moments_all_moments_for_dfs(df_list, moment_labels, specs):

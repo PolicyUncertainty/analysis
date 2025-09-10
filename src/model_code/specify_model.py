@@ -163,11 +163,14 @@ def specify_and_solve_model(
     load_model,
     load_solution,
     sim_specs=None,
+    men_only=False,
     debug_info=None,
+    men_only=False,
 ):
     """Specify and solve model.
 
     Also includes possibility to save solutions.
+    men_only=False,
 
     """
 
@@ -182,6 +185,7 @@ def specify_and_solve_model(
         load_model=load_model,
         sim_specs=sim_specs,
         debug_info=debug_info,
+        men_only=men_only,
     )
 
     # check if folder of model objects exits:

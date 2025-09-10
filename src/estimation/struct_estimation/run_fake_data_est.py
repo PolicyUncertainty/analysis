@@ -77,7 +77,7 @@ model_name = "start_lower_fake"
 
 print(f"Running fake estimation for params: {model_name}", flush=True)
 
-LOAD_SOL_MODEL = False
+LOAD_SOL_MODEL = True
 LOAD_SOLUTION = None
 LOAD_DF = None
 SAVE_RESULTS = False
@@ -108,10 +108,12 @@ data_sim, _ = solve_and_simulate_scenario(
     df_exists=LOAD_DF,
     solution_exists=LOAD_SOLUTION,
     sol_model_exists=LOAD_SOL_MODEL,
+    men_only=True,
 )
 # Assume unobserved informed, health and job offers
 data_fake = data_sim.copy()
 data_fake.reset_index(inplace=True)
+data_fake = data_fake[data_fake["sex"] == 0]
 
 # data_fake["informed"] = -99
 # data_fake.loc[data_fake["health"].isin([1, 2]), "health"] = -99

@@ -145,6 +145,7 @@ estimation_results = estimate_model(
     use_observed_data=False,
     sim_data=data_fake,
     print_women_examples=False,
+    print_men_examples=False,
     men_only=True,
     scale_opt=True,
     multistart=True,

@@ -44,7 +44,7 @@ def plot_pension_rates(path_dict, show=False, save=False):
     
     if save:
         fig.savefig(path_dict["misc_plots"] + "pension_rates.pdf", bbox_inches="tight")
-        fig.savefig(path_dict["misc_plots"] + "pension_rates.png", bbox_inches="tight", dpi=300)
+        fig.savefig(path_dict["misc_plots"] + "pension_rates.png", bbox_inches="tight")
         
     if show:
         plt.show()

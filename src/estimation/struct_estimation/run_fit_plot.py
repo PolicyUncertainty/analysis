@@ -20,7 +20,7 @@ from model_code.transform_data_from_model import (
     calc_choice_probs_for_df,
     load_scale_and_correct_data,
 )
-from set_paths import create_path_dict, get_model_resutls_path
+from set_paths import create_path_dict, get_model_results_path
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 path_dict = create_path_dict()
@@ -35,7 +35,7 @@ load_data_from_sol = True
 
 
 # check if folder of model objects exits:
-model_folder = get_model_resutls_path(path_dict, model_name)
+model_folder = get_model_results_path(path_dict, model_name)
 
 if load_data_from_sol:
     data_decision = pd.read_csv(

@@ -18,11 +18,11 @@ def set_standard_matplotlib_specs(plot_type="paper"):
     # Set matplotlib fontsizes
     plt.rcParams.update(
         {
-            "axes.titlesize": 22,
-            "axes.labelsize": 18,
-            "xtick.labelsize": 18,
-            "ytick.labelsize": 18,
-            "legend.fontsize": 18,
+            "axes.titlesize": 24,
+            "axes.labelsize": 24,
+            "xtick.labelsize": 24,
+            "ytick.labelsize": 24,
+            "legend.fontsize": 24,
         }
     )
     # Make lines of plots thicker
@@ -42,8 +42,8 @@ def set_standard_matplotlib_specs(plot_type="paper"):
     plt.rcParams["axes.facecolor"] = "none"
 
     # set common alpha values
-    plt.rcParams["grid.alpha"] = 0.3
-    plt.rcParams["legend.framealpha"] = 1
+    # plt.rcParams["grid.alpha"] = 0.3
+    # plt.rcParams["legend.framealpha"] = 1
 
     # set grid and legend defaults
     plt.rcParams["legend.fancybox"] = True

@@ -5,6 +5,8 @@ from pathlib import Path
 import jax
 
 
+
+
 def create_path_dict(define_user=False, user=None):
     # Set jax to 64 bit
     jax.config.update("jax_enable_x64", True)
@@ -12,7 +14,11 @@ def create_path_dict(define_user=False, user=None):
     # Assign raw data paths (only if define_user is True)
     if define_user:
         if user is None:
-            user = input("Enter user name ([b]runo / [m]ax / [g]regor): ")
+            detected_user = detect_user_from_path()
+            if detected_user:
+                user = detected_user
+            else:
+                user = input("Enter user name ([b]runo / [m]ax / [g]regor): ")
         else:
             pass
 
@@ -95,7 +101,21 @@ def create_path_dict(define_user=False, user=None):
     return paths_dict
 
 
-def get_model_resutls_path(paths_dict, model_name):
+def detect_user_from_path():
+    """Detect user from current working directory path."""
+    current_path = str(Path.cwd()).lower()
+    user_mapping = {
+        'bruno': 'b',
+        'maxbl': 'm', 
+        'gregorschuler': 'g'
+    }
+    for username, user_key in user_mapping.items():
+        if username in current_path:
+            print(f"Auto-detected user: {username}")
+            return user_key
+    return None
+
+def get_model_results_path(paths_dict, model_name):
     model_folder = paths_dict["intermediate_data"] + "model_" + model_name + "/"
     if not os.path.exists(model_folder):
         os.makedirs(model_folder)

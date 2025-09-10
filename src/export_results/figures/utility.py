@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from model_code.utility.bequest_utility import utility_final_consume_all
-from model_code.utility.utility_functions import consumption_scale, utility_func
+from model_code.utility.utility_functions_cobb import consumption_scale, utility_func
 
 # %%
 

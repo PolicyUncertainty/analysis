@@ -84,7 +84,7 @@ SAVE_RESULTS = False
 
 # Load start params
 start_params_all = load_and_set_start_params(paths_dict)
-params = start_params_all
+params = start_params_all.copy()
 # params = pkl.load(
 #     open(paths_dict["struct_results"] + f"est_params_women_3_it.pkl", "rb")
 # )

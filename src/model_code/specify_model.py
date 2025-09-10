@@ -19,7 +19,6 @@ from model_code.stochastic_processes.job_offers import job_offer_process_transit
 from model_code.stochastic_processes.partner_transitions import partner_transition
 from model_code.taste_shocks import shock_function_dict
 from model_code.utility.bequest_utility import create_final_period_utility_functions
-from model_code.utility.utility_functions_add import create_utility_functions
 from model_code.wealth_and_budget.assets_grid import create_end_of_period_assets
 from model_code.wealth_and_budget.budget_equation import budget_constraint
 from set_paths import get_model_resutls_path
@@ -34,6 +33,7 @@ def specify_model(
     sim_specs=None,
     load_model=False,
     debug_info=None,
+    use_additive=False,
     men_only=False,
 ):
     """Generate model class."""
@@ -118,6 +118,15 @@ def specify_model(
     else:
         alternative_sim_specifications = None
 
+    if use_additive:
+        from model_code.utility.utility_functions_add import create_utility_functions
+
+        utility_functions = create_utility_functions()
+    else:
+        from model_code.utility.utility_functions_cobb import create_utility_functions
+
+        utility_functions = create_utility_functions()
+
     if men_only:
         model_path = path_dict["intermediate_data"] + "model_men.pkl"
     else:
@@ -128,7 +137,7 @@ def specify_model(
             model_specs=specs,
             model_config=model_config,
             state_space_functions=create_state_space_functions(),
-            utility_functions=create_utility_functions(),
+            utility_functions=utility_functions,
             utility_functions_final_period=create_final_period_utility_functions(),
             budget_constraint=budget_constraint,
             shock_functions=shock_function_dict(),
@@ -143,7 +152,7 @@ def specify_model(
             model_specs=specs,
             model_config=model_config,
             state_space_functions=create_state_space_functions(),
-            utility_functions=create_utility_functions(),
+            utility_functions=utility_functions,
             utility_functions_final_period=create_final_period_utility_functions(),
             budget_constraint=budget_constraint,
             shock_functions=shock_function_dict(),

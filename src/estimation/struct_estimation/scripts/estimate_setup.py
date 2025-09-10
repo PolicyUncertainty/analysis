@@ -48,7 +48,12 @@ def estimate_model(
 
     specs = generate_derived_and_data_derived_specs(path_dict)
 
-    print_function = generate_print_func(params_to_estimate_names, specs)
+    print_function = generate_print_func(
+        params_to_estimate_names,
+        specs,
+        print_men_examples=print_men_examples,
+        print_women_examples=print_women_examples,
+    )
 
     # # Assign start params from before
     if last_estimate is not None:

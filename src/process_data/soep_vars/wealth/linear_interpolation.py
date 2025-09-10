@@ -18,7 +18,7 @@ def add_wealth_interpolate_and_deflate(
     observation for each household, and deflates wealth using the consumer price
     index."""
     # Dump wealth data or load
-    file_name = path_dict["intermediate_data"] + "wealth_data.pkl"
+    file_name = path_dict["struct_data"] + "wealth_data.pkl"
     if load_wealth:
         wealth_data_full = pd.read_pickle(file_name)
     else:

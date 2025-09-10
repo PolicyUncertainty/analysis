@@ -27,11 +27,11 @@ def create_choice_variable_from_artkalen(
         df = df.groupby("pid").apply(partial_select)
         df["art_choice"] = df["choice"].copy()
         df[["art_choice", "corrected_age"]].to_pickle(
-            path_dict["intermediate_data"] + "art_choice.pkl"
+            path_dict["struct_data"] + "art_choice.pkl"
         )
     else:
         df[["art_choice", "corrected_age"]] = pd.read_pickle(
-            path_dict["intermediate_data"] + "art_choice.pkl"
+            path_dict["struct_data"] + "art_choice.pkl"
         )
 
     df["lagged_art_choice"] = df.groupby("pid")["art_choice"].shift(1)

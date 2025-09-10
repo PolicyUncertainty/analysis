@@ -23,7 +23,7 @@ def plot_mortality(path_dict, specs, show=False, save=False):
     # Load the data
     # Mortality estimation sample
     df = pd.read_pickle(
-        path_dict["intermediate_data"] + "mortality_transition_estimation_sample.pkl"
+        path_dict["first_step_data"] + "mortality_transition_estimation_sample.pkl"
     )
 
     # Estimated mortality transition matrix (life table adjusted probabilities of death)

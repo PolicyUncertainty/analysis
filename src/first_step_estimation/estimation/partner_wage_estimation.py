@@ -81,7 +81,7 @@ def estimate_partner_wage_parameters(paths_dict, specs):
         )
         # Save wage data with predictions for plotting
         combined_wage_data.to_csv(
-            paths_dict["intermediate_data"]
+            paths_dict["first_step_data"]
             + "partner_wage_estimation_sample_with_predictions.csv"
         )
 
@@ -105,7 +105,7 @@ def prepare_estimation_data(paths_dict, specs):
     """Prepare the data for the wage estimation."""
     # load and modify data
     wage_data = pd.read_csv(
-        paths_dict["intermediate_data"] + "partner_wage_estimation_sample.csv"
+        paths_dict["first_step_data"] + "partner_wage_estimation_sample.csv"
     )
 
     wage_data = wage_data[wage_data["age"] < 63]
@@ -136,7 +136,7 @@ def calculate_partner_hours(path_dict):
 
     # load data, filter, create age bins
     df = pd.read_pickle(
-        path_dict["intermediate_data"] + "partner_wage_estimation_sample.pkl"
+        path_dict["first_step_data"] + "partner_wage_estimation_sample.pkl"
     )
     df = df[df["age"] >= start_age]
     df = df[df["age"] <= end_age]

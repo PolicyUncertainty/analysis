@@ -23,7 +23,7 @@ def create_survival_transition_sample(paths, specs, load_data=False):
 
     # cleaned sample
     out_file_path = (
-        paths["intermediate_data"] + "mortality_transition_estimation_sample.pkl"
+        paths["first_step_data"] + "mortality_transition_estimation_sample.pkl"
     )
 
     if load_data:

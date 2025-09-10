@@ -22,7 +22,7 @@ def create_job_sep_sample(paths, specs, load_data=False):
     if not os.path.exists(paths["intermediate_data"]):
         os.makedirs(paths["intermediate_data"])
 
-    out_file_path = paths["intermediate_data"] + "job_sep_sample.pkl"
+    out_file_path = paths["first_step_data"] + "job_sep_sample.pkl"
 
     if load_data:
         data = pd.read_pickle(out_file_path)

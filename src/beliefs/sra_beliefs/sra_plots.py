@@ -151,7 +151,7 @@ def plot_expected_sra_vs_birth_year(
     """
     if df is None and path_dict is not None:
         df = pd.read_csv(
-            path_dict["intermediate_data"] + "beliefs/soep_is_truncated_normals.csv"
+            path_dict["beliefs_data"] + "soep_is_truncated_normals.csv"
         )
     elif df is None and path_dict is None:
         raise ValueError("Either df or paths_dict must be provided.")
@@ -196,7 +196,7 @@ def plot_alpha_heterogeneity_coefficients_combined(
     # Load data if not provided
     if results_df is None and path_dict is not None:
         results_df = pd.read_csv(
-            path_dict["intermediate_data"] + "beliefs/alpha_heterogeneity_results.csv"
+            path_dict["beliefs_est_results"] + "alpha_heterogeneity_results.csv"
         )
     elif results_df is None and path_dict is None:
         raise ValueError("Either results_df or path_dict must be provided.")
@@ -305,7 +305,7 @@ def plot_example_sra_evolution(
 
     if use_estimated_params:
         # Load estimated parameters from the beliefs data
-        df = pd.read_csv(path_dict["intermediate_data"] + "beliefs/beliefs_parameters.csv")
+        df = pd.read_csv(path_dict["beliefs_est_results"] + "beliefs_parameters.csv")
         alpha = df[df["parameter"] == "alpha"]["estimate"].values[0]
         sigma_sq = df[df["parameter"] == "sigma_sq"]["estimate"].values[0]
 

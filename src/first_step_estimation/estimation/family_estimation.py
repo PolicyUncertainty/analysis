@@ -195,7 +195,7 @@ def estimate_nb_children(paths_dict, specs):
     on sex, education and age bin."""
     # load data, filter, create period and has_partner state
     df = pd.read_pickle(
-        paths_dict["intermediate_data"] + "partner_transition_estimation_sample.pkl"
+        paths_dict["first_step_data"] + "partner_transition_estimation_sample.pkl"
     )
 
     start_age = specs["start_age"]

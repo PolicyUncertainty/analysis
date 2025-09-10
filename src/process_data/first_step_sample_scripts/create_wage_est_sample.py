@@ -12,7 +12,7 @@ def create_wage_est_sample(paths, specs, load_data=False):
     if not os.path.exists(paths["intermediate_data"]):
         os.makedirs(paths["intermediate_data"])
 
-    out_file_path = paths["intermediate_data"] + "wage_estimation_sample.csv"
+    out_file_path = paths["first_step_data"] + "wage_estimation_sample.csv"
 
     if load_data:
         data = pd.read_pickle(out_file_path)

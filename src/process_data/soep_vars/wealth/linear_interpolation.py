@@ -369,7 +369,7 @@ def add_personal_data(path_dict, specs, wealth_data_full, use_processed_pl=True)
         ppathl_data, pgen_data, on=["pid", "hid", "syear"], how="left"
     )
 
-    pl_intermediate_file = path_dict["intermediate_data"] + "pl_structural_w.pkl"
+    pl_intermediate_file = path_dict["struct_data"] + "pl_structural_w.pkl"
     if use_processed_pl:
         pl_data = pd.read_pickle(pl_intermediate_file)
     else:

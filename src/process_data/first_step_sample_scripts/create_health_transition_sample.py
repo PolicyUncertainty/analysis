@@ -22,7 +22,7 @@ def create_health_transition_sample(paths, specs, load_data=False):
         os.makedirs(paths["intermediate_data"])
 
     out_file_path = (
-        paths["intermediate_data"] + "health_transition_estimation_sample.pkl"
+        paths["first_step_data"] + "health_transition_estimation_sample.pkl"
     )
 
     if load_data:

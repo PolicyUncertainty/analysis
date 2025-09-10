@@ -7,7 +7,7 @@ def est_SRA_params(paths, df=None, print_summary=False):
     # load (if df is None) and filter data
     if df is None:
         df = pd.read_csv(
-            paths["intermediate_data"] + "beliefs/soep_is_truncated_normals.csv"
+            paths["beliefs_data"] + "soep_is_truncated_normals.csv"
         )
     df = filter_df(df)
     # estimate expected SRA increase and variance
@@ -109,7 +109,7 @@ def est_alpha_heterogeneity(paths, df=None):
     # load (if df is None) and filter data
     if df is None:
         df = pd.read_csv(
-            paths["intermediate_data"] + "beliefs/soep_is_truncated_normals.csv"
+            paths["beliefs_data"] + "soep_is_truncated_normals.csv"
         )
     df = filter_df(df)
     
@@ -246,7 +246,9 @@ def estimate_expected_SRA_variance(paths, df=None, print_summary=False):
 
 def estimate_expected_SRA_variance_by_taking_average(paths, df=None):
     if df is None:
-        df = pd.read_pickle(paths["intermediate_data"] + "policy_expect_data.pkl")
+        df = pd.read_csv(
+            paths["beliefs_data"] + "soep_is_truncated_normals.csv"
+        )
 
     # truncate data: remove birth years outside before 1964
     df = filter_df(df)

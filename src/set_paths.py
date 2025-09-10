@@ -49,6 +49,12 @@ def create_path_dict(define_user=False, user=None):
         "intermediate_data": analysis_path + "output/intermediate_data/",
         "open_data": analysis_path + "output/open_access_data/",
     }
+
+    # Assign intermediate data subfolders
+    for subfolder in ["beliefs", "first_step", "struct"]:
+        folder_name = paths_dict["intermediate_data"] + subfolder
+        paths_dict[subfolder + "_data"] = folder_name + "/"
+
     # Assign est result folders
     paths_dict["est_results"] = analysis_path + "output/est_results/"
     paths_dict["beliefs_est_results"] = (
@@ -99,7 +105,7 @@ def create_path_dict(define_user=False, user=None):
 
     # Assign name of structural estimation sample
     paths_dict["struct_est_sample"] = (
-        paths_dict["intermediate_data"] + "structural_estimation_sample.csv"
+        paths_dict["struct_data"] + "structural_estimation_sample.csv"
     )
     return paths_dict
 

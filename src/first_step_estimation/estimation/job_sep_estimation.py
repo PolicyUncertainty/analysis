@@ -25,8 +25,8 @@ def est_job_sep(paths_dict, specs, load_data=False):
     # Estimate job separation probabilities
     job_sep_probs, job_sep_params = est_job_for_sample(df_job, specs)
     # Save results
-    job_sep_params.to_csv(paths_dict["est_results"] + "job_sep_params.csv")
-    pkl.dump(job_sep_probs, open(paths_dict["est_results"] + "job_sep_probs.pkl", "wb"))
+    job_sep_params.to_csv(paths_dict["first_step_results"] + "job_sep_params.csv")
+    pkl.dump(job_sep_probs, open(paths_dict["first_step_results"] + "job_sep_probs.pkl", "wb"))
 
 
 def est_job_for_sample(df_job, specs):

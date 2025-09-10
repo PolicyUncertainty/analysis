@@ -88,3 +88,53 @@ def compute_expected_retirement_age(
         return expected_ret_age / cumulative_ret_prob
     else:
         return max_periods - 1 + start_age
+    
+if __name__ == "__main__":
+    # Test with partner transition matrix
+    from model_code.stochastic_processes.partner_transitions import partner_transition
+    from set_paths import create_path_dict
+    from specs.derive_specs import generate_derived_and_data_derived_specs
+    
+    paths = create_path_dict()
+    specs = generate_derived_and_data_derived_specs(paths, load_precomputed=True)
+    
+    print("Expected partner retirement age by current age (male, low edu, working partner):")
+    for age in [30, 40, 50, 60, 65, 70]:
+        state = {
+            "period": age - specs["start_age"],
+            "education": 0,
+            "sex": 0,
+            "partner_state": 1,  # working partner
+            "model_specs": specs
+        }
+        exp_age = compute_expected_retirement_age(
+            state,
+            partner_transition,
+            choice_state="partner_state",
+            retired_state=2,
+            start_age=specs["start_age"],
+            max_periods=specs["n_periods"]
+        )
+        print(f"  Current age {age} -> E[retirement age | working now] = {exp_age:.1f}")
+    
+    print("\nComparison across demographics (all age 40, working partner):")
+    test_cases = [
+        {"period": 10, "education": 0, "sex": 0, "partner_state": 1},  # male, low edu
+        {"period": 10, "education": 1, "sex": 0, "partner_state": 1},  # male, high edu
+        {"period": 10, "education": 0, "sex": 1, "partner_state": 1},  # female, low edu
+        {"period": 10, "education": 1, "sex": 1, "partner_state": 1},  # female, high edu
+    ]
+    
+    for state in test_cases:
+        state["model_specs"] = specs
+        exp_age = compute_expected_retirement_age(
+            state,
+            partner_transition,
+            choice_state="partner_state",
+            retired_state=2,
+            start_age=specs["start_age"],
+            max_periods=specs["n_periods"]
+        )
+        edu = "high" if state["education"] else "low"
+        sex = "female" if state["sex"] else "male"
+        print(f"  {sex:6}, {edu:4} edu -> E[retirement age] = {exp_age:.1f}")

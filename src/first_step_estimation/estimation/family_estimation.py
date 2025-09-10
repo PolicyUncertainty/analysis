@@ -121,7 +121,7 @@ def estimate_partner_transitions(paths_dict, specs, load_data):
             empirical_shares_data[(sex_label, edu_label)] = empirical_shares
 
     # Save results
-    out_file_path = paths_dict["est_results"] + "partner_transition_matrix.csv"
+    out_file_path = paths_dict["first_step_results"] + "partner_transition_matrix.csv"
     full_df.to_csv(out_file_path)
     
     return full_df, predicted_shares_data, empirical_shares_data
@@ -236,7 +236,7 @@ def estimate_nb_children(paths_dict, specs):
                 model = sm.OLS(Y, X).fit()
                 estimates.loc[(sex, education, has_partner), columns] = model.params
 
-    out_file_path = paths_dict["est_results"] + "nb_children_estimates.csv"
+    out_file_path = paths_dict["first_step_results"] + "nb_children_estimates.csv"
     estimates.to_csv(out_file_path)
     
     return estimates

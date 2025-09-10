@@ -138,7 +138,7 @@ def estimate_mortality(paths_dict, specs):
         to_csv_summary = res.params.copy()
         to_csv_summary["hazard_ratio"] = np.exp(to_csv_summary["value"])
         to_csv_summary.to_csv(
-            paths_dict["est_results"] + f"est_params_mortality_{sex_label.lower()}.csv"
+            paths_dict["first_step_results"] + f"est_params_mortality_{sex_label.lower()}.csv"
         )
 
         # update mortality_df with the estimated parameters
@@ -182,12 +182,12 @@ def estimate_mortality(paths_dict, specs):
         }
     )
     mortality_df.to_csv(
-        paths_dict["est_results"] + "mortality_transition_matrix.csv",
+        paths_dict["first_step_results"] + "mortality_transition_matrix.csv",
         sep=",",
         index=False,
     )
     lifetable_df.to_csv(
-        paths_dict["est_results"] + "lifetable.csv",
+        paths_dict["first_step_results"] + "lifetable.csv",
         sep=",",
         index=False,
     )

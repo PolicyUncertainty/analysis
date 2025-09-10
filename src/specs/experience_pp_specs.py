@@ -126,7 +126,7 @@ def add_very_long_insured_specs(specs, path_dict):
 
     """
     exp_factor_for_credited_periods = pd.read_csv(
-        path_dict["est_results"] + "credited_periods_estimates.csv", index_col=0
+        path_dict["first_step_results"] + "credited_periods_estimates.csv", index_col=0
     )
 
     exp_thresholds = np.zeros((2,), dtype=float)

@@ -39,7 +39,7 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     # Read in health transition matrix
     specs["health_trans_mat"] = read_in_health_transition_specs(path_dict, specs)
 
-    job_sep_probs = pkl.load(open(path_dict["est_results"] + "job_sep_probs.pkl", "rb"))
+    job_sep_probs = pkl.load(open(path_dict["first_step_results"] + "job_sep_probs.pkl", "rb"))
     specs["job_sep_probs"] = job_sep_probs
     specs["log_job_sep_probs"] = inv_logit_formula(job_sep_probs)
     return specs

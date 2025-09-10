@@ -13,7 +13,7 @@ def predict_children_by_state(path_dict, specs):
     """
     n_periods = specs["end_age"] - specs["start_age"] + 1
     params = pd.read_csv(
-        path_dict["est_results"] + "nb_children_estimates.csv", index_col=[0, 1, 2]
+        path_dict["first_step_results"] + "nb_children_estimates.csv", index_col=[0, 1, 2]
     )
     # populate numpy ndarray which maps state to average number of children
     children = np.zeros((2, specs["n_education_types"], 2, n_periods))
@@ -34,7 +34,7 @@ def predict_children_by_state(path_dict, specs):
 
 def read_in_partner_transition_specs(paths_dict, specs):
     est_probs_df = pd.read_csv(
-        paths_dict["est_results"] + "partner_transition_matrix.csv",
+        paths_dict["first_step_results"] + "partner_transition_matrix.csv",
     )
 
     n_periods_transition = specs["n_periods"] - 1

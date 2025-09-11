@@ -75,14 +75,14 @@ def add_population_averages(specs, path_dict):
                 mask & (pop_averages["choice"] == 3), "annual_hours"
             ].values[0]
 
-    specs["av_annual_hours_pt"] = jnp.asarray(av_annual_hours_pt)
-    specs["av_annual_hours_ft"] = jnp.asarray(av_annual_hours_ft)
+    specs["av_annual_hours_pt"] = av_annual_hours_pt
+    specs["av_annual_hours_ft"] = av_annual_hours_ft
 
     # Create auxiliary mean hourly full time wage for pension calculation (see appendix)
     mean_annual_wage = np.loadtxt(
         path_dict["first_step_incomes"] + "pop_avg_annual_wage.txt"
     )
-    specs["mean_hourly_ft_wage"] = jnp.asarray(mean_annual_wage / av_annual_hours_ft)
+    specs["mean_hourly_ft_wage"] = mean_annual_wage / av_annual_hours_ft
     return specs
 
 
@@ -102,7 +102,7 @@ def add_pt_and_ft_min_wage(specs):
             )
             annual_min_wage_pt[sex, edu] = specs["monthly_min_wage"] * hours_ratio * 12
 
-    return jnp.asarray(annual_min_wage_pt), specs["monthly_min_wage"] * 12
+    return annual_min_wage_pt, specs["monthly_min_wage"] * 12
 
 
 def calc_annual_pension_point_value(specs):
@@ -147,9 +147,9 @@ def add_wage_specs(path_dict, specs):
     )
     income_shock_scale = wage_params.loc[mask, "value"].values[0]
 
-    specs["gamma_0"] = jnp.asarray(gamma_0)
-    specs["gamma_1"] = jnp.asarray(gamma_1)
-    specs["gamma_2"] = jnp.asarray(gamma_2)
+    specs["gamma_0"] = gamma_0
+    specs["gamma_1"] = gamma_1
+    specs["gamma_2"] = gamma_2
     specs["income_shock_std"] = income_shock_scale
     return specs
 
@@ -194,4 +194,4 @@ def calculate_partner_incomes(path_dict, specs):
         annual_partner_wages[:, :, ~not_predicted_periods].mean(axis=2) * 0.48
     )
 
-    return jnp.asarray(annual_partner_wages), jnp.asarray(annual_partner_pension)
+    return annual_partner_wages, annual_partner_pension

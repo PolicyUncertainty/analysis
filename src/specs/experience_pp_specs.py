@@ -116,7 +116,7 @@ def create_max_experience_working(path_dict, specs, load_precomputed=False):
     specs["very_long_insured_grid_points"] = (
         all_exp_thresholds_very_long_insured / max_exps_period_working[-1]
     )
-    specs["max_exps_period_working"] = jnp.asarray(max_exps_period_working)
+    specs["max_exps_period_working"] = max_exps_period_working
     return specs
 
 
@@ -138,7 +138,7 @@ def add_very_long_insured_specs(specs, path_dict):
         # We count experience in half years, so round up to next 0.5
         exp_thresholds[sex_var] = np.ceil(exp_thresholds[sex_var] * 2) / 2
 
-    specs["experience_threshold_very_long_insured"] = jnp.asarray(exp_thresholds)
+    specs["experience_threshold_very_long_insured"] = exp_thresholds
     return specs
 
 
@@ -171,5 +171,5 @@ def create_pension_points_per_exp(specs):
                     / mean_hourly_wage
                 )
 
-    specs["pp_for_exp_by_sex_edu"] = jnp.asarray(pp_per_exp)
+    specs["pp_for_exp_by_sex_edu"] = pp_per_exp
     return specs

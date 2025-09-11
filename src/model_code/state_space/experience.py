@@ -23,7 +23,7 @@ def define_experience_grid(specs):
     experience_grid[0] = 0
     experience_grid[1] = 0.15
     experience_grid[-3] = 0.85
-    return jnp.asarray(experience_grid)
+    return experience_grid
 
 
 def get_next_period_experience(

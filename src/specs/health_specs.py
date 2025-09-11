@@ -83,7 +83,7 @@ def read_in_health_transition_specs(paths_dict, specs):
         :, :, :, bad_health_var, :
     ]
 
-    return jnp.asarray(health_trans_mat)
+    return health_trans_mat
 
 
 def process_health_labels(specs):

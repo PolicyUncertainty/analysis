@@ -13,7 +13,8 @@ def predict_children_by_state(path_dict, specs):
     """
     n_periods = specs["end_age"] - specs["start_age"] + 1
     params = pd.read_csv(
-        path_dict["first_step_results"] + "nb_children_estimates.csv", index_col=[0, 1, 2]
+        path_dict["first_step_results"] + "nb_children_estimates.csv",
+        index_col=[0, 1, 2],
     )
     # populate numpy ndarray which maps state to average number of children
     children = np.zeros((2, specs["n_education_types"], 2, n_periods))
@@ -29,7 +30,7 @@ def predict_children_by_state(path_dict, specs):
                     children[sex, edu, has_partner, period] = np.maximum(
                         0, predicted_nb_children
                     )
-    return jnp.asarray(children)
+    return children
 
 
 def read_in_partner_transition_specs(paths_dict, specs):
@@ -88,4 +89,4 @@ def read_in_partner_transition_specs(paths_dict, specs):
                     # ):
                     #     raise ValueError("This should happen in a parametric world")
 
-    return jnp.asarray(trans_probs), n_partner_states
+    return trans_probs, n_partner_states

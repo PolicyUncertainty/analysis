@@ -52,12 +52,10 @@ def generate_start_states_from_obs(
         start_period_data["wealth"].values / model_specs["wealth_unit"]
     )
 
-    states_dict["assets_begin_of_period"] = jnp.asarray(
-        adjust_observed_assets(
-            observed_states_dict=states_dict,
-            params={},
-            model_class=model_class,
-        )
+    states_dict["assets_begin_of_period"] = adjust_observed_assets(
+        observed_states_dict=states_dict,
+        params={},
+        model_class=model_class,
     )
     n_individuals = periods.shape[0]
     n_multiply_start_obs = model_specs["n_multiply_start_obs"]

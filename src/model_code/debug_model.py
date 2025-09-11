@@ -21,7 +21,7 @@ np_health_mat = np.array(specs["health_trans_mat"])
 survival_third_last_period = 1 - np_health_mat[:, :, 68, :-1, -1:]
 np_health_mat[:, :, 68, :-1, -1] = 0
 np_health_mat[:, :, 68, :-1, :-1] /= survival_third_last_period
-specs["health_trans_mat"] = jnp.asarray(np_health_mat)
+specs["health_trans_mat"] = np_health_mat
 
 model = specify_model(
     paths_dict,

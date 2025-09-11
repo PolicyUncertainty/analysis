@@ -109,9 +109,9 @@ def add_erp_belief_specs(specs, path_dict):
                 valid_ages, edu_label
             ]
 
-    specs["uninformed_ERP"] = jnp.asarray(uninformed_penalties)
-    specs["informed_hazard_rate"] = jnp.asarray(informed_hazard_rate)
-    specs["informed_shares_in_ages"] = jnp.asarray(informed_shares_in_ages)
+    specs["uninformed_ERP"] = uninformed_penalties
+    specs["informed_hazard_rate"] = informed_hazard_rate
+    specs["informed_shares_in_ages"] = informed_shares_in_ages
     return specs
 
 

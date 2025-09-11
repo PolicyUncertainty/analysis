@@ -39,3 +39,6 @@ est_params_stable.pkl
 
 # Server files
 *.out
+
+# Claude Code configuration
+CLAUDE.md

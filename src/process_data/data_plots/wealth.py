@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from set_styles import set_colors
+from set_styles import set_colors, get_figsize
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
@@ -30,7 +30,7 @@ def plot_average_wealth_by_type(path_dict, specs=None, show=False, save=False):
         "wealth"
     ].median()
 
-    fig, axs = plt.subplots(ncols=specs["n_education_types"])
+    fig, axs = plt.subplots(ncols=specs["n_education_types"], figsize=get_figsize(nrows=1, ncols=specs["n_education_types"]))
     for edu_var, edu_label in enumerate(specs["education_labels"]):
         ax = axs[edu_var]
         for sex_var, sex_label in enumerate(specs["sex_labels"]):

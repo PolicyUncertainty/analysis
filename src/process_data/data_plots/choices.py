@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
-from set_styles import set_colors
+from set_styles import set_colors, get_figsize
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
@@ -40,7 +40,7 @@ def plot_data_choices(path_dict, specs=None, lagged=False, show=False, save=Fals
     edu_labels = specs["education_labels"]
     sex_labels = specs["sex_labels"]
 
-    fig, axs = plt.subplots(ncols=n_choices, nrows=2)
+    fig, axs = plt.subplots(ncols=n_choices, nrows=2, figsize=get_figsize(nrows=2, ncols=n_choices))
     for sex_var, sex_label in enumerate(sex_labels):
         for edu_var, edu_label in enumerate(edu_labels):
             edu_df = struct_est_sample[

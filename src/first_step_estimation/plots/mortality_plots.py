@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from set_styles import set_colors
+from set_styles import set_colors, get_figsize
 
 
 def plot_mortality(path_dict, specs, show=False, save=False):
@@ -28,16 +28,16 @@ def plot_mortality(path_dict, specs, show=False, save=False):
 
     # Estimated mortality transition matrix (life table adjusted probabilities of death)
     estimated_mortality = pd.read_csv(
-        path_dict["est_results"] + "mortality_transition_matrix.csv"
+        path_dict["first_step_results"] + "mortality_transition_matrix.csv"
     )
 
     # Estimated mortality parameters
     df_params_male = pd.read_csv(
-        path_dict["est_results"] + "est_params_mortality_men.csv"
+        path_dict["first_step_results"] + "est_params_mortality_men.csv"
     )
     df_params_male.set_index("Unnamed: 0", inplace=True)
     df_params_female = pd.read_csv(
-        path_dict["est_results"] + "est_params_mortality_women.csv"
+        path_dict["first_step_results"] + "est_params_mortality_women.csv"
     )
     df_params_female.set_index("Unnamed: 0", inplace=True)
 
@@ -71,7 +71,7 @@ def plot_mortality(path_dict, specs, show=False, save=False):
                 )
 
     # Create plots showing survival probabilities
-    fig, axs = plt.subplots(nrows=2, ncols=2, figsize=(15, 10))
+    fig, axs = plt.subplots(nrows=2, ncols=2, figsize=get_figsize(2, 2))
 
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
         for health, health_label in enumerate(
@@ -143,11 +143,11 @@ def plot_mortality_hazard_ratios(path_dict, specs, show=False, save=False):
     param_files = ["est_params_mortality_men.csv", "est_params_mortality_women.csv"]
     sex_labels = specs["sex_labels"]
 
-    fig, axs = plt.subplots(ncols=2, figsize=(15, 6))
+    fig, axs = plt.subplots(ncols=2, figsize=get_figsize(2, 1))
 
     for sex_var, (param_file, sex_label) in enumerate(zip(param_files, sex_labels)):
         try:
-            df_params = pd.read_csv(path_dict["est_results"] + param_file, index_col=0)
+            df_params = pd.read_csv(path_dict["first_step_results"] + param_file, index_col=0)
 
             ax = axs[sex_var]
 

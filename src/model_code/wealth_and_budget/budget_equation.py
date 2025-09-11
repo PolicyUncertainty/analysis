@@ -33,12 +33,14 @@ def budget_constraint(
     )
 
     # Calculate partner income
-    partner_income_after_ssc, gross_partner_income = calc_partner_income_after_ssc(
-        partner_state=partner_state,
-        sex=sex,
-        model_specs=model_specs,
-        education=education,
-        period=period,
+    partner_income_after_ssc, gross_partner_wage, gross_partner_pension = (
+        calc_partner_income_after_ssc(
+            partner_state=partner_state,
+            sex=sex,
+            model_specs=model_specs,
+            education=education,
+            period=period,
+        )
     )
 
     # Income from lagged choice 0. Here the experience is already transformed into pension points,
@@ -108,7 +110,11 @@ def budget_constraint(
 
     aux = {
         "net_hh_income": total_income / model_specs["wealth_unit"],
-        "gross_hh_income": (gross_labor_income + gross_partner_income)
+        "joint_gross_labor_income": (gross_labor_income + gross_partner_wage)
+        / model_specs["wealth_unit"],
+        "joint_gross_retirement_income": (
+            gross_partner_pension + gross_retirement_income
+        )
         / model_specs["wealth_unit"],
         "gross_labor_income": gross_labor_income / model_specs["wealth_unit"],
         "gross_retirement_income": gross_retirement_income / model_specs["wealth_unit"],

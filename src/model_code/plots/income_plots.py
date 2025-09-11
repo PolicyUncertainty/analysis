@@ -18,7 +18,7 @@ from model_code.wealth_and_budget.wages import (
     calc_labor_income_after_ssc,
     calculate_gross_labor_income,
 )
-from set_styles import set_colors
+from set_styles import set_colors, get_figsize
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
@@ -42,7 +42,8 @@ def plot_incomes(path_dict, show=False, save=False):
     annual_unemployment = specs["annual_unemployment_benefits"]
     unemployment_benefits = np.ones_like(exp_levels) * annual_unemployment
 
-    fig, axes = plt.subplots(2, 2, figsize=(10, 5))
+    figsize = get_figsize(2, 2)
+    fig, axes = plt.subplots(2, 2, figsize=figsize)
 
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
         # Now loop over education to generate specific net and gross wages and pensions
@@ -113,10 +114,10 @@ def plot_incomes(path_dict, show=False, save=False):
                     model_specs=specs,
                 )
                 gross_pensions[exp_idx] = calc_gross_pension_income(
-                    exp_stock_pension, specs
+                    pension_points=exp_stock_pension, model_specs=specs
                 )
                 after_ssc_pensions[exp_idx], _ = calc_pensions_after_ssc(
-                    gross_pensions[exp_idx], specs
+                    pension_points=exp_stock_pension, model_specs=specs
                 )
 
             # Plot wages and pensions
@@ -139,7 +140,7 @@ def plot_incomes(path_dict, show=False, save=False):
 
             # Only show legend on first subplot
             if sex_var == 0 and edu_var == 0:
-                ax.legend(bbox_to_anchor=(1.05, 1), loc="upper left")
+                ax.legend(loc="upper left")
 
     plt.tight_layout()
 

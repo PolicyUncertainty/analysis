@@ -1,6 +1,6 @@
 import numpy as np
 from matplotlib import pyplot as plt
-from set_styles import set_colors
+from set_styles import set_colors, get_figsize
 
 from model_code.state_space.experience import (
     construct_experience_years,
@@ -25,8 +25,8 @@ def plot_ret_experience(path_dict, specs, show=False, save=False):
     """
     colors, _ = set_colors()
     periods = np.arange(30, 40)
-    fig, ax = plt.subplots()
-    
+    fig, ax = plt.subplots(figsize=get_figsize(1, 1))
+
     for i, exp_years in enumerate(np.arange(30, 50, 10)):
         # We scale the experience for a not retired person last period (policy state 8 is below)
         exp = scale_experience_years(

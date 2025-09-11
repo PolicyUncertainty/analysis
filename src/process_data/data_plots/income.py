@@ -16,7 +16,7 @@ from model_code.state_space.experience import scale_experience_years
 from process_data.structural_sample_scripts.create_structural_est_sample import (
     CORE_TYPE_DICT,
 )
-from set_styles import set_colors
+from set_styles import get_figsize, set_colors
 
 
 def plot_income(path_dict, specs, show=False, save=False):
@@ -51,28 +51,28 @@ def plot_income(path_dict, specs, show=False, save=False):
         debug_info=None,
     )
 
+    data_decision["experience_years"] = data_decision["experience"].values
+
     # Transform experience
-    max_init_exp = scale_experience_years(
+    data_decision["experience"] = scale_experience_years(
         period=data_decision["period"].values,
-        experience_years=data_decision["experience"].values,
+        experience_years=data_decision["experience_years"].values,
         is_retired=data_decision["lagged_choice"].values == 0,
         model_specs=model_class.model_specs,
     )
 
     # We can adjust wealth outside, as it does not depend on estimated parameters
     # (only on interest rate)
-    # Now transform for dcegm
     states_dict = {
         name: data_decision[name].values
         for name in model_class.model_structure["discrete_states_names"]
     }
-    states_dict["experience"] = data_decision["experience"].values
     states_dict["assets_begin_of_period"] = (
         data_decision["wealth"].values / specs["wealth_unit"]
     )
+    states_dict["experience"] = data_decision["experience"].values
 
-    model_name = specs["model_name"]
-
+    # Run budget constraint to get income
     assets_begin_of_period, aux = adjust_observed_assets(
         observed_states_dict=states_dict,
         params={},
@@ -80,66 +80,75 @@ def plot_income(path_dict, specs, show=False, save=False):
         aux_outs=True,
     )
 
-    data_decision["income_sim"] = (
-        assets_begin_of_period - states_dict["assets_begin_of_period"]
-    )
-
-    # Joint incomes
-    data_decision["joint_labor_income"] = (
+    # Observed incomes. Gross labor income and household net income(include transfers, taxes and interest)
+    data_decision["obs_joint_gross_labor_income"] = (
         (data_decision["monthly_wage"] + data_decision["monthly_wage_partner"]) * 12
     ) / specs["wealth_unit"]
-    data_decision["gross_hh_income"] = aux["gross_hh_income"]
-
-    data_decision = data_decision[data_decision["partner_state"] > 0]
-
-    sim_inc = data_decision.groupby(["sex", "education", "period"])[
-        "gross_hh_income"
+    obs_gross_labor_income = data_decision.groupby(["sex", "education", "period"])[
+        "obs_joint_gross_labor_income"
     ].mean()
-    sim_inc_net = data_decision.groupby(["sex", "education", "period"])[
-        "income_sim"
-    ].mean()
-
-    obs_inc_net = (
+    obs_net_total_income = (
         data_decision.groupby(["sex", "education", "period"])[
             "last_year_hh_net_income"
         ].mean()
         / specs["wealth_unit"]
     )
-    obs_inc = data_decision.groupby(["sex", "education", "period"])[
-        "joint_labor_income"
+
+    # Simulated
+    data_decision["sim_joint_gross_labor_income"] = aux["joint_gross_labor_income"]
+    sim_gross_labor_income = data_decision.groupby(["sex", "education", "period"])[
+        "sim_joint_gross_labor_income"
+    ].mean()
+    data_decision["sim_net_joint_income"] = aux["net_hh_income"]
+    sim_net_total_income = data_decision.groupby(["sex", "education", "period"])[
+        "sim_net_joint_income"
     ].mean()
 
-    fig, axs = plt.subplots(ncols=2, figsize=(12, 4))
-    for sex_var, sex_label in enumerate(specs["sex_labels"]):
-        for edu_var, edu_label in enumerate(specs["education_labels"]):
-            ax = axs[edu_var]
-            ax.plot(
-                sim_inc.loc[(sex_var, edu_var, slice(None))],
+    # data_decision = data_decision[data_decision["partner_state"] > 0]
+
+    fig, axs = plt.subplots(ncols=2, nrows=2, figsize=get_figsize(nrows=1, ncols=2))
+    for edu_var, edu_label in enumerate(specs["education_labels"]):
+        ax_col = axs[:, edu_var]
+        for sex_var, sex_label in enumerate(specs["sex_labels"]):
+            ax_col[0].plot(
+                sim_net_total_income.loc[(sex_var, edu_var, slice(None))],
                 color=colors[sex_var],
                 label=f"Sim {sex_label}",
             )
-            ax.plot(
-                obs_inc.loc[(sex_var, edu_var, slice(None))],
+            ax_col[0].plot(
+                obs_net_total_income.loc[(sex_var, edu_var, slice(None))],
                 color=colors[sex_var],
                 ls="--",
                 label=f"Obs {sex_label}",
             )
-            # ax.plot(obs_inc_net.loc[(sex_var, edu_var, slice(None))], color=JET_COLOR_MAP[sex_var], ls=":")
-            # ax.plot(sim_inc_net.loc[(sex_var, edu_var, slice(None))], color=JET_COLOR_MAP[sex_var], ls="-.", label=sex_label)
 
-            ax.set_title(edu_label)
-            ax.set_xlabel("Period")
-            ax.set_ylabel("Income")
-            ax.legend()
+            ax_col[1].plot(
+                sim_gross_labor_income.loc[(sex_var, edu_var, slice(None))],
+                color=colors[sex_var],
+                label=f"Sim {sex_label}",
+            )
+            ax_col[1].plot(
+                obs_gross_labor_income.loc[(sex_var, edu_var, slice(None))],
+                color=colors[sex_var],
+                ls="--",
+                label=f"Obs {sex_label}",
+            )
+
+        axs[0, edu_var].set_title(edu_label)
+        axs[1, edu_var].set_xlabel("Period")
+
+    axs[0, 0].set_ylabel("HH Net Income")
+    axs[1, 0].set_ylabel("HH Gross Labor income")
+    axs[0, 0].legend()
 
     plt.tight_layout()
 
     if save:
         fig.savefig(
-            path_dict["data_plots"] + "income_comparison.pdf", bbox_inches="tight"
+            path_dict["data_plots"] + "hh_income_comparison.pdf", bbox_inches="tight"
         )
         fig.savefig(
-            path_dict["data_plots"] + "income_comparison.png",
+            path_dict["data_plots"] + "hh_income_comparison.png",
             bbox_inches="tight",
             dpi=300,
         )

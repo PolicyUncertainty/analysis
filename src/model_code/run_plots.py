@@ -1,9 +1,13 @@
+import os
 import pickle
+
 import matplotlib.pyplot as plt
 import pandas as pd
 import yaml
-import os
 
+from estimation.struct_estimation.start_params_and_bounds.set_start_params import (
+    load_and_set_start_params,
+)
 from set_paths import create_path_dict
 from set_styles import set_plot_defaults
 from specs.derive_specs import generate_derived_and_data_derived_specs
@@ -26,16 +30,17 @@ if os.path.exists(estimated_params_path):
     params_source = "estimated"
 else:
     print(f"WARNING: Estimated parameters file '{estimated_params_path}' not found.")
-    print("Using start values from estimation/struct_estimation/start_params_and_bounds/start_params.yaml")
-    
+    print(
+        "Using start values from estimation/struct_estimation/start_params_and_bounds/start_params.yaml"
+    )
+
     # Load start parameters
-    start_params_path = path_dict["start_params_and_bounds"] + "start_params.yaml"
-    with open(start_params_path, 'r') as f:
-        params = yaml.safe_load(f)
+    params = load_and_set_start_params(path_dict)
     params_source = "start_values"
 
 # Model solution plots (require solved model)
 from model_code.plots.plot_law_of_motion import plot_ret_experience
+
 plot_ret_experience(path_dict, specs, show=show_plots, save=save_plots)
 
 from model_code.plots.retirement_probs_illustration import (
@@ -53,35 +58,41 @@ try:
         load_model=False,
         load_solution=False,
     )
-    
+
     plot_solution(model_solved=model_solved, specs=specs, path_dict=path_dict)
-    plot_ret_probs_for_state(model_solved=model_solved, specs=specs, path_dict=path_dict)
+    plot_ret_probs_for_state(
+        model_solved=model_solved, specs=specs, path_dict=path_dict
+    )
     plot_work_probs_for_state(model_solved=model_solved, specs=specs)
-    
+
     if params_source == "start_values":
         print(f"Model plots generated using start parameter values.")
-    
+
 except Exception as e:
     print(f"ERROR: Could not solve model: {str(e)}")
     print("Skipping model solution plots.")
 
 # Income plots (uses model specifications - can run without solved model)
 from model_code.plots.income_plots import plot_incomes
+
 plot_incomes(path_dict, show=show_plots, save=save_plots)
 
 # Wealth plots (uses model specifications - can run without solved model)
 from model_code.plots.wealth_plots import plot_budget_of_unemployed
+
 plot_budget_of_unemployed(path_dict, specs, show=show_plots, save=save_plots)
 
 # Utility plots (require model parameters, if estimated parameters not available, uses start params. if start params incomplete, skips utility plots)
-from model_code.plots.utility_plots import plot_utility, plot_bequest, plot_cons_scale
+from model_code.plots.utility_plots import plot_bequest, plot_cons_scale, plot_utility
 
 try:
     plot_utility(path_dict, params, specs, show=show_plots, save=save_plots)
     plot_bequest(path_dict, params, specs, show=show_plots, save=save_plots)
 except KeyError as e:
     if params_source == "start_values":
-        print(f"WARNING: Some utility plots skipped - missing parameters, e.g., {e} in start_params.yaml")
+        print(
+            f"WARNING: Some utility plots skipped - missing parameters, e.g., {e} in start_params.yaml"
+        )
     else:
         raise e
 
@@ -90,4 +101,6 @@ plot_cons_scale(path_dict, specs, show=show_plots, save=save_plots)
 
 print("Model plotting completed.")
 if params_source == "start_values":
-    print("Note: Some plots used start parameter values instead of estimated parameters.")
+    print(
+        "Note: Some plots used start parameter values instead of estimated parameters."
+    )

@@ -2,7 +2,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from set_styles import set_colors
+from set_styles import set_colors, get_figsize
 
 
 def plot_healthy_unhealthy(path_dict, specs, show=False, save=False):
@@ -56,7 +56,7 @@ def plot_healthy_unhealthy(path_dict, specs, show=False, save=False):
     initial_dist = np.zeros(specs["n_all_health_states"])
 
     # Create the plot
-    fig, axs = plt.subplots(ncols=2, figsize=(12, 8))
+    fig, axs = plt.subplots(ncols=2, figsize=get_figsize(ncols=2))
     colors, _ = set_colors()
     
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
@@ -153,7 +153,7 @@ def plot_health_transition_prob(path_dict, specs, show=False, save=False):
 
     # Define the bandwidth for the kernel density estimation
     bandwidth = specs["health_smoothing_bandwidth"]
-    fig, axs = plt.subplots(2, 1, figsize=(10, 12), sharex=True)
+    fig, axs = plt.subplots(2, 1, figsize=get_figsize(2, 1), sharex=True)
     colors, _ = set_colors()
 
     for health_var in specs["observed_health_vars"]:

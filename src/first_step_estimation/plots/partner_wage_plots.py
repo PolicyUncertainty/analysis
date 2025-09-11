@@ -2,7 +2,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from set_styles import set_colors
+from set_styles import set_colors, get_figsize
 
 
 def plot_partner_wage_results(path_dict, specs, show=False, save=False):
@@ -31,7 +31,7 @@ def plot_partner_wage_results(path_dict, specs, show=False, save=False):
         path_dict["first_step_data"] + "partner_wage_estimation_sample_with_predictions.csv", 
         index_col=0
     )
-    
+
     # Create plots for each sex
     for sex_val, sex_label in enumerate(sex_labels):
         fig, ax = plt.subplots()
@@ -70,10 +70,14 @@ def plot_partner_wage_results(path_dict, specs, show=False, save=False):
         ax.set_ylabel("Monthly Wage")
         
         if save:
-            plt.savefig(
+            fig.savefig(
                 path_dict["first_step_plots"] + f"partner_wages_{file_appends[sex_val]}.png",
                 bbox_inches="tight"
             )
-    
+            fig.savefig(
+                path_dict["first_step_plots"] + f"partner_wages_{file_appends[sex_val]}.pdf",
+                bbox_inches="tight"
+            )
+
     if show:
         plt.show()

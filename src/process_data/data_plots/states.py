@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
-from set_styles import set_colors
+from set_styles import set_colors, get_figsize
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
@@ -36,9 +36,13 @@ def plot_state_by_age_and_type(path_dict, state_vars, specs=None, show=False, sa
 
     n_education_types = specs["n_education_types"]
     n_state_vars = len(state_vars)
+    #fig, axs = plt.subplots(
+    #    nrows=n_education_types, ncols=n_state_vars, figsize=(15, 5 * n_education_types)
+    #)
     fig, axs = plt.subplots(
-        nrows=n_education_types, ncols=n_state_vars, figsize=(15, 5 * n_education_types)
+        nrows=n_education_types, ncols=n_state_vars, figsize=get_figsize(nrows=n_education_types, ncols=n_state_vars)
     )
+
 
     for edu in range(n_education_types):
         edu_df = struct_est_sample[struct_est_sample["education"] == edu]
@@ -63,7 +67,7 @@ def plot_state_by_age_and_type(path_dict, state_vars, specs=None, show=False, sa
                 raise ValueError("Only median and mean are supported")
             ax = axs[edu, idx] if n_education_types > 1 else axs[idx]
             ax.plot(plot_ages, state_values, label=state_var, color=colors[edu])
-            ax.legend()
+            #ax.legend()
             ax.set_title(f"{specs['education_labels'][edu]}: {state_var}")
             ax.set_xlabel("Age")
             ax.set_ylabel(state_var)

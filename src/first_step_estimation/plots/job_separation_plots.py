@@ -6,7 +6,7 @@ import pandas as pd
 from process_data.first_step_sample_scripts.create_job_sep_sample import (
     create_job_sep_sample,
 )
-from set_styles import set_colors
+from set_styles import set_colors, get_figsize
 
 
 def plot_job_separations(path_dict, specs, show=False, save=False):
@@ -38,7 +38,7 @@ def plot_job_separations(path_dict, specs, show=False, save=False):
         df_job["age"].values,
     ]
 
-    fig, axs = plt.subplots(ncols=2, nrows=2, figsize=(12, 8))
+    fig, axs = plt.subplots(ncols=2, nrows=2, figsize=get_figsize(2, 2))
     colors, _ = set_colors()
 
     obs_shares = df_job.groupby(["sex", "education", "good_health", "age"])[

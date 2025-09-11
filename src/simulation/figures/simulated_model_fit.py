@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from set_styles import set_colors
+from set_styles import set_colors, get_figsize
 JET_COLOR_MAP, LINE_STYLES = set_colors()
 from model_code.transform_data_from_model import load_scale_and_correct_data
 from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
@@ -44,7 +44,7 @@ def plot_quantiles(
 
     data_sim["age"] = data_sim["period"] + specs["start_age"]
 
-    fig, axs = plt.subplots(ncols=specs["n_education_types"])
+    fig, axs = plt.subplots(ncols=specs["n_education_types"], figsize=get_figsize(ncols=specs["n_education_types"]))
     max_wealth = 5
     # Also generate an aggregate graph
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
@@ -134,7 +134,7 @@ def plot_choice_shares_single(
     data_decision["age"] = data_decision["period"] + specs["start_age"]
     data_sim["age"] = data_sim["period"] + specs["start_age"]
 
-    fig, axes = plt.subplots(2, specs["n_choices"])
+    fig, axes = plt.subplots(2, specs["n_choices"], figsize=get_figsize(ncols=specs["n_choices"], nrows=2))
     for sex, sex_label in enumerate(specs["sex_labels"]):
         for edu_var, edu_label in enumerate(specs["education_labels"]):
             data_sim_restr = data_sim[

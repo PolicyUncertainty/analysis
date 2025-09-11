@@ -26,7 +26,10 @@ def est_job_sep(paths_dict, specs, load_data=False):
     job_sep_probs, job_sep_params = est_job_for_sample(df_job, specs)
     # Save results
     job_sep_params.to_csv(paths_dict["first_step_results"] + "job_sep_params.csv")
-    pkl.dump(job_sep_probs, open(paths_dict["first_step_results"] + "job_sep_probs.pkl", "wb"))
+    pkl.dump(
+        job_sep_probs,
+        open(paths_dict["first_step_results"] + "job_sep_probs.pkl", "wb"),
+    )
 
 
 def est_job_for_sample(df_job, specs):
@@ -94,6 +97,11 @@ def est_job_for_sample(df_job, specs):
                 job_sep_probs_group = 1 / (1 + np.exp(-exp_factor))
                 job_sep_probs[sex_var, edu_var, good_health, predicted_ages] = (
                     job_sep_probs_group
+                )
+                first_predicted_age = predicted_ages[0]
+                # Fill in for ages below prediction with first predicted age
+                job_sep_probs[sex_var, edu_var, good_health, :first_predicted_age] = (
+                    job_sep_probs_group[0]
                 )
                 job_sep_probs[
                     sex_var, edu_var, good_health, specs["max_est_age_labor"] + 1 :

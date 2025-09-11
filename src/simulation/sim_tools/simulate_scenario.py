@@ -4,7 +4,7 @@ from model_code.specify_model import specify_and_solve_model
 from model_code.state_space.experience import construct_experience_years
 from set_paths import get_model_results_path
 from simulation.sim_tools.start_obs_for_sim import generate_start_states_from_obs
-from specs.derive_specs import read_and_derive_specs
+from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
 def solve_and_simulate_scenario(
@@ -98,49 +98,49 @@ def simulate_scenario(
         only_informed=only_informed,
         men_only=men_only,
     )
-    model_specs = model_solved.model_specs
+    specs = generate_derived_and_data_derived_specs(path_dict)
 
     df = model_solved.simulate(
         states_initial=initial_states,
-        seed=model_specs["seed"],
+        seed=specs["seed"],
     )
 
     # Create additional variables
-    df["age"] = df.index.get_level_values("period") + model_specs["start_age"]
+    df["age"] = df.index.get_level_values("period") + specs["start_age"]
     # Create experience years
     df["exp_years"] = construct_experience_years(
         float_experience=df["experience"].values,
         period=df.index.get_level_values("period").values,
         is_retired=df["lagged_choice"].values == 0,
-        model_specs=model_specs,
+        model_specs=specs,
     )
 
     # Create policy value
     df["policy_state_value"] = (
-        model_specs["min_SRA"] + df["policy_state"] * model_specs["SRA_grid_size"]
+        specs["min_SRA"] + df["policy_state"] * specs["SRA_grid_size"]
     )
     if men_only:
         sexes = [0]
     else:
-        sexes = range(model_specs["n_sexes"])
+        sexes = range(specs["n_sexes"])
 
     # Assign working hours for choice 1
     df["working_hours"] = 0.0
     for sex_var in sexes:
-        for edu_var in range(model_specs["n_education_types"]):
+        for edu_var in range(specs["n_education_types"]):
             df.loc[
                 (df["choice"] == 3)
                 & (df["sex"] == sex_var)
                 & (df["education"] == edu_var),
                 "working_hours",
-            ] = model_specs["av_annual_hours_ft"][sex_var, edu_var]
+            ] = specs["av_annual_hours_ft"][sex_var, edu_var]
 
             df.loc[
                 (df["choice"] == 2)
                 & (df["sex"] == sex_var)
                 & (df["education"] == edu_var),
                 "working_hours",
-            ] = model_specs["av_annual_hours_pt"][sex_var, edu_var]
+            ] = specs["av_annual_hours_pt"][sex_var, edu_var]
 
     # Create income vars:
     # First, total income as the difference between wealth at the beginning of next period and savings
@@ -149,7 +149,7 @@ def simulate_scenario(
     )
     df["income_wo_interest"] = df.groupby("agent")["assets_begin_of_period"].shift(
         -1
-    ) - df["savings"] * (1 + model_specs["interest_rate"])
+    ) - df["savings"] * (1 + specs["interest_rate"])
 
     # periodic savings and savings rate
     df["savings_dec"] = df["total_income"] - df["consumption"]

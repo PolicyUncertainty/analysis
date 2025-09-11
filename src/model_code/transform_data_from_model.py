@@ -114,7 +114,7 @@ def load_scale_and_correct_data(path_dict, model_class):
     # data_decision.groupby("age")["gross_retirement_income"].mean().plot()
     # data_decision.groupby("age")["last_year_pension"].mean().plot()
     # plt.show()
-    data_decision["assets_begin_of_period"] = out[1]
+    data_decision["assets_begin_of_period"] = out[0]
     return data_decision
 
 

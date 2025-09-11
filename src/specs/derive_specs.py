@@ -5,6 +5,7 @@ import numpy as np
 import yaml
 
 from model_code.stochastic_processes.math_funcs import inv_logit_formula, logit_formula
+from specs.belief_specs import add_belief_process_specs
 from specs.experience_pp_specs import add_experience_and_pp_specs
 from specs.family_specs import (
     predict_children_by_state,
@@ -12,7 +13,6 @@ from specs.family_specs import (
 )
 from specs.health_specs import process_health_labels, read_in_health_transition_specs
 from specs.income_specs import add_income_specs
-from specs.belief_specs import add_belief_process_specs
 
 
 def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
@@ -39,7 +39,9 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     # Read in health transition matrix
     specs["health_trans_mat"] = read_in_health_transition_specs(path_dict, specs)
 
-    job_sep_probs = pkl.load(open(path_dict["first_step_results"] + "job_sep_probs.pkl", "rb"))
+    job_sep_probs = pkl.load(
+        open(path_dict["first_step_results"] + "job_sep_probs.pkl", "rb")
+    )
     specs["job_sep_probs"] = job_sep_probs
     specs["log_job_sep_probs"] = inv_logit_formula(job_sep_probs)
     return specs

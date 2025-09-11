@@ -2,6 +2,7 @@ import pickle
 from copy import deepcopy
 
 import dcegm
+import jax
 import jax.numpy as jnp
 import numpy as np
 
@@ -123,6 +124,14 @@ def specify_model(
     else:
         model_path = path_dict["intermediate_data"] + "model.pkl"
 
+    def try_jax_array(x):
+        try:
+            return jnp.asarray(x)
+        except:
+            return x
+
+    specs = {k: try_jax_array(v) for k, v in specs.items()}
+
     if load_model:
         model = dcegm.setup_model(
             model_specs=specs,
@@ -195,7 +204,7 @@ def specify_and_solve_model(
 
     # Generate name of solution
     if subj_unc:
-        resolution_age = model.model_specs["resolution_age"]
+        resolution_age = specs["resolution_age"]
         sol_name = f"sol_subj_unc_{resolution_age}.pkl"
     else:
         sol_name = "sol_no_subj_unc.pkl"

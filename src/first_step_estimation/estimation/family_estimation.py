@@ -1,15 +1,25 @@
-# Description: This file contains estimation functions for family transitions.
+# Description: This file estimates the parameters of the partner transition matrix using the SOEP panel data.
 # For each sex, education level and age bin (10 years), we estimate P(partner_state | lagged_partner_state) non-parametrically.
 import pickle as pkl
 
+import matplotlib.pyplot as plt
 import numpy as np
 import optimagic as om
 import pandas as pd
 import statsmodels.api as sm
+from statsmodels.discrete.conditional_models import ConditionalLogit
+from statsmodels.discrete.discrete_model import Logit, MNLogit
 
 from process_data.first_step_sample_scripts.create_partner_transition_sample import (
     create_partner_transition_sample,
 )
+from set_styles import set_colors
+from specs.derive_specs import read_and_derive_specs
+
+JET_COLOR_MAP, _ = set_colors()
+
+# import warnings
+# warnings.filterwarnings("error")
 
 
 def estimate_partner_transitions(paths_dict, specs, load_data):
@@ -41,9 +51,9 @@ def estimate_partner_transitions(paths_dict, specs, load_data):
 
     partner_state_vals = list(range(specs["n_partner_states"]))
 
-    # Store data for potential plotting
-    predicted_shares_data = {}
-    empirical_shares_data = {}
+    col_count = 0
+    fig, axs = plt.subplots(nrows=2, ncols=2)
+    fig, axs2 = plt.subplots(nrows=3, ncols=3)
 
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
         for edu_var, edu_label in enumerate(specs["education_labels"]):
@@ -74,14 +84,20 @@ def estimate_partner_transitions(paths_dict, specs, load_data):
                 (all_ages[0], partner_state_vals)
             ].values
 
-            # Load starting parameters
-            params_start = pkl.load(
-                open(
-                    paths_dict["first_step_results"]
-                    + f"result_{sex_label}_{edu_label}.pkl",
-                    "rb",
-                )
-            )
+            params_start = {}
+            for current_state in param_name_states[:2]:
+                for next_state in param_name_states[1:]:
+                    params_start[f"const_{current_state}_to_{next_state}"] = 0
+                    params_start[f"age_{current_state}_to_{next_state}"] = 0
+                    params_start[f"age_squared_{current_state}_to_{next_state}"] = 0
+                    params_start[f"age_cubic_{current_state}_to_{next_state}"] = 0
+            # params_start = pkl.load(
+            #     open(
+            #         paths_dict["first_step_results"]
+            #         + f"result_{sex_label}_{edu_label}.pkl",
+            #         "rb",
+            #     )
+            # )
 
             # Set upper bounds to 500 and lower bounds to -inf
             upper_bounds = {key: 5 for key in params_start.keys()}
@@ -95,11 +111,29 @@ def estimate_partner_transitions(paths_dict, specs, load_data):
                 "weights": n_obs_per_age / n_obs_per_age.sum(),
             }
 
-            # For now, use the loaded parameters as results
-            # The optimization code is commented out in the original
+            result = om.minimize(
+                fun=method_of_moments,
+                params=params_start,
+                fun_kwargs=kwargs,
+                algorithm="scipy_neldermead",
+                # algo_options={
+                #     "n_cores": 7,
+                # },
+                bounds=bounds,
+            )
+
+            params_result = result.params
+
+            pkl.dump(
+                params_result,
+                open(
+                    paths_dict["first_step_results"]
+                    + f"result_{sex_label}_{edu_label}.pkl",
+                    "wb",
+                ),
+            )
             params_result = params_start
 
-            # Calculate transition matrices for all ages
             for age in all_ages:
                 trans_mat = calc_trans_mat(params_result, age)
                 for current_partner_state, partner_label in enumerate(
@@ -109,22 +143,55 @@ def estimate_partner_transitions(paths_dict, specs, load_data):
                         (sex_label, edu_label, age, partner_label, all_partner_labels)
                     ] = trans_mat[current_partner_state, :]
 
-            # Calculate predicted shares for potential plotting
+            for current_partner_state, partner_label in enumerate(all_partner_labels):
+                for next_partner_state, next_partner_label in enumerate(
+                    all_partner_labels
+                ):
+                    axs2[current_partner_state, next_partner_state].plot(
+                        all_ages,
+                        full_df.loc[
+                            (
+                                sex_label,
+                                edu_label,
+                                all_ages,
+                                partner_label,
+                                next_partner_label,
+                            )
+                        ],
+                        label=f"{sex_label}; {edu_label}",
+                        color=JET_COLOR_MAP[col_count],
+                    )
+
             pred_shares = predicted_shares(
                 params=params_result,
                 est_ages=all_ages,
                 start_shares=initial_shares,
             )
-            
-            # Store data for plotting
-            predicted_shares_data[(sex_label, edu_label)] = pred_shares
-            empirical_shares_data[(sex_label, edu_label)] = empirical_shares
 
-    # Save results
-    out_file_path = paths_dict["first_step_results"] + "partner_transition_matrix.csv"
+            ax = axs[col_count // 2, col_count % 2]
+            for current_partner_state in partner_state_vals:
+                ax.plot(
+                    all_ages,
+                    pred_shares.loc[(all_ages, current_partner_state)],
+                    label=f"{current_partner_state}",
+                    color=JET_COLOR_MAP[current_partner_state],
+                )
+                ax.plot(
+                    all_ages,
+                    empirical_shares.loc[(all_ages, current_partner_state)],
+                    linestyle="--",
+                    color=JET_COLOR_MAP[current_partner_state],
+                    label=f"{current_partner_state}",
+                )
+
+            ax.legend()
+            col_count += 1
+
+    axs2[0, 0].legend()
+    plt.show()
+    out_file_path = paths_dict["est_results"] + "partner_transition_matrix.csv"
+    # Check if it sums for each partner state to 1
     full_df.to_csv(out_file_path)
-    
-    return full_df, predicted_shares_data, empirical_shares_data
 
 
 def calc_trans_mat(params, age):
@@ -159,6 +226,9 @@ def calc_trans_mat(params, age):
                 exp_vals[2] *= above_40
                 exp_vals = np.array(exp_vals, dtype=float)
 
+        # exp_vals = np.exp([
+        #     1, params[f"{age_bin_name}_{current_state_name}_to_working_age"], params[f"{age_bin_name}_{current_state_name}_to_retirement"]
+        # ])
         trans_mat[i, :] = exp_vals / exp_vals.sum()
 
     return trans_mat
@@ -195,7 +265,7 @@ def estimate_nb_children(paths_dict, specs):
     on sex, education and age bin."""
     # load data, filter, create period and has_partner state
     df = pd.read_pickle(
-        paths_dict["first_step_data"] + "partner_transition_estimation_sample.pkl"
+        paths_dict["intermediate_data"] + "partner_transition_estimation_sample.pkl"
     )
 
     start_age = specs["start_age"]
@@ -236,7 +306,7 @@ def estimate_nb_children(paths_dict, specs):
                 model = sm.OLS(Y, X).fit()
                 estimates.loc[(sex, education, has_partner), columns] = model.params
 
-    out_file_path = paths_dict["first_step_results"] + "nb_children_estimates.csv"
+    out_file_path = paths_dict["est_results"] + "nb_children_estimates.csv"
     estimates.to_csv(out_file_path)
-    
+    # plot results
     return estimates

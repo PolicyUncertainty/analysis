@@ -42,7 +42,7 @@ def plot_incomes(path_dict, show=False, save=False):
     annual_unemployment = specs["annual_unemployment_benefits"]
     unemployment_benefits = np.ones_like(exp_levels) * annual_unemployment
 
-    fig, axes = plt.subplots(2, 2, figsize=(10, 5))
+    fig, axes = plt.subplots(2, 2, figsize=(24, 16))
 
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
         # Now loop over education to generate specific net and gross wages and pensions
@@ -139,7 +139,7 @@ def plot_incomes(path_dict, show=False, save=False):
 
             # Only show legend on first subplot
             if sex_var == 0 and edu_var == 0:
-                ax.legend(bbox_to_anchor=(1.05, 1), loc="upper left")
+                ax.legend(loc="upper left")
 
     plt.tight_layout()
 

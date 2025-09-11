@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from set_styles import set_colors
+from set_styles import set_colors, get_figsize
 JET_COLOR_MAP, LINE_STYLES = set_colors()
 
 
@@ -50,7 +50,7 @@ def sra_increase_aggregate_plot(path_dict, model_name):
     df_unc = df_unc[df_unc["sra_at_63"].isin(reform_SRA)]
     df_no_unc = df_no_unc[df_no_unc["sra_at_63"].isin(reform_SRA)]
     df_debias = df_debias[df_debias["sra_at_63"].isin(reform_SRA)]
-    fig, axs = plt.subplots(ncols=3, figsize=(16, 9))
+    fig, axs = plt.subplots(ncols=3, figsize=get_figsize(ncols=3, nrows=1))
 
     row_names = {
         "below_sixty_savings": "Perc. Change Savings",
@@ -130,7 +130,7 @@ def sra_increase_aggregate_plot(path_dict, model_name):
 
     fig.savefig(path_dict["plots"] + f"cf_increase_behavior.png", transparent=True)
 
-    fig, ax = plt.subplots(figsize=(6, 8))
+    fig, ax = plt.subplots()
     ax.plot(
         df_unc["sra_at_63"], df_unc["cv"] * 100, label="Uncertainty and Misinformation"
     )

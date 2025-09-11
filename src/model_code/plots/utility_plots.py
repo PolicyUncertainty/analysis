@@ -4,7 +4,7 @@ import numpy as np
 
 from model_code.utility.bequest_utility import utility_final_consume_all
 from model_code.utility.utility_functions_cobb import consumption_scale, utility_func
-from set_styles import set_colors
+from set_styles import set_colors, get_figsize
 
 
 def plot_utility(path_dict, params, specs, show=False, save=False):
@@ -95,7 +95,7 @@ def plot_bequest(path_dict, params, specs, show=False, save=False):
     wealth = np.linspace(5_000, 100_000, 1000) / specs["wealth_unit"]
 
     choice_labels = specs["choice_labels"]
-    fig, axs = plt.subplots(nrows=2, figsize=(8, 10))
+    fig, axs = plt.subplots(nrows=2, figsize=get_figsize(nrows=2, ncols=1))
 
     for sex in range(2):
         ax = axs[sex]
@@ -156,7 +156,7 @@ def plot_cons_scale(path_dict, specs, show=False, save=False):
     married_labels = ["Single", "Partnered"]
     edu_labels = specs["education_labels"]
 
-    fig, axs = plt.subplots(ncols=2, figsize=(12, 5))
+    fig, axs = plt.subplots(ncols=2, figsize=get_figsize(ncols=2, nrows=1))
 
     for married_val, married_label in enumerate(married_labels):
         ax = axs[married_val]

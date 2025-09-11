@@ -40,7 +40,7 @@ def plot_savings_rate(path_dict, specs, covariate=None, show=False, save=False, 
     if window > 1:
         avg_rate = avg_rate.rolling(window=window, min_periods=1).mean()
     
-    fig, ax = plt.subplots(figsize=(10, 6))
+    fig, ax = plt.subplots()
     ax.plot(avg_rate.index, avg_rate.values, label="Average", color=colors[0])
     
     # If covariate is specified and is integer/categorical, plot for each value

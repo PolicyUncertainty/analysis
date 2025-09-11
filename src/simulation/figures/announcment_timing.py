@@ -9,9 +9,9 @@ def announcement_timing_lc_plot(path_dict, model_name):
         path_dict["sim_results"] + f"announcement_lc_{model_name}.csv", index_col=0
     )
 
-    fig1, ax1 = plt.subplots(figsize=(10, 10))
-    fig2, ax2 = plt.subplots(figsize=(10, 10))
-    fig3, ax3 = plt.subplots(figsize=(10, 10))
+    fig1, ax1 = plt.subplots()
+    fig2, ax2 = plt.subplots()
+    fig3, ax3 = plt.subplots()
     axs = [ax1, ax2, ax3]
 
     subset_ages = np.arange(30, 81, 2)

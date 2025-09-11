@@ -81,7 +81,7 @@ def test_budget_unemployed(
     savings_scaled = savings * specs_internal["wealth_unit"]
     has_partner = int(partner_state > 0)
     nb_children = specs["children_by_state"][sex, education, has_partner, period]
-    income_partner, _ = calc_partner_income_after_ssc(
+    income_partner, _, _ = calc_partner_income_after_ssc(
         partner_state=partner_state,
         sex=sex,
         model_specs=specs_internal,

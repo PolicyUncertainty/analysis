@@ -68,6 +68,7 @@ estimation_results = estimate_model(
     last_estimate=last_estimate,
     save_results=SAVE_RESULTS,
     men_only=True,
+    slow_version=True,
 )
 print(estimation_results)
 

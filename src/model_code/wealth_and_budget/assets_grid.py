@@ -4,15 +4,15 @@ import numpy as np
 def create_end_of_period_assets():
     """Create a saving grid with sections."""
     section_1 = np.arange(start=0, stop=10, step=2)  # 5
-    section_2 = np.arange(start=10, stop=20, step=2)  # 5
+    section_2 = np.arange(start=10, stop=20, step=2.5)  # 4
     section_3 = np.arange(start=20, stop=50, step=10)  # 3
     section_4 = np.arange(start=50, stop=100, step=20)  # 2
     section_5 = np.arange(start=100, stop=500, step=250)  # 2
-    section_6 = np.arange(start=500, stop=1000, step=250)  # 2
+    section_6 = [500]  # 1
     # 500_000 to 1000_000 in steps of 200_000
     section_7 = np.arange(start=1000, stop=10000, step=4000)  # 2
     # Add 10 and a 100 million to the grid
-    section_8 = np.array([10_000, 100_000])
+    section_8 = np.array([100_000])
     savings_grid = np.concatenate(
         [
             section_1,

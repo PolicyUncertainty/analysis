@@ -12,7 +12,7 @@ from process_data.first_step_sample_scripts.create_partner_transition_sample imp
 )
 
 
-def estimate_partner_transitions(paths_dict, specs, load_data):
+def estimate_partner_transitions(paths_dict, specs, load_data=True, simulation_only=False):
     """Estimate the partner state transition matrix."""
     est_data = create_partner_transition_sample(paths_dict, specs, load_data=load_data)
 
@@ -75,17 +75,28 @@ def estimate_partner_transitions(paths_dict, specs, load_data):
             ].values
 
             # Load starting parameters
-            params_start = pkl.load(
-                open(
-                    paths_dict["first_step_results"]
-                    + f"result_{sex_label}_{edu_label}.pkl",
-                    "rb",
+            try:
+                params_start = pkl.load(
+                    open(
+                        paths_dict["first_step_results"]
+                        + f"result_{sex_label}_{edu_label}.pkl",
+                        "rb",
+                    )
                 )
-            )
+            except FileNotFoundError:
+                print(f"File not found: {paths_dict['first_step_results'] + f'result_{sex_label}_{edu_label}.pkl'}. Using zeros as starting values.")
+                params_start = {}
+                for current_state in param_name_states[:2]:
+                    for next_state in param_name_states[1:]:
+                        params_start[f"const_{current_state}_to_{next_state}"] = 0
+                        params_start[f"age_{current_state}_to_{next_state}"] = 0
+                        params_start[f"age_squared_{current_state}_to_{next_state}"] = 0
+                        params_start[f"age_cubic_{current_state}_to_{next_state}"] = 0
+
 
             # Set upper bounds to 500 and lower bounds to -inf
             upper_bounds = {key: 5 for key in params_start.keys()}
-            lower_bounds = {key: -5 for key in params_start.keys()}
+            lower_bounds = {key: -1 for key in params_start.keys()}
             bounds = om.Bounds(lower=lower_bounds, upper=upper_bounds)
 
             kwargs = {
@@ -95,9 +106,31 @@ def estimate_partner_transitions(paths_dict, specs, load_data):
                 "weights": n_obs_per_age / n_obs_per_age.sum(),
             }
 
-            # For now, use the loaded parameters as results
-            # The optimization code is commented out in the original
-            params_result = params_start
+            # if simulation_only is True, use the loaded parameters as results
+            if simulation_only:
+                params_result = params_start
+            else:
+                result = om.minimize(
+                 fun=method_of_moments,
+                 params=params_start,
+                 fun_kwargs=kwargs,
+                 algorithm="scipy_neldermead",
+                 algo_options={
+                     "n_cores": 7,
+                 },
+                 bounds=bounds,
+                 multistart=True,
+                )
+                params_result = result.params
+            
+            pkl.dump(
+                 params_result,
+                 open(
+                     paths_dict["first_step_results"]
+                     + f"result_{sex_label}_{edu_label}.pkl",
+                     "wb",
+                 ),
+             )
 
             # Calculate transition matrices for all ages
             for age in all_ages:

@@ -238,7 +238,7 @@ def test_budget_worker(
     )
 
     nb_children = specs_internal["children_by_state"][
-        sex, education, partner_state, period
+        sex, education, has_partner_int, period
     ]
     child_benefits = nb_children * specs_internal["monthly_child_benefits"] * 12
     if partner_state == 0:
@@ -359,7 +359,7 @@ def test_retiree(
     )
 
     nb_children = specs_internal["children_by_state"][
-        sex, education, partner_state, period
+        sex, education, has_partner_int, period
     ]
     child_benefits = nb_children * specs_internal["monthly_child_benefits"] * 12
     if partner_state == 0:
@@ -551,7 +551,7 @@ def test_fresh_retiree(
     )
 
     nb_children = specs_internal["children_by_state"][
-        sex, education, partner_state, period
+        sex, education, has_partner_int, period
     ]
     child_benefits = nb_children * specs_internal["annual_child_benefits"]
     if partner_state == 0:

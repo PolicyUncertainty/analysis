@@ -78,8 +78,8 @@ model_name = "start_lower_fake"
 print(f"Running fake estimation for params: {model_name}", flush=True)
 
 LOAD_SOL_MODEL = False
-LOAD_SOLUTION = None
-LOAD_DF = None
+LOAD_SOLUTION = False
+LOAD_DF = False
 SAVE_RESULTS = False
 
 # Load start params

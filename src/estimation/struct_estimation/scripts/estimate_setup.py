@@ -108,7 +108,7 @@ def estimate_model(
         add_kwargs = {}
 
     if scale_opt:
-        add_kwargs["scaling"] = om.ScalingOptions(method="bounds", clipping_value=0.0)
+        add_kwargs["scaling"] = om.ScalingOptions(method="bounds")
 
     if multistart:
         add_kwargs["multistart"] = (om.MultistartOptions(n_samples=10, seed=0),)

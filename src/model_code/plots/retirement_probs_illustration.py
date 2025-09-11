@@ -7,11 +7,11 @@ from model_code.state_space.experience import (
     construct_experience_years,
     scale_experience_years,
 )
-from set_styles import set_colors
+from set_styles import set_colors, get_figsize
 
 
 def plot_solution(model_solved, specs, path_dict):
-    fig, ax = plt.subplots(figsize=(10, 6))
+    fig, ax = plt.subplots()
 
     # asset_grid = np.arange(1, 5)
     # n_obs = len(asset_grid)

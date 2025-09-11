@@ -1,9 +1,9 @@
 import matplotlib.pyplot as plt
 
 
-def set_plot_defaults():
+def set_plot_defaults(plot_type="paper"):
     """wrapper to set standard matplotlib specifications for plots."""
-    set_standard_matplotlib_specs()
+    set_standard_matplotlib_specs(plot_type=plot_type)
     set_colors()
     return
 
@@ -28,7 +28,7 @@ def set_standard_matplotlib_specs(plot_type="paper"):
     # Make lines of plots thicker
     plt.rcParams["lines.linewidth"] = 3
 
-    # Set figure size
+    # Set figure size (base size for get_figsize)
     if plot_type == "paper":
         plt.rcParams["figure.figsize"] = (12, 8)
     elif plot_type == "presentation":
@@ -51,6 +51,16 @@ def set_standard_matplotlib_specs(plot_type="paper"):
     # set common line width for specific elements (overrides global when needed)
     plt.rcParams["grid.linewidth"] = 2
     return
+
+
+def get_figsize(nrows=1, ncols=1):
+    """
+    Get the figure size for a plot with subplots arranged in nrows and ncols.
+    
+    Returns a tuple for figsize scaled by nrows and ncols, using the current base size from rcParams.
+    """
+    base_width, base_height = plt.rcParams["figure.figsize"]
+    return (base_width * ncols, base_height * nrows)
 
 
 def set_colors():

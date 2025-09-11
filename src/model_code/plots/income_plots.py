@@ -18,7 +18,7 @@ from model_code.wealth_and_budget.wages import (
     calc_labor_income_after_ssc,
     calculate_gross_labor_income,
 )
-from set_styles import set_colors
+from set_styles import set_colors, get_figsize
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
@@ -42,7 +42,8 @@ def plot_incomes(path_dict, show=False, save=False):
     annual_unemployment = specs["annual_unemployment_benefits"]
     unemployment_benefits = np.ones_like(exp_levels) * annual_unemployment
 
-    fig, axes = plt.subplots(2, 2, figsize=(24, 16))
+    figsize = get_figsize(2, 2)
+    fig, axes = plt.subplots(2, 2, figsize=figsize)
 
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
         # Now loop over education to generate specific net and gross wages and pensions

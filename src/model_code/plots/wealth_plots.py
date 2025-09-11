@@ -2,7 +2,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from set_styles import set_colors
+from set_styles import set_colors, get_figsize
 from model_code.wealth_and_budget.budget_equation import budget_constraint
 
 
@@ -26,8 +26,8 @@ def plot_budget_of_unemployed(path_dict, specs, show=False, save=False):
     colors, _ = set_colors()
     savings = np.linspace(0, 5, 50)
 
-    fig, axs = plt.subplots(ncols=2, figsize=(12, 6))
-    
+    fig, axs = plt.subplots(ncols=2, figsize=get_figsize(2, 1))
+
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
         ax = axs[sex_var]
         for edu_var, edu_label in enumerate(specs["education_labels"]):

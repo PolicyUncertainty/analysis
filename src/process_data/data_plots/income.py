@@ -16,7 +16,7 @@ from model_code.state_space.experience import scale_experience_years
 from process_data.structural_sample_scripts.create_structural_est_sample import (
     CORE_TYPE_DICT,
 )
-from set_styles import set_colors
+from set_styles import set_colors, get_figsize
 
 
 def plot_income(path_dict, specs, show=False, save=False):
@@ -109,7 +109,7 @@ def plot_income(path_dict, specs, show=False, save=False):
         "joint_labor_income"
     ].mean()
 
-    fig, axs = plt.subplots(ncols=2, figsize=(12, 4))
+    fig, axs = plt.subplots(ncols=2, figsize=get_figsize(nrows=1, ncols=2))
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
         for edu_var, edu_label in enumerate(specs["education_labels"]):
             ax = axs[edu_var]

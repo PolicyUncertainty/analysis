@@ -32,6 +32,9 @@ from process_data.soep_vars.partner_code import (
 from process_data.soep_vars.wealth.linear_interpolation import (
     add_wealth_interpolate_and_deflate,
 )
+from process_data.soep_vars.wealth.flow_savings import (
+    create_flow_savings
+)
 from process_data.structural_sample_scripts.classify_reitrees import (
     add_very_long_insured_classification,
 )
@@ -131,7 +134,7 @@ def create_structural_est_sample(
     # We are done with lagging and leading and drop the buffer years
     df = filter_years(df, specs["start_year"], specs["end_year"])
 
-    # Add wealth
+    # Add wealth and flow savings 
     df = add_wealth_interpolate_and_deflate(
         df,
         paths,
@@ -141,11 +144,11 @@ def create_structural_est_sample(
         filter_missings=True,
     )
 
-    # df["savings_dec"] = df["wealth"] - df.groupby("pid")["wealth"].shift(
-    #     1, fill_value=np.nan
-    # )
+    df = create_flow_savings(df, specs)
 
+    # create experience and working years
     df = create_experience_and_working_years(df.copy(), filter_missings=True)
+    
     # Now we can also kick out the buffer age for lagging
     df = filter_below_age(df, specs["start_age"])
 
@@ -224,7 +227,7 @@ def create_structural_est_sample(
     df = df[list(all_type_dict.keys())]
     df = df.astype(all_type_dict)
 
-    print_data_description(df)
+    print_data_description(df, detailed=True)
 
     # Anonymize and save data
     df["year"] = df.index.get_level_values("syear").values
@@ -324,7 +327,7 @@ def load_and_merge_soep_core(path_dict, use_processed_pl):
     return merged_data
 
 
-def print_data_description(df):
+def print_data_description(df, detailed=False):
     n_retirees = df.groupby("choice").size().loc[0]
     n_unemployed = df.groupby("choice").size().loc[1]
     n_part_time = df.groupby("choice").size().loc[2]
@@ -348,4 +351,25 @@ def print_data_description(df):
         + str(n_full_time)
         + " full time [3]."
     )
+    print("---------------------------")
+    if detailed:
+        print("Detailed description of choice and state variables:")
+        choice_vars = ["choice", "lagged_choice"]
+        state_vars = [
+            "period",
+            "education",
+            "sex",
+            "job_offer",
+            "partner_state",
+            "health",
+            "policy_state",
+            "wealth",
+        ]
+        for var in choice_vars + state_vars:
+            print(f"\nDescription of {var}:")
+            print(df[var].describe())
+            # value counts for non-float variables
+            if var in choice_vars + state_vars and not pd.api.types.is_float_dtype(df[var]):
+                print(f"Value counts of {var}:")
+                print(df[var].value_counts().sort_index())
     print("---------------------------")

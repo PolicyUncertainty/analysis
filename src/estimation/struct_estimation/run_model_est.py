@@ -67,6 +67,7 @@ estimation_results = estimate_model(
     use_weights=USE_WEIGHTS,
     last_estimate=last_estimate,
     save_results=SAVE_RESULTS,
+    men_only=True,
 )
 print(estimation_results)
 

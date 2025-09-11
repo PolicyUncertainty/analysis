@@ -101,47 +101,47 @@ def estimate_model(
         sim_data=sim_data,
         men_only=men_only,
     )
-
-    if supply_jacobian:
-        add_kwargs = {"jac": est_class.jacobian_func}
-    else:
-        add_kwargs = {}
-
-    if scale_opt:
-        add_kwargs["scaling"] = om.ScalingOptions(method="bounds")
-
-    if multistart:
-        add_kwargs["multistart"] = (om.MultistartOptions(n_samples=10, seed=0),)
-
-    result = om.minimize(
-        fun=est_class.crit_func,
-        params=start_params,
-        bounds=bounds,
-        algorithm="scipy_lbfgsb",
-        # logging="test_log.db",
-        error_handling="continue",
-        **add_kwargs,
-    )
-    pickle.dump(
-        result, open(path_dict["struct_results"] + f"em_result_{file_append}.pkl", "wb")
-    )
-    start_params_all.update(result.params)
-
-    pickle.dump(
-        start_params_all,
-        open(path_dict["struct_results"] + f"est_params_{file_append}.pkl", "wb"),
-    )
-
-    calc_and_save_standard_errors(
-        path_dict=path_dict,
-        ll_func=est_class.ll_func,
-        final_params_all=start_params_all,
-        final_params_est=result.params,
-        params_to_estimate_names=params_to_estimate_names,
-        weights=est_class.weights,
-        file_append=file_append,
-    )
-    return result
+    #
+    # if supply_jacobian:
+    #     add_kwargs = {"jac": est_class.jacobian_func}
+    # else:
+    #     add_kwargs = {}
+    #
+    # if scale_opt:
+    #     add_kwargs["scaling"] = om.ScalingOptions(method="bounds")
+    #
+    # if multistart:
+    #     add_kwargs["multistart"] = (om.MultistartOptions(n_samples=10, seed=0),)
+    #
+    # result = om.minimize(
+    #     fun=est_class.crit_func,
+    #     params=start_params,
+    #     bounds=bounds,
+    #     algorithm="scipy_lbfgsb",
+    #     # logging="test_log.db",
+    #     error_handling="continue",
+    #     **add_kwargs,
+    # )
+    # pickle.dump(
+    #     result, open(path_dict["struct_results"] + f"em_result_{file_append}.pkl", "wb")
+    # )
+    # start_params_all.update(result.params)
+    #
+    # pickle.dump(
+    #     start_params_all,
+    #     open(path_dict["struct_results"] + f"est_params_{file_append}.pkl", "wb"),
+    # )
+    #
+    # calc_and_save_standard_errors(
+    #     path_dict=path_dict,
+    #     ll_func=est_class.ll_func,
+    #     final_params_all=start_params_all,
+    #     final_params_est=result.params,
+    #     params_to_estimate_names=params_to_estimate_names,
+    #     weights=est_class.weights,
+    #     file_append=file_append,
+    # )
+    # return result
 
 
 class est_class_from_paths:

@@ -1,12 +1,12 @@
 #!/bin/bash
 
-#SBATCH --job-name=soepy_estimation
+#SBATCH --job-name=est_cpu
 #SBATCH --mail-user=mblesch@zedat.fu-berlin.de
 #SBATCH --mail-type=end
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=60
-#SBATCH --mem-per-cpu=400
+#SBATCH --cpus-per-task=20
+#SBATCH --mem-per-cpu=6000
 #SBATCH --time=8:00:00
 #SBATCH --qos=standard
 

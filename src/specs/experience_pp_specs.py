@@ -97,7 +97,7 @@ def create_max_experience_working(path_dict, specs, load_precomputed=False):
     )
     # Now span for each period the maximum experience for working periods.
     max_exps_period_working = np.arange(
-        max_exp_diff_period_working, max_exp_working + 1
+        max_exp_diff_period_working, max_exp_working + 2
     )
     # Lowest period very long insured
     min_period_very_long_insured = specs["min_SRA"] - 2 - specs["start_age"]
@@ -144,7 +144,7 @@ def add_very_long_insured_specs(specs, path_dict):
 
 def create_pension_points_per_exp(specs):
     # Create grid for experience to pension points mapping
-    max_exp = specs["max_exps_period_working"].max() + 1
+    max_exp = specs["max_exps_period_working"].max() + 2
     exp_grid = np.arange(0, max_exp)
     hourly_wages_per_exp = np.zeros(
         (specs["n_sexes"], specs["n_education_types"], len(exp_grid)), dtype=float

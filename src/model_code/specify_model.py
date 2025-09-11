@@ -124,14 +124,6 @@ def specify_model(
     else:
         model_path = path_dict["intermediate_data"] + "model.pkl"
 
-    def try_jax_array(x):
-        try:
-            return jnp.asarray(x)
-        except:
-            return x
-
-    specs = {k: try_jax_array(v) for k, v in specs.items()}
-
     if load_model:
         model = dcegm.setup_model(
             model_specs=specs,

@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from set_styles import set_colors
+from set_styles import set_colors, get_figsize
 
 
 def plot_family_transition_results(path_dict, specs, show=False, save=False):
@@ -11,7 +11,7 @@ def plot_family_transition_results(path_dict, specs, show=False, save=False):
 
     # Load the transition matrix results
     full_df = pd.read_csv(
-        path_dict["est_results"] + "partner_transition_matrix.csv",
+        path_dict["first_step_results"] + "partner_transition_matrix.csv",
         index_col=[0, 1, 2, 3, 4],
     )
     full_df.index.names = [
@@ -33,7 +33,7 @@ def plot_family_transition_results(path_dict, specs, show=False, save=False):
     partner_state_vals = list(range(specs["n_partner_states"]))
 
     col_count = 0
-    fig2, axs2 = plt.subplots(nrows=3, ncols=3, figsize=[16, 9])
+    fig2, axs2 = plt.subplots(nrows=3, ncols=3, figsize=get_figsize(3, 3))
 
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
         for edu_var, edu_label in enumerate(specs["education_labels"]):
@@ -126,7 +126,7 @@ def plot_children(path_dict, specs, show=False, save=False):
     nb_children_est = specs["children_by_state"]
     ages = np.arange(start_age, end_age + 1)
 
-    fig, axs = plt.subplots(ncols=4, figsize=(12, 8))
+    fig, axs = plt.subplots(ncols=4, figsize=get_figsize(ncols=4))
     i = 0
 
     colors, _ = set_colors()
@@ -206,7 +206,7 @@ def plot_marriage_and_divorce(path_dict, specs, show=False, save=False):
     ages = np.arange(start_age, end_age + 1 - 10)
     initial_dist = np.zeros(specs["n_partner_states"])
 
-    fig, axs = plt.subplots(nrows=2, ncols=specs["n_partner_states"], figsize=(12, 8))
+    fig, axs = plt.subplots(nrows=2, ncols=specs["n_partner_states"], figsize=get_figsize(2, specs["n_partner_states"]))
     colors, _ = set_colors()
 
     for partner_state, partner_label in enumerate(specs["partner_labels"]):
@@ -311,7 +311,7 @@ def plot_predicted_vs_empirical_shares(
     all_ages = np.arange(specs["start_age"], specs["end_age"])
     partner_state_vals = list(range(specs["n_partner_states"]))
 
-    fig, axs = plt.subplots(nrows=2, ncols=2)
+    fig, axs = plt.subplots(nrows=2, ncols=2, figsize=get_figsize(2, 2))
     col_count = 0
 
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
@@ -398,7 +398,7 @@ def plot_children(path_dict, specs, show=False, save=False):
     nb_children_est = specs["children_by_state"]
     ages = np.arange(start_age, end_age + 1)
 
-    fig, axs = plt.subplots(ncols=4, figsize=(12, 8))
+    fig, axs = plt.subplots(ncols=4, figsize=get_figsize(ncols=4))
     i = 0
 
     colors, _ = set_colors()
@@ -478,7 +478,7 @@ def plot_marriage_and_divorce(path_dict, specs, show=False, save=False):
     ages = np.arange(start_age, end_age + 1 - 10)
     initial_dist = np.zeros(specs["n_partner_states"])
 
-    fig, axs = plt.subplots(nrows=2, ncols=specs["n_partner_states"], figsize=(12, 8))
+    fig, axs = plt.subplots(nrows=2, ncols=specs["n_partner_states"], figsize=get_figsize(2, specs["n_partner_states"]))
     colors, _ = set_colors()
 
     for partner_state, partner_label in enumerate(specs["partner_labels"]):

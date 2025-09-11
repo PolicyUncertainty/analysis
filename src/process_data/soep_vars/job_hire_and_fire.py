@@ -10,7 +10,7 @@ def generate_job_separation_var(data):
     return data
 
 
-def determine_observed_job_offers(data, working_choices):
+def determine_observed_job_offers(data, was_fired_last_period, working_choices):
     """Determine if a job offer is observed and if so what it is. The function
     implements the following rule:
 
@@ -37,22 +37,22 @@ def determine_observed_job_offers(data, working_choices):
     We mark unobsorved states by a state value of -99
     """
     working_this_period = data["choice"].isin(working_choices)
-    # was_working_last_period = data["lagged_choice"].isin(working_choices)
+    was_working_last_period = data["lagged_choice"].isin(working_choices)
 
     data["job_offer"] = -99
 
     # Individuals working have job offer equal to 1 and are fully observed
     data.loc[working_this_period, "job_offer"] = 1
 
-    # # Individuals who are unemployed or retired and are fired this period have job offer
-    # # equal to 0. This includes individuals with lagged choice unemployment, as they
-    # # might be interviewed after firing.
-    # maskfired = (~working_this_period) & was_fired_last_period & was_working_last_period
-    # data.loc[maskfired, "job_offer"] = 0
-    #
-    # # Everybody who was not fired is also fully observed an has an job offer
-    # mask_not_fired = (
-    #     (~working_this_period) & (~was_fired_last_period) & was_working_last_period
-    # )
-    # data.loc[mask_not_fired, "job_offer"] = 1
+    # Individuals who are unemployed or retired and are fired this period have job offer
+    # equal to 0. This includes individuals with lagged choice unemployment, as they
+    # might be interviewed after firing.
+    maskfired = (~working_this_period) & was_fired_last_period & was_working_last_period
+    data.loc[maskfired, "job_offer"] = 0
+
+    # Everybody who was not fired is also fully observed an has an job offer
+    mask_not_fired = (
+        (~working_this_period) & (~was_fired_last_period) & was_working_last_period
+    )
+    data.loc[mask_not_fired, "job_offer"] = 1
     return data

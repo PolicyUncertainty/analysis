@@ -20,7 +20,7 @@ from process_data.data_plots.choices import plot_data_choices
 plot_data_choices(path_dict, specs, lagged=False, show=show_plots, save=save_plots)
 plot_data_choices(path_dict, specs, lagged=True, show=show_plots, save=save_plots)
 from process_data.data_plots.savings_rate import plot_savings_rate
-plot_savings_rate(path_dict, specs, covariate="sex", show=show_plots, save=save_plots, window=5)
+plot_savings_rate(path_dict, specs, covariate="partner", show=show_plots, save=save_plots, window=5)
 
 # State variable plots
 from process_data.data_plots.states import plot_state_by_age_and_type
@@ -36,13 +36,12 @@ plot_state_by_age_and_type(path_dict, state_vars, specs, show=show_plots, save=s
 from process_data.data_plots.wealth import plot_average_wealth_by_type
 plot_average_wealth_by_type(path_dict, specs, show=show_plots, save=save_plots)
 
-# Income plots (requires estimated parameters)
+# Income plots
 try:
     from process_data.data_plots.income import plot_income
     plot_income(path_dict, specs, show=show_plots, save=save_plots)
 except FileNotFoundError as e:
     print(f"WARNING: Could not generate income plots - missing file: {e}")
-    print("Income plots require estimated model parameters.")
 
 print("Data plotting completed.")
 

@@ -1,7 +1,3 @@
-# WARNING: This interactive script will be deprecated soon.
-# Use the new declarative run_plots script below for automated plotting.
-
-# Declarative plotting script for process_data
 from set_paths import create_path_dict
 from set_styles import set_plot_defaults
 from specs.derive_specs import generate_derived_and_data_derived_specs
@@ -23,6 +19,8 @@ plot_retirement_timing_data(path_dict, specs, show=show_plots, save=save_plots)
 from process_data.data_plots.choices import plot_data_choices
 plot_data_choices(path_dict, specs, lagged=False, show=show_plots, save=save_plots)
 plot_data_choices(path_dict, specs, lagged=True, show=show_plots, save=save_plots)
+from process_data.data_plots.savings_rate import plot_savings_rate
+plot_savings_rate(path_dict, specs, covariate="sex", show=show_plots, save=save_plots, window=5)
 
 # State variable plots
 from process_data.data_plots.states import plot_state_by_age_and_type
@@ -48,7 +46,7 @@ except FileNotFoundError as e:
 
 print("Data plotting completed.")
 
-# OLD INTERACTIVE CODE (to be removed):
+# OLD INTERACTIVE CODE (soon to be removed):
 # %%
 # import matplotlib.pyplot as plt
 # 

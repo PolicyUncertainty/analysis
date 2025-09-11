@@ -204,7 +204,7 @@ def create_structural_est_sample(
         "monthly_wage_partner": "float64",
         "hh_net_income": "float64",
         "last_year_hh_net_income": "float64",
-        # "savings_dec": "float64",
+        "savings_dec": "float64",
         "working_years": "float64",
         "children": "float64",
         # "surveyed_health": "int8",

@@ -3,7 +3,7 @@ from matplotlib import pyplot as plt
 from estimation.msm.scripts.labor_supply_moments import calc_labor_supply_choice
 from estimation.msm.scripts.labor_transition_moments import calc_transition_to_work
 from estimation.msm.scripts.wealth_moments import calc_wealth_moment
-from set_styles import set_colors
+from set_styles import set_colors, get_figsize
 JET_COLOR_MAP, LINE_STYLES = set_colors()
 
 
@@ -31,7 +31,7 @@ def plot_choice_moments(moments_list, moment_labels, specs):
 
     max_val *= 1.1
     # Choice moments
-    fig, axs = plt.subplots(nrows=4, ncols=2)
+    fig, axs = plt.subplots(nrows=4, ncols=2, figsize=get_figsize(2, 4))
     axs[0, 0].set_title("Men")
     axs[0, 1].set_title("Women")
 
@@ -85,7 +85,7 @@ def plot_transition_moments(moments_list, moment_labels, specs):
     edu_vars = moments_list[0].index.get_level_values("education").unique()
 
     n_types = len(sex_vars) + len(edu_vars)
-    fig, axs = plt.subplots(nrows=2, ncols=n_types)
+    fig, axs = plt.subplots(nrows=2, ncols=n_types, figsize=get_figsize(nrows=2, ncols=n_types))
 
     state_label = ["unemployed", "work"]
     sex_labels = specs["sex_labels"]
@@ -134,7 +134,7 @@ def plot_wealth_moments(moments_list, moment_labels, specs):
 
     max_val *= 1.1
     # Labor transitions moments
-    fig, axs = plt.subplots(nrows=2, ncols=2)
+    fig, axs = plt.subplots(nrows=2, ncols=2, figsize=get_figsize(2, 2))
     axs[0, 0].set_title("Low Educated")
     axs[0, 1].set_title("High Educated")
 

@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from set_styles import set_colors
+from set_styles import set_colors, get_figsize
 
 JET_COLOR_MAP, LINE_STYLES = set_colors()
 from estimation.struct_estimation.scripts.estimate_setup import generate_print_func
@@ -85,7 +85,7 @@ def plot_life_cycle_choice_probs(
             n_choices = 3
         else:
             n_choices = 4
-        fig, axes = plt.subplots(ncols=n_choices, figsize=(14, 8))
+        fig, axes = plt.subplots(ncols=n_choices, figsize=get_figsize(ncols=n_choices, nrows=1))
         for edu_var, edu_label in enumerate(specs["education_labels"]):
             data_subset = df_int[
                 (df_int["education"] == edu_var) & (df_int["sex"] == sex_var)

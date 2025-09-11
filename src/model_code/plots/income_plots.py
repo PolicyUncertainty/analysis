@@ -113,10 +113,10 @@ def plot_incomes(path_dict, show=False, save=False):
                     model_specs=specs,
                 )
                 gross_pensions[exp_idx] = calc_gross_pension_income(
-                    exp_stock_pension, specs
+                    pension_points=exp_stock_pension, model_specs=specs
                 )
                 after_ssc_pensions[exp_idx], _ = calc_pensions_after_ssc(
-                    gross_pensions[exp_idx], specs
+                    pension_points=exp_stock_pension, model_specs=specs
                 )
 
             # Plot wages and pensions

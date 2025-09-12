@@ -192,7 +192,7 @@ def plot_marriage_and_divorce(path_dict, specs, show=False, save=False):
         Whether to save plots to disk
     """
     start_age = specs["start_age"]
-    end_age = specs["end_age"]
+    end_age = specs["end_age_transition_estimation"]
     df = pd.read_pickle(
         path_dict["first_step_data"] + "partner_transition_estimation_sample.pkl"
     )

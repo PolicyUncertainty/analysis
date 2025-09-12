@@ -201,6 +201,7 @@ def specify_and_solve_model(
         sim_specs=sim_specs,
         debug_info=debug_info,
         sex_type=sex_type,
+        edu_type=edu_type,
     )
 
     # check if folder of model objects exits:

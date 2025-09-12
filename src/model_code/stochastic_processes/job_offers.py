@@ -74,11 +74,11 @@ def job_sep_probability(
     )
     # Check if next period (when age increases by 1) the agent is at the policy state or above. So this period policy
     # state value -1 should be <= age and policy state value > age
-    policy_state_next_period = ((policy_state_value - 1) <= age) & (
+    after_SRA_next_before_now = ((policy_state_value - 1) <= age) & (
         policy_state_value > age
     )
 
-    logit_intercept = log_job_sep_prob + SRA_interecpt * policy_state_next_period
+    logit_intercept = log_job_sep_prob + SRA_interecpt * after_SRA_next_before_now
     job_sep_prob = logit_formula(logit_intercept)
     return job_sep_prob
 

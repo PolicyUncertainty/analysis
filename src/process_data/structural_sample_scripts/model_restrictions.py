@@ -36,4 +36,9 @@ def enforce_model_choice_restriction(df, specs):
         str(len(df))
         + " left after dropping people are unemployed after the sra and men who work part-time"
     )
+    # Set job offer for all fresh retirees, whichs contract could have run out to -99.
+    fresh_retired_mask = (df["choice"] == 0) & (df["lagged_choice"] != 0)
+    SRA_diff = df["age"] - df["policy_state_value"]
+    just_after_SRA = (SRA_diff >= 0) & (SRA_diff < 1)
+    df.loc[fresh_retired_mask & just_after_SRA, "job_offer"] = -99
     return df

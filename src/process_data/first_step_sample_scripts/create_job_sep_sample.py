@@ -15,7 +15,7 @@ from process_data.auxiliary.lagged_and_lead_vars import (
 from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.health import correct_health_state, create_health_var
 from process_data.soep_vars.job_hire_and_fire import generate_job_separation_var
-from process_data.soep_vars.work_choices import create_choice_variable
+from process_data.soep_vars.work_choices import create_choice_and_employment_status
 
 
 def create_job_sep_sample(paths, specs, load_data=False):
@@ -43,7 +43,7 @@ def create_job_sep_sample(paths, specs, load_data=False):
     df = filter_years(df, specs["start_year"] - 1, specs["end_year"] + 1)
 
     # create choice and lagged choice variable
-    df = create_choice_variable(df)
+    df = create_choice_and_employment_status(df)
     # lagged choice
     df = span_dataframe(df, specs["start_year"] - 1, specs["end_year"] + 1)
 

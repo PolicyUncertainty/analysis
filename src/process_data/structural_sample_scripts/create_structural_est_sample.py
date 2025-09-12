@@ -29,11 +29,9 @@ from process_data.soep_vars.partner_code import (
     correct_partner_state,
     create_partner_state,
 )
+from process_data.soep_vars.wealth.flow_savings import create_flow_savings
 from process_data.soep_vars.wealth.linear_interpolation import (
     add_wealth_interpolate_and_deflate,
-)
-from process_data.soep_vars.wealth.flow_savings import (
-    create_flow_savings
 )
 from process_data.structural_sample_scripts.classify_reitrees import (
     add_very_long_insured_classification,
@@ -134,7 +132,7 @@ def create_structural_est_sample(
     # We are done with lagging and leading and drop the buffer years
     df = filter_years(df, specs["start_year"], specs["end_year"])
 
-    # Add wealth and flow savings 
+    # Add wealth and flow savings
     df = add_wealth_interpolate_and_deflate(
         df,
         paths,
@@ -148,7 +146,7 @@ def create_structural_est_sample(
 
     # create experience and working years
     df = create_experience_and_working_years(df.copy(), filter_missings=True)
-    
+
     # Now we can also kick out the buffer age for lagging
     df = filter_below_age(df, specs["start_age"])
 
@@ -186,6 +184,10 @@ def create_structural_est_sample(
         path_dict=paths,
         specs=specs,
     )
+
+    # Drop civil servants and self-employed
+    df = df[~(df["self_employed"] | df["civil_servant"])]
+    print(f"Dropping civil servants and self-employed, {len(df)} observations left.")
 
     # Rename to monthly wage
     df.rename(
@@ -369,7 +371,9 @@ def print_data_description(df, detailed=False):
             print(f"\nDescription of {var}:")
             print(df[var].describe())
             # value counts for non-float variables
-            if var in choice_vars + state_vars and not pd.api.types.is_float_dtype(df[var]):
+            if var in choice_vars + state_vars and not pd.api.types.is_float_dtype(
+                df[var]
+            ):
                 print(f"Value counts of {var}:")
                 print(df[var].value_counts().sort_index())
     print("---------------------------")

@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 from process_data.soep_vars.artkalen import prepare_artkalen_data
-from process_data.soep_vars.work_choices import create_choice_variable
+from process_data.soep_vars.work_choices import create_choice_and_employment_status
 
 
 def create_choice_variable_from_artkalen(
@@ -37,7 +37,7 @@ def create_choice_variable_from_artkalen(
     df["lagged_art_choice"] = df.groupby("pid")["art_choice"].shift(1)
 
     # Create pgen choice and overwrite
-    df = create_choice_variable(df, filter_missings=False)
+    df = create_choice_and_employment_status(df, filter_missings=False)
     df["pgen_choice"] = df["choice"].copy()
     df["lagged_pgen_choice"] = df.groupby("pid")["pgen_choice"].shift(1)
 

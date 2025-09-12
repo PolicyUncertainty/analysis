@@ -177,27 +177,35 @@ def plot_retirement_fit(
     not_retired_mask = data_decision["lagged_choice"] != 0
     data_subset = data_decision[not_retired_mask].copy()
 
+    choices_shares_obs = (
+        data_subset.groupby(["sex", "SRA_diff"])["choice"]
+        .value_counts()
+        .unstack()
+        .fillna(0.0)
+    )
+    rename_map = {
+        key: choice_label for key, choice_label in enumerate(specs["choice_labels"])
+    }
+
+    choices_shares_obs.rename(rename_map, axis=1, inplace=True)
+
     # Create a stacked bar plot with each choice sum on top of each other
     choice_shares_est = data_subset.groupby(["sex", "SRA_diff"])[
         [f"choice_{choice}" for choice in range(specs["n_choices"])]
     ].sum()
-    choice_shares_est.columns = specs["choice_labels"]
+    rename_map_2 = {
+        f"choice_{key}": choice_label
+        for key, choice_label in enumerate(specs["choice_labels"])
+    }
+    choice_shares_est.rename(rename_map_2, axis=1, inplace=True)
 
     fig, axs = plt.subplots(nrows=2, figsize=(14, 8))
 
     for sex_var in specs["sex_grid"]:
         sex_label = specs["sex_labels"][sex_var]
 
-        choices_shares_obs = (
-            data_subset.groupby(["sex", "SRA_diff"])["choice"]
-            .value_counts()
-            .unstack()
-            .fillna(0.0)
-        )
-        rename_map = {
-            key: choice_label for key, choice_label in enumerate(specs["choice_labels"])
-        }
-        choices_shares_obs.rename(columns=rename_map, inplace=True)
+        if sex_var == 0:
+            choice_shares_est.drop("Part-time", axis=1, inplace=True)
 
         choice_shares_est_to_plot = choice_shares_est.loc[sex_var].reindex(diffs)
         choices_shares_obs_to_plot = choices_shares_obs.loc[sex_var].reindex(diffs)

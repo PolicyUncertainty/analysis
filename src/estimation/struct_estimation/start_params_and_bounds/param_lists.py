@@ -24,8 +24,10 @@ men_SRA_firing = [
 ]
 
 # Men - Combine low/high params
-low_disutil_firing = men_disutil_params_low + ["SRA_firing_logit_intercept_men_low"]
-high_disutil_firing = men_disutil_params_high + ["SRA_firing_logit_intercept_men_high"]
+low_men_disutil_firing = men_disutil_params_low + ["SRA_firing_logit_intercept_men_low"]
+high_men_disutil_firing = men_disutil_params_high + [
+    "SRA_firing_logit_intercept_men_high"
+]
 
 
 men_taste = [
@@ -71,8 +73,12 @@ women_disutil_params_high = [
     "disutil_children_ft_work_high",
 ]
 
-# Women - Combined (for backward compatibility)
-women_disutil_params = women_disutil_params_low + women_disutil_params_high
+low_women_disutil_firing = women_disutil_params_low + [
+    "SRA_firing_logit_intercept_women_low"
+]
+high_women_disutil_firing = women_disutil_params_high + [
+    "SRA_firing_logit_intercept_women_high"
+]
 
 women_SRA_firing = [
     "SRA_firing_logit_intercept_women_low",

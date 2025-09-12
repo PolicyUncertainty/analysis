@@ -2,7 +2,10 @@
 import pickle as pkl
 
 from estimation.struct_estimation.start_params_and_bounds.param_lists import (
-    men_disutil_params_high,
+    high_men_disutil_firing,
+    high_women_disutil_firing,
+    low_men_disutil_firing,
+    low_women_disutil_firing,
 )
 from set_paths import create_path_dict
 
@@ -13,9 +16,7 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
     load_and_set_start_params,
 )
 
-params_to_estimate_names = men_disutil_params_high + [
-    "SRA_firing_logit_intercept_men_high"
-]
+params_to_estimate_names = low_men_disutil_firing
 
 model_name = "high_men_3"
 

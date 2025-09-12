@@ -65,7 +65,7 @@ kappa: 21
 
 # Taste shock scale
 taste_shock_scale_men: 0.3
-taste_shock_scale_women: 1.0
+taste_shock_scale_women: 0.3
 
 # SRA firing params
 SRA_firing_logit_intercept_men_low: 6

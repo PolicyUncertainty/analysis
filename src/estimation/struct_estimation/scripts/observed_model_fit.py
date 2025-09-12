@@ -177,14 +177,6 @@ def plot_retirement_fit(
     not_retired_mask = data_decision["lagged_choice"] != 0
     data_subset = data_decision[not_retired_mask].copy()
 
-    choices_shares_obs = (
-        data_subset.groupby(["sex", "SRA_diff"])["choice"]
-        .value_counts()
-        .unstack()
-        .fillna(0.0)
-    )
-    choices_shares_obs.columns = specs["choice_labels"]
-
     # Create a stacked bar plot with each choice sum on top of each other
     choice_shares_est = data_subset.groupby(["sex", "SRA_diff"])[
         [f"choice_{choice}" for choice in range(specs["n_choices"])]
@@ -195,6 +187,18 @@ def plot_retirement_fit(
 
     for sex_var in specs["sex_grid"]:
         sex_label = specs["sex_labels"][sex_var]
+
+        choices_shares_obs = (
+            data_subset.groupby(["sex", "SRA_diff"])["choice"]
+            .value_counts()
+            .unstack()
+            .fillna(0.0)
+        )
+        rename_map = {
+            key: choice_label for key, choice_label in enumerate(specs["choice_labels"])
+        }
+        choices_shares_obs.rename(columns=rename_map, inplace=True)
+
         choice_shares_est_to_plot = choice_shares_est.loc[sex_var].reindex(diffs)
         choices_shares_obs_to_plot = choices_shares_obs.loc[sex_var].reindex(diffs)
 

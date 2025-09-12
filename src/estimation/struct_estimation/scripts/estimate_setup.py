@@ -41,7 +41,8 @@ def estimate_model(
     print_women_examples=False,
     use_observed_data=True,
     sim_data=None,
-    men_only=False,
+    sex_type="all",
+    edu_type="all",
     scale_opt=False,
     multistart=False,
     slow_version=False,
@@ -100,7 +101,8 @@ def estimate_model(
         print_women_examples=print_women_examples,
         use_observed_data=use_observed_data,
         sim_data=sim_data,
-        men_only=men_only,
+        sex_type=sex_type,
+        edu_type=edu_type,
         slow_version=slow_version,
     )
 
@@ -161,8 +163,9 @@ class est_class_from_paths:
         save_results=True,
         sim_data=None,
         use_observed_data=True,
-        men_only=False,
         slow_version=False,
+        sex_type="all",
+        edu_type="all",
     ):
         self.iter_count = 0
         self.save_results = save_results
@@ -192,7 +195,8 @@ class est_class_from_paths:
             custom_resolution_age=None,
             load_model=load_model,
             sim_specs=None,
-            men_only=men_only,
+            sex_type=sex_type,
+            edu_type=edu_type,
         )
 
         if use_observed_data:
@@ -205,9 +209,17 @@ class est_class_from_paths:
                 raise ValueError("If not using observed data, sim_data must be given.")
             data_decision = sim_data.copy()
 
-        if men_only:
+        if sex_type == "men":
             data_decision = data_decision[data_decision["sex"] == 0]
+        elif sex_type == "women":
+            data_decision = data_decision[data_decision["sex"] == 1]
+        else:
+            pass
+
+        if edu_type == "low":
             data_decision = data_decision[data_decision["education"] == 0]
+        elif edu_type == "high":
+            data_decision = data_decision[data_decision["education"] == 1]
         else:
             pass
 
@@ -218,8 +230,8 @@ class est_class_from_paths:
 
         if use_weights:
             raise ValueError("Weights currently not supported.")
-            self.weights = data_decision["age_weights"].values
-            self.weight_sum = np.sum(self.weights)
+            # self.weights = data_decision["age_weights"].values
+            # self.weight_sum = np.sum(self.weights)
         else:
             self.weights = np.ones(data_decision.shape[0])
             self.weight_sum = data_decision.shape[0]

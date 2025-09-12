@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from set_styles import set_colors, get_figsize
+from set_styles import get_figsize, set_colors
 
 JET_COLOR_MAP, LINE_STYLES = set_colors()
 from estimation.struct_estimation.scripts.estimate_setup import generate_print_func
@@ -17,7 +17,13 @@ from set_paths import get_model_results_path
 
 
 def create_fit_plots(
-    path_dict, specs, model_name, load_sol_model, load_solution, load_data_from_sol
+    path_dict,
+    specs,
+    params,
+    model_name,
+    load_sol_model,
+    load_solution,
+    load_data_from_sol,
 ):
     # check if folder of model objects exits:
     model_folder = get_model_results_path(path_dict, model_name)
@@ -28,9 +34,6 @@ def create_fit_plots(
         )
 
     else:
-        params = pickle.load(
-            open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
-        )
         generate_print_func(params.keys(), specs)(params)
 
         model_solved = specify_and_solve_model(
@@ -85,7 +88,9 @@ def plot_life_cycle_choice_probs(
             n_choices = 3
         else:
             n_choices = 4
-        fig, axes = plt.subplots(ncols=n_choices, figsize=get_figsize(ncols=n_choices, nrows=1))
+        fig, axes = plt.subplots(
+            ncols=n_choices, figsize=get_figsize(ncols=n_choices, nrows=1)
+        )
         for edu_var, edu_label in enumerate(specs["education_labels"]):
             data_subset = df_int[
                 (df_int["education"] == edu_var) & (df_int["sex"] == sex_var)

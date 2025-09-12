@@ -5,32 +5,53 @@ mu_high: 1.5
 mu_bequest_high: 1.5
 mu_bequest_low: 1.5
 
-# Full time work dis-utility men
-disutil_ft_work_good_men: 1.0
-disutil_ft_work_bad_men: 1.0
-# disutil_ft_work_disability_men: 1.0
-disutil_partner_retired_men: -2
+# Full time work dis-utility men - Low Education
+disutil_ft_work_low_good_men: 1.0
+disutil_ft_work_low_bad_men: 1.0
 
-# Full time work dis-utility women
-disutil_ft_work_good_women: 1.0
-disutil_ft_work_bad_women: 1.0
-# disutil_ft_work_disability_women: 1.0
-disutil_partner_retired_women: -2
+# Full time work dis-utility men - High Education
+disutil_ft_work_high_good_men: 1.0
+disutil_ft_work_high_bad_men: 1.0
 
-# Part time dis-utility men
-disutil_pt_work_good_women: 1.0
-disutil_pt_work_bad_women: 1.0
-# disutil_pt_work_disability_women: 1.0
+# Unemployment dis-utility men - Low Education
+disutil_unemployed_low_good_men: 0.5
+disutil_unemployed_low_bad_men: 0.5
 
-# Unemployment dis-utility men
-disutil_unemployed_good_men: 0.5
-disutil_unemployed_bad_men: 0.5
-# disutil_unemployed_disability_men: 0.5
+# Unemployment dis-utility men - High Education
+disutil_unemployed_high_good_men: 0.5
+disutil_unemployed_high_bad_men: 0.5
 
-# Unemployment dis-utility women
-disutil_unemployed_good_women: 0.5
-disutil_unemployed_bad_women: 0.5
-# disutil_unemployed_disability_women: 0.5
+# Partner retired dis-utility men
+disutil_partner_retired_low_men: -2
+disutil_partner_retired_high_men: -2
+
+# Full time work dis-utility women - Low Education
+disutil_ft_work_low_good_women: 1.0
+disutil_ft_work_low_bad_women: 1.0
+
+# Full time work dis-utility women - High Education
+disutil_ft_work_high_good_women: 1.0
+disutil_ft_work_high_bad_women: 1.0
+
+# Part time dis-utility women - Low Education
+disutil_pt_work_low_good_women: 1.0
+disutil_pt_work_low_bad_women: 1.0
+
+# Part time dis-utility women - High Education
+disutil_pt_work_high_good_women: 1.0
+disutil_pt_work_high_bad_women: 1.0
+
+# Unemployment dis-utility women - Low Education
+disutil_unemployed_low_good_women: 0.5
+disutil_unemployed_low_bad_women: 0.5
+
+# Unemployment dis-utility women - High Education
+disutil_unemployed_high_good_women: 0.5
+disutil_unemployed_high_bad_women: 0.5
+
+# Partner retired dis-utility women
+disutil_partner_retired_low_women: -2
+disutil_partner_retired_high_women: -2
 
 # Children dis-utility
 disutil_children_ft_work_low: 0.2

@@ -35,7 +35,8 @@ def specify_model(
     sim_specs=None,
     load_model=False,
     debug_info=None,
-    men_only=False,
+    sex_type="all",
+    edu_type="all",
 ):
     """Generate model class."""
 
@@ -52,12 +53,23 @@ def specify_model(
     # Experience grid
     experience_grid = define_experience_grid(specs)
 
-    if men_only:
+    if sex_type == "men":
         sex_grid = [0]
-        edu_grid = [0]
-    else:
+    elif sex_type == "women":
+        sex_grid = [1]
+    elif sex_type == "all":
         sex_grid = [0, 1]
-        edu_grid = np.arange(specs["n_education_types"], dtype=int)
+    else:
+        raise ValueError("sex_type not recognized")
+
+    if edu_type == "all":
+        edu_grid = [0, 1]
+    elif edu_type == "low":
+        edu_grid = [0]
+    elif edu_type == "high":
+        edu_grid = [1]
+    else:
+        raise ValueError("edu_type not recognized")
 
     model_config = {
         "min_period_batch_segments": [33, 44],
@@ -121,10 +133,7 @@ def specify_model(
     else:
         alternative_sim_specifications = None
 
-    if men_only:
-        model_path = path_dict["intermediate_data"] + "model_men.pkl"
-    else:
-        model_path = path_dict["intermediate_data"] + "model.pkl"
+    model_path = path_dict["intermediate_data"] + f"model_{sex_type}_{edu_type}.pkl"
 
     if load_model:
         model = dcegm.setup_model(
@@ -169,7 +178,8 @@ def specify_and_solve_model(
     load_model,
     load_solution,
     sim_specs=None,
-    men_only=False,
+    sex_type="all",
+    edu_type="all",
     debug_info=None,
 ):
     """Specify and solve model.
@@ -190,7 +200,7 @@ def specify_and_solve_model(
         load_model=load_model,
         sim_specs=sim_specs,
         debug_info=debug_info,
-        men_only=men_only,
+        sex_type=sex_type,
     )
 
     # check if folder of model objects exits:

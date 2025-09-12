@@ -209,20 +209,9 @@ class est_class_from_paths:
                 raise ValueError("If not using observed data, sim_data must be given.")
             data_decision = sim_data.copy()
 
-        if sex_type == "men":
-            data_decision = data_decision[data_decision["sex"] == 0]
-        elif sex_type == "women":
-            data_decision = data_decision[data_decision["sex"] == 1]
-        else:
-            pass
-
-        if edu_type == "low":
-            data_decision = data_decision[data_decision["education"] == 0]
-        elif edu_type == "high":
-            data_decision = data_decision[data_decision["education"] == 1]
-        else:
-            pass
-
+        data_decision = filter_data_by_type(
+            df=data_decision, sex_type=sex_type, edu_type=edu_type
+        )
         # Already retired individuals hold no identification
         data_decision = data_decision[data_decision["lagged_choice"] != 0]
         # Create states dict
@@ -481,3 +470,25 @@ def get_gendered_params(params_to_estimate_names, append):
         params["other_params"] = other_params
 
     return params
+
+
+def filter_data_by_type(df, sex_type, edu_type):
+    if sex_type == "men":
+        df = df[df["sex"] == 0]
+    elif sex_type == "women":
+        df = df[df["sex"] == 1]
+    elif sex_type == "all":
+        pass
+    else:
+        raise ValueError("sex_type not recognized.")
+
+    if edu_type == "low":
+        df = df[df["education"] == 0]
+    elif edu_type == "high":
+        df = df[df["education"] == 1]
+    elif edu_type == "all":
+        pass
+    else:
+        raise ValueError("edu_type not recognized.")
+
+    return df

@@ -53,23 +53,10 @@ def specify_model(
     # Experience grid
     experience_grid = define_experience_grid(specs)
 
-    if sex_type == "men":
-        sex_grid = [0]
-    elif sex_type == "women":
-        sex_grid = [1]
-    elif sex_type == "all":
-        sex_grid = [0, 1]
-    else:
-        raise ValueError("sex_type not recognized")
-
-    if edu_type == "all":
-        edu_grid = [0, 1]
-    elif edu_type == "low":
-        edu_grid = [0]
-    elif edu_type == "high":
-        edu_grid = [1]
-    else:
-        raise ValueError("edu_type not recognized")
+    sex_grid, edu_grid = specify_type_grids(
+        sex_type=sex_type,
+        edu_type=edu_type,
+    )
 
     model_config = {
         "min_period_batch_segments": [33, 44],
@@ -225,3 +212,25 @@ def specify_and_solve_model(
     else:
         model_solved = model.solve(params, save_sol_path=solution_file)
         return model_solved
+
+
+def specify_type_grids(sex_type, edu_type):
+    if sex_type == "men":
+        sex_grid = [0]
+    elif sex_type == "women":
+        sex_grid = [1]
+    elif sex_type == "all":
+        sex_grid = [0, 1]
+    else:
+        raise ValueError("sex_type not recognized")
+
+    if edu_type == "all":
+        edu_grid = [0, 1]
+    elif edu_type == "low":
+        edu_grid = [0]
+    elif edu_type == "high":
+        edu_grid = [1]
+    else:
+        raise ValueError("edu_type not recognized")
+
+    return sex_grid, edu_grid

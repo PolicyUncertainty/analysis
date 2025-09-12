@@ -19,6 +19,8 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
 params_to_estimate_names = low_men_disutil_firing
 
 model_name = "high_men_3"
+sex_type = "men"
+edu_type = "low"
 
 print(f"Running estimation for model: {model_name}", flush=True)
 
@@ -55,8 +57,8 @@ estimation_results = estimate_model(
     use_weights=USE_WEIGHTS,
     last_estimate=last_estimate,
     save_results=SAVE_RESULTS,
-    sex_type="men",
-    edu_type="high",
+    sex_type=sex_type,
+    edu_type=edu_type,
     slow_version=True,
 )
 print(estimation_results)
@@ -75,6 +77,8 @@ create_fit_plots(
     load_sol_model=True,
     load_solution=None,
     load_data_from_sol=False,
+    sex_type=sex_type,
+    edu_type=edu_type,
 )
 
 

@@ -21,14 +21,6 @@ load_data_from_sol = True
 # Load start params
 start_params_all = load_and_set_start_params(path_dict)
 
-# Low edu men
-start_params_all["disutil_unemployed_low_good_men"] = 0.3982895233324046
-start_params_all["disutil_unemployed_low_bad_men"] = 0.35630092790781426
-start_params_all["disutil_ft_work_low_good_men"] = 0.6491840265554566
-start_params_all["disutil_ft_work_low_bad_men"] = 0.945899297378813
-start_params_all["disutil_partner_low_retired_men"] = -0.14767339974551175
-start_params_all["SRA_firing_logit_intercept_men_low"] = 4.558180110702362
-
 
 create_fit_plots(
     path_dict=path_dict,

@@ -59,7 +59,7 @@ def utility_func_alive(
     model_specs,
 ):
     """Calculate the choice specific cobb-douglas utility, i.e. u =
-    ((c*eta/consumption_scale)^(1-mu))/(1-mu) ."""
+    ((c/consumption_scale)^(1-mu))/(1-mu) - disutility_work ."""
     # gather params
     mu = jax.lax.select(
         education == 1, on_true=params["mu_high"], on_false=params["mu_low"]
@@ -194,26 +194,63 @@ def disutility_work(
 
     good_health = health == model_specs["good_health_var"]
 
-    # reading parameters
-    disutil_ft_work_men = params["disutil_ft_work_good_men"] * good_health + params[
-        "disutil_ft_work_bad_men"
-    ] * (1 - good_health)
-    disutil_unemployment_men = params[
-        "disutil_unemployed_good_men"
-    ] * good_health + params["disutil_unemployed_bad_men"] * (1 - good_health)
+    # Men's disutility parameters by education level
+    disutil_ft_work_men_low = (
+        params["disutil_ft_work_low_bad_men"] * (1 - good_health)
+        + params["disutil_ft_work_low_good_men"] * good_health
+    )
+    disutil_ft_work_men_high = (
+        params["disutil_ft_work_high_bad_men"] * (1 - good_health)
+        + params["disutil_ft_work_high_good_men"] * good_health
+    )
+    disutil_ft_work_men = (
+        disutil_ft_work_men_low * (1 - education) + disutil_ft_work_men_high * education
+    )
+
+    disutil_unemployment_men_low = params[
+        "disutil_unemployed_low_good_men"
+    ] * good_health + params["disutil_unemployed_low_bad_men"] * (1 - good_health)
+    disutil_unemployment_men_high = params[
+        "disutil_unemployed_high_good_men"
+    ] * good_health + params["disutil_unemployed_high_bad_men"] * (1 - good_health)
+    disutil_unemployment_men = (
+        disutil_unemployment_men_low * (1 - education)
+        + disutil_unemployment_men_high * education
+    )
+
+    disutil_retirement_men = (
+        params["disutil_partner_retired_low_men"] * (1 - education)
+        + params["disutil_partner_retired_high_men"] * education
+    )
 
     disutil_sum_men = (
         disutil_unemployment_men * is_unemployed
         + disutil_ft_work_men * is_working_full_time
-        + partner_retired * params["disutil_partner_retired_men"] * retired
+        + partner_retired * disutil_retirement_men * retired
     )
 
-    disutil_ft_work_women = params["disutil_ft_work_good_women"] * good_health + params[
-        "disutil_ft_work_bad_women"
-    ] * (1 - good_health)
-    disutil_pt_work_women = params["disutil_pt_work_good_women"] * good_health + params[
-        "disutil_pt_work_bad_women"
-    ] * (1 - good_health)
+    # Women's disutility parameters by education level
+    disutil_ft_work_women_low = params[
+        "disutil_ft_work_low_good_women"
+    ] * good_health + params["disutil_ft_work_low_bad_women"] * (1 - good_health)
+    disutil_ft_work_women_high = params[
+        "disutil_ft_work_high_good_women"
+    ] * good_health + params["disutil_ft_work_high_bad_women"] * (1 - good_health)
+    disutil_ft_work_women = (
+        disutil_ft_work_women_low * (1 - education)
+        + disutil_ft_work_women_high * education
+    )
+
+    disutil_pt_work_women_low = params[
+        "disutil_pt_work_low_good_women"
+    ] * good_health + params["disutil_pt_work_low_bad_women"] * (1 - good_health)
+    disutil_pt_work_women_high = params[
+        "disutil_pt_work_high_good_women"
+    ] * good_health + params["disutil_pt_work_high_bad_women"] * (1 - good_health)
+    disutil_pt_work_women = (
+        disutil_pt_work_women_low * (1 - education)
+        + disutil_pt_work_women_high * education
+    )
 
     disutil_children = params["disutil_children_ft_work_high"] * education + params[
         "disutil_children_ft_work_low"
@@ -225,18 +262,30 @@ def disutility_work(
     ]
     disutil_children_ft = disutil_children * nb_children
 
-    disutil_unemployment = params[
-        "disutil_unemployed_good_women"
-    ] * good_health + params["disutil_unemployed_bad_women"] * (1 - good_health)
-
-    disutil_sum_women = (
-        disutil_unemployment * is_unemployed
-        + disutil_pt_work_women * is_working_part_time
-        + (disutil_ft_work_women + disutil_children_ft) * is_working_full_time
-        + partner_retired * params["disutil_partner_retired_women"] * retired
+    disutil_unemployment_women_low = params[
+        "disutil_unemployed_low_good_women"
+    ] * good_health + params["disutil_unemployed_low_bad_women"] * (1 - good_health)
+    disutil_unemployment_women_high = params[
+        "disutil_unemployed_high_good_women"
+    ] * good_health + params["disutil_unemployed_high_bad_women"] * (1 - good_health)
+    disutil_unemployment_women = (
+        disutil_unemployment_women_low * (1 - education)
+        + disutil_unemployment_women_high * education
     )
 
-    # Select exponential factor by sex
+    disutil_retirement_women = (
+        params["disutil_partner_retired_low_women"] * (1 - education)
+        + params["disutil_partner_retired_high_women"] * education
+    )
+
+    disutil_sum_women = (
+        disutil_unemployment_women * is_unemployed
+        + disutil_pt_work_women * is_working_part_time
+        + (disutil_ft_work_women + disutil_children_ft) * is_working_full_time
+        + partner_retired * disutil_retirement_women * retired
+    )
+
+    # Select disutility by sex
     disutility = jax.lax.select(sex == 0, disutil_sum_men, disutil_sum_women)
     return disutility
 

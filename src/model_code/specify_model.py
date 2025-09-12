@@ -20,7 +20,6 @@ from model_code.stochastic_processes.job_offers import job_offer_process_transit
 from model_code.stochastic_processes.partner_transitions import partner_transition
 from model_code.taste_shocks import shock_function_dict
 from model_code.utility.bequest_utility import create_final_period_utility_functions
-from model_code.utility.utility_functions_cobb import create_utility_functions
 from model_code.wealth_and_budget.assets_grid import create_end_of_period_assets
 from model_code.wealth_and_budget.budget_equation import budget_constraint
 from set_paths import get_model_results_path
@@ -37,6 +36,7 @@ def specify_model(
     debug_info=None,
     sex_type="all",
     edu_type="all",
+    util_type="add",
 ):
     """Generate model class."""
 
@@ -119,6 +119,13 @@ def specify_model(
 
     else:
         alternative_sim_specifications = None
+
+    if util_type == "add":
+        from model_code.utility.utility_functions_add import create_utility_functions
+    elif util_type == "cobb":
+        from model_code.utility.utility_functions_cobb import create_utility_functions
+    else:
+        raise ValueError("unknown utility type")
 
     model_path = path_dict["intermediate_data"] + f"model_{sex_type}_{edu_type}.pkl"
 

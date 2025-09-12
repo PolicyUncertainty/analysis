@@ -1,5 +1,6 @@
 # Set paths of project
 import pickle as pkl
+import sys
 
 from estimation.struct_estimation.start_params_and_bounds.param_lists import (
     high_men_disutil_firing,
@@ -16,11 +17,36 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
     load_and_set_start_params,
 )
 
-params_to_estimate_names = low_men_disutil_firing
+param_lists = {
+    "men": {"low": low_men_disutil_firing, "high": high_men_disutil_firing},
+    "women": {"low": low_women_disutil_firing, "high": high_women_disutil_firing},
+}
 
-model_name = "high_men_3"
-sex_type = "men"
-edu_type = "low"
+model_name = sys.argv[1]
+if "men" in model_name:
+    sex_type = "men"
+elif "women" in model_name:
+    sex_type = "women"
+else:
+    sex_type = "all"
+
+# Determine education type
+if "low" in model_name:
+    edu_type = "low"
+elif "high" in model_name:
+    edu_type = "high"
+else:
+    edu_type = "all"
+
+params_to_estimate_names = param_lists[sex_type][edu_type]
+
+
+if "add" in model_name:
+    util_type = "add"
+elif "cobb" in model_name:
+    util_type = "cobb"
+else:
+    raise ValueError("unknown model")
 
 print(f"Running estimation for model: {model_name}", flush=True)
 
@@ -39,16 +65,8 @@ else:
 # Load start params
 start_params_all = load_and_set_start_params(paths_dict)
 
-# Low edu men
-start_params_all["disutil_unemployed_low_good_men"] = 0.3982895233324046
-start_params_all["disutil_unemployed_low_bad_men"] = 0.35630092790781426
-start_params_all["disutil_ft_work_low_good_men"] = 0.6491840265554566
-start_params_all["disutil_ft_work_low_bad_men"] = 0.945899297378813
-start_params_all["disutil_partner_low_retired_men"] = -0.14767339974551175
-start_params_all["SRA_firing_logit_intercept_men_low"] = 4.558180110702362
-
 # Run estimation
-estimation_results = estimate_model(
+estimation_results, end_params = estimate_model(
     paths_dict,
     params_to_estimate_names=params_to_estimate_names,
     file_append=model_name,
@@ -59,7 +77,10 @@ estimation_results = estimate_model(
     save_results=SAVE_RESULTS,
     sex_type=sex_type,
     edu_type=edu_type,
+    util_type=util_type,
     slow_version=True,
+    scale_opt=True,
+    multistart=True,
 )
 print(estimation_results)
 
@@ -72,7 +93,7 @@ specs = generate_derived_and_data_derived_specs(paths_dict)
 create_fit_plots(
     path_dict=paths_dict,
     specs=specs,
-    params=start_params_all,
+    params=end_params,
     model_name=model_name,
     load_sol_model=True,
     load_solution=None,

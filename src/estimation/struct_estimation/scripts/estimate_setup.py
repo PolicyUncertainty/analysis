@@ -43,6 +43,7 @@ def estimate_model(
     sim_data=None,
     sex_type="all",
     edu_type="all",
+    util_type="add",
     scale_opt=False,
     multistart=False,
     slow_version=False,
@@ -104,6 +105,7 @@ def estimate_model(
         sex_type=sex_type,
         edu_type=edu_type,
         slow_version=slow_version,
+        util_type=util_type,
     )
 
     if supply_jacobian:
@@ -145,7 +147,7 @@ def estimate_model(
         weights=est_class.weights,
         file_append=file_append,
     )
-    return result
+    return result, start_params_all
 
 
 class est_class_from_paths:
@@ -166,6 +168,7 @@ class est_class_from_paths:
         slow_version=False,
         sex_type="all",
         edu_type="all",
+        util_type="add",
     ):
         self.iter_count = 0
         self.save_results = save_results
@@ -197,6 +200,7 @@ class est_class_from_paths:
             sim_specs=None,
             sex_type=sex_type,
             edu_type=edu_type,
+            util_type=util_type,
         )
 
         if use_observed_data:

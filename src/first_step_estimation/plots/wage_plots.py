@@ -70,10 +70,14 @@ def plot_wage_regression_results(path_dict, specs, show=False, save=False):
         ax.legend(loc="upper left")
         
         if save:
-            plt.savefig(
+            fig.savefig(
                 path_dict["first_step_plots"] + f"wages_{file_appends[sex_val]}.png",
                 bbox_inches="tight"
             )
-    
+            fig.savefig(
+                path_dict["first_step_plots"] + f"wages_{file_appends[sex_val]}.pdf",
+                bbox_inches="tight"
+            )
+
     if show:
         plt.show()

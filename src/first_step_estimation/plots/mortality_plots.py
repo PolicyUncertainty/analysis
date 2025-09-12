@@ -102,7 +102,7 @@ def plot_mortality(path_dict, specs, show=False, save=False):
             ax.set_ylabel("Survival Probability")
             ax.set_ylim(0, 1)
             ax.legend()
-            ax.grid(True, alpha=0.3)
+            #ax.grid(True, alpha=0.3)
 
     fig.tight_layout()
 

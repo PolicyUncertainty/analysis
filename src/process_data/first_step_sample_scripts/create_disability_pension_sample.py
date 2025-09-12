@@ -14,7 +14,7 @@ from process_data.auxiliary.filter_data import (
 from process_data.auxiliary.lagged_and_lead_vars import span_dataframe
 from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.health import correct_health_state, create_health_var
-from process_data.soep_vars.work_choices import create_choice_variable
+from process_data.soep_vars.work_choices import create_choice_and_employment_status
 
 
 # %%
@@ -37,7 +37,7 @@ def create_disability_pension_sample(paths, specs, load_data=False):
     # Create education type
     df = create_education_type(df)
 
-    df = create_choice_variable(df)
+    df = create_choice_and_employment_status(df)
 
     df = filter_years(df, specs["start_year"] - 1, specs["end_year"] + 1)
 

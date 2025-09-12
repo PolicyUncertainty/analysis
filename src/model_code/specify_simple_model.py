@@ -112,7 +112,7 @@ def specify_simple_model(
             model_save_path=model_path,
         )
 
-    print("Model specified.")
+    print("Model specified.", flush=True)
     return model
 
 

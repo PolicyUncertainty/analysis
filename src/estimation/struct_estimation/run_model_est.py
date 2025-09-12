@@ -57,6 +57,17 @@ else:
 # Load start params
 start_params_all = load_and_set_start_params(paths_dict)
 
+# Low edu men
+# disutil_unemployed_good_men: 0.3982895233324046
+# disutil_unemployed_bad_men: 0.35630092790781426
+# Group: full-time
+# disutil_ft_work_good_men: 0.6491840265554566
+# disutil_ft_work_bad_men: 0.945899297378813
+# Group: partner
+# disutil_partner_retired_men: -0.14767339974551175
+# Group: SRA_firing
+# SRA_firing_logit_intercept_men_low: 4.558180110702362
+
 # Run estimation
 estimation_results = estimate_model(
     paths_dict,

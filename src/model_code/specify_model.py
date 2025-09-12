@@ -54,15 +54,17 @@ def specify_model(
 
     if men_only:
         sex_grid = [0]
+        edu_grid = [0]
     else:
         sex_grid = [0, 1]
+        edu_grid = np.arange(specs["n_education_types"], dtype=int)
 
     model_config = {
         "min_period_batch_segments": [33, 44],
         "n_periods": specs["n_periods"],
         "choices": np.arange(specs["n_choices"], dtype=int),
         "deterministic_states": {
-            "education": np.arange(specs["n_education_types"], dtype=int),
+            "education": edu_grid,
             "sex": sex_grid,
         },
         "stochastic_states": {

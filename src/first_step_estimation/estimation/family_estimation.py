@@ -12,7 +12,9 @@ from process_data.first_step_sample_scripts.create_partner_transition_sample imp
 )
 
 
-def estimate_partner_transitions(paths_dict, specs, load_data=True, simulation_only=False):
+def estimate_partner_transitions(
+    paths_dict, specs, load_data=True, simulation_only=False
+):
     """Estimate the partner state transition matrix."""
     est_data = create_partner_transition_sample(paths_dict, specs, load_data=load_data)
 
@@ -84,7 +86,9 @@ def estimate_partner_transitions(paths_dict, specs, load_data=True, simulation_o
                     )
                 )
             except FileNotFoundError:
-                print(f"File not found: {paths_dict['first_step_results'] + f'result_{sex_label}_{edu_label}.pkl'}. Using zeros as starting values.")
+                print(
+                    f"File not found: {paths_dict['first_step_results'] + f'result_{sex_label}_{edu_label}.pkl'}. Using zeros as starting values."
+                )
                 params_start = {}
                 for current_state in param_name_states[:2]:
                     for next_state in param_name_states[1:]:
@@ -92,7 +96,6 @@ def estimate_partner_transitions(paths_dict, specs, load_data=True, simulation_o
                         params_start[f"age_{current_state}_to_{next_state}"] = 0
                         params_start[f"age_squared_{current_state}_to_{next_state}"] = 0
                         params_start[f"age_cubic_{current_state}_to_{next_state}"] = 0
-
 
             # Set upper bounds to 500 and lower bounds to -inf
             upper_bounds = {key: 5 for key in params_start.keys()}
@@ -111,26 +114,26 @@ def estimate_partner_transitions(paths_dict, specs, load_data=True, simulation_o
                 params_result = params_start
             else:
                 result = om.minimize(
-                 fun=method_of_moments,
-                 params=params_start,
-                 fun_kwargs=kwargs,
-                 algorithm="scipy_neldermead",
-                 algo_options={
-                     "n_cores": 7,
-                 },
-                 bounds=bounds,
-                 multistart=True,
+                    fun=method_of_moments,
+                    params=params_start,
+                    fun_kwargs=kwargs,
+                    algorithm="scipy_neldermead",
+                    algo_options={
+                        "n_cores": 7,
+                    },
+                    bounds=bounds,
+                    multistart=True,
                 )
                 params_result = result.params
-            
+
             pkl.dump(
-                 params_result,
-                 open(
-                     paths_dict["first_step_results"]
-                     + f"result_{sex_label}_{edu_label}.pkl",
-                     "wb",
-                 ),
-             )
+                params_result,
+                open(
+                    paths_dict["first_step_results"]
+                    + f"result_{sex_label}_{edu_label}.pkl",
+                    "wb",
+                ),
+            )
 
             # Calculate transition matrices for all ages
             for age in all_ages:
@@ -148,7 +151,7 @@ def estimate_partner_transitions(paths_dict, specs, load_data=True, simulation_o
                 est_ages=all_ages,
                 start_shares=initial_shares,
             )
-            
+
             # Store data for plotting
             predicted_shares_data[(sex_label, edu_label)] = pred_shares
             empirical_shares_data[(sex_label, edu_label)] = empirical_shares
@@ -156,7 +159,7 @@ def estimate_partner_transitions(paths_dict, specs, load_data=True, simulation_o
     # Save results
     out_file_path = paths_dict["first_step_results"] + "partner_transition_matrix.csv"
     full_df.to_csv(out_file_path)
-    
+
     return full_df, predicted_shares_data, empirical_shares_data
 
 
@@ -271,5 +274,5 @@ def estimate_nb_children(paths_dict, specs):
 
     out_file_path = paths_dict["first_step_results"] + "nb_children_estimates.csv"
     estimates.to_csv(out_file_path)
-    
+
     return estimates

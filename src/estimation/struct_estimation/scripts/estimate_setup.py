@@ -207,6 +207,7 @@ class est_class_from_paths:
 
         if men_only:
             data_decision = data_decision[data_decision["sex"] == 0]
+            data_decision = data_decision[data_decision["education"] == 0]
         else:
             pass
 

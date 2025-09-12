@@ -8,21 +8,11 @@ from model_code.pension_system.experience_stock import (
 
 
 def define_experience_grid(specs):
-    # Experience grid
-    experience_grid = np.linspace(0, 1, 11)
-    # Add very long insured threshold to experience grid and sort
-    experience_grid = np.append(experience_grid, specs["very_long_insured_grid_points"])
-    # Delete 0.5
-    experience_grid = experience_grid[
-        (~np.isclose(experience_grid, 0.5))
-        & ~np.isclose(experience_grid, 0.6)
-        & (~np.isclose(experience_grid, 0))
-    ]
-
+    experience_grid = np.append(specs["very_long_insured_grid_points"], 0)
+    experience_grid = np.append(experience_grid, 1)
+    experience_grid = np.append(experience_grid, 0.85)
+    experience_grid = np.append(experience_grid, 0.3)
     experience_grid = np.sort(experience_grid)
-    experience_grid[0] = 0
-    experience_grid[1] = 0.15
-    experience_grid[-3] = 0.85
     return experience_grid
 
 

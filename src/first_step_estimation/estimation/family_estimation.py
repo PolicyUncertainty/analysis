@@ -103,7 +103,7 @@ def estimate_partner_transitions(
                 "age_grid": all_ages,
                 "empirical_shares": empirical_shares,
                 "start_shares": initial_shares,
-                "weights": n_obs_per_age / n_obs_per_age.sum(),
+                "weights": np.sqrt(n_obs_per_age / n_obs_per_age.sum()),
             }
 
             # if simulation_only is True, use the loaded parameters as results
@@ -116,14 +116,15 @@ def estimate_partner_transitions(
                     trans_mat_over_all_ages = calc_trans_row_for_age(
                         x, all_ages, "single", param_state_names, age_is_vector=True
                     )
-                    max_trans_to_marriage = trans_mat_over_all_ages[:, 1].max()
+                    max_trans_to_marriage = trans_mat_over_all_ages[1, :].max()
                     return max_trans_to_marriage
 
+                print("Constraints start at:", prob_to_marriage_fun(params_start))
                 result = om.minimize(
                     fun=method_of_moments,
                     params=params_start,
                     fun_kwargs=kwargs,
-                    algorithm="scipy_slsqp",
+                    algorithm="scipy_cobyla",
                     # algo_options={
                     #     "n_cores": 7,
                     # },
@@ -241,10 +242,12 @@ def predicted_shares(params, est_ages, start_shares):
     return shares
 
 
+# @om.mark.least_squares
 def method_of_moments(params, age_grid, empirical_shares, start_shares, weights):
     """Objective function for method of moments: minimize the squared difference."""
     predicted = predicted_shares(params, age_grid, start_shares)
-    crit_val = np.sum(((predicted - empirical_shares) ** 2) * weights)
+    residuals = (predicted - empirical_shares) * weights
+    crit_val = np.sum(residuals**2)
     print(crit_val)
     return crit_val
 

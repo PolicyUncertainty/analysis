@@ -23,9 +23,9 @@ param_lists = {
 }
 
 model_name = sys.argv[1]
-if "men" in model_name:
+if "_men" in model_name:
     sex_type = "men"
-elif "women" in model_name:
+elif "_women" in model_name:
     sex_type = "women"
 else:
     sex_type = "all"

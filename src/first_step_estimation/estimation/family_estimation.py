@@ -7,13 +7,14 @@ import optimagic as om
 import pandas as pd
 import statsmodels.api as sm
 
+from first_step_estimation.plots.family_plots import plot_family_transition_results
 from process_data.first_step_sample_scripts.create_partner_transition_sample import (
     create_partner_transition_sample,
 )
 
 
 def estimate_partner_transitions(
-    paths_dict, specs, load_data=True, simulation_only=False
+    paths_dict, specs, load_data=True, simulation_only=True
 ):
     """Estimate the partner state transition matrix."""
     est_data = create_partner_transition_sample(paths_dict, specs, load_data=load_data)
@@ -77,25 +78,21 @@ def estimate_partner_transitions(
             ].values
 
             # Load starting parameters
-            try:
-                params_start = pkl.load(
-                    open(
-                        paths_dict["first_step_results"]
-                        + f"result_{sex_label}_{edu_label}.pkl",
-                        "rb",
-                    )
+            params_start = pkl.load(
+                open(
+                    paths_dict["first_step_results"]
+                    + f"result_{sex_label}_{edu_label}.pkl",
+                    "rb",
                 )
-            except FileNotFoundError:
-                print(
-                    f"File not found: {paths_dict['first_step_results'] + f'result_{sex_label}_{edu_label}.pkl'}. Using zeros as starting values."
-                )
-                params_start = {}
-                for current_state in param_name_states[:2]:
-                    for next_state in param_name_states[1:]:
-                        params_start[f"const_{current_state}_to_{next_state}"] = 0
-                        params_start[f"age_{current_state}_to_{next_state}"] = 0
-                        params_start[f"age_squared_{current_state}_to_{next_state}"] = 0
-                        params_start[f"age_cubic_{current_state}_to_{next_state}"] = 0
+            )
+
+            # params_start = {}
+            # for current_state in param_name_states[:2]:
+            #     for next_state in param_name_states[1:]:
+            #         params_start[f"const_{current_state}_to_{next_state}"] = 0
+            #         params_start[f"age_{current_state}_to_{next_state}"] = 0
+            #         params_start[f"age_squared_{current_state}_to_{next_state}"] = 0
+            #         params_start[f"age_cubic_{current_state}_to_{next_state}"] = 0
 
             # Set upper bounds to 500 and lower bounds to -inf
             upper_bounds = {key: 5 for key in params_start.keys()}
@@ -113,27 +110,40 @@ def estimate_partner_transitions(
             if simulation_only:
                 params_result = params_start
             else:
+                param_state_names = ["single", "working_age", "retirement"]
+
+                def prob_to_marriage_fun(x):
+                    trans_mat_over_all_ages = calc_trans_row_for_age(
+                        x, all_ages, "single", param_state_names, age_is_vector=True
+                    )
+                    max_trans_to_marriage = trans_mat_over_all_ages[:, 1].max()
+                    return max_trans_to_marriage
+
                 result = om.minimize(
                     fun=method_of_moments,
                     params=params_start,
                     fun_kwargs=kwargs,
-                    algorithm="scipy_neldermead",
-                    algo_options={
-                        "n_cores": 7,
-                    },
+                    algorithm="scipy_slsqp",
+                    # algo_options={
+                    #     "n_cores": 7,
+                    # },
                     bounds=bounds,
-                    multistart=True,
+                    constraints=om.NonlinearConstraint(
+                        func=prob_to_marriage_fun,
+                        upper_bound=0.5,
+                    ),
+                    # multistart=True,
                 )
                 params_result = result.params
 
-            pkl.dump(
-                params_result,
-                open(
-                    paths_dict["first_step_results"]
-                    + f"result_{sex_label}_{edu_label}.pkl",
-                    "wb",
-                ),
-            )
+                pkl.dump(
+                    params_result,
+                    open(
+                        paths_dict["first_step_results"]
+                        + f"result_{sex_label}_{edu_label}.pkl",
+                        "wb",
+                    ),
+                )
 
             # Calculate transition matrices for all ages
             for age in all_ages:
@@ -156,6 +166,7 @@ def estimate_partner_transitions(
             predicted_shares_data[(sex_label, edu_label)] = pred_shares
             empirical_shares_data[(sex_label, edu_label)] = empirical_shares
 
+    # plot_family_transition_results(paths_dict, specs, show=True, save=False, est_df=full_df)
     # Save results
     out_file_path = paths_dict["first_step_results"] + "partner_transition_matrix.csv"
     full_df.to_csv(out_file_path)
@@ -167,37 +178,49 @@ def calc_trans_mat(params, age):
     """Compute the transition matrix for a given age using a multinomial logit
     specification."""
 
-    above_40 = age > 40
     if age >= 75:
         return np.array([[1, 0, 0], [0, 0, 1], [0, 0, 1]], dtype=float)
 
     param_state_names = ["single", "working_age", "retirement"]
-    age_sq = age**2 / 1_000
-    age_cub = age**3 / 100_000
 
     trans_mat = np.zeros((3, 3), dtype=float)
     for i, current_state_name in enumerate(param_state_names):
-        if current_state_name == "retirement":
-            exp_vals = np.array([0, 0, 1], dtype=float)
-        else:
-            exp_vals = [1]
-            for next_state_name in param_state_names[1:]:
-                val = (
-                    params[f"const_{current_state_name}_to_{next_state_name}"]
-                    + params[f"age_{current_state_name}_to_{next_state_name}"] * age
-                    + params[f"age_squared_{current_state_name}_to_{next_state_name}"]
-                    * age_sq
-                    + params[f"age_cubic_{current_state_name}_to_{next_state_name}"]
-                    * age_cub
-                )
-                exp_vals += [np.exp(val)]
-            else:
-                exp_vals[2] *= above_40
-                exp_vals = np.array(exp_vals, dtype=float)
-
-        trans_mat[i, :] = exp_vals / exp_vals.sum()
+        trans_mat[i, :] = calc_trans_row_for_age(
+            params, age, current_state_name, param_state_names
+        )
 
     return trans_mat
+
+
+def calc_trans_row_for_age(
+    params, age, current_state_name, param_state_names, age_is_vector=False
+):
+    above_40 = age > 40
+    if current_state_name == "retirement":
+        exp_vals = np.array([0, 0, 1], dtype=float)
+    else:
+        if age_is_vector:
+            exp_vals = [np.ones_like(age)]
+        else:
+            exp_vals = [1]
+        for next_state_name in param_state_names[1:]:
+            val = (
+                params[f"const_{current_state_name}_to_{next_state_name}"]
+                + params[f"age_{current_state_name}_to_{next_state_name}"] * age
+                + params[f"age_squared_{current_state_name}_to_{next_state_name}"]
+                * (age**2 / 1_000)
+                + params[f"age_cubic_{current_state_name}_to_{next_state_name}"]
+                * (age**3 / 100_000)
+            )
+            exp_vals += [np.exp(val)]
+        else:
+            exp_vals[2] *= above_40
+
+    exp_vals = np.array(exp_vals, dtype=float)
+    if age_is_vector:
+        return exp_vals / exp_vals.sum(axis=0)
+    else:
+        return exp_vals / exp_vals.sum()
 
 
 def predicted_shares(params, est_ages, start_shares):

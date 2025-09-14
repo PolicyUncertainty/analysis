@@ -3,10 +3,10 @@ import pickle as pkl
 import sys
 
 from estimation.struct_estimation.start_params_and_bounds.param_lists import (
-    high_men_disutil_firing,
-    high_women_disutil_firing,
-    low_men_disutil_firing,
-    low_women_disutil_firing,
+    men_disutil_firing,
+    men_job_offer_params,
+    women_disutil_firing,
+    women_job_offer_params,
 )
 from set_paths import create_path_dict
 
@@ -19,14 +19,10 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
 
 param_lists = {
     "men": {
-        "low": low_men_disutil_firing,
-        "high": high_men_disutil_firing,
-        "all": low_men_disutil_firing + high_men_disutil_firing,
+        "all": men_disutil_firing + men_job_offer_params,
     },
     "women": {
-        "low": low_women_disutil_firing,
-        "high": high_women_disutil_firing,
-        "all": low_women_disutil_firing + high_women_disutil_firing,
+        "all": women_disutil_firing + women_job_offer_params,
     },
 }
 

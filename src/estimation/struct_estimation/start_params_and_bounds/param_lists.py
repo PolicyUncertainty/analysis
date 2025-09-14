@@ -1,40 +1,25 @@
 wealth_params = ["mu_low", "mu_high", "bequest_scale", "kappa"]
 
-# Men - Low Education
-men_disutil_params_low = [
-    "disutil_ft_work_low_good_men",
-    "disutil_ft_work_low_bad_men",
-    "disutil_unemployed_low_good_men",
-    "disutil_unemployed_low_bad_men",
-    "disutil_partner_retired_low_men",
-]
-
-# Men - High Education
-men_disutil_params_high = [
-    "disutil_ft_work_high_good_men",
-    "disutil_ft_work_high_bad_men",
-    "disutil_unemployed_high_good_men",
-    "disutil_unemployed_high_bad_men",
-    "disutil_partner_retired_high_men",
+# Men - Health specific disutility
+men_disutil_params = [
+    "disutil_ft_work_good_men",
+    "disutil_ft_work_bad_men",
+    "disutil_unemployed_good_men",
+    "disutil_unemployed_bad_men",
+    "disutil_partner_retired_men",
 ]
 
 men_SRA_firing = [
     "SRA_firing_logit_intercept_men_low",
     "SRA_firing_logit_intercept_men_high",
 ]
-
-# Men - Combine low/high params
-low_men_disutil_firing = men_disutil_params_low + ["SRA_firing_logit_intercept_men_low"]
-high_men_disutil_firing = men_disutil_params_high + [
-    "SRA_firing_logit_intercept_men_high"
-]
-
+men_disutil_firing = men_disutil_params + men_SRA_firing
 
 men_taste = [
     "taste_shock_scale_men",
 ]
 
-men_job_finding_params = [
+men_job_offer_params = [
     "job_finding_logit_const_men",
     "job_finding_logit_high_educ_men",
     "job_finding_logit_good_health_men",
@@ -49,41 +34,26 @@ men_disability_params = [
     "disability_logit_age_above_55_men",
 ]
 
-# Women - Low Education
-women_disutil_params_low = [
-    "disutil_ft_work_low_good_women",
-    "disutil_ft_work_low_bad_women",
-    "disutil_pt_work_low_good_women",
-    "disutil_pt_work_low_bad_women",
-    "disutil_unemployed_low_good_women",
-    "disutil_unemployed_low_bad_women",
-    "disutil_partner_retired_low_women",
-    "disutil_children_ft_work_low",
-]
-
-# Women - High Education
-women_disutil_params_high = [
-    "disutil_ft_work_high_good_women",
-    "disutil_ft_work_high_bad_women",
-    "disutil_pt_work_high_good_women",
-    "disutil_pt_work_high_bad_women",
-    "disutil_unemployed_high_good_women",
-    "disutil_unemployed_high_bad_women",
-    "disutil_partner_retired_high_women",
+# Women - Health specific disutility
+women_disutil_params = [
+    "disutil_ft_work_good_women",
+    "disutil_ft_work_bad_women",
+    "disutil_pt_work_good_women",
+    "disutil_pt_work_bad_women",
+    "disutil_unemployed_good_women",
+    "disutil_unemployed_bad_women",
+    "disutil_partner_retired_women",
     "disutil_children_ft_work_high",
-]
-
-low_women_disutil_firing = women_disutil_params_low + [
-    "SRA_firing_logit_intercept_women_low"
-]
-high_women_disutil_firing = women_disutil_params_high + [
-    "SRA_firing_logit_intercept_women_high"
+    "disutil_children_ft_work_low",
 ]
 
 women_SRA_firing = [
     "SRA_firing_logit_intercept_women_low",
     "SRA_firing_logit_intercept_women_high",
 ]
+
+women_disutil_firing = women_disutil_params + women_SRA_firing
+
 
 women_taste = [
     "taste_shock_scale_women",

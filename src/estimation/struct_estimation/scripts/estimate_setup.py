@@ -218,6 +218,7 @@ class est_class_from_paths:
         )
         # Already retired individuals hold no identification
         data_decision = data_decision[data_decision["lagged_choice"] != 0]
+        data_decision = data_decision[data_decision["age"] >= 55]
         # Create states dict
         states_dict = create_states_dict(data_decision, model_class=model)
 

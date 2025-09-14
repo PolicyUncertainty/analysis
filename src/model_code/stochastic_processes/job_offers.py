@@ -103,7 +103,7 @@ def calc_job_finding_prob_women(params, education, good_health, age):
         params["job_finding_logit_const_women"]
         + params["job_finding_logit_high_educ_women"] * education
         + params["job_finding_logit_good_health_women"] * good_health
-        + params["job_finding_logit_age_women"] * age * (1 - above_55)
+        + params["job_finding_logit_age_women"] * age
         + params["job_finding_logit_age_above_55_women"] * (age - 55) * above_55
     )
     prob = logit_formula(exp_factor)

@@ -24,9 +24,15 @@ param_lists = {
     "women": {
         "all": women_disutil_firing + women_job_offer_params,
     },
+    "all": {
+        "all": men_disutil_firing
+        + men_job_offer_params
+        + women_disutil_firing
+        + women_job_offer_params,
+    },
 }
 
-model_name = "all_men_3_cobb"
+model_name = "all_3_cobb"
 if "_men" in model_name:
     sex_type = "men"
 elif "_women" in model_name:
@@ -55,7 +61,7 @@ else:
 print(f"Running estimation for model: {model_name}", flush=True)
 
 LOAD_LAST_ESTIMATE = False
-LOAD_SOL_MODEL = False
+LOAD_SOL_MODEL = True
 SAVE_RESULTS = True
 USE_WEIGHTS = False
 

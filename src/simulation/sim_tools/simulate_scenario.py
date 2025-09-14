@@ -4,7 +4,10 @@ from model_code.specify_model import specify_and_solve_model
 from model_code.state_space.experience import construct_experience_years
 from set_paths import get_model_results_path
 from simulation.sim_tools.start_obs_for_sim import generate_start_states_from_obs
-from specs.derive_specs import generate_derived_and_data_derived_specs
+from specs.derive_specs import (
+    generate_derived_and_data_derived_specs,
+    read_and_derive_specs,
+)
 
 
 def solve_and_simulate_scenario(
@@ -43,6 +46,10 @@ def solve_and_simulate_scenario(
         "SRA_at_start": SRA_at_start,
         "SRA_at_retirement": SRA_at_retirement,
     }
+    if men_only:
+        sex_type = "men"
+    else:
+        sex_type = "all"
     model_solved = specify_and_solve_model(
         path_dict=path_dict,
         params=params,
@@ -52,7 +59,7 @@ def solve_and_simulate_scenario(
         load_model=sol_model_exists,
         load_solution=solution_exists,
         sim_specs=sim_specs,
-        men_only=men_only,
+        sex_type=sex_type,
     )
 
     if df_exists:

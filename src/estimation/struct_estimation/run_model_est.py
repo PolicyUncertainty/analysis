@@ -18,11 +18,19 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
 )
 
 param_lists = {
-    "men": {"low": low_men_disutil_firing, "high": high_men_disutil_firing},
-    "women": {"low": low_women_disutil_firing, "high": high_women_disutil_firing},
+    "men": {
+        "low": low_men_disutil_firing,
+        "high": high_men_disutil_firing,
+        "all": low_men_disutil_firing + high_men_disutil_firing,
+    },
+    "women": {
+        "low": low_women_disutil_firing,
+        "high": high_women_disutil_firing,
+        "all": low_women_disutil_firing + high_women_disutil_firing,
+    },
 }
 
-model_name = sys.argv[1]
+model_name = "all_men_3_cobb"
 if "_men" in model_name:
     sex_type = "men"
 elif "_women" in model_name:
@@ -41,9 +49,9 @@ else:
 params_to_estimate_names = param_lists[sex_type][edu_type]
 
 
-if "add" in model_name:
+if "_add" in model_name:
     util_type = "add"
-elif "cobb" in model_name:
+elif "_cobb" in model_name:
     util_type = "cobb"
 else:
     raise ValueError("unknown model")

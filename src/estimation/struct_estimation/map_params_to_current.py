@@ -8,7 +8,7 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
 def merge_params(params_dict):
     """Merge two parameter dictionaries"""
     params = params_dict["default"].copy()
-    for key in params.keys():
+    for key in params_dict.keys():
         if key != "default":
             param_list = params_dict[key]["names"]
             for param in param_list:

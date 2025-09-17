@@ -3,34 +3,34 @@ mu_low: 1.0e-12
 mu_high: 1.0e-12
 
 # Full time work dis-utility men - Health specific
-disutil_ft_work_good_men: 1e-12
-disutil_ft_work_bad_men: 1e-12
+disutil_ft_work_good_men: 0.1
+disutil_ft_work_bad_men: 0.1
 
 # Unemployment dis-utility men - Health specific
-disutil_unemployed_good_men: 1e-12
-disutil_unemployed_bad_men: 1e-12
+disutil_unemployed_good_men: 0.1
+disutil_unemployed_bad_men: 0.1
 
 # Partner retired dis-utility men
-disutil_partner_retired_men: -5
+disutil_partner_retired_men: -2.0
 
 # Full time work dis-utility women - Health specific
-disutil_ft_work_good_women: 1e-12
-disutil_ft_work_bad_women: 1e-12
+disutil_ft_work_good_women: 0.1
+disutil_ft_work_bad_women: 0.1
 
 # Part time dis-utility women - Health specific
-disutil_pt_work_good_women: 1e-12
-disutil_pt_work_bad_women: 1e-12
+disutil_pt_work_good_women: 0.1
+disutil_pt_work_bad_women: 0.1
 
 # Unemployment dis-utility women - Health specific
-disutil_unemployed_good_women: 1e-12
-disutil_unemployed_bad_women: 1e-12
+disutil_unemployed_good_women: 0.1
+disutil_unemployed_bad_women: 0.1
 
 # Partner retired dis-utility women
-disutil_partner_retired_women: -5
+disutil_partner_retired_women: -2.0
 
 # Children dis-utility
-disutil_children_ft_work_low: 1e-12
-disutil_children_ft_work_high: 1e-12
+disutil_children_ft_work_low: 0.1
+disutil_children_ft_work_high: 0.1
 
 # Taste shocks
 taste_shock_scale_men: 0.05
@@ -67,7 +67,7 @@ disability_logit_age_above_55_women: -5
 disability_logit_high_educ_women: -5
 
 # SRA firing params
-SRA_firing_logit_intercept_men_low: 1e-12
-SRA_firing_logit_intercept_men_high: 1e-12
-SRA_firing_logit_intercept_women_low: 1e-12
-SRA_firing_logit_intercept_women_high: 1e-12
+SRA_firing_logit_intercept_men_low: -1.2
+SRA_firing_logit_intercept_men_high: -1.2
+SRA_firing_logit_intercept_women_low: -1.2
+SRA_firing_logit_intercept_women_high: -1.2

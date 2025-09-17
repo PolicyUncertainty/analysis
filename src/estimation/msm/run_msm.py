@@ -11,13 +11,9 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
 
 params_to_estimate_names = [
     # "bequest_scale",
-    "mu_bequest_high",
-    "mu_bequest_low",
     "mu_low",
     "mu_high",
     # "mu_men",
-    # "mu_bequest_high",
-    # "mu_bequest_low",
     # Men Full-time - 4 parameters
     "disutil_ft_work_good_men",
     "disutil_ft_work_bad_men",

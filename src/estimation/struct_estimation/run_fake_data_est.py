@@ -21,8 +21,6 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 
 params_to_estimate_names = [
     # "mu_men",
-    # "mu_bequest_high",
-    # "mu_bequest_low",
     # Men Full-time - 4 parameters
     "disutil_ft_work_good_men",
     "disutil_ft_work_bad_men",

@@ -95,16 +95,17 @@ def create_structural_est_sample(
     # Filter data to estimation years. Leave additional years for lagging and leading
     df = filter_years(df, specs["start_year"] - 1, specs["end_year"] + 1)
 
-    # Create type variables. They should not be missing anyway
+    # Create type variables and age
     df = recode_sex(df)
     df = create_education_type(df, filter_missings=False)
+    df = calc_age_at_interview(df, drop_invalid=True)
 
+    # Span dataframe to have continuous panel for lagged and lead variables
+    # (needed for choice, partner state, job offer, health)
     df = span_dataframe(df, specs["start_year"] - 1, specs["end_year"] + 1)
-
-    df = calc_age_at_interview(df)
-
-    # Filter ages below
-    df = filter_below_age(df, specs["start_age"] - 1)
+    df = create_choice_variable_from_artkalen(
+        path_dict=paths, specs=specs, df=df, load_artkalen_choice=load_artkalen_choice
+    )
 
     # Having a spanned dataframe we can correct the partner state
     # (missing partner observation in a single year).
@@ -114,14 +115,7 @@ def create_structural_est_sample(
     df = create_health_var(df, filter_missings=False)
     df = correct_health_state(df)
 
-    df = create_choice_variable_from_artkalen(
-        path_dict=paths, specs=specs, df=df, load_artkalen_choice=load_artkalen_choice
-    )
-
-    # Create informed state
-    df = create_informed_state(df)
-
-    # Generare job separation variable
+    # Generate job separation variable
     df = generate_job_separation_var(df)
 
     # Now use this information to determine job offer state
@@ -130,6 +124,9 @@ def create_structural_est_sample(
     df = determine_observed_job_offers(
         df, was_fired_last_period=was_fired_last_period, working_choices=[2, 3]
     )
+
+    # Create informed state
+    df = create_informed_state(df)
 
     # We are done with lagging and leading and drop the buffer years
     df = filter_years(df, specs["start_year"], specs["end_year"])
@@ -149,7 +146,7 @@ def create_structural_est_sample(
     # create experience and working years
     df = create_experience_and_working_years(df.copy(), filter_missings=True)
     
-    # Now we can also kick out the buffer age for lagging
+    # Filter to above minimum age
     df = filter_below_age(df, specs["start_age"])
 
     # We also delete now the observations with invalid data, which we left before to have a continuous panel
@@ -227,7 +224,7 @@ def create_structural_est_sample(
     df = df[list(all_type_dict.keys())]
     df = df.astype(all_type_dict)
 
-    print_data_description(df, detailed=True)
+    print_data_description(df, detailed=False)
 
     # Anonymize and save data
     df["year"] = df.index.get_level_values("syear").values
@@ -277,6 +274,7 @@ def load_and_merge_soep_core(path_dict, use_processed_pl):
     if use_processed_pl:
         pl_data = pd.read_pickle(pl_intermediate_file)
     else:
+        print("Loading and merging pl data. This might take a while...")
         # Add pl data
         pl_data_reader = pd.read_stata(
             f"{soep_c38_path}/pl.dta",

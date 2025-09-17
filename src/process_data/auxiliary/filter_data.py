@@ -1,31 +1,34 @@
+def _print_filter(before, after, msg):
+    pct = (after - before) / before * 100 if before > 0 else 0
+    print(f"{after} {msg} ({pct:+.2f}%)")
+
 def filter_years(df, start_year, end_year):
+    before = len(df)
     df = df.loc[(slice(None), range(start_year, end_year + 1)), :]
-    print(
-        str(len(df))
-        + f" left after dropping people outside of estimation years {start_year} - {end_year}."
-    )
+    _print_filter(before, len(df), f"left after dropping people outside of estimation years {start_year} - {end_year}")
     return df
 
 
 def filter_below_age(df, age):
+    before = len(df)
     df = df[df["age"] >= age]
-    print(
-        str(len(df)) + " left after dropping people under " + str(age) + " years old."
-    )
+    _print_filter(before, len(df), f"left after dropping people under {age} years old")
     return df
 
 
 def filter_above_age(df, age):
+    before = len(df)
     df = df[df["age"] <= age]
-    print(str(len(df)) + " left after dropping people over " + str(age) + " years old.")
+    _print_filter(before, len(df), f"left after dropping people over {age} years old")
     return df
 
 
 def recode_sex(df):
     """Recode sex to 0(men) and 1(women), from SOEP definition 1(men) and 2(women)."""
+    before = len(df)
     df.loc[:, "sex"] = df["sex"] - 1
     df = df[df["sex"] >= 0].copy()
-    print(str(len(df)) + " left after dropping missing and unspecified sex.")
+    _print_filter(before, len(df), "left after dropping missing and unspecified sex")
     return df
 
 
@@ -59,11 +62,7 @@ def drop_missings(df, vars_to_check):
 
     """
     for var in vars_to_check:
+        before = len(df)
         df = df[df[var].notna()]
-        print(
-            str(len(df))
-            + " observations left after dropping people with missing "
-            + var
-            + " data."
-        )
+        _print_filter(before, len(df), f"observations left after dropping people with missing {var} data")
     return df

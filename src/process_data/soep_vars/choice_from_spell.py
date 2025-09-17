@@ -18,6 +18,8 @@ def create_choice_variable_from_artkalen(
     )
 
     if not load_artkalen_choice:
+        print("Creating artkalen choice variable. This might take a while...")
+        # Initialize columns
         df["choice"] = np.nan
         df["corrected_age"] = df["age"].astype(float)
         # With create artkalen choice

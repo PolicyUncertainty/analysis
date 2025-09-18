@@ -46,7 +46,7 @@ def plot_savings(
             mask_sim = (data_sim["sex"] == sex_var) & (data_sim["education"] == edu_var)
             data_sim_edu = data_sim[mask_sim]
 
-            ages = np.arange(specs["start_age"] + 1, 90)
+            ages = np.arange(specs["start_age"] + 1, 65)
 
             mean_savings = data_sim_edu.groupby("age")["savings_dec"].mean().loc[ages]
             mean_income = data_sim_edu.groupby("age")["total_income"].mean().loc[ages]

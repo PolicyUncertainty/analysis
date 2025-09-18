@@ -122,14 +122,9 @@ def test_utility_func(
     health_str = "good" if health == 0 else "bad"
     sex_str = "men" if sex == 0 else "women"
 
-    if sex == 0:
-        disutil_unemployment = params[f"disutil_unemployed_{health_str}_{sex_str}"]
-        disutil_factor_ft_work = params[f"disutil_ft_work_{health_str}_{sex_str}"]
-        disutil_retirement = params[f"disutil_partner_retired_{sex_str}"]
-    else:
-        disutil_unemployment = params[f"disutil_unemployed_{health_str}_{sex_str}"]
-        disutil_factor_ft_work = params[f"disutil_ft_work_{health_str}_{sex_str}"]
-        disutil_retirement = params[f"disutil_partner_retired_{sex_str}"]
+    disutil_unemployment = params[f"disutil_unemployed_{health_str}_{sex_str}"]
+    disutil_factor_ft_work = params[f"disutil_ft_work_{health_str}_{sex_str}"]
+    disutil_retirement = params[f"disutil_partner_retired_{sex_str}"]
 
     if sex == 1:
         has_partner_int = int(partner_state > 0)

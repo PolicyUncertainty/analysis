@@ -20,7 +20,7 @@ from set_styles import get_figsize, set_colors
 
 
 def plot_income(path_dict, specs, show=False, save=False):
-    """Plot simulated vs observed income by sex and education.
+    """Plot simulated vs observed income by partner state and education.
 
     Parameters
     ----------
@@ -81,64 +81,82 @@ def plot_income(path_dict, specs, show=False, save=False):
     )
 
     # Observed incomes. Gross labor income and household net income(include transfers, taxes and interest)
-    data_decision["obs_joint_gross_labor_income"] = (
-        (data_decision["monthly_wage"] + data_decision["monthly_wage_partner"]) * 12
-    ) / specs["wealth_unit"]
-    obs_gross_labor_income = data_decision.groupby(["sex", "education", "period"])[
-        "obs_joint_gross_labor_income"
-    ].mean()
+    # data_decision["obs_joint_gross_labor_income"] = (
+    #     (data_decision["monthly_wage"] + data_decision["monthly_wage_partner"]) * 12
+    # ) / specs["wealth_unit"]
+    # obs_gross_labor_income = data_decision.groupby(["partner_state", "sex", "education", "period"])[
+    #     "obs_joint_gross_labor_income"
+    # ].mean()
     obs_net_total_income = (
-        data_decision.groupby(["sex", "education", "period"])[
+        data_decision.groupby(["partner_state", "sex", "education", "period"])[
             "last_year_hh_net_income"
         ].mean()
         / specs["wealth_unit"]
     )
 
     # Simulated
-    data_decision["sim_joint_gross_labor_income"] = aux["joint_gross_labor_income"]
-    sim_gross_labor_income = data_decision.groupby(["sex", "education", "period"])[
-        "sim_joint_gross_labor_income"
-    ].mean()
+    # data_decision["sim_joint_gross_labor_income"] = aux["joint_gross_labor_income"]
+    # sim_gross_labor_income = data_decision.groupby(["partner_state", "sex", "education", "period"])[
+    #     "sim_joint_gross_labor_income"
+    # ].mean()
     data_decision["sim_net_joint_income"] = aux["net_hh_income"]
-    sim_net_total_income = data_decision.groupby(["sex", "education", "period"])[
-        "sim_net_joint_income"
-    ].mean()
+    sim_net_total_income = data_decision.groupby(
+        ["partner_state", "sex", "education", "period"]
+    )["sim_net_joint_income"].mean()
 
     # data_decision = data_decision[data_decision["partner_state"] > 0]
 
-    fig, axs = plt.subplots(ncols=2, nrows=2, figsize=get_figsize(nrows=1, ncols=2))
-    for edu_var, edu_label in enumerate(specs["education_labels"]):
-        ax_col = axs[:, edu_var]
-        for sex_var, sex_label in enumerate(specs["sex_labels"]):
-            ax_col[0].plot(
-                sim_net_total_income.loc[(sex_var, edu_var, slice(None))],
-                color=colors[sex_var],
-                label=f"Sim {sex_label}",
-            )
-            ax_col[0].plot(
-                obs_net_total_income.loc[(sex_var, edu_var, slice(None))],
-                color=colors[sex_var],
-                ls="--",
-                label=f"Obs {sex_label}",
-            )
+    fig, axs = plt.subplots(
+        ncols=len(specs["education_labels"]),
+        nrows=len(specs["partner_labels"]),
+        figsize=get_figsize(
+            nrows=len(specs["partner_labels"]), ncols=len(specs["education_labels"])
+        ),
+    )
 
-            ax_col[1].plot(
-                sim_gross_labor_income.loc[(sex_var, edu_var, slice(None))],
-                color=colors[sex_var],
-                label=f"Sim {sex_label}",
-            )
-            ax_col[1].plot(
-                obs_gross_labor_income.loc[(sex_var, edu_var, slice(None))],
-                color=colors[sex_var],
-                ls="--",
-                label=f"Obs {sex_label}",
-            )
+    for partner_state, partner_label in enumerate(specs["partner_labels"]):
+        for edu_var, edu_label in enumerate(specs["education_labels"]):
+            ax = axs[partner_state, edu_var]
+            for sex_var, sex_label in enumerate(specs["sex_labels"]):
+                ax.plot(
+                    sim_net_total_income.loc[
+                        (partner_state, sex_var, edu_var, slice(None))
+                    ],
+                    color=colors[sex_var],
+                    label=f"Sim {sex_label}",
+                )
+                ax.plot(
+                    obs_net_total_income.loc[
+                        (partner_state, sex_var, edu_var, slice(None))
+                    ],
+                    color=colors[sex_var],
+                    ls="--",
+                    label=f"Obs {sex_label}",
+                )
 
-        axs[0, edu_var].set_title(edu_label)
-        axs[1, edu_var].set_xlabel("Period")
+                # ax.plot(
+                #     sim_gross_labor_income.loc[(partner_state, sex_var, edu_var, slice(None))],
+                #     color=colors[sex_var],
+                #     label=f"Sim {sex_label}",
+                # )
+                # ax.plot(
+                #     obs_gross_labor_income.loc[(partner_state, sex_var, edu_var, slice(None))],
+                #     color=colors[sex_var],
+                #     ls="--",
+                #     label=f"Obs {sex_label}",
+                # )
 
-    axs[0, 0].set_ylabel("HH Net Income")
-    axs[1, 0].set_ylabel("HH Gross Labor income")
+            if edu_var == 0:
+                axs[partner_state, edu_var].set_ylabel(
+                    f"{partner_label}\nHH Net Income"
+                )
+            if partner_state == len(specs["partner_labels"]) - 1:
+                axs[partner_state, edu_var].set_xlabel("Period")
+            if partner_state == 0:
+                axs[partner_state, edu_var].set_title(edu_label)
+
+    # axs[0, 0].set_ylabel("HH Net Income")
+    # axs[1, 0].set_ylabel("HH Gross Labor income")  # This line would be for the second subplot type
     axs[0, 0].legend()
 
     plt.tight_layout()

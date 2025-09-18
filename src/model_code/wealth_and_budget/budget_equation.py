@@ -98,10 +98,11 @@ def budget_constraint(
     )
 
     total_income = jnp.maximum(total_net_income + child_benefits, unemployment_benefits)
+    interest_rate = model_specs["interest_rate"]
+    interest = interest_rate * assets_scaled
+    income_plus_interest = total_income + interest
     # calculate beginning of period wealth M_t
-    assets_begin_of_period = (
-        1 + model_specs["interest_rate"]
-    ) * assets_scaled + total_income
+    assets_begin_of_period = assets_scaled + income_plus_interest
 
     # death = health == model_specs["death_health_var"]
     # assets_begin_of_period = jax.lax.select(
@@ -109,7 +110,7 @@ def budget_constraint(
     # )
 
     aux = {
-        "net_hh_income": total_income / model_specs["wealth_unit"],
+        "net_hh_income": income_plus_interest / model_specs["wealth_unit"],
         "joint_gross_labor_income": (gross_labor_income + gross_partner_wage)
         / model_specs["wealth_unit"],
         "joint_gross_retirement_income": (

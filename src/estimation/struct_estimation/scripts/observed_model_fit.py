@@ -29,6 +29,7 @@ def create_fit_plots(
     load_data_from_sol,
     sex_type="all",
     edu_type="all",
+    util_type="add",
 ):
     # check if folder of model objects exits:
     model_folder = get_model_results_path(path_dict, model_name)
@@ -52,6 +53,7 @@ def create_fit_plots(
             sim_specs=None,
             edu_type=edu_type,
             sex_type=sex_type,
+            util_type=util_type,
             debug_info="all",
         )
 

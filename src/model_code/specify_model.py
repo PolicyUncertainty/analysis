@@ -174,6 +174,7 @@ def specify_and_solve_model(
     sim_specs=None,
     sex_type="all",
     edu_type="all",
+    util_type="add",
     debug_info=None,
 ):
     """Specify and solve model.
@@ -196,6 +197,7 @@ def specify_and_solve_model(
         debug_info=debug_info,
         sex_type=sex_type,
         edu_type=edu_type,
+        util_type=util_type,
     )
 
     # check if folder of model objects exits:

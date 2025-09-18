@@ -62,7 +62,6 @@ def get_next_period_experience(
         "exp_increase_part_time"
     ]
     exp_years_this_period = exp_years_last_period + exp_update
-
     # Calculate experience in the case of fresh retirement
     # We track all deductions and bonuses of the retirement decision through an adjusted
     # experience stock

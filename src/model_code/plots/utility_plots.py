@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from model_code.utility.bequest_utility import utility_final_consume_all
-from model_code.utility.utility_functions_cobb import consumption_scale, utility_func
-from set_styles import set_colors, get_figsize
+from model_code.utility.utility_functions_add import consumption_scale, utility_func
+from set_styles import get_figsize, set_colors
 
 
 def plot_utility(path_dict, params, specs, show=False, save=False):
@@ -32,10 +32,11 @@ def plot_utility(path_dict, params, specs, show=False, save=False):
     choice_labels = specs["choice_labels"]
     fig, ax = plt.subplots()
 
+    n_cons = len(consumption)
+    utilities = np.zeros((n_cons, len(choice_labels)), dtype=float)
     for choice, choice_label in enumerate(choice_labels):
-        utilities = np.zeros_like(consumption)
         for i, c in enumerate(consumption):
-            utilities[i] = utility_func(
+            utilities[i, choice] = utility_func(
                 consumption=c,
                 partner_state=partner_state,
                 sex=0,
@@ -46,14 +47,16 @@ def plot_utility(path_dict, params, specs, show=False, save=False):
                 params=params,
                 model_specs=specs,
             )
+
         ax.plot(
-            utilities,
+            utilities[:, choice],
             consumption,
             label=choice_label,
             color=colors[choice % len(colors)],
         )
+
     ax.legend()
-    ax.set_xlabel("Utility")
+    ax.set_xlabel("Utility Men")
     ax.set_ylabel("Consumption")
     ax.set_title("Utility function (reversed axes)")
 

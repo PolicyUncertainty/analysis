@@ -635,7 +635,7 @@ def test_informed(
         sex=0,
         education=0,
         experience=exp_cont_prev,
-        informed=2,
+        informed=1,
         health=1,
         model_specs=specs_internal,
     )

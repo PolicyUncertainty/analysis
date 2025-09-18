@@ -206,7 +206,6 @@ def plot_retirement_fit(
     for sex_var in specs["sex_grid"]:
         sex_label = specs["sex_labels"][sex_var]
 
-        # breakpoint()
         # if sex_var == 0:
         #     choice_shares_est.drop("Part-time", axis=1, inplace=True)
 

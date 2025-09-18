@@ -12,11 +12,11 @@ path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict)
 
 # Set run specs
-model_name = "all_men_3_cobb"
+model_name = "old_25_add"
 print(f"Running model: {model_name}")
 load_sol_model = False
 load_solution = None
-load_data_from_sol = False
+load_data_from_sol = True
 
 # Load start params
 start_params_all = load_and_set_start_params(path_dict)

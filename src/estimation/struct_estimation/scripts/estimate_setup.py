@@ -223,7 +223,7 @@ class est_class_from_paths:
         data_decision = data_decision[data_decision["lagged_choice"] != 0]
         if old_only:
             data_decision = data_decision[data_decision["age"] >= 55]
-        print(data_decision.groupby("sex").size())
+
         # Create states dict
         states_dict = create_states_dict(data_decision, model_class=model)
 

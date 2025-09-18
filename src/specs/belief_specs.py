@@ -43,9 +43,14 @@ def add_erp_belief_specs(specs, path_dict):
         path_dict["beliefs_est_results"] + "beliefs_parameters.csv"
     )
 
-    # Extract ERP parameters
+    # Extract ERP parameters (informed transition)
     erp_params = beliefs_params_df[
         beliefs_params_df["parameter"].isin(["initial_informed_share", "hazard_rate"])
+    ]
+
+    # Extract uninformed ERP belief parameters (NEW!)
+    uninformed_erp_params = beliefs_params_df[
+        beliefs_params_df["parameter"] == "erp_uninformed_belief"
     ]
 
     # Create hazard rate DataFrame in expected format
@@ -54,20 +59,29 @@ def add_erp_belief_specs(specs, path_dict):
         columns=specs["education_labels"],
     )
 
-    # Fill from structured data
+    # Fill hazard rate data from structured data
     for _, row in erp_params.iterrows():
         param_name = row["parameter"]
         edu_label = row["type"]  # education label is in 'type' column
         estimate = row["estimate"]
         df_informed_hazard_rate.loc[param_name, edu_label] = estimate
 
-    # Create placeholder DataFrames for uninformed penalties and predicted shares
-    # These are currently not used in the main model, but kept for compatibility
+    # Create uninformed penalties DataFrame and fill with actual data (FIXED!)
     df_uninformed_penalties = pd.DataFrame(
         index=["erp_uninformed_belief", "erp_uninformed_belief_sem"],
         columns=specs["education_labels"],
-        data=0.0,
+        data=0.0,  # Start with zeros, then fill with actual data
     )
+
+    # Fill uninformed penalties with actual data from CSV
+    for _, row in uninformed_erp_params.iterrows():
+        edu_label = row["type"]
+        estimate = row["estimate"]
+        std_error = row["std_error"] if not pd.isna(row["std_error"]) else 0.0
+        
+        if edu_label in df_uninformed_penalties.columns:
+            df_uninformed_penalties.loc["erp_uninformed_belief", edu_label] = estimate
+            df_uninformed_penalties.loc["erp_uninformed_belief_sem", edu_label] = std_error
 
     df_predicted_shares = pd.DataFrame(columns=specs["education_labels"])
     n_edu_types = len(specs["education_labels"])
@@ -83,21 +97,15 @@ def add_erp_belief_specs(specs, path_dict):
     )
 
     for edu_val, edu_label in enumerate(specs["education_labels"]):
-        # Extract values from DataFrame, handling potential missing values
+        # Extract values from DataFrame - no fallbacks, let it fail if data is missing
         uninformed_penalties[edu_val] = (
             df_uninformed_penalties.loc["erp_uninformed_belief", edu_label] / 100
-            if edu_label in df_uninformed_penalties.columns
-            else 0
         )
         informed_hazard_rate[edu_val] = (
             df_informed_hazard_rate.loc["hazard_rate", edu_label]
-            if edu_label in df_informed_hazard_rate.columns
-            else 0
         )
         initial_shares[edu_val] = (
             df_informed_hazard_rate.loc["initial_informed_share", edu_label]
-            if edu_label in df_informed_hazard_rate.columns
-            else 0
         )
 
         # Handle predicted shares if available
@@ -113,9 +121,3 @@ def add_erp_belief_specs(specs, path_dict):
     specs["informed_hazard_rate"] = informed_hazard_rate
     specs["informed_shares_in_ages"] = informed_shares_in_ages
     return specs
-
-
-# Keep old function name for backward compatibility during transition
-def add_informed_process_specs(specs, path_dict):
-    """Legacy function name - redirects to new function."""
-    return add_erp_belief_specs(specs, path_dict)

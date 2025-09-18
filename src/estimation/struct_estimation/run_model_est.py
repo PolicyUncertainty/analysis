@@ -6,6 +6,7 @@ from estimation.struct_estimation.start_params_and_bounds.param_lists import (
     men_disutil_firing,
     men_job_offer_params,
     women_disutil_firing,
+    women_job_offer_old_age_params,
     women_job_offer_params,
 )
 from set_paths import create_path_dict
@@ -17,57 +18,22 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
     load_and_set_start_params,
 )
 
-param_lists = {
-    "men": {
-        "all": men_disutil_firing + men_job_offer_params,
-    },
-    "women": {
-        "all": women_disutil_firing + women_job_offer_params,
-    },
-    "all": {
-        "all": men_disutil_firing
-        + men_job_offer_params
-        + women_disutil_firing
-        + women_job_offer_params,
-    },
-}
-
-model_name = "all_3_cobb"
-if "_men" in model_name:
-    sex_type = "men"
-elif "_women" in model_name:
-    sex_type = "women"
-else:
-    sex_type = "all"
-
-# Determine education type
-if "low" in model_name:
-    edu_type = "low"
-elif "high" in model_name:
-    edu_type = "high"
-else:
-    edu_type = "all"
-
-params_to_estimate_names = param_lists[sex_type][edu_type]
-
-
-if "_add" in model_name:
-    util_type = "add"
-elif "_cobb" in model_name:
-    util_type = "cobb"
-else:
-    raise ValueError("unknown model")
-
-print(f"Running estimation for model: {model_name}", flush=True)
+model_name = "old_add"
+params_to_estimate_names = women_job_offer_old_age_params + women_disutil_firing
+sex_type = "all"
+edu_type = "all"
+util_type = "add"
 
 LOAD_LAST_ESTIMATE = False
 LOAD_SOL_MODEL = True
 SAVE_RESULTS = True
 USE_WEIGHTS = False
 
+print(f"Running estimation for model: {model_name}", flush=True)
+
 if LOAD_LAST_ESTIMATE:
     last_estimate = pkl.load(
-        open(paths_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
+        open(paths_dict["struct_results"] + f"est_params_all_3_add.pkl", "rb")
     )
 else:
     last_estimate = None
@@ -88,29 +54,32 @@ estimation_results, end_params = estimate_model(
     sex_type=sex_type,
     edu_type=edu_type,
     util_type=util_type,
-    slow_version=True,
-    scale_opt=True,
-    multistart=True,
+    old_only=True,
+    print_men_examples=False,
+    print_women_examples=True,
+    slow_version=False,
+    scale_opt=False,
+    multistart=False,
 )
 print(estimation_results)
 
-# %% Set paths of project
-from specs.derive_specs import generate_derived_and_data_derived_specs
-
-specs = generate_derived_and_data_derived_specs(paths_dict)
-
-
-create_fit_plots(
-    path_dict=paths_dict,
-    specs=specs,
-    params=end_params,
-    model_name=model_name,
-    load_sol_model=True,
-    load_solution=None,
-    load_data_from_sol=False,
-    sex_type=sex_type,
-    edu_type=edu_type,
-)
+# # %% Set paths of project
+# from specs.derive_specs import generate_derived_and_data_derived_specs
+#
+# specs = generate_derived_and_data_derived_specs(paths_dict)
+#
+#
+# create_fit_plots(
+#     path_dict=paths_dict,
+#     specs=specs,
+#     params=end_params,
+#     model_name=model_name,
+#     load_sol_model=True,
+#     load_solution=None,
+#     load_data_from_sol=False,
+#     sex_type=sex_type,
+#     edu_type=edu_type,
+# )
 
 
 # %%

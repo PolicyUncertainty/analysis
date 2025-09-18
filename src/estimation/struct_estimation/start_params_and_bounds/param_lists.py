@@ -59,12 +59,14 @@ women_taste = [
     "taste_shock_scale_women",
 ]
 
-women_job_offer_params = [
+women_job_offer_old_age_params = [
     "job_finding_logit_const_women",
     "job_finding_logit_high_educ_women",
     "job_finding_logit_good_health_women",
-    "job_finding_logit_age_women",
     "job_finding_logit_age_above_55_women",
+]
+women_job_offer_params = women_job_offer_old_age_params + [
+    "job_finding_logit_age_women"
 ]
 
 women_disability_params = [

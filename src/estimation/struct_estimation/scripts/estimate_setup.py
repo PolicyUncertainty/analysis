@@ -41,6 +41,7 @@ def estimate_model(
     print_women_examples=False,
     use_observed_data=True,
     sim_data=None,
+    old_only=False,
     sex_type="all",
     edu_type="all",
     util_type="add",
@@ -101,6 +102,7 @@ def estimate_model(
         print_men_examples=print_men_examples,
         print_women_examples=print_women_examples,
         use_observed_data=use_observed_data,
+        old_only=old_only,
         sim_data=sim_data,
         sex_type=sex_type,
         edu_type=edu_type,
@@ -166,6 +168,7 @@ class est_class_from_paths:
         sim_data=None,
         use_observed_data=True,
         slow_version=False,
+        old_only=False,
         sex_type="all",
         edu_type="all",
         util_type="add",
@@ -218,7 +221,8 @@ class est_class_from_paths:
         )
         # Already retired individuals hold no identification
         data_decision = data_decision[data_decision["lagged_choice"] != 0]
-        # data_decision = data_decision[data_decision["age"] >= 55]
+        if old_only:
+            data_decision = data_decision[data_decision["age"] >= 55]
         print(data_decision.groupby("sex").size())
         # Create states dict
         states_dict = create_states_dict(data_decision, model_class=model)

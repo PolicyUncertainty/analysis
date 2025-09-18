@@ -64,5 +64,8 @@ def drop_missings(df, vars_to_check):
     for var in vars_to_check:
         before = len(df)
         df = df[df[var].notna()]
-        _print_filter(before, len(df), f"observations left after dropping people with missing {var} data")
+        if before == len(df):
+            continue
+        else:
+            _print_filter(before, len(df), f"observations left after dropping people with missing {var} data")
     return df

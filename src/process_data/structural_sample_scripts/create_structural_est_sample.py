@@ -210,8 +210,8 @@ def create_structural_est_sample(
         "children": "float64",
         # "surveyed_health": "int8",
         "last_year_pension": "float64",
-        "pseudo_pid": "int32",
-        "pseudo_hid": "int32",
+        "pseudo_pid": "Int32",
+        "pseudo_hid": "Int32",
     }
 
     df["hh_net_income"] /= specs["wealth_unit"]
@@ -395,6 +395,25 @@ def create_pseudo_ids(df):
     """This function creates a pseudo pid and a pseudo hid for each individual and household.
     Pseudo ids are ascending integers starting from 1.
     """
-    df["pseudo_pid"] = df["pid"].astype("category").cat.codes + 1
-    df["pseudo_hid"] = df["hid"].astype("category").cat.codes + 1
+    import numpy as np
+    # If pid/hid are in the index, get them from there
+    if "pid" in df.index.names:
+        pid_vals = df.index.get_level_values("pid")
+    else:
+        pid_vals = df["pid"]
+    if "hid" in df.index.names:
+        hid_vals = df.index.get_level_values("hid")
+    else:
+        hid_vals = df["hid"]
+
+    # Use numpy array to avoid index alignment issues
+    pseudo_pid = pd.Series(pid_vals).astype("category").cat.codes.to_numpy()
+    pseudo_hid = pd.Series(hid_vals).astype("category").cat.codes.to_numpy()
+
+    # Replace -1 (for missing) with np.nan, then add 1
+    pseudo_pid = np.where(pseudo_pid == -1, np.nan, pseudo_pid + 1)
+    pseudo_hid = np.where(pseudo_hid == -1, np.nan, pseudo_hid + 1)
+
+    df["pseudo_pid"] = pseudo_pid
+    df["pseudo_hid"] = pseudo_hid
     return df

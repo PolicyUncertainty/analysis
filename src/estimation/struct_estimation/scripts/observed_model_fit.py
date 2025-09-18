@@ -206,8 +206,9 @@ def plot_retirement_fit(
     for sex_var in specs["sex_grid"]:
         sex_label = specs["sex_labels"][sex_var]
 
-        if sex_var == 0:
-            choice_shares_est.drop("Part-time", axis=1, inplace=True)
+        # breakpoint()
+        # if sex_var == 0:
+        #     choice_shares_est.drop("Part-time", axis=1, inplace=True)
 
         choice_shares_est_to_plot = choice_shares_est.loc[sex_var].reindex(diffs)
         choices_shares_obs_to_plot = choices_shares_obs.loc[sex_var].reindex(diffs)

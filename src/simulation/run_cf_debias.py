@@ -19,34 +19,27 @@ import pickle as pkl
 
 import numpy as np
 
-from simulation.tables.cv import calc_compensated_variation
 from simulation.figures.retirement_plot import plot_retirement_difference
 from simulation.sim_tools.calc_life_time_results import add_new_life_cycle_results
 from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
+from simulation.tables.cv import calc_compensated_variation
 
 # %%
 # Set specifications
 seeed = 123
-model_name = specs["model_name"]
+model_name = "all_men_3"
+men_only = True
 load_model = True  # informed state as type
-load_unc_solution = True  # baseline solution conntainer
-load_df_biased = None
+load_unc_solution = False  # baseline solution conntainer
+load_df_biased = False
 load_df_unbiased = (
-    None  # True = load existing df, False = create new df, None = create but not save
+    False  # True = load existing df, False = create new df, None = create but not save
 )
 
 
 # Load params
-# params = pkl.load(
-#     open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
-# )
-
-from estimation.struct_estimation.map_params_to_current import (
-    merge_men_and_women_params,
-)
-
-params = merge_men_and_women_params(
-    path_dict=path_dict, ungendered_model_name=model_name
+params = pkl.load(
+    open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
 )
 
 # Create life cylce df object which is None.
@@ -74,6 +67,7 @@ for i, sra in enumerate(sra_at_63):
         only_informed=False,
         solution_exists=load_unc_solution,
         sol_model_exists=load_model,
+        men_only=men_only,
     )
 
     df_base = df_base.reset_index()

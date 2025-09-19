@@ -41,7 +41,10 @@ def estimate_model(
     print_women_examples=False,
     use_observed_data=True,
     sim_data=None,
-    men_only=False,
+    old_only=False,
+    sex_type="all",
+    edu_type="all",
+    util_type="add",
     scale_opt=False,
     multistart=False,
     slow_version=False,
@@ -99,9 +102,12 @@ def estimate_model(
         print_men_examples=print_men_examples,
         print_women_examples=print_women_examples,
         use_observed_data=use_observed_data,
+        old_only=old_only,
         sim_data=sim_data,
-        men_only=men_only,
+        sex_type=sex_type,
+        edu_type=edu_type,
         slow_version=slow_version,
+        util_type=util_type,
     )
 
     if supply_jacobian:
@@ -113,7 +119,7 @@ def estimate_model(
         add_kwargs["scaling"] = om.ScalingOptions(method="bounds")
 
     if multistart:
-        add_kwargs["multistart"] = (om.MultistartOptions(n_samples=10, seed=0),)
+        add_kwargs["multistart"] = om.MultistartOptions(n_samples=5, seed=0)
 
     result = om.minimize(
         fun=est_class.crit_func,
@@ -143,7 +149,7 @@ def estimate_model(
         weights=est_class.weights,
         file_append=file_append,
     )
-    return result
+    return result, start_params_all
 
 
 class est_class_from_paths:
@@ -161,8 +167,11 @@ class est_class_from_paths:
         save_results=True,
         sim_data=None,
         use_observed_data=True,
-        men_only=False,
         slow_version=False,
+        old_only=False,
+        sex_type="all",
+        edu_type="all",
+        util_type="add",
     ):
         self.iter_count = 0
         self.save_results = save_results
@@ -192,7 +201,9 @@ class est_class_from_paths:
             custom_resolution_age=None,
             load_model=load_model,
             sim_specs=None,
-            men_only=men_only,
+            sex_type=sex_type,
+            edu_type=edu_type,
+            util_type=util_type,
         )
 
         if use_observed_data:
@@ -205,20 +216,21 @@ class est_class_from_paths:
                 raise ValueError("If not using observed data, sim_data must be given.")
             data_decision = sim_data.copy()
 
-        if men_only:
-            data_decision = data_decision[data_decision["sex"] == 0]
-        else:
-            pass
-
+        data_decision = filter_data_by_type(
+            df=data_decision, sex_type=sex_type, edu_type=edu_type
+        )
         # Already retired individuals hold no identification
         data_decision = data_decision[data_decision["lagged_choice"] != 0]
+        if old_only:
+            data_decision = data_decision[data_decision["age"] >= 55]
+
         # Create states dict
         states_dict = create_states_dict(data_decision, model_class=model)
 
         if use_weights:
             raise ValueError("Weights currently not supported.")
-            self.weights = data_decision["age_weights"].values
-            self.weight_sum = np.sum(self.weights)
+            # self.weights = data_decision["age_weights"].values
+            # self.weight_sum = np.sum(self.weights)
         else:
             self.weights = np.ones(data_decision.shape[0])
             self.weight_sum = data_decision.shape[0]
@@ -468,3 +480,25 @@ def get_gendered_params(params_to_estimate_names, append):
         params["other_params"] = other_params
 
     return params
+
+
+def filter_data_by_type(df, sex_type, edu_type):
+    if sex_type == "men":
+        df = df[df["sex"] == 0]
+    elif sex_type == "women":
+        df = df[df["sex"] == 1]
+    elif sex_type == "all":
+        pass
+    else:
+        raise ValueError("sex_type not recognized.")
+
+    if edu_type == "low":
+        df = df[df["education"] == 0]
+    elif edu_type == "high":
+        df = df[df["education"] == 1]
+    elif edu_type == "all":
+        pass
+    else:
+        raise ValueError("edu_type not recognized.")
+
+    return df

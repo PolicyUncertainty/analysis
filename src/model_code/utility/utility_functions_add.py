@@ -58,8 +58,8 @@ def utility_func_alive(
     params,
     model_specs,
 ):
-    """Calculate the choice specific cobb-douglas utility, i.e. u =
-    ((c*eta/consumption_scale)^(1-mu))/(1-mu) ."""
+    """Calculate the choice specific additive utility, i.e. u =
+    ((c/consumption_scale)^(1-mu))/(1-mu) - disutility_work ."""
     # gather params
     mu = jax.lax.select(
         education == 1, on_true=params["mu_high"], on_false=params["mu_low"]
@@ -143,7 +143,8 @@ def marginal_utility_function_alive(
     mu = jax.lax.select(
         education == 1, on_true=params["mu_high"], on_false=params["mu_low"]
     )
-    marg_util_mu_not_one = ((1 / cons_scale) ** (1 - mu)) * (consumption ** (-mu))
+
+    marg_util_mu_not_one = (consumption / cons_scale) ** (-mu) / cons_scale
 
     marg_util = jax.lax.select(
         jnp.allclose(mu, 1),
@@ -173,9 +174,8 @@ def inverse_marginal_func(
     mu = jax.lax.select(
         education == 1, on_true=params["mu_high"], on_false=params["mu_low"]
     )
-    consumption_mu_not_one = marginal_utility ** (-1 / mu) * (1 / cons_scale) ** (
-        (1 - mu) / mu
-    )
+
+    consumption_mu_not_one = (marginal_utility * cons_scale) ** (-1 / mu) * cons_scale
     consumption = jax.lax.select(
         jnp.allclose(mu, 1), 1 / marginal_utility, consumption_mu_not_one
     )
@@ -194,27 +194,34 @@ def disutility_work(
 
     good_health = health == model_specs["good_health_var"]
 
-    # reading parameters
-    disutil_ft_work_men = params["disutil_ft_work_good_men"] * good_health + params[
-        "disutil_ft_work_bad_men"
-    ] * (1 - good_health)
+    # Men's disutility parameters by health (no longer education-specific)
+    disutil_ft_work_men = (
+        params["disutil_ft_work_bad_men"] * (1 - good_health)
+        + params["disutil_ft_work_good_men"] * good_health
+    )
+
     disutil_unemployment_men = params[
         "disutil_unemployed_good_men"
     ] * good_health + params["disutil_unemployed_bad_men"] * (1 - good_health)
 
-    disutil_sum_men = (
+    disutil_retirement_men = params["disutil_partner_retired_men"]
+
+    disutil_men = (
         disutil_unemployment_men * is_unemployed
         + disutil_ft_work_men * is_working_full_time
-        + partner_retired * params["disutil_partner_retired_men"] * retired
+        + partner_retired * disutil_retirement_men * retired
     )
 
+    # Women's disutility parameters by health (no longer education-specific)
     disutil_ft_work_women = params["disutil_ft_work_good_women"] * good_health + params[
         "disutil_ft_work_bad_women"
     ] * (1 - good_health)
+
     disutil_pt_work_women = params["disutil_pt_work_good_women"] * good_health + params[
         "disutil_pt_work_bad_women"
     ] * (1 - good_health)
 
+    # Children disutility remains education-specific as it's conceptually different
     disutil_children = params["disutil_children_ft_work_high"] * education + params[
         "disutil_children_ft_work_low"
     ] * (1 - education)
@@ -225,20 +232,23 @@ def disutility_work(
     ]
     disutil_children_ft = disutil_children * nb_children
 
-    disutil_unemployment = params[
+    disutil_unemployment_women = params[
         "disutil_unemployed_good_women"
     ] * good_health + params["disutil_unemployed_bad_women"] * (1 - good_health)
 
-    disutil_sum_women = (
-        disutil_unemployment * is_unemployed
+    disutil_retirement_women = params["disutil_partner_retired_women"]
+
+    disutil_women = (
+        disutil_unemployment_women * is_unemployed
         + disutil_pt_work_women * is_working_part_time
         + (disutil_ft_work_women + disutil_children_ft) * is_working_full_time
-        + partner_retired * params["disutil_partner_retired_women"] * retired
+        + partner_retired * disutil_retirement_women * retired
     )
 
-    # Select exponential factor by sex
-    disutility = jax.lax.select(sex == 0, disutil_sum_men, disutil_sum_women)
-    return disutility
+    # Select disutility by sex
+    disutil_work = jax.lax.select(sex == 0, disutil_men, disutil_women)
+
+    return disutil_work
 
 
 def consumption_scale(partner_state, sex, education, period, model_specs):

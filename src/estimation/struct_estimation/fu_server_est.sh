@@ -6,9 +6,9 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --time=7:00:00
-#SBATCH --mem=40GB
+#SBATCH --mem=35GB
 #SBATCH --partition=scavenger
-#SBATCH --gres=gpu:h100:1
+#SBATCH --gres=gpu:a5000:1
 #SBATCH --qos=standard
 
 module add Python/3.12.3-GCCcore-13.3.0

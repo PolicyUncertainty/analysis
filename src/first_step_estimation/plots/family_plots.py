@@ -3,18 +3,24 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from set_styles import set_colors, get_figsize
+from set_styles import get_figsize, set_colors
 
 
-def plot_family_transition_results(path_dict, specs, show=False, save=False):
+def plot_family_transition_results(
+    path_dict, specs, show=False, save=False, est_df=None
+):
     """Plot family transition estimation results including transition matrices and predicted vs empirical shares."""
 
-    # Load the transition matrix results
-    full_df = pd.read_csv(
-        path_dict["first_step_results"] + "partner_transition_matrix.csv",
-        index_col=[0, 1, 2, 3, 4],
-    )
-    full_df.index.names = [
+    if est_df is None:
+        # Load the transition matrix results
+        full_df = pd.read_csv(
+            path_dict["first_step_results"] + "partner_transition_matrix.csv",
+            index_col=[0, 1, 2, 3, 4],
+        )
+    else:
+        full_df = est_df
+    # Check if full_df index corresponds to expected levels
+    expected_index_levels = [
         "sex",
         "education",
         "age",
@@ -22,6 +28,10 @@ def plot_family_transition_results(path_dict, specs, show=False, save=False):
         "lead_partner_state",
     ]
 
+    if list(full_df.index.names) != expected_index_levels:
+        raise ValueError(
+            f"Index levels of full_df do not match expected levels: {expected_index_levels}"
+        )
     # Set up colors
     colors, line_styles = set_colors()
 
@@ -206,7 +216,11 @@ def plot_marriage_and_divorce(path_dict, specs, show=False, save=False):
     ages = np.arange(start_age, end_age + 1 - 10)
     initial_dist = np.zeros(specs["n_partner_states"])
 
-    fig, axs = plt.subplots(nrows=2, ncols=specs["n_partner_states"], figsize=get_figsize(2, specs["n_partner_states"]))
+    fig, axs = plt.subplots(
+        nrows=2,
+        ncols=specs["n_partner_states"],
+        figsize=get_figsize(2, specs["n_partner_states"]),
+    )
     colors, _ = set_colors()
 
     for partner_state, partner_label in enumerate(specs["partner_labels"]):
@@ -478,7 +492,11 @@ def plot_marriage_and_divorce(path_dict, specs, show=False, save=False):
     ages = np.arange(start_age, end_age + 1 - 10)
     initial_dist = np.zeros(specs["n_partner_states"])
 
-    fig, axs = plt.subplots(nrows=2, ncols=specs["n_partner_states"], figsize=get_figsize(2, specs["n_partner_states"]))
+    fig, axs = plt.subplots(
+        nrows=2,
+        ncols=specs["n_partner_states"],
+        figsize=get_figsize(2, specs["n_partner_states"]),
+    )
     colors, _ = set_colors()
 
     for partner_state, partner_label in enumerate(specs["partner_labels"]):

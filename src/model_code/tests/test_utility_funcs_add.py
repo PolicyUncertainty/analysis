@@ -58,7 +58,6 @@ def test_consumption_cale(partner_state, sex, education, period, paths_and_specs
     np.testing.assert_almost_equal(cons_scale, np.sqrt(hh_size))
 
 
-# """
 @pytest.mark.parametrize(
     "consumption, sex, partner_state, education, health, period, disutil_work, disutil_unemployed, mu",
     list(
@@ -90,13 +89,13 @@ def test_utility_func(
     params = {
         "mu_low": mu,
         "mu_high": mu + 1,
-        # Men
+        # Men - Health specific (no longer education-specific)
         "disutil_ft_work_good_men": disutil_work + 1,
         "disutil_ft_work_bad_men": disutil_work,
         "disutil_unemployed_bad_men": disutil_unemployed,
         "disutil_unemployed_good_men": disutil_unemployed,
         "disutil_partner_retired_men": -disutil_unemployed,
-        # Women
+        # Women - Health specific (no longer education-specific)
         "disutil_ft_work_good_women": disutil_work + 1,
         "disutil_ft_work_bad_women": disutil_work,
         "disutil_pt_work_good_women": disutil_work + 1,
@@ -119,18 +118,13 @@ def test_utility_func(
         model_specs=model_specs,
     )
 
-    # Read out disutil params
+    # Read out disutil params - now health-specific only
     health_str = "good" if health == 0 else "bad"
     sex_str = "men" if sex == 0 else "women"
-    edu_str = "low" if education == 0 else "high"
 
-    if sex == 0:
-        disutil_unemployment = params[f"disutil_unemployed_{health_str}_{sex_str}"]
-        disutil_factor_ft_work = params[f"disutil_ft_work_{health_str}_{sex_str}"]
-
-    else:
-        disutil_unemployment = params[f"disutil_unemployed_{health_str}_{sex_str}"]
-        disutil_factor_ft_work = params[f"disutil_ft_work_{health_str}_{sex_str}"]
+    disutil_unemployment = params[f"disutil_unemployed_{health_str}_{sex_str}"]
+    disutil_factor_ft_work = params[f"disutil_ft_work_{health_str}_{sex_str}"]
+    disutil_retirement = params[f"disutil_partner_retired_{sex_str}"]
 
     if sex == 1:
         has_partner_int = int(partner_state > 0)
@@ -154,6 +148,9 @@ def test_utility_func(
             / (1 - mu_edu)
             - disutil
         )
+
+    # Test retirement choice (choice = 0)
+    retirement_disutil = (partner_state == 2) * disutil_retirement
     np.testing.assert_almost_equal(
         utility_func(
             consumption=consumption,
@@ -166,9 +163,10 @@ def test_utility_func(
             params=params,
             model_specs=model_specs,
         ),
-        utility_lambda((partner_state == 2) * (-disutil_unemployed)),
+        utility_lambda(retirement_disutil),
     )
 
+    # Test unemployment choice (choice = 1)
     np.testing.assert_almost_equal(
         utility_func(
             consumption=consumption,
@@ -183,6 +181,8 @@ def test_utility_func(
         ),
         utility_lambda(disutil_unemployment),
     )
+
+    # Test part-time work for women (choice = 2)
     if sex == 1:
         disutil_factor_pt_work = params[f"disutil_pt_work_{health_str}_{sex_str}"]
 
@@ -201,6 +201,7 @@ def test_utility_func(
             utility_lambda(disutil_factor_pt_work),
         )
 
+    # Test full-time work (choice = 3)
     np.testing.assert_almost_equal(
         utility_func(
             consumption=consumption,
@@ -249,13 +250,13 @@ def test_marginal_utility(
     params = {
         "mu_low": mu,
         "mu_high": mu + 1,
-        # Men
+        # Men - Health specific (no longer education-specific)
         "disutil_ft_work_good_men": disutil_work + 1,
         "disutil_ft_work_bad_men": disutil_work,
         "disutil_unemployed_bad_men": disutil_unemployed,
         "disutil_unemployed_good_men": disutil_unemployed,
         "disutil_partner_retired_men": -disutil_unemployed,
-        # Women
+        # Women - Health specific (no longer education-specific)
         "disutil_ft_work_good_women": disutil_work + 1,
         "disutil_ft_work_bad_women": disutil_work,
         "disutil_pt_work_good_women": disutil_work + 1,
@@ -269,7 +270,7 @@ def test_marginal_utility(
         "kappa": 21,
     }
 
-    random_choice = np.random.choice(np.array([0, 1, 2]))
+    random_choice = np.random.choice(np.array([0, 1, 2, 3]))
     marg_util_jax = jax.jacfwd(utility_func, argnums=0)(
         consumption,
         sex,
@@ -324,13 +325,13 @@ def test_inv_marginal_utility(
     params = {
         "mu_low": mu,
         "mu_high": mu + 1,
-        # Men
+        # Men - Health specific (no longer education-specific)
         "disutil_ft_work_good_men": disutil_work + 1,
         "disutil_ft_work_bad_men": disutil_work,
         "disutil_unemployed_bad_men": disutil_unemployed,
         "disutil_unemployed_good_men": disutil_unemployed,
         "disutil_partner_retired_men": -disutil_unemployed,
-        # Women
+        # Women - Health specific (no longer education-specific)
         "disutil_ft_work_good_women": disutil_work + 1,
         "disutil_ft_work_bad_women": disutil_work,
         "disutil_pt_work_good_women": disutil_work + 1,

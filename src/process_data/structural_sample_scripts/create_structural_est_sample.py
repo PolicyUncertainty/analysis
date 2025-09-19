@@ -29,11 +29,9 @@ from process_data.soep_vars.partner_code import (
     correct_partner_state,
     create_partner_state,
 )
+from process_data.soep_vars.wealth.flow_savings import create_flow_savings
 from process_data.soep_vars.wealth.linear_interpolation import (
     add_wealth_interpolate_and_deflate,
-)
-from process_data.soep_vars.wealth.flow_savings import (
-    create_flow_savings
 )
 from process_data.structural_sample_scripts.classify_reitrees import (
     add_very_long_insured_classification,
@@ -133,9 +131,11 @@ def create_structural_est_sample(
 
     # create experience and working years
     df = create_experience_and_working_years(df.copy(), filter_missings=True)
-    print_data_description(df, choice_breakdown=True, id_breakdown=True, state_description=False)
+    print_data_description(
+        df, choice_breakdown=True, id_breakdown=True, state_description=False
+    )
 
-    # Add wealth and flow savings 
+    # Add wealth and flow savings
     df = add_wealth_interpolate_and_deflate(
         df,
         paths,
@@ -146,8 +146,8 @@ def create_structural_est_sample(
     )
 
     df = create_flow_savings(df, specs)
-    
-    # Filter to above minimum age
+
+    # Now we can also kick out the buffer age for lagging
     df = filter_below_age(df, specs["start_age"])
 
     # We also delete now the observations with invalid data, which we left before to have a continuous panel
@@ -188,7 +188,11 @@ def create_structural_est_sample(
     # Create pseudo ids
     df = create_pseudo_ids(df)
 
-    # Rename columns
+    # Drop civil servants and self-employed
+    df = df[~(df["self_employed"] | df["civil_servant"])]
+    print(f"Dropping civil servants and self-employed, {len(df)} observations left.")
+
+    # Rename to monthly wage
     df.rename(
         columns={
             "pglabgro": "monthly_wage",
@@ -226,7 +230,9 @@ def create_structural_est_sample(
     )
 
     print(str(len(df)) + " left in final estimation sample.")
-    print_data_description(df, choice_breakdown=True, id_breakdown=True, state_description=False)
+    print_data_description(
+        df, choice_breakdown=True, id_breakdown=True, state_description=False
+    )
 
     all_type_dict = {
         **CORE_TYPE_DICT,
@@ -239,9 +245,6 @@ def create_structural_est_sample(
     df["year"] = df.index.get_level_values("syear").values
     df.reset_index(drop=True, inplace=True)
     df.to_csv(paths["struct_est_sample"])
-
-    # median wealth by age
-    # df["median_wealth"] = df.groupby("age")["wealth"].transform("median")
 
     return df
 
@@ -334,9 +337,11 @@ def load_and_merge_soep_core(path_dict, use_processed_pl):
     return merged_data
 
 
-def print_data_description(df, choice_breakdown=False, id_breakdown=False, state_description=False):
+def print_data_description(
+    df, choice_breakdown=False, id_breakdown=False, state_description=False
+):
     print("-" * 30)
-    
+
     if choice_breakdown:
         n_retirees = df.groupby("choice").size().loc[0]
         n_unemployed = df.groupby("choice").size().loc[1]
@@ -348,23 +353,30 @@ def print_data_description(df, choice_breakdown=False, id_breakdown=False, state
             + df.groupby(["choice", "lagged_choice"]).size().get((0, 3), 0)
         )
         print(
-        "Breakdown by choice:\n" + str(n_retirees) + " retirees [0] \n"
-        "--"
-        + str(n_fresh_retirees)
-        + " thereof fresh retirees [0, lagged =!= 0] \n"
-        + str(n_unemployed)
-        + " unemployed [1] \n"
-        + str(n_part_time)
-        + " part-time [2] \n"
-        + str(n_full_time)
-        + " full time [3]."
+            "Breakdown by choice:\n" + str(n_retirees) + " retirees [0] \n"
+            "--"
+            + str(n_fresh_retirees)
+            + " thereof fresh retirees [0, lagged =!= 0] \n"
+            + str(n_unemployed)
+            + " unemployed [1] \n"
+            + str(n_part_time)
+            + " part-time [2] \n"
+            + str(n_full_time)
+            + " full time [3]."
         )
         print("-" * 30)
 
     if id_breakdown:
-        print("Unique number of individuals (pid), individuals linked with pension records (rv_id), and households (hid):")
-        print("Number of unique pid: " + str(df.index.get_level_values("pid").nunique()))
-        print("Number of unique rv_id (linked pension records): " + str(df["rv_id"].nunique()))
+        print(
+            "Unique number of individuals (pid), individuals linked with pension records (rv_id), and households (hid):"
+        )
+        print(
+            "Number of unique pid: " + str(df.index.get_level_values("pid").nunique())
+        )
+        print(
+            "Number of unique rv_id (linked pension records): "
+            + str(df["rv_id"].nunique())
+        )
         print("Number of unique hid: " + str(df["hid"].nunique()))
         print("-" * 30)
 
@@ -385,10 +397,14 @@ def print_data_description(df, choice_breakdown=False, id_breakdown=False, state
             print(f"\nDescription of {var}:")
             print(df[var].describe())
             # value counts for non-float variables
-            if var in choice_vars + state_vars and not pd.api.types.is_float_dtype(df[var]):
+            if var in choice_vars + state_vars and not pd.api.types.is_float_dtype(
+                df[var]
+            ):
                 print(f"Value counts of {var}:")
                 print(df[var].value_counts().sort_index())
+
         print("-" * 30)
+        print("---------------------------")
 
 
 def create_pseudo_ids(df):
@@ -396,6 +412,7 @@ def create_pseudo_ids(df):
     Pseudo ids are ascending integers starting from 1.
     """
     import numpy as np
+
     # If pid/hid are in the index, get them from there
     if "pid" in df.index.names:
         pid_vals = df.index.get_level_values("pid")

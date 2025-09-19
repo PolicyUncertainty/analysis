@@ -54,7 +54,9 @@ def read_and_derive_specs(spec_path):
     specs["n_periods"] = specs["end_age"] - specs["start_age"] + 1
     # Number of education types and choices from labels
     specs["n_education_types"] = len(specs["education_labels"])
+    specs["education_grid"] = np.arange(specs["n_education_types"], dtype=int)
     specs["n_sexes"] = len(specs["sex_labels"])
+    specs["sex_grid"] = np.arange(specs["n_sexes"], dtype=int)
     specs["n_choices"] = len(specs["choice_labels"])
 
     # Process information from health labels

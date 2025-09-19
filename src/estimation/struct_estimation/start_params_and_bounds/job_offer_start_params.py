@@ -1,6 +1,12 @@
 import matplotlib.pyplot as plt
 from statsmodels import api as sm
 
+from model_code.stochastic_processes.job_offers import (
+    calc_job_finding_prob_men,
+    calc_job_finding_prob_women,
+    job_sep_probability,
+)
+
 
 def est_job_offer_params_full_obs(df, specs):
     # Filter for unemployed, because we only estimate job offer probs on them
@@ -20,7 +26,7 @@ def est_job_offer_params_full_obs(df, specs):
     # logit_df["above_60"] = (logit_df["age"] >= 60).astype(float)
     logit_df["good_health"] = (logit_df["health"] == 0).astype(float)
     logit_df["age_above_55"] = (logit_df["age"] >= 55) * (logit_df["age"] - 55)
-    logit_df["age_below_55"] = (logit_df["age"] < 55) * logit_df["age"]
+    # logit_df["age_below_55"] = (logit_df["age"] < 55) * logit_df["age"]
 
     logit_df = logit_df[logit_df["age"] < 65]
     logit_df["intercept"] = 1
@@ -37,22 +43,24 @@ def est_job_offer_params_full_obs(df, specs):
     ]
 
     job_offer_params = {}
+    fig, axs = plt.subplots(ncols=2, figsize=(8, 6))
+
     for sex_var, sex_append in enumerate(["men", "women"]):
         logit_df_gender = logit_df[logit_df["sex"] == sex_var].copy()
         logit_model = sm.Logit(
             logit_df_gender["work_start"], logit_df_gender[logit_vars]
         )
         logit_fitted = logit_model.fit()
-        # logit_df_gender["predicted_probs"] = logit_fitted.predict(
-        #     logit_df_gender[logit_vars]
-        # )
-        # fig, ax = plt.subplots(figsize=(8, 6))
-        # predicted_probs = logit_df_gender.groupby("age")["predicted_probs"].mean()
-        # observed_probs = logit_df_gender.groupby("age")["work_start"].mean()
-        # ax.plot(predicted_probs, label="Predicted", color="blue")
-        # ax.plot(observed_probs, label="Observed", color="orange", linestyle="--")
-        # ax.legend()
-        # plt.show()
+        # print(logit_fitted.summary())
+        logit_df_gender["predicted_probs"] = logit_fitted.predict(
+            logit_df_gender[logit_vars]
+        )
+        predicted_probs = logit_df_gender.groupby("age")["predicted_probs"].mean()
+        observed_probs = logit_df_gender.groupby("age")["work_start"].mean()
+        ax = axs[sex_var]
+        ax.plot(predicted_probs, label="Predicted", color="blue")
+        ax.plot(observed_probs, label="Observed", color="orange", linestyle="--")
+        ax.legend()
 
         params = logit_fitted.params
 
@@ -65,5 +73,27 @@ def est_job_offer_params_full_obs(df, specs):
             # f"job_finding_logit_below_55_{sex_append}": params["age_below_55"],
         }
         job_offer_params = {**job_offer_params, **gender_params}
+
+    # job_offer_prob_60_high_good = calc_job_finding_prob_men(
+    #     params=job_offer_params,
+    #     education=1,
+    #     good_health=1,
+    #     age=60,
+    # )
+    # print(
+    #     f"Job offer prob for 60 year old high educated men in good health: {job_offer_prob_60_high_good}",
+    #     flush=True,
+    # )
+    # job_offer_prob_60_high_good = calc_job_finding_prob_women(
+    #     params=job_offer_params,
+    #     education=1,
+    #     good_health=1,
+    #     age=60,
+    # )
+    # print(
+    #     f"Job offer prob for 60 year old high educated wo   men in good health: {job_offer_prob_60_high_good}",
+    #     flush=True,
+    # )
+    # plt.show()
 
     return job_offer_params

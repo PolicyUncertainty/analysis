@@ -11,8 +11,8 @@ specs = generate_derived_and_data_derived_specs(path_dict)
 
 
 model_name = specs["model_name"]
-load_df = True
-load_solution = True
+load_df = None
+load_solution = None
 load_sol_model = True
 
 
@@ -30,79 +30,92 @@ params = pickle.load(
 # )
 which_plots = "s"
 
-from simulation.figures.illustrate_sim_data import plot_sim_vars
+from simulation.figures.savings_rate import plot_savings
 
-if which_plots in ["a", "c"]:
-    plot_sim_vars(
-        path_dict,
-        specs,
-        params,
-        model_name,
-        plot_dead=False,
-        sim_var="consumption",
-        load_df=load_df,
-        load_solution=load_solution,
-        load_sol_model=load_sol_model,
-    )
-    # After running, we can set all to true
-    load_df = True
-    load_solution = True
-    load_sim_model = True
-    load_sol_model = True
-
-if which_plots in ["a", "u"]:
-    plot_sim_vars(
-        path_dict,
-        specs,
-        params,
-        model_name,
-        plot_dead=False,
-        sim_var="utility",
-        load_df=load_df,
-        load_solution=load_solution,
-        load_sol_model=load_sol_model,
-    )
-    # After running, we can set all to true
-    load_df = True
-    load_solution = True
-    load_sim_model = True
-    load_sol_model = True
-
-if which_plots in ["a", "w"]:
-    plot_sim_vars(
-        path_dict,
-        specs,
-        params,
-        model_name,
-        plot_dead=False,
-        sim_var="wealth_at_beginning",
-        load_df=load_df,
-        load_solution=load_solution,
-        load_sol_model=load_sol_model,
-    )
-    # After running, we can set all to true
-    load_df = True
-    load_solution = True
-    load_sim_model = True
-    load_sol_model = True
-
-if which_plots in ["a", "s"]:
-    plot_sim_vars(
-        path_dict,
-        specs,
-        params,
-        model_name,
-        plot_dead=False,
-        sim_var="net_hh_income",
-        load_df=load_df,
-        load_solution=load_solution,
-        load_sol_model=load_sol_model,
-    )
-    # After running, we can set all to true
-    load_df = True
-    load_solution = True
-    load_sim_model = True
-    load_sol_model = True
+plot_savings(
+    path_dict=path_dict,
+    specs=specs,
+    params=params,
+    model_name=model_name,
+    file_name="savings_rate_illustration",
+    load_df=load_df,
+    load_solution=load_solution,
+    load_sol_model=load_sol_model,
+)
 
 
-plt.show()
+#
+# if which_plots in ["a", "c"]:
+#     plot_sim_vars(
+#         path_dict,
+#         specs,
+#         params,
+#         model_name,
+#         plot_dead=False,
+#         sim_var="consumption",
+#         load_df=load_df,
+#         load_solution=load_solution,
+#         load_sol_model=load_sol_model,
+#     )
+#     # After running, we can set all to true
+#     load_df = True
+#     load_solution = True
+#     load_sim_model = True
+#     load_sol_model = True
+#
+# if which_plots in ["a", "u"]:
+#     plot_sim_vars(
+#         path_dict,
+#         specs,
+#         params,
+#         model_name,
+#         plot_dead=False,
+#         sim_var="utility",
+#         load_df=load_df,
+#         load_solution=load_solution,
+#         load_sol_model=load_sol_model,
+#     )
+#     # After running, we can set all to true
+#     load_df = True
+#     load_solution = True
+#     load_sim_model = True
+#     load_sol_model = True
+#
+# if which_plots in ["a", "w"]:
+#     plot_sim_vars(
+#         path_dict,
+#         specs,
+#         params,
+#         model_name,
+#         plot_dead=False,
+#         sim_var="wealth_at_beginning",
+#         load_df=load_df,
+#         load_solution=load_solution,
+#         load_sol_model=load_sol_model,
+#     )
+#     # After running, we can set all to true
+#     load_df = True
+#     load_solution = True
+#     load_sim_model = True
+#     load_sol_model = True
+#
+# if which_plots in ["a", "s"]:
+#     plot_sim_vars(
+#         path_dict,
+#         specs,
+#         params,
+#         model_name,
+#         plot_dead=False,
+#         sim_var="net_hh_income",
+#         load_df=load_df,
+#         load_solution=load_solution,
+#         load_sol_model=load_sol_model,
+#     )
+#     # After running, we can set all to true
+#     load_df = True
+#     load_solution = True
+#     load_sim_model = True
+#     load_sol_model = True
+#
+#
+# plt.show()

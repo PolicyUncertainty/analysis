@@ -4,11 +4,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from set_styles import set_colors, get_figsize
+from set_styles import get_figsize, set_colors
 
 JET_COLOR_MAP, LINE_STYLES = set_colors()
-from estimation.struct_estimation.scripts.estimate_setup import generate_print_func
-from model_code.specify_model import specify_and_solve_model
+from estimation.struct_estimation.scripts.estimate_setup import (
+    filter_data_by_type,
+    generate_print_func,
+)
+from model_code.specify_model import specify_and_solve_model, specify_type_grids
 from model_code.transform_data_from_model import (
     calc_choice_probs_for_df,
     load_scale_and_correct_data,
@@ -17,7 +20,16 @@ from set_paths import get_model_results_path
 
 
 def create_fit_plots(
-    path_dict, specs, model_name, load_sol_model, load_solution, load_data_from_sol
+    path_dict,
+    specs,
+    params,
+    model_name,
+    load_sol_model,
+    load_solution,
+    load_data_from_sol,
+    sex_type="all",
+    edu_type="all",
+    util_type="add",
 ):
     # check if folder of model objects exits:
     model_folder = get_model_results_path(path_dict, model_name)
@@ -28,9 +40,6 @@ def create_fit_plots(
         )
 
     else:
-        params = pickle.load(
-            open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
-        )
         generate_print_func(params.keys(), specs)(params)
 
         model_solved = specify_and_solve_model(
@@ -42,17 +51,28 @@ def create_fit_plots(
             load_model=load_sol_model,
             load_solution=load_solution,
             sim_specs=None,
+            edu_type=edu_type,
+            sex_type=sex_type,
+            util_type=util_type,
             debug_info="all",
         )
 
         data_decision = load_scale_and_correct_data(
             path_dict=path_dict, model_class=model_solved
         )
+        data_decision = filter_data_by_type(
+            df=data_decision, sex_type=sex_type, edu_type=edu_type
+        )
 
         data_decision = calc_choice_probs_for_df(
             df=data_decision, params=params, model_solved=model_solved
         )
         data_decision.to_csv(model_folder["model_results"] + "data_with_probs.csv")
+
+    specs["sex_grid"], specs["education_grid"] = specify_type_grids(
+        sex_type=sex_type,
+        edu_type=edu_type,
+    )
 
     plot_life_cycle_choice_probs(
         specs=specs,
@@ -80,13 +100,17 @@ def plot_life_cycle_choice_probs(
     df_int = data_decision[data_decision["age"] < 75].copy()
 
     choice_share_labels = ["Choice Share Men", "Choice Share Women"]
-    for sex_var, sex_label in enumerate(specs["sex_labels"]):
+    for sex_var in specs["sex_grid"]:
+        sex_label = specs["sex_labels"][sex_var]
         if sex_var == 0:
             n_choices = 3
         else:
             n_choices = 4
-        fig, axes = plt.subplots(ncols=n_choices, figsize=get_figsize(ncols=n_choices, nrows=1))
-        for edu_var, edu_label in enumerate(specs["education_labels"]):
+        fig, axes = plt.subplots(
+            ncols=n_choices, figsize=get_figsize(ncols=n_choices, nrows=1)
+        )
+        for edu_var in specs["education_grid"]:
+            edu_label = specs["education_labels"][edu_var]
             data_subset = df_int[
                 (df_int["education"] == edu_var) & (df_int["sex"] == sex_var)
             ]
@@ -161,17 +185,29 @@ def plot_retirement_fit(
         .unstack()
         .fillna(0.0)
     )
-    choices_shares_obs.columns = specs["choice_labels"]
+    rename_map = {
+        key: choice_label for key, choice_label in enumerate(specs["choice_labels"])
+    }
+
+    choices_shares_obs.rename(rename_map, axis=1, inplace=True)
 
     # Create a stacked bar plot with each choice sum on top of each other
     choice_shares_est = data_subset.groupby(["sex", "SRA_diff"])[
         [f"choice_{choice}" for choice in range(specs["n_choices"])]
     ].sum()
-    choice_shares_est.columns = specs["choice_labels"]
+    rename_map_2 = {
+        f"choice_{key}": choice_label
+        for key, choice_label in enumerate(specs["choice_labels"])
+    }
+    choice_shares_est.rename(rename_map_2, axis=1, inplace=True)
 
     fig, axs = plt.subplots(nrows=2, figsize=(14, 8))
 
-    for sex_var, sex_label in enumerate(specs["sex_labels"]):
+    for sex_var in specs["sex_grid"]:
+        sex_label = specs["sex_labels"][sex_var]
+
+        # if sex_var == 0:
+        #     choice_shares_est.drop("Part-time", axis=1, inplace=True)
 
         choice_shares_est_to_plot = choice_shares_est.loc[sex_var].reindex(diffs)
         choices_shares_obs_to_plot = choices_shares_obs.loc[sex_var].reindex(diffs)

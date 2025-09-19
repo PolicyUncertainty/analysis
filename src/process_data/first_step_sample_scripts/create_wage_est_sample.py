@@ -5,7 +5,7 @@ import pandas as pd
 from process_data.auxiliary.filter_data import filter_data
 from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.experience import sum_experience_variables
-from process_data.soep_vars.work_choices import create_choice_variable
+from process_data.soep_vars.work_choices import create_choice_and_employment_status
 
 
 def create_wage_est_sample(paths, specs, load_data=False):
@@ -25,7 +25,7 @@ def create_wage_est_sample(paths, specs, load_data=False):
     df = filter_data(df, specs, lag_and_lead_buffer_years=False)
 
     # create labor choice, keep only working (2: part-time, 3: full-time)
-    df = create_choice_variable(df)
+    df = create_choice_and_employment_status(df)
 
     # education
     df = create_education_type(df, filter_missings=True)

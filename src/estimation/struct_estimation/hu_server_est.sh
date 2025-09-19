@@ -7,12 +7,12 @@
 #SBATCH --ntasks=1
 #SBATCH --time=9:00:00
 #SBATCH --mem=80GB
-#SBATCH --partition=gpu_h100
-#SBATCH --gres=gpu:h100nvl:2
+#SBATCH --partition=gpu_a100
+#SBATCH --gres=gpu:a10080gb:1
 #SBATCH --qos=standard
 
 module add cuda/12.4.1
 
 python run_model_est.py
-#python run_fit_plot.py
+# python run_fit_plot.py
 #python ../../simulation/run_model_fit_sim.py

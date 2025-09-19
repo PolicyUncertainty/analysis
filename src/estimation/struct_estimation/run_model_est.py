@@ -1,18 +1,13 @@
 # Set paths of project
 import pickle as pkl
+import sys
 
 from estimation.struct_estimation.start_params_and_bounds.param_lists import (
-    men_disability_params,
-    men_disutil_params,
-    men_job_finding_params,
-    men_SRA_firing,
-    men_taste,
-    wealth_params,
-    women_disability_params,
-    women_disutil_params,
+    men_disutil_firing,
+    men_job_offer_params,
+    women_disutil_firing,
+    women_job_offer_old_age_params,
     women_job_offer_params,
-    women_SRA_firing,
-    women_taste,
 )
 from set_paths import create_path_dict
 
@@ -23,33 +18,22 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
     load_and_set_start_params,
 )
 
-params_to_estimate_names = (
-    wealth_params
-    + men_disutil_params
-    + men_SRA_firing
-    + men_taste
-    + men_job_finding_params
-    + men_disability_params
-    + women_SRA_firing
-    + women_taste
-    + women_disutil_params
-    + women_job_offer_params
-    + women_disability_params
-)
-
-
-model_name = "men_3"
-
-print(f"Running estimation for model: {model_name}", flush=True)
+model_name = "old_add"
+params_to_estimate_names = women_job_offer_old_age_params + women_disutil_firing
+sex_type = "all"
+edu_type = "all"
+util_type = "add"
 
 LOAD_LAST_ESTIMATE = False
 LOAD_SOL_MODEL = True
 SAVE_RESULTS = True
 USE_WEIGHTS = False
 
+print(f"Running estimation for model: {model_name}", flush=True)
+
 if LOAD_LAST_ESTIMATE:
     last_estimate = pkl.load(
-        open(paths_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
+        open(paths_dict["struct_results"] + f"est_params_all_3_add.pkl", "rb")
     )
 else:
     last_estimate = None
@@ -58,7 +42,7 @@ else:
 start_params_all = load_and_set_start_params(paths_dict)
 
 # Run estimation
-estimation_results = estimate_model(
+estimation_results, end_params = estimate_model(
     paths_dict,
     params_to_estimate_names=params_to_estimate_names,
     file_append=model_name,
@@ -67,25 +51,35 @@ estimation_results = estimate_model(
     use_weights=USE_WEIGHTS,
     last_estimate=last_estimate,
     save_results=SAVE_RESULTS,
-    men_only=True,
-    slow_version=True,
+    sex_type=sex_type,
+    edu_type=edu_type,
+    util_type=util_type,
+    old_only=True,
+    print_men_examples=False,
+    print_women_examples=True,
+    slow_version=False,
+    scale_opt=False,
+    multistart=False,
 )
 print(estimation_results)
 
-# %% Set paths of project
-from specs.derive_specs import generate_derived_and_data_derived_specs
-
-specs = generate_derived_and_data_derived_specs(paths_dict)
-
-
-create_fit_plots(
-    path_dict=paths_dict,
-    specs=specs,
-    model_name=model_name,
-    load_sol_model=True,
-    load_solution=None,
-    load_data_from_sol=False,
-)
+# # %% Set paths of project
+# from specs.derive_specs import generate_derived_and_data_derived_specs
+#
+# specs = generate_derived_and_data_derived_specs(paths_dict)
+#
+#
+# create_fit_plots(
+#     path_dict=paths_dict,
+#     specs=specs,
+#     params=end_params,
+#     model_name=model_name,
+#     load_sol_model=True,
+#     load_solution=None,
+#     load_data_from_sol=False,
+#     sex_type=sex_type,
+#     edu_type=edu_type,
+# )
 
 
 # %%

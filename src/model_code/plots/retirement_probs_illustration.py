@@ -7,7 +7,7 @@ from model_code.state_space.experience import (
     construct_experience_years,
     scale_experience_years,
 )
-from set_styles import set_colors, get_figsize
+from set_styles import get_figsize, set_colors
 
 
 def plot_solution(model_solved, specs, path_dict):
@@ -69,8 +69,8 @@ def plot_solution(model_solved, specs, path_dict):
         )
 
         ax.plot(
-            endog_grid[0, exp_id, 26:30],
-            value_grid[0, exp_id, 26:30],
+            endog_grid[0, exp_id, :],
+            value_grid[0, exp_id, :],
             label=f"Exp years {exp_years} ret",
         )
 

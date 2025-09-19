@@ -23,7 +23,7 @@ def define_experience_grid(specs):
     experience_grid[0] = 0
     experience_grid[1] = 0.15
     experience_grid[-3] = 0.85
-    return experience_grid
+    return jnp.asarray(experience_grid)
 
 
 def get_next_period_experience(
@@ -62,7 +62,6 @@ def get_next_period_experience(
         "exp_increase_part_time"
     ]
     exp_years_this_period = exp_years_last_period + exp_update
-
     # Calculate experience in the case of fresh retirement
     # We track all deductions and bonuses of the retirement decision through an adjusted
     # experience stock

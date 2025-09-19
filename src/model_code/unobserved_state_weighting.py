@@ -27,12 +27,9 @@ def create_unobserved_state_specs(data_decision):
 
         # For the informed state we use the share of this period. The period in the kwargs is the one from
         # before (see assignment below).
-        current_age = model_specs["start_age"] + kwargs["period"] + 1
-        informed_share = model_specs["informed_shares_in_ages"][
-            current_age, kwargs["education"]
-        ]
+        prob_informed = kwargs["probability_informed"]
         informed_new = kwargs["informed_new"]
-        informed_weight = informed_share * informed_new + (1 - informed_share) * (
+        informed_weight = prob_informed * informed_new + (1 - prob_informed) * (
             1 - informed_new
         )
 
@@ -63,6 +60,7 @@ def create_unobserved_state_specs(data_decision):
         "policy_state": data_decision["policy_state"].values,
         "lagged_health": data_decision["lagged_health"].values,
         "lagged_choice": data_decision["lagged_choice"].values,
+        "probability_informed": data_decision["probability_informed"].values,
     }
 
     unobserved_state_specs = {

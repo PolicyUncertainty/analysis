@@ -60,6 +60,7 @@ def choice_probs_for_choice_vals(
         observed_choices=choice_vals,
         unobserved_state_specs=unobserved_state_specs,
         use_probability_of_observed_states=use_probability_of_observed_states,
+        return_weight_func=False,
     )
 
     choice_probs_observations = choice_prob_func(
@@ -132,6 +133,7 @@ def create_states_dict(df, model_class):
     states_dict["assets_begin_of_period"] = df["assets_begin_of_period"].values
     return states_dict
 
+
 def create_informed_probability(df, specs):
     """Predict informed probability by education and age using hazard rate model."""
     df = df.copy()
@@ -149,7 +151,7 @@ def create_informed_probability(df, specs):
         # Calculate periods since initial age (minimum age in belief data, i.e., 17)
         periods = ages - 17
 
-        # Calculate uninformed probability 
+        # Calculate uninformed probability
         initial_uninformed_share = 1 - initial_informed_share
         prob_uninformed = initial_uninformed_share * (1 - hazard_rate) ** periods
         prob_informed = 1 - prob_uninformed

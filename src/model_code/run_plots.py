@@ -51,21 +51,21 @@ from model_code.plots.plot_law_of_motion import plot_ret_experience_multi
 
 plot_ret_experience_multi(path_dict, specs, show=show_plots, save=save_plots)
 
-from model_code.plots.weights import plot_weights
-
-model = specify_model(
-    path_dict,
-    specs,
-    subj_unc=True,
-    custom_resolution_age=None,
-    sim_specs=None,
-    load_model=True,
-    debug_info=None,
-    sex_type="all",
-    edu_type="all",
-    util_type="add",
-)
-plot_weights(model, params, specs, path_dict)
+# from model_code.plots.weights import plot_weights
+#
+# model = specify_model(
+#     path_dict,
+#     specs,
+#     subj_unc=True,
+#     custom_resolution_age=None,
+#     sim_specs=None,
+#     load_model=True,
+#     debug_info=None,
+#     sex_type="all",
+#     edu_type="all",
+#     util_type="add",
+# )
+# plot_weights(model, params, specs, path_dict)
 
 from model_code.plots.retirement_probs_illustration import (
     plot_ret_probs_for_state,

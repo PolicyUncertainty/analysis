@@ -43,6 +43,7 @@ def plot_weights(model_class, params, specs, paths):
                 possible_states[poss_state_id][unobs_name],
                 weighting_vars_for_possible_states[poss_state_id][f"{unobs_name}_new"],
             ).all()
+
     for poss_state_id in range(len(possible_states)):
         name = ""
         for unobs_name in unobserved_state_specs["observed_bools_states"].keys():
@@ -54,5 +55,6 @@ def plot_weights(model_class, params, specs, paths):
             name += f"{unobs_name}_{unobs_val[0]}_"
 
         df[name + "weight"] = weights[:, poss_state_id]
-
+    integrate_weights = weights.sum(axis=1) * observed_weights
     df["observed_weight"] = observed_weights
+    # breakpoint()

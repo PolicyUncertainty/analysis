@@ -19,13 +19,14 @@ men_taste = [
     "taste_shock_scale_men",
 ]
 
-men_job_offer_params = [
+men_job_offer_old_age_params = [
     "job_finding_logit_const_men",
     "job_finding_logit_high_educ_men",
     "job_finding_logit_good_health_men",
-    "job_finding_logit_age_men",
     "job_finding_logit_age_above_55_men",
 ]
+
+men_job_offer_params = men_job_offer_old_age_params + ["job_finding_logit_age_men"]
 
 men_disability_params = [
     "disability_logit_const_men",
@@ -43,8 +44,8 @@ women_disutil_params = [
     "disutil_unemployed_good_women",
     "disutil_unemployed_bad_women",
     "disutil_partner_retired_women",
-    "disutil_children_ft_work_high",
-    "disutil_children_ft_work_low",
+    # "disutil_children_ft_work_high",
+    # "disutil_children_ft_work_low",
 ]
 
 women_SRA_firing = [

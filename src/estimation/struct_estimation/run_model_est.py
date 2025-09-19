@@ -4,8 +4,11 @@ import sys
 
 from estimation.struct_estimation.start_params_and_bounds.param_lists import (
     men_disutil_firing,
+    men_disutil_params,
+    men_job_offer_old_age_params,
     men_job_offer_params,
     women_disutil_firing,
+    women_disutil_params,
     women_job_offer_old_age_params,
     women_job_offer_params,
 )
@@ -18,14 +21,14 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
     load_and_set_start_params,
 )
 
-model_name = "old_add"
-params_to_estimate_names = women_job_offer_old_age_params + women_disutil_firing
-sex_type = "all"
+model_name = "old_25_men"
+params_to_estimate_names = men_job_offer_old_age_params + men_disutil_params
+sex_type = "men"
 edu_type = "all"
 util_type = "add"
 
 LOAD_LAST_ESTIMATE = False
-LOAD_SOL_MODEL = True
+LOAD_SOL_MODEL = False
 SAVE_RESULTS = True
 USE_WEIGHTS = False
 
@@ -55,7 +58,7 @@ estimation_results, end_params = estimate_model(
     edu_type=edu_type,
     util_type=util_type,
     old_only=True,
-    print_men_examples=False,
+    print_men_examples=True,
     print_women_examples=True,
     slow_version=False,
     scale_opt=False,

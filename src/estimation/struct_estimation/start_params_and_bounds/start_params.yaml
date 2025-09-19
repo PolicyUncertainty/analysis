@@ -1,7 +1,7 @@
 ---
 # Utility parameters
-mu_low: 1.5
-mu_high: 1.5
+mu_low: 2.5
+mu_high: 2.5
 
 # Full time work dis-utility men - Health specific
 disutil_ft_work_good_men: 1.0
@@ -43,11 +43,11 @@ kappa: 21
 taste_shock_scale_men: 0.3
 taste_shock_scale_women: 0.3
 
-# SRA firing params - Starting at intercept 2.0 (gives ~57% probability)
-SRA_firing_logit_intercept_men_low: 2.0
-SRA_firing_logit_intercept_men_high: 2.0
-SRA_firing_logit_intercept_women_low: 2.0
-SRA_firing_logit_intercept_women_high: 2.0
+# SRA firing params - Starting at intercept 4.5 (gives ~57% probability)
+SRA_firing_logit_intercept_men_low: 4.5
+SRA_firing_logit_intercept_men_high: 4.5
+SRA_firing_logit_intercept_women_low: 4.5
+SRA_firing_logit_intercept_women_high: 4.5
 
 # Job finding probability - men
 job_finding_logit_const_men: 0.5

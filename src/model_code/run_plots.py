@@ -9,7 +9,7 @@ from estimation.struct_estimation.scripts.estimate_setup import generate_print_f
 from estimation.struct_estimation.start_params_and_bounds.set_start_params import (
     load_and_set_start_params,
 )
-from model_code.specify_model import specify_and_solve_model
+from model_code.specify_model import specify_and_solve_model, specify_model
 from model_code.specify_simple_model import specify_and_solve_simple_model
 from set_paths import create_path_dict
 from set_styles import set_plot_defaults
@@ -45,10 +45,27 @@ generate_print_func(
     params.keys(), specs, print_men_examples=True, print_women_examples=True
 )(params)
 
+
 # Model solution plots (require solved model)
 from model_code.plots.plot_law_of_motion import plot_ret_experience_multi
 
 plot_ret_experience_multi(path_dict, specs, show=show_plots, save=save_plots)
+
+from model_code.plots.weights import plot_weights
+
+model = specify_model(
+    path_dict,
+    specs,
+    subj_unc=True,
+    custom_resolution_age=None,
+    sim_specs=None,
+    load_model=True,
+    debug_info=None,
+    sex_type="all",
+    edu_type="all",
+    util_type="add",
+)
+plot_weights(model, params, specs, path_dict)
 
 from model_code.plots.retirement_probs_illustration import (
     plot_ret_probs_for_state,

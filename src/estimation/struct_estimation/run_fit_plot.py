@@ -14,9 +14,9 @@ specs = generate_derived_and_data_derived_specs(path_dict)
 # Set run specs
 model_name = "old_25_add"
 print(f"Running model: {model_name}")
-load_sol_model = False
-load_solution = None
-load_data_from_sol = True
+load_sol_model = True
+load_solution = True
+load_data_from_sol = False
 
 # Load start params
 start_params_all = load_and_set_start_params(path_dict)

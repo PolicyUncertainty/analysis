@@ -22,7 +22,7 @@ def create_unobserved_state_specs(data_decision):
             education=kwargs["education"],
             policy_state=kwargs["policy_state"],
             period=kwargs["period"],
-            choice=kwargs["choice"],
+            choice=kwargs["lagged_choice"],
         )[job_offer_new]
 
         # For the informed state we use the share of this period. The period in the kwargs is the one from
@@ -56,12 +56,13 @@ def create_unobserved_state_specs(data_decision):
 
         return job_offer_weight * informed_weight * health_weight
 
-    relevant_prev_period_states_dict = {
+    relevant_vars_for_weighting = {
         "period": data_decision["period"].values - 1,
         "education": data_decision["education"].values,
         "sex": data_decision["sex"].values,
         "policy_state": data_decision["policy_state"].values,
         "lagged_health": data_decision["lagged_health"].values,
+        "lagged_choice": data_decision["lagged_choice"].values,
     }
 
     unobserved_state_specs = {
@@ -71,10 +72,7 @@ def create_unobserved_state_specs(data_decision):
             "health": (data_decision["health"] > -1).values,
         },
         "weight_func": weight_func,
-        "state_choices_weighing": {
-            "states": relevant_prev_period_states_dict,
-            "choices": data_decision["lagged_choice"].values,
-        },
+        "weighting_vars": relevant_vars_for_weighting,
         # Bad health is unobserved if it is either just bad or even disabled.
         "custom_unobserved_states": {
             "health": [1, 2],

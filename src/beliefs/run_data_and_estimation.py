@@ -31,14 +31,22 @@ alpha_heterogeneity_df = est_alpha_heterogeneity(path_dict, df=df_truncated_norm
 from beliefs.erp_beliefs.informed_state_transition import (
     calibrate_uninformed_hazard_rate_with_se,
 )
+from beliefs.erp_beliefs.uninformed_erp_beliefs import calculate_uninformed_erp_beliefs
 
 uninformed_params_df = calibrate_uninformed_hazard_rate_with_se(
     df, specs, calculate_se=False
 )
 
+# Calculate uninformed ERP beliefs (conditional averages)
+uninformed_erp_beliefs_df = calculate_uninformed_erp_beliefs(df, specs)
+
 # save results to beliefs_est_results
-params_df = pd.concat([sra_params_df, uninformed_params_df], ignore_index=True)
+params_df = pd.concat([sra_params_df, uninformed_params_df, uninformed_erp_beliefs_df], ignore_index=True)
 params_df.to_csv(path_dict["beliefs_est_results"] + "beliefs_parameters.csv", index=False)
+
+print("FINAL PARAMETER SUMMARY")
+print("="*60)
+print(params_df)
 
 # save heterogeneity results
 alpha_heterogeneity_df.to_csv(path_dict["beliefs_est_results"] + "alpha_heterogeneity_results.csv", index=False)

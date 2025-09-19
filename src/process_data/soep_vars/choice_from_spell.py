@@ -18,6 +18,8 @@ def create_choice_variable_from_artkalen(
     )
 
     if not load_artkalen_choice:
+        print("Creating artkalen choice variable. This might take a while...")
+        # Initialize columns
         df["choice"] = np.nan
         df["corrected_age"] = df["age"].astype(float)
         # With create artkalen choice
@@ -33,7 +35,7 @@ def create_choice_variable_from_artkalen(
         df[["art_choice", "corrected_age"]] = pd.read_pickle(
             path_dict["struct_data"] + "art_choice.pkl"
         )
-
+    df["corrected_age"] = df["corrected_age"].fillna(df["age"].astype(float))
     df["lagged_art_choice"] = df.groupby("pid")["art_choice"].shift(1)
 
     # Create pgen choice and overwrite

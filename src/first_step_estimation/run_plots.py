@@ -19,8 +19,9 @@ set_plot_defaults()
 # Note: Plots require estimation to be run first to generate necessary data files
 
 # wage plots (requires wage_estimation_sample_with_predictions.csv)
-from first_step_estimation.plots.wage_plots import plot_wage_regression_results
+from first_step_estimation.plots.wage_plots import plot_wage_regression_results, plot_wage_regression_by_experience
 plot_wage_regression_results(path_dict, specs, show=show_plots, save=save_plots)
+plot_wage_regression_by_experience(path_dict, specs, show=show_plots, save=save_plots)
 
 # partner wage plots (requires partner_wage_estimation_sample_with_predictions.csv)
 from first_step_estimation.plots.partner_wage_plots import plot_partner_wage_results

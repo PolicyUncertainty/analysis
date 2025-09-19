@@ -35,7 +35,11 @@ def create_partner_state(df, filter_missing=False):
 
 
 def correct_partner_state(full_df):
-
+    """This function corrects the partner state if it is missing in a year but
+    the partner state is the same in the year before and after.
+    Requires: 'pid', 'syear', 'partner_state'
+    Assumes that full_df is spanned (i.e. all years for each pid are present).
+    """
     # Lag and lead partner state
     lead_partner_state = full_df.groupby("pid")["partner_state"].shift(-1)
     lagged_parner_state = full_df.groupby("pid")["partner_state"].shift(1)

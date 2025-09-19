@@ -22,6 +22,7 @@ def add_wealth_interpolate_and_deflate(
     if load_wealth:
         wealth_data_full = pd.read_pickle(file_name)
     else:
+        print("Processing wealth data. This might take a while...")
         wealth_data = load_wealth_data(path_dict["soep_c38"])
         wealth_data_full = span_full_wealth_panel(wealth_data, specs)
         # Merge wealth data with pid/syear information
@@ -51,9 +52,15 @@ def add_wealth_interpolate_and_deflate(
     data = data.merge(wealth_data_full, on=["hid", "syear"], how="left")
     data.set_index(["pid", "syear"], inplace=True)
     if filter_missings:
+        before = len(data)
         data = data[data["wealth"].notna()]
-        print(str(len(data)) + " left after dropping people with missing wealth.")
+        _print_filter(before, len(data), "left after dropping people with missing wealth")
     return data
+
+
+def _print_filter(before, after, msg):
+    pct = (after - before) / before * 100 if before > 0 else 0
+    print(f"{after} {msg} ({pct:+.2f}%)")
 
 
 # hid 167, 302, 930, 981, 1031, 2046, 5240, 9474, 3490091, 3503398 show some edge cases and how they are handled

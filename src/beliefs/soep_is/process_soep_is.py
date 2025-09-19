@@ -76,7 +76,7 @@ def add_covariates(df, paths, specs, filter_missings=False):
     df.set_index(["pid", "syear"], inplace=True)
     df = rename_and_reformat_is_covariates(df)
     df = recode_sex(df)
-    df = calc_age_at_interview(df, drop_missing_month=filter_missings)
+    df = calc_age_at_interview(df, drop_invalid=filter_missings)
     df = create_education_type(df, filter_missings=filter_missings)
     df = create_health_var(df, filter_missings=filter_missings)
     df = classify_informed(df, specs)

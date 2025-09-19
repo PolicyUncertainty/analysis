@@ -1,6 +1,11 @@
 import numpy as np
 
 
+def _print_filter(before, after, msg):
+    pct = (after - before) / before * 100 if before > 0 else 0
+    print(f"{after} {msg} ({pct:+.2f}%)")
+
+
 def create_experience_variable_with_cap(data, exp_cap):
     """This function creates an experience variable as the sum of full-time and 0.5
     weighted part-time experience.
@@ -62,11 +67,9 @@ def sum_experience_variables(data, filter_missings=True):
     data.loc[mask_ft_valid, "experience"] = data.loc[mask_ft_valid, "pgexpft"]
     if filter_missings:
         # If both are invalid drop observations
+        before = len(data)
         data = data[data["experience"].notna()]
-        print(
-            str(len(data))
-            + " left after dropping people with invalid experience values."
-        )
+        _print_filter(before, len(data), "left after dropping people with invalid experience values")
     return data
 
 
@@ -96,10 +99,9 @@ def raw_working_years(data, filter_missings=True):
     data.loc[mask_ft_valid, "working_years"] = data.loc[mask_ft_valid, "pgexpft"]
     if filter_missings:
         # If both are invalid drop observations
+        before = len(data)
         data = data[data["working_years"].notna()]
-        print(
-            str(len(data)) + " left after dropping people with invalid working years."
-        )
+        _print_filter(before, len(data), "left after dropping people with invalid working years")
     return data
 
 

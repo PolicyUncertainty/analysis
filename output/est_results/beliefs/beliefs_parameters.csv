@@ -1,7 +1,9 @@
 parameter,estimate,std_error,type
-alpha,0.03953351979053024,0.0013316644127089475,
-sigma_sq,0.029536921752850134,0.0009636551085504335,
-initial_informed_share,0.06620802300127678,,Low Education
-hazard_rate,0.011299536074403715,,Low Education
-initial_informed_share,0.2822958789497842,,High Education
-hazard_rate,0.0075044337321271805,,High Education
+alpha,0.04008685069763618,0.001351458597456587,
+sigma_sq,0.02990963304235186,0.0009801502023333345,
+initial_informed_share,0.07416348329750884,,Low Education
+hazard_rate,0.011212492255119355,,Low Education
+initial_informed_share,0.2878481411091479,,High Education
+hazard_rate,0.0072928313808082205,,High Education
+erp_uninformed_belief,18.91949152542373,0.9535693223673349,Low Education
+erp_uninformed_belief,16.246445497630333,0.7787690701312983,High Education

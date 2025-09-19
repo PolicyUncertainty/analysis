@@ -91,6 +91,7 @@ def estimate_wage_parameters(paths_dict, specs):
     )
     # After estimation print some summary statistics
     print_wage_equation(wage_parameters, edu_labels, sex_labels)
+    print_lc_wage_and_exp(wage_data, edu_labels, sex_labels)
     calc_wage_population_averages(wage_data, year_fixed_effects, specs, paths_dict)
 
     return wage_parameters
@@ -267,39 +268,103 @@ def est_shock_std(residuals, n_obs, n_params):
 
 
 def print_wage_equation(wage_parameters, edu_labels, sex_labels):
-    # print wage equation
+    """Print wage equation parameters for each education-sex combination."""
+    print("=" * 60)
+    print("WAGE EQUATION PARAMETERS")
+    print("=" * 60)
+
     for edu_val, edu_label in enumerate(edu_labels):
         for sex_val, sex_label in enumerate(sex_labels):
-            print("Hourly wage equation: " + edu_label + " " + sex_label)
-            print(
-                "ln(hrly_wage) = "
-                + str(wage_parameters.loc[(edu_label, sex_label, "constant"), "value"])
-                + " + "
-                + str(wage_parameters.loc[(edu_label, sex_label, "exp"), "value"])
-                + " * exp "
-                + str(
-                    wage_parameters.loc[(edu_label, sex_label, "exp_squared"), "value"]
-                )
-                + " * exp^2 "
-                + "+ epsilon"
-            )
+            # Check if this combination exists in the data
+            if (edu_label, sex_label, "constant") not in wage_parameters.index:
+                continue
+
+            print(f"\nHourly wage equation: {edu_label} {sex_label}")
+
+            # Get coefficients and standard errors
+            constant = wage_parameters.loc[(edu_label, sex_label, "constant"), "value"]
+            constant_se = wage_parameters.loc[(edu_label, sex_label, "constant_ser"), "value"]
+            exp_coef = wage_parameters.loc[(edu_label, sex_label, "exp"), "value"]
+            exp_coef_se = wage_parameters.loc[(edu_label, sex_label, "exp_ser"), "value"]
+            exp_sq_coef = wage_parameters.loc[(edu_label, sex_label, "exp_squared"), "value"]
+            exp_sq_coef_se = wage_parameters.loc[(edu_label, sex_label, "exp_squared_ser"), "value"]
+
+            # Format the equation with proper signs
+            exp_sign = "+" if exp_coef >= 0 else ""
+            exp_sq_sign = "+" if exp_sq_coef >= 0 else ""
+
+            print(f"ln(hrly_wage) = {constant:.2f} ({constant_se:.2f}) {exp_sign}{exp_coef:.2f} ({exp_coef_se:.2f}) * exp {exp_sq_sign}{exp_sq_coef:.4f} ({exp_sq_coef_se:.4f}) * exp^2 + epsilon")
+
+            # Calculate example wage
             exp = 20
-            hrly_wage_with_20_exp = np.exp(
-                wage_parameters.loc[(edu_label, sex_label, "constant"), "value"]
-                + wage_parameters.loc[(edu_label, sex_label, "exp"), "value"] * exp
-                + wage_parameters.loc[(edu_label, sex_label, "exp_squared"), "value"]
-                * exp
-            )
-            print(
-                "Example: hourly wage with 20 years of experience: "
-                + str(hrly_wage_with_20_exp)
-            )
-            print(
-                "Income shock std: "
-                + str(
-                    wage_parameters.loc[
-                        (edu_label, sex_label, "income_shock_std"), "value"
-                    ]
-                )
-            )
-            print("--------------------")
+            hrly_wage_with_20_exp = np.exp(constant + exp_coef * exp + exp_sq_coef * exp**2)
+            print(f"Example: hourly wage with 20 years of experience: {hrly_wage_with_20_exp:.2f}")
+
+            # Get income shock std
+            shock_std = wage_parameters.loc[(edu_label, sex_label, "income_shock_std"), "value"]
+            print(f"Income shock std: {shock_std:.2f}")
+            print("-" * 40)
+
+
+def print_lc_wage_and_exp(wage_data, edu_labels, sex_labels):
+    """Print diagnostic table showing average experience and hourly wage by age groups and type."""
+    print("\n" + "=" * 80)
+    print("LIFE-CYCLE WAGE AND EXPERIENCE DIAGNOSTICS")
+    print("=" * 80)
+
+    # Define age groups
+    age_groups = {
+        "20s": (20, 29),
+        "30s": (30, 39),
+        "40s": (40, 49),
+        "50s": (50, 59),
+        "60s": (60, 69)
+    }
+
+    # Create age group column
+    wage_data_copy = wage_data.copy()
+    wage_data_copy["age_group"] = None
+    for group_name, (min_age, max_age) in age_groups.items():
+        mask = (wage_data_copy["age"] >= min_age) & (wage_data_copy["age"] <= max_age)
+        wage_data_copy.loc[mask, "age_group"] = group_name
+
+    for edu_val, edu_label in enumerate(edu_labels):
+        for sex_val, sex_label in enumerate(sex_labels):
+            # Filter data for this type
+            type_data = wage_data_copy[
+                (wage_data_copy["education"] == edu_val) &
+                (wage_data_copy["sex"] == sex_val) &
+                (wage_data_copy["age_group"].notna())
+            ]
+
+            if type_data.empty:
+                continue
+
+            print(f"\n{edu_label} {sex_label}")
+            print("-" * 60)
+
+            # Calculate correlations
+            age_exp_corr = type_data["age"].corr(type_data["experience"])
+            age_wage_corr = type_data["age"].corr(type_data["hourly_wage"])
+
+            print(f"Correlations: Age-Experience: {age_exp_corr:.3f}, Age-Wage: {age_wage_corr:.3f}")
+            print("-" * 60)
+            print(f"{'Age Group':<10} {'Experience':<20} {'Hourly Wage':<20} {'N Obs':<10}")
+            print(f"{'':10} {'Mean (Std)':<20} {'Mean (Std)':<20} {'':10}")
+            print("-" * 60)
+
+            for group_name in ["20s", "30s", "40s", "50s", "60s"]:
+                group_data = type_data[type_data["age_group"] == group_name]
+
+                if group_data.empty:
+                    print(f"{group_name:<10} {'No data':<20} {'No data':<20} {'0':<10}")
+                else:
+                    exp_mean = group_data["experience"].mean()
+                    exp_std = group_data["experience"].std()
+                    wage_mean = group_data["hourly_wage"].mean()
+                    wage_std = group_data["hourly_wage"].std()
+                    n_obs = len(group_data)
+
+                    print(f"{group_name:<10} {exp_mean:.1f} ({exp_std:.1f}){'':<6} {wage_mean:.1f} ({wage_std:.1f}){'':<6} {n_obs:<10}")
+
+            print()  # Add spacing between types

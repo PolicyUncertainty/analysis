@@ -115,6 +115,8 @@ def load_scale_and_correct_data(path_dict, model_class):
     # data_decision.groupby("age")["last_year_pension"].mean().plot()
     # plt.show()
     data_decision["assets_begin_of_period"] = out[0]
+
+    data_decision = create_informed_probability(data_decision, model_specs)
     return data_decision
 
 
@@ -129,3 +131,30 @@ def create_states_dict(df, model_class):
     states_dict["experience"] = df["experience"].values
     states_dict["assets_begin_of_period"] = df["assets_begin_of_period"].values
     return states_dict
+
+def create_informed_probability(df, specs):
+    """Predict informed probability by education and age using hazard rate model."""
+    df = df.copy()
+    probs = np.zeros(len(df))
+
+    for edu_val, edu_label in enumerate(specs["education_labels"]):
+        mask = df["education"] == edu_val
+        if not mask.any():
+            continue
+
+        ages = df.loc[mask, "age"].values
+        initial_informed_share = specs["initial_informed_share"][edu_val]
+        hazard_rate = specs["informed_hazard_rate"][edu_val]
+
+        # Calculate periods since initial age (minimum age in belief data, i.e., 17)
+        periods = ages - 17
+
+        # Calculate uninformed probability 
+        initial_uninformed_share = 1 - initial_informed_share
+        prob_uninformed = initial_uninformed_share * (1 - hazard_rate) ** periods
+        prob_informed = 1 - prob_uninformed
+
+        probs[mask] = prob_informed
+
+    df["probability_informed"] = probs
+    return df

@@ -35,7 +35,7 @@ disutil_children_ft_work_high: 0.4
 
 # Bequest
 bequest_scale: 2.4
-kappa: 21
+kappa: 0
 
 # Job separation params are set internally driven by data
 

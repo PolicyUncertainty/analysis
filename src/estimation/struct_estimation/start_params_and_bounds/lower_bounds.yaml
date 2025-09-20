@@ -38,7 +38,7 @@ taste_shock_scale_women: 0.05
 
 # Bequest
 bequest_scale: 1.0e-12
-kappa: 1.0e-12
+kappa: 0
 
 # Job finding probability - men
 job_finding_logit_const_men: -5

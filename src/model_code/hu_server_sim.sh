@@ -13,4 +13,4 @@
 
 module add cuda/12.4.1
 
-python run_model_illustration.py
+python run_plots.py

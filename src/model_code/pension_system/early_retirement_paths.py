@@ -120,7 +120,4 @@ def retirement_age_long_insured(SRA, model_specs):
     Versicherte" only differs with respect to deductions. Not with respect to entry age. We introduce the
     lower bound of 63 as this is the current law, even for individuals with SRA below 67.
     """
-    return np.maximum(
-        SRA - model_specs["years_before_SRA_long_insured"],
-        model_specs["min_long_insured_age"],
-    )
+    return model_specs["min_long_insured_age"]

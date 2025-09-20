@@ -50,88 +50,88 @@ generate_print_func(
 from model_code.plots.plot_law_of_motion import plot_ret_experience_multi
 
 plot_ret_experience_multi(path_dict, specs, show=show_plots, save=save_plots)
-
-from model_code.plots.weights import plot_weights
-
-model = specify_model(
-    path_dict,
-    specs,
-    subj_unc=True,
-    custom_resolution_age=None,
-    sim_specs=None,
-    load_model=True,
-    debug_info=None,
-    sex_type="all",
-    edu_type="all",
-    util_type="add",
-)
-plot_weights(model, params, specs, path_dict)
-
-from model_code.plots.retirement_probs_illustration import (
-    plot_ret_probs_for_state,
-    plot_solution,
-    plot_work_probs_for_state,
-)
-
-try:
-    model_solved = specify_and_solve_model(
-        path_dict=path_dict,
-        file_append=model_name,
-        params=params,
-        subj_unc=True,
-        custom_resolution_age=None,
-        load_model=True,
-        load_solution=True,
-        sim_specs=None,
-        sex_type="all",
-        edu_type="all",
-        util_type="add",
-    )
-
-    plot_solution(model_solved=model_solved, specs=specs, path_dict=path_dict)
-    plot_ret_probs_for_state(
-        model_solved=model_solved, specs=specs, path_dict=path_dict
-    )
-    plot_work_probs_for_state(
-        model_solved=model_solved, specs=specs, path_dict=path_dict
-    )
-
-    if params_source == "start_values":
-        print(f"Model plots generated using start parameter values.")
-
-except Exception as e:
-    print(f"ERROR: Could not solve model: {str(e)}")
-    print("Skipping model solution plots.")
-
-# Income plots (uses model specifications - can run without solved model)
-from model_code.plots.income_plots import plot_incomes
-
-plot_incomes(path_dict, show=show_plots, save=save_plots)
-
-# Wealth plots (uses model specifications - can run without solved model)
-from model_code.plots.wealth_plots import plot_budget_of_unemployed
-
-plot_budget_of_unemployed(path_dict, specs, show=show_plots, save=save_plots)
-
-# Utility plots (require model parameters, if estimated parameters not available, uses start params. if start params incomplete, skips utility plots)
-from model_code.plots.utility_plots import plot_bequest, plot_cons_scale, plot_utility
-
-try:
-    plot_utility(path_dict, params, specs, show=show_plots, save=save_plots)
-    plot_bequest(path_dict, params, specs, show=show_plots, save=save_plots)
-except KeyError as e:
-    if params_source == "start_values":
-        print(
-            f"WARNING: Some utility plots skipped - missing parameters, e.g., {e} in start_params.yaml"
-        )
-    else:
-        raise e
-
-
-plot_cons_scale(path_dict, specs, show=show_plots, save=save_plots)
-
-print("Model plotting completed.")
-if params_source == "start_values":
-    print(
-        "Note: Some plots used start parameter values instead of estimated parameters."
-    )
+#
+# from model_code.plots.weights import plot_weights
+#
+# model = specify_model(
+#     path_dict,
+#     specs,
+#     subj_unc=True,
+#     custom_resolution_age=None,
+#     sim_specs=None,
+#     load_model=True,
+#     debug_info=None,
+#     sex_type="all",
+#     edu_type="all",
+#     util_type="add",
+# )
+# plot_weights(model, params, specs, path_dict)
+#
+# from model_code.plots.retirement_probs_illustration import (
+#     plot_ret_probs_for_state,
+#     plot_solution,
+#     plot_work_probs_for_state,
+# )
+#
+# try:
+#     model_solved = specify_and_solve_model(
+#         path_dict=path_dict,
+#         file_append=model_name,
+#         params=params,
+#         subj_unc=True,
+#         custom_resolution_age=None,
+#         load_model=True,
+#         load_solution=True,
+#         sim_specs=None,
+#         sex_type="all",
+#         edu_type="all",
+#         util_type="add",
+#     )
+#
+#     plot_solution(model_solved=model_solved, specs=specs, path_dict=path_dict)
+#     plot_ret_probs_for_state(
+#         model_solved=model_solved, specs=specs, path_dict=path_dict
+#     )
+#     plot_work_probs_for_state(
+#         model_solved=model_solved, specs=specs, path_dict=path_dict
+#     )
+#
+#     if params_source == "start_values":
+#         print(f"Model plots generated using start parameter values.")
+#
+# except Exception as e:
+#     print(f"ERROR: Could not solve model: {str(e)}")
+#     print("Skipping model solution plots.")
+#
+# # Income plots (uses model specifications - can run without solved model)
+# from model_code.plots.income_plots import plot_incomes
+#
+# plot_incomes(path_dict, show=show_plots, save=save_plots)
+#
+# # Wealth plots (uses model specifications - can run without solved model)
+# from model_code.plots.wealth_plots import plot_budget_of_unemployed
+#
+# plot_budget_of_unemployed(path_dict, specs, show=show_plots, save=save_plots)
+#
+# # Utility plots (require model parameters, if estimated parameters not available, uses start params. if start params incomplete, skips utility plots)
+# from model_code.plots.utility_plots import plot_bequest, plot_cons_scale, plot_utility
+#
+# try:
+#     plot_utility(path_dict, params, specs, show=show_plots, save=save_plots)
+#     plot_bequest(path_dict, params, specs, show=show_plots, save=save_plots)
+# except KeyError as e:
+#     if params_source == "start_values":
+#         print(
+#             f"WARNING: Some utility plots skipped - missing parameters, e.g., {e} in start_params.yaml"
+#         )
+#     else:
+#         raise e
+#
+#
+# plot_cons_scale(path_dict, specs, show=show_plots, save=save_plots)
+#
+# print("Model plotting completed.")
+# if params_source == "start_values":
+#     print(
+#         "Note: Some plots used start parameter values instead of estimated parameters."
+#     )

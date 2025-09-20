@@ -62,13 +62,15 @@ def plot_retirement_difference(
     fig, axes = plt.subplots(2, 2, figsize=(15, 10))
 
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
-        for edu_var, edu_label in enumerate(specs["edu_labels"]):
+        for edu_var, edu_label in enumerate(specs["education_labels"]):
             ax = axes[sex_var, edu_var]
 
             mask_base = (df_base_plot["sex"] == sex_var) & (
-                df_base_plot["edu"] == edu_var
+                df_base_plot["education"] == edu_var
             )
-            mask_cf = (df_cf_plot["sex"] == sex_var) & (df_cf_plot["edu"] == edu_var)
+            mask_cf = (df_cf_plot["sex"] == sex_var) & (
+                df_cf_plot["education"] == edu_var
+            )
 
             inflow_shares_base_subset = (
                 df_base_plot[mask_base]["SRA_diff"]
@@ -169,10 +171,30 @@ def plot_retirement_share(
         df_base_sex = df_base[df_base["sex"] == sex_var]
         df_cf_sex = df_cf[df_cf["sex"] == sex_var]
 
-        for edu_var, edu_label in enumerate(specs["edu_labels"]):
-            # Filter by education
-            df_base_sex_edu = df_base_sex[df_base_sex["edu"] == edu_var]
-            df_cf_sex_edu = df_cf_sex[df_cf_sex["edu"] == edu_var]
+        # Get all agents informed at 63
+        base_agents_informed_at_63 = df_base_sex[
+            (df_base_sex["age"] == 63) & (df_base_sex["informed"] == 1)
+        ]["agent"]
+        cf_agents_informed_at_63 = df_cf_sex[
+            (df_cf_sex["age"] == 63) & (df_cf_sex["informed"] == 1)
+        ]["agent"]
+
+        for informed_var, informed_label in enumerate(["uninformed", "informed"]):
+
+            if informed_label == "informed":
+                df_base_sex_edu = df_base_sex[
+                    df_base_sex["agent"].isin(base_agents_informed_at_63)
+                ]
+                df_cf_sex_edu = df_cf_sex[
+                    df_cf_sex["agent"].isin(cf_agents_informed_at_63)
+                ]
+            else:
+                df_base_sex_edu = df_base_sex[
+                    ~df_base_sex["agent"].isin(base_agents_informed_at_63)
+                ]
+                df_cf_sex_edu = df_cf_sex[
+                    ~df_cf_sex["agent"].isin(cf_agents_informed_at_63)
+                ]
 
             # Calculate retirement shares for this sex-edu combination
             base_share_sex_edu = (
@@ -192,24 +214,24 @@ def plot_retirement_share(
             axes_sex[sex_var, 0].plot(
                 base_share_sex_edu.index,
                 base_share_sex_edu.values,
-                label=f"{base_label} - {edu_label}",
+                label=f"{base_label} - {informed_label}",
             )
             axes_sex[sex_var, 0].plot(
                 cf_share_sex_edu.index,
                 cf_share_sex_edu.values,
-                label=f"{cf_label} - {edu_label}",
+                label=f"{cf_label} - {informed_label}",
             )
 
             # Plot zoom ages (right column)
             axes_sex[sex_var, 1].plot(
                 old_ages,
                 base_share_sex_edu.loc[old_ages],
-                label=f"{base_label} - {edu_label}",
+                label=f"{base_label} - {informed_label}",
             )
             axes_sex[sex_var, 1].plot(
                 old_ages,
                 cf_share_sex_edu.loc[old_ages],
-                label=f"{cf_label} - {edu_label}",
+                label=f"{cf_label} - {informed_label}",
             )
 
         # Set labels and titles for this sex
@@ -226,6 +248,6 @@ def plot_retirement_share(
     plt.tight_layout()
     fig_sex.savefig(
         path_dict["simulation_plots"]
-        + f"retirement_share_by_sex_edu_sra_{final_SRA}_{model_name}.png"
+        + f"retirement_share_by_sex_informed_sra_{final_SRA}_{model_name}.png"
     )
     plt.close(fig_sex)

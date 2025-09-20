@@ -45,7 +45,7 @@ def plot_ret_experience_multi(path_dict, specs, show=False, save=False):
     for health in health_values:
 
         fig, axes = plt.subplots(2, 2, figsize=get_figsize(2, 2))
-        fig.suptitle(f"{health_labels[health - 1]}", fontsize=14, fontweight="bold")
+        fig.suptitle(f"{health_labels[health - 1]}", fontweight="bold")
 
         for sex_idx, sex in enumerate(sex_values):
             for edu_idx, education in enumerate(education_values):
@@ -105,7 +105,7 @@ def plot_ret_experience_multi(path_dict, specs, show=False, save=False):
 
                 # Add legend only to the top-right subplot to avoid clutter
                 if sex_idx == 0 and edu_idx == 1:
-                    ax.legend(bbox_to_anchor=(1.05, 1), loc="upper left", fontsize=8)
+                    ax.legend(bbox_to_anchor=(1.05, 1), loc="upper left")
 
         plt.tight_layout()
 

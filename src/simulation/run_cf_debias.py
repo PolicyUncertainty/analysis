@@ -32,10 +32,10 @@ from simulation.tables.cv import calc_compensated_variation
 seeed = 123
 model_name = specs["model_name"]
 load_model = True  # informed state as type
-load_unc_solution = False  # baseline solution conntainer
-load_df_biased = False
+load_unc_solution = True  # baseline solution conntainer
+load_df_biased = None
 load_df_unbiased = (
-    False  # True = load existing df, False = create new df, None = create but not save
+    None  # True = load existing df, False = create new df, None = create but not save
 )
 
 
@@ -47,6 +47,9 @@ params = pkl.load(
 # Create life cylce df object which is None.
 # The result function will then initialize in the first iteration.
 res_df_life_cycle = None
+
+df_base_dict = {}
+df_cf_dict = {}
 
 # Initialize retirement ages
 # sra_at_63 = np.arange(67, 70 + specs["SRA_grid_size"], specs["SRA_grid_size"])
@@ -72,6 +75,8 @@ for i, sra in enumerate(sra_at_63):
     )
 
     df_base = df_base.reset_index()
+    if i == 0:
+        df_base_dict[67] = df_base
 
     load_unc_solution = True if load_unc_solution is not None else load_unc_solution
     load_model = True
@@ -92,6 +97,10 @@ for i, sra in enumerate(sra_at_63):
         solution_exists=load_unc_solution,
         sol_model_exists=load_model,
     )
+    df_cf = df_cf.reset_index()
+
+    if i == 0:
+        df_cf_dict[67] = df_cf
 
     plot_retirement_difference(
         path_dict=path_dict,
@@ -118,8 +127,19 @@ for i, sra in enumerate(sra_at_63):
         base_label="With Uninformed",
         cf_label="Only Informed",
     )
-
-    df_cf = df_cf.reset_index()
+    if i > 0:
+        plot_retirement_share(
+            path_dict=path_dict,
+            specs=specs,
+            df_base=df_base_dict[67],
+            df_cf=df_base,
+            final_SRA=sra,
+            model_name=model_name,
+            left_difference=-4,
+            right_difference=2,
+            base_label="sra_67",
+            cf_label=f"sra_{int(sra)}",
+        )
 
     res_df_life_cycle = add_new_life_cycle_results(
         df_base=df_base,

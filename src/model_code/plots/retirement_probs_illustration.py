@@ -48,7 +48,6 @@ def plot_solution(model_solved, specs, path_dict):
             is_retired=states["lagged_choice"] == 0,
             model_specs=specs,
         )
-        print(exp_float)
 
         endog_grid, value_grid, policy_grid = (
             model_solved.get_solution_for_discrete_state_choice(
@@ -83,8 +82,7 @@ def plot_ret_probs_for_state(model_solved, specs, path_dict):
 
     policy_states = np.arange(specs["n_policy_states"] - 1, dtype=int)
     policy_state_values = specs["min_SRA"] + policy_states * specs["SRA_grid_size"]
-    # Vary periods, but fix SRA to 67 (policy state 8)
-    period = 34
+    period = 37
 
     # Low educated men not retired
     education = 1
@@ -92,8 +90,8 @@ def plot_ret_probs_for_state(model_solved, specs, path_dict):
     lagged_choice = 3
     # Job offer and single
     job_offer = 1
-    partner_state = 1
-    assets = 47.963214
+    partner_state = 0
+    assets = 8
 
     n_obs = len(policy_states)
     int_array = np.ones(n_obs, dtype=int)
@@ -115,12 +113,12 @@ def plot_ret_probs_for_state(model_solved, specs, path_dict):
     fig, axs = plt.subplots(
         nrows=2,
         ncols=2,
-        figsize=(10, 12),
+        figsize=get_figsize(2, 2),
     )
 
     for id_exp, very_str in enumerate(["Very Long Insured", "Long Insured"]):
 
-        exp_years = [38, 44][id_exp]
+        exp_years = [45, 44][id_exp]
 
         exp_grid_float = scale_experience_years(
             experience_years=exp_years,

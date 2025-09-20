@@ -14,6 +14,7 @@ from estimation.struct_estimation.scripts.estimate_setup import (
 from model_code.specify_model import specify_and_solve_model, specify_type_grids
 from model_code.transform_data_from_model import (
     calc_choice_probs_for_df,
+    calc_unobserved_choice_probs_for_df,
     load_scale_and_correct_data,
 )
 from set_paths import get_model_results_path
@@ -42,31 +43,17 @@ def create_fit_plots(
     else:
         generate_print_func(params.keys(), specs)(params)
 
-        model_solved = specify_and_solve_model(
+        data_decision = create_df_with_probs(
             path_dict=path_dict,
             params=params,
-            subj_unc=True,
-            custom_resolution_age=None,
-            file_append=model_name,
-            load_model=load_sol_model,
+            model_name=model_name,
+            load_sol_model=load_sol_model,
             load_solution=load_solution,
-            sim_specs=None,
             edu_type=edu_type,
             sex_type=sex_type,
             util_type=util_type,
-            debug_info="all",
         )
 
-        data_decision = load_scale_and_correct_data(
-            path_dict=path_dict, model_class=model_solved
-        )
-        data_decision = filter_data_by_type(
-            df=data_decision, sex_type=sex_type, edu_type=edu_type
-        )
-
-        data_decision = calc_choice_probs_for_df(
-            df=data_decision, params=params, model_solved=model_solved
-        )
         data_decision.to_csv(model_folder["model_results"] + "data_with_probs.csv")
 
     specs["sex_grid"], specs["education_grid"] = specify_type_grids(
@@ -90,6 +77,50 @@ def create_fit_plots(
 
     # plt.show()
     # plt.close("all")
+
+
+def create_df_with_probs(
+    path_dict,
+    params,
+    model_name,
+    load_sol_model,
+    load_solution,
+    edu_type="all",
+    sex_type="all",
+    util_type="add",
+    unobs_choice_probs=False,
+):
+    model_solved = specify_and_solve_model(
+        path_dict=path_dict,
+        params=params,
+        subj_unc=True,
+        custom_resolution_age=None,
+        file_append=model_name,
+        load_model=load_sol_model,
+        load_solution=load_solution,
+        sim_specs=None,
+        edu_type=edu_type,
+        sex_type=sex_type,
+        util_type=util_type,
+        debug_info="all",
+    )
+
+    data_decision = load_scale_and_correct_data(
+        path_dict=path_dict, model_class=model_solved
+    )
+
+    data_decision = filter_data_by_type(
+        df=data_decision, sex_type=sex_type, edu_type=edu_type
+    )
+
+    data_decision = calc_choice_probs_for_df(
+        df=data_decision, params=params, model_solved=model_solved
+    )
+    if unobs_choice_probs:
+        data_decision = calc_unobserved_choice_probs_for_df(
+            df=data_decision, params=params, model_solved=model_solved
+        )
+    return data_decision
 
 
 def plot_life_cycle_choice_probs(
@@ -173,7 +204,7 @@ def plot_retirement_fit(
         data_decision["age"] - data_decision["policy_state_value"]
     )
 
-    diffs = np.arange(-2, 2.25, 0.25)
+    diffs = np.arange(-4, 1.25, 0.25)
     pos = np.arange(0, len(diffs))
 
     not_retired_mask = data_decision["lagged_choice"] != 0

@@ -43,6 +43,56 @@ def calc_choice_probs_for_df(df, params, model_solved):
     return df
 
 
+def calc_unobserved_choice_probs_for_df(df, params, model_solved):
+    states_dict = create_states_dict(df=df, model_class=model_solved)
+
+    model_specs = model_solved.model_specs
+
+    unobserved_state_specs = create_unobserved_state_specs(df)
+
+    # Create names using the pattern: variable_value_variable_value_variable_value
+    state_names = {
+        (0, 1, 0): "job_offer_0_health_1_informed_0",
+        (0, 1, 1): "job_offer_0_health_1_informed_1",
+        (0, 2, 0): "job_offer_0_health_2_informed_0",
+        (0, 2, 1): "job_offer_0_health_2_informed_1",
+        (1, 1, 0): "job_offer_1_health_1_informed_0",
+        (1, 1, 1): "job_offer_1_health_1_informed_1",
+        (1, 2, 0): "job_offer_1_health_2_informed_0",
+        (1, 2, 1): "job_offer_1_health_2_informed_1",
+    }
+    # Iterate over dictionary and select corresponding job_offer, health, informed
+    for key, state_name in state_names.items():
+        job_offer_val, health_val, informed_val = key
+        states_dict["job_offer"][
+            ~unobserved_state_specs["observed_bools_states"]["job_offer"]
+        ] = job_offer_val
+        states_dict["health"][
+            ~unobserved_state_specs["observed_bools_states"]["health"]
+        ] = health_val
+        states_dict["informed"][
+            ~unobserved_state_specs["observed_bools_states"]["informed"]
+        ] = informed_val
+
+        for choice in range(model_specs["n_choices"]):
+            choice_vals = np.ones_like(df["choice"].values) * choice
+
+            choice_probs_observations = choice_probs_for_choice_vals(
+                choice_vals=choice_vals,
+                states_dict=states_dict,
+                model_solved=model_solved,
+                params=params,
+                use_probability_of_observed_states=False,
+            )
+
+            choice_probs_observations = np.nan_to_num(
+                choice_probs_observations, nan=0.0
+            )
+            df[f"{state_name}_choice_{choice}"] = choice_probs_observations
+
+    return df
+
+
 def choice_probs_for_choice_vals(
     choice_vals,
     states_dict,

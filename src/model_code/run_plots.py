@@ -16,7 +16,7 @@ from set_styles import set_plot_defaults
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 # paths, specs, create directories
-path_dict = create_path_dict(define_user=True)
+path_dict = create_path_dict(define_user=False)
 specs = generate_derived_and_data_derived_specs(path_dict)
 show_plots = False
 save_plots = True
@@ -51,21 +51,21 @@ from model_code.plots.plot_law_of_motion import plot_ret_experience_multi
 
 plot_ret_experience_multi(path_dict, specs, show=show_plots, save=save_plots)
 
-# from model_code.plots.weights import plot_weights
-#
-# model = specify_model(
-#     path_dict,
-#     specs,
-#     subj_unc=True,
-#     custom_resolution_age=None,
-#     sim_specs=None,
-#     load_model=True,
-#     debug_info=None,
-#     sex_type="all",
-#     edu_type="all",
-#     util_type="add",
-# )
-# plot_weights(model, params, specs, path_dict)
+from model_code.plots.weights import plot_weights
+
+model = specify_model(
+    path_dict,
+    specs,
+    subj_unc=True,
+    custom_resolution_age=None,
+    sim_specs=None,
+    load_model=True,
+    debug_info=None,
+    sex_type="all",
+    edu_type="all",
+    util_type="add",
+)
+plot_weights(model, params, specs, path_dict)
 
 from model_code.plots.retirement_probs_illustration import (
     plot_ret_probs_for_state,
@@ -80,7 +80,7 @@ try:
         params=params,
         subj_unc=True,
         custom_resolution_age=None,
-        load_model=False,
+        load_model=True,
         load_solution=True,
         sim_specs=None,
         sex_type="all",

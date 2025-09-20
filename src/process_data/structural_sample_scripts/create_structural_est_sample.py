@@ -216,6 +216,7 @@ def create_structural_est_sample(
         "last_year_pension": "float64",
         "pseudo_pid": "Int32",
         "pseudo_hid": "Int32",
+        "very_long_insured": "bool",
     }
 
     df["hh_net_income"] /= specs["wealth_unit"]

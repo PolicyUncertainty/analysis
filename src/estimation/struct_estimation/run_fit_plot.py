@@ -12,26 +12,28 @@ path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict)
 
 # Set run specs
-model_name = "old_25_add"
+model_name = "25_women"
 print(f"Running model: {model_name}")
 load_sol_model = True
-load_solution = True
+load_solution = None
 load_data_from_sol = False
 
 # Load start params
-start_params_all = load_and_set_start_params(path_dict)
-
+params = pkl.load(
+    open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
+)
 
 create_fit_plots(
     path_dict=path_dict,
     specs=specs,
-    params=start_params_all,
+    params=params,
     model_name=model_name,
     load_sol_model=load_sol_model,
     load_solution=load_solution,
     load_data_from_sol=load_data_from_sol,
     sex_type="all",
     edu_type="all",
+    util_type="add",
 )
 
 

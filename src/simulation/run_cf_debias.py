@@ -19,7 +19,10 @@ import pickle as pkl
 
 import numpy as np
 
-from simulation.figures.retirement_plot import plot_retirement_difference
+from simulation.figures.retirement_plot import (
+    plot_retirement_difference,
+    plot_retirement_share,
+)
 from simulation.sim_tools.calc_life_time_results import add_new_life_cycle_results
 from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 from simulation.tables.cv import calc_compensated_variation
@@ -27,7 +30,7 @@ from simulation.tables.cv import calc_compensated_variation
 # %%
 # Set specifications
 seeed = 123
-model_name = "all_men_3"
+model_name = specs["model_name"]
 men_only = True
 load_model = True  # informed state as type
 load_unc_solution = False  # baseline solution conntainer
@@ -92,17 +95,30 @@ for i, sra in enumerate(sra_at_63):
         sol_model_exists=load_model,
     )
 
-    fig = plot_retirement_difference(
+    plot_retirement_difference(
+        path_dict=path_dict,
+        specs=specs,
         df_base=df_base,
         df_cf=df_cf,
         final_SRA=sra,
+        model_name=model_name,
         left_difference=-4,
         right_difference=2,
         base_label="With Uninformed",
         cf_label="Only Informed",
     )
-    fig.savefig(
-        path_dict["plots"] + f"retirement_inflow_comparison_sra_{sra}_{model_name}.png"
+
+    plot_retirement_share(
+        path_dict=path_dict,
+        specs=specs,
+        df_base=df_base,
+        df_cf=df_cf,
+        final_SRA=sra,
+        model_name=model_name,
+        left_difference=-4,
+        right_difference=2,
+        base_label="With Uninformed",
+        cf_label="Only Informed",
     )
 
     df_cf = df_cf.reset_index()

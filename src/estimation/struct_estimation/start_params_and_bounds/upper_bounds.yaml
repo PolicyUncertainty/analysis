@@ -29,8 +29,8 @@ disutil_unemployed_bad_women: 2.0
 disutil_partner_retired_women: 2.0
 
 # Children dis-utility
-disutil_children_ft_work_low: 2.0
-disutil_children_ft_work_high: 2.0
+disutil_children_ft_work_low: 0.5
+disutil_children_ft_work_high: 0.5
 
 # Taste shock
 taste_shock_scale_men: 5

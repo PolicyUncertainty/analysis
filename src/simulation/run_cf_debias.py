@@ -31,7 +31,6 @@ from simulation.tables.cv import calc_compensated_variation
 # Set specifications
 seeed = 123
 model_name = specs["model_name"]
-men_only = False
 load_model = True  # informed state as type
 load_unc_solution = False  # baseline solution conntainer
 load_df_biased = False
@@ -70,7 +69,6 @@ for i, sra in enumerate(sra_at_63):
         only_informed=False,
         solution_exists=load_unc_solution,
         sol_model_exists=load_model,
-        men_only=men_only,
     )
 
     df_base = df_base.reset_index()

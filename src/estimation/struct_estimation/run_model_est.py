@@ -3,8 +3,10 @@ import pickle as pkl
 import sys
 
 from estimation.struct_estimation.start_params_and_bounds.param_lists import (
+    men_disability_old_age_params,
     men_disutil_firing,
     men_disutil_params,
+    men_disutil_params_edu,
     men_job_offer_old_age_params,
     men_job_offer_params,
     women_disutil_firing,
@@ -22,7 +24,11 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
 )
 
 model_name = "old_men_reverse"
-params_to_estimate_names = men_disutil_params
+params_to_estimate_names = (
+    men_disutil_params_edu
+    + men_job_offer_old_age_params
+    + men_disability_old_age_params
+)
 sex_type = "men"
 edu_type = "all"
 util_type = "add"
@@ -38,8 +44,6 @@ if LOAD_LAST_ESTIMATE:
     last_estimate = pkl.load(
         open(paths_dict["struct_results"] + f"est_params_25_women.pkl", "rb")
     )
-    # last_estimate["disutil_children_ft_work_high"] = 0.1
-    last_estimate["disutil_children_ft_work_low"] = 0.13
 else:
     last_estimate = None
 

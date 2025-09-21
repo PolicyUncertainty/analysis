@@ -10,6 +10,18 @@ disutil_ft_work_bad_men: 2.0
 disutil_unemployed_good_men: 2.0
 disutil_unemployed_bad_men: 2.0
 
+# Full time work dis-utility men - Health and Education specific
+disutil_ft_work_high_good_men: 2.0
+disutil_ft_work_high_bad_men: 2.0
+disutil_ft_work_low_good_men: 2.0
+disutil_ft_work_low_bad_men: 2.0
+
+# Unemployment dis-utility men - Health and Education specific
+disutil_unemployed_high_good_men: 2.0
+disutil_unemployed_high_bad_men: 2.0
+disutil_unemployed_low_good_men: 2.0
+disutil_unemployed_low_bad_men: 2.0
+
 # Partner retired dis-utility men
 disutil_partner_retired_men: 2.0
 

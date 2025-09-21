@@ -1,0 +1,57 @@
+import pandas as pd
+import numpy as np
+
+def calc_life_cycle_detailed(df):
+    """
+    Calculate detailed life cycle statistics by age and demographic groups.
+    
+    Computes choice rates, savings rate, and average wealth by age,
+    both in aggregate and split by sex, education, informed status, 
+    health, and partner state.
+    """
+    
+    # Define grouping combinations: aggregate + each demographic split
+    group_combinations = [
+        (['age'], 'aggregate'),
+        (['age', 'sex'], 'sex'),
+        (['age', 'education'], 'education'), 
+        (['age', 'informed'], 'informed'),
+        (['age', 'health'], 'health'),
+        (['age', 'partner_state'], 'partner_state')
+    ]
+    
+    results = []
+    
+    for group_cols, group_name in group_combinations:
+        grouped = df.groupby(group_cols)
+        
+        # Choice rates for all 4 choices (0=retirement, 1=unemployment, 2=part-time, 3=full-time)
+        choice_rates = grouped['choice'].value_counts(normalize=True).unstack(fill_value=0)
+        # Rename columns to be more descriptive
+        choice_rate_cols = {}
+        for choice in [0, 1, 2, 3]:
+            if choice in choice_rates.columns:
+                choice_rate_cols[f'choice_{choice}_rate'] = choice_rates[choice]
+            else:
+                choice_rate_cols[f'choice_{choice}_rate'] = 0
+        choice_rates_df = pd.DataFrame(choice_rate_cols)
+        
+        # Savings rate (aggregate method) and average wealth
+        other_stats = pd.DataFrame({
+            'savings_rate': grouped['savings_dec'].sum() / grouped['total_income'].sum(),
+            'avg_wealth': grouped['savings'].mean()
+        })
+        
+        # Combine all statistics
+        stats = other_stats.join(choice_rates_df)
+        
+        # Add group identifiers
+        stats = stats.reset_index()
+        stats['group_type'] = group_name
+        stats['group_value'] = 'all' if group_name == 'aggregate' else stats[group_name]
+        
+        results.append(stats)
+    
+    # Combine and set multi-index
+    final_df = pd.concat(results, ignore_index=True)
+    return final_df.set_index(['group_type', 'group_value', 'age'])

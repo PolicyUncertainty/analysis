@@ -2,6 +2,7 @@
 import pandas as pd
 import pickle as pkl
 import jax
+import os
 
 from set_paths import create_path_dict
 from specs.derive_specs import generate_derived_and_data_derived_specs
@@ -45,4 +46,5 @@ res_df_life_cycle = add_new_life_cycle_results(
     res_df_life_cycle=None,
 )
 
-res_df_life_cycle.to_csv(path_dict["intermediate_data"] + f"baseline_lc_{model_name}.csv")
+output_path = path_dict["simulation_data"] + "/baseline/"
+res_df_life_cycle.to_csv(output_path + f"baseline_lc_{model_name}.csv")

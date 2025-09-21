@@ -18,9 +18,6 @@ def plot_weights(model_class, params, specs, paths):
         model_name=specs["model_name"],
         load_sol_model=True,
         load_solution=True,
-        sex_type="all",
-        edu_type="all",
-        util_type="add",
         unobs_choice_probs=True,
     )
 

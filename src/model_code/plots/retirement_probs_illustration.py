@@ -18,20 +18,21 @@ def plot_solution(model_solved, specs, path_dict):
     n_obs = 1
     prototype_array = np.arange(n_obs)
     # exp_years_grid = np.linspace(10, 50, 5)
-    period = 35
-    choice = 3
-    choice_2 = 0
+    period = 33
+    choice = 0
+    choice_2 = 1
     lagged_choice = 3
-    policy_state = 0
-    job_offer = 1
+    policy_state = 2
+    job_offer = 0
     sex = 0
-    informed = 1
+    informed = 0
+    education = 1
 
     for exp_id in range(8, 9):
         states = {
             "period": np.ones_like(prototype_array) * period,
             "lagged_choice": np.ones_like(prototype_array) * lagged_choice,
-            "education": np.zeros_like(prototype_array),
+            "education": np.ones_like(prototype_array) * education,
             "sex": np.ones_like(prototype_array) * sex,
             "informed": np.ones_like(prototype_array) * informed,
             "policy_state": np.ones_like(prototype_array) * policy_state,
@@ -56,9 +57,9 @@ def plot_solution(model_solved, specs, path_dict):
         )
 
         ax.plot(
-            endog_grid[0, exp_id, 26:30],
-            value_grid[0, exp_id, 26:30],
-            label=f"Exp years {exp_years}",
+            endog_grid[0, exp_id, 1:5],
+            value_grid[0, exp_id, 1:5],
+            label=f"Exp years {exp_years} - choice {choice}",
         )
 
         endog_grid, value_grid, policy_grid = (
@@ -68,9 +69,9 @@ def plot_solution(model_solved, specs, path_dict):
         )
 
         ax.plot(
-            endog_grid[0, exp_id, :],
-            value_grid[0, exp_id, :],
-            label=f"Exp years {exp_years} ret",
+            endog_grid[0, exp_id, 1:5],
+            value_grid[0, exp_id, 1:5],
+            label=f"Exp years {exp_years} - choice {choice_2}",
         )
 
     ax.legend()
@@ -90,7 +91,7 @@ def plot_ret_probs_for_state(model_solved, specs, path_dict):
     lagged_choice = 3
     # Job offer and single
     job_offer = 1
-    partner_state = 0
+    partner_state = 1
     assets = 8
 
     n_obs = len(policy_states)
@@ -118,7 +119,7 @@ def plot_ret_probs_for_state(model_solved, specs, path_dict):
 
     for id_exp, very_str in enumerate(["Very Long Insured", "Long Insured"]):
 
-        exp_years = [45, 44][id_exp]
+        exp_years = [45, 40][id_exp]
 
         exp_grid_float = scale_experience_years(
             experience_years=exp_years,
@@ -179,7 +180,7 @@ def plot_work_probs_for_state(model_solved, specs, path_dict):
 
     # Vary periods, but fix SRA to 67 (policy state 8)
     period = 36
-    policy_state = 4
+    policy_state = 8
 
     # Low educated men not retired
     education = 0
@@ -187,8 +188,8 @@ def plot_work_probs_for_state(model_solved, specs, path_dict):
     lagged_choice = 1
     # Job offer and single
     job_offer = 1
-    health = 0
-    exp_grid = np.arange(30, 50, 2, dtype=float)
+    health = 1
+    exp_grid = np.arange(30, 55, 2, dtype=float)
     informed = 0
 
     n_obs = len(exp_grid)
@@ -230,7 +231,7 @@ def plot_work_probs_for_state(model_solved, specs, path_dict):
             ax = axs[partner_state]
             ax.plot(
                 exp_grid,
-                np.nan_to_num(choice_probs[:, 3], nan=0.0),
+                np.nan_to_num(choice_probs[:, 0], nan=0.0),
                 label=f"Assets {assets}",
             )
         ax.set_ylabel("Probability of working")
@@ -242,4 +243,4 @@ def plot_work_probs_for_state(model_solved, specs, path_dict):
         ax.set_xlabel("Experience years")
 
     plt.show()
-    fig.savefig(path_dict["plots"] + f"work_probs_state_period_{period}.png")
+    fig.savefig(path_dict["plots"] + f"ret_probs_state_period_{period}.png")

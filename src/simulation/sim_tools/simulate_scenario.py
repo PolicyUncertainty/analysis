@@ -54,8 +54,6 @@ def solve_and_simulate_scenario(
         load_model=sol_model_exists,
         load_solution=solution_exists,
         sim_specs=sim_specs,
-        sex_type="all",
-        edu_type="all",
     )
 
     if df_exists:

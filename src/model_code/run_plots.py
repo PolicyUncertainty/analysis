@@ -10,7 +10,6 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
     load_and_set_start_params,
 )
 from model_code.specify_model import specify_and_solve_model, specify_model
-from model_code.specify_simple_model import specify_and_solve_simple_model
 from set_paths import create_path_dict
 from set_styles import set_plot_defaults
 from specs.derive_specs import generate_derived_and_data_derived_specs
@@ -64,9 +63,6 @@ generate_print_func(
 #     sim_specs=None,
 #     load_model=True,
 #     debug_info=None,
-#     sex_type="all",
-#     edu_type="all",
-#     util_type="add",
 # )
 # plot_weights(model, params, specs, path_dict)
 #
@@ -84,12 +80,12 @@ model_solved = specify_and_solve_model(
     subj_unc=True,
     custom_resolution_age=None,
     load_model=True,
-    load_solution=True,
+    load_solution=None,
     sim_specs=None,
-    sex_type="all",
-    edu_type="all",
-    util_type="add",
 )
+from model_code.plots.test_sensitivity import test_solution_changes
+
+test_solution_changes(model_solved=model_solved)
 
 # plot_solution(model_solved=model_solved, specs=specs, path_dict=path_dict)
 # plot_ret_probs_for_state(

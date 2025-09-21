@@ -31,9 +31,6 @@ create_fit_plots(
     load_sol_model=load_sol_model,
     load_solution=load_solution,
     load_data_from_sol=load_data_from_sol,
-    sex_type="all",
-    edu_type="all",
-    util_type="add",
 )
 
 

@@ -1,14 +1,14 @@
 import numpy as np
 
 
-def test_solution_changes(model_solved, specs, choice=3):
+def test_solution_changes(model_solved):
     """Test if changing one state variable affects the model solution."""
 
     # Base state
     n_obs = 1
     prototype_array = np.arange(n_obs)
     base_states = {
-        "period": np.ones_like(prototype_array) * 69,
+        "period": np.ones_like(prototype_array) * 71,
         "lagged_choice": np.ones_like(prototype_array) * 3,
         "education": np.zeros_like(prototype_array),
         "sex": np.zeros_like(prototype_array),
@@ -22,7 +22,7 @@ def test_solution_changes(model_solved, specs, choice=3):
     # Get baseline solution
     baseline_endog, baseline_value, baseline_policy = (
         model_solved.get_solution_for_discrete_state_choice(
-            states=base_states, choices=np.ones_like(prototype_array) * choice
+            states=base_states, choices=np.ones_like(prototype_array) * 0
         )
     )
 
@@ -37,32 +37,30 @@ def test_solution_changes(model_solved, specs, choice=3):
         "informed": [1],
     }
 
-    print(f"Testing solution sensitivity for choice {choice}:")
-    print("-" * 50)
-
     for state_var, test_values in test_ranges.items():
         for test_value in test_values:
-            # Modify one state variable
-            modified_states = base_states.copy()
-            modified_states[state_var] = np.ones_like(prototype_array) * test_value
+            for choice in [0, 1, 2, 3]:  # Test all choices
+                # Modify one state variable
+                modified_states = base_states.copy()
+                modified_states[state_var] = np.ones_like(prototype_array) * test_value
 
-            # Get modified solution
-            mod_endog, mod_value, mod_policy = (
-                model_solved.get_solution_for_discrete_state_choice(
-                    states=modified_states,
-                    choices=np.ones_like(prototype_array) * choice,
+                # Get modified solution
+                mod_endog, mod_value, mod_policy = (
+                    model_solved.get_solution_for_discrete_state_choice(
+                        states=modified_states,
+                        choices=np.ones_like(prototype_array) * choice,
+                    )
                 )
-            )
 
-            # Check if anything changed
-            changed = (
-                not np.allclose(baseline_value, mod_value, atol=1e-2)
-                or not np.allclose(baseline_endog, mod_endog, atol=1e-2)
-                or not np.allclose(baseline_policy, mod_policy, atol=1e-2)
-            )
+                # Check if anything changed
+                changed = (
+                    not np.allclose(baseline_value, mod_value, atol=1e-2)
+                    or not np.allclose(baseline_endog, mod_endog, atol=1e-2)
+                    or not np.allclose(baseline_policy, mod_policy, atol=1e-2)
+                )
 
-            status = "CHANGED" if changed else "NO CHANGE"
-            print(
-                f"{state_var}: {base_states[state_var][0]} -> {test_value}: {status}",
-                flush=True,
-            )
+                status = "CHANGED" if changed else "NO CHANGE"
+                print(
+                    f"{state_var} - choice 0: {base_states[state_var][0]} -> {test_value} and choice {choice}: {status}",
+                    flush=True,
+                )

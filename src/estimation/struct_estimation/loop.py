@@ -59,8 +59,6 @@ for tase_shock_scale in [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4]:
         load_sol_model=load_sol_model,
         load_solution=load_solution,
         load_data_from_sol=load_data_from_sol,
-        sex_type="all",
-        edu_type="all",
     )
 
 

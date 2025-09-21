@@ -8,10 +8,9 @@ from set_styles import get_figsize, set_colors
 
 JET_COLOR_MAP, LINE_STYLES = set_colors()
 from estimation.struct_estimation.scripts.estimate_setup import (
-    filter_data_by_type,
     generate_print_func,
 )
-from model_code.specify_model import specify_and_solve_model, specify_type_grids
+from model_code.specify_model import specify_and_solve_model
 from model_code.transform_data_from_model import (
     calc_choice_probs_for_df,
     calc_unobserved_choice_probs_for_df,
@@ -28,9 +27,6 @@ def create_fit_plots(
     load_sol_model,
     load_solution,
     load_data_from_sol,
-    sex_type="all",
-    edu_type="all",
-    util_type="add",
 ):
     # check if folder of model objects exits:
     model_folder = get_model_results_path(path_dict, model_name)
@@ -49,17 +45,9 @@ def create_fit_plots(
             model_name=model_name,
             load_sol_model=load_sol_model,
             load_solution=load_solution,
-            edu_type=edu_type,
-            sex_type=sex_type,
-            util_type=util_type,
         )
 
         data_decision.to_csv(model_folder["model_results"] + "data_with_probs.csv")
-
-    specs["sex_grid"], specs["education_grid"] = specify_type_grids(
-        sex_type=sex_type,
-        edu_type=edu_type,
-    )
 
     plot_life_cycle_choice_probs(
         specs=specs,
@@ -85,9 +73,6 @@ def create_df_with_probs(
     model_name,
     load_sol_model,
     load_solution,
-    edu_type="all",
-    sex_type="all",
-    util_type="add",
     unobs_choice_probs=False,
 ):
     model_solved = specify_and_solve_model(
@@ -99,18 +84,11 @@ def create_df_with_probs(
         load_model=load_sol_model,
         load_solution=load_solution,
         sim_specs=None,
-        edu_type=edu_type,
-        sex_type=sex_type,
-        util_type=util_type,
         debug_info="all",
     )
 
     data_decision = load_scale_and_correct_data(
         path_dict=path_dict, model_class=model_solved
-    )
-
-    data_decision = filter_data_by_type(
-        df=data_decision, sex_type=sex_type, edu_type=edu_type
     )
 
     data_decision = calc_choice_probs_for_df(

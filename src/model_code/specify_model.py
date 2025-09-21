@@ -20,6 +20,9 @@ from model_code.stochastic_processes.job_offers import job_offer_process_transit
 from model_code.stochastic_processes.partner_transitions import partner_transition
 from model_code.taste_shocks import shock_function_dict
 from model_code.utility.bequest_utility import create_final_period_utility_functions
+from model_code.utility.utility_functions_add import (
+    create_utility_functions,
+)
 from model_code.wealth_and_budget.assets_grid import create_end_of_period_assets
 from model_code.wealth_and_budget.budget_equation import budget_constraint
 from set_paths import get_model_results_path
@@ -34,9 +37,6 @@ def specify_model(
     sim_specs=None,
     load_model=False,
     debug_info=None,
-    sex_type="all",
-    edu_type="all",
-    util_type="add",
 ):
     """Generate model class."""
 
@@ -53,18 +53,13 @@ def specify_model(
     # Experience grid
     experience_grid = define_experience_grid(specs)
 
-    sex_grid, edu_grid = specify_type_grids(
-        sex_type=sex_type,
-        edu_type=edu_type,
-    )
-
     model_config = {
         "min_period_batch_segments": [33, 44],
         "n_periods": specs["n_periods"],
         "choices": np.arange(specs["n_choices"], dtype=int),
         "deterministic_states": {
-            "education": edu_grid,
-            "sex": sex_grid,
+            "education": np.arange(specs["n_education_types"], dtype=int),
+            "sex": np.arange(specs["n_sexes"], dtype=int),
         },
         "stochastic_states": {
             "policy_state": np.arange(specs["n_policy_states"], dtype=int),
@@ -120,16 +115,7 @@ def specify_model(
     else:
         alternative_sim_specifications = None
 
-    if util_type == "add":
-        from model_code.utility.utility_functions_add_edu import (
-            create_utility_functions,
-        )
-    elif util_type == "cobb":
-        from model_code.utility.utility_functions_cobb import create_utility_functions
-    else:
-        raise ValueError("unknown utility type")
-
-    model_path = path_dict["intermediate_data"] + f"model_{sex_type}_{edu_type}.pkl"
+    model_path = path_dict["intermediate_data"] + f"model.pkl"
 
     if load_model:
         model = dcegm.setup_model(
@@ -174,9 +160,6 @@ def specify_and_solve_model(
     load_model,
     load_solution,
     sim_specs=None,
-    sex_type="all",
-    edu_type="all",
-    util_type="add",
     debug_info=None,
 ):
     """Specify and solve model.
@@ -197,9 +180,6 @@ def specify_and_solve_model(
         load_model=load_model,
         sim_specs=sim_specs,
         debug_info=debug_info,
-        sex_type=sex_type,
-        edu_type=edu_type,
-        util_type=util_type,
     )
 
     # check if folder of model objects exits:
@@ -223,25 +203,3 @@ def specify_and_solve_model(
     else:
         model_solved = model.solve(params, save_sol_path=solution_file)
         return model_solved
-
-
-def specify_type_grids(sex_type, edu_type):
-    if sex_type == "men":
-        sex_grid = [0]
-    elif sex_type == "women":
-        sex_grid = [1]
-    elif sex_type == "all":
-        sex_grid = [0, 1]
-    else:
-        raise ValueError("sex_type not recognized")
-
-    if edu_type == "all":
-        edu_grid = [0, 1]
-    elif edu_type == "low":
-        edu_grid = [0]
-    elif edu_type == "high":
-        edu_grid = [1]
-    else:
-        raise ValueError("edu_type not recognized")
-
-    return sex_grid, edu_grid

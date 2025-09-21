@@ -41,9 +41,6 @@ def estimate_model(
     use_observed_data=True,
     sim_data=None,
     old_only=False,
-    sex_type="all",
-    edu_type="all",
-    util_type="add",
     scale_opt=False,
     multistart=False,
     slow_version=False,
@@ -103,10 +100,7 @@ def estimate_model(
         use_observed_data=use_observed_data,
         old_only=old_only,
         sim_data=sim_data,
-        sex_type=sex_type,
-        edu_type=edu_type,
         slow_version=slow_version,
-        util_type=util_type,
     )
     add_kwargs = {}
 
@@ -164,9 +158,6 @@ class est_class_from_paths:
         use_observed_data=True,
         slow_version=False,
         old_only=False,
-        sex_type="all",
-        edu_type="all",
-        util_type="add",
     ):
         self.iter_count = 0
         self.save_results = save_results
@@ -196,9 +187,6 @@ class est_class_from_paths:
             custom_resolution_age=None,
             load_model=load_model,
             sim_specs=None,
-            sex_type=sex_type,
-            edu_type=edu_type,
-            util_type=util_type,
         )
 
         if use_observed_data:
@@ -211,9 +199,6 @@ class est_class_from_paths:
                 raise ValueError("If not using observed data, sim_data must be given.")
             data_decision = sim_data.copy()
 
-        data_decision = filter_data_by_type(
-            df=data_decision, sex_type=sex_type, edu_type=edu_type
-        )
         # Already retired individuals hold no identification
         data_decision = data_decision[data_decision["lagged_choice"] != 0]
         if old_only:
@@ -480,25 +465,3 @@ def get_gendered_params(params_to_estimate_names, append):
         params["other_params"] = other_params
 
     return params
-
-
-def filter_data_by_type(df, sex_type, edu_type):
-    if sex_type == "men":
-        df = df[df["sex"] == 0]
-    elif sex_type == "women":
-        df = df[df["sex"] == 1]
-    elif sex_type == "all":
-        pass
-    else:
-        raise ValueError("sex_type not recognized.")
-
-    if edu_type == "low":
-        df = df[df["education"] == 0]
-    elif edu_type == "high":
-        df = df[df["education"] == 1]
-    elif edu_type == "all":
-        pass
-    else:
-        raise ValueError("edu_type not recognized.")
-
-    return df

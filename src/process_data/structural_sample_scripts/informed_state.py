@@ -3,5 +3,5 @@ def create_informed_state(df):
     df["informed"] = -99
 
     # # Individuals choosing retirement are informed
-    # df.loc[df["choice"] == 0, "informed"] = 1
+    df.loc[df["choice"] == 0, "informed"] = 1
     return df

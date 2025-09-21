@@ -42,3 +42,4 @@ est_params_stable.pkl
 
 # Claude Code configuration
 CLAUDE.md
+test_*.csv

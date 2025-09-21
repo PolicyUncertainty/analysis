@@ -26,10 +26,11 @@ OLD_ONLY = True
 start_params_all = load_and_set_start_params(paths_dict)
 specs = generate_derived_and_data_derived_specs(paths_dict)
 
-test_name = "test_1"
+# test_name = "test_1"
 # data_decision = pd.read_csv(test_name + ".csv")
 # mask_m = data_decision["sex"] == 0
-# ll_list = ["ll_0.1",   "ll_0.2",    "ll_0.3",  "ll_0.4"]
+# ll_list = ["ll_0.1", "ll_0.2", "ll_0.3", "ll_0.4"]
+# breakpoint()
 param_to_loop = "disutil_ft_work_good_men"
 
 params_to_estimate_names = [param_to_loop]
@@ -65,7 +66,7 @@ if OLD_ONLY:
 data_decision = data_decision[data_decision["lagged_choice"] != 0]
 
 for disutil in [0.1, 0.2, 0.3, 0.4]:
-    data_decision[f"ll_{disutil}"] = est_class.crit_func(
+    data_decision[f"ll_{disutil}"] = est_class.ll_func(
         {param_to_loop: disutil},
     )
 

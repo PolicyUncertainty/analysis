@@ -32,7 +32,6 @@ def create_unobserved_state_specs(data_decision):
         informed_weight = prob_informed * informed_new + (1 - prob_informed) * (
             1 - informed_new
         )
-
         # Health is unobserved if it is either just bad or even disabled.
         # We choose a weight of 1 if it is observed. Start with calculating disability prob
         # and then select correct case

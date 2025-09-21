@@ -1,65 +1,68 @@
 # Set paths of project
 import pickle as pkl
+import sys
 
-from set_paths import create_path_dict
-
-paths_dict = create_path_dict(define_user=False)
-from estimation.struct_estimation.scripts.estimate_setup import estimate_model
-from estimation.struct_estimation.start_params_and_bounds.set_start_params import (
-    load_and_set_start_params,
-)
-
-LOAD_SOL_MODEL = True
-SAVE_RESULTS = False
-USE_WEIGHTS = False
-
-# Load start params
-start_params_all = load_and_set_start_params(paths_dict)
-
-
-# %% Set paths of project
-import pickle as pkl
-
-from estimation.struct_estimation.scripts.observed_model_fit import create_fit_plots
 from set_paths import create_path_dict
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
-path_dict = create_path_dict()
-specs = generate_derived_and_data_derived_specs(path_dict)
+paths_dict = create_path_dict(define_user=False)
+from estimation.struct_estimation.scripts.estimate_setup import estimate_model
+from estimation.struct_estimation.scripts.initialize_ll_function_only import (
+    initialize_est_class,
+)
+from estimation.struct_estimation.scripts.observed_model_fit import create_fit_plots
+from estimation.struct_estimation.start_params_and_bounds.set_start_params import (
+    load_and_set_start_params,
+)
+from model_code.specify_model import specify_model
+from model_code.transform_data_from_model import load_scale_and_correct_data
 
-# Set run specs
-model_name = "all_men_3_cobb"
-print(f"Running model: {model_name}")
-load_sol_model = False
-load_solution = None
-load_data_from_sol = False
+LOAD_SOL_MODEL = True
+OLD_ONLY = True
+
+# Load start params
+start_params_all = load_and_set_start_params(paths_dict)
+specs = generate_derived_and_data_derived_specs(paths_dict)
+
+test_name = "test_1"
 
 
-for tase_shock_scale in [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4]:
-    start_params_all["taste_shock_scale_men"] = tase_shock_scale
+params_to_estimate_names = ["disutil_ft_work_good_men"]
+est_class = initialize_est_class(
+    paths_dict,
+    params_to_estimate_names=params_to_estimate_names,
+    file_append=test_name,
+    load_model=LOAD_SOL_MODEL,
+    start_params_all=start_params_all,
+    use_weights=False,
+    save_results=True,
+    print_men_examples=True,
+    print_women_examples=True,
+    use_observed_data=True,
+    sim_data=None,
+    old_only=OLD_ONLY,
+)
 
-    model_name = f"{tase_shock_scale:.2f}_scale"
-    # estimation_results = estimate_model(
-    #     paths_dict,
-    #     params_to_estimate_names=params_to_estimate_names,
-    #     file_append=model_name,
-    #     load_model=LOAD_SOL_MODEL,
-    #     start_params_all=start_params_all,
-    #     use_weights=USE_WEIGHTS,
-    #     last_estimate=None,
-    #     save_results=SAVE_RESULTS,
-    # )
-    # print(estimation_results)
+model = specify_model(
+    path_dict=paths_dict,
+    specs=specs,
+    subj_unc=True,
+    custom_resolution_age=None,
+    load_model=LOAD_SOL_MODEL,
+    sim_specs=None,
+)
+data_decision = load_scale_and_correct_data(path_dict=paths_dict, model_class=model)
+if OLD_ONLY:
+    data_decision = data_decision[data_decision["age"] >= 55]
 
-    create_fit_plots(
-        path_dict=path_dict,
-        specs=specs,
-        params=start_params_all,
-        model_name=model_name,
-        load_sol_model=load_sol_model,
-        load_solution=load_solution,
-        load_data_from_sol=load_data_from_sol,
+data_decision = data_decision[data_decision["lagged_choice"] != 0]
+
+for disutil in [0.1, 0.2, 0.3, 0.4]:
+    data_decision[f"ll_{disutil}"] = est_class.crit_func(
+        {"disutil_unemployed_good_men": disutil},
     )
+
+data_decision.to_csv(test_name + ".csv")
 
 
 # %%

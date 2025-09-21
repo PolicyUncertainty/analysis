@@ -70,18 +70,11 @@ def estimate_model(
                 raise ValueError(f"Key {key} not found in last_estimate.")
             start_params_all[key] = last_estimate[key]
 
-    start_params = {name: start_params_all[name] for name in params_to_estimate_names}
     print_function(start_params_all)
 
-    lower_bounds_all = yaml.safe_load(
-        open(path_dict["start_params_and_bounds"] + "lower_bounds.yaml", "rb")
+    start_params, lower_bounds, upper_bounds = select_start_params_and_bounds(
+        start_params_all, params_to_estimate_names, path_dict
     )
-    lower_bounds = {name: lower_bounds_all[name] for name in params_to_estimate_names}
-
-    upper_bounds_all = yaml.safe_load(
-        open(path_dict["start_params_and_bounds"] + "upper_bounds.yaml", "rb")
-    )
-    upper_bounds = {name: upper_bounds_all[name] for name in params_to_estimate_names}
 
     bounds = om.Bounds(lower=lower_bounds, upper=upper_bounds)
 
@@ -139,6 +132,24 @@ def estimate_model(
         file_append=file_append,
     )
     return result, start_params_all
+
+
+def select_start_params_and_bounds(
+    start_params_all, params_to_estimate_names, path_dict
+):
+    start_params = {name: start_params_all[name] for name in params_to_estimate_names}
+
+    lower_bounds_all = yaml.safe_load(
+        open(path_dict["start_params_and_bounds"] + "lower_bounds.yaml", "rb")
+    )
+    lower_bounds = {name: lower_bounds_all[name] for name in params_to_estimate_names}
+
+    upper_bounds_all = yaml.safe_load(
+        open(path_dict["start_params_and_bounds"] + "upper_bounds.yaml", "rb")
+    )
+    upper_bounds = {name: upper_bounds_all[name] for name in params_to_estimate_names}
+
+    return start_params, lower_bounds, upper_bounds
 
 
 class est_class_from_paths:

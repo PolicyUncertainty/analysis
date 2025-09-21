@@ -21,8 +21,9 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
     load_and_set_start_params,
 )
 
-model_name = "25_women"
-params_to_estimate_names = women_disutil_params + women_job_offer_params
+model_name = "final_old_men"
+# params_to_estimate_names = women_disutil_params + women_job_offer_params
+params_to_estimate_names = men_disutil_params
 
 LOAD_LAST_ESTIMATE = False
 LOAD_SOL_MODEL = True
@@ -35,8 +36,6 @@ if LOAD_LAST_ESTIMATE:
     last_estimate = pkl.load(
         open(paths_dict["struct_results"] + f"est_params_25_women.pkl", "rb")
     )
-    # last_estimate["disutil_children_ft_work_high"] = 0.1
-    last_estimate["disutil_children_ft_work_low"] = 0.13
 else:
     last_estimate = None
 
@@ -53,7 +52,7 @@ estimation_results, end_params = estimate_model(
     use_weights=USE_WEIGHTS,
     last_estimate=last_estimate,
     save_results=SAVE_RESULTS,
-    old_only=False,
+    old_only=True,
     print_men_examples=True,
     print_women_examples=True,
     slow_version=False,
@@ -63,20 +62,20 @@ estimation_results, end_params = estimate_model(
 print(estimation_results)
 
 # %% Set paths of project
-from specs.derive_specs import generate_derived_and_data_derived_specs
-
-specs = generate_derived_and_data_derived_specs(paths_dict)
-
-
-create_fit_plots(
-    path_dict=paths_dict,
-    specs=specs,
-    params=end_params,
-    model_name=model_name,
-    load_sol_model=True,
-    load_solution=None,
-    load_data_from_sol=False,
-)
+# from specs.derive_specs import generate_derived_and_data_derived_specs
+#
+# specs = generate_derived_and_data_derived_specs(paths_dict)
+#
+#
+# create_fit_plots(
+#     path_dict=paths_dict,
+#     specs=specs,
+#     params=end_params,
+#     model_name=model_name,
+#     load_sol_model=True,
+#     load_solution=None,
+#     load_data_from_sol=False,
+# )
 
 
 # %%

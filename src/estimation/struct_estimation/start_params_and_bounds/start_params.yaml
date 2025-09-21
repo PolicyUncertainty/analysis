@@ -4,24 +4,24 @@ mu_low: 2.5
 mu_high: 2.5
 
 # # Full time work dis-utility men - Health specific
-# disutil_ft_work_good_men: 0.3
-# disutil_ft_work_bad_men: 0.4
+disutil_ft_work_good_men: 0.3
+disutil_ft_work_bad_men: 0.4
 
-# # Unemployment dis-utility men - Health specific
-# disutil_unemployed_good_men: 0.15
-# disutil_unemployed_bad_men: 0.15
+ # Unemployment dis-utility men - Health specific
+disutil_unemployed_good_men: 0.15
+disutil_unemployed_bad_men: 0.15
 
 # Full time work dis-utility men - Education and Health specific
-disutil_ft_work_high_good_men: 0.3
-disutil_ft_work_high_bad_men: 0.4
-disutil_ft_work_low_good_men: 0.4
-disutil_ft_work_low_bad_men: 0.3
-
-# Unemployment dis-utility men - Education and Health specific
-disutil_unemployed_high_good_men: 0.15
-disutil_unemployed_high_bad_men: 0.15
-disutil_unemployed_low_good_men: 0.15
-disutil_unemployed_low_bad_men: 0.15
+# disutil_ft_work_high_good_men: 0.3
+# disutil_ft_work_high_bad_men: 0.4
+# disutil_ft_work_low_good_men: 0.4
+# disutil_ft_work_low_bad_men: 0.3
+#
+## Unemployment dis-utility men - Education and Health specific
+# disutil_unemployed_high_good_men: 0.15
+# disutil_unemployed_high_bad_men: 0.15
+# disutil_unemployed_low_good_men: 0.15
+# disutil_unemployed_low_bad_men: 0.15
 
 # Partner retired dis-utility men
 disutil_partner_retired_men: -0.2

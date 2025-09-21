@@ -6,7 +6,7 @@ men_disutil_params = [
     "disutil_ft_work_bad_men",
     "disutil_unemployed_good_men",
     "disutil_unemployed_bad_men",
-    # "disutil_partner_retired_men",
+    "disutil_partner_retired_men",
 ]
 
 men_SRA_firing = [
@@ -20,7 +20,7 @@ men_taste = [
 ]
 
 men_job_offer_old_age_params = [
-    "job_finding_logit_const_men",
+    "job_finding_logit_consta_men",
     "job_finding_logit_high_educ_men",
     "job_finding_logit_good_health_men",
     "job_finding_logit_age_above_55_men",

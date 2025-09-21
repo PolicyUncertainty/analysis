@@ -51,7 +51,7 @@ def create_path_dict(define_user=False, user=None):
     }
 
     # Assign intermediate data subfolders
-    for subfolder in ["beliefs", "first_step", "struct"]:
+    for subfolder in ["beliefs", "first_step", "struct", "simulation"]:
         folder_name = paths_dict["intermediate_data"] + subfolder
         paths_dict[subfolder + "_data"] = folder_name + "/"
 

@@ -121,7 +121,9 @@ def specify_model(
         alternative_sim_specifications = None
 
     if util_type == "add":
-        from model_code.utility.utility_functions_add import create_utility_functions
+        from model_code.utility.utility_functions_add_edu import (
+            create_utility_functions,
+        )
     elif util_type == "cobb":
         from model_code.utility.utility_functions_cobb import create_utility_functions
     else:

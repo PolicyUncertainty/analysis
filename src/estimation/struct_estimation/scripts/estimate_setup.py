@@ -33,7 +33,6 @@ def estimate_model(
     file_append,
     load_model,
     start_params_all,  #
-    supply_jacobian=False,
     use_weights=True,
     last_estimate=None,
     save_results=True,
@@ -109,11 +108,7 @@ def estimate_model(
         slow_version=slow_version,
         util_type=util_type,
     )
-
-    if supply_jacobian:
-        add_kwargs = {"jac": est_class.jacobian_func}
-    else:
-        add_kwargs = {}
+    add_kwargs = {}
 
     if scale_opt:
         add_kwargs["scaling"] = om.ScalingOptions(method="bounds")
@@ -125,9 +120,9 @@ def estimate_model(
         fun=est_class.crit_func,
         params=start_params,
         bounds=bounds,
-        algorithm="scipy_lbfgsb",
+        algorithm="scipy_newton_cg",
         # logging="test_log.db",
-        error_handling="continue",
+        # error_handling="continue",
         **add_kwargs,
     )
     pickle.dump(

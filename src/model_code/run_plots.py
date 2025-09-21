@@ -28,28 +28,31 @@ set_plot_defaults()
 model_name = specs["model_name"]
 estimated_params_path = path_dict["struct_results"] + f"est_params_{model_name}.pkl"
 
-if os.path.exists(estimated_params_path):
-    params = pickle.load(open(estimated_params_path, "rb"))
-    params_source = "estimated"
-else:
-    print(f"WARNING: Estimated parameters file '{estimated_params_path}' not found.")
-    print(
-        "Using start values from estimation/struct_estimation/start_params_and_bounds/start_params.yaml"
-    )
+# if os.path.exists(estimated_params_path):
+#     params = pickle.load(open(estimated_params_path, "rb"))
+#     params_source = "estimated"
+# else:
+#     print(f"WARNING: Estimated parameters file '{estimated_params_path}' not found.")
+#     print(
+#         "Using start values from estimation/struct_estimation/start_params_and_bounds/start_params.yaml"
+#     )
+#
+#     # Load start parameters
+#     params = load_and_set_start_params(path_dict)
+#     params_source = "start_values"
 
-    # Load start parameters
-    params = load_and_set_start_params(path_dict)
-    params_source = "start_values"
+
+params = load_and_set_start_params(path_dict)
 
 generate_print_func(
     params.keys(), specs, print_men_examples=True, print_women_examples=True
 )(params)
 
 
-# Model solution plots (require solved model)
-from model_code.plots.plot_law_of_motion import plot_ret_experience_multi
-
-plot_ret_experience_multi(path_dict, specs, show=show_plots, save=save_plots)
+# # Model solution plots (require solved model)
+# from model_code.plots.plot_law_of_motion import plot_ret_experience_multi
+#
+# plot_ret_experience_multi(path_dict, specs, show=show_plots, save=save_plots)
 #
 # from model_code.plots.weights import plot_weights
 #
@@ -72,30 +75,30 @@ plot_ret_experience_multi(path_dict, specs, show=show_plots, save=save_plots)
 #     plot_solution,
 #     plot_work_probs_for_state,
 # )
-#
+
 # try:
-#     model_solved = specify_and_solve_model(
-#         path_dict=path_dict,
-#         file_append=model_name,
-#         params=params,
-#         subj_unc=True,
-#         custom_resolution_age=None,
-#         load_model=True,
-#         load_solution=True,
-#         sim_specs=None,
-#         sex_type="all",
-#         edu_type="all",
-#         util_type="add",
-#     )
-#
-#     plot_solution(model_solved=model_solved, specs=specs, path_dict=path_dict)
-#     plot_ret_probs_for_state(
-#         model_solved=model_solved, specs=specs, path_dict=path_dict
-#     )
-#     plot_work_probs_for_state(
-#         model_solved=model_solved, specs=specs, path_dict=path_dict
-#     )
-#
+model_solved = specify_and_solve_model(
+    path_dict=path_dict,
+    file_append=model_name,
+    params=params,
+    subj_unc=True,
+    custom_resolution_age=None,
+    load_model=True,
+    load_solution=True,
+    sim_specs=None,
+    sex_type="all",
+    edu_type="all",
+    util_type="add",
+)
+
+# plot_solution(model_solved=model_solved, specs=specs, path_dict=path_dict)
+# plot_ret_probs_for_state(
+#     model_solved=model_solved, specs=specs, path_dict=path_dict
+# )
+# plot_work_probs_for_state(
+#     model_solved=model_solved, specs=specs, path_dict=path_dict
+# )
+
 #     if params_source == "start_values":
 #         print(f"Model plots generated using start parameter values.")
 #

@@ -1,7 +1,7 @@
 ---
 ################
 # Current model name:
-model_name: 25_women
+model_name: old_25_men
 
 ###############################################################################
 # Model specification
@@ -66,8 +66,8 @@ income_tax_rates: [0.0, 0.14, 0.2397, 0.42, 0.45]
 # Start with early retirement penalty (ERP)
 ERP: 0.036
 late_retirement_bonus: 0.06
-monthly_pension_point_value_west_2020: 33.05
-monthly_pension_point_value_east_2020: 31.89
+monthly_pension_point_value_west_2020: 34.19
+monthly_pension_point_value_east_2020: 33.23
 pop_share_west: 0.83
 pop_share_east: 0.17
 

@@ -7,7 +7,7 @@ import os
 from set_paths import create_path_dict
 from specs.derive_specs import generate_derived_and_data_derived_specs
 from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
-from simulation.sim_tools.calc_life_time_results import add_new_life_cycle_results
+from simulation.sim_tools.calc_life_cycle_detailed import calc_life_cycle_detailed
 
 jax.config.update("jax_enable_x64", True)
 
@@ -38,13 +38,11 @@ df_baseline, _ = solve_and_simulate_scenario(
 
 df_baseline = df_baseline.reset_index()
 
-# %%
-res_df_life_cycle = add_new_life_cycle_results(
-    df_base=df_baseline,
-    df_cf=df_baseline,
-    scenatio_indicator="baseline",
-    res_df_life_cycle=None,
-)
 
+# %%
+# Generate detailed life cycle results
+df_lc_detailed = calc_life_cycle_detailed(df_baseline)
+
+# Save detailed results
 output_path = path_dict["simulation_data"] + "/baseline/"
 res_df_life_cycle.to_csv(output_path + f"baseline_lc_{model_name}.csv")

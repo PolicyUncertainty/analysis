@@ -15,8 +15,7 @@ set_plot_defaults()
 
 # %%
 # Set up data path
-#model_name = specs["model_name"]
-model_name = "old_men_high_fire_multi"
+model_name = specs["model_name"]
 
 # %%
 # Create detailed lifecycle plots for baseline

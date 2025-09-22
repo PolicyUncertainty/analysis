@@ -14,8 +14,7 @@ jax.config.update("jax_enable_x64", True)
 # %%
 path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict)
-#model_name = specs["model_name"]
-model_name = "old_men_high_fire_multi"
+model_name = specs["model_name"]
 
 params = pkl.load(
     open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")

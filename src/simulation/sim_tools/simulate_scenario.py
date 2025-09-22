@@ -9,7 +9,6 @@ from specs.derive_specs import (
     read_and_derive_specs,
 )
 
-
 def solve_and_simulate_scenario(
     path_dict,
     params,
@@ -74,7 +73,6 @@ def solve_and_simulate_scenario(
             data_sim.to_csv(df_file)
             return data_sim, model_solved
 
-
 def simulate_scenario(
     path_dict,
     model_solved,
@@ -108,7 +106,6 @@ def simulate_scenario(
     df = create_additional_variables(df, specs)
     return df
 
-
 def create_df_name(
     path_dict,
     custom_resolution_age,
@@ -141,7 +138,6 @@ def create_df_name(
 
 
 
-
 def _create_income_variables(df, specs):
     """Create income related variables in the simulated dataframe.
     Note: check budget equation first! They may already be there (under "aux").
@@ -171,11 +167,11 @@ def _create_income_variables(df, specs):
 def _transform_states_into_variables(df, specs):
     """Transform state variables into more interpretable variables."""
     # Create additional variables
-    df["age"] = df.index.get_level_values("period") + specs["start_age"]
+    df["age"] = df["period"] + specs["start_age"]
     # Create experience years
     df["exp_years"] = construct_experience_years(
         float_experience=df["experience"].values,
-        period=df.index.get_level_values("period").values,
+        period=df["period"].values,
         is_retired=df["lagged_choice"].values == 0,
         model_specs=specs,
     )
@@ -215,8 +211,8 @@ def _compute_actual_retirement_age(df):
 
 def _compute_initial_informed_status(df, specs):
     """Compute initial informed status based on informed state variable."""
-    df_initial = df[df.index.get_level_values("period") == 0]
-    informed_status = df_initial.set_index("agent")["informed"]
+    df_initial = df[df["period"] == 0][["agent", "informed"]]
+    informed_status = df_initial.set_index("agent")["informed"].map({0: 0, 1: 1})
     informed_status = informed_status.map({0: "Uninformed", 1: "Informed"})
     df["initial_informed"] = df["agent"].map(informed_status)
     return df
@@ -229,3 +225,4 @@ def create_additional_variables(df, specs):
     df = _compute_actual_retirement_age(df)
     df = _compute_initial_informed_status(df, specs)
     return df
+

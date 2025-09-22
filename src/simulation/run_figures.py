@@ -30,7 +30,7 @@ plot_detailed_lifecycle_results(
     path_dict=path_dict,
     specs=specs,
     subfolder="baseline",
-    comparison_name="no_uncertainty",
+    comparison_name="no_reform_expected",
     show=show_plots,
     save=save_plots
 )

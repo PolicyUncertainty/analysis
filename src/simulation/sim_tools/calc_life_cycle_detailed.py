@@ -27,20 +27,23 @@ def calc_life_cycle_detailed(df):
         
         # Choice rates for all 4 choices (0=retirement, 1=unemployment, 2=part-time, 3=full-time)
         choice_rates = grouped['choice'].value_counts(normalize=True).unstack(fill_value=0)
-
+        
         # Ensure all choice columns exist (add missing ones as zeros with proper index)
         for choice in [0, 1, 2, 3]:
             if choice not in choice_rates.columns:
                 choice_rates[choice] = 0
-
+        
         # Rename columns to be more descriptive
         choice_rates_df = choice_rates[[0, 1, 2, 3]].copy()
         choice_rates_df.columns = [f'choice_{i}_rate' for i in [0, 1, 2, 3]]
         
-        # Savings rate (aggregate method) and average wealth
+        # Savings rate (aggregate method), average wealth, and income variables
         other_stats = pd.DataFrame({
             'savings_rate': grouped['savings_dec'].sum() / grouped['total_income'].sum(),
-            'avg_wealth': grouped['savings'].mean()
+            'avg_wealth': grouped['savings'].mean(),
+            'consumption': grouped['consumption'].mean(),
+            'gross_own_income': grouped['gross_own_income'].mean() if 'gross_own_income' in df.columns else 0,
+            'net_hh_income': grouped['net_hh_income'].mean() if 'net_hh_income' in df.columns else 0
         })
         
         # Combine all statistics

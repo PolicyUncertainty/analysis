@@ -59,7 +59,7 @@ def solve_and_simulate_scenario(
     )
 
     if df_exists:
-        data_sim = pd.read_pickle(df_file)
+        data_sim = pd.read_csv(df_file)
         return data_sim, model_solved
     else:
         data_sim = simulate_scenario(
@@ -71,7 +71,7 @@ def solve_and_simulate_scenario(
         if df_exists is None:
             return data_sim, model_solved
         else:
-            data_sim.to_pickle(df_file)
+            data_sim.to_csv(df_file)
             return data_sim, model_solved
 
 
@@ -152,6 +152,15 @@ def simulate_scenario(
     df["lagged_health"] = df.groupby("agent")["health"].shift(1)
     df = df[(df["health"] != 3) | ((df["health"] == 3) & (df["lagged_health"] != 3))]
 
+    # Create gross own income (without pension income)
+    df["gross_own_income"] = (
+        (df["choice"] == 0) * df["gross_retirement_income"] +  # Retired
+        (df["choice"] == 1) * 0 +  # Unemployed
+        ((df["choice"] == 2) | (df["choice"] == 3)) * df["gross_labor_income"]  # Part-time or full-time work
+    )
+
+    # 
+
     return df
 
 
@@ -166,9 +175,9 @@ def create_df_name(
 ):
     # Create df name
     if only_informed:
-        name_append = "debiased.pkl"
+        name_append = "debiased.csv"
     else:
-        name_append = "biased.pkl"
+        name_append = "biased.csv"
 
     if custom_resolution_age is None:
         specs = read_and_derive_specs(path_dict["specs"])

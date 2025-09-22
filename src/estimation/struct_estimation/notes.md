@@ -1,3 +1,21 @@
+Sunda night2
+
+Beste Männer inkl. edu: very_old_men_1 - 32 jobid
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ###################### Add params ########################################
 disutil_unemployed_good_men: 0.47110679603020106
 disutil_unemployed_bad_men: 0.6075496909677541

@@ -196,13 +196,28 @@ def disutility_work(
 
     # Men's disutility parameters by health (no longer education-specific)
     disutil_ft_work_men = (
-        params["disutil_ft_work_bad_men"] * (1 - good_health)
-        + params["disutil_ft_work_good_men"] * good_health
+        params["disutil_ft_work_high_bad_men"] * (1 - good_health) * education
+        + params["disutil_ft_work_low_bad_men"] * (1 - good_health) * (1 - education)
+        + params["disutil_ft_work_high_good_men"] * good_health * education
+        + params["disutil_ft_work_low_good_men"] * good_health * (1 - education)
     )
 
-    disutil_unemployment_men = params[
-        "disutil_unemployed_good_men"
-    ] * good_health + params["disutil_unemployed_bad_men"] * (1 - good_health)
+    disutil_unemployment_men = (
+        params["disutil_unemployed_high_good_men"] * good_health * education
+        + params["disutil_unemployed_low_good_men"] * good_health * (1 - education)
+        + params["disutil_unemployed_high_bad_men"] * (1 - good_health) * education
+        + params["disutil_unemployed_low_bad_men"] * (1 - good_health) * (1 - education)
+    )
+
+    #     # Men's disutility parameters by health (no longer education-specific)
+    # disutil_ft_work_men = (
+    #     params["disutil_ft_work_bad_men"] * (1 - good_health)
+    #     + params["disutil_ft_work_good_men"] * good_health
+    # )
+
+    # disutil_unemployment_men = params[
+    #     "disutil_unemployed_good_men"
+    # ] * good_health + params["disutil_unemployed_bad_men"] * (1 - good_health)
 
     disutil_retirement_men = params["disutil_partner_retired_men"]
 

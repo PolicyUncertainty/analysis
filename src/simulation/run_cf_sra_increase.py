@@ -40,7 +40,8 @@ params = pkl.load(
 
 # Initialize alpha values and replace 0.04 with subjective alpha
 # Initialize alpha values and replace 0.04 with subjective alpha
-sra_at_63 = np.arange(67, 70 + specs["SRA_grid_size"], specs["SRA_grid_size"])
+# sra_at_63 = np.arange(67, 70 + specs["SRA_grid_size"], specs["SRA_grid_size"])
+sra_at_63 = np.arange(67, 70 + 1, 1)
 
 # Create result dfs and assign sra. Uncertainty
 result_df_unc = pd.DataFrame(dtype=float)
@@ -72,6 +73,7 @@ for i, sra in enumerate(sra_at_63):
     )
 
     df_unc = df_unc.reset_index()
+    # df_unc = df_unc[df_unc["sex"] == 0]
     # After the first run we can always set models and solutions to True
     load_sol_model = True
     load_unc_solution = True if load_unc_solution is not None else load_unc_solution
@@ -108,6 +110,8 @@ for i, sra in enumerate(sra_at_63):
     )
 
     df_no_unc = df_no_unc.reset_index()
+    # df_no_unc = df_no_unc[df_no_unc["sex"] == 0]
+
 
     # After the first run we can always set models and solutions to True
     load_sol_model = True
@@ -131,43 +135,43 @@ for i, sra in enumerate(sra_at_63):
             specs=specs,
         )
 
-    df_debias, _ = solve_and_simulate_scenario(
-        path_dict=path_dict,
-        params=params,
-        subj_unc=False,
-        custom_resolution_age=None,
-        announcement_age=None,
-        SRA_at_retirement=sra,
-        SRA_at_start=sra,
-        only_informed=True,
-        model_name=model_name,
-        df_exists=load_df,
-        solution_exists=load_no_unc_solution,
-        sol_model_exists=load_sol_model,
-    )
-    # After the first run we can always set models and solutions to True
-    load_sol_model = True
-    load_no_unc_solution = (
-        True if load_no_unc_solution is not None else load_no_unc_solution
-    )
+    # df_debias, _ = solve_and_simulate_scenario(
+    #     path_dict=path_dict,
+    #     params=params,
+    #     subj_unc=False,
+    #     custom_resolution_age=None,
+    #     announcement_age=None,
+    #     SRA_at_retirement=sra,
+    #     SRA_at_start=sra,
+    #     only_informed=True,
+    #     model_name=model_name,
+    #     df_exists=load_df,
+    #     solution_exists=load_no_unc_solution,
+    #     sol_model_exists=load_sol_model,
+    # )
+    # # After the first run we can always set models and solutions to True
+    # load_sol_model = True
+    # load_no_unc_solution = (
+    #     True if load_no_unc_solution is not None else load_no_unc_solution
+    # )
 
-    df_debias = df_debias.reset_index()
+    # df_debias = df_debias.reset_index()
 
-    if i == 0:
-        df_base_debias = df_debias.copy()
+    # if i == 0:
+    #     df_base_debias = df_debias.copy()
 
-    else:
-        results_row = calc_overall_results(df_base=df_base_debias, df_cf=df_debias)
+    # else:
+    #     results_row = calc_overall_results(df_base=df_base_debias, df_cf=df_debias)
 
-        for key, value in results_row.items():
-            result_df_debias.loc[i, key] = value
+    #     for key, value in results_row.items():
+    #         result_df_debias.loc[i, key] = value
 
-        result_df_debias.loc[i, "cv"] = calc_compensated_variation(
-            df_base=df_base_debias,
-            df_cf=df_debias,
-            params=params,
-            specs=specs,
-        )
+    #     result_df_debias.loc[i, "cv"] = calc_compensated_variation(
+    #         df_base=df_base_debias,
+    #         df_cf=df_debias,
+    #         params=params,
+    #         specs=specs,
+    #     )
 
 # Save results
 result_df_unc.to_csv(

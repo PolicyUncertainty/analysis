@@ -3,13 +3,16 @@ import pickle as pkl
 import sys
 
 from estimation.struct_estimation.start_params_and_bounds.param_lists import (
+    men_disability_old_age_params,
     men_disutil_firing,
     men_disutil_params,
+    men_disutil_params_edu,
     men_job_offer_old_age_params,
     men_job_offer_params,
     women_disutil_firing,
     women_disutil_params,
     women_job_offer_old_age_params,
+women_disability_old_age_params,
     women_job_offer_params,
 )
 from set_paths import create_path_dict
@@ -21,9 +24,12 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
     load_and_set_start_params,
 )
 
-model_name = "25_women"
-params_to_estimate_names = women_disutil_params + women_job_offer_params
-sex_type = "all"
+model_name = "final_2"
+params_to_estimate_names = [
+        "disutil_children_ft_work_high",
+    "disutil_children_ft_work_low",
+]
+sex_type = "women"
 edu_type = "all"
 util_type = "add"
 
@@ -36,10 +42,8 @@ print(f"Running estimation for model: {model_name}", flush=True)
 
 if LOAD_LAST_ESTIMATE:
     last_estimate = pkl.load(
-        open(paths_dict["struct_results"] + f"est_params_25_women.pkl", "rb")
+        open(paths_dict["struct_results"] + f"est_params_merge_final.pkl", "rb")
     )
-    # last_estimate["disutil_children_ft_work_high"] = 0.1
-    last_estimate["disutil_children_ft_work_low"] = 0.13
 else:
     last_estimate = None
 
@@ -63,28 +67,29 @@ estimation_results, end_params = estimate_model(
     print_men_examples=True,
     print_women_examples=True,
     slow_version=False,
-    scale_opt=False,
-    multistart=False,
+    scale_opt=True,
+    multistart=True,
 )
 print(estimation_results)
 
-# %% Set paths of project
-from specs.derive_specs import generate_derived_and_data_derived_specs
+# # %% Set paths of project
+# from specs.derive_specs import generate_derived_and_data_derived_specs
 
-specs = generate_derived_and_data_derived_specs(paths_dict)
+# specs = generate_derived_and_data_derived_specs(paths_dict)
 
 
-create_fit_plots(
-    path_dict=paths_dict,
-    specs=specs,
-    params=end_params,
-    model_name=model_name,
-    load_sol_model=True,
-    load_solution=None,
-    load_data_from_sol=False,
-    sex_type=sex_type,
-    edu_type=edu_type,
-)
+# create_fit_plots(
+#     path_dict=paths_dict,
+#     specs=specs,
+#     params=end_params,
+#     model_name=model_name,
+#     load_sol_model=True,
+#     load_solution=None,
+#     load_data_from_sol=False,
+#     sex_type=sex_type,
+#     edu_type=edu_type,
+# )
 
 
 # %%
+# 

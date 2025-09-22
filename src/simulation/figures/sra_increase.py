@@ -2,7 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from set_styles import set_colors, get_figsize
+from set_styles import get_figsize, set_colors
+
 JET_COLOR_MAP, LINE_STYLES = set_colors()
 
 
@@ -17,10 +18,10 @@ def sra_increase_aggregate_plot(path_dict, model_name):
         path_dict["sim_results"] + f"sra_increase_aggregate_no_unc_{model_name}.csv",
         index_col=0,
     )
-    df_debias = pd.read_csv(
-        path_dict["sim_results"] + f"sra_increase_aggregate_debias_{model_name}.csv",
-        index_col=0,
-    )
+    # df_debias = pd.read_csv(
+    #     path_dict["sim_results"] + f"sra_increase_aggregate_debias_{model_name}.csv",
+    #     index_col=0,
+    # )
 
     # Transform df to also have 67 data
     for column in df_unc.columns.values:
@@ -30,26 +31,26 @@ def sra_increase_aggregate_plot(path_dict, model_name):
             if "base" in column:
                 df_unc.loc[0, column] = df_unc.loc[1, column]
                 df_no_unc.loc[0, column] = df_no_unc.loc[1, column]
-                df_debias.loc[0, column] = df_debias.loc[1, column]
+                # df_debias.loc[0, column] = df_debias.loc[1, column]
             else:
                 column_name_without_cf = column[2:]
                 df_unc.loc[0, column] = df_unc.loc[1, "base" + column_name_without_cf]
                 df_no_unc.loc[0, column] = df_no_unc.loc[
                     1, "base" + column_name_without_cf
                 ]
-                df_debias.loc[0, column] = df_debias.loc[
-                    1, "base" + column_name_without_cf
-                ]
+                # df_debias.loc[0, column] = df_debias.loc[
+                #     1, "base" + column_name_without_cf
+                # ]
         else:
             # Assign to 0 itemn 1 from base
             df_unc.loc[0, column] = 0.0
             df_no_unc.loc[0, column] = 0.0
-            df_debias.loc[0, column] = 0.0
+            # df_debias.loc[0, column] = 0.0
 
     reform_SRA = [67, 68, 69, 70]
     df_unc = df_unc[df_unc["sra_at_63"].isin(reform_SRA)]
     df_no_unc = df_no_unc[df_no_unc["sra_at_63"].isin(reform_SRA)]
-    df_debias = df_debias[df_debias["sra_at_63"].isin(reform_SRA)]
+    # df_debias = df_debias[df_debias["sra_at_63"].isin(reform_SRA)]
     fig, axs = plt.subplots(ncols=3, figsize=get_figsize(ncols=3, nrows=1))
 
     row_names = {
@@ -63,7 +64,7 @@ def sra_increase_aggregate_plot(path_dict, model_name):
         ax = axs[i]
         change_unc = df_unc["cf_" + var] / df_unc["base_" + var] - 1
         change_no_unc = df_no_unc["cf_" + var] / df_no_unc["base_" + var] - 1
-        change_debias = df_debias["cf_" + var] / df_debias["base_" + var] - 1
+        # change_debias = df_debias["cf_" + var] / df_debias["base_" + var] - 1
         ax.plot(
             df_unc["sra_at_63"],
             change_unc * 100,
@@ -99,7 +100,7 @@ def sra_increase_aggregate_plot(path_dict, model_name):
     # Change of retirement age
     change_unc = df_unc["cf_ret_age"] - df_unc["base_ret_age"]
     change_no_unc = df_no_unc["cf_ret_age"] - df_no_unc["base_ret_age"]
-    change_debias = df_debias["cf_ret_age"] - df_debias["base_ret_age"]
+    # change_debias = df_debias["cf_ret_age"] - df_debias["base_ret_age"]
 
     ax.plot(df_unc["sra_at_63"], change_unc)
     ax.plot(df_no_unc["sra_at_63"], change_no_unc)

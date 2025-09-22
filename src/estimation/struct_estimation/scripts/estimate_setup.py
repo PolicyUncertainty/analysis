@@ -222,7 +222,7 @@ class est_class_from_paths:
         # Already retired individuals hold no identification
         data_decision = data_decision[data_decision["lagged_choice"] != 0]
         if old_only:
-            data_decision = data_decision[data_decision["age"] >= 55]
+            data_decision = data_decision[data_decision["age"] >=60]
 
         # Create states dict
         states_dict = create_states_dict(data_decision, model_class=model)
@@ -315,6 +315,9 @@ def generate_print_func(
 
     for param in ["disutil_children_ft_work_low", "disutil_children_ft_work_high"]:
         if param in params_to_estimate_names:
+            # Inialize full-time if not existing
+            if "full-time" not in women_params.keys():
+                women_params["full-time"] = []
             women_params["all"] += [param]
             women_params["full-time"] += [param]
     neutral_params = [

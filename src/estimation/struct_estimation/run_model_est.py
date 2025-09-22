@@ -12,6 +12,7 @@ from estimation.struct_estimation.start_params_and_bounds.param_lists import (
     women_disutil_firing,
     women_disutil_params,
     women_job_offer_old_age_params,
+women_disability_old_age_params,
     women_job_offer_params,
 )
 from set_paths import create_path_dict
@@ -23,18 +24,17 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
     load_and_set_start_params,
 )
 
-model_name = "old_men_reverse"
-params_to_estimate_names = (
-    men_disutil_params_edu
-    + men_job_offer_old_age_params
-    + men_disability_old_age_params
-)
-sex_type = "men"
+model_name = "final_2"
+params_to_estimate_names = [
+        "disutil_children_ft_work_high",
+    "disutil_children_ft_work_low",
+]
+sex_type = "women"
 edu_type = "all"
 util_type = "add"
 
-LOAD_LAST_ESTIMATE = False
-LOAD_SOL_MODEL = False
+LOAD_LAST_ESTIMATE = True
+LOAD_SOL_MODEL = True
 SAVE_RESULTS = True
 USE_WEIGHTS = False
 
@@ -42,7 +42,7 @@ print(f"Running estimation for model: {model_name}", flush=True)
 
 if LOAD_LAST_ESTIMATE:
     last_estimate = pkl.load(
-        open(paths_dict["struct_results"] + f"est_params_25_women.pkl", "rb")
+        open(paths_dict["struct_results"] + f"est_params_merge_final.pkl", "rb")
     )
 else:
     last_estimate = None
@@ -63,12 +63,12 @@ estimation_results, end_params = estimate_model(
     sex_type=sex_type,
     edu_type=edu_type,
     util_type=util_type,
-    old_only=True,
+    old_only=False,
     print_men_examples=True,
     print_women_examples=True,
     slow_version=False,
-    scale_opt=False,
-    multistart=False,
+    scale_opt=True,
+    multistart=True,
 )
 print(estimation_results)
 
@@ -92,3 +92,4 @@ print(estimation_results)
 
 
 # %%
+# 

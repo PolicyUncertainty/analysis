@@ -31,8 +31,9 @@ def sra_at_retirement(df):
     return mean_sra
 
 
-def expected_liftime_income(df, specs):
-    disc_income = specs["discount_factor"] ** (df["period"])
+def expected_lifetime_income(df, specs):
+    df["disc_income"] = specs["discount_factor"] ** (df["period"]) * df["total_income"]
+    return df["disc_income"].mean()
 
 
 def below_sixty_savings(df):

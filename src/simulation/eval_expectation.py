@@ -10,16 +10,16 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 
 specs = generate_derived_and_data_derived_specs(path_dict)
 
-# Import jax and set jax to work with 64bit
-import jax
-
-jax.config.update("jax_enable_x64", True)
-
 import pickle as pkl
 
+# Import jax and set jax to work with 64bit
+import jax
 import numpy as np
 
-from simulation.sim_tools.calc_aggregate_results import calc_average_retirement_age
+from simulation.sim_tools.calc_aggregate_results import (
+    calc_average_retirement_age,
+    expected_lifetime_income,
+)
 from simulation.sim_tools.simulate_exp import simulate_exp
 
 # %%
@@ -54,13 +54,13 @@ for subj_unc in [True, False]:
             n_multiply=10_000,
             path_dict=path_dict,
             params=params,
-            subj_unc=True,
+            subj_unc=subj_unc,
             custom_resolution_age=None,
             model_name=model_name,
             solution_exists=load_unc_solution,
             sol_model_exists=load_sol_model,
         )
-        df = df.reset_index()
-        df["age"] = df["period"] + 30
         avg_ret_age = calc_average_retirement_age(df)
+        total_inc = expected_lifetime_income(df, params)
+        print(f"{informed_label} expected lifetime income: {total_inc}")
         print(f"{informed_label} expected average retirement age: {avg_ret_age}")

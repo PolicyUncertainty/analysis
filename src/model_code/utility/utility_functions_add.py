@@ -243,9 +243,9 @@ def disutility_work(
 
 
         # Children disutility remains education-specific as it's conceptually different
-    disutil_children_pt = params["disutil_children_pt_work_high"] * education + params[
-        "disutil_children_pt_work_low"
-    ] * (1 - education)
+    # disutil_children_pt = params["disutil_children_pt_work_high"] * education + params[
+    #     "disutil_children_pt_work_low"
+    # ] * (1 - education)
 
     has_partner_int = (partner_state > 0).astype(int)
     nb_children = model_specs["children_by_state"][
@@ -261,7 +261,7 @@ def disutility_work(
 
     disutil_women = (
         disutil_unemployment_women * is_unemployed
-        + (disutil_pt_work_women + disutil_children_pt) * is_working_part_time
+        + disutil_pt_work_women * is_working_part_time
         + (disutil_ft_work_women + disutil_children_ft) * is_working_full_time
         + partner_retired * disutil_retirement_women * retired
     )

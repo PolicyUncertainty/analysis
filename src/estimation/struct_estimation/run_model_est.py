@@ -26,9 +26,9 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
     load_and_set_start_params,
 )
 
-model_name = "whole_men_dis"
-params_to_estimate_names = men_disutil_params_edu
-sex_type = "men"
+model_name = "final_3_women"
+params_to_estimate_names = women_disutil_params
+sex_type = "women"
 edu_type = "all"
 util_type = "add"
 
@@ -62,7 +62,7 @@ estimation_results, end_params = estimate_model(
     sex_type=sex_type,
     edu_type=edu_type,
     util_type=util_type,
-    old_only=False,
+    old_only=True,
     print_men_examples=True,
     print_women_examples=True,
     slow_version=False,

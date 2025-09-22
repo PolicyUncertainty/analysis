@@ -5,7 +5,7 @@ from set_styles import get_figsize, set_colors
 
 def plot_detailed_lifecycle_results(df_results_path, path_dict, specs, subfolder=None, 
                                    df_results_comparison_path=None, comparison_name=None, 
-                                   show=False, save=True):
+                                   show=False, save=True, end_age=80):
     """
     Plot detailed lifecycle results by demographic groups.
     
@@ -62,7 +62,7 @@ def plot_detailed_lifecycle_results(df_results_path, path_dict, specs, subfolder
     }
     
     # Define group types to plot (exclude aggregate)
-    group_types = ['sex', 'education', 'informed', 'health', 'partner_state']
+    group_types = ['sex', 'education', 'initial_informed', 'health', 'partner_state']
     
     # Get group labels from specs
     group_labels = {
@@ -125,11 +125,12 @@ def plot_detailed_lifecycle_results(df_results_path, path_dict, specs, subfolder
                                linewidth=2,
                                linestyle='--')
             
+            ax.set_xlim(specs.get('start_age', 30), end_age)
             ax.set_xlabel('Age')
             ax.set_ylabel(outcome_name)
             ax.set_title(outcome_name)
             ax.legend()
-            ax.grid(True, alpha=0.3)
+            #ax.grid(True, alpha=0.3)
         
         #plt.suptitle(f'Lifecycle Profiles by {group_type.title()}', fontsize=16)
         plt.tight_layout()

@@ -15,7 +15,7 @@ def calc_life_cycle_detailed(df):
         (['age'], 'aggregate'),
         (['age', 'sex'], 'sex'),
         (['age', 'education'], 'education'), 
-        (['age', 'informed'], 'informed'),
+        (['age', 'initial_informed'], 'initial_informed'),
         (['age', 'health'], 'health'),
         (['age', 'partner_state'], 'partner_state')
     ]

@@ -3,7 +3,9 @@ import pandas as pd
 import os
 from set_styles import get_figsize, set_colors
 
-def plot_detailed_lifecycle_results(df_results_path, path_dict, specs, subfolder=None, show=False, save=True):
+def plot_detailed_lifecycle_results(df_results_path, path_dict, specs, subfolder=None, 
+                                   df_results_comparison_path=None, comparison_name=None, 
+                                   show=False, save=True):
     """
     Plot detailed lifecycle results by demographic groups.
     
@@ -17,6 +19,10 @@ def plot_detailed_lifecycle_results(df_results_path, path_dict, specs, subfolder
         Model specifications with labels
     subfolder : str, optional
         Subfolder within simulation_plots to save plots
+    df_results_comparison_path : str, optional
+        Path to comparison CSV file to overlay with dotted lines
+    comparison_name : str, optional
+        Name for comparison data (default: "comparison")
     show : bool
         Whether to display plots
     save : bool
@@ -25,7 +31,14 @@ def plot_detailed_lifecycle_results(df_results_path, path_dict, specs, subfolder
     
     # Load the detailed results from CSV
     df_results = pd.read_csv(df_results_path, index_col=[0, 1, 2])
-
+    
+    # Load comparison data if provided
+    df_comparison = None
+    if df_results_comparison_path:
+        df_comparison = pd.read_csv(df_results_comparison_path, index_col=[0, 1, 2])
+    
+    comp_name = comparison_name or "comparison"
+    
     # Set up plot save directory
     if subfolder:
         plot_dir = path_dict["simulation_plots"] + f"{subfolder}/"
@@ -53,13 +66,17 @@ def plot_detailed_lifecycle_results(df_results_path, path_dict, specs, subfolder
         'sex': specs.get('sex_labels', ['Male', 'Female']),
         'education': specs.get('education_labels', ['Low Education', 'High Education']),
         'informed': ['Uninformed', 'Informed'],
-        'health': ['Good Health', 'Bad Health', 'Disabled', 'Dead'],
+        'health': ['Good Health', 'Bad Health', 'Dead'],
         'partner_state': ['Single', 'Partnered']
     }
     
     for group_type in group_types:
         # Skip if group not in data
         if group_type not in df_results.index.get_level_values('group_type'):
+            continue
+        
+        # Skip if group not in comparison data (if provided)
+        if df_comparison is not None and group_type not in df_comparison.index.get_level_values('group_type'):
             continue
             
         # Create figure with subplots for each outcome
@@ -69,10 +86,13 @@ def plot_detailed_lifecycle_results(df_results_path, path_dict, specs, subfolder
         group_data = df_results.loc[group_type]
         group_values = group_data.index.get_level_values('group_value').unique()
         
+        # Get comparison data if available
+        group_data_comp = df_comparison.loc[group_type] if df_comparison is not None else None
+        
         for i, (outcome_var, outcome_name) in enumerate(outcomes.items()):
             ax = axes[i]
             
-            # Plot line for each group value
+            # Plot line for each group value - main data (solid lines)
             for j, group_val in enumerate(sorted(group_values)):
                 if group_val in group_data.index.get_level_values('group_value'):
                     data = group_data.loc[group_val][outcome_var]
@@ -90,7 +110,17 @@ def plot_detailed_lifecycle_results(df_results_path, path_dict, specs, subfolder
                     ax.plot(data.index, data.values, 
                            color=colors[j % len(colors)], 
                            label=label, 
-                           linewidth=2)
+                           linewidth=2,
+                           linestyle='-')
+                    
+                    # Plot comparison data (dotted lines) if available
+                    if group_data_comp is not None and group_val in group_data_comp.index.get_level_values('group_value'):
+                        data_comp = group_data_comp.loc[group_val][outcome_var]
+                        ax.plot(data_comp.index, data_comp.values, 
+                               color=colors[j % len(colors)], 
+                               label=f'{label} ({comp_name})', 
+                               linewidth=2,
+                               linestyle='--')
             
             ax.set_xlabel('Age')
             ax.set_ylabel(outcome_name)

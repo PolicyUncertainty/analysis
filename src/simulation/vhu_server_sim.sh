@@ -13,8 +13,8 @@
 
 module add cuda/12.4.1
 
-python run_baseline.py
-#python run_figures.py
+# python run_baseline.py
+python run_figures.py
 # python run_model_fit_sim.py
 # python run_illustration.py
 # python run_cf_sra_increase.py

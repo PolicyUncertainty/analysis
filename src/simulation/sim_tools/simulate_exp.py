@@ -1,6 +1,7 @@
 import numpy as np
 
 from model_code.specify_model import specify_and_solve_model
+from simulation.sim_tools.simulate_scenario import create_additional_variables
 from specs.derive_specs import (
     generate_derived_and_data_derived_specs,
 )
@@ -39,4 +40,6 @@ def simulate_exp(
         states_initial=initial_states,
         seed=specs["seed"],
     )
+    df = df.reset_index()
+    df = create_additional_variables(df, specs)
     return df

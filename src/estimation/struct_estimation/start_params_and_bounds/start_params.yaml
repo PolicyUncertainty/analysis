@@ -13,14 +13,14 @@ mu_high: 2.5
 
 # Full time work dis-utility men - Health and Education specific
 disutil_ft_work_high_good_men: 0.2
-disutil_ft_work_high_bad_men: 0.3
-disutil_ft_work_low_good_men: 0.5
+disutil_ft_work_high_bad_men: 0.6
+disutil_ft_work_low_good_men: 0.7
 disutil_ft_work_low_bad_men: 0.6
 
 # Unemployment dis-utility men - Health and Education specific
-disutil_unemployed_high_good_men: 0.2
-disutil_unemployed_high_bad_men: 0.3
-disutil_unemployed_low_good_men: 0.5
+disutil_unemployed_high_good_men: 0.1
+disutil_unemployed_high_bad_men: 0.1
+disutil_unemployed_low_good_men: 0.1
 disutil_unemployed_low_bad_men: 0.1
 
 # Partner retired dis-utility men
@@ -42,8 +42,11 @@ disutil_unemployed_bad_women: 0.4
 disutil_partner_retired_women: -0.1
 
 # Children dis-utility
-disutil_children_ft_work_low: 1e-12
-disutil_children_ft_work_high: 1e-12
+disutil_children_ft_work_low: 0.05
+disutil_children_ft_work_high: 0.05
+
+disutil_children_pt_work_low: 0.05
+disutil_children_pt_work_high: 0.05
 
 # Bequest
 bequest_scale: 2.4

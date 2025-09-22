@@ -12,7 +12,7 @@ path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict)
 
 # Set run specs
-model_name = "final_2"
+model_name = "whole_men_dis"
 print(f"Running model: {model_name}")
 load_sol_model = True
 load_solution = None

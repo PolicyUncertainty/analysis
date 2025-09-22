@@ -42,3 +42,7 @@ est_params_stable.pkl
 
 # Claude Code configuration
 CLAUDE.md
+
+# Ignore est and sim files. Add only single ones
+output/est_results/struct_results/*.pkl
+/output/sim_results/*.csv

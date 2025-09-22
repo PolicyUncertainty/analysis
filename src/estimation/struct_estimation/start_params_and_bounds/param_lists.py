@@ -1,13 +1,13 @@
 wealth_params = ["mu_low", "mu_high", "bequest_scale", "kappa"]
 
 # Men - Health specific disutility
-men_disutil_params = [
-    "disutil_ft_work_good_men",
-    "disutil_ft_work_bad_men",
-    "disutil_unemployed_good_men",
-    "disutil_unemployed_bad_men",
-    "disutil_partner_retired_men",
-]
+# men_disutil_params = [
+#     "disutil_ft_work_good_men",
+#     "disutil_ft_work_bad_men",
+#     "disutil_unemployed_good_men",
+#     "disutil_unemployed_bad_men",
+#     "disutil_partner_retired_men",
+# ]
 
 # Men - Health and Education specific disutility
 men_disutil_params_edu = [
@@ -26,7 +26,6 @@ men_SRA_firing = [
     "SRA_firing_logit_intercept_men_low",
     "SRA_firing_logit_intercept_men_high",
 ]
-men_disutil_firing = men_disutil_params + men_SRA_firing
 
 men_taste = [
     "taste_shock_scale_men",
@@ -59,8 +58,10 @@ women_disutil_params = [
     "disutil_unemployed_good_women",
     "disutil_unemployed_bad_women",
     # "disutil_partner_retired_women",
-    # "disutil_children_ft_work_high",
-    # "disutil_children_ft_work_low",
+    "disutil_children_ft_work_high",
+    "disutil_children_ft_work_low",
+    "disutil_children_pt_work_high",
+    "disutil_children_pt_work_low",
 ]
 
 women_SRA_firing = [

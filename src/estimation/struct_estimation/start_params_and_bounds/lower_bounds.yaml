@@ -41,8 +41,11 @@ disutil_unemployed_bad_women: 1.0e-12
 disutil_partner_retired_women: -2.0
 
 # Children dis-utility
-disutil_children_ft_work_low: -0.2
-disutil_children_ft_work_high: -0.2
+disutil_children_ft_work_low: 1e-12
+disutil_children_ft_work_high: 1e-12
+
+disutil_children_pt_work_low: 1e-12
+disutil_children_pt_work_high: 1e-12
 
 # Taste shocks
 taste_shock_scale_men: 0.05

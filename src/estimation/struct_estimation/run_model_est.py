@@ -4,8 +4,9 @@ import sys
 
 from estimation.struct_estimation.start_params_and_bounds.param_lists import (
     men_disability_old_age_params,
-    men_disutil_firing,
-    men_disutil_params,
+    # men_disutil_firing,
+    # men_disutil_params,
+    men_disability_params,
     men_disutil_params_edu,
     men_job_offer_old_age_params,
     men_job_offer_params,
@@ -14,6 +15,7 @@ from estimation.struct_estimation.start_params_and_bounds.param_lists import (
     women_job_offer_old_age_params,
 women_disability_old_age_params,
     women_job_offer_params,
+    women_disability_params
 )
 from set_paths import create_path_dict
 
@@ -24,16 +26,13 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
     load_and_set_start_params,
 )
 
-model_name = "final_2"
-params_to_estimate_names = [
-        "disutil_children_ft_work_high",
-    "disutil_children_ft_work_low",
-]
-sex_type = "women"
+model_name = "whole_men_dis"
+params_to_estimate_names = men_disutil_params_edu
+sex_type = "men"
 edu_type = "all"
 util_type = "add"
 
-LOAD_LAST_ESTIMATE = True
+LOAD_LAST_ESTIMATE = False
 LOAD_SOL_MODEL = True
 SAVE_RESULTS = True
 USE_WEIGHTS = False

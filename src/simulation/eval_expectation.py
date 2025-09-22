@@ -19,17 +19,13 @@ import pickle as pkl
 
 import numpy as np
 
-from simulation.figures.retirement_plot import (
-    plot_retirement_difference,
-    plot_retirement_share,
-)
 from simulation.sim_tools.calc_aggregate_results import calc_average_retirement_age
 from simulation.sim_tools.simulate_exp import simulate_exp
 
 # %%
 # Set specifications
 model_name = specs["model_name"]
-load_sol_model = False  # informed state as type
+load_sol_model = True  # informed state as type
 load_unc_solution = True  # baseline solution conntainer
 
 # Load params
@@ -63,5 +59,7 @@ for informed, informed_label in enumerate(["Uninformed", "Informed"]):
         solution_exists=load_unc_solution,
         sol_model_exists=load_sol_model,
     )
-    avg_ret_age = calc_average_retirement_age(df, specs)
-    print(f"{informed_label} Average retirement age: {avg_ret_age}")
+    df = df.reset_index()
+    df["age"] = df["period"] + 30
+    avg_ret_age = calc_average_retirement_age(df)
+    print(f"{informed_label} expected average retirement age: {avg_ret_age}")

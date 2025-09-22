@@ -15,7 +15,7 @@ def calc_overall_results(df_base, df_cf):
 
 def calc_average_retirement_age(df):
     fresh_retired_mask = (
-        (df["choice"] == 0) & (df["lagged_choice"] != 0) & (df["health"] != 2)
+        (df["choice"] == 0) & (df["lagged_choice"] != 0) & (df["health"] != 3)
     )
 
     mean_ret_age = df.loc[fresh_retired_mask, "age"].mean()
@@ -24,7 +24,7 @@ def calc_average_retirement_age(df):
 
 def sra_at_retirement(df):
     fresh_retired_mask = (
-        (df["choice"] == 0) & (df["lagged_choice"] != 0) & (df["health"] != 2)
+        (df["choice"] == 0) & (df["lagged_choice"] != 0) & (df["health"] != 3)
     )
 
     mean_sra = df.loc[fresh_retired_mask, "policy_state_value"].mean()

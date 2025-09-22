@@ -189,9 +189,9 @@ def calculate_partner_incomes(path_dict, specs):
     # annual partner wage
     annual_partner_wages = partner_wages * 12
 
-    # Quasi wealth hack
-    annual_partner_pension = (
-        annual_partner_wages[:, :, ~not_predicted_periods].mean(axis=2) * 0.48
-    )
+    # Average pension 2020 of men and women
+    # Source: https://statistik-rente.de/drv/extern/publikationen
+    # /statistikbaende/documents/Rente_2020.pdf
+    annual_partner_pension = np.array([[800, 800], [1227, 1227]]) * 12
 
     return annual_partner_wages, annual_partner_pension

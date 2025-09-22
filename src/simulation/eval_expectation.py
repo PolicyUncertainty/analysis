@@ -61,6 +61,6 @@ for subj_unc in [True, False]:
             sol_model_exists=load_sol_model,
         )
         avg_ret_age = calc_average_retirement_age(df)
-        total_inc = expected_lifetime_income(df, params)
+        total_inc = expected_lifetime_income(df, specs)
         print(f"{informed_label} expected lifetime income: {total_inc}")
         print(f"{informed_label} expected average retirement age: {avg_ret_age}")

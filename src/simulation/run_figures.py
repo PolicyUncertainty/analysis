@@ -15,12 +15,13 @@ set_plot_defaults()
 
 # %%
 # Set up data path
-model_name = specs["model_name"]
+#model_name = specs["model_name"]
+model_name = "old_men_high_fire_multi"
 
 # %%
 # Create detailed lifecycle plots for baseline
 from simulation.figures.detailed_lc_results import plot_detailed_lifecycle_results
-baseline_lc_path = path_dict["simulation_data"] + "/baseline/" + f"baseline_lc_{model_name}.csv"
+baseline_lc_path = path_dict["simulation_data"] + "baseline/" + f"baseline_lc_{model_name}.csv"
 plot_detailed_lifecycle_results(
     df_results_path=baseline_lc_path,
     path_dict=path_dict,

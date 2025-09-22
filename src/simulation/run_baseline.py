@@ -14,7 +14,8 @@ jax.config.update("jax_enable_x64", True)
 # %%
 path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict)
-model_name = specs["model_name"]
+#model_name = specs["model_name"]
+model_name = "old_men_high_fire_multi"
 
 params = pkl.load(
     open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
@@ -32,12 +33,14 @@ df_baseline, _ = solve_and_simulate_scenario(
     model_name=model_name,
     df_exists=False,
     only_informed=False,
-    solution_exists=True,
-    sol_model_exists=True,
+    solution_exists=False,
+    sol_model_exists=False,
 )
 
 df_baseline = df_baseline.reset_index()
 
+# temp: restrict to men
+df_baseline = df_baseline[df_baseline["sex"] == "Male"]
 
 # %%
 # Generate detailed life cycle results

@@ -1,24 +1,37 @@
 import matplotlib.pyplot as plt
 import pandas as pd
+import os
 from set_styles import get_figsize, set_colors
 
-def plot_detailed_lifecycle_results(df_results, path_dict, specs, show=False, save=True):
+def plot_detailed_lifecycle_results(df_results_path, path_dict, specs, subfolder=None, show=False, save=True):
     """
     Plot detailed lifecycle results by demographic groups.
     
     Parameters:
     -----------
-    df_results : pd.DataFrame
-        Multi-index DataFrame from calc_life_cycle_detailed
+    df_results_path : str
+        Path to CSV file with multi-index DataFrame from calc_life_cycle_detailed
     path_dict : dict
         Path dictionary for saving plots
     specs : dict
         Model specifications with labels
+    subfolder : str, optional
+        Subfolder within simulation_plots to save plots
     show : bool
         Whether to display plots
     save : bool
         Whether to save plots
     """
+    
+    # Load the detailed results from CSV
+    df_results = pd.read_csv(df_results_path, index_col=[0, 1, 2])
+
+    # Set up plot save directory
+    if subfolder:
+        plot_dir = path_dict["simulation_plots"] + f"{subfolder}/"
+        os.makedirs(plot_dir, exist_ok=True)
+    else:
+        plot_dir = path_dict["simulation_plots"]
     
     colors, _ = set_colors()
     
@@ -40,7 +53,7 @@ def plot_detailed_lifecycle_results(df_results, path_dict, specs, show=False, sa
         'sex': specs.get('sex_labels', ['Male', 'Female']),
         'education': specs.get('education_labels', ['Low Education', 'High Education']),
         'informed': ['Uninformed', 'Informed'],
-        'health': ['Good Health', 'Bad Health', 'Dead'],
+        'health': ['Good Health', 'Bad Health', 'Disabled', 'Dead'],
         'partner_state': ['Single', 'Partnered']
     }
     
@@ -64,10 +77,14 @@ def plot_detailed_lifecycle_results(df_results, path_dict, specs, show=False, sa
                 if group_val in group_data.index.get_level_values('group_value'):
                     data = group_data.loc[group_val][outcome_var]
                     
-                    # Get label for this group value
-                    if group_val < len(group_labels[group_type]):
-                        label = group_labels[group_type][int(group_val)]
-                    else:
+                    # Convert group_val to int for indexing (CSV loading makes it a string)
+                    try:
+                        group_val_int = int(float(group_val))
+                        if group_val_int < len(group_labels[group_type]):
+                            label = group_labels[group_type][group_val_int]
+                        else:
+                            label = f'{group_type}={group_val}'
+                    except (ValueError, TypeError):
                         label = f'{group_type}={group_val}'
                     
                     ax.plot(data.index, data.values, 
@@ -86,8 +103,8 @@ def plot_detailed_lifecycle_results(df_results, path_dict, specs, show=False, sa
         
         if save:
             filename = f'lifecycle_profiles_by_{group_type}'
-            fig.savefig(path_dict["simulation_plots"] + f'{filename}.pdf', bbox_inches='tight')
-            fig.savefig(path_dict["simulation_plots"] + f'{filename}.png', bbox_inches='tight', dpi=300)
+            fig.savefig(plot_dir + f'{filename}.pdf', bbox_inches='tight')
+            fig.savefig(plot_dir + f'{filename}.png', bbox_inches='tight', dpi=300)
         
         if show:
             plt.show()

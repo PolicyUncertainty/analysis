@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import os
 
 from set_styles import get_figsize, set_colors
 
@@ -81,6 +82,10 @@ def sra_increase_aggregate_plot_by_gender(path_dict, model_name):
     
     # Load all results
     results = load_gender_results(path_dict, model_name)
+
+    plot_folder = path_dict["simulation_plots"] + model_name + "/"
+    if not os.path.exists(plot_folder):
+        os.makedirs(plot_folder)
     
     # Prepare data for all scenarios and genders
     prepared_data = {}
@@ -148,7 +153,7 @@ def sra_increase_aggregate_plot_by_gender(path_dict, model_name):
     axs[1, 1].legend(loc="lower center", bbox_to_anchor=(0.5, -0.2), ncol=2, frameon=True)
     
     plt.tight_layout()
-    fig.savefig(path_dict["plots"] + f"cf_increase_behavior_by_gender.png", 
+    fig.savefig(plot_folder + f"cf_increase_behavior_by_gender.png", 
                 transparent=True, bbox_inches='tight')
     
     # # Create compensating variation plot by gender
@@ -191,6 +196,10 @@ def sra_increase_aggregate_plot(path_dict, model_name):
     
     # Create gender-specific plots
     sra_increase_aggregate_plot_by_gender(path_dict, model_name)
+
+    plot_folder = path_dict["simulation_plots"] + model_name + "/"
+    if not os.path.exists(plot_folder):
+        os.makedirs(plot_folder)
     
     # Also create the original overall plots for backward compatibility
     results = load_gender_results(path_dict, model_name)
@@ -227,7 +236,7 @@ def sra_increase_aggregate_plot(path_dict, model_name):
     axs[1].legend(loc="lower center", bbox_to_anchor=(0.5, -0.15), ncol=2, frameon=True)
     
     fig.align_ylabels(axs)
-    fig.savefig(path_dict["plots"] + f"cf_increase_behavior.png", transparent=True)
+    fig.savefig(plot_folder + f"cf_increase_behavior.png", transparent=True)
     
     # # Original CV plot
     # fig_cv_orig, ax_cv_orig = plt.subplots()
@@ -241,4 +250,4 @@ def sra_increase_aggregate_plot(path_dict, model_name):
     # ax_cv_orig.legend()
     # fig_cv_orig.savefig(path_dict["plots"] + f"cf_increase_cv.png")
     
-    return fig, fig_gender, fig_cv_gender
+    return fig

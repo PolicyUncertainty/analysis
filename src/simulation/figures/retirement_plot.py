@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from set_styles import get_figsize
-
+import os
 
 def plot_retirement_difference(
     path_dict,
@@ -18,6 +18,10 @@ def plot_retirement_difference(
 ):
     df_base["SRA_diff"] = df_base["age"] - final_SRA
     df_cf["SRA_diff"] = df_cf["age"] - final_SRA
+
+    plot_folder = path_dict["simulation_plots"] + model_name + "/"
+    if not os.path.exists(plot_folder):
+        os.makedirs(plot_folder)
 
     df_base_plot = df_base[
         (df_base["SRA_diff"] >= left_difference)
@@ -53,7 +57,7 @@ def plot_retirement_difference(
     ax.set_ylabel("Inflow into retirement share")
     ax.set_title(f"Inflow into retirement by age relative to SRA {final_SRA}")
     fig.savefig(
-        path_dict["simulation_plots"]
+        plot_folder
         + f"retirement_inflow_comparison_sra_{final_SRA}_{model_name}.png"
     )
     plt.close(fig)
@@ -107,7 +111,7 @@ def plot_retirement_difference(
     )
     plt.tight_layout()
     fig.savefig(
-        path_dict["simulation_plots"]
+        plot_folder
         + f"retirement_inflow_by_edu_sex_sra_{final_SRA}_{model_name}.png"
     )
     plt.close(fig)
@@ -125,6 +129,10 @@ def plot_retirement_share(
     base_label,
     cf_label,
 ):
+    plot_folder = path_dict["simulation_plots"] + model_name + "/"
+    if not os.path.exists(plot_folder):
+        os.makedirs(plot_folder)
+
     all_base_share = (
         df_base.groupby("age")["choice"]
         .value_counts(normalize=True)
@@ -158,7 +166,7 @@ def plot_retirement_share(
 
     plt.tight_layout()
     fig_all.savefig(
-        path_dict["simulation_plots"]
+        plot_folder
         + f"retirement_share_comparison_sra_{final_SRA}_{model_name}.png"
     )
     plt.close(fig_all)
@@ -247,7 +255,7 @@ def plot_retirement_share(
 
     plt.tight_layout()
     fig_sex.savefig(
-        path_dict["simulation_plots"]
+        plot_folder
         + f"retirement_share_by_sex_informed_sra_{final_SRA}_{model_name}.png"
     )
     plt.close(fig_sex)

@@ -84,6 +84,7 @@ def create_path_dict(define_user=False, user=None):
         "validation",
         "simulation",
         "misc",
+        "estimation",
     ]:
         folder_name_plots = paths_dict["plots"] + subfolder
         folder_name_tables = paths_dict["tables"] + subfolder

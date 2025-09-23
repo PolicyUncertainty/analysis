@@ -3,27 +3,27 @@ mu_low: 5
 mu_high: 5
 
 # Full time work dis-utility men - Health specific
-disutil_ft_work_good_men: 0.6
-disutil_ft_work_bad_men: 0.6
+disutil_ft_work_good_men: 0.8
+disutil_ft_work_bad_men: 0.8
 
 # Unemployment dis-utility men - Health specific
-disutil_unemployed_good_men: 0.6
-disutil_unemployed_bad_men: 0.6
+disutil_unemployed_good_men: 0.8
+disutil_unemployed_bad_men: 0.8
 
 # Full time work dis-utility men - Health and Education specific
-disutil_ft_work_high_good_men: 0.6
-disutil_ft_work_high_bad_men: 0.6
-disutil_ft_work_low_good_men: 0.6
-disutil_ft_work_low_bad_men: 0.6
+disutil_ft_work_high_good_men: 0.8
+disutil_ft_work_high_bad_men: 0.8
+disutil_ft_work_low_good_men: 0.8
+disutil_ft_work_low_bad_men: 0.8
 
 # Unemployment dis-utility men - Health and Education specific
-disutil_unemployed_high_good_men: 0.6
-disutil_unemployed_high_bad_men: 0.6
-disutil_unemployed_low_good_men: 0.6
-disutil_unemployed_low_bad_men: 0.6
+disutil_unemployed_high_good_men: 0.8
+disutil_unemployed_high_bad_men: 0.8
+disutil_unemployed_low_good_men: 0.8
+disutil_unemployed_low_bad_men: 0.8
 
 # Partner retired dis-utility men
-disutil_partner_retired_men: 2.0
+disutil_partner_retired_men: 0.0
 
 # Full time work dis-utility women - Health specific
 disutil_ft_work_good_women: 1.0
@@ -38,7 +38,7 @@ disutil_unemployed_good_women: 1.0
 disutil_unemployed_bad_women: 1.0
 
 # Partner retired dis-utility women
-disutil_partner_retired_women: 2.0
+disutil_partner_retired_women: 0.0
 
 # Children dis-utility
 disutil_children_ft_work_low: 0.15

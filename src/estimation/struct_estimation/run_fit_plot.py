@@ -12,7 +12,7 @@ path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict)
 
 # Set run specs
-model_name = "final_3_men"
+model_name = "fire_all"
 print(f"Running model: {model_name}")
 load_sol_model = True
 load_solution = None
@@ -29,18 +29,18 @@ params = pkl.load(
 # params_dict["men"] = {}
 # # Load start params
 # params_dict["women"]["params"] = pkl.load(
-#     open(path_dict["struct_results"] + f"est_params_very_old_women_2.pkl", "rb")
+#     open(path_dict["struct_results"] + f"est_params_fire_old_women.pkl", "rb")
 # )
 # params_dict["women"]["names"] = [ key for key in params_dict["default"].keys() if "_women" in key or "children" in key ]
 
 # params_dict["men"]["params"] = pkl.load(
-#     open(path_dict["struct_results"] + f"est_params_very_old_men_1.pkl", "rb")
+#     open(path_dict["struct_results"] + f"est_params_fire_old_edu.pkl", "rb")
 # )
 # params_dict["men"]["names"] = [ key for key in params_dict["default"].keys() if "_men" in key]
 # params = merge_params(params_dict)
 # pkl.dump(
 #     params,
-#     open(path_dict["struct_results"] + f"est_params_merge_final.pkl", "wb"),
+#     open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "wb"),
 # )
 
 

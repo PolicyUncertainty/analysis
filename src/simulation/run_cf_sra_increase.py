@@ -92,8 +92,8 @@ def process_gender_results(
 seeed = 123
 model_name = specs["model_name"]
 load_sol_model = True
-load_unc_solution = False
-load_no_unc_solution = False
+load_unc_solution = None
+load_no_unc_solution = None
 load_df = None
 model_solution_unc = None
 model_solution_no_unc = None

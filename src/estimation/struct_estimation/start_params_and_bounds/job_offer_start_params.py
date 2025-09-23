@@ -46,9 +46,9 @@ def est_job_offer_params_full_obs(df, specs):
 
         params = logit_fitted.params
         gender_params = {
-            f"job_finding_logit_const_{sex_append}": params["intercept"],
+            f"job_finding_logit_const_{sex_append}": params["intercept"] + params["education"],
             f"job_finding_logit_age_{sex_append}": params["age"],
-            f"job_finding_logit_high_educ_{sex_append}": params["education"],
+            f"job_finding_logit_high_educ_{sex_append}": 0.0,
             f"job_finding_logit_good_health_{sex_append}": params["good_health"],
             f"job_finding_logit_age_above_55_{sex_append}": 0.0,
         }

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name=pol_unc
+#SBATCH --job-name=est_pol
 #SBATCH --mail-user=maximilian.blesch@hu-berlin.de
 #SBATCH --mail-type=end
 #SBATCH --nodes=1

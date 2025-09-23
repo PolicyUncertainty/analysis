@@ -3,7 +3,7 @@ import pickle
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-
+import os
 from set_styles import get_figsize, set_colors
 
 JET_COLOR_MAP, LINE_STYLES = set_colors()
@@ -60,17 +60,21 @@ def create_fit_plots(
         sex_type=sex_type,
         edu_type=edu_type,
     )
+    folder_name_plots = path_dict["estimation_plots"] + model_name + "/"
+    # Check if folder exists, if not create it
+    if not os.path.exists(folder_name_plots):
+        os.makedirs(folder_name_plots)
 
     plot_life_cycle_choice_probs(
         specs=specs,
         data_decision=data_decision,
-        save_folder=path_dict["plots"],
+        save_folder=folder_name_plots,
     )
 
     plot_retirement_fit(
         specs=specs,
         data_decision=data_decision,
-        save_folder=path_dict["plots"],
+        save_folder=folder_name_plots,
     )
 
     # print_choice_probs_by_group(df=data_decision, specs=specs, path_dict=path_dict)

@@ -1,5 +1,6 @@
 import numpy as np
 from matplotlib import pyplot as plt
+import os
 
 from set_styles import get_figsize
 from simulation.figures.simulated_model_fit import JET_COLOR_MAP
@@ -60,5 +61,9 @@ def plot_savings(
             )
             ax.set_title(f"{edu_label}")
     axs[0].legend()
+
+    plot_folder = path_dict["simulation_plots"] + model_name + "/"
+    if not os.path.exists(plot_folder):
+        os.makedirs(plot_folder)
     if file_name is not None:
-        fig.savefig(path_dict["plots"] + f"{file_name}.png", transparent=True, dpi=300)
+        fig.savefig(plot_folder + f"{file_name}.png", transparent=True, dpi=300)

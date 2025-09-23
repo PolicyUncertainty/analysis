@@ -5,7 +5,8 @@ import sys
 from estimation.struct_estimation.start_params_and_bounds.param_lists import (
     men_disability_old_age_params,
     # men_disutil_firing,
-    # men_disutil_params,
+    men_SRA_firing,
+    men_disutil_params,
     men_disability_params,
     men_disutil_params_edu,
     men_job_offer_old_age_params,
@@ -26,8 +27,8 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
     load_and_set_start_params,
 )
 
-model_name = "final_3_women"
-params_to_estimate_names = women_disutil_params
+model_name = "fire_all_women"
+params_to_estimate_names = women_disutil_firing
 sex_type = "women"
 edu_type = "all"
 util_type = "add"
@@ -41,7 +42,7 @@ print(f"Running estimation for model: {model_name}", flush=True)
 
 if LOAD_LAST_ESTIMATE:
     last_estimate = pkl.load(
-        open(paths_dict["struct_results"] + f"est_params_merge_final.pkl", "rb")
+        open(paths_dict["struct_results"] + f"est_params_fire_old_done.pkl", "rb")
     )
 else:
     last_estimate = None
@@ -62,7 +63,7 @@ estimation_results, end_params = estimate_model(
     sex_type=sex_type,
     edu_type=edu_type,
     util_type=util_type,
-    old_only=True,
+    old_only=False,
     print_men_examples=True,
     print_women_examples=True,
     slow_version=False,
@@ -71,23 +72,23 @@ estimation_results, end_params = estimate_model(
 )
 print(estimation_results)
 
-# # %% Set paths of project
-# from specs.derive_specs import generate_derived_and_data_derived_specs
+# %% Set paths of project
+from specs.derive_specs import generate_derived_and_data_derived_specs
 
-# specs = generate_derived_and_data_derived_specs(paths_dict)
+specs = generate_derived_and_data_derived_specs(paths_dict)
 
 
-# create_fit_plots(
-#     path_dict=paths_dict,
-#     specs=specs,
-#     params=end_params,
-#     model_name=model_name,
-#     load_sol_model=True,
-#     load_solution=None,
-#     load_data_from_sol=False,
-#     sex_type=sex_type,
-#     edu_type=edu_type,
-# )
+create_fit_plots(
+    path_dict=paths_dict,
+    specs=specs,
+    params=end_params,
+    model_name=model_name,
+    load_sol_model=True,
+    load_solution=None,
+    load_data_from_sol=False,
+    sex_type=sex_type,
+    edu_type=edu_type,
+)
 
 
 # %%

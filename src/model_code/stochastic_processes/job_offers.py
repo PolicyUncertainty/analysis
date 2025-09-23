@@ -45,7 +45,6 @@ def job_offer_process_transition(
         good_health=good_health,
         model_specs=model_specs,
     )
-
     job_sep_case = labor_choice | after_SRA_next_before_now
     job_offer_case = unemployment_choice & (~after_SRA_next_before_now)
 

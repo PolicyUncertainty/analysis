@@ -9,6 +9,7 @@ from specs.derive_specs import (
     read_and_derive_specs,
 )
 
+
 def solve_and_simulate_scenario(
     path_dict,
     params,
@@ -22,6 +23,7 @@ def solve_and_simulate_scenario(
     only_informed=False,
     solution_exists=True,
     sol_model_exists=True,
+    model_solution=None,
 ):
     model_out_folder = get_model_results_path(path_dict, model_name)
 
@@ -38,24 +40,27 @@ def solve_and_simulate_scenario(
     )
     df_file = model_out_folder["simulation"] + df_name
 
-    # Create model and assign simulation specs.
-    sim_specs = {
-        "announcement_age": announcement_age,
-        "SRA_at_start": SRA_at_start,
-        "SRA_at_retirement": SRA_at_retirement,
-    }
-    model_solved = specify_and_solve_model(
-        path_dict=path_dict,
-        params=params,
-        file_append=model_name,
-        custom_resolution_age=custom_resolution_age,
-        subj_unc=subj_unc,
-        load_model=sol_model_exists,
-        load_solution=solution_exists,
-        sim_specs=sim_specs,
-        sex_type="all",
-        edu_type="all",
-    )
+    if model_solution is None:
+        # Create model and assign simulation specs.
+        sim_specs = {
+            "announcement_age": announcement_age,
+            "SRA_at_start": SRA_at_start,
+            "SRA_at_retirement": SRA_at_retirement,
+        }
+        model_solved = specify_and_solve_model(
+            path_dict=path_dict,
+            params=params,
+            file_append=model_name,
+            custom_resolution_age=custom_resolution_age,
+            subj_unc=subj_unc,
+            load_model=sol_model_exists,
+            load_solution=solution_exists,
+            sim_specs=sim_specs,
+            sex_type="all",
+            edu_type="all",
+        )
+    else:
+        model_solved = model_solution
 
     if df_exists:
         data_sim = pd.read_csv(df_file)
@@ -72,6 +77,7 @@ def solve_and_simulate_scenario(
         else:
             data_sim.to_csv(df_file)
             return data_sim, model_solved
+
 
 def simulate_scenario(
     path_dict,
@@ -93,9 +99,10 @@ def simulate_scenario(
         states_initial=initial_states,
         seed=specs["seed"],
     )
-    df.reset_index(inplace=True)   
+    df.reset_index(inplace=True)
     df = create_additional_variables(df, specs)
     return df
+
 
 def create_df_name(
     path_dict,
@@ -127,15 +134,18 @@ def create_df_name(
         df_name = f"df_no_unc_{SRA_at_retirement}_{name_append}"
     return df_name
 
+
 def _create_income_variables(df, specs):
     """Create income related variables in the simulated dataframe.
     Note: check budget equation first! They may already be there (under "aux").
     """
     df = df.copy()
-    
+
     # Create income vars:
     # First, total income as the difference between wealth at the beginning of next period and savings
-    df.loc[:, "total_income"] = df["assets_begin_of_period"] - df.groupby("agent")["savings"].shift(1)
+    df.loc[:, "total_income"] = df["assets_begin_of_period"] - df.groupby("agent")[
+        "savings"
+    ].shift(1)
 
     # periodic savings and savings rate
     df.loc[:, "savings_dec"] = df["total_income"] - df["consumption"]
@@ -144,23 +154,27 @@ def _create_income_variables(df, specs):
     # Create lagged health state to filter out already dead people
     df.loc[:, "lagged_health"] = df.groupby("agent")["health"].shift(1)
     # Use explicit copy when filtering to avoid warnings
-    df = df[(df["health"] != 3) | ((df["health"] == 3) & (df["lagged_health"] != 3))].copy()
+    df = df[
+        (df["health"] != 3) | ((df["health"] == 3) & (df["lagged_health"] != 3))
+    ].copy()
 
     # Create gross own income (without pension income)
     df.loc[:, "gross_own_income"] = (
-        (df["choice"] == 0) * df["gross_retirement_income"] +  # Retired
-        (df["choice"] == 1) * 0 +  # Unemployed
-        ((df["choice"] == 2) | (df["choice"] == 3)) * df["gross_labor_income"]  # Part-time or full-time work
+        (df["choice"] == 0) * df["gross_retirement_income"]  # Retired
+        + (df["choice"] == 1) * 0  # Unemployed
+        + ((df["choice"] == 2) | (df["choice"] == 3))
+        * df["gross_labor_income"]  # Part-time or full-time work
     )
     return df
+
 
 def _transform_states_into_variables(df, specs):
     """Transform state variables into more interpretable variables."""
     df = df.copy()
-    
+
     # Create additional variables
     df.loc[:, "age"] = df["period"] + specs["start_age"]
-    
+
     # Create experience years
     df.loc[:, "exp_years"] = construct_experience_years(
         float_experience=df["experience"].values,
@@ -175,55 +189,65 @@ def _transform_states_into_variables(df, specs):
     )
     return df
 
+
 def _compute_working_hours(df, specs):
     """Compute working hours based on employment choice and demographics."""
     df = df.copy()
-    
+
     # Initialize working_hours column
     df.loc[:, "working_hours"] = 0.0
-    
+
     for sex_var in [0, 1]:
         for edu_var in range(specs["n_education_types"]):
             # Full-time work
             mask_ft = (
-                (df["choice"] == 3) & 
-                (df["sex"] == sex_var) & 
-                (df["education"] == edu_var)
+                (df["choice"] == 3)
+                & (df["sex"] == sex_var)
+                & (df["education"] == edu_var)
             )
-            df.loc[mask_ft, "working_hours"] = specs["av_annual_hours_ft"][sex_var, edu_var]
+            df.loc[mask_ft, "working_hours"] = specs["av_annual_hours_ft"][
+                sex_var, edu_var
+            ]
 
             # Part-time work
             mask_pt = (
-                (df["choice"] == 2) & 
-                (df["sex"] == sex_var) & 
-                (df["education"] == edu_var)
+                (df["choice"] == 2)
+                & (df["sex"] == sex_var)
+                & (df["education"] == edu_var)
             )
-            df.loc[mask_pt, "working_hours"] = specs["av_annual_hours_pt"][sex_var, edu_var]
-    
+            df.loc[mask_pt, "working_hours"] = specs["av_annual_hours_pt"][
+                sex_var, edu_var
+            ]
+
     return df
+
 
 def _compute_actual_retirement_age(df):
     """Compute actual retirement age based on choice variable."""
     df = df.copy()
-    
+
     df_retirement = df[df["choice"] == 0].copy()
     actual_retirement_ages = df_retirement.groupby("agent")["age"].min()
     df.loc[:, "actual_retirement_age"] = df["agent"].map(actual_retirement_ages)
     return df
 
+
 def _compute_initial_informed_status(df, specs):
     """Compute initial informed status based on informed state variable."""
     df = df.copy()
-    
+
     df_initial = df[df["period"] == 0][["agent", "informed"]].copy()
-    informed_status = df_initial.set_index("agent")["informed"].map({0: "Uninformed", 1: "Informed"})
+    informed_status = df_initial.set_index("agent")["informed"].map(
+        {0: "Uninformed", 1: "Informed"}
+    )
     df.loc[:, "initial_informed"] = df["agent"].map(informed_status)
     return df
+
 
 def create_additional_variables(df, specs):
     """Wrapper function to create additional variables in the simulated dataframe."""
     df = df.copy()
-    
+
     df = _create_income_variables(df, specs)
     df = _transform_states_into_variables(df, specs)
     df = _compute_working_hours(df, specs)

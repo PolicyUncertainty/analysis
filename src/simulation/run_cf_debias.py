@@ -50,6 +50,7 @@ res_df_life_cycle = None
 
 df_base_dict = {}
 df_cf_dict = {}
+model_solved_unc = None
 
 # Initialize retirement ages
 # sra_at_63 = np.arange(67, 70 + specs["SRA_grid_size"], specs["SRA_grid_size"])
@@ -59,7 +60,7 @@ for i, sra in enumerate(sra_at_63):
     print(sra)
 
     # Simulate baseline with subjective belief
-    df_base, _ = solve_and_simulate_scenario(
+    df_base, model_solved_unc = solve_and_simulate_scenario(
         path_dict=path_dict,
         params=params,
         subj_unc=True,
@@ -72,6 +73,7 @@ for i, sra in enumerate(sra_at_63):
         only_informed=False,
         solution_exists=load_unc_solution,
         sol_model_exists=load_model,
+        model_solution=model_solved_unc,
     )
 
     df_base = df_base.reset_index()
@@ -96,6 +98,7 @@ for i, sra in enumerate(sra_at_63):
         only_informed=True,
         solution_exists=load_unc_solution,
         sol_model_exists=load_model,
+        model_solution=model_solved_unc,
     )
     df_cf = df_cf.reset_index()
 

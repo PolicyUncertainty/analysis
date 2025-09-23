@@ -222,7 +222,7 @@ class est_class_from_paths:
         # Already retired individuals hold no identification
         data_decision = data_decision[data_decision["lagged_choice"] != 0]
         if old_only:
-            data_decision = data_decision[data_decision["age"] >=60]
+            data_decision = data_decision[data_decision["age"] >= 60]
 
         # Create states dict
         states_dict = create_states_dict(data_decision, model_class=model)
@@ -363,7 +363,7 @@ def generate_print_func(
                 f"Job offer prob for 60 year old high educated men in good health: {job_offer_prob_60_high_good}",
                 flush=True,
             )
-            job_sep = job_sep_probability(
+            job_sep, _ = job_sep_probability(
                 params=params,
                 policy_state=8,
                 education=0,
@@ -388,7 +388,7 @@ def generate_print_func(
                 f"Job offer prob for 60 year old high educated women in good health: {job_offer_prob_60_high_good}",
                 flush=True,
             )
-            job_sep = job_sep_probability(
+            job_sep, _ = job_sep_probability(
                 params=params,
                 policy_state=8,
                 education=0,

@@ -36,7 +36,7 @@ def job_offer_process_transition(
     job_finding_prob = jax.lax.select(
         sex == 0, job_finding_prob_men, job_finding_prob_women
     )
-    job_sep_prob = job_sep_probability(
+    job_sep_prob, after_SRA_next_before_now = job_sep_probability(
         params=params,
         policy_state=policy_state,
         education=education,
@@ -46,10 +46,11 @@ def job_offer_process_transition(
         model_specs=model_specs,
     )
 
+    job_sep_case = labor_choice | after_SRA_next_before_now
+    job_offer_case = unemployment_choice & (~after_SRA_next_before_now)
+
     # Transition probability
-    prob_value_0 = (
-        job_sep_prob * labor_choice + (1 - job_finding_prob) * unemployment_choice
-    )
+    prob_value_0 = job_sep_prob * job_sep_case + (1 - job_finding_prob) * job_offer_case
 
     return jnp.array([prob_value_0, 1 - prob_value_0])
 
@@ -80,7 +81,7 @@ def job_sep_probability(
 
     logit_intercept = log_job_sep_prob + SRA_interecpt * after_SRA_next_before_now
     job_sep_prob = logit_formula(logit_intercept)
-    return job_sep_prob
+    return job_sep_prob, after_SRA_next_before_now
 
 
 def calc_job_finding_prob_men(params, education, good_health, age):

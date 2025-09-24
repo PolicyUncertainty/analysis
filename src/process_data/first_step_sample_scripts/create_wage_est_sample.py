@@ -5,6 +5,7 @@ import pandas as pd
 from process_data.auxiliary.filter_data import filter_data
 from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.experience import sum_experience_variables
+from process_data.soep_vars.health import correct_health_state, create_health_var
 from process_data.soep_vars.work_choices import create_choice_and_employment_status
 
 
@@ -25,10 +26,17 @@ def create_wage_est_sample(paths, specs, load_data=False):
     df = filter_data(df, specs, lag_and_lead_buffer_years=False)
 
     # create labor choice, keep only working (2: part-time, 3: full-time)
-    df = create_choice_and_employment_status(df)
+    df = create_choice_and_employment_status(df, filter_missings=False)
 
+    # Create health state
+    # We create the health variable and correct it
+    df = create_health_var(df, filter_missings=False)
+    df = correct_health_state(df, filter_missings=False)
+
+    # Rename number of children variable
+    df.rename(columns={"d11107": "num_children"}, inplace=True)
     # education
-    df = create_education_type(df, filter_missings=True)
+    df = create_education_type(df, filter_missings=False)
 
     # weekly working hours. We will impute missing values later
     df.rename(columns={"pgvebzeit": "weekly_hours"}, inplace=True)
@@ -38,16 +46,10 @@ def create_wage_est_sample(paths, specs, load_data=False):
 
     # experience, where we use the sum of part and full time (note: unlike in
     # structural estimation, we do not round or enforce a cap on experience here)
-    df = sum_experience_variables(df)
+    df = sum_experience_variables(df, filter_missings=False)
 
     # gross monthly wage
     df.rename(columns={"pglabgro": "monthly_wage"}, inplace=True)
-    df = df[df["monthly_wage"] > 0]
-    print(str(len(df)) + " observations after dropping invalid wage values.")
-
-    # Drop unemployed(wage should be zero) and retired individuals
-    df = df[df["choice"].isin([2, 3])]
-    print(str(len(df)) + " observations after dropping non-working individuals.")
 
     # bring back indeces (pid, syear)
     df = df.reset_index()
@@ -63,6 +65,8 @@ def create_wage_est_sample(paths, specs, load_data=False):
         "annual_hours",
         "monthly_hours",
         "education",
+        "health",
+        "num_children",
         "sex",
     ]
 
@@ -103,6 +107,19 @@ def load_and_merge_soep_core(soep_c38_path):
     merged_data = pd.merge(
         pgen_data, pathl_data, on=["pid", "hid", "syear"], how="inner"
     )
+
+    pequiv_data = pd.read_stata(
+        # d11107: number of children in household
+        # d11101: age of individual
+        # m11126: Self-Rated Health Status
+        # m11124: Disability Status of Individual
+        f"{soep_c38_path}/pequiv.dta",
+        columns=["pid", "syear", "d11107", "d11101", "m11126", "m11124"],
+        convert_categoricals=False,
+    )
+
+    # Merge pequiv data
+    merged_data = pd.merge(merged_data, pequiv_data, on=["pid", "syear"], how="inner")
 
     merged_data["age"] = merged_data["syear"] - merged_data["gebjahr"]
     del pgen_data, pathl_data

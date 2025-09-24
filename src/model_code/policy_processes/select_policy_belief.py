@@ -51,7 +51,12 @@ def select_solution_transition_func_and_update_specs(
 
 
 def select_sim_policy_function_and_update_specs(
-    specs, subj_unc, announcement_age, SRA_at_start, SRA_at_retirement
+    specs,
+    subj_unc,
+    announcement_age,
+    SRA_at_start,
+    SRA_at_retirement,
+    custom_resolution_age,
 ):
 
     # Check if subjective uncertainty is given and if announcment is given.
@@ -75,6 +80,11 @@ def select_sim_policy_function_and_update_specs(
                 raise ValueError(
                     "If there is no subjective uncertainty, the SRA at start should be the same as at retirement."
                 )
+
+            if custom_resolution_age is None:
+                specs["resolution_age"] = specs["resolution_age_estimation"]
+            else:
+                specs["resolution_age"] = custom_resolution_age
 
             # We are in the case of subjective uncertainty and a gradual increase in the SRA.
             sim_alpha = (SRA_at_retirement - SRA_at_start) / (

@@ -19,38 +19,11 @@ import pickle as pkl
 
 import numpy as np
 
-from simulation.sim_tools.calc_aggregate_results import calc_overall_results
+from simulation.sim_tools.calc_aggregate_results import add_overall_results
 from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
-from simulation.tables.cv import calc_compensated_variation
 
 
-# %%
-def write_results_to_dataframe(i, df_base, df_cf, result_df, params, specs):
-    """
-    Helper function to calculate and write results to result dataframe
-
-    Args:
-        i: iteration index
-        df_base: baseline dataframe
-        df_cf: counterfactual dataframe
-        result_df: result dataframe to write to
-        params: model parameters
-        specs: model specifications
-    """
-    results_row = calc_overall_results(df_base=df_base, df_cf=df_cf)
-    for key, value in results_row.items():
-        result_df.loc[i, key] = value
-    # result_df.loc[i, "cv"] = calc_compensated_variation(
-    #     df_base=df_base,
-    #     df_cf=df_cf,
-    #     params=params,
-    #     specs=specs,
-    # )
-
-
-def process_gender_results(
-    i, df, result_dfs, df_base, params, specs
-):
+def process_gender_results(i, df, result_dfs):
     """
     Process results for all gender categories (men, women, overall)
 
@@ -63,17 +36,26 @@ def process_gender_results(
         specs: model specifications
         scenario_name: name for debugging/logging
     """
+    mask_m = df["sex"] == 0
+    mask_w = ~mask_m
+    mask_all = mask_w | mask_m
 
-    # Calculate and write results for each gender category
-    write_results_to_dataframe(
-        i, df_base[], df_men, result_dfs["men"], params, specs
-    )
-    write_results_to_dataframe(
-        i, df_bases["women"], df_women, result_dfs["women"], params, specs
-    )
-    write_results_to_dataframe(
-        i, df_bases["overall"], df_overall, result_dfs["overall"], params, specs
-    )
+    result_dict_keys = ["overall", "men", "women"]
+    masks = [mask_all, mask_m, mask_w]
+
+    for mask, key in zip(masks, result_dict_keys):
+        add_overall_results(
+            result_df=result_dfs[key], index=i, pre_name="cf", df_scenario=df[mask]
+        )
+        if i == 0:
+            all_idxs = result_dfs[key].index
+            for all_i in all_idxs:
+                add_overall_results(
+                    result_df=result_dfs[key],
+                    index=all_i,
+                    pre_name="base",
+                    df_scenario=df[mask],
+                )
 
 
 # Save all results
@@ -104,7 +86,7 @@ def create_result_dfs(sra_at_63):
 seeed = 123
 model_name = specs["model_name"]
 load_sol_model = True
-load_solutions = False
+load_solutions = True
 load_df = None
 
 # Load params
@@ -120,8 +102,7 @@ result_dfs = create_result_dfs(sra_at_63)
 
 # Initialize baseline storage
 
-for unc_scenario in [True, False]:
-    df_bases = {}
+for unc_scenario in [True]:
     if unc_scenario:
         df_label = "unc"
     else:
@@ -153,10 +134,8 @@ for unc_scenario in [True, False]:
         )
 
         df = df.reset_index()
-        process_gender_results(
-            i, df, result_dfs[df_label], df_bases, params, specs
-        )
-
+        process_gender_results(i, df, result_dfs[df_label])
+        del df
     # # ========== DEBIAS SCENARIO (COMMENTED OUT) ==========
     # df_debias, _ = solve_and_simulate_scenario(
     #     path_dict=path_dict,

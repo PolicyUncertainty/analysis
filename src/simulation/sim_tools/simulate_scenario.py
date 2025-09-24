@@ -1,6 +1,10 @@
 import pandas as pd
 
-from model_code.specify_model import specify_and_solve_model
+from model_code.specify_model import (
+    create_model_config_wo_informed,
+    define_alternative_sim_specifications,
+    specify_and_solve_model,
+)
 from model_code.state_space.experience import construct_experience_years
 from set_paths import get_model_results_path
 from simulation.sim_tools.start_obs_for_sim import generate_start_states_from_obs
@@ -24,6 +28,9 @@ def solve_and_simulate_scenario(
     solution_exists=True,
     sol_model_exists=True,
     model_solution=None,
+    sex_type="all",
+    edu_type="all",
+    util_type="add",
 ):
     model_out_folder = get_model_results_path(path_dict, model_name)
 
@@ -40,13 +47,14 @@ def solve_and_simulate_scenario(
     )
     df_file = model_out_folder["simulation"] + df_name
 
+    # Create model and assign simulation specs.
+    sim_specs = {
+        "announcement_age": announcement_age,
+        "SRA_at_start": SRA_at_start,
+        "SRA_at_retirement": SRA_at_retirement,
+    }
+
     if model_solution is None:
-        # Create model and assign simulation specs.
-        sim_specs = {
-            "announcement_age": announcement_age,
-            "SRA_at_start": SRA_at_start,
-            "SRA_at_retirement": SRA_at_retirement,
-        }
         model_solved = specify_and_solve_model(
             path_dict=path_dict,
             params=params,
@@ -56,11 +64,28 @@ def solve_and_simulate_scenario(
             load_model=sol_model_exists,
             load_solution=solution_exists,
             sim_specs=sim_specs,
-            sex_type="all",
-            edu_type="all",
+            sex_type=sex_type,
+            edu_type=edu_type,
+            util_type=util_type,
         )
     else:
+        specs = generate_derived_and_data_derived_specs(path_dict)
+
         model_solved = model_solution
+        alternative_sim_specifications, alternative_sim_specs = (
+            define_alternative_sim_specifications(
+                sim_specs=sim_specs,
+                specs=specs,
+                subj_unc=subj_unc,
+                custom_resolution_age=model_solved.model_specs["resolution_age"],
+                sex_type=sex_type,
+                edu_type=edu_type,
+            )
+        )
+        model_solved.set_alternative_sim_funcs(
+            alternative_sim_specifications=alternative_sim_specifications,
+            alternative_specs=alternative_sim_specs,
+        )
 
     if df_exists:
         data_sim = pd.read_csv(df_file)

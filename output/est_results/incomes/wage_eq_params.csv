@@ -1,41 +1,51 @@
 education,sex,parameter,value
-Low Education,Men,constant,2.376549414416302
-Low Education,Men,exp,0.03375916372780782
-Low Education,Men,exp_squared,-0.0003700611189801302
-Low Education,Men,constant_ser,0.13547552612928176
-Low Education,Men,exp_ser,0.005673248265898816
-Low Education,Men,exp_squared_ser,3.857199986097942e-05
-Low Education,Women,constant,2.423700928952171
-Low Education,Women,exp,0.029954637503745416
-Low Education,Women,exp_squared,-0.00037930604521747895
-Low Education,Women,constant_ser,0.0706487578212231
-Low Education,Women,exp_ser,0.004609838832628454
-Low Education,Women,exp_squared_ser,5.391451342940964e-05
-High Education,Men,constant,2.885621176139659
-High Education,Men,exp,0.04383793264814508
-High Education,Men,exp_squared,-0.0007620108226800468
-High Education,Men,constant_ser,0.18816299131780487
-High Education,Men,exp_ser,0.009338539253485816
-High Education,Men,exp_squared_ser,5.8819703795821285e-05
-High Education,Women,constant,2.8264039205442586
-High Education,Women,exp,0.03517718986259886
-High Education,Women,exp_squared,-0.0006478593276397791
-High Education,Women,constant_ser,0.05982716787432451
-High Education,Women,exp_ser,0.0046984810339838826
-High Education,Women,exp_squared_ser,7.436284760902685e-05
-all,all,constant,2.6080661378161847
-all,all,exp,0.03304447890142663
-all,all,exp_squared,-0.0005024355966192137
-all,all,constant_ser,0.041447118735175446
-all,all,exp_ser,0.002335711081519175
-all,all,exp_squared_ser,2.4537766718663682e-05
-all,all,income_shock_std,0.12544003238763757
-all,all,income_shock_std_ser,7.727552318709e-05
-Low Education,Men,income_shock_std,0.11903328856988908
-Low Education,Men,income_shock_std_ser,0.00011782506858962113
-High Education,Men,income_shock_std,0.12023623479368814
-High Education,Men,income_shock_std_ser,0.00017733341075635192
-Low Education,Women,income_shock_std,0.12781803557795984
-Low Education,Women,income_shock_std_ser,0.0001438153600301284
-High Education,Women,income_shock_std,0.13671908790040999
-High Education,Women,income_shock_std_ser,0.00021676472755671403
+Low Education,Men,constant,2.4823774577536235
+Low Education,Men,exp,0.030560544927090365
+Low Education,Men,exp_squared,-0.0003373496290592577
+Low Education,Men,IMR,-0.1174447600179451
+Low Education,Men,constant_ser,0.17851122858296012
+Low Education,Men,exp_ser,0.0067757057371291216
+Low Education,Men,exp_squared_ser,3.78379308294253e-05
+Low Education,Men,IMR_ser,0.08353675020676464
+Low Education,Women,constant,2.3057015000747407
+Low Education,Women,exp,0.03309935741423036
+Low Education,Women,exp_squared,-0.00037184376322484895
+Low Education,Women,IMR,0.059382714720616944
+Low Education,Women,constant_ser,0.07294174394494735
+Low Education,Women,exp_ser,0.004783055094218595
+Low Education,Women,exp_squared_ser,5.315661841238152e-05
+Low Education,Women,IMR_ser,0.05403066029381496
+High Education,Men,constant,2.7183859393628556
+High Education,Men,exp,0.05009995656802104
+High Education,Men,exp_squared,-0.0007817266284765245
+High Education,Men,IMR,0.07642018730888109
+High Education,Men,constant_ser,0.22135554048805428
+High Education,Men,exp_ser,0.010110839740097266
+High Education,Men,exp_squared_ser,6.89049305159526e-05
+High Education,Men,IMR_ser,0.17543775733165462
+High Education,Women,constant,2.7367195144181524
+High Education,Women,exp,0.037954568954138436
+High Education,Women,exp_squared,-0.0006709359430641596
+High Education,Women,IMR,0.08531861105902618
+High Education,Women,constant_ser,0.0807293597862397
+High Education,Women,exp_ser,0.004486121252958332
+High Education,Women,exp_squared_ser,7.274825980306765e-05
+High Education,Women,IMR_ser,0.11574585828038494
+all,all,constant,2.527630821255793
+all,all,exp,0.03565157645983729
+all,all,exp_squared,-0.0005060821524300467
+all,all,IMR,0.02947892550193876
+all,all,constant_ser,0.04992906672071599
+all,all,exp_ser,0.0025006479703557918
+all,all,exp_squared_ser,2.2673126432931874e-05
+all,all,IMR_ser,0.05020747389086264
+all,all,income_shock_std,0.13151964422278214
+all,all,income_shock_std_ser,8.465761204216836e-05
+Low Education,Men,income_shock_std,0.1195864814223599
+Low Education,Men,income_shock_std_ser,0.0001216802714420639
+High Education,Men,income_shock_std,0.122124984549636
+High Education,Men,income_shock_std_ser,0.00018255749794815113
+Low Education,Women,income_shock_std,0.13912192175721794
+Low Education,Women,income_shock_std_ser,0.00016594867427233232
+High Education,Women,income_shock_std,0.14465632057019553
+High Education,Women,income_shock_std_ser,0.00023939437333095229

@@ -1,3 +1,6 @@
+import numpy as np
+
+
 def create_education_type(data, filter_missings=False):
     """This function creates a education type from pgpsbil in soep-pgen.
 
@@ -6,6 +9,7 @@ def create_education_type(data, filter_missings=False):
 
     """
     data["education"] = 0
+    data.loc[data["pgpsbil"] < 0, "education"] = np.nan
     data.loc[data["pgpsbil"] == 3, "education"] = 1  # Fachhochschulreife
     data.loc[data["pgpsbil"] == 4, "education"] = 1  # Abitur
 
@@ -14,7 +18,5 @@ def create_education_type(data, filter_missings=False):
             str(len(data))
             + " left after dropping people with missing education values."
         )
-        data = data[data["pgpsbil"].notna()]
-    else:
-        data.loc[data["pgpsbil"] < 0, "education"] = None
+        data = data[data["education"].notna()]
     return data

@@ -9,7 +9,6 @@ from model_code.policy_processes.informed_state_transition import (
     informed_transition,
 )
 from model_code.policy_processes.select_policy_belief import (
-    select_sim_policy_function_and_update_specs,
     select_solution_transition_func_and_update_specs,
 )
 from model_code.state_space.experience import define_experience_grid

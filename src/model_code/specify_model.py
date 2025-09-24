@@ -26,27 +26,7 @@ from set_paths import get_model_results_path
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
-def specify_model(
-    path_dict,
-    specs,
-    subj_unc,
-    custom_resolution_age,
-    sim_specs=None,
-    load_model=False,
-    debug_info=None,
-    sex_type="all",
-    edu_type="all",
-    util_type="add",
-):
-    """Generate model class."""
-
-    SRA_belief_solution, specs = select_solution_transition_func_and_update_specs(
-        path_dict=path_dict,
-        specs=specs,
-        subj_unc=subj_unc,
-        custom_resolution_age=custom_resolution_age,
-    )
-
+def create_model_config_wo_informed(specs, sex_type, edu_type):
     # Create savings grid
     savings_grid = create_end_of_period_assets()
 
@@ -78,6 +58,30 @@ def specify_model(
         },
         "n_quad_points": specs["n_quad_points"],
     }
+    return model_config
+
+
+def specify_model(
+    path_dict,
+    specs,
+    subj_unc,
+    custom_resolution_age,
+    sim_specs=None,
+    load_model=False,
+    debug_info=None,
+    sex_type="all",
+    edu_type="all",
+    util_type="add",
+):
+    """Generate model class."""
+
+    SRA_belief_solution, specs = select_solution_transition_func_and_update_specs(
+        path_dict=path_dict,
+        specs=specs,
+        subj_unc=subj_unc,
+        custom_resolution_age=custom_resolution_age,
+    )
+
     stochastic_states_transitions = {
         "policy_state": SRA_belief_solution,
         "job_offer": job_offer_process_transition,
@@ -85,40 +89,32 @@ def specify_model(
         "health": health_transition,
     }
 
-    # Now we use the alternative sim specification to define informed in the solution
-    # as deterministic state (type) and in the simulation as stochastic state.
-    informed_states = np.arange(2, dtype=int)
-    model_config_sim = deepcopy(model_config)
-    stochastic_states_transitions_sim = deepcopy(stochastic_states_transitions)
-
-    # First add it as a deterministic state
-    model_config["deterministic_states"]["informed"] = informed_states
+    model_config = create_model_config_wo_informed(
+        specs=specs,
+        sex_type=sex_type,
+        edu_type=edu_type,
+    )
 
     if sim_specs is not None:
-        # Now as stochastic in the sim objects
-        model_config_sim["stochastic_states"]["informed"] = informed_states
-        stochastic_states_transitions_sim["informed"] = informed_transition
-
-        transition_func_sim, specs = select_sim_policy_function_and_update_specs(
+        alternative_sim_specifications, specs = define_alternative_sim_specifications(
+            sim_specs=sim_specs,
             specs=specs,
+            custom_resolution_age=custom_resolution_age,
             subj_unc=subj_unc,
-            announcement_age=sim_specs["announcement_age"],
-            SRA_at_start=sim_specs["SRA_at_start"],
-            SRA_at_retirement=sim_specs["SRA_at_retirement"],
+            sex_type=sex_type,
+            edu_type=edu_type,
         )
-        stochastic_states_transitions_sim["policy_state"] = transition_func_sim
-
-        # Now specify the dict:
-        alternative_sim_specifications = {
-            "model_config": model_config_sim,
-            "stochastic_states_transitions": stochastic_states_transitions_sim,
-            "state_space_functions": create_state_space_functions(),
-            "budget_constraint": budget_constraint,
-            "shock_functions": shock_function_dict(),
-        }
 
     else:
         alternative_sim_specifications = None
+
+    # Assign informed
+    # Now we use the alternative sim specification to define informed in the solution
+    # as deterministic state (type) and in the simulation as stochastic state.
+    informed_states = np.arange(2, dtype=int)
+
+    # First add it as a deterministic state
+    model_config["deterministic_states"]["informed"] = informed_states
 
     if util_type == "add":
         from model_code.utility.utility_functions_add import create_utility_functions
@@ -161,6 +157,47 @@ def specify_model(
 
     print("Model specified.")
     return model
+
+
+def define_alternative_sim_specifications(
+    sim_specs, specs, subj_unc, custom_resolution_age, sex_type, edu_type
+):
+    stochastic_states_transitions = {
+        "job_offer": job_offer_process_transition,
+        "partner_state": partner_transition,
+        "health": health_transition,
+    }
+
+    model_config = create_model_config_wo_informed(
+        specs=specs,
+        sex_type=sex_type,
+        edu_type=edu_type,
+    )
+
+    # Now as stochastic in the sim objects
+    model_config["stochastic_states"]["informed"] = np.arange(2, dtype=int)
+
+    stochastic_states_transitions["informed"] = informed_transition
+
+    transition_func_sim, specs = select_sim_policy_function_and_update_specs(
+        specs=specs,
+        subj_unc=subj_unc,
+        announcement_age=sim_specs["announcement_age"],
+        SRA_at_start=sim_specs["SRA_at_start"],
+        SRA_at_retirement=sim_specs["SRA_at_retirement"],
+        custom_resolution_age=custom_resolution_age,
+    )
+    stochastic_states_transitions["policy_state"] = transition_func_sim
+
+    # Now specify the dict:
+    alternative_sim_specifications = {
+        "model_config": model_config,
+        "stochastic_states_transitions": stochastic_states_transitions,
+        "state_space_functions": create_state_space_functions(),
+        "budget_constraint": budget_constraint,
+        "shock_functions": shock_function_dict(),
+    }
+    return alternative_sim_specifications, specs
 
 
 def specify_and_solve_model(

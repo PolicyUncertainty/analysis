@@ -1,81 +1,11 @@
-import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import numpy as np
 
 from model_code.pension_system.early_retirement_paths import check_very_long_insured
 from model_code.state_space.experience import (
-    construct_experience_years,
     scale_experience_years,
 )
-from set_styles import get_figsize, set_colors
-
-
-def plot_solution(model_solved, specs, path_dict):
-    fig, ax = plt.subplots()
-
-    # asset_grid = np.arange(1, 5)
-    # n_obs = len(asset_grid)
-    n_obs = 1
-    prototype_array = np.arange(n_obs)
-    # exp_years_grid = np.linspace(10, 50, 5)
-    period = 35
-    choice = 3
-    choice_2 = 0
-    lagged_choice = 3
-    policy_state = 0
-    job_offer = 1
-    sex = 0
-    informed = 1
-
-    for exp_id in range(8, 9):
-        states = {
-            "period": np.ones_like(prototype_array) * period,
-            "lagged_choice": np.ones_like(prototype_array) * lagged_choice,
-            "education": np.zeros_like(prototype_array),
-            "sex": np.ones_like(prototype_array) * sex,
-            "informed": np.ones_like(prototype_array) * informed,
-            "policy_state": np.ones_like(prototype_array) * policy_state,
-            "job_offer": np.ones_like(prototype_array) * job_offer,
-            "partner_state": np.zeros_like(prototype_array),
-            "health": np.zeros_like(prototype_array),
-        }
-        exp_float = model_solved.model_config["continuous_states_info"][
-            "second_continuous_grid"
-        ][exp_id]
-        exp_years = construct_experience_years(
-            float_experience=exp_float,
-            period=period,
-            is_retired=states["lagged_choice"] == 0,
-            model_specs=specs,
-        )
-
-        endog_grid, value_grid, policy_grid = (
-            model_solved.get_solution_for_discrete_state_choice(
-                states=states, choices=np.ones_like(prototype_array) * choice
-            )
-        )
-
-        ax.plot(
-            endog_grid[0, exp_id, 26:30],
-            value_grid[0, exp_id, 26:30],
-            label=f"Exp years {exp_years}",
-        )
-
-        endog_grid, value_grid, policy_grid = (
-            model_solved.get_solution_for_discrete_state_choice(
-                states=states, choices=np.ones_like(prototype_array) * choice_2
-            )
-        )
-
-        ax.plot(
-            endog_grid[0, exp_id, :],
-            value_grid[0, exp_id, :],
-            label=f"Exp years {exp_years} ret",
-        )
-
-    ax.legend()
-
-    fig.savefig(path_dict["plots"] + f"solution_value_func_period_{period}.png")
+from set_styles import get_figsize
 
 
 def plot_ret_probs_for_state(model_solved, specs, path_dict):

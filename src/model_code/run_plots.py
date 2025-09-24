@@ -45,12 +45,14 @@ generate_print_func(
     params.keys(), specs, print_men_examples=True, print_women_examples=True
 )(params)
 
+from model_code.plots.plot_sollution import plot_ret_solution, plot_solution
 
-# Model solution plots (require solved model)
-from model_code.plots.plot_law_of_motion import plot_ret_experience_multi
-
-plot_ret_experience_multi(path_dict, specs, show=show_plots, save=save_plots)
 #
+# # Model solution plots (require solved model)
+# from model_code.plots.plot_law_of_motion import plot_ret_experience_multi
+#
+# plot_ret_experience_multi(path_dict, specs, show=show_plots, save=save_plots)
+# #
 # from model_code.plots.weights import plot_weights
 #
 # model = specify_model(
@@ -67,29 +69,28 @@ plot_ret_experience_multi(path_dict, specs, show=show_plots, save=save_plots)
 # )
 # plot_weights(model, params, specs, path_dict)
 #
-# from model_code.plots.retirement_probs_illustration import (
-#     plot_ret_probs_for_state,
-#     plot_solution,
-#     plot_work_probs_for_state,
-# )
-#
+from model_code.plots.retirement_probs_illustration import (
+    plot_ret_probs_for_state,
+    plot_work_probs_for_state,
+)
+
 # try:
-#     model_solved = specify_and_solve_model(
-#         path_dict=path_dict,
-#         file_append=model_name,
-#         params=params,
-#         subj_unc=True,
-#         custom_resolution_age=None,
-#         load_model=True,
-#         load_solution=True,
-#         sim_specs=None,
-#         sex_type="all",
-#         edu_type="all",
-#         util_type="add",
-#     )
-#
-#     plot_solution(model_solved=model_solved, specs=specs, path_dict=path_dict)
-#     plot_ret_probs_for_state(
+model_solved = specify_and_solve_model(
+    path_dict=path_dict,
+    file_append=model_name,
+    params=params,
+    subj_unc=True,
+    custom_resolution_age=None,
+    load_model=True,
+    load_solution=True,
+    sim_specs=None,
+    sex_type="all",
+    edu_type="all",
+    util_type="add",
+)
+plot_ret_solution(model_solved, specs, path_dict)
+# plot_solution(model_solved=model_solved, specs=specs, path_dict=path_dict)
+# plot_ret_probs_for_state(
 #         model_solved=model_solved, specs=specs, path_dict=path_dict
 #     )
 #     plot_work_probs_for_state(

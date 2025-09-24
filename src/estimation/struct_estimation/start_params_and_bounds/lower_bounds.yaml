@@ -22,6 +22,21 @@ disutil_unemployed_high_bad_men: 1.0e-12
 disutil_unemployed_low_good_men: 1.0e-12
 disutil_unemployed_low_bad_men: 1.0e-12
 
+# Full time work dis-utility men - Disabled health
+disutil_ft_work_disabled_men: 0
+
+# Unemployment dis-utility men - Disabled health
+disutil_unemployed_disabled_men: 0
+
+# Full time work dis-utility women - Disabled health
+disutil_ft_work_disabled_women: 0
+
+# Part time work dis-utility women - Disabled health
+disutil_pt_work_disabled_women: 0
+
+# Unemployment dis-utility women - Disabled health
+disutil_unemployed_disabled_women: 0
+
 # Partner retired dis-utility men
 disutil_partner_retired_men: -2.0
 
@@ -43,7 +58,6 @@ disutil_partner_retired_women: -2.0
 # Children dis-utility
 disutil_children_ft_work_low: 1e-12
 disutil_children_ft_work_high: 1e-12
-
 disutil_children_pt_work_low: 1e-12
 disutil_children_pt_work_high: 1e-12
 

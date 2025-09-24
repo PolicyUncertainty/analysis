@@ -2,22 +2,21 @@
 import pickle as pkl
 import sys
 
-from estimation.struct_estimation.start_params_and_bounds.param_lists import (
+from estimation.struct_estimation.start_params_and_bounds.param_lists import (  # men_disutil_firing,
     men_disability_old_age_params,
-    # men_disutil_firing,
-    men_SRA_firing,
-    men_disutil_params,
     men_disability_params,
-    men_disutil_params_edu,
     men_disutil_firing_edu,
+    men_disutil_params,
+    men_disutil_params_edu,
     men_job_offer_old_age_params,
     men_job_offer_params,
+    men_SRA_firing,
+    women_disability_old_age_params,
+    women_disability_params,
     women_disutil_firing,
     women_disutil_params,
     women_job_offer_old_age_params,
-women_disability_old_age_params,
     women_job_offer_params,
-    women_disability_params
 )
 from set_paths import create_path_dict
 
@@ -28,19 +27,22 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
     load_and_set_start_params,
 )
 
-model_name = "last_old_women"
-params_to_estimate_names = women_disutil_firing
-sex_type = "women"
+model_name = "disabled_old_men"
+params_to_estimate_names = men_disutil_firing_edu
+sex_type = "men"
 edu_type = "all"
 util_type = "add"
 old_sample_only = True
 
 LOAD_LAST_ESTIMATE = False
-LOAD_SOL_MODEL = True
+LOAD_SOL_MODEL = False
 SAVE_RESULTS = True
 USE_WEIGHTS = False
 
-print(f"Running estimation for model: {model_name}; old sample {old_sample_only}", flush=True)
+print(
+    f"Running estimation for model: {model_name}; old sample {old_sample_only}",
+    flush=True,
+)
 
 if LOAD_LAST_ESTIMATE:
     last_estimate = pkl.load(
@@ -51,8 +53,8 @@ else:
 
 # Load start params
 start_params_all = load_and_set_start_params(paths_dict)
-# last_estimate["disutil_children_ft_work_low"] = 0.1
-# last_estimate["disutil_children_ft_work_high"] = 0.1
+last_estimate["disability_logit_const_men"] += 0.2
+last_estimate["disability_logit_const_women"] += 0.2
 
 # Run estimation
 estimation_results, end_params = estimate_model(
@@ -96,4 +98,4 @@ print(estimation_results)
 
 
 # %%
-# 
+#

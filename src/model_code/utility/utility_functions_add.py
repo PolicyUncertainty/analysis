@@ -193,31 +193,35 @@ def disutility_work(
     partner_retired = partner_state == 2
 
     good_health = health == model_specs["good_health_var"]
+    bad_health = health == model_specs["bad_health_var"]
+    disabled_health = health == model_specs["disabled_health_var"]
 
     # Men's disutility parameters by health (no longer education-specific)
     disutil_ft_work_men = (
-        params["disutil_ft_work_high_bad_men"] * (1 - good_health) * education
-        + params["disutil_ft_work_low_bad_men"] * (1 - good_health) * (1 - education)
+        params["disutil_ft_work_high_bad_men"] * bad_health * education
+        + params["disutil_ft_work_low_bad_men"] * bad_health * (1 - education)
         + params["disutil_ft_work_high_good_men"] * good_health * education
         + params["disutil_ft_work_low_good_men"] * good_health * (1 - education)
+        + params["disutil_ft_work_disabled_men"] * disabled_health
     )
 
     disutil_unemployment_men = (
         params["disutil_unemployed_high_good_men"] * good_health * education
         + params["disutil_unemployed_low_good_men"] * good_health * (1 - education)
-        + params["disutil_unemployed_high_bad_men"] * (1 - good_health) * education
-        + params["disutil_unemployed_low_bad_men"] * (1 - good_health) * (1 - education)
+        + params["disutil_unemployed_high_bad_men"] * bad_health * education
+        + params["disutil_unemployed_low_bad_men"] * bad_health * (1 - education)
+        + params["disutil_unemployed_disabled_men"] * disabled_health
     )
 
     #     # Men's disutility parameters by health (no longer education-specific)
     # disutil_ft_work_men = (
-    #     params["disutil_ft_work_bad_men"] * (1 - good_health)
+    #     params["disutil_ft_work_bad_men"] * bad_health
     #     + params["disutil_ft_work_good_men"] * good_health
     # )
 
     # disutil_unemployment_men = params[
     #     "disutil_unemployed_good_men"
-    # ] * good_health + params["disutil_unemployed_bad_men"] * (1 - good_health)
+    # ] * good_health + params["disutil_unemployed_bad_men"] * bad_health
 
     disutil_retirement_men = params["disutil_partner_retired_men"]
 
@@ -228,21 +232,24 @@ def disutility_work(
     )
 
     # Women's disutility parameters by health (no longer education-specific)
-    disutil_ft_work_women = params["disutil_ft_work_good_women"] * good_health + params[
-        "disutil_ft_work_bad_women"
-    ] * (1 - good_health)
+    disutil_ft_work_women = (
+        params["disutil_ft_work_good_women"] * good_health
+        + params["disutil_ft_work_bad_women"] * bad_health
+        + params["disutil_ft_work_disabled_women"] * disabled_health
+    )
 
-    disutil_pt_work_women = params["disutil_pt_work_good_women"] * good_health + params[
-        "disutil_pt_work_bad_women"
-    ] * (1 - good_health)
+    disutil_pt_work_women = (
+        params["disutil_pt_work_good_women"] * good_health
+        + params["disutil_pt_work_bad_women"] * bad_health
+        + params["disutil_pt_work_disabled_women"] * disabled_health
+    )
 
     # Children disutility remains education-specific as it's conceptually different
     disutil_children_ft = params["disutil_children_ft_work_high"] * education + params[
         "disutil_children_ft_work_low"
     ] * (1 - education)
 
-
-        # Children disutility remains education-specific as it's conceptually different
+    # Children disutility remains education-specific as it's conceptually different
     # disutil_children_pt = params["disutil_children_pt_work_high"] * education + params[
     #     "disutil_children_pt_work_low"
     # ] * (1 - education)
@@ -253,9 +260,11 @@ def disutility_work(
     ]
     disutil_children_ft = disutil_children_ft * nb_children
 
-    disutil_unemployment_women = params[
-        "disutil_unemployed_good_women"
-    ] * good_health + params["disutil_unemployed_bad_women"] * (1 - good_health)
+    disutil_unemployment_women = (
+        params["disutil_unemployed_good_women"] * good_health
+        + params["disutil_unemployed_bad_women"] * bad_health
+        + params["disutil_unemployed_disabled"] * disabled_health
+    )
 
     disutil_retirement_women = params["disutil_partner_retired_women"]
 

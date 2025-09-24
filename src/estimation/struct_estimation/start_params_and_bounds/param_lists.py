@@ -15,10 +15,12 @@ men_disutil_params_edu = [
     "disutil_ft_work_high_bad_men",
     "disutil_ft_work_low_good_men",
     "disutil_ft_work_low_bad_men",
+    "disutil_ft_work_disabled_men",  # NEW
     "disutil_unemployed_high_good_men",
     "disutil_unemployed_high_bad_men",
     "disutil_unemployed_low_good_men",
     "disutil_unemployed_low_bad_men",
+    "disutil_unemployed_disabled_men",  # NEW
     # "disutil_partner_retired_men",
 ]
 
@@ -55,10 +57,13 @@ men_disability_params = [
 women_disutil_params = [
     "disutil_ft_work_good_women",
     "disutil_ft_work_bad_women",
+    "disutil_ft_work_disabled_women",  # NEW
     "disutil_pt_work_good_women",
     "disutil_pt_work_bad_women",
+    "disutil_pt_work_disabled_women",  # NEW
     "disutil_unemployed_good_women",
     "disutil_unemployed_bad_women",
+    "disutil_unemployed_disabled_women",  # NEW
     # "disutil_partner_retired_women",
     # "disutil_children_ft_work_high",
     # "disutil_children_ft_work_low",

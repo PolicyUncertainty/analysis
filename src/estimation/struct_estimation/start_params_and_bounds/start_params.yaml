@@ -38,13 +38,27 @@ disutil_pt_work_bad_women: 0.2
 disutil_unemployed_good_women: 0.3
 disutil_unemployed_bad_women: 0.4
 
+# Full time work dis-utility men - Disabled health
+disutil_ft_work_disabled_men: 0.4
+
+# Unemployment dis-utility men - Disabled health
+disutil_unemployed_disabled_men: 0.4
+
+# Full time work dis-utility women - Disabled health
+disutil_ft_work_disabled_women: 0.4
+
+# Part time work dis-utility women - Disabled health
+disutil_pt_work_disabled_women: 0.4
+
+# Unemployment dis-utility women - Disabled health
+disutil_unemployed_disabled_women: 0.4
+
 # Partner retired dis-utility women
 disutil_partner_retired_women: 0.0
 
 # Children dis-utility
 disutil_children_ft_work_low: 0.1
 disutil_children_ft_work_high: 0.1
-
 disutil_children_pt_work_low: 0.1
 disutil_children_pt_work_high: 0.1
 

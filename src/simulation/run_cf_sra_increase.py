@@ -102,7 +102,7 @@ result_dfs = create_result_dfs(sra_at_63)
 
 # Initialize baseline storage
 
-for unc_scenario in [True]:
+for unc_scenario in [True, False]:
     if unc_scenario:
         df_label = "unc"
     else:

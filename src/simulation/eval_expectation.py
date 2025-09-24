@@ -64,7 +64,7 @@ fig4, axs4 = plt.subplots(n_types, 2, figsize=get_figsize(n_types, 2))
 
 SRA_grid = np.arange(65, 71, 1)
 n_grid = len(SRA_grid)
-for subj_unc in [True]:
+for subj_unc in [True, False]:
     model_solution = None
     for informed, informed_label in enumerate(["Uninformed", "Informed"]):
         axs[0, informed].set_title(f"Retirement Age - {informed_label}")

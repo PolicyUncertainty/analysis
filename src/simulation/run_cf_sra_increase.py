@@ -37,20 +37,19 @@ def write_results_to_dataframe(i, df_base, df_cf, result_df, params, specs):
         params: model parameters
         specs: model specifications
     """
-    if i > 0:  # Skip first iteration (baseline)
-        results_row = calc_overall_results(df_base=df_base, df_cf=df_cf)
-        for key, value in results_row.items():
-            result_df.loc[i, key] = value
-        # result_df.loc[i, "cv"] = calc_compensated_variation(
-        #     df_base=df_base,
-        #     df_cf=df_cf,
-        #     params=params,
-        #     specs=specs,
-        # )
+    results_row = calc_overall_results(df_base=df_base, df_cf=df_cf)
+    for key, value in results_row.items():
+        result_df.loc[i, key] = value
+    # result_df.loc[i, "cv"] = calc_compensated_variation(
+    #     df_base=df_base,
+    #     df_cf=df_cf,
+    #     params=params,
+    #     specs=specs,
+    # )
 
 
 def process_gender_results(
-    i, df, result_dfs, df_bases, params, specs, scenario_name=""
+    i, df, result_dfs, df_base, params, specs
 ):
     """
     Process results for all gender categories (men, women, overall)
@@ -64,48 +63,27 @@ def process_gender_results(
         specs: model specifications
         scenario_name: name for debugging/logging
     """
-    # Split by gender
-    df_men = df[df["sex"] == 0]
-    df_women = df[df["sex"] == 1]
-    df_overall = df.copy()
 
-    if i == 0:
-        # Store baselines
-        df_bases["men"] = df_men.copy()
-        df_bases["women"] = df_women.copy()
-        df_bases["overall"] = df_overall.copy()
-    else:
-        # Calculate and write results for each gender category
-        write_results_to_dataframe(
-            i, df_bases["men"], df_men, result_dfs["men"], params, specs
-        )
-        write_results_to_dataframe(
-            i, df_bases["women"], df_women, result_dfs["women"], params, specs
-        )
-        write_results_to_dataframe(
-            i, df_bases["overall"], df_overall, result_dfs["overall"], params, specs
-        )
+    # Calculate and write results for each gender category
+    write_results_to_dataframe(
+        i, df_base[], df_men, result_dfs["men"], params, specs
+    )
+    write_results_to_dataframe(
+        i, df_bases["women"], df_women, result_dfs["women"], params, specs
+    )
+    write_results_to_dataframe(
+        i, df_bases["overall"], df_overall, result_dfs["overall"], params, specs
+    )
 
 
-# %%
-# Set specifications
-seeed = 123
-model_name = specs["model_name"]
-load_sol_model = True
-load_unc_solution = None
-load_no_unc_solution = None
-load_df = None
-model_solution_unc = None
-model_solution_no_unc = None
-
-# Load params
-params = pkl.load(
-    open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
-)
-
-
-# Initialize alpha values and replace 0.04 with subjective alpha
-sra_at_63 = np.arange(67, 70 + 1, 1)
+# Save all results
+def save_results(result_dfs, path_dict, model_name):
+    """Save all result dataframes to CSV files"""
+    for scenario in result_dfs:
+        for gender in result_dfs[scenario]:
+            filename = f"sra_increase_aggregate_{scenario}_{gender}_{model_name}.csv"
+            result_dfs[scenario][gender].to_csv(path_dict["sim_results"] + filename)
+            print(f"Saved: {filename}")
 
 
 # Initialize result dataframes and baseline storage
@@ -121,62 +99,63 @@ def create_result_dfs(sra_at_63):
     return result_dfs
 
 
+# %%
+# Set specifications
+seeed = 123
+model_name = specs["model_name"]
+load_sol_model = True
+load_solutions = False
+load_df = None
+
+# Load params
+params = pkl.load(
+    open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
+)
+
+
+# Initialize alpha values and replace 0.04 with subjective alpha
+sra_at_63 = np.arange(67, 70 + 1, 1)
+
 result_dfs = create_result_dfs(sra_at_63)
 
 # Initialize baseline storage
-df_bases_unc = {}
-df_bases_no_unc = {}
-# df_bases_debias = {}
 
-for i, sra in enumerate(sra_at_63):
-    print("Start simulation for sra: ", sra)
+for unc_scenario in [True, False]:
+    df_bases = {}
+    if unc_scenario:
+        df_label = "unc"
+    else:
+        df_label = "no_unc"
 
-    # ========== UNCERTAINTY SCENARIO ==========
-    df_unc, model_solution_unc = solve_and_simulate_scenario(
-        path_dict=path_dict,
-        params=params,
-        subj_unc=True,
-        custom_resolution_age=None,
-        announcement_age=None,
-        SRA_at_retirement=sra,
-        SRA_at_start=67,
-        model_name=model_name,
-        df_exists=load_df,
-        solution_exists=load_unc_solution,
-        sol_model_exists=load_sol_model,
-    )
+    model_sol = None
 
-    df_unc = df_unc.reset_index()
-    process_gender_results(
-        i, df_unc, result_dfs["unc"], df_bases_unc, params, specs, "uncertainty"
-    )
+    for i, sra in enumerate(sra_at_63):
+        print("Start simulation for sra: ", sra)
+        if unc_scenario:
+            SRA_at_start = 67
+        else:
+            SRA_at_start = sra
 
-    # ========== NO UNCERTAINTY SCENARIO ==========
-    df_no_unc, model_solution_no_unc = solve_and_simulate_scenario(
-        path_dict=path_dict,
-        params=params,
-        subj_unc=False,
-        custom_resolution_age=None,
-        announcement_age=None,
-        SRA_at_retirement=sra,
-        SRA_at_start=sra,
-        model_name=model_name,
-        df_exists=load_df,
-        solution_exists=load_no_unc_solution,
-        sol_model_exists=load_sol_model,
-        model_solution=model_solution_no_unc,
-    )
+        # ========== UNCERTAINTY SCENARIO ==========
+        df, model_sol = solve_and_simulate_scenario(
+            path_dict=path_dict,
+            params=params,
+            subj_unc=unc_scenario,
+            custom_resolution_age=None,
+            announcement_age=None,
+            SRA_at_retirement=sra,
+            SRA_at_start=SRA_at_start,
+            model_name=model_name,
+            df_exists=load_df,
+            solution_exists=load_solutions,
+            sol_model_exists=load_sol_model,
+            model_solution=model_sol,
+        )
 
-    df_no_unc = df_no_unc.reset_index()
-    process_gender_results(
-        i,
-        df_no_unc,
-        result_dfs["no_unc"],
-        df_bases_no_unc,
-        params,
-        specs,
-        "no_uncertainty",
-    )
+        df = df.reset_index()
+        process_gender_results(
+            i, df, result_dfs[df_label], df_bases, params, specs
+        )
 
     # # ========== DEBIAS SCENARIO (COMMENTED OUT) ==========
     # df_debias, _ = solve_and_simulate_scenario(
@@ -196,23 +175,5 @@ for i, sra in enumerate(sra_at_63):
 
     # df_debias = df_debias.reset_index()
     # process_gender_results(i, df_debias, result_dfs["debias"], df_bases_debias, params, specs, "debias")
-
-    # Update loading flags after first iteration
-    load_sol_model = True
-    load_unc_solution = True if load_unc_solution is not None else load_unc_solution
-    load_no_unc_solution = (
-        True if load_no_unc_solution is not None else load_no_unc_solution
-    )
-
-
-# Save all results
-def save_results(result_dfs, path_dict, model_name):
-    """Save all result dataframes to CSV files"""
-    for scenario in result_dfs:
-        for gender in result_dfs[scenario]:
-            filename = f"sra_increase_aggregate_{scenario}_{gender}_{model_name}.csv"
-            result_dfs[scenario][gender].to_csv(path_dict["sim_results"] + filename)
-            print(f"Saved: {filename}")
-
 
 save_results(result_dfs, path_dict, model_name)

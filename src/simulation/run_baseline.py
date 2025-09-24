@@ -4,6 +4,7 @@ import pickle as pkl
 
 import jax
 import pandas as pd
+import os
 
 from set_paths import create_path_dict
 from simulation.sim_tools.calc_life_cycle_detailed import calc_life_cycle_detailed
@@ -45,12 +46,17 @@ df_baseline, _ = solve_and_simulate_scenario(
 
 df_baseline = df_baseline.reset_index()
 
+del df_baseline
+
 # %%
 # Generate detailed life cycle results
 df_lc_detailed = calc_life_cycle_detailed(df_baseline)
 
 # Save detailed results
-output_path = path_dict["simulation_data"] + "/baseline/"
+output_path = path_dict["simulation_data"] + "baseline/"
+if not os.path.exists(output_path):
+    os.makedirs(output_path)
+
 df_lc_detailed.to_csv(output_path + f"baseline_lc_{model_name}.csv")
 
 
@@ -75,8 +81,6 @@ df_baseline_no_uncertainty = df_baseline_no_uncertainty.reset_index()
 # Generate detailed life cycle results
 df_lc_detailed_no_uncertainty = calc_life_cycle_detailed(df_baseline_no_uncertainty)
 
-# Save detailed results
-output_path = path_dict["simulation_data"] + "/baseline/"
 df_lc_detailed_no_uncertainty.to_csv(
     output_path + f"baseline_lc_{model_name}_no_uncertainty.csv"
 )

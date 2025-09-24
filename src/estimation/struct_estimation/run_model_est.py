@@ -9,6 +9,7 @@ from estimation.struct_estimation.start_params_and_bounds.param_lists import (
     men_disutil_params,
     men_disability_params,
     men_disutil_params_edu,
+    men_disutil_firing_edu,
     men_job_offer_old_age_params,
     men_job_offer_params,
     women_disutil_firing,
@@ -28,17 +29,18 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
 )
 
 model_name = "last_old_women"
-params_to_estimate_names = women_disutil_params
+params_to_estimate_names = women_disutil_firing
 sex_type = "women"
 edu_type = "all"
 util_type = "add"
+old_sample_only = True
 
 LOAD_LAST_ESTIMATE = False
 LOAD_SOL_MODEL = True
 SAVE_RESULTS = True
 USE_WEIGHTS = False
 
-print(f"Running estimation for model: {model_name}", flush=True)
+print(f"Running estimation for model: {model_name}; old sample {old_sample_only}", flush=True)
 
 if LOAD_LAST_ESTIMATE:
     last_estimate = pkl.load(
@@ -65,7 +67,7 @@ estimation_results, end_params = estimate_model(
     sex_type=sex_type,
     edu_type=edu_type,
     util_type=util_type,
-    old_only=True,
+    old_only=old_sample_only,
     print_men_examples=True,
     print_women_examples=True,
     slow_version=False,

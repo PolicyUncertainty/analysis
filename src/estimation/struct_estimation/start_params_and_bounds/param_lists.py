@@ -27,6 +27,8 @@ men_SRA_firing = [
     "SRA_firing_logit_intercept_men_high",
 ]
 
+men_disutil_firing_edu = men_disutil_params_edu + men_SRA_firing
+
 men_taste = [
     "taste_shock_scale_men",
 ]

@@ -82,7 +82,7 @@ disability_logit_age_above_55_women: -5
 disability_logit_high_educ_women: -5
 
 # SRA firing params
-SRA_firing_logit_intercept_men_low: -1.2
-SRA_firing_logit_intercept_men_high: -1.2
-SRA_firing_logit_intercept_women_low: -1.2
-SRA_firing_logit_intercept_women_high: -1.2
+SRA_firing_logit_intercept_men_low: 2.0
+SRA_firing_logit_intercept_men_high: 2.0
+SRA_firing_logit_intercept_women_low: 2.0
+SRA_firing_logit_intercept_women_high: 2.0

@@ -1,14 +1,13 @@
 import pandas as pd
 
 
-def calc_overall_results(df_base, df_cf):
+def calc_overall_results(pre_name, df_scenario):
 
     out_row = pd.Series()
-    for pre, df_scenario in zip(["cf", "base"], [df_cf, df_base]):
-        out_row[f"{pre}_below_sixty_savings"] = below_sixty_savings(df_scenario)
-        out_row[f"{pre}_ret_age"] = calc_average_retirement_age(df_scenario)
-        out_row[f"{pre}_sra_at_ret"] = sra_at_retirement(df_scenario)
-        out_row[f"{pre}_working_hours"] = df_scenario["working_hours"].mean()
+    out_row[f"{pre_name}_below_sixty_savings"] = below_sixty_savings(df_scenario)
+    out_row[f"{pre_name}_ret_age"] = calc_average_retirement_age(df_scenario)
+    out_row[f"{pre_name}_sra_at_ret"] = sra_at_retirement(df_scenario)
+    out_row[f"{pre_name}_working_hours"] = df_scenario["working_hours"].mean()
 
     return out_row
 

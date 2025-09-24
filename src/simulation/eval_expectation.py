@@ -29,7 +29,7 @@ from simulation.sim_tools.simulate_exp import simulate_exp
 # Set specifications
 model_name = specs["model_name"]
 load_sol_model = True  # informed state as type
-load_solution = True  # baseline solution conntainer
+load_solution = None  # baseline solution conntainer
 
 # Load params
 params = pkl.load(
@@ -38,62 +38,84 @@ params = pkl.load(
 
 fixed_states = {
     "period": 0,
-    "education": 0,
     "lagged_choice": 1,
-    "sex": 0,
     "health": 0,
     "assets_begin_of_period": 6,
     "experience": 0.5,
     "partner_state": 0,
     "job_offer": 1,
 }
-fig, axs = plt.subplots(1, 2, figsize=get_figsize(1, 2))
-fig2, axs2 = plt.subplots(1, 2, figsize=get_figsize(1, 2))
+
+type_list = []
+type_vars = []
+for sex_var, sex_label in enumerate(specs["sex_labels"]):
+    for edu_var, edu_label in enumerate(specs["education_labels"]):
+        type_list += [f"{sex_label}_{edu_label}"]
+        type_vars += [(sex_var, edu_var)]
+
+
+n_types = len(type_list)
+fig, axs = plt.subplots(n_types, 2, figsize=get_figsize(n_types, 2))
+fig2, axs2 = plt.subplots(n_types, 2, figsize=get_figsize(n_types, 2))
 
 SRA_grid = np.arange(65, 71, 1)
-for subj_unc in [True]:
+n_grid = len(SRA_grid)
+for subj_unc in [True, False]:
     model_solution = None
     for informed, informed_label in enumerate(["Uninformed", "Informed"]):
-        ax = axs[informed]
-        ax2 = axs2[informed]
-        ax.set_title(f"Retirement Age - {informed_label}")
-        ax.set_xlabel("SRA")
-        ax.set_ylabel("Retirement Age")
+        axs[0, informed].set_title(f"Retirement Age - {informed_label}")
+        axs2[0, informed].set_title(f"Expected Lifetime Income - {informed_label}")
 
-        ax2.set_title(f"Expected Lifetime Income - {informed_label}")
-        ax2.set_xlabel("SRA")
-        ax2.set_ylabel("Expected Lifetime Income")
-        if subj_unc:
-            exp_label = "expected reform"
-        else:
-            exp_label = "known reform"
+        for id_type in range(n_types):
+            print("Eval expectation: ", subj_unc, informed_label, type_list[id_type], flush=True)
+            sex_var, edu_var = type_vars[id_type]
+            type_label = type_list[id_type]
 
-        exp_ret_age = np.zeros_like(SRA_grid, dtype=float)
-        exp_income = np.zeros_like(SRA_grid, dtype=float)
-        for id_SRA, SRA in enumerate(SRA_grid):
-            policy_state = int((SRA - 65) / 0.25)
-            state = {**fixed_states, "policy_state": policy_state, "informed": informed}
+            ax = axs[id_type, informed]
+            ax.set_ylabel(f"Age - {type_label}")
 
-            df, model_solution = simulate_exp(
-                initial_state=state,
-                n_multiply=10_000,
-                path_dict=path_dict,
-                params=params,
-                subj_unc=subj_unc,
-                custom_resolution_age=None,
-                model_name=model_name,
-                solution_exists=load_solution,
-                sol_model_exists=load_sol_model,
-                model_solution=model_solution,
-            )
-            exp_ret_age[id_SRA] = calc_average_retirement_age(df)
-            exp_income[id_SRA] = expected_lifetime_income(df, specs)
+            ax2 = axs2[id_type, informed]
+            ax2.set_ylabel(f"Income - {type_label}")
 
-        ax.plot(SRA_grid, exp_ret_age, label=exp_label)
-        ax2.plot(SRA_grid, exp_income, label=exp_label)
+            exp_ret_age = np.zeros(n_grid, dtype=float)
+            exp_income = np.zeros(n_grid, dtype=float)
+            for id_SRA, SRA in enumerate(SRA_grid):
+                policy_state = int((SRA - 65) / 0.25)
+                state = {
+                    **fixed_states,
+                    "policy_state": policy_state,
+                    "informed": informed,
+                    "sex": sex_var,
+                    "education": edu_var,
+                }
 
-    ax.legend()
-    ax2.legend()
+                df, model_solution = simulate_exp(
+                    initial_state=state,
+                    n_multiply=1_000,
+                    path_dict=path_dict,
+                    params=params,
+                    subj_unc=subj_unc,
+                    custom_resolution_age=None,
+                    model_name=model_name,
+                    solution_exists=load_solution,
+                    sol_model_exists=load_sol_model,
+                    model_solution=model_solution,
+                )
+                exp_ret_age[id_SRA] = calc_average_retirement_age(df)
+                exp_income[id_SRA] = expected_lifetime_income(df, specs)
+
+            if subj_unc:
+                exp_label = "expected reform"
+            else:
+                exp_label = "known reform"
+            ax.plot(SRA_grid, exp_ret_age, label=exp_label)
+            ax2.plot(SRA_grid, exp_income, label=exp_label)
+
+axs[0, 0].legend()
+axs2[0, 0].legend()
+axs[-1, 0].set_xlabel("SRA")
+axs2[-1, 0].set_xlabel("SRA")
+
 
 plot_folder = path_dict["simulation_plots"] + model_name + "/"
 if not os.path.exists(plot_folder):

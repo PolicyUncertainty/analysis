@@ -19,8 +19,6 @@ model_name = specs["model_name"]
 params = pkl.load(
     open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
 )
-params["taste_shock_scale_men"] = 0.2
-params["taste_shock_scale_women"] = 0.2
 
 # %%
 # baseline: sra 67, with uncertainty and misinformation

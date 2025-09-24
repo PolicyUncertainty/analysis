@@ -42,11 +42,11 @@ disutil_unemployed_bad_women: 0.4
 disutil_partner_retired_women: 0.0
 
 # Children dis-utility
-disutil_children_ft_work_low: 0.0
-disutil_children_ft_work_high: 0.0
+disutil_children_ft_work_low: 0.1
+disutil_children_ft_work_high: 0.1
 
-disutil_children_pt_work_low: 0.0
-disutil_children_pt_work_high: 0.0
+disutil_children_pt_work_low: 0.1
+disutil_children_pt_work_high: 0.1
 
 # Bequest
 bequest_scale: 100

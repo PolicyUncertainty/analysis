@@ -27,8 +27,8 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
     load_and_set_start_params,
 )
 
-model_name = "fire_all_women"
-params_to_estimate_names = women_disutil_firing
+model_name = "last_old_women"
+params_to_estimate_names = women_disutil_params
 sex_type = "women"
 edu_type = "all"
 util_type = "add"
@@ -49,6 +49,8 @@ else:
 
 # Load start params
 start_params_all = load_and_set_start_params(paths_dict)
+# last_estimate["disutil_children_ft_work_low"] = 0.1
+# last_estimate["disutil_children_ft_work_high"] = 0.1
 
 # Run estimation
 estimation_results, end_params = estimate_model(
@@ -63,7 +65,7 @@ estimation_results, end_params = estimate_model(
     sex_type=sex_type,
     edu_type=edu_type,
     util_type=util_type,
-    old_only=False,
+    old_only=True,
     print_men_examples=True,
     print_women_examples=True,
     slow_version=False,
@@ -72,23 +74,23 @@ estimation_results, end_params = estimate_model(
 )
 print(estimation_results)
 
-# %% Set paths of project
-from specs.derive_specs import generate_derived_and_data_derived_specs
+# # %% Set paths of project
+# from specs.derive_specs import generate_derived_and_data_derived_specs
 
-specs = generate_derived_and_data_derived_specs(paths_dict)
+# specs = generate_derived_and_data_derived_specs(paths_dict)
 
 
-create_fit_plots(
-    path_dict=paths_dict,
-    specs=specs,
-    params=end_params,
-    model_name=model_name,
-    load_sol_model=True,
-    load_solution=None,
-    load_data_from_sol=False,
-    sex_type=sex_type,
-    edu_type=edu_type,
-)
+# create_fit_plots(
+#     path_dict=paths_dict,
+#     specs=specs,
+#     params=end_params,
+#     model_name=model_name,
+#     load_sol_model=True,
+#     load_solution=None,
+#     load_data_from_sol=False,
+#     sex_type=sex_type,
+#     edu_type=edu_type,
+# )
 
 
 # %%

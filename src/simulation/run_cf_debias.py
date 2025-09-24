@@ -31,7 +31,7 @@ from simulation.tables.cv import calc_compensated_variation
 # Set specifications
 seeed = 123
 model_name = specs["model_name"]
-load_model = True  # informed state as type
+load_model = False  # informed state as type
 load_unc_solution = None  # baseline solution conntainer
 load_df_biased = None
 load_df_unbiased = (

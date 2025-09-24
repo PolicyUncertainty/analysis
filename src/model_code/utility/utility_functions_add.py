@@ -263,7 +263,7 @@ def disutility_work(
     disutil_unemployment_women = (
         params["disutil_unemployed_good_women"] * good_health
         + params["disutil_unemployed_bad_women"] * bad_health
-        + params["disutil_unemployed_disabled"] * disabled_health
+        + params["disutil_unemployed_disabled_women"] * disabled_health
     )
 
     disutil_retirement_women = params["disutil_partner_retired_women"]

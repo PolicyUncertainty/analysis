@@ -17,20 +17,24 @@ def simulate_exp(
     custom_resolution_age=None,
     solution_exists=True,
     sol_model_exists=True,
+    model_solution=None,
 ):
 
-    model_solved = specify_and_solve_model(
-        path_dict=path_dict,
-        params=params,
-        file_append=model_name,
-        custom_resolution_age=custom_resolution_age,
-        subj_unc=subj_unc,
-        load_model=sol_model_exists,
-        load_solution=solution_exists,
-        sim_specs=None,
-        sex_type="all",
-        edu_type="all",
-    )
+    if model_solution is None:
+        model_solved = specify_and_solve_model(
+            path_dict=path_dict,
+            params=params,
+            file_append=model_name,
+            custom_resolution_age=custom_resolution_age,
+            subj_unc=subj_unc,
+            load_model=sol_model_exists,
+            load_solution=solution_exists,
+            sim_specs=None,
+            sex_type="all",
+            edu_type="all",
+        )
+    else:
+        model_solved = model_solution
     initial_states = {
         key: np.ones(n_multiply) * value for key, value in initial_state.items()
     }
@@ -42,4 +46,4 @@ def simulate_exp(
     )
     df = df.reset_index()
     df = create_additional_variables(df, specs)
-    return df
+    return df, model_solved

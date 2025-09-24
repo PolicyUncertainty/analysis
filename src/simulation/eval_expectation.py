@@ -29,7 +29,7 @@ from simulation.sim_tools.simulate_exp import simulate_exp
 # Set specifications
 model_name = specs["model_name"]
 load_sol_model = True  # informed state as type
-load_unc_solution = None  # baseline solution conntainer
+load_solution = True  # baseline solution conntainer
 
 # Load params
 params = pkl.load(
@@ -51,17 +51,18 @@ fig, axs = plt.subplots(1, 2, figsize=get_figsize(1, 2))
 fig2, axs2 = plt.subplots(1, 2, figsize=get_figsize(1, 2))
 
 SRA_grid = np.arange(65, 71, 1)
-for informed, informed_label in enumerate(["Uninformed", "Informed"]):
-    ax = axs[informed]
-    ax2 = axs2[informed]
-    ax.set_title(f"Retirement Age - {informed_label}")
-    ax.set_xlabel("SRA")
-    ax.set_ylabel("Retirement Age")
+for subj_unc in [True]:
+    model_solution = None
+    for informed, informed_label in enumerate(["Uninformed", "Informed"]):
+        ax = axs[informed]
+        ax2 = axs2[informed]
+        ax.set_title(f"Retirement Age - {informed_label}")
+        ax.set_xlabel("SRA")
+        ax.set_ylabel("Retirement Age")
 
-    ax2.set_title(f"Expected Lifetime Income - {informed_label}")
-    ax2.set_xlabel("SRA")
-    ax2.set_ylabel("Expected Lifetime Income")
-    for subj_unc in [True, False]:
+        ax2.set_title(f"Expected Lifetime Income - {informed_label}")
+        ax2.set_xlabel("SRA")
+        ax2.set_ylabel("Expected Lifetime Income")
         if subj_unc:
             exp_label = "expected reform"
         else:
@@ -73,7 +74,7 @@ for informed, informed_label in enumerate(["Uninformed", "Informed"]):
             policy_state = int((SRA - 65) / 0.25)
             state = {**fixed_states, "policy_state": policy_state, "informed": informed}
 
-            df = simulate_exp(
+            df, model_solution = simulate_exp(
                 initial_state=state,
                 n_multiply=10_000,
                 path_dict=path_dict,
@@ -81,8 +82,9 @@ for informed, informed_label in enumerate(["Uninformed", "Informed"]):
                 subj_unc=subj_unc,
                 custom_resolution_age=None,
                 model_name=model_name,
-                solution_exists=load_unc_solution,
+                solution_exists=load_solution,
                 sol_model_exists=load_sol_model,
+                model_solution=model_solution,
             )
             exp_ret_age[id_SRA] = calc_average_retirement_age(df)
             exp_income[id_SRA] = expected_lifetime_income(df, specs)

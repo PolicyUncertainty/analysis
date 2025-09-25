@@ -1,9 +1,10 @@
+import os
 import pickle
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import os
+
 from set_styles import get_figsize, set_colors
 
 JET_COLOR_MAP, LINE_STYLES = set_colors()
@@ -65,6 +66,17 @@ def create_fit_plots(
     if not os.path.exists(folder_name_plots):
         os.makedirs(folder_name_plots)
 
+    plot_ret_fit_age(
+        specs=specs,
+        data_decision=data_decision,
+        save_folder=folder_name_plots,
+    )
+    plot_life_cycle_choice_probs_health(
+        specs=specs,
+        data_decision=data_decision,
+        save_folder=folder_name_plots,
+    )
+
     plot_life_cycle_choice_probs(
         specs=specs,
         data_decision=data_decision,
@@ -125,6 +137,181 @@ def create_df_with_probs(
             df=data_decision, params=params, model_solved=model_solved
         )
     return data_decision
+
+
+def plot_ret_fit_age(
+    specs,
+    data_decision,
+    save_folder,
+):
+    df_int = data_decision[data_decision["age"] < 75].copy()
+
+    old_ages = np.arange(60, 72)
+
+    choice_share_labels = ["Choice Share Men", "Choice Share Women"]
+    health_labels = ["Not good health", "Good health"]
+    good_health_mask = df_int["health"] == 0
+    for sex_var in specs["sex_grid"]:
+        sex_label = specs["sex_labels"][sex_var]
+        if sex_var == 0:
+            n_choices = 3
+        else:
+            n_choices = 4
+        fig, axes = plt.subplots(
+            ncols=n_choices, figsize=get_figsize(ncols=n_choices, nrows=1)
+        )
+        count = -1
+        for edu_var in specs["education_grid"]:
+            edu_label = specs["education_labels"][edu_var]
+
+            for health_label in health_labels:
+                count += 1
+                if health_label == "Good health":
+                    mask = good_health_mask
+                else:
+                    mask = ~good_health_mask
+                data_subset = df_int[
+                    (df_int["education"] == edu_var) & (df_int["sex"] == sex_var) & mask
+                ]
+                all_choice_shares_obs = (
+                    data_subset.groupby(["age"])["choice"]
+                    .value_counts(normalize=True)
+                    .unstack()
+                )
+                labels = specs["choice_labels"]
+                for choice in range(specs["n_choices"]):
+
+                    choice_shares_predicted = data_subset.groupby(["age"])[
+                        f"choice_{choice}"
+                    ].mean()
+
+                    # Only plot if we are not in men and part-time
+                    men_and_part_time = (sex_var == 0) and (choice == 2)
+                    if not men_and_part_time:
+                        men_and_full_time = (sex_var == 0) and (choice == 3)
+                        if men_and_full_time:
+                            ax = axes[choice - 1]
+                        else:
+                            ax = axes[choice]
+
+                        ax.plot(
+                            choice_shares_predicted.reindex(old_ages),
+                            label=f"Pred. {edu_label} - {health_label}",
+                            color=JET_COLOR_MAP[count],
+                        )
+                        ax.plot(
+                            all_choice_shares_obs[choice].reindex(old_ages),
+                            label=f"Obs. {edu_label} - {health_label}",
+                            color=JET_COLOR_MAP[count],
+                            linestyle="--",
+                        )
+
+                        ax.set_ylim([-0.05, 1.05])
+                        ax.set_title(f"{labels[choice]}")
+                        ax.set_xlabel("Age")
+
+        axes[1].legend(loc="upper left")
+        axes[0].set_ylabel(choice_share_labels[sex_var])
+        # Fig title
+        fig.tight_layout()
+
+        fig.savefig(  # fig.suptitle(f"Choice shares {specs['education_labels'][edu]}")
+            save_folder + f"ret_age_fit_{sex_label}.png",
+            transparent=True,
+            dpi=300,
+        )
+        fig.savefig(  # fig.suptitle(f"Choice shares {specs['education_labels'][edu]}")
+            save_folder + f"ret_age_fit_{sex_label}.pdf",
+            transparent=True,
+            dpi=300,
+        )
+
+
+def plot_life_cycle_choice_probs_health(
+    specs,
+    data_decision,
+    save_folder,
+):
+    df_int = data_decision[data_decision["age"] < 75].copy()
+
+    choice_share_labels = ["Choice Share Men", "Choice Share Women"]
+    health_labels = ["Not good health", "Good health"]
+    good_health_mask = df_int["health"] == 0
+    for sex_var in specs["sex_grid"]:
+        sex_label = specs["sex_labels"][sex_var]
+        if sex_var == 0:
+            n_choices = 3
+        else:
+            n_choices = 4
+        fig, axes = plt.subplots(
+            ncols=n_choices, figsize=get_figsize(ncols=n_choices, nrows=1)
+        )
+        count = -1
+        for edu_var in specs["education_grid"]:
+            edu_label = specs["education_labels"][edu_var]
+
+            for health_label in health_labels:
+                count += 1
+                if health_label == "Good health":
+                    mask = good_health_mask
+                else:
+                    mask = ~good_health_mask
+                data_subset = df_int[
+                    (df_int["education"] == edu_var) & (df_int["sex"] == sex_var) & mask
+                ]
+                all_choice_shares_obs = (
+                    data_subset.groupby(["age"])["choice"]
+                    .value_counts(normalize=True)
+                    .unstack()
+                )
+
+                labels = specs["choice_labels"]
+                for choice in range(specs["n_choices"]):
+
+                    choice_shares_predicted = data_subset.groupby(["age"])[
+                        f"choice_{choice}"
+                    ].mean()
+
+                    # Only plot if we are not in men and part-time
+                    men_and_part_time = (sex_var == 0) and (choice == 2)
+                    if not men_and_part_time:
+                        men_and_full_time = (sex_var == 0) and (choice == 3)
+                        if men_and_full_time:
+                            ax = axes[choice - 1]
+                        else:
+                            ax = axes[choice]
+
+                        ax.plot(
+                            choice_shares_predicted,
+                            label=f"Pred. {edu_label}",
+                            color=JET_COLOR_MAP[count],
+                        )
+                        ax.plot(
+                            all_choice_shares_obs[choice],
+                            label=f"Obs. {edu_label}",
+                            color=JET_COLOR_MAP[count],
+                            linestyle="--",
+                        )
+
+                        ax.set_ylim([-0.05, 1.05])
+                        ax.set_title(f"{labels[choice]}")
+                        ax.set_xlabel("Age")
+
+        axes[1].legend(loc="upper left")
+        axes[0].set_ylabel(choice_share_labels[sex_var])
+        # Fig title
+        fig.tight_layout()
+
+        fig.savefig(  # fig.suptitle(f"Choice shares {specs['education_labels'][edu]}")
+            save_folder + f"observed_model_fit_{sex_label}.png",
+            transparent=True,
+            dpi=300,
+        )
+        fig.savefig(  # fig.suptitle(f"Choice shares {specs['education_labels'][edu]}")
+            save_folder + f"observed_model_fit_{sex_label}.pdf",
+            transparent=True,
+            dpi=300,
+        )
 
 
 def plot_life_cycle_choice_probs(
@@ -194,6 +381,11 @@ def plot_life_cycle_choice_probs(
 
         fig.savefig(  # fig.suptitle(f"Choice shares {specs['education_labels'][edu]}")
             save_folder + f"observed_model_fit_{sex_label}.png",
+            transparent=True,
+            dpi=300,
+        )
+        fig.savefig(  # fig.suptitle(f"Choice shares {specs['education_labels'][edu]}")
+            save_folder + f"observed_model_fit_{sex_label}.pdf",
             transparent=True,
             dpi=300,
         )
@@ -282,6 +474,11 @@ def plot_retirement_fit(
     fig.tight_layout()
     fig.savefig(
         save_folder + f"retirement_fit.png",
+        transparent=True,
+        dpi=300,
+    )
+    fig.savefig(
+        save_folder + f"retirement_fit.pdf",
         transparent=True,
         dpi=300,
     )

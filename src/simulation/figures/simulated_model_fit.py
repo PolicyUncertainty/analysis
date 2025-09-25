@@ -1,9 +1,11 @@
+import os
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import os
 
-from set_styles import set_colors, get_figsize
+from set_styles import get_figsize, set_colors
+
 JET_COLOR_MAP, LINE_STYLES = set_colors()
 from model_code.transform_data_from_model import load_scale_and_correct_data
 from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
@@ -45,7 +47,10 @@ def plot_quantiles(
 
     data_sim["age"] = data_sim["period"] + specs["start_age"]
 
-    fig, axs = plt.subplots(ncols=specs["n_education_types"], figsize=get_figsize(ncols=specs["n_education_types"]))
+    fig, axs = plt.subplots(
+        ncols=specs["n_education_types"],
+        figsize=get_figsize(ncols=specs["n_education_types"]),
+    )
     max_wealth = 5
     # Also generate an aggregate graph
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
@@ -97,11 +102,12 @@ def plot_quantiles(
     axs[0].legend()
     for edu in range(specs["n_education_types"]):
         axs[edu].set_ylim([0, max_wealth * 1.1])
-    
+
     plot_folder = path_dict["simulation_plots"] + model_name + "/"
 
     if file_name is not None:
         fig.savefig(plot_folder + f"{file_name}.png", transparent=True, dpi=300)
+        fig.savefig(plot_folder + f"{file_name}.pdf", dpi=300)
 
 
 def plot_choice_shares_single(
@@ -138,7 +144,9 @@ def plot_choice_shares_single(
     data_decision["age"] = data_decision["period"] + specs["start_age"]
     data_sim["age"] = data_sim["period"] + specs["start_age"]
 
-    fig, axes = plt.subplots(2, specs["n_choices"], figsize=get_figsize(ncols=specs["n_choices"], nrows=2))
+    fig, axes = plt.subplots(
+        2, specs["n_choices"], figsize=get_figsize(ncols=specs["n_choices"], nrows=2)
+    )
     for sex, sex_label in enumerate(specs["sex_labels"]):
         for edu_var, edu_label in enumerate(specs["education_labels"]):
             data_sim_restr = data_sim[
@@ -192,6 +200,7 @@ def plot_choice_shares_single(
         os.makedirs(plot_folder)
     if file_name is not None:
         fig.savefig(plot_folder + f"{file_name}.png", transparent=True, dpi=300)
+        fig.savefig(plot_folder + f"{file_name}.pdf", dpi=300)
 
 
 def plot_states(
@@ -335,3 +344,4 @@ def plot_states(
             fig.savefig(
                 path_dict["plots"] + f"{state_name}.png", transparent=True, dpi=300
             )
+            fig.savefig(path_dict["plots"] + f"{state_name}.pdf", dpi=300)

@@ -1,6 +1,7 @@
+import os
+
 import numpy as np
 from matplotlib import pyplot as plt
-import os
 
 from set_styles import get_figsize
 from simulation.figures.simulated_model_fit import JET_COLOR_MAP
@@ -67,3 +68,4 @@ def plot_savings(
         os.makedirs(plot_folder)
     if file_name is not None:
         fig.savefig(plot_folder + f"{file_name}.png", transparent=True, dpi=300)
+        fig.savefig(plot_folder + f"{file_name}.pdf", dpi=300)

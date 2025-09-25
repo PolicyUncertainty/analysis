@@ -283,12 +283,12 @@ def plot_life_cycle_choice_probs_health(
 
                         ax.plot(
                             choice_shares_predicted,
-                            label=f"Pred. {edu_label}",
+                            label=f"Pred. {edu_label} - {health_label}",
                             color=JET_COLOR_MAP[count],
                         )
                         ax.plot(
                             all_choice_shares_obs[choice],
-                            label=f"Obs. {edu_label}",
+                            label=f"Obs. {edu_label} - {health_label}",
                             color=JET_COLOR_MAP[count],
                             linestyle="--",
                         )
@@ -303,12 +303,12 @@ def plot_life_cycle_choice_probs_health(
         fig.tight_layout()
 
         fig.savefig(  # fig.suptitle(f"Choice shares {specs['education_labels'][edu]}")
-            save_folder + f"observed_model_fit_{sex_label}.png",
+            save_folder + f"observed_model_fit_health_{sex_label}.png",
             transparent=True,
             dpi=300,
         )
         fig.savefig(  # fig.suptitle(f"Choice shares {specs['education_labels'][edu]}")
-            save_folder + f"observed_model_fit_{sex_label}.pdf",
+            save_folder + f"observed_model_fit_health_{sex_label}.pdf",
             transparent=True,
             dpi=300,
         )

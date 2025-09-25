@@ -62,7 +62,9 @@ def calc_early_retirement_pension_points(
         informed * model_specs["ERP"]
         + (1 - informed) * model_specs["uninformed_ERP"][education]
     )
-    early_retirement_factor = 1 - early_retirement_penalty * penalty_years
+    early_retirement_factor = (1 - early_retirement_penalty * penalty_years).clip(
+        min=0.0, max=1.0
+    )
 
     # Assign disability pension points if eligible. These are always higher in
     # case of early retirement.

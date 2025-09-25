@@ -41,6 +41,8 @@ def select_solution_transition_func_and_update_specs(
             raise ValueError(
                 "custom_resolution_age can only be given in case of subjective uncertainty"
             )
+
+        specs["resolution_age"] = None
         # Assign empty step periods as we have no increase in expectation, because of the equality of
         # the value function if there is no uncertainty about the future of the SRA.
         specs["policy_step_periods"] = np.array([])
@@ -95,6 +97,7 @@ def select_sim_policy_function_and_update_specs(
             )
         transition_func_sim = realized_policy_step_function
     else:
+        specs["resolution_age"] = None
         transition_func_sim = announce_policy_state
         specs = update_specs_for_policy_announcement(
             specs=specs,

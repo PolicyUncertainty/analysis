@@ -65,8 +65,8 @@ women_disutil_params = [
     "disutil_unemployed_bad_women",
     "disutil_unemployed_disabled_women",  # NEW
     # "disutil_partner_retired_women",
-    # "disutil_children_ft_work_high",
-    # "disutil_children_ft_work_low",
+    "disutil_children_ft_work_high",
+    "disutil_children_ft_work_low",
     # "disutil_children_pt_work_high",
     # "disutil_children_pt_work_low",
 ]

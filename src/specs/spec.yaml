@@ -1,7 +1,7 @@
 ---
 ################
 # Current model name:
-model_name: fire_old_done
+model_name: mu_low_taste_men
 
 ###############################################################################
 # Model specification
@@ -121,6 +121,6 @@ end_age_transition_estimation: 75
 # Simulation parameters
 ###############################################################################
 n_agents: 100_000
-# We have around 500 30-year olds in the data. This yields then 500_000
+# We have around 500 30-year olds in the data. This yields then 50_000
 n_multiply_start_obs: 100
 seed: 123

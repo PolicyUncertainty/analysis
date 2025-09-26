@@ -86,7 +86,7 @@ def create_result_dfs(sra_at_63):
 seeed = 123
 model_name = specs["model_name"]
 load_sol_model = True
-load_solutions = None
+load_solutions = False
 load_df = None
 
 # Load params

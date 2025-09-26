@@ -11,8 +11,6 @@ from simulation.sim_tools.calc_life_cycle_detailed import calc_life_cycle_detail
 from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
-jax.config.update("jax_enable_x64", True)
-
 # %%
 path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict)
@@ -29,7 +27,7 @@ params = pkl.load(
 
 # %%
 # baseline: sra 67, with uncertainty and misinformation
-df_baseline, _ = solve_and_simulate_scenario(
+df_baseline, model = solve_and_simulate_scenario(
     path_dict=path_dict,
     params=params,
     subj_unc=True,
@@ -46,11 +44,12 @@ df_baseline, _ = solve_and_simulate_scenario(
 
 df_baseline = df_baseline.reset_index()
 
-del df_baseline
-
 # %%
 # Generate detailed life cycle results
 df_lc_detailed = calc_life_cycle_detailed(df_baseline)
+del df_baseline
+del model
+
 
 # Save detailed results
 output_path = path_dict["simulation_data"] + "baseline/"

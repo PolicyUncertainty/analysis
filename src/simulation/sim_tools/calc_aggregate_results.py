@@ -35,13 +35,13 @@ def sra_at_retirement(df):
 
 def expected_lifetime_income(df, specs):
     df["disc_income"] = specs["discount_factor"] ** (df["period"]) * df["total_income"]
-    return df["disc_income"].groupby("agent_id").sum().mean()
+    return df.groupby("agent")["disc_income"].sum().mean()
 
 
 def expected_working_lifetime_income(df, specs):
     mask = df["age"] < 63
     df["disc_income"] = specs["discount_factor"] ** (df["period"]) * df["total_income"]
-    return df.loc[mask, "disc_income"].groupby("agent_id").sum().mean()
+    return df.loc[mask, :].groupby("agent")["disc_income"].sum().mean()
 
 
 def expected_pension(df):

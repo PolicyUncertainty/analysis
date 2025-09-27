@@ -12,7 +12,7 @@ from model_code.wealth_and_budget.wages import calc_hourly_wage
 def add_experience_and_pp_specs(specs, path_dict, load_precomputed):
     specs = add_very_long_insured_specs(specs, path_dict)
     specs = create_max_experience_working(path_dict, specs, load_precomputed)
-    specs = create_pension_points_per_exp(specs)
+    specs = create_pension_points_per_exp(path_dict, specs)
     specs = create_max_pension_point(path_dict, specs, load_precomputed)
     return specs
 
@@ -132,9 +132,9 @@ def add_very_long_insured_specs(specs, path_dict):
     exp_thresholds = np.zeros((2,), dtype=float)
     for sex_var, sex_label in enumerate(["men", "women"]):
         exp_thresholds[sex_var] = (
-            45
-            / exp_factor_for_credited_periods.loc[f"experience_{sex_label}", "estimate"]
+            45 / exp_factor_for_credited_periods.loc[f"experience_{sex_label}"].iloc[0]
         )
+
         # We count experience in half years, so round up to next 0.5
         exp_thresholds[sex_var] = np.ceil(exp_thresholds[sex_var] * 2) / 2
 
@@ -142,22 +142,40 @@ def add_very_long_insured_specs(specs, path_dict):
     return specs
 
 
-def create_pension_points_per_exp(specs):
+def create_pension_points_per_exp(path_dict, specs):
     # Create grid for experience to pension points mapping
     max_exp = specs["max_exps_period_working"].max() + 2
     exp_grid = np.arange(0, max_exp)
+    struct_sample = pd.read_csv(path_dict["struct_est_sample"])
+
+    type_specific_init_exp = (
+        struct_sample[
+            (struct_sample["period"] == 0) & struct_sample["choice"].isin([2, 3])
+        ]
+        .groupby(["sex", "education"])["experience"]
+        .mean()
+        .unstack()
+        .values
+    )
+
     hourly_wages_per_exp = np.zeros(
         (specs["n_sexes"], specs["n_education_types"], len(exp_grid)), dtype=float
     )
+    age = 30
     for sex_var in range(specs["n_sexes"]):
         for edu_var in range(specs["n_education_types"]):
-            hourly_wages_per_exp[sex_var, edu_var, :] = calc_hourly_wage(
-                sex=np.ones_like(exp_grid, dtype=int) * sex_var,
-                education=np.ones_like(exp_grid, dtype=int) * edu_var,
-                experience_years=exp_grid,
-                income_shock=0,
-                model_specs=specs,
-            )
+            for id_exp, exp in enumerate(exp_grid):
+                hourly_wages_per_exp[sex_var, edu_var, id_exp] = calc_hourly_wage(
+                    sex=sex_var,
+                    education=edu_var,
+                    age=age,
+                    experience_years=exp,
+                    income_shock=0,
+                    model_specs=specs,
+                )
+                if exp > type_specific_init_exp[sex_var, edu_var]:
+                    age += 1
+                    age = min(age, 65)
 
     pp_per_exp = np.zeros_like(hourly_wages_per_exp)
     for sex_var in range(specs["n_sexes"]):

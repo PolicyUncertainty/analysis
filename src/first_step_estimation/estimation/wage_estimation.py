@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from linearmodels.panel.model import PanelOLS
 from scipy.stats import norm
+from statsmodels.api import OLS
 from statsmodels.discrete.discrete_model import Probit
 from statsmodels.tools import add_constant
 
@@ -18,7 +19,7 @@ def estimate_wage_parameters(paths_dict, specs):
     # specs, data, and parameter containers
     edu_labels = specs["education_labels"]
     sex_labels = specs["sex_labels"]
-    regressors = ["constant", "exp", "exp_squared", "IMR"]
+    regressors = ["constant", "ln_exp", "above_50_age", "IMR"]
     wage_data_raw = load_and_prepare_wage_data(paths_dict)
 
     wage_data_raw = estimate_selection_correction_grouped(wage_data_raw, specs)
@@ -28,7 +29,10 @@ def estimate_wage_parameters(paths_dict, specs):
     # Calculate average working hours by type and choice
     # # Map annual hours to data, for hours smaller and equal than 0
     # wage_data = add_missing_hours(wage_data, average_working_hours)
-    wage_data = wage_data[wage_data["monthly_hours"] > 0].copy()
+    wage_data = wage_data[wage_data["weekly_hours"] > 5].copy()
+
+    # Restrict to maximum experience
+    wage_data = wage_data[wage_data["experience"] <= specs["max_est_age_labor"] - 14]
 
     # Now everyone has correct monthly hours. We can define hourly wage
     wage_data["hourly_wage"] = wage_data["monthly_wage"] / wage_data["monthly_hours"]
@@ -99,7 +103,7 @@ def estimate_wage_parameters(paths_dict, specs):
         paths_dict["tables"] + "wage_eq_params.tex", float_format="%.4f"
     )
     # After estimation print some summary statistics
-    print_wage_equation(wage_parameters, edu_labels, sex_labels)
+    # print_wage_equation(wage_parameters, edu_labels, sex_labels)
     print_lc_wage_and_exp(wage_data, edu_labels, sex_labels)
     calc_wage_population_averages(wage_data_raw, year_fixed_effects, specs, paths_dict)
     calc_population_working_hours(wage_data, paths_dict)
@@ -112,30 +116,29 @@ def estimate_selection_correction_grouped(wage_data, specs):
     wage_data = wage_data.copy()
     wage_data["IMR"] = np.nan  # prepare column
 
-    pred_vars = ["age", "health", "education"]
+    pred_vars = ["age", "health", "education", "married", "age_squared", "num_children"]
 
     invalid_mask = wage_data[pred_vars].isnull().any(axis=1)
 
-    for sex_val, sex_label in enumerate(specs["sex_labels"]):
+    for sex_val, _ in enumerate(specs["sex_labels"]):
         mask = (wage_data["sex"] == sex_val) & ~invalid_mask
         group_data = wage_data.loc[mask].copy()
 
-        if sex_val == 0:
-            gender_x_vars = pred_vars
-        else:
-            gender_x_vars = pred_vars + ["num_children"]
+        y = (group_data["weekly_hours"] > 5).astype(int)
+        X = add_constant(group_data[pred_vars]).astype(float)
 
-        y = (group_data["monthly_hours"] > 0).astype(int)
-        X = add_constant(group_data[gender_x_vars])
-
-        probit_model = Probit(y, X, missing="drop")
+        probit_model = Probit(y, X)
         probit_res = probit_model.fit(disp=False)
 
-        # XB = latent index
-        xb = probit_model.predict(probit_res.params, X)
+        xb = X @ probit_res.params  # Direct calculation instead of predict
         pdf_xb = norm.pdf(xb)
         cdf_xb = norm.cdf(xb)
-        imr = pdf_xb / np.clip(cdf_xb, 1e-8, 1.0)
+
+        # Clip to avoid numerical issues
+        cdf_xb = np.clip(cdf_xb, 1e-8, 1 - 1e-8)
+
+        # Calculate IMR only for selected observations (monthly_hours > 0)
+        imr = np.where(y == 1, pdf_xb / cdf_xb, np.nan)
 
         wage_data.loc[mask, "IMR"] = imr
 
@@ -148,7 +151,13 @@ def load_and_prepare_wage_data(paths_dict):
         paths_dict["first_step_data"] + "wage_estimation_sample.csv", index_col=0
     )
     wage_data["ln_exp"] = np.log(wage_data["experience"] + 1)
+    wage_data["ln_exp_55"] = np.log(wage_data["experience"] + 1) * (
+        wage_data["age"] >= 55
+    )
+    wage_data["above_50_age"] = (wage_data["age"] >= 50) * (wage_data["age"] - 50)
     wage_data["exp"] = wage_data["experience"]
+
+    wage_data["age_squared"] = wage_data["age"] ** 2
 
     wage_data["exp_squared"] = wage_data["experience"] ** 2
     wage_data["constant"] = np.ones(len(wage_data))
@@ -210,7 +219,9 @@ def fit_panel_reg_model(
     )
     year_dummies = year_dummies.drop(columns=[f"year_{reference_year}"])
     wage_data_type = pd.concat([wage_data_type, year_dummies], axis=1)
+
     rhs_vars = wage_data_type[regressors + list(year_dummies.columns)]
+
     # estimate parametric regression, save parameters
     model = PanelOLS(
         dependent=wage_data_type["ln_wage"],
@@ -220,6 +231,7 @@ def fit_panel_reg_model(
     fitted_model = model.fit(
         cov_type="clustered", cluster_entity=True, cluster_time=True
     )
+    print(fitted_model.summary)
     # Add prediction to data
     wage_data_type["predicted_ln_wage"] = fitted_model.predict()
     wage_data_type["predicted_wage"] = np.exp(wage_data_type["predicted_ln_wage"])
@@ -259,12 +271,12 @@ def calc_wage_population_averages(df, year_fixed_effects, specs, paths_dict):
     edu_labels = specs["education_labels"]
     sex_labels = specs["sex_labels"]
 
-    df = df[df["monthly_hours"] > 0].copy()
+    df = df[df["weekly_hours"] > 5].copy()
 
     # Now everyone has correct monthly hours. We can define hourly wage
     df["hourly_wage"] = df["monthly_wage"] / df["monthly_hours"]
     # We are 2013 onwards, so everybody must at least earn 8.5. This is to filter out false reporting.
-    wage_data = df[df["hourly_wage"] > 8.5]
+    df = df[df["hourly_wage"] > 8.5]
     df["ln_wage"] = np.log(df["hourly_wage"])
 
     # annual average wage (deflated or inflated by type-specific year fixed effects)
@@ -281,8 +293,10 @@ def calc_wage_population_averages(df, year_fixed_effects, specs, paths_dict):
                     edu_mask & sex_mask & year_mask, "ln_wage_deflated"
                 ] -= year_fixed_effects[(edu_label, sex_label)][year]
 
-    df["annual_wage_deflated"] = np.exp(df["ln_wage_deflated"]) * df["annual_hours"]
+    df["wage_deflated"] = np.exp(df["ln_wage_deflated"])
+    df["annual_wage_deflated"] = df["wage_deflated"] * df["annual_hours"]
     pop_avg_annual_wage = df["annual_wage_deflated"].mean()
+
     np.savetxt(
         paths_dict["first_step_incomes"] + "pop_avg_annual_wage.txt",
         np.array([pop_avg_annual_wage]),
@@ -339,30 +353,28 @@ def print_wage_equation(wage_parameters, edu_labels, sex_labels):
             constant_se = wage_parameters.loc[
                 (edu_label, sex_label, "constant_ser"), "value"
             ]
-            exp_coef = wage_parameters.loc[(edu_label, sex_label, "exp"), "value"]
+            exp_coef = wage_parameters.loc[(edu_label, sex_label, "ln_exp"), "value"]
             exp_coef_se = wage_parameters.loc[
-                (edu_label, sex_label, "exp_ser"), "value"
+                (edu_label, sex_label, "ln_exp_ser"), "value"
             ]
-            exp_sq_coef = wage_parameters.loc[
-                (edu_label, sex_label, "exp_squared"), "value"
+            above_50_coeff = wage_parameters.loc[
+                (edu_label, sex_label, "above_50_age"), "value"
             ]
-            exp_sq_coef_se = wage_parameters.loc[
-                (edu_label, sex_label, "exp_squared_ser"), "value"
+            above_50_coeff_ser = wage_parameters.loc[
+                (edu_label, sex_label, "above_50_age_ser"), "value"
             ]
 
             # Format the equation with proper signs
             exp_sign = "+" if exp_coef >= 0 else ""
-            exp_sq_sign = "+" if exp_sq_coef >= 0 else ""
+            exp_sq_sign = "+" if above_50_coeff >= 0 else ""
 
             print(
-                f"ln(hrly_wage) = {constant:.2f} ({constant_se:.2f}) {exp_sign}{exp_coef:.2f} ({exp_coef_se:.2f}) * exp {exp_sq_sign}{exp_sq_coef:.4f} ({exp_sq_coef_se:.4f}) * exp^2 + epsilon"
+                f"ln(hrly_wage) = {constant:.2f} ({constant_se:.2f}) {exp_sign}{exp_coef:.2f} ({exp_coef_se:.2f}) * exp {exp_sq_sign}{above_50_coeff:.4f} ({above_50_coeff_ser:.4f}) * 1( + epsilon"
             )
 
             # Calculate example wage
-            exp = 20
-            hrly_wage_with_20_exp = np.exp(
-                constant + exp_coef * exp + exp_sq_coef * exp**2
-            )
+            exp = 21
+            hrly_wage_with_20_exp = np.exp(constant + exp_coef * exp)
             print(
                 f"Example: hourly wage with 20 years of experience: {hrly_wage_with_20_exp:.2f}"
             )

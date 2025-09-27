@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-from jax import numpy as jnp
 
 
 def add_income_specs(specs, path_dict):
@@ -124,8 +123,10 @@ def add_wage_specs(path_dict, specs):
     wage_params.reset_index(inplace=True)
 
     gamma_0 = np.zeros((specs["n_sexes"], specs["n_education_types"]), dtype=float)
-    gamma_1 = np.zeros((specs["n_sexes"], specs["n_education_types"]), dtype=float)
-    gamma_2 = np.zeros((specs["n_sexes"], specs["n_education_types"]), dtype=float)
+    gamma_ln_exp = np.zeros((specs["n_sexes"], specs["n_education_types"]), dtype=float)
+    gamma_above_50 = np.zeros(
+        (specs["n_sexes"], specs["n_education_types"]), dtype=float
+    )
 
     for edu_id, edu_label in enumerate(specs["education_labels"]):
         for sex_var, sex in enumerate(specs["sex_labels"]):
@@ -133,24 +134,25 @@ def add_wage_specs(path_dict, specs):
             gamma_0[sex_var, edu_id] = wage_params.loc[
                 mask & (wage_params["parameter"] == "constant"), "value"
             ].values[0]
-            gamma_1[sex_var, edu_id] = wage_params.loc[
-                mask & (wage_params["parameter"] == "exp"), "value"
+            gamma_ln_exp[sex_var, edu_id] = wage_params.loc[
+                mask & (wage_params["parameter"] == "ln_exp"), "value"
             ].values[0]
-            gamma_2[sex_var, edu_id] = wage_params.loc[
-                mask & (wage_params["parameter"] == "exp_squared"), "value"
+            gamma_above_50[sex_var, edu_id] = wage_params.loc[
+                mask & (wage_params["parameter"] == "above_50_age"), "value"
             ].values[0]
 
-    mask = (
-        (wage_params["education"] == "all")
-        & (wage_params["sex"] == "all")
-        & (wage_params["parameter"] == "income_shock_std")
-    )
-    income_shock_scale = wage_params.loc[mask, "value"].values[0]
-
+    # Assign to specs
     specs["gamma_0"] = gamma_0
-    specs["gamma_1"] = gamma_1
-    specs["gamma_2"] = gamma_2
-    specs["income_shock_std"] = income_shock_scale
+    specs["gamma_ln_exp"] = gamma_ln_exp
+    specs["gamma_above_50"] = gamma_above_50
+
+    # Now read out params for all for pension calculation
+    all_mask = (wage_params["education"] == "all") & (wage_params["sex"] == "all")
+    income_shock_scale_all = wage_params.loc[
+        all_mask & (wage_params["parameter"] == "income_shock_std"), "value"
+    ].values[0]
+
+    specs["income_shock_std"] = income_shock_scale_all
     return specs
 
 
@@ -160,38 +162,53 @@ def calculate_partner_incomes(path_dict, specs):
     # Limit periods to the one of max retirement age as we restricted our estimation sample
     # until then. For the predictions after max retirement age we use the last max retirement period
     not_predicted_periods = np.where(
-        periods > (specs["max_ret_age"] - specs["start_age"])
+        periods > (specs["max_age_partner_working"] - specs["start_age"])
     )[0]
-    periods[not_predicted_periods] = specs["max_ret_age"] - specs["start_age"]
+    periods[not_predicted_periods] = (
+        specs["max_age_partner_working"] - specs["start_age"]
+    )
 
-    # Only do this for men now
-    partner_wage_params_men = pd.read_csv(
-        path_dict["first_step_incomes"] + "partner_wage_eq_params_men.csv"
-    )
-    partner_wage_params_women = pd.read_csv(
-        path_dict["first_step_incomes"] + "partner_wage_eq_params_women.csv"
-    )
     partner_wages = np.zeros(
         (specs["n_sexes"], specs["n_education_types"], specs["n_periods"]), dtype=float
     )
-    for sex_var, sex_label in enumerate(specs["sex_labels"]):
-        if sex_label == "Men":
-            params = partner_wage_params_men
-        else:
-            params = partner_wage_params_women
-        for edu_var, edu_label in enumerate(specs["education_labels"]):
+    sex_param_labels = ["men", "women"]
+    for edu_var, edu_label in enumerate(specs["education_labels"]):
+        for sex_var, sex_label in enumerate(sex_param_labels):
+            params = pd.read_csv(
+                path_dict["first_step_incomes"]
+                + f"partner_wage_eq_params_{sex_label}.csv"
+            )
             mask = params["education"] == edu_label
             partner_wages[sex_var, edu_var, :] = (
                 params.loc[mask, "constant"].values[0]
                 + params.loc[mask, "period"].values[0] * periods
                 + params.loc[mask, "period_sq"].values[0] * periods**2
             )
+            # Additional cubic term
+            if sex_label == "men":
+                partner_wages[sex_var, edu_var, :] += (
+                    params.loc[mask, "period_cub"].values[0] * periods**3
+                )
+
     # annual partner wage
     annual_partner_wages = partner_wages * 12
 
     # Average pension 2020 of men and women
     # Source: https://statistik-rente.de/drv/extern/publikationen
     # /statistikbaende/documents/Rente_2020.pdf
-    annual_partner_pension = np.array([[800, 800], [1227, 1227]]) * 12
+    # annual_partner_pension = np.array([[800, 800], [1227, 1227]]) * 12
+    # Below is soep estimate
+    annual_partner_pension = np.zeros((2, 2))
+    partner_pension = pd.read_csv(
+        path_dict["first_step_incomes"] + "partner_pension.csv"
+    )
+    for sex in range(2):
+        for edu in range(2):
+            mask = (partner_pension["sex"] == sex) & (
+                partner_pension["education"] == edu
+            )
+            annual_partner_pension[sex, edu] = partner_pension.loc[
+                mask, "public_pension_p"
+            ].values[0]
 
     return annual_partner_wages, annual_partner_pension

@@ -179,6 +179,7 @@ def calc_trans_mat(params, age):
     """Compute the transition matrix for a given age using a multinomial logit
     specification."""
 
+    # As max_age_partner_working in specs
     if age >= 75:
         return np.array([[1, 0, 0], [0, 0, 1], [0, 0, 1]], dtype=float)
 

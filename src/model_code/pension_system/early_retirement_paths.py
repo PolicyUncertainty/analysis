@@ -49,8 +49,8 @@ def calc_early_retirement_pension_points(
         total_pension_points=total_pension_points,
     )
 
-    # Penalty years. If disability pension(then limit to 3 years)
-    penalty_years_disability = retirement_age_difference.clip(max=3)
+    # Penalty years. If disability pension(then limit to 3 years) and only until 63
+    penalty_years_disability = (63.0 - actual_retirement_age).clip(max=3.0, min=0.0)
     penalty_years = jax.lax.select(
         disability_pension_bool,
         on_true=penalty_years_disability,
@@ -98,7 +98,8 @@ def calc_disability_pension_points(
 ):
     """Calculate the disability pension points."""
     average_points_work_span = total_pension_points / (actual_retirement_age - 18)
-    total_points_disability = (SRA_at_retirement - 18) * average_points_work_span
+    # Fill up for span 65 - 18 = 47
+    total_points_disability = 47 * average_points_work_span
     return total_points_disability
 
 

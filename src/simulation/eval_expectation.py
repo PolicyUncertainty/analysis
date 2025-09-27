@@ -31,7 +31,7 @@ from simulation.sim_tools.simulate_exp import simulate_exp
 # Set specifications
 model_name = specs["model_name"]
 load_sol_model = True  # informed state as type
-load_solution = None  # baseline solution conntainer
+load_solution = True  # baseline solution conntainer
 
 # Load params
 params = pkl.load(
@@ -62,7 +62,8 @@ fig2, axs2 = plt.subplots(n_types, 2, figsize=get_figsize(n_types, 2))
 fig3, axs3 = plt.subplots(n_types, 2, figsize=get_figsize(n_types, 2))
 fig4, axs4 = plt.subplots(n_types, 2, figsize=get_figsize(n_types, 2))
 
-SRA_grid = np.arange(65, 71, 1)
+df_dict = {}
+SRA_grid = np.arange(67, 68)
 n_grid = len(SRA_grid)
 for subj_unc in [True, False]:
     model_solution = None
@@ -86,6 +87,7 @@ for subj_unc in [True, False]:
             exp_pension = np.zeros(n_grid, dtype=float)
             exp_work_income = np.zeros(n_grid, dtype=float)
             for id_SRA, SRA in enumerate(SRA_grid):
+                print(SRA, flush=True)
                 policy_state = int((SRA - 65) / 0.25)
                 state = {
                     **fixed_states,
@@ -111,6 +113,7 @@ for subj_unc in [True, False]:
                 exp_income[id_SRA] = expected_lifetime_income(df, specs)
                 exp_pension[id_SRA] = expected_pension(df)
                 exp_work_income[id_SRA] = expected_working_lifetime_income(df, specs)
+                # df_dict[SRA] = df
 
             if subj_unc:
                 exp_label = "expected reform"

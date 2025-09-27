@@ -33,7 +33,6 @@ def create_partner_wage_est_sample(paths, specs, load_data=False):
 
     # Create partner state and drop if partner is absent or in non-working age
     df = create_partner_state(df)
-    df = df[df["partner_state"] == 1]
 
     df = filter_below_age(df, specs["start_age"])
     df = recode_sex(df)
@@ -72,6 +71,18 @@ def load_and_merge_soep_core(soep_c38_path):
     merged_data = pd.merge(
         pgen_data, pathl_data, on=["pid", "hid", "syear"], how="inner"
     )
+    pequiv_data = pd.read_stata(
+        f"{soep_c38_path}/pequiv.dta",
+        columns=[
+            "pid",
+            "syear",
+            "igrv1",
+        ],
+        convert_categoricals=False,
+    ).rename(columns={"igrv1": "public_pension"})
+
+    # Merge pgen data with pathl data and hl data
+    merged_data = pd.merge(merged_data, pequiv_data, on=["pid", "syear"], how="left")
 
     merged_data["age"] = merged_data["syear"] - merged_data["gebjahr"]
     del pgen_data, pathl_data

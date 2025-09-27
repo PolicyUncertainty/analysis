@@ -24,6 +24,8 @@ def budget_constraint(
     model_specs,
 ):
     assets_scaled = asset_end_of_previous_period * model_specs["wealth_unit"]
+
+    age = model_specs["start_age"] + period
     # Recalculate experience
     experience_years = construct_experience_years(
         float_experience=experience,
@@ -66,6 +68,7 @@ def budget_constraint(
     labor_income_after_ssc, gross_labor_income = calc_labor_income_after_ssc(
         lagged_choice=lagged_choice,
         experience_years=experience_years,
+        age=age,
         education=education,
         sex=sex,
         income_shock=income_shock_previous_period,

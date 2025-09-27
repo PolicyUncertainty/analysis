@@ -114,15 +114,16 @@ def sra_increase_aggregate_plot_by_gender(path_dict, model_name):
             prepared_data[scenario][gender] = df[df["sra_at_63"].isin(reform_SRA)]
 
     # Create the main behavioral changes plot (3 rows x 3 columns)
-    fig, axs = plt.subplots(nrows=3, ncols=3, figsize=get_figsize(ncols=3, nrows=3))
+    fig, axs = plt.subplots(nrows=3, ncols=4, figsize=get_figsize(ncols=3, nrows=4))
 
     # Variables to plot
     variables = {
         "below_sixty_savings": "Perc. Change Savings",
         "working_hours": "Perc. Change Hours",
+        "working_hours_below_63": "Perc. Change Hours < 63",
     }
 
-    column_titles = ["Savings", "Working Hours", "Retirement Age"]
+    column_titles = ["Savings", "Working Hours", "Working Hours < 63", "Retirement Age"]
     row_titles = ["Overall", "Men", "Women"]
     gender_order = ["overall", "men", "women"]
 
@@ -153,7 +154,7 @@ def sra_increase_aggregate_plot_by_gender(path_dict, model_name):
                 ax.set_ylabel(f"{row_titles[row]}\n{ylabel}")
 
         # Plot retirement age changes in third column
-        ax = axs[row, 2]
+        ax = axs[row, 3]
         show_legend = row == 1  # Show legend only for middle row
         plot_retirement_age_changes(
             ax,

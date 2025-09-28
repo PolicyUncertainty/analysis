@@ -52,23 +52,32 @@ def health_transition(
 
 def calc_disability_probability(params, sex, education, period, model_specs):
     age = model_specs["start_age"] + period
+    above_50 = age >= 50
     above_55 = age >= 55
+    above_60 = age >= 60
 
     # Calculate exp value for men and women
     logit_factor_men = (
         params["disability_logit_const_men"]
-        + params["disability_logit_age_men"] * age
-        + params["disability_logit_age_above_55_men"] * (age - 55) * above_55
+        # + params["disability_logit_age_men"] * age
+        # + params["disability_logit_age_above_55_men"] * (age - 55) * above_55
+        + params["disability_logit_above_50_men"] * above_50
+        + params["disability_logit_above_55_men"] * above_55
+        + params["disability_logit_above_60_men"] * above_60
         + params["disability_logit_high_educ_men"] * education
     )
     logit_factor_women = (
         params["disability_logit_const_women"]
-        + params["disability_logit_age_women"] * age
-        + params["disability_logit_age_above_55_women"] * (age - 55) * above_55
+        # + params["disability_logit_age_women"] * age
+        # + params["disability_logit_age_above_55_women"] * (age - 55) * above_55
+        + params["disability_logit_above_50_women"] * above_50
+        + params["disability_logit_above_55_women"] * above_55
+        + params["disability_logit_above_60_women"] * above_60
         + params["disability_logit_high_educ_women"] * education
     )
     # Now select based on sex state
     is_men = sex == 0
+
     logit_factor = jax.lax.select(
         is_men, on_true=logit_factor_men, on_false=logit_factor_women
     )

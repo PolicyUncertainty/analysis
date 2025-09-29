@@ -8,6 +8,9 @@ from dcegm.likelihood import (
 from first_step_estimation.estimation.partner_wage_estimation import (
     create_deflate_factor,
 )
+from model_code.pension_system.experience_stock import (
+    calc_pension_points_form_experience,
+)
 from model_code.state_space.experience import scale_experience_years
 from model_code.unobserved_state_weighting import create_unobserved_state_specs
 from process_data.structural_sample_scripts.create_structural_est_sample import (
@@ -167,6 +170,11 @@ def load_scale_and_correct_data(path_dict, model_class):
     # plt.show()
     data_decision["assets_begin_of_period"] = out[0]
 
+    data_decision = correct_wealth_to_include_non_pension_retirement_income(
+        df=data_decision,
+        model_specs=model_specs,
+    )
+
     data_decision = create_informed_probability(data_decision, model_specs)
     return data_decision
 
@@ -209,4 +217,45 @@ def create_informed_probability(df, specs):
         probs[mask] = prob_informed
 
     df["probability_informed"] = probs
+    return df
+
+
+def correct_wealth_to_include_non_pension_retirement_income(
+    df,
+    model_specs,
+):
+    df = df.copy()
+    # Correct wealth to include non-pension retirement income
+    # We assume that non-pension retirement income is 30% of pension wealth.
+    # Thus, we compute for every individual their pension (function of experience, education, sex) and compute the
+    # net present value assuming they expect to retire at the SRA and live until life expectancy (from specs).
+    pension_points = calc_pension_points_form_experience(
+        education=df["education"].values,
+        sex=df["sex"].values,
+        experience_years=df["experience_years"].values,
+        model_specs=model_specs,
+    )
+    df["current_pension"] = pension_points * model_specs["annual_pension_point_value"]
+    life_expectancy = model_specs["life_exp"][df["sex"].values, df["education"].values]
+    age_payments_start = np.maximum(df["policy_state_value"].values, df["age"].values)
+    age_payments_end = np.maximum(life_expectancy, df["age"].values)
+    df["payment_years"] = age_payments_end - age_payments_start
+    df["years_until_payment_starts"] = age_payments_start - df["age"].values
+
+    # calculate perpetuity of getting pension income after SRA, then subtract perpetuity after death
+    discount_factor = 1 / (1 + model_specs["interest_rate"])
+    annuity_factor = 1 / (1 - discount_factor)
+    df["pension_annuity_value"] = (
+        df["current_pension"] * annuity_factor
+        - df["current_pension"]
+        * annuity_factor
+        * discount_factor ** df["payment_years"]
+    )
+    # Discount to present day.
+    df["pension_wealth"] = (
+        df["pension_annuity_value"]
+        * discount_factor ** df["years_until_payment_starts"]
+    )
+    df["wealth_correction"] = 0.4 * df["pension_wealth"] / model_specs["wealth_unit"]
+    df["assets_begin_of_period"] += df["wealth_correction"]
     return df

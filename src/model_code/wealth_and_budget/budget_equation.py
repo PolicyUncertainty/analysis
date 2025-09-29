@@ -55,7 +55,7 @@ def budget_constraint(
     has_partner_int = (partner_state > 0).astype(int)
 
     # Income lagged choice 1
-    unemployment_benefits = calc_unemployment_benefits(
+    unemployment_benefits, own_unemployemnt_benefits = calc_unemployment_benefits(
         assets=assets_scaled,
         education=education,
         sex=sex,
@@ -100,7 +100,13 @@ def budget_constraint(
         model_specs=model_specs,
     )
 
-    total_income = jnp.maximum(total_net_income + child_benefits, unemployment_benefits)
+    # Unemployed after 58. We use this rule to proxy the extended alg1 claim
+    was_old_age_unemployed = (lagged_choice == 1) & (age >= 58)
+    total_net_income += (
+        child_benefits + was_old_age_unemployed * own_unemployemnt_benefits
+    )
+
+    total_income = jnp.maximum(total_net_income, unemployment_benefits)
     interest_rate = model_specs["interest_rate"]
     interest = interest_rate * assets_scaled
     income_plus_interest = total_income + interest

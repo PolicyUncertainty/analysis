@@ -210,3 +210,34 @@ def create_informed_probability(df, specs):
 
     df["probability_informed"] = probs
     return df
+
+
+# from model_code.state_space.experience import calculate_pension_size_for_experience_and_type
+
+def correct_wealth_to_include_non_pension_retirement_income(
+    df,
+    model_specs,
+):
+    df = df.copy()
+    # Correct wealth to include non-pension retirement income
+    # We assume that non-pension retirement income is 30% of pension wealth.
+    # Thus, we compute for every individual their pension (function of experience, education, sex) and compute the
+    # net present value assuming they expect to retire at the SRA and live until life expectancy (from specs).
+
+    df["current_pension"] = calculate_pension_size_for_experience_and_type(df, model_specs)
+    life_expectancy = model_specs["life_expectancy"][df["sex"].values][df["education"].values]
+    df["years_between_SRA_and_death"] = (
+        life_expectancy - df["policy_state_value"].values
+    )
+    df["years_until_SRA"] = df["policy_state_value"].values - df["age"].values
+
+    # calculate perpetuity of getting pension income after SRA, then subtract perpetuity after death
+    discount_factor = 1 / (1 + model_specs["interest_rate"])
+    annuity_factor = 1 / (1 - discount_factor)
+    df["pension_annuity_value"] = (
+        df["current_pension"] * annuity_factor - df["current_pension"] * annuity_factor * discount_factor ** df["years_between_SRA_and_death"]
+    )
+    df["pension_wealth"] = df["pension_annuity_value"] * discount_factor ** df["years_until_SRA"] 
+    df["wealth_correction"] = 0.3 * df["pension_wealth"]
+    df["assets_begin_of_period"] += df["wealth_correction"] / model_specs["wealth_unit"]
+    return df

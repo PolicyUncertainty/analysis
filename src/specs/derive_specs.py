@@ -74,4 +74,5 @@ def read_and_derive_specs(spec_path):
         specs["max_SRA"] + specs["SRA_grid_size"],
         specs["SRA_grid_size"],
     )
+    specs["life_exp"] = np.array(specs["life_exp"])
     return specs

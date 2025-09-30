@@ -31,10 +31,22 @@ def estimate_partner_wage_parameters(paths_dict, specs):
     wage_data = create_deflate_factor(paths_dict, specs, wage_data)
     wage_data["wage_p"] /= wage_data["deflate_factor"]
 
+    wage_data_pensions = wage_data[wage_data["partner_state"] == 2].copy()
     # Estimate partner pensions
-    wage_data.loc[wage_data["public_pension_p"] < 1, "public_pension_p"] = np.nan
-    wage_data["public_pension_p"] /= wage_data["deflate_factor"]
-    wage_data.groupby(["sex", "education"])["public_pension_p"].mean().to_csv(
+    wage_data_pensions.loc[
+        wage_data_pensions["public_pension_p"] < 1, "public_pension_p"
+    ] = np.nan
+    wage_data_pensions["public_pension_p"] /= wage_data_pensions["deflate_factor"]
+    wage_data_pensions.loc[
+        wage_data_pensions["all_pensions_p"] < 1, "all_pensions_p"
+    ] = np.nan
+    wage_data_pensions["all_pensions_p"] /= wage_data_pensions["deflate_factor"]
+    # Old prediction only on public pensions
+    # wage_data_pensions.groupby(["sex", "education"])["public_pension_p"].mean().to_csv(
+    #     paths_dict["first_step_incomes"] + "partner_pension.csv"
+    # )
+    # New prediction on all pensions
+    wage_data_pensions.groupby(["sex", "education"])["all_pensions_p"].median().to_csv(
         paths_dict["first_step_incomes"] + "partner_pension.csv"
     )
     wage_data = wage_data[wage_data["partner_state"] == 1]

@@ -148,6 +148,12 @@ def load_scale_and_correct_data(path_dict, model_class):
     data_decision["assets_begin_of_period"] = (
         data_decision["wealth"] / model_specs["wealth_unit"]
     )
+
+    data_decision = correct_wealth_to_include_non_pension_retirement_income(
+        df=data_decision,
+        model_specs=model_specs,
+    )
+
     states_dict = create_states_dict(df=data_decision, model_class=model_class)
 
     out = adjust_observed_assets(
@@ -169,11 +175,8 @@ def load_scale_and_correct_data(path_dict, model_class):
     # data_decision.groupby("age")["last_year_pension"].mean().plot()
     # plt.show()
     data_decision["assets_begin_of_period"] = out[0]
-
-    data_decision = correct_wealth_to_include_non_pension_retirement_income(
-        df=data_decision,
-        model_specs=model_specs,
-    )
+    for inc_key in out[1].keys():
+        data_decision[inc_key] = out[1][inc_key]
 
     data_decision = create_informed_probability(data_decision, model_specs)
     return data_decision

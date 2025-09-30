@@ -120,6 +120,8 @@ def budget_constraint(
 
     aux = {
         "net_hh_income": income_plus_interest / model_specs["wealth_unit"],
+        "hh_net_income_wo_interest": total_income / model_specs["wealth_unit"],
+        "interest": interest / model_specs["wealth_unit"],
         "joint_gross_labor_income": (gross_labor_income + gross_partner_wage)
         / model_specs["wealth_unit"],
         "joint_gross_retirement_income": (

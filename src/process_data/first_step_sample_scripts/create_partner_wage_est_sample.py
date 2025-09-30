@@ -77,9 +77,14 @@ def load_and_merge_soep_core(soep_c38_path):
             "pid",
             "syear",
             "igrv1",
+            "ioldy",
+            "icomp",
         ],
         convert_categoricals=False,
-    ).rename(columns={"igrv1": "public_pension"})
+    )
+
+    pequiv_data.rename(columns={"igrv1": "public_pension"}, inplace=True)
+    pequiv_data["all_pensions"] = pequiv_data["ioldy"] + pequiv_data["icomp"]
 
     # Merge pgen data with pathl data and hl data
     merged_data = pd.merge(merged_data, pequiv_data, on=["pid", "syear"], how="left")

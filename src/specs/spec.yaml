@@ -59,10 +59,12 @@ unemployment_wealth_thresh: 10_050
 monthly_child_benefits: 204
 # Minimum Wage (Source: Destatis)
 monthly_min_wage: 1620  # 9.35 * 40 hours * 4.33 weeks = 1620
-# Tax Brackets (Source: GETTSIM)
-income_tax_brackets: [9408, 14532, 57051, 270500]
-# Tax rates (Source: GETTSIM)
-income_tax_rates: [0.0, 0.14, 0.2397, 0.42, 0.45]
+# Tax system from https://esth.bundesfinanzministerium.de/esth/2020
+# /A-Einkommensteuergesetz/IV-Tarif/Paragraf-32a/inhalt.html
+income_tax_brackets: [0.0, 9408, 14532, 57051, 270500]
+linear_income_tax_rates: [0.0, 1400, 2397, 0.42, 0.45]
+quadratic_income_tax_rates: [0.0, 972.87, 212.02]
+intercepts_income_tax: [0.0, 0.0, 972.79, -8963.74, -17078.74]
 
 # Retirement system parameters.
 # Start with early retirement penalty (ERP)

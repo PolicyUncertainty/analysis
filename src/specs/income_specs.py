@@ -208,7 +208,7 @@ def calculate_partner_incomes(path_dict, specs):
                 partner_pension["education"] == edu
             )
             annual_partner_pension[sex, edu] = partner_pension.loc[
-                mask, "public_pension_p"
+                mask, "all_pensions_p"
             ].values[0]
 
     return annual_partner_wages, annual_partner_pension

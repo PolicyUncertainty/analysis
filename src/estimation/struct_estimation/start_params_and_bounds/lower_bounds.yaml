@@ -22,6 +22,11 @@ disutil_unemployed_high_bad_men: 1.0e-12
 disutil_unemployed_low_good_men: 1.0e-12
 disutil_unemployed_low_bad_men: 1.0e-12
 
+disutil_unemployed_above_58_good_women: -1
+disutil_unemployed_above_58_bad_women: -1
+disutil_unemployed_above_58_good_men: -1
+disutil_unemployed_above_58_bad_men: -1
+
 # Full time work dis-utility men - Disabled health
 disutil_ft_work_disabled_men: 0
 
@@ -67,7 +72,10 @@ taste_shock_scale_women: 0.05
 
 # Bequest
 bequest_scale: 1.0e-12
-kappa: 0
+kappa_high_men: 0
+kappa_high_women: 0
+kappa_low_men: 0
+kappa_low_women: 0
 
 # Job finding probability - men
 job_finding_logit_const_men: -5

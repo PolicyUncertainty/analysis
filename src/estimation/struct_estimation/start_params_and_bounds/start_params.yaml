@@ -12,27 +12,33 @@ mu_high: 2.5
 # disutil_unemployed_bad_men: 0.1
 
 # Full time work dis-utility men - Health and Education specific
-disutil_ft_work_high_good_men: 1.2
-disutil_ft_work_high_bad_men: 1.4
-disutil_ft_work_low_good_men: 1.3
-disutil_ft_work_low_bad_men: 1.6
+disutil_ft_work_high_good_men: 0.6
+disutil_ft_work_high_bad_men: 0.6
+disutil_ft_work_low_good_men: 0.6
+disutil_ft_work_low_bad_men: 0.6
 
 # Unemployment dis-utility men - Health and Education specific
-disutil_unemployed_high_good_men: 1.1
-disutil_unemployed_high_bad_men: 1.1
-disutil_unemployed_low_good_men: 1.1
-disutil_unemployed_low_bad_men: 1.1
+disutil_unemployed_high_good_men: 0.3
+disutil_unemployed_high_bad_men: 0.3
+disutil_unemployed_low_good_men: 0.3
+disutil_unemployed_low_bad_men: 0.3
+
+
+disutil_unemployed_above_58_good_women: 0.0
+disutil_unemployed_above_58_bad_women: 0.0
+disutil_unemployed_above_58_good_men: 0.0
+disutil_unemployed_above_58_bad_men: 0.0
 
 # Partner retired dis-utility men
 disutil_partner_retired_men: 0.0
 
 # Full time work dis-utility women - Health specific
-disutil_ft_work_good_women: 1.9
-disutil_ft_work_bad_women: 1.9
+disutil_ft_work_good_women: 0.6
+disutil_ft_work_bad_women: 0.6
 
 # Part time dis-utility women - Health specific
-disutil_pt_work_good_women: 1.3
-disutil_pt_work_bad_women: 1.1
+disutil_pt_work_good_women: 0.6
+disutil_pt_work_bad_women: 0.6
 
 # Unemployment dis-utility women - Health specific
 disutil_unemployed_good_women: 0.3
@@ -64,13 +70,16 @@ disutil_children_pt_work_high: 0.3
 
 # Bequest
 bequest_scale: 100
-kappa: 21
+kappa_high_men: 5
+kappa_high_women: 35
+kappa_low_men: 10
+kappa_low_women: 30
 
 # Job separation params are set internally driven by data
 
 # Taste shock scale
-taste_shock_scale_men: 0.1
-taste_shock_scale_women: 0.1
+taste_shock_scale_men: 0.5
+taste_shock_scale_women: 0.5
 
 # SRA firing params - Starting at intercept 4.5 (gives ~57% probability)
 SRA_firing_logit_intercept_men_low: 4.5

@@ -1,7 +1,9 @@
 ---
 ################
 # Current model name:
-model_name: mu_low_taste_men
+model_name: nf
+util_type: add
+
 
 ###############################################################################
 # Model specification

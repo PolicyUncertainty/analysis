@@ -1,4 +1,9 @@
-wealth_params = ["mu_low", "mu_high", "bequest_scale", "kappa"]
+wealth_params = ["mu_low", "mu_high", "bequest_scale", 
+                "kappa_high_men",
+                "kappa_high_women",
+                "kappa_low_men",
+                "kappa_low_women",
+                 ]
 
 # Men - Health specific disutility
 men_disutil_params = [
@@ -21,6 +26,8 @@ men_disutil_params_edu = [
     "disutil_unemployed_low_good_men",
     "disutil_unemployed_low_bad_men",
     "disutil_unemployed_disabled_men",  # NEW
+    # "disutil_unemployed_above_58_good_men",
+    # "disutil_unemployed_above_58_bad_men",
     # "disutil_partner_retired_men",
 ]
 
@@ -67,6 +74,8 @@ women_disutil_params = [
     # "disutil_partner_retired_women",
     "disutil_children_ft_work_high",
     "disutil_children_ft_work_low",
+    "disutil_unemployed_above_58_good_women",
+    "disutil_unemployed_above_58_bad_women",
     # "disutil_children_pt_work_high",
     # "disutil_children_pt_work_low",
 ]

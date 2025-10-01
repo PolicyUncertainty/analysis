@@ -30,8 +30,9 @@ from simulation.sim_tools.simulate_exp import simulate_exp
 # %%
 # Set specifications
 model_name = specs["model_name"]
-load_sol_model = True  # informed state as type
-load_solution = True  # baseline solution conntainer
+util_type = specs["util_type"]
+load_sol_model = True
+load_solution = None 
 
 # Load params
 params = pkl.load(
@@ -63,7 +64,7 @@ fig3, axs3 = plt.subplots(n_types, 2, figsize=get_figsize(n_types, 2))
 fig4, axs4 = plt.subplots(n_types, 2, figsize=get_figsize(n_types, 2))
 
 df_dict = {}
-SRA_grid = np.arange(67, 68)
+SRA_grid = np.arange(65, 71, 1)
 n_grid = len(SRA_grid)
 for subj_unc in [True, False]:
     model_solution = None
@@ -108,6 +109,7 @@ for subj_unc in [True, False]:
                     solution_exists=load_solution,
                     sol_model_exists=load_sol_model,
                     model_solution=model_solution,
+                    util_type=util_type,
                 )
                 exp_ret_age[id_SRA] = calc_average_retirement_age(df)
                 exp_income[id_SRA] = expected_lifetime_income(df, specs)
@@ -115,6 +117,7 @@ for subj_unc in [True, False]:
                 exp_work_income[id_SRA] = expected_working_lifetime_income(df, specs)
                 # df_dict[SRA] = df
 
+            print(exp_ret_age, flush=True)
             if subj_unc:
                 exp_label = "expected reform"
             else:

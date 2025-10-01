@@ -40,6 +40,7 @@ def utility_func(
     utility_death = utility_final_consume_all(
         wealth=consumption,
         education=education,
+        sex=sex,
         params=params,
     )
     death_bool = health == model_specs["death_health_var"]
@@ -115,6 +116,7 @@ def marginal_utility_func(
     marginal_utility_death = marginal_utility_final_consume_all(
         wealth=consumption,
         education=education,
+        sex=sex,
         params=params,
     )
     death_bool = health == model_specs["death_health_var"]
@@ -192,6 +194,10 @@ def disutility_work(
     is_working_full_time = choice == 3
     partner_retired = partner_state == 2
 
+    # Generate age
+    age = model_specs["start_age"] + period
+    above_58 = age >= 58
+
     good_health = health == model_specs["good_health_var"]
     bad_health = health == model_specs["bad_health_var"]
     disabled_health = health == model_specs["disabled_health_var"]
@@ -211,6 +217,8 @@ def disutility_work(
         + params["disutil_unemployed_high_bad_men"] * bad_health * education
         + params["disutil_unemployed_low_bad_men"] * bad_health * (1 - education)
         + params["disutil_unemployed_disabled_men"] * disabled_health
+        +  params["disutil_unemployed_above_58_bad_men"] * bad_health * above_58
+        +  params["disutil_unemployed_above_58_good_men"] * good_health * above_58
     )
 
     #     # Men's disutility parameters by health (no longer education-specific)
@@ -264,6 +272,8 @@ def disutility_work(
         params["disutil_unemployed_good_women"] * good_health
         + params["disutil_unemployed_bad_women"] * bad_health
         + params["disutil_unemployed_disabled_women"] * disabled_health
+        + above_58 * params["disutil_unemployed_above_58_bad_women"] * bad_health
+        + above_58 * params["disutil_unemployed_above_58_good_women"] * good_health
     )
 
     disutil_retirement_women = params["disutil_partner_retired_women"]

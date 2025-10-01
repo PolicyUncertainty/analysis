@@ -11,6 +11,8 @@ specs = generate_derived_and_data_derived_specs(path_dict)
 
 
 model_name = specs["model_name"]
+util_type = specs["util_type"]
+
 load_df = None
 load_solution = None
 load_sol_model = True
@@ -41,6 +43,7 @@ plot_savings(
     load_df=load_df,
     load_solution=load_solution,
     load_sol_model=load_sol_model,
+    util_type=util_type,
 )
 
 

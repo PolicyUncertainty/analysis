@@ -15,13 +15,13 @@ def plot_ret_probs_for_state(model_solved, specs, path_dict):
     period = 37
 
     # Low educated men not retired
-    education = 1
-    sex = 0
+    education = 0
+    sex = 1
     lagged_choice = 3
     # Job offer and single
     job_offer = 1
-    partner_state = 0
-    assets = 8
+    partner_state = 1
+    assets = 22
 
     n_obs = len(policy_states)
     int_array = np.ones(n_obs, dtype=int)
@@ -48,7 +48,7 @@ def plot_ret_probs_for_state(model_solved, specs, path_dict):
 
     for id_exp, very_str in enumerate(["Very Long Insured", "Long Insured"]):
 
-        exp_years = [45, 44][id_exp]
+        exp_years = [45, 25][id_exp]
 
         exp_grid_float = scale_experience_years(
             experience_years=exp_years,

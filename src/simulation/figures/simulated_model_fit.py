@@ -23,6 +23,7 @@ def plot_quantiles(
     load_df=True,
     load_solution=True,
     load_sol_model=True,
+    util_type="add"
 ):
     # Simulate baseline with subjective belief
     data_sim, model_solved = solve_and_simulate_scenario(
@@ -37,6 +38,7 @@ def plot_quantiles(
         df_exists=load_df,
         solution_exists=load_solution,
         sol_model_exists=load_sol_model,
+        util_type=util_type
     )
 
     data_sim = data_sim.reset_index()
@@ -119,6 +121,7 @@ def plot_choice_shares_single(
     load_df=True,
     load_solution=True,
     load_sol_model=True,
+    util_type="add"
 ):
     # alpha_belief = float(np.loadtxt(
     # path_dict["est_results"] + "exp_val_params.txt"))
@@ -136,6 +139,7 @@ def plot_choice_shares_single(
         df_exists=load_df,
         solution_exists=load_solution,
         sol_model_exists=load_sol_model,
+        util_type=util_type
     )
 
     data_sim = data_sim.reset_index()
@@ -211,6 +215,7 @@ def plot_states(
     load_df=True,
     load_solution=True,
     load_sol_model=True,
+    util_type="add"
 ):
     # Simulate baseline with subjective belief
     data_sim, model_solved = solve_and_simulate_scenario(
@@ -225,6 +230,7 @@ def plot_states(
         df_exists=load_df,
         solution_exists=load_solution,
         sol_model_exists=load_sol_model,
+        util_type=util_type
     )
 
     data_sim = data_sim.reset_index()

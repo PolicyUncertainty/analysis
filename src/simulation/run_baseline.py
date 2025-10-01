@@ -40,6 +40,7 @@ df_baseline, model = solve_and_simulate_scenario(
     only_informed=False,
     solution_exists=load_unc_sol,
     sol_model_exists=load_sol_model,
+    util_type=specs["util_type"],
 )
 
 df_baseline = df_baseline.reset_index()
@@ -73,6 +74,7 @@ df_baseline_no_uncertainty, _ = solve_and_simulate_scenario(
     only_informed=False,
     solution_exists=load_no_unc_solution,
     sol_model_exists=load_sol_model,
+    util_type=specs["util_type"],
 )
 
 df_baseline_no_uncertainty = df_baseline_no_uncertainty.reset_index()

@@ -27,15 +27,15 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
     load_and_set_start_params,
 )
 
-model_name = "mu_free_taste_women"
-params_to_estimate_names = women_disutil_firing + ["taste_shock_scale_women"]
-sex_type = "women"
+model_name = "tsc5_low_mu_men"
+params_to_estimate_names = men_disutil_params_edu + ["taste_shock_scale_men"]
+sex_type = "men"
 edu_type = "all"
 util_type = "add"
-old_sample_only = False
+old_sample_only = True
 
 LOAD_LAST_ESTIMATE = False
-LOAD_SOL_MODEL = True
+LOAD_SOL_MODEL = False
 SAVE_RESULTS = True
 USE_WEIGHTS = False
 
@@ -55,11 +55,11 @@ else:
 
 # Load start params
 start_params_all = load_and_set_start_params(paths_dict)
-start_params_all["mu_high"] = 1.5
-start_params_all["mu_low"] = 1.5
 start_params_all["taste_shock_scale_men"] = 0.5
-start_params_all["taste_shock_scale_women"] = 0.5
-
+start_params_all["taste_shock_scale_women"] = 0.2
+start_params_all["bequest_scale"] = 5
+start_params_all["mu_low"] = 1.5
+start_params_all["mu_high"] = 1.5
 
 # Run estimation
 estimation_results, end_params = estimate_model(

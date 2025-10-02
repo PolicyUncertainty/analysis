@@ -9,14 +9,17 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 specs = generate_derived_and_data_derived_specs(path_dict)
 import jax
 jax.config.update("jax_enable_x64", True)
-# sim tools and plotting
+# sim tools 
+from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
+from simulation.sim_tools.simulation_print import start_simulation_print
+from simulation.sim_tools.calc_aggregate_results import add_overall_results
+from simulation.sim_tools.calc_life_cycle_detailed import calc_life_cycle_detailed
+# figures and tables
 from simulation.figures.retirement_plot import (
     plot_retirement_difference,
     plot_retirement_share,
 )
-from simulation.sim_tools.calc_life_time_results import add_new_life_cycle_results
-from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
-from simulation.sim_tools.simulation_print import start_simulation_print
+from simulation.figures.detailed_lc_results import plot_detailed_lifecycle_results
 from simulation.tables.cv import calc_compensated_variation
 
 # %%
@@ -25,6 +28,9 @@ seeed = 123
 model_name = specs["model_name"]
 util_type = specs["util_type"]
 sra_at_63 = 69.0
+
+base_label = "Baseline with Uninformed"
+cf_label = "Only Informed"
 
 load_model = False  # informed state as type
 load_unc_solution = False  # baseline solution conntainer
@@ -81,6 +87,19 @@ df_cf, _ = solve_and_simulate_scenario(
 )
 df_cf = df_cf.reset_index()
 
+# calculate aggregate and lifetime results
+for df, label in zip([df_base, df_cf], ["baseline", "cf"]):
+    df = add_overall_results(
+        result_df=pd.DataFrame(index=[0]),
+        df=df, index=0, pre_name=label
+    )
+
+df_lc_baseline = calc_life_cycle_detailed(df_base)
+df_lc_cf = calc_life_cycle_detailed(df_cf)
+
+
+
+# plots
 plot_retirement_difference(
     path_dict=path_dict,
     specs=specs,
@@ -90,8 +109,8 @@ plot_retirement_difference(
     model_name=model_name,
     left_difference=-4,
     right_difference=2,
-    base_label="With Uninformed",
-    cf_label="Only Informed",
+    base_label=base_label,
+    cf_label=cf_label,
 )
 
 plot_retirement_share(
@@ -101,6 +120,14 @@ plot_retirement_share(
     df_cf=df_cf,
     final_SRA=sra_at_63,
     model_name=model_name,
-    base_label="With Uninformed",
-    cf_label="Only Informed",
+    base_label=base_label,
+    cf_label=cf_label,
+)
+
+plot_detailed_lifecycle_results(
+    path_dict=path_dict,
+    specs=specs,
+    df_lc_baseline=df_lc_baseline,
+    df_lc_cf=df_lc_cf,
+    model_name=model_name,
 )

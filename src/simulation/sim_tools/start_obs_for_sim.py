@@ -126,7 +126,7 @@ def generate_start_states_from_obs(
     # Assign job offers, informed agents and health
     # If only informed should be simulated assign 1 everywhere
     if only_informed:
-        states_dict["informed"] = jnp.ones_like(states_dict["period"])
+        states_dict["informed"] = np.ones_like(states_dict["period"])
     else:
         states_dict["informed"] = informed_agents.flatten()
 
@@ -134,8 +134,8 @@ def generate_start_states_from_obs(
     states_dict["health"] = health_agents.flatten()
 
     policy_state_agents = (
-        jnp.ones_like(states_dict["health"]) * initial_policy_state
-    ).astype(jnp.uint8)
+        np.ones_like(states_dict["health"]) * initial_policy_state
+    ).astype(np.uint8)
     states_dict["policy_state"] = policy_state_agents
 
     initial_states = jax.tree.map(create_array_with_smallest_int_dtype, states_dict)

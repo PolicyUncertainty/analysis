@@ -5,6 +5,7 @@ import sys
 from estimation.struct_estimation.start_params_and_bounds.param_lists import (  # men_disutil_firing,
     men_disability_old_age_params,
     men_disability_params,
+    men_disutil_params_partner,
     men_disutil_firing_edu,
     men_disutil_params,
     men_disutil_params_edu,
@@ -27,8 +28,8 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
     load_and_set_start_params,
 )
 
-model_name = "tsc5_low_mu_men"
-params_to_estimate_names = men_disutil_params_edu + ["taste_shock_scale_men"]
+model_name = "partner_men"
+params_to_estimate_names = men_disutil_params_partner
 sex_type = "men"
 edu_type = "all"
 util_type = "add"

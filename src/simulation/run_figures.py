@@ -36,14 +36,6 @@ comparison_data_path = (
 df_baseline = pd.read_csv(baseline_data_path, index_col=[0, 1, 2])
 df_comparison = pd.read_csv(comparison_data_path, index_col=[0, 1, 2])
 
-# df_67 = pd.read_csv("df_subj_67.csv")
-# df_67 = df_67[df_67["health"] != 3]
-# df_67_no = pd.read_csv("df_no_subj_67.csv")
-# df_67_no = df_67_no[df_67_no["health"] != 3]
-# df_67_f = df_67[(df_67["choice"] == 0) & (df_67["lagged_choice"] != 0)]
-# df_67_no_f = df_67_no[(df_67_no["choice"] == 0) & (df_67_no["lagged_choice"] != 0)]
-# df_67_no_f = df_67_no_f[df_67_no_f["period"] < 70]
-
 plot_detailed_lifecycle_results(
     df_baseline=df_baseline,
     df_comparison=df_comparison,

@@ -11,17 +11,26 @@ mu_high: 2.5
 # disutil_unemployed_good_men: 0.3
 # disutil_unemployed_bad_men: 0.1
 
-# Full time work dis-utility men - Health and Education specific
-disutil_ft_work_high_good_men: 0.6
-disutil_ft_work_high_bad_men: 0.6
-disutil_ft_work_low_good_men: 0.6
-disutil_ft_work_low_bad_men: 0.6
+# # Full time work dis-utility men - Health and Education specific
+# disutil_ft_work_high_good_men: 0.6
+# disutil_ft_work_high_bad_men: 0.6
+# disutil_ft_work_low_good_men: 0.6
+# disutil_ft_work_low_bad_men: 0.6
 
-# Unemployment dis-utility men - Health and Education specific
-disutil_unemployed_high_good_men: 0.3
-disutil_unemployed_high_bad_men: 0.3
-disutil_unemployed_low_good_men: 0.3
-disutil_unemployed_low_bad_men: 0.3
+# # Unemployment dis-utility men - Health and Education specific
+# disutil_unemployed_high_good_men: 0.3
+# disutil_unemployed_high_bad_men: 0.3
+# disutil_unemployed_low_good_men: 0.3
+# disutil_unemployed_low_bad_men: 0.3
+
+disutil_ft_work_partner_good_men: 0.6
+disutil_ft_work_partner_bad_men: 0.6
+disutil_ft_work_single_good_men: 0.6
+disutil_ft_work_single_bad_men: 0.6
+disutil_unemployed_partner_good_men: 0.3
+disutil_unemployed_partner_bad_men: 0.3
+disutil_unemployed_single_good_men: 0.3
+disutil_unemployed_single_bad_men: 0.3
 
 
 disutil_unemployed_above_58_good_women: 0.0

@@ -66,6 +66,16 @@ disutil_children_ft_work_high: 0.0
 disutil_children_pt_work_low: 0.0
 disutil_children_pt_work_high: 0.0
 
+
+disutil_ft_work_partner_good_men: 0.0
+disutil_ft_work_partner_bad_men: 0.0
+disutil_ft_work_single_good_men: 0.0
+disutil_ft_work_single_bad_men: 0.0
+disutil_unemployed_partner_good_men: 0.0
+disutil_unemployed_partner_bad_men: 0.0
+disutil_unemployed_single_good_men: 0.0
+disutil_unemployed_single_bad_men: 0.0
+
 # Taste shocks
 taste_shock_scale_men: 0.05
 taste_shock_scale_women: 0.05

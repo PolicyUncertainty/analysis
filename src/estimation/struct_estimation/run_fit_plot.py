@@ -12,7 +12,7 @@ path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict)
 
 # Set run specs
-model_name = "nf_low_mu_men"
+model_name = "partner_men"
 print(f"Running model: {model_name}")
 load_sol_model = True
 load_solution = None
@@ -20,7 +20,7 @@ load_data_from_sol = False
 util_type = "add"
 
 params = pkl.load(
-    open(path_dict["struct_results"] + f"est_params_nf.pkl", "rb")
+    open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
 )
 
 # from estimation.struct_estimation.map_params_to_current import merge_params

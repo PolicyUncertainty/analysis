@@ -193,6 +193,7 @@ def disutility_work(
     is_working_part_time = choice == 2
     is_working_full_time = choice == 3
     partner_retired = partner_state == 2
+    has_partner = (partner_state > 0).astype(int)
 
     # Generate age
     age = model_specs["start_age"] + period
@@ -220,6 +221,27 @@ def disutility_work(
         +  params["disutil_unemployed_above_58_bad_men"] * bad_health * above_58
         +  params["disutil_unemployed_above_58_good_men"] * good_health * above_58
     )
+
+        # Men's disutility parameters by health (no longer education-specific)
+    # disutil_ft_work_men = (
+    #     params["disutil_ft_work_partner_bad_men"] * bad_health * has_partner
+    #     + params["disutil_ft_work_partner_good_men"] * good_health * has_partner
+    #     + params["disutil_ft_work_single_bad_men"] * bad_health * (1 - has_partner)
+    #     + params["disutil_ft_work_single_good_men"] * good_health * (1 - has_partner)
+    #     + params["disutil_ft_work_disabled_men"] * disabled_health
+    # )
+
+
+
+    # disutil_unemployment_men = (
+    #     params["disutil_unemployed_partner_good_men"] * good_health * has_partner
+    #     + params["disutil_unemployed_partner_bad_men"] * bad_health * has_partner
+    #     + params["disutil_unemployed_single_bad_men"] * bad_health * (1 - has_partner)
+    #     + params["disutil_unemployed_single_good_men"] * good_health * (1 - has_partner)
+    #     + params["disutil_unemployed_disabled_men"] * disabled_health
+    #     +  params["disutil_unemployed_above_58_bad_men"] * bad_health * above_58
+    #     +  params["disutil_unemployed_above_58_good_men"] * good_health * above_58
+    # )
 
     #     # Men's disutility parameters by health (no longer education-specific)
     # disutil_ft_work_men = (

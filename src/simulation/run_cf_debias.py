@@ -89,7 +89,7 @@ df_cf = df_cf.reset_index()
 
 # calculate aggregate and lifetime results
 result_df = pd.DataFrame(index=[0])
-for df, label in zip([df_base, df_cf], ["baseline", "cf"]):
+for df, label in zip([df_base, df_cf], [base_label, cf_label]):
     result_df = add_overall_results(
         result_df=result_df,
         df=df, index=0, pre_name=label

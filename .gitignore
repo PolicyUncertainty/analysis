@@ -35,7 +35,6 @@ ll*.txt
 
 # Debug files
 src/*/debug/
-est_params_stable.pkl
 
 # Server files
 *.out
@@ -48,7 +47,7 @@ output/est_results/struct_results/*.pkl
 !output/est_results/struct_results/fire_old_done/
 !output/est_results/struct_results/try/
 !output/est_results/struct_results/est_params_fire_old_done.pkl
-
+!output/est_results/struct_results/est_params_nf.pkl
 
 /output/sim_results/*.csv
 !output/sim_results/fire_old_done/

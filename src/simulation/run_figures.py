@@ -1,6 +1,9 @@
 # %%
+import pandas as pd
+
 from set_paths import create_path_dict
 from set_styles import set_plot_defaults
+from simulation.sim_tools.calc_life_cycle_detailed import calc_life_cycle_detailed
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 # %%
@@ -30,9 +33,12 @@ comparison_data_path = (
     + f"baseline_lc_{model_name}_no_uncertainty.csv"
 )
 
+df_baseline = pd.read_csv(baseline_data_path, index_col=[0, 1, 2])
+df_comparison = pd.read_csv(comparison_data_path, index_col=[0, 1, 2])
+
 plot_detailed_lifecycle_results(
-    df_results_path=baseline_data_path,
-    df_results_comparison_path=comparison_data_path,
+    df_baseline=df_baseline,
+    df_comparison=df_comparison,
     path_dict=path_dict,
     model_name=model_name,
     specs=specs,

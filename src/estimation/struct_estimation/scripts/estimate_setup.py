@@ -75,6 +75,17 @@ def estimate_model(
             start_params_all[key] = last_estimate[key]
 
     start_params = {name: start_params_all[name] for name in params_to_estimate_names}
+    print("Complete params vector at start:", flush=True)
+
+    generate_print_func(
+        start_params_all.keys(),
+        specs,
+        print_men_examples=print_men_examples,
+        print_women_examples=print_women_examples,
+    )(start_params_all)
+
+    print("Params to be estimated at start:", flush=True)
+
     print_function(start_params_all)
 
     lower_bounds_all = yaml.safe_load(
@@ -86,6 +97,20 @@ def estimate_model(
         open(path_dict["start_params_and_bounds"] + "upper_bounds.yaml", "rb")
     )
     upper_bounds = {name: upper_bounds_all[name] for name in params_to_estimate_names}
+
+    # check that start params are within bounds
+    for name in params_to_estimate_names:
+        try:
+            condition = lower_bounds[name] <= start_params[name] <= upper_bounds[name]
+        except:
+            raise ValueError(f"Start param {name} has invalid bounds or start value. "
+                             f"Upper bound: {upper_bounds[name]}, lower bound: {lower_bounds[name]}, start value: {start_params[name]}")
+
+        if not condition:
+            raise ValueError(
+                    f"Start param {name} with value {start_params[name]} is not within bounds "
+                    f"[{lower_bounds[name]}, {upper_bounds[name]}]"
+                )
 
     bounds = om.Bounds(lower=lower_bounds, upper=upper_bounds)
 

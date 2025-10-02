@@ -85,6 +85,7 @@ def create_result_dfs(sra_at_63):
 # Set specifications
 seeed = 123
 model_name = specs["model_name"]
+util_type = specs["util_type"]
 load_sol_model = True
 load_solutions = None
 load_df = None
@@ -124,6 +125,7 @@ for unc_scenario in [True, False]:
             subj_unc=unc_scenario,
             custom_resolution_age=None,
             announcement_age=None,
+            only_informed=False,
             SRA_at_retirement=sra,
             SRA_at_start=SRA_at_start,
             model_name=model_name,
@@ -131,6 +133,7 @@ for unc_scenario in [True, False]:
             solution_exists=load_solutions,
             sol_model_exists=load_sol_model,
             model_solution=model_sol,
+            util_type=util_type
         )
 
         df = df.reset_index()

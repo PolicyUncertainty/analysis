@@ -3,7 +3,9 @@ import pickle
 
 import matplotlib.pyplot as plt
 
+from model_code.specify_model import specify_model
 from set_paths import create_path_dict
+from simulation.sim_tools.investigate_start_obs import investigate_start_obs
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 path_dict = create_path_dict()
@@ -11,14 +13,29 @@ specs = generate_derived_and_data_derived_specs(path_dict)
 
 
 model_name = specs["model_name"]
+util_type = specs["util_type"]
+
 load_df = None
 load_solution = None
 load_sol_model = True
 
 
-params = pickle.load(
-    open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
+model = specify_model(
+    path_dict,
+    specs,
+    custom_resolution_age=None,
+    subj_unc=True,
+    load_model=load_sol_model,
+    util_type=util_type,
 )
+
+initial_obs_table = investigate_start_obs(
+    model_class=model,
+    path_dict=path_dict,
+)
+# params = pickle.load(
+#     open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
+# )
 
 # which_plots = input(
 #     "Which plots do you want to show?\n \n"
@@ -28,20 +45,21 @@ params = pickle.load(
 #     " - [w]ealth\n"
 #     " - [s]avings\n"
 # )
-which_plots = "s"
-
-from simulation.figures.savings_rate import plot_savings
-
-plot_savings(
-    path_dict=path_dict,
-    specs=specs,
-    params=params,
-    model_name=model_name,
-    file_name="savings_rate_illustration",
-    load_df=load_df,
-    load_solution=load_solution,
-    load_sol_model=load_sol_model,
-)
+# which_plots = "s"
+#
+# from simulation.figures.savings_rate import plot_savings
+#
+# plot_savings(
+#     path_dict=path_dict,
+#     specs=specs,
+#     params=params,
+#     model_name=model_name,
+#     file_name="savings_rate_illustration",
+#     load_df=load_df,
+#     load_solution=load_solution,
+#     load_sol_model=load_sol_model,
+#     util_type=util_type,
+# )
 
 
 #

@@ -13,9 +13,7 @@ from matplotlib import pyplot as plt
 
 from model_code.specify_model import specify_model
 from model_code.state_space.experience import scale_experience_years
-from process_data.structural_sample_scripts.create_structural_est_sample import (
-    CORE_TYPE_DICT,
-)
+from model_code.transform_data_from_model import load_scale_and_correct_data
 from set_styles import get_figsize, set_colors
 
 
@@ -34,12 +32,6 @@ def plot_income(path_dict, specs, show=False, save=False):
         Whether to save plots to disk
     """
     colors, _ = set_colors()
-    # Load data
-    data_decision = pd.read_csv(path_dict["struct_est_sample"])
-    data_decision = data_decision.astype(CORE_TYPE_DICT)
-
-    # old people
-    data_decision = data_decision[data_decision["period"] < 50]
 
     model_class = specify_model(
         path_dict,
@@ -51,60 +43,22 @@ def plot_income(path_dict, specs, show=False, save=False):
         debug_info=None,
     )
 
-    data_decision["experience_years"] = data_decision["experience"].values
+    data_decision = load_scale_and_correct_data(path_dict, model_class)
+    data_decision = data_decision[data_decision["lagged_choice"] != 1]
 
-    # Transform experience
-    data_decision["experience"] = scale_experience_years(
-        period=data_decision["period"].values,
-        experience_years=data_decision["experience_years"].values,
-        is_retired=data_decision["lagged_choice"].values == 0,
-        model_specs=model_class.model_specs,
-    )
-
-    # We can adjust wealth outside, as it does not depend on estimated parameters
-    # (only on interest rate)
-    states_dict = {
-        name: data_decision[name].values
-        for name in model_class.model_structure["discrete_states_names"]
-    }
-    states_dict["assets_begin_of_period"] = (
-        data_decision["wealth"].values / specs["wealth_unit"]
-    )
-    states_dict["experience"] = data_decision["experience"].values
-
-    # Run budget constraint to get income
-    assets_begin_of_period, aux = adjust_observed_assets(
-        observed_states_dict=states_dict,
-        params={},
-        model_class=model_class,
-        aux_outs=True,
-    )
-
-    # Observed incomes. Gross labor income and household net income(include transfers, taxes and interest)
-    # data_decision["obs_joint_gross_labor_income"] = (
-    #     (data_decision["monthly_wage"] + data_decision["monthly_wage_partner"]) * 12
-    # ) / specs["wealth_unit"]
-    # obs_gross_labor_income = data_decision.groupby(["partner_state", "sex", "education", "period"])[
-    #     "obs_joint_gross_labor_income"
-    # ].mean()
     obs_net_total_income = (
         data_decision.groupby(["partner_state", "sex", "education", "period"])[
             "last_year_hh_net_income"
-        ].mean()
+        ].median()
         / specs["wealth_unit"]
     )
 
-    # Simulated
-    # data_decision["sim_joint_gross_labor_income"] = aux["joint_gross_labor_income"]
-    # sim_gross_labor_income = data_decision.groupby(["partner_state", "sex", "education", "period"])[
-    #     "sim_joint_gross_labor_income"
-    # ].mean()
-    data_decision["sim_net_joint_income"] = aux["net_hh_income"]
     sim_net_total_income = data_decision.groupby(
         ["partner_state", "sex", "education", "period"]
-    )["sim_net_joint_income"].mean()
-
-    # data_decision = data_decision[data_decision["partner_state"] > 0]
+    )["net_hh_income"].median()
+    sim_labor_income = data_decision.groupby(
+        ["partner_state", "sex", "education", "period"]
+    )["gross_labor_income"].median()
 
     fig, axs = plt.subplots(
         ncols=len(specs["education_labels"]),
@@ -132,6 +86,14 @@ def plot_income(path_dict, specs, show=False, save=False):
                     color=colors[sex_var],
                     ls="--",
                     label=f"Obs {sex_label}",
+                )
+                ax.plot(
+                    sim_labor_income.loc[
+                        (partner_state, sex_var, edu_var, slice(None))
+                    ],
+                    color=colors[sex_var],
+                    ls=":",
+                    label=f"Sim Labor {sex_label}",
                 )
 
                 # ax.plot(

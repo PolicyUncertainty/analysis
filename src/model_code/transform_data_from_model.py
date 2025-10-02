@@ -5,9 +5,10 @@ from dcegm.likelihood import (
     create_choice_prob_function,
 )
 
-from first_step_estimation.estimation.partner_wage_estimation import (
-    create_deflate_factor,
+from model_code.pension_system.experience_stock import (
+    calc_pension_points_form_experience,
 )
+from model_code.pension_system.pension_wealth import calc_pension_annuity_value
 from model_code.state_space.experience import scale_experience_years
 from model_code.unobserved_state_weighting import create_unobserved_state_specs
 from process_data.structural_sample_scripts.create_structural_est_sample import (
@@ -145,6 +146,12 @@ def load_scale_and_correct_data(path_dict, model_class):
     data_decision["assets_begin_of_period"] = (
         data_decision["wealth"] / model_specs["wealth_unit"]
     )
+
+    data_decision = correct_wealth_to_include_non_pension_retirement_income(
+        df=data_decision,
+        model_specs=model_specs,
+    )
+
     states_dict = create_states_dict(df=data_decision, model_class=model_class)
 
     out = adjust_observed_assets(
@@ -166,6 +173,8 @@ def load_scale_and_correct_data(path_dict, model_class):
     # data_decision.groupby("age")["last_year_pension"].mean().plot()
     # plt.show()
     data_decision["assets_begin_of_period"] = out[0]
+    for inc_key in out[1].keys():
+        data_decision[inc_key] = out[1][inc_key]
 
     data_decision = create_informed_probability(data_decision, model_specs)
     return data_decision
@@ -211,9 +220,6 @@ def create_informed_probability(df, specs):
     df["probability_informed"] = probs
     return df
 
-
-# from model_code.state_space.experience import calculate_pension_size_for_experience_and_type
-
 def correct_wealth_to_include_non_pension_retirement_income(
     df,
     model_specs,
@@ -223,21 +229,30 @@ def correct_wealth_to_include_non_pension_retirement_income(
     # We assume that non-pension retirement income is 30% of pension wealth.
     # Thus, we compute for every individual their pension (function of experience, education, sex) and compute the
     # net present value assuming they expect to retire at the SRA and live until life expectancy (from specs).
-
-    df["current_pension"] = calculate_pension_size_for_experience_and_type(df, model_specs)
-    life_expectancy = model_specs["life_expectancy"][df["sex"].values][df["education"].values]
-    df["years_between_SRA_and_death"] = (
-        life_expectancy - df["policy_state_value"].values
+    pension_points = calc_pension_points_form_experience(
+        education=df["education"].values,
+        sex=df["sex"].values,
+        experience_years=df["experience_years"].values,
+        model_specs=model_specs,
     )
-    df["years_until_SRA"] = df["policy_state_value"].values - df["age"].values
+    df["current_pension"] = pension_points * model_specs["annual_pension_point_value"]
+    life_expectancy = model_specs["life_exp"][df["sex"].values, df["education"].values]
+    age_payments_start = np.maximum(df["policy_state_value"].values, df["age"].values)
+    age_payments_end = np.maximum(life_expectancy, df["age"].values)
+    df["payment_years"] = age_payments_end - age_payments_start
+    df["years_until_payment_starts"] = age_payments_start - df["age"].values
 
-    # calculate perpetuity of getting pension income after SRA, then subtract perpetuity after death
+    df["pension_annuity_value"] = calc_pension_annuity_value(
+        pension_payments=df["current_pension"],
+        payment_years=df["payment_years"],
+        interest_rate=model_specs["interest_rate"],
+    )
     discount_factor = 1 / (1 + model_specs["interest_rate"])
-    annuity_factor = 1 / (1 - discount_factor)
-    df["pension_annuity_value"] = (
-        df["current_pension"] * annuity_factor - df["current_pension"] * annuity_factor * discount_factor ** df["years_between_SRA_and_death"]
+    # Discount to present day.
+    df["pension_wealth"] = (
+        df["pension_annuity_value"]
+        * discount_factor ** df["years_until_payment_starts"]
     )
-    df["pension_wealth"] = df["pension_annuity_value"] * discount_factor ** df["years_until_SRA"] 
-    df["wealth_correction"] = 0.3 * df["pension_wealth"]
-    df["assets_begin_of_period"] += df["wealth_correction"] / model_specs["wealth_unit"]
+    df["wealth_correction"] = 0.4 * df["pension_wealth"] / model_specs["wealth_unit"]
+    df["assets_begin_of_period"] += df["wealth_correction"]
     return df

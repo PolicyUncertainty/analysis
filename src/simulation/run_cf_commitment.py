@@ -26,9 +26,11 @@ from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 # Set specifications
 seeed = 123
 model_name = specs["model_name"]
+util_type = specs["util_type"]
+
 load_sol_model = True  # informed state as type
-load_unc_solution = True  # baseline solution conntainer
-load_no_unc_solution = True  # counterfactual solution conntainer
+load_unc_solution = None  # baseline solution conntainer
+load_no_unc_solution = None  # counterfactual solution conntainer
 load_df = (
     None  # True = load existing df, False = create new df, None = create but not save
 )
@@ -67,6 +69,7 @@ for i, sra in enumerate(sra_at_63):
         df_exists=load_df,
         solution_exists=load_unc_solution,
         sol_model_exists=load_sol_model,
+        util_type=util_type
     )
 
     df_base = df_base.reset_index()
@@ -88,6 +91,7 @@ for i, sra in enumerate(sra_at_63):
         df_exists=load_df,
         solution_exists=load_no_unc_solution,
         sol_model_exists=load_sol_model,
+        util_type=util_type
     )
 
     df_cf = df_cf.reset_index()

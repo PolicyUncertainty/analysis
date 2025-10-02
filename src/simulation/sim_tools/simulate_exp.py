@@ -18,6 +18,7 @@ def simulate_exp(
     solution_exists=True,
     sol_model_exists=True,
     model_solution=None,
+    util_type="add",
 ):
 
     if model_solution is None:
@@ -32,6 +33,7 @@ def simulate_exp(
             sim_specs=None,
             sex_type="all",
             edu_type="all",
+            util_type=util_type
         )
     else:
         model_solved = model_solution
@@ -44,6 +46,9 @@ def simulate_exp(
         states_initial=initial_states,
         seed=specs["seed"],
     )
+    # Kick out dead people
+    df = df[df["health"] != 3].copy()
+    # Reset index to avoid issues
     df = df.reset_index()
     df = create_additional_variables(df, specs)
     return df, model_solved

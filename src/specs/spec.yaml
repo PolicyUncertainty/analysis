@@ -1,7 +1,9 @@
 ---
 ################
 # Current model name:
-model_name: fire_old_done
+model_name: nf
+util_type: add
+
 
 ###############################################################################
 # Model specification
@@ -22,8 +24,8 @@ partner_labels: [Single, Working Partner, Retired Partner]
 n_quad_points: 5
 n_experience_grid_points: 11
 # Fixed structural parameters, we will not estimate
-interest_rate: 0.03
-discount_factor: 0.97
+interest_rate: 0.0225
+discount_factor: 0.98
 income_shock_mean: 0.0
 
 # economic model parameters
@@ -43,6 +45,8 @@ min_long_insured_age: 63
 max_ret_age: 72
 # Maximum age to estimate labor market
 max_est_age_labor: 65
+# partners are all retired at this age
+max_age_partner_working: 75
 # Assume that part time gives half a year of experience
 exp_increase_part_time: 0.5
 
@@ -57,10 +61,12 @@ unemployment_wealth_thresh: 10_050
 monthly_child_benefits: 204
 # Minimum Wage (Source: Destatis)
 monthly_min_wage: 1620  # 9.35 * 40 hours * 4.33 weeks = 1620
-# Tax Brackets (Source: GETTSIM)
-income_tax_brackets: [9408, 14532, 57051, 270500]
-# Tax rates (Source: GETTSIM)
-income_tax_rates: [0.0, 0.14, 0.2397, 0.42, 0.45]
+# Tax system from https://esth.bundesfinanzministerium.de/esth/2020
+# /A-Einkommensteuergesetz/IV-Tarif/Paragraf-32a/inhalt.html
+income_tax_brackets: [0.0, 9408, 14532, 57051, 270500]
+linear_income_tax_rates: [0.0, 1400, 2397, 0.42, 0.45]
+quadratic_income_tax_rates: [0.0, 972.87, 212.02]
+intercepts_income_tax: [0.0, 0.0, 972.79, -8963.74, -17078.74]
 
 # Retirement system parameters.
 # Start with early retirement penalty (ERP)
@@ -121,6 +127,11 @@ end_age_transition_estimation: 75
 # Simulation parameters
 ###############################################################################
 n_agents: 100_000
-# We have around 500 30-year olds in the data. This yields then 500_000
+# We have around 500 30-year olds in the data. This yields then 50_000
 n_multiply_start_obs: 100
 seed: 123
+###############################################################################
+# Life expectancy parameters from simulation
+life_exp:
+  - [79.49, 83.39]
+  - [84.49, 85.16]

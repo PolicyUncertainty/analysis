@@ -1,17 +1,18 @@
 import os
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 
 from set_styles import get_figsize, set_colors
 
 
 def plot_detailed_lifecycle_results(
-    df_results_path,
+    df_baseline,
     path_dict,
     specs,
     model_name,
-    df_results_comparison_path=None,
+    df_comparison=None,
     comparison_name=None,
     show=False,
     save=True,
@@ -40,15 +41,9 @@ def plot_detailed_lifecycle_results(
         Whether to save plots
     """
 
-    # Load the detailed results from CSV
-    df_results = pd.read_csv(df_results_path, index_col=[0, 1, 2])
-
-    # Load comparison data if provided
-    df_comparison = None
-    if df_results_comparison_path:
-        df_comparison = pd.read_csv(df_results_comparison_path, index_col=[0, 1, 2])
-
     comp_name = comparison_name or "comparison"
+
+    plot_ages = np.arange(specs.get("start_age", 30), end_age, dtype=int)
 
     plot_dir = path_dict["simulation_plots"] + f"{model_name}/baseline/"
     # Check if directory exists, if not create it
@@ -84,7 +79,7 @@ def plot_detailed_lifecycle_results(
 
     for group_type in group_types:
         # Skip if group not in data
-        if group_type not in df_results.index.get_level_values("group_type"):
+        if group_type not in df_baseline.index.get_level_values("group_type"):
             continue
 
         # Skip if group not in comparison data (if provided)
@@ -98,7 +93,7 @@ def plot_detailed_lifecycle_results(
         fig, axes = plt.subplots(3, 3, figsize=get_figsize(3, 3))
         axes = axes.flatten()
 
-        group_data = df_results.loc[group_type]
+        group_data = df_baseline.loc[group_type]
         group_values = group_data.index.get_level_values("group_value").unique()
 
         # Get comparison data if available
@@ -125,8 +120,8 @@ def plot_detailed_lifecycle_results(
                         label = f"{group_type}={group_val}"
 
                     ax.plot(
-                        data.index,
-                        data.values,
+                        plot_ages,
+                        data.reindex(plot_ages).values,
                         color=colors[j % len(colors)],
                         label=label,
                         linewidth=2,
@@ -141,15 +136,14 @@ def plot_detailed_lifecycle_results(
                     ):
                         data_comp = group_data_comp.loc[group_val][outcome_var]
                         ax.plot(
-                            data_comp.index,
-                            data_comp.values,
+                            plot_ages,
+                            data_comp.reindex(plot_ages).values,
                             color=colors[j % len(colors)],
                             label=f"{label} ({comp_name})",
                             linewidth=2,
                             linestyle="--",
                         )
 
-            ax.set_xlim(specs.get("start_age", 30), end_age)
             ax.set_xlabel("Age")
             ax.set_ylabel(outcome_name)
             ax.set_title(outcome_name)

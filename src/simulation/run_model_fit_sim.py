@@ -13,14 +13,19 @@ specs = generate_derived_and_data_derived_specs(path_dict)
 
 
 model_name = specs["model_name"]
+util_type = specs["util_type"]
+
 load_df = None
-load_solution = True
+load_solution = None
 load_sol_model = True
 
 
 params = pickle.load(
     open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
 )
+params["bequest_scale"] = 5
+params["mu_low"] = 1.5
+params["mu_high"] = 1.5
 
 
 # which_plots = input(
@@ -51,6 +56,7 @@ if which_plots in ["a", "c", "wc"]:
         load_df=load_df,
         load_solution=load_solution,
         load_sol_model=load_sol_model,
+        util_type=util_type,
     )
     # After running, we can set all to true
     load_df = True if load_df is not None else load_df
@@ -71,6 +77,7 @@ if which_plots in ["a", "w", "wc"]:
         load_df=load_df,
         load_solution=load_solution,
         load_sol_model=load_sol_model,
+        util_type=util_type,
     )
     # After running, we can set all to true
     load_df = True if load_df is not None else load_df
@@ -88,6 +95,7 @@ if which_plots in ["a", "s"]:
         load_df=load_df,
         load_solution=load_solution,
         load_sol_model=load_sol_model,
+        util_type=util_type,
     )
     # After running, we can set all to true
     load_df = True if load_df is not None else load_df
@@ -107,6 +115,7 @@ if which_plots in ["a", "i"]:
         load_df=load_df,
         load_solution=load_solution,
         load_sol_model=load_sol_model,
+        util_type=util_type,
     )
 
 

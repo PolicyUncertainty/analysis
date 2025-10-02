@@ -24,6 +24,8 @@ def budget_constraint(
     model_specs,
 ):
     assets_scaled = asset_end_of_previous_period * model_specs["wealth_unit"]
+
+    age = model_specs["start_age"] + period
     # Recalculate experience
     experience_years = construct_experience_years(
         float_experience=experience,
@@ -53,7 +55,7 @@ def budget_constraint(
     has_partner_int = (partner_state > 0).astype(int)
 
     # Income lagged choice 1
-    unemployment_benefits = calc_unemployment_benefits(
+    unemployment_benefits, own_unemployemnt_benefits = calc_unemployment_benefits(
         assets=assets_scaled,
         education=education,
         sex=sex,
@@ -66,6 +68,7 @@ def budget_constraint(
     labor_income_after_ssc, gross_labor_income = calc_labor_income_after_ssc(
         lagged_choice=lagged_choice,
         experience_years=experience_years,
+        age=age,
         education=education,
         sex=sex,
         income_shock=income_shock_previous_period,
@@ -97,7 +100,13 @@ def budget_constraint(
         model_specs=model_specs,
     )
 
-    total_income = jnp.maximum(total_net_income + child_benefits, unemployment_benefits)
+    # Unemployed after 58. We use this rule to proxy the extended alg1 claim
+    was_old_age_unemployed = (lagged_choice == 1) & (age >= 58)
+    total_net_income += (
+        child_benefits + was_old_age_unemployed * own_unemployemnt_benefits
+    )
+
+    total_income = jnp.maximum(total_net_income, unemployment_benefits)
     interest_rate = model_specs["interest_rate"]
     interest = interest_rate * assets_scaled
     income_plus_interest = total_income + interest
@@ -111,6 +120,8 @@ def budget_constraint(
 
     aux = {
         "net_hh_income": income_plus_interest / model_specs["wealth_unit"],
+        "hh_net_income_wo_interest": total_income / model_specs["wealth_unit"],
+        "interest": interest / model_specs["wealth_unit"],
         "joint_gross_labor_income": (gross_labor_income + gross_partner_wage)
         / model_specs["wealth_unit"],
         "joint_gross_retirement_income": (

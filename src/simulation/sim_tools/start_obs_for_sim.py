@@ -1,18 +1,13 @@
 import jax
 import jax.numpy as jnp
-import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
-import scipy.stats as stats
-import seaborn as sns
-from dcegm.asset_correction import adjust_observed_assets
 from dcegm.pre_processing.shared import create_array_with_smallest_int_dtype
 
-from model_code.state_space.experience import scale_experience_years
 from model_code.stochastic_processes.health_transition import (
     calc_disability_probability,
 )
 from model_code.stochastic_processes.job_offers import job_offer_process_transition
+from model_code.transform_data_from_model import load_scale_and_correct_data
 
 
 def generate_start_states_from_obs(
@@ -21,7 +16,9 @@ def generate_start_states_from_obs(
     model_specs = model_class.model_specs
     model_structure = model_class.model_structure
 
-    observed_data = pd.read_csv(path_dict["struct_est_sample"])
+    observed_data = load_scale_and_correct_data(
+        path_dict=path_dict, model_class=model_class
+    )
 
     # Generate start policy state from initial SRA
     initial_policy_state = np.floor(
@@ -37,24 +34,12 @@ def generate_start_states_from_obs(
         name: start_period_data[name].values
         for name in model_structure["discrete_states_names"]
     }
+    states_dict["assets_begin_of_period"] = start_period_data[
+        "assets_begin_of_period"
+    ].values
+    states_dict["experience"] = start_period_data["experience"].values
     periods = start_period_data["period"].values
-    # Transform experience for wealth adjustment
-    states_dict["experience"] = scale_experience_years(
-        period=periods,
-        experience_years=start_period_data["experience"].values,
-        is_retired=start_period_data["lagged_choice"].values == 0,
-        model_specs=model_specs,
-    )
 
-    states_dict["assets_begin_of_period"] = (
-        start_period_data["wealth"].values / model_specs["wealth_unit"]
-    )
-
-    states_dict["assets_begin_of_period"] = adjust_observed_assets(
-        observed_states_dict=states_dict,
-        params={},
-        model_class=model_class,
-    )
     n_individuals = periods.shape[0]
     n_multiply_start_obs = model_specs["n_multiply_start_obs"]
 
@@ -141,7 +126,7 @@ def generate_start_states_from_obs(
     # Assign job offers, informed agents and health
     # If only informed should be simulated assign 1 everywhere
     if only_informed:
-        states_dict["informed"] = jnp.ones_like(states_dict["period"])
+        states_dict["informed"] = np.ones_like(states_dict["period"])
     else:
         states_dict["informed"] = informed_agents.flatten()
 
@@ -149,8 +134,8 @@ def generate_start_states_from_obs(
     states_dict["health"] = health_agents.flatten()
 
     policy_state_agents = (
-        jnp.ones_like(states_dict["health"]) * initial_policy_state
-    ).astype(jnp.uint8)
+        np.ones_like(states_dict["health"]) * initial_policy_state
+    ).astype(np.uint8)
     states_dict["policy_state"] = policy_state_agents
 
     initial_states = jax.tree.map(create_array_with_smallest_int_dtype, states_dict)

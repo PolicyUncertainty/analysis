@@ -5,6 +5,7 @@ import sys
 from estimation.struct_estimation.start_params_and_bounds.param_lists import (  # men_disutil_firing,
     men_disability_old_age_params,
     men_disability_params,
+    men_disutil_params_partner,
     men_disutil_firing_edu,
     men_disutil_params,
     men_disutil_params_edu,
@@ -27,8 +28,8 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
     load_and_set_start_params,
 )
 
-model_name = "disabled_old_men"
-params_to_estimate_names = men_disutil_firing_edu
+model_name = "partner_men"
+params_to_estimate_names = men_disutil_params_partner
 sex_type = "men"
 edu_type = "all"
 util_type = "add"
@@ -39,22 +40,27 @@ LOAD_SOL_MODEL = False
 SAVE_RESULTS = True
 USE_WEIGHTS = False
 
+sample_name = "old" if old_sample_only else "full"
+
 print(
-    f"Running estimation for model: {model_name}; old sample {old_sample_only}",
+    f"Running estimation for model: {model_name}; sample: {sample_name}, {sex_type}, {edu_type}, {util_type}",
     flush=True,
 )
 
 if LOAD_LAST_ESTIMATE:
     last_estimate = pkl.load(
-        open(paths_dict["struct_results"] + f"est_params_fire_old_done.pkl", "rb")
+        open(paths_dict["struct_results"] + f"est_params_disabled_old.pkl", "rb")
     )
 else:
     last_estimate = None
 
 # Load start params
 start_params_all = load_and_set_start_params(paths_dict)
-last_estimate["disability_logit_const_men"] += 0.2
-last_estimate["disability_logit_const_women"] += 0.2
+start_params_all["taste_shock_scale_men"] = 0.5
+start_params_all["taste_shock_scale_women"] = 0.2
+start_params_all["bequest_scale"] = 5
+start_params_all["mu_low"] = 1.5
+start_params_all["mu_high"] = 1.5
 
 # Run estimation
 estimation_results, end_params = estimate_model(

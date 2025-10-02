@@ -2,6 +2,7 @@ import os
 import pickle
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import yaml
 
@@ -23,6 +24,10 @@ save_plots = True
 
 # Set plot defaults
 set_plot_defaults()
+
+# from model_code.wealth_and_budget.tax_and_ssc import calc_inc_tax_for_single_income
+# incomes = np.arange(0, 300_000, 2000)
+# plt.plot(incomes, calc_inc_tax_for_single_income(incomes, specs))
 
 # Load model parameters - try estimated params first, fall back to start params
 model_name = specs["model_name"]
@@ -82,17 +87,17 @@ model_solved = specify_and_solve_model(
     subj_unc=True,
     custom_resolution_age=None,
     load_model=True,
-    load_solution=True,
+    load_solution=None,
     sim_specs=None,
     sex_type="all",
     edu_type="all",
     util_type="add",
 )
-plot_ret_solution(model_solved, specs, path_dict)
+# plot_ret_solution(model_solved, specs, path_dict)
 # plot_solution(model_solved=model_solved, specs=specs, path_dict=path_dict)
-# plot_ret_probs_for_state(
-#         model_solved=model_solved, specs=specs, path_dict=path_dict
-#     )
+plot_ret_probs_for_state(
+        model_solved=model_solved, specs=specs, path_dict=path_dict
+    )
 #     plot_work_probs_for_state(
 #         model_solved=model_solved, specs=specs, path_dict=path_dict
 #     )

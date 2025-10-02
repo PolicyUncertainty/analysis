@@ -124,6 +124,8 @@ def simulate_scenario(
         states_initial=initial_states,
         seed=specs["seed"],
     )
+    # Kick out dead people
+    df = df[df["health"] != 3].copy()
     df.reset_index(inplace=True)
     df = create_additional_variables(df, specs)
     return df
@@ -175,13 +177,6 @@ def _create_income_variables(df, specs):
     # periodic savings and savings rate
     df.loc[:, "savings_dec"] = df["total_income"] - df["consumption"]
     df.loc[:, "savings_rate"] = df["savings_dec"] / df["total_income"]
-
-    # Create lagged health state to filter out already dead people
-    df.loc[:, "lagged_health"] = df.groupby("agent")["health"].shift(1)
-    # Use explicit copy when filtering to avoid warnings
-    df = df[
-        (df["health"] != 3) | ((df["health"] == 3) & (df["lagged_health"] != 3))
-    ].copy()
 
     # Create gross own income (without pension income)
     df.loc[:, "gross_own_income"] = (

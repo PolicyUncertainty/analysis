@@ -26,6 +26,7 @@ from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 # %%
 # Set specifications
 model_name = specs["model_name"]
+util_type = specs["util_type"]
 seed = 123
 load_sol_model = True  # informed state as types
 load_unc_solution = None  # baseline solution container
@@ -64,6 +65,7 @@ for announcement_age in announcement_ages:
         df_exists=load_df_base,
         solution_exists=load_unc_solution,
         sol_model_exists=load_sol_model,
+        util_type=util_type
     )
 
     df_base = df_base.reset_index()
@@ -86,6 +88,7 @@ for announcement_age in announcement_ages:
         df_exists=load_df,
         solution_exists=load_unc_solution,
         sol_model_exists=load_sol_model,
+        util_type=util_type
     )
 
     df_cf = df_cf.reset_index()

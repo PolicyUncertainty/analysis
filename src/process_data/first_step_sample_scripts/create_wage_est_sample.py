@@ -40,6 +40,14 @@ def create_wage_est_sample(paths, specs, load_data=False):
 
     # weekly working hours. We will impute missing values later
     df.rename(columns={"pgvebzeit": "weekly_hours"}, inplace=True)
+
+    # Filter out civil servants and self-employed
+    df = df[~df["civil_servant"]]
+    df = df[~df["self_employed"]]
+
+    # Create married
+    df["married"] = df["parid"] > 0
+
     # Also annual and monthly working hours
     df["annual_hours"] = df["weekly_hours"] * 52
     df["monthly_hours"] = df["annual_hours"] / 12
@@ -57,6 +65,7 @@ def create_wage_est_sample(paths, specs, load_data=False):
     relevant_cols = [
         "pid",
         "syear",
+        "married",
         "age",
         "choice",
         "experience",
@@ -68,6 +77,8 @@ def create_wage_est_sample(paths, specs, load_data=False):
         "health",
         "num_children",
         "sex",
+        "self_employed",
+        "civil_servant",
     ]
 
     # Keep relevant columns
@@ -99,7 +110,7 @@ def load_and_merge_soep_core(soep_c38_path):
     )
     pathl_data = pd.read_stata(
         f"{soep_c38_path}/ppathl.dta",
-        columns=["pid", "hid", "syear", "sex", "gebjahr"],
+        columns=["pid", "hid", "syear", "sex", "gebjahr", "parid"],
         convert_categoricals=False,
     )
 

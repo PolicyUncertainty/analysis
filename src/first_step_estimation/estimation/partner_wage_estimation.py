@@ -22,9 +22,8 @@ def estimate_partner_wage_parameters(paths_dict, specs):
         Results are saved to CSV files and wage data with predictions is saved for plotting
     """
     edu_labels = specs["education_labels"]
-    sex_labels = specs["sex_labels"]
-    covs = ["constant", "period", "period_sq"]
     wage_data = prepare_estimation_data(paths_dict, specs)
+
     wage_data = sm.add_constant(wage_data)
 
     wage_data["ln_period"] = np.log(wage_data["period"] + 1)
@@ -32,11 +31,37 @@ def estimate_partner_wage_parameters(paths_dict, specs):
     wage_data = create_deflate_factor(paths_dict, specs, wage_data)
     wage_data["wage_p"] /= wage_data["deflate_factor"]
 
+    wage_data_pensions = wage_data[wage_data["partner_state"] == 2].copy()
+    # Estimate partner pensions
+    wage_data_pensions.loc[
+        wage_data_pensions["public_pension_p"] < 1, "public_pension_p"
+    ] = np.nan
+    wage_data_pensions["public_pension_p"] /= wage_data_pensions["deflate_factor"]
+    wage_data_pensions.loc[
+        wage_data_pensions["all_pensions_p"] < 1, "all_pensions_p"
+    ] = np.nan
+    wage_data_pensions["all_pensions_p"] /= wage_data_pensions["deflate_factor"]
+    # Old prediction only on public pensions
+    # wage_data_pensions.groupby(["sex", "education"])["public_pension_p"].mean().to_csv(
+    #     paths_dict["first_step_incomes"] + "partner_pension.csv"
+    # )
+    # New prediction on all pensions
+    wage_data_pensions.groupby(["sex", "education"])["all_pensions_p"].median().to_csv(
+        paths_dict["first_step_incomes"] + "partner_pension.csv"
+    )
+    wage_data = wage_data[wage_data["partner_state"] == 1]
+
     # Store all wage data with predictions for plotting
     all_wage_data_with_predictions = []
 
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
         wage_data_sex = wage_data[wage_data["sex"] == sex_var]
+
+        # Use cubic term for partner of men because of lfc labor supply pattern of women
+        if sex_var == 0:
+            covs = ["constant", "period", "period_sq", "period_cub"]
+        else:
+            covs = ["constant", "period", "period_sq"]
 
         # Initialize empty container for coefficients
         wage_parameters = pd.DataFrame(
@@ -59,6 +84,7 @@ def estimate_partner_wage_parameters(paths_dict, specs):
             )
 
             fitted_model = model.fit()
+            print(fitted_model.summary())
             # Assign prediction
             wage_data_edu["wage_pred"] = fitted_model.predict()
 
@@ -108,11 +134,12 @@ def prepare_estimation_data(paths_dict, specs):
         paths_dict["first_step_data"] + "partner_wage_estimation_sample.csv"
     )
 
-    wage_data = wage_data[wage_data["age"] < 63]
+    wage_data = wage_data[wage_data["age"] < specs["max_age_partner_working"]]
 
     # Add period
     wage_data["period"] = wage_data["age"] - specs["start_age"]
     wage_data["period_sq"] = wage_data["period"] ** 2
+    wage_data["period_cub"] = wage_data["period"] ** 3
 
     # We only want to look at working age people
     wage_data = wage_data[wage_data["age"] < specs["max_ret_age"]]

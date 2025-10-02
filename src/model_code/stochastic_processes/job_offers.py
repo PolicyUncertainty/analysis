@@ -36,20 +36,29 @@ def job_offer_process_transition(
     job_finding_prob = jax.lax.select(
         sex == 0, job_finding_prob_men, job_finding_prob_women
     )
-    job_sep_prob, after_SRA_next_before_now = job_sep_probability(
-        params=params,
-        policy_state=policy_state,
-        education=education,
-        sex=sex,
-        age=age,
-        good_health=good_health,
-        model_specs=model_specs,
-    )
-    job_sep_case = labor_choice | after_SRA_next_before_now
-    job_offer_case = unemployment_choice & (~after_SRA_next_before_now)
+    # job_sep_prob, after_SRA_next_before_now = job_sep_probability(
+    #     params=params,
+    #     policy_state=policy_state,
+    #     education=education,
+    #     sex=sex,
+    #     age=age,
+    #     good_health=good_health,
+    #     model_specs=model_specs,
+    # )
+    # job_sep_case = labor_choice | after_SRA_next_before_now
+    # job_offer_case = unemployment_choice & (~after_SRA_next_before_now)
 
-    # Transition probability
-    prob_value_0 = job_sep_prob * job_sep_case + (1 - job_finding_prob) * job_offer_case
+    # # Transition probability
+    # prob_value_0 = job_sep_prob * job_sep_case + (1 - job_finding_prob) * job_offer_case
+    
+    log_job_sep_prob = model_specs["log_job_sep_probs"][
+        sex, education, good_health, age
+    ]
+    job_sep_prob = logit_formula(log_job_sep_prob)
+
+    # Transition probability without SRA firing
+    prob_value_0 = job_sep_prob * labor_choice + (1 - job_finding_prob) * unemployment_choice
+
 
     return jnp.array([prob_value_0, 1 - prob_value_0])
 
@@ -72,8 +81,8 @@ def job_sep_probability(
     policy_state_value = (
         model_specs["min_SRA"] + policy_state * model_specs["SRA_grid_size"]
     )
-    # Check if next period (when age increases by 1) the agent is at the policy state or above. So this period policy
-    # state value -1 should be <= age and policy state value > age
+    # # Check if next period (when age increases by 1) the agent is at the policy state or above. So this period policy
+    # # state value -1 should be <= age and policy state value > age
     after_SRA_next_before_now = ((policy_state_value - 1) <= age) & (
         policy_state_value > age
     )

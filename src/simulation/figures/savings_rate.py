@@ -17,6 +17,7 @@ def plot_savings(
     load_df=True,
     load_solution=True,
     load_sol_model=True,
+    util_type="add"
 ):
     # Simulate baseline with subjective belief
     data_sim, model_solved = solve_and_simulate_scenario(
@@ -31,6 +32,7 @@ def plot_savings(
         df_exists=load_df,
         solution_exists=load_solution,
         sol_model_exists=load_sol_model,
+        util_type=util_type
     )
 
     data_sim = data_sim.reset_index()

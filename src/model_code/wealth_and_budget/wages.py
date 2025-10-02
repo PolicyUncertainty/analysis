@@ -4,13 +4,14 @@ from model_code.wealth_and_budget.tax_and_ssc import calc_after_ssc_income_worke
 
 
 def calc_labor_income_after_ssc(
-    lagged_choice, experience_years, education, sex, income_shock, model_specs
+    lagged_choice, experience_years, age, education, sex, income_shock, model_specs
 ):
     # Gross labor income
     gross_labor_income = calculate_gross_labor_income(
         lagged_choice=lagged_choice,
         experience_years=experience_years,
         education=education,
+        age=age,
         sex=sex,
         income_shock=income_shock,
         model_specs=model_specs,
@@ -20,7 +21,7 @@ def calc_labor_income_after_ssc(
 
 
 def calculate_gross_labor_income(
-    lagged_choice, experience_years, education, sex, income_shock, model_specs
+    lagged_choice, experience_years, age, education, sex, income_shock, model_specs
 ):
     """Calculate the gross labor income.
 
@@ -41,6 +42,7 @@ def calculate_gross_labor_income(
     hourly_wage = calc_hourly_wage(
         sex=sex,
         education=education,
+        age=age,
         experience_years=experience_years,
         income_shock=income_shock,
         model_specs=model_specs,
@@ -56,12 +58,24 @@ def calculate_gross_labor_income(
     return labor_income_min_checked
 
 
-def calc_hourly_wage(sex, education, experience_years, income_shock, model_specs):
-    gamma_0 = model_specs["gamma_0"][sex, education]
-    gamma_1 = model_specs["gamma_1"][sex, education]
-    gamma_2 = model_specs["gamma_2"][sex, education]
-    exp_squared = experience_years**2
-    hourly_wage = jnp.exp(
-        gamma_0 + gamma_1 * experience_years + gamma_2 * exp_squared + income_shock
+def calc_hourly_wage(sex, education, age, experience_years, income_shock, model_specs):
+    hourly_wage = hourly_wage_equation(
+        gamma_0=model_specs["gamma_0"][sex, education],
+        gamma_ln_exp=model_specs["gamma_ln_exp"][sex, education],
+        gamma_above_50=model_specs["gamma_above_50"][sex, education],
+        income_shock=income_shock,
+        experience=experience_years,
+        age=age,
     )
     return hourly_wage
+
+
+def hourly_wage_equation(
+    gamma_0, gamma_ln_exp, gamma_above_50, income_shock, experience, age
+):
+    above_50_age = (age >= 50) * (age - 50)
+    ln_exp = jnp.log(experience + 1)
+    wage = jnp.exp(
+        gamma_0 + gamma_ln_exp * ln_exp + gamma_above_50 * above_50_age + income_shock
+    )
+    return wage

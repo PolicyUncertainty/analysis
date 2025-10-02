@@ -1,5 +1,7 @@
 import pandas as pd
 
+from model_code.pension_system.pension_wealth import calc_pension_annuity_value
+
 
 def add_overall_results(result_df, index, pre_name, df_scenario):
 
@@ -43,6 +45,34 @@ def sra_at_retirement(df):
 
     mean_sra = df.loc[fresh_retired_mask, "policy_state_value"].mean()
     return mean_sra
+
+
+def private_wealth_at_retirement(df):
+    fresh_retired_mask = (
+        (df["choice"] == 0) & (df["lagged_choice"] != 0) & (df["health"] != 3)
+    )
+
+    mean_wealth = df.loc[fresh_retired_mask, "assets_begin_of_period"].mean()
+    return mean_wealth
+
+
+def pension_wealth_at_retirement(df, specs):
+    first_time_pension_payment = (
+        (df["lagged_choice"] == 0)
+        & (df["policy_state_value"] != 29)
+        & (df["health"] != 3)
+    )
+    df_first = df.loc[first_time_pension_payment, :]
+    pension_payments = df_first["gross_retirement_income"]
+    ret_age = df_first["age"] - 1
+    life_exp = specs["life_exp"][df_first["sex"].values, df_first["education"].values]
+    payment_years = life_exp - ret_age
+    annuity_value = calc_pension_annuity_value(
+        pension_payments=pension_payments,
+        payment_years=payment_years,
+        interest_rate=specs["interest_rate"],
+    )
+    return annuity_value.mean()
 
 
 def expected_lifetime_income(df, specs):

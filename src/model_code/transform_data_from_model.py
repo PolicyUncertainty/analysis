@@ -5,12 +5,10 @@ from dcegm.likelihood import (
     create_choice_prob_function,
 )
 
-from first_step_estimation.estimation.partner_wage_estimation import (
-    create_deflate_factor,
-)
 from model_code.pension_system.experience_stock import (
     calc_pension_points_form_experience,
 )
+from model_code.pension_system.pension_wealth import calc_pension_annuity_value
 from model_code.state_space.experience import scale_experience_years
 from model_code.unobserved_state_weighting import create_unobserved_state_specs
 from process_data.structural_sample_scripts.create_structural_est_sample import (
@@ -245,15 +243,12 @@ def correct_wealth_to_include_non_pension_retirement_income(
     df["payment_years"] = age_payments_end - age_payments_start
     df["years_until_payment_starts"] = age_payments_start - df["age"].values
 
-    # calculate perpetuity of getting pension income after SRA, then subtract perpetuity after death
-    discount_factor = 1 / (1 + model_specs["interest_rate"])
-    annuity_factor = 1 / (1 - discount_factor)
-    df["pension_annuity_value"] = (
-        df["current_pension"] * annuity_factor
-        - df["current_pension"]
-        * annuity_factor
-        * discount_factor ** df["payment_years"]
+    df["pension_annuity_value"] = calc_pension_annuity_value(
+        pension_payments=df["current_pension"],
+        payment_years=df["payment_years"],
+        interest_rate=model_specs["interest_rate"],
     )
+    discount_factor = 1 / (1 + model_specs["interest_rate"])
     # Discount to present day.
     df["pension_wealth"] = (
         df["pension_annuity_value"]

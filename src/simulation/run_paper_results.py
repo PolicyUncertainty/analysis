@@ -28,7 +28,7 @@ model_name = specs["model_name"]
 util_type = specs["util_type"]
 
 load_model = True  # informed state as type
-load_unc_solution = True  # baseline solution conntainer
+load_unc_solution = None  # baseline solution conntainer
 
 
 # Load params

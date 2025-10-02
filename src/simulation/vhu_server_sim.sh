@@ -13,13 +13,13 @@
 
 module add cuda/12.4.1
 
-python run_baseline.py
-python run_sra_69.py
-python run_figures.py
+# python run_baseline.py
+# python run_sra_69.py
+# python run_figures.py
 # python run_model_fit_sim.py
 # python run_illustration.py
 # python run_cf_sra_increase.py
-# python run_cf_debias.py
+python run_cf_debias.py
 # python run_plots_cf.py
 # python run_cf_commitment.py
 # python run_cf_announcement_timing.py

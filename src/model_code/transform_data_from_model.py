@@ -220,7 +220,6 @@ def create_informed_probability(df, specs):
     df["probability_informed"] = probs
     return df
 
-
 def correct_wealth_to_include_non_pension_retirement_income(
     df,
     model_specs,

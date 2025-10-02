@@ -24,7 +24,7 @@ from simulation.sim_tools.calc_exp_results import calc_exp_results, generate_lat
 # %%
 # Set specifications
 seeed = 123
-model_name = "ue"
+model_name = specs["model_name"]
 util_type = specs["util_type"]
 
 load_model = True  # informed state as type
@@ -35,10 +35,6 @@ load_unc_solution = True  # baseline solution conntainer
 params = pkl.load(
     open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
 )
-params["kappa_low_men"] = params["kappa"]
-params["kappa_high_men"] = params["kappa"]
-params["kappa_low_women"] = params["kappa"]
-params["kappa_high_women"] = params["kappa"]
 
 res_df = calc_exp_results(
     path_dict=path_dict,

@@ -20,6 +20,7 @@ from simulation.figures.retirement_plot import (
     plot_retirement_share,
 )
 from simulation.figures.detailed_lc_results import plot_detailed_lifecycle_results
+from simulation.tables.aggregate_comparison_baseline_cf import aggregate_comparison_baseline_cf
 from simulation.tables.cv import calc_compensated_variation
 
 # %%
@@ -92,13 +93,21 @@ result_df = pd.DataFrame(index=[0])
 for df, label in zip([df_base, df_cf], [base_label, cf_label]):
     result_df = add_overall_results(
         result_df=result_df,
-        df=df, index=0, pre_name=label
+        df=df, index=0, pre_name=label,
+        specs=specs
     )
 
 df_lc_baseline = calc_life_cycle_detailed(df_base)
 df_lc_cf = calc_life_cycle_detailed(df_cf)
 
-
+# Create aggregate comparison table
+aggregate_comparison_baseline_cf(
+    result_df=result_df,
+    base_label=base_label,
+    cf_label=cf_label,
+    path_dict=path_dict,
+    model_name=model_name
+)
 
 # plots
 plot_retirement_difference(

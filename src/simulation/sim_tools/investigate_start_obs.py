@@ -26,5 +26,5 @@ def investigate_start_obs(
     median = median.rename(columns=rename_median)
     mean = mean.rename(columns=rename_mean)
     initial_obs_table = median.merge(mean, left_index=True, right_index=True)
-    initial_obs_table.to_csv(path_dict["sim_results"] + "initial_obs_table.csv")
+    initial_obs_table.to_csv(path_dict["data_tables"] + "initial_obs_table.csv")
     return initial_obs_table

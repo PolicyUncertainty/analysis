@@ -32,7 +32,7 @@ def calc_exp_results(
     util_type,
 ):
     initial_obs_table = pd.read_csv(
-        path_dict["sim_results"] + "initial_obs_table.csv", index_col=[0, 1]
+        path_dict["data_tables"] + "initial_obs_table.csv", index_col=[0, 1]
     )
     fixed_states = {
         "period": 0,

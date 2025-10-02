@@ -25,6 +25,11 @@ def calc_working_hours_below_63(df):
     return df.loc[mask, "working_hours"].mean()
 
 
+def calc_consumption_below_63(df):
+    mask = df["age"] < 63
+    return df.loc[mask, "consumption"].mean()
+
+
 def calc_overall_working_hours(df):
     return df["working_hours"].mean()
 

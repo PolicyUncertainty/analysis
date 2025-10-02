@@ -13,6 +13,8 @@ import numpy as np
 
 from simulation.sim_tools.calc_aggregate_results import (
     calc_average_retirement_age,
+    calc_consumption_below_63,
+    calc_working_hours_below_63,
     expected_lifetime_income,
     pension_wealth_at_retirement,
     private_wealth_at_retirement,
@@ -55,7 +57,7 @@ def calc_exp_results(
             "ExpLifetimeIncome",
             "PrivWealthRet",
             "PensWealthRet",
-            "FT-Prob",
+            "ExpWorkHours",
             "Consumption",
         ],
     )
@@ -98,16 +100,14 @@ def calc_exp_results(
             res_df.loc["PensWealthRet", col_name] = (
                 pension_wealth_at_retirement(df, specs) * 10
             )
-            # Calc FT prob and consumption
-            choice_probs = model_solution.choice_probabilities_for_states(states=state)
-            res_df.loc["FT-Prob", col_name] = choice_probs[0, 3] * 100
-            choice_policies = model_solution.choice_policies_for_states(states=state)
-
-            res_df.loc["Consumption", col_name] = (
-                np.nansum(choice_probs[0, :] * choice_policies[0, :]) * 10
-            )
+            res_df.loc["ExpWorkHours", col_name] = calc_working_hours_below_63(df)
+            res_df.loc["Consumption", col_name] = calc_consumption_below_63(df) * 10
 
     return res_df
+
+
+import numpy as np
+import pandas as pd
 
 
 def generate_latex_table(res_df):
@@ -124,67 +124,50 @@ def generate_latex_table(res_df):
     str
         LaTeX table code
     """
+
     # Create mapping for expressive row names
     row_names = {
         "ExpRetAge": "Expected Retirement Age",
-        "ExpLifetimeIncome": "Expected Lifetime Income (€)",
-        "PrivWealthRet": "Private Wealth at Retirement (€)",
-        "PensWealthRet": "Pension Wealth at Retirement (€)",
-        "FT-Prob": "Full-Time Work Probability",
-        "Consumption": "Consumption (€)",
+        "ExpLifetimeIncome": "Expected Lifetime Income (Tsd.)",
+        "PrivWealthRet": "Private Wealth at Retirement (Tsd.)",
+        "PensWealthRet": "Pension Wealth at Retirement (Tsd.)",
+        "ExpWorkHours": "Full-Time Work Probability",
+        "Consumption": "Consumption (Tsd.)",
     }
 
-    # Create mapping for expressive column names
-    col_names = {
-        "Uninformed_unc_True": "Uninformed\\newline w/ Uncertainty",
-        "Informed_unc_True": "Informed\\newline w/ Uncertainty",
-        "Uninformed_unc_False": "Uninformed\\newline w/o Uncertainty",
-        "Informed_unc_False": "Informed\\newline w/o Uncertainty",
-    }
-
-    # Rename columns and index
+    # Rename index
     df_latex = res_df.copy()
     df_latex.index = df_latex.index.map(lambda x: row_names.get(x, x))
-    df_latex.columns = df_latex.columns.map(lambda x: col_names.get(x, x))
 
-    # Format numbers appropriately
-    def format_value(val, row_name):
+    # Format all numbers with 2 decimals
+    def format_value(val):
         if pd.isna(val):
             return "--"
-        if "Age" in row_name:
-            return f"{val:.2f}"
-        elif "Probability" in row_name:
-            return f"{val:.3f}"
-        elif "€" in row_name:
-            return f"{val:,.0f}".replace(",", "\\,")
-        else:
-            return f"{val:.2f}"
+        return f"{val:.2f}"
 
     # Start building LaTeX table
     latex_code = []
     latex_code.append("\\begin{table}[htbp]")
     latex_code.append("    \\centering")
     latex_code.append(
-        "    \\caption{Retirement Decisions Under Different Information and Uncertainty Scenarios}"
+        "    \\caption{Retirement Decisions Under Different Information and Reform Scenarios}"
     )
     latex_code.append("    \\label{tab:retirement_scenarios}")
-    latex_code.append("    \\begin{tabular}{l" + "c" * len(df_latex.columns) + "}")
+    latex_code.append("    \\begin{threeparttable}")
+    latex_code.append("    \\begin{tabular}{lcccc}")
     latex_code.append("        \\toprule")
 
     # Header with scenario groups
     latex_code.append(
         "        \\multirow{2}{*}{\\textbf{Outcome}} & "
-        + "\\multicolumn{2}{c}{\\textbf{Expecting Reform}} & "
-        + "\\multicolumn{2}{c}{\\textbf{Not expecting reform}} \\\\"
+        + "\\multicolumn{2}{c}{\\textbf{Expected Reform}} & "
+        + "\\multicolumn{2}{c}{\\textbf{No Expected Reform}} \\\\"
     )
     latex_code.append("        \\cmidrule(lr){2-3} \\cmidrule(lr){4-5}")
 
     # Column headers
-    headers = [""] + ["Uninformed", "Informed", "Uninformed", "Informed"]
     latex_code.append(
-        "        "
-        + " & ".join(f"\\textbf{{{h}}}" if h else h for h in headers)
-        + " \\\\"
+        "         & \\textbf{Uninformed} & \\textbf{Informed} & \\textbf{Uninformed} & \\textbf{Informed} \\\\"
     )
     latex_code.append("        \\midrule")
 
@@ -193,7 +176,7 @@ def generate_latex_table(res_df):
         row_data = [row_name]
         for col in df_latex.columns:
             val = df_latex.loc[row_name, col]
-            row_data.append(format_value(val, row_name))
+            row_data.append(format_value(val))
 
         # Add extra spacing after certain rows
         line = "        " + " & ".join(row_data) + " \\\\"
@@ -206,18 +189,19 @@ def generate_latex_table(res_df):
 
     latex_code.append("        \\bottomrule")
     latex_code.append("    \\end{tabular}")
-    latex_code.append("    \\begin{tablenotes}[flushleft]")
+    latex_code.append("    \\begin{tablenotes}")
     latex_code.append("        \\small")
     latex_code.append(
         "        \\item \\textit{Notes:} This table presents expected outcomes for different combinations of "
     )
     latex_code.append(
-        "        information states and uncertainty. Informed individuals know their health status, while "
+        "        information states and reform expectations. Informed individuals know their health status, while "
     )
     latex_code.append(
-        "        uninformed individuals face uncertainty. Monetary values are in Euros."
+        "        uninformed individuals face uncertainty. Monetary values are in thousands."
     )
     latex_code.append("    \\end{tablenotes}")
+    latex_code.append("    \\end{threeparttable}")
     latex_code.append("\\end{table}")
 
     return "\n".join(latex_code)

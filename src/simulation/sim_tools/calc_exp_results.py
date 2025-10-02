@@ -106,13 +106,10 @@ def calc_exp_results(
     return res_df
 
 
-import numpy as np
-import pandas as pd
-
-
 def generate_latex_table(res_df):
     """
-    Generate a nicely formatted LaTeX table from the results DataFrame.
+    Generate LaTeX tabular code from the results DataFrame.
+    Only produces the tabular environment content (no table wrapper, caption, or notes).
 
     Parameters
     ----------
@@ -122,86 +119,86 @@ def generate_latex_table(res_df):
     Returns
     -------
     str
-        LaTeX table code
+        LaTeX tabular code
     """
 
     # Create mapping for expressive row names
     row_names = {
-        "ExpRetAge": "Expected Retirement Age",
-        "ExpLifetimeIncome": "Expected Lifetime Income (Tsd.)",
+        "ExpWorkHours": "Expected Work Hours",
         "PrivWealthRet": "Private Wealth at Retirement (Tsd.)",
         "PensWealthRet": "Pension Wealth at Retirement (Tsd.)",
-        "ExpWorkHours": "Full-Time Work Probability",
+        "ExpLifetimeIncome": "Expected Lifetime Income (Tsd.)",
+        "ExpRetAge": "Expected Retirement Age",
         "Consumption": "Consumption (Tsd.)",
     }
 
-    # Rename index
+    # Reorder rows: ExpRetAge first, then wealth variables, then reaction margins
+    row_order = [
+        "ExpRetAge",
+        "PrivWealthRet",
+        "PensWealthRet",
+        "ExpLifetimeIncome",
+        "ExpWorkHours",
+        "Consumption",
+    ]
+
+    # Add any remaining rows that might exist
+    for idx in res_df.index:
+        if idx not in row_order:
+            row_order.append(idx)
+
+    # Reorder columns: No Reform (Informed, Uninformed), then Expected Reform (Informed, Uninformed)
+    col_order = [
+        "Informed_unc_False",
+        "Uninformed_unc_False",
+        "Informed_unc_True",
+        "Uninformed_unc_True",
+    ]
+
+    # Reorder dataframe
     df_latex = res_df.copy()
+    df_latex = df_latex.reindex(index=row_order, columns=col_order)
+
+    # Rename index
     df_latex.index = df_latex.index.map(lambda x: row_names.get(x, x))
 
-    # Format all numbers with 2 decimals
-    def format_value(val):
-        if pd.isna(val):
-            return "--"
-        return f"{val:.2f}"
-
-    # Start building LaTeX table
+    # Start building LaTeX tabular
     latex_code = []
-    latex_code.append("\\begin{table}[htbp]")
-    latex_code.append("    \\centering")
-    latex_code.append(
-        "    \\caption{Retirement Decisions Under Different Information and Reform Scenarios}"
-    )
-    latex_code.append("    \\label{tab:retirement_scenarios}")
-    latex_code.append("    \\begin{threeparttable}")
-    latex_code.append("    \\begin{tabular}{lcccc}")
-    latex_code.append("        \\toprule")
+    latex_code.append("\\begin{tabular}{lcccc}")
+    latex_code.append("    \\toprule")
 
     # Header with scenario groups
     latex_code.append(
-        "        \\multirow{2}{*}{\\textbf{Outcome}} & "
-        + "\\multicolumn{2}{c}{\\textbf{Expected Reform}} & "
-        + "\\multicolumn{2}{c}{\\textbf{No Expected Reform}} \\\\"
+        "    \\multirow{2}{*}{\\textbf{Outcome}} & "
+        + "\\multicolumn{2}{c}{\\textbf{No Expected Reform}} & "
+        + "\\multicolumn{2}{c}{\\textbf{Expected Reform}} \\\\"
     )
-    latex_code.append("        \\cmidrule(lr){2-3} \\cmidrule(lr){4-5}")
+    latex_code.append("    \\cmidrule(lr){2-3} \\cmidrule(lr){4-5}")
 
     # Column headers
     latex_code.append(
-        "         & \\textbf{Uninformed} & \\textbf{Informed} & \\textbf{Uninformed} & \\textbf{Informed} \\\\"
+        "     & \\textbf{Informed} & \\textbf{Uninformed} & \\textbf{Informed} & \\textbf{Uninformed} \\\\"
     )
-    latex_code.append("        \\midrule")
+    latex_code.append("  {}   & (1) & (2) & (3) & (4) \\\\")
+    latex_code.append("    \\midrule")
 
     # Data rows
     for idx, row_name in enumerate(df_latex.index):
         row_data = [row_name]
         for col in df_latex.columns:
             val = df_latex.loc[row_name, col]
-            row_data.append(format_value(val))
+            row_data.append(f"{val:.2f}")
 
-        # Add extra spacing after certain rows
-        line = "        " + " & ".join(row_data) + " \\\\"
-        if idx == 0:  # After retirement age
+        # Add extra spacing after ExpRetAge (row 0) and after PensWealthRet (row 2)
+        line = "    " + " & ".join(row_data) + " \\\\"
+        if idx == 0:  # After ExpRetAge
             line += " \\addlinespace"
-        elif idx == 3:  # After pension wealth
+        elif idx == 2:  # After PensWealthRet
             line += " \\addlinespace"
 
         latex_code.append(line)
 
-    latex_code.append("        \\bottomrule")
-    latex_code.append("    \\end{tabular}")
-    latex_code.append("    \\begin{tablenotes}")
-    latex_code.append("        \\small")
-    latex_code.append(
-        "        \\item \\textit{Notes:} This table presents expected outcomes for different combinations of "
-    )
-    latex_code.append(
-        "        information states and reform expectations. Informed individuals know their health status, while "
-    )
-    latex_code.append(
-        "        uninformed individuals face uncertainty. Monetary values are in thousands."
-    )
-    latex_code.append("    \\end{tablenotes}")
-    latex_code.append("    \\end{threeparttable}")
-    latex_code.append("\\end{table}")
+    latex_code.append("    \\bottomrule")
+    latex_code.append("\\end{tabular}")
 
     return "\n".join(latex_code)

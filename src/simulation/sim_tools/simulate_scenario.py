@@ -92,7 +92,7 @@ def solve_and_simulate_scenario(
     -----
     Loading flags control computational efficiency:
     - Set solution_exists=True and pass model_solution from previous call to reuse solutions
-    - Set df_exists=True to skip simulation if results already computed
+    - Set df_exists=True to skip simulation if results already computed. !This will return None for model_solution!
     - Use df_exists=None for temporary simulations you don't want to save
     """
     model_out_folder = get_model_results_path(path_dict, model_name)
@@ -117,7 +117,13 @@ def solve_and_simulate_scenario(
         "SRA_at_retirement": SRA_at_retirement,
     }
 
+    if df_exists:
+        data_sim = pd.read_csv(df_file)
+        print("Loading existing simulated dataframe from file. Warning: returns None for model solution.")
+        return data_sim, None
+
     if model_solution is None:
+        # Create and solve model
         model_solved = specify_and_solve_model(
             path_dict=path_dict,
             params=params,
@@ -132,6 +138,7 @@ def solve_and_simulate_scenario(
             util_type=util_type,
         )
     else:
+        # Use existing model solution but update sim specs
         specs = generate_derived_and_data_derived_specs(path_dict)
 
         model_solved = model_solution
@@ -149,22 +156,20 @@ def solve_and_simulate_scenario(
             alternative_sim_specifications=alternative_sim_specifications,
             alternative_specs=alternative_sim_specs,
         )
-
-    if df_exists:
-        data_sim = pd.read_csv(df_file)
+    # Simulate 
+    data_sim = simulate_scenario(
+        path_dict=path_dict,
+        initial_SRA=SRA_at_start,
+        model_solved=model_solved,
+        only_informed=only_informed,
+    )
+    if df_exists is None:
+        # do not save df
         return data_sim, model_solved
     else:
-        data_sim = simulate_scenario(
-            path_dict=path_dict,
-            initial_SRA=SRA_at_start,
-            model_solved=model_solved,
-            only_informed=only_informed,
-        )
-        if df_exists is None:
-            return data_sim, model_solved
-        else:
-            data_sim.to_csv(df_file)
-            return data_sim, model_solved
+        # save df
+        data_sim.to_csv(df_file)
+        return data_sim, model_solved
 
 
 def simulate_scenario(

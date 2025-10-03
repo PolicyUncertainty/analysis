@@ -81,10 +81,6 @@ def aggregate_comparison_baseline_cf(result_df, base_label, cf_label, path_dict,
     latex_lines = []
     
     # Table header
-    latex_lines.append(r'\begin{table}[htbp]')
-    latex_lines.append(r'  \centering')
-    latex_lines.append(r'  \caption{Aggregate Results: Baseline vs. Counterfactual}')
-    latex_lines.append(r'  \label{tab:cf_debias_aggregate}')
     latex_lines.append(r'  \begin{tabular}{lccc}')
     latex_lines.append(r'    \toprule')
     latex_lines.append(f'    Outcome & {base_label} & {cf_label} & Difference (\\%) \\\\')
@@ -111,7 +107,6 @@ def aggregate_comparison_baseline_cf(result_df, base_label, cf_label, path_dict,
     # Table footer
     latex_lines.append(r'    \bottomrule')
     latex_lines.append(r'  \end{tabular}')
-    latex_lines.append(r'\end{table}')
     
     # Join lines
     latex_table = '\n'.join(latex_lines)

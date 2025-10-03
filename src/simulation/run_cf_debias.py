@@ -36,8 +36,8 @@ cf_label = "Only Informed"
 load_model = False  # informed state as type
 load_unc_solution = None  # baseline solution conntainer
 model_solution = None  # actual baseline model solution object (None = create new)
-load_df_baseline = False # True = load existing df, False = create new df, None = create but do not save
-load_df_unbiased = False # same as above
+load_df_baseline = True # True = load existing df, False = create new df, None = create but do not save
+load_df_unbiased = True # same as above
 
 
 # Load params
@@ -124,23 +124,27 @@ plot_retirement_difference(
     cf_label=cf_label,
 )
 
-plot_retirement_share(
-    path_dict=path_dict,
-    specs=specs,
-    df_base=df_base,
-    df_cf=df_cf,
-    final_SRA=sra_at_63,
-    model_name=model_name,
-    left_difference=-6,
-    right_difference=2,
-    base_label=base_label,
-    cf_label=cf_label,
-)
+# plot_retirement_share(
+#     path_dict=path_dict,
+#     specs=specs,
+#     df_base=df_base,
+#     df_cf=df_cf,
+#     final_SRA=sra_at_63,
+#     model_name=model_name,
+#     left_difference=-6,
+#     right_difference=2,
+#     base_label=base_label,
+#     cf_label=cf_label,
+# )
 
 plot_detailed_lifecycle_results(
     path_dict=path_dict,
     specs=specs,
-    df_lc_baseline=df_lc_baseline,
-    df_lc_cf=df_lc_cf,
     model_name=model_name,
+    comparison_name="all_informed",
+    df_baseline=df_lc_baseline,
+    df_comparison=df_lc_cf,
+    show=False,
+    save=True,
+    end_age=80,
 )

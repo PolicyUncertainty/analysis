@@ -9,13 +9,13 @@ from set_styles import get_figsize, set_colors
 JET_COLOR_MAP, LINE_STYLES = set_colors()
 
 
-def load_gender_results(path_dict, model_name):
+def load_het_results(path_dict, het_names, model_name):
     """Load all gender-specific result dataframes"""
     results = {}
 
     for scenario in ["unc", "no_unc"]:  # , "debias"]:
         results[scenario] = {}
-        for gender in ["overall", "men", "women"]:
+        for gender in het_names:
             filepath = (
                 path_dict["sim_results"]
                 + f"sra_increase_aggregate_{scenario}_{gender}_{model_name}.csv"
@@ -88,11 +88,12 @@ def plot_retirement_age_changes(ax, df_unc, df_no_unc, title, show_legend=False)
     return ax
 
 
-def sra_increase_aggregate_plot_by_gender(path_dict, model_name):
+def sra_increase_aggregate_plot_by_gender(path_dict, het_names, fig_name, model_name):
     """Plot the change in baseline outcomes as a percentage of the baseline outcome by gender."""
 
+    het_names = ["overall"] + het_names
     # Load all results
-    results = load_gender_results(path_dict, model_name)
+    results = load_het_results(path_dict, het_names, model_name)
 
     plot_folder = path_dict["simulation_plots"] + model_name + "/"
     if not os.path.exists(plot_folder):
@@ -102,7 +103,7 @@ def sra_increase_aggregate_plot_by_gender(path_dict, model_name):
     prepared_data = {}
     for scenario in ["unc", "no_unc"]:
         prepared_data[scenario] = {}
-        for gender in ["overall", "men", "women"]:
+        for gender in het_names:
             df = results[scenario][gender]
             prepared_data[scenario][gender] = prepare_baseline_data(df)
 
@@ -183,7 +184,7 @@ def sra_increase_aggregate_plot_by_gender(path_dict, model_name):
         bbox_inches="tight",
     )
     fig.savefig(
-        plot_folder + f"cf_increase_behavior_by_gender.pdf", bbox_inches="tight"
+        plot_folder + f"cf_increase_behavior_{fig_name}.pdf", bbox_inches="tight"
     )
 
     # # Create compensating variation plot by gender
@@ -223,9 +224,6 @@ def sra_increase_aggregate_plot(path_dict, model_name):
     Wrapper function to maintain backward compatibility with original function name.
     Creates both the original overall plots and the new gender-specific plots.
     """
-
-    # Create gender-specific plots
-    sra_increase_aggregate_plot_by_gender(path_dict, model_name)
 
     plot_folder = path_dict["simulation_plots"] + model_name + "/"
     if not os.path.exists(plot_folder):

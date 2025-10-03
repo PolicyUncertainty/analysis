@@ -41,7 +41,7 @@ def process_gender_results(i, df, result_dfs, het_spec_vars, het_var_name):
 
     for het_name in het_names:
         if het_name != "overall":
-            mask = df[het_var_name] == het_spec_vars[het_name]
+            mask = df[het_var_name].isin(het_spec_vars[het_name])
             df_scenario = df[mask]
         else:
             df_scenario = df
@@ -67,9 +67,9 @@ def process_gender_results(i, df, result_dfs, het_spec_vars, het_var_name):
 def save_results(result_dfs, path_dict, model_name):
     """Save all result dataframes to CSV files"""
     for scenario in result_dfs:
-        for gender in result_dfs[scenario]:
-            filename = f"sra_increase_aggregate_{scenario}_{gender}_{model_name}.csv"
-            result_dfs[scenario][gender].to_csv(path_dict["sim_results"] + filename)
+        for het_name in result_dfs[scenario]:
+            filename = f"sra_increase_aggregate_{scenario}_{het_name}_{model_name}.csv"
+            result_dfs[scenario][het_name].to_csv(path_dict["sim_results"] + filename)
             print(f"Saved: {filename}")
 
 
@@ -90,22 +90,20 @@ def create_result_dfs(sra_at_63, scenarios, het_spec_vars):
 # %%
 # Set specifications
 seeed = 123
-model_name = "test"
+model_name = specs["model_name"]
 util_type = specs["util_type"]
 load_sol_model = True
 load_solutions = None
 load_df = None
 
 het_var_name = "sex"
-het_spec_vars = {"men": 0, "women": 1}
+het_spec_vars = {"men": [0], "women": [1]}
 scenarios = ["unc", "no_unc"]  # , "debias"]
 
 # Load params
-# params = pkl.load(
-#     open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
-# )
-from estimation.struct_estimation.start_params_and_bounds.set_start_params import load_and_set_start_params
-params = load_and_set_start_params(path_dict)
+params = pkl.load(
+    open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
+)
 
 
 

@@ -44,10 +44,7 @@ CLAUDE.md
 
 # Ignore est and sim files. Add only single ones
 output/est_results/struct_results/*.pkl
-!output/est_results/struct_results/fire_old_done/
-!output/est_results/struct_results/try/
-!output/est_results/struct_results/est_params_fire_old_done.pkl
-!output/est_results/struct_results/est_params_nf.pkl
+!output/est_results/struct_results/*all_age*.pkl
 
 /output/sim_results/*.csv
 !output/sim_results/fire_old_done/

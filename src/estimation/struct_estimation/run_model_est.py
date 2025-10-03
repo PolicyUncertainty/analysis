@@ -3,20 +3,16 @@ import pickle as pkl
 import sys
 
 from estimation.struct_estimation.start_params_and_bounds.param_lists import (  # men_disutil_firing,
-    men_disability_old_age_params,
     men_disability_params,
     men_disutil_params_partner,
     men_disutil_firing_edu,
     men_disutil_params,
     men_disutil_params_edu,
-    men_job_offer_old_age_params,
     men_job_offer_params,
     men_SRA_firing,
-    women_disability_old_age_params,
     women_disability_params,
     women_disutil_firing,
     women_disutil_params,
-    women_job_offer_old_age_params,
     women_job_offer_params,
 )
 from set_paths import create_path_dict
@@ -28,12 +24,12 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
     load_and_set_start_params,
 )
 
-model_name = "partner_men"
-params_to_estimate_names = men_disutil_params_partner
-sex_type = "men"
+model_name = "all_age_women"
+params_to_estimate_names = women_disutil_params + women_disability_params + women_job_offer_params
+sex_type = "women"
 edu_type = "all"
 util_type = "add"
-old_sample_only = True
+old_sample_only = False
 
 LOAD_LAST_ESTIMATE = False
 LOAD_SOL_MODEL = False
@@ -49,18 +45,13 @@ print(
 
 if LOAD_LAST_ESTIMATE:
     last_estimate = pkl.load(
-        open(paths_dict["struct_results"] + f"est_params_disabled_old.pkl", "rb")
+        open(paths_dict["struct_results"] + f"est_params_nf.pkl", "rb")
     )
 else:
     last_estimate = None
 
 # Load start params
 start_params_all = load_and_set_start_params(paths_dict)
-start_params_all["taste_shock_scale_men"] = 0.5
-start_params_all["taste_shock_scale_women"] = 0.2
-start_params_all["bequest_scale"] = 5
-start_params_all["mu_low"] = 1.5
-start_params_all["mu_high"] = 1.5
 
 # Run estimation
 estimation_results, end_params = estimate_model(

@@ -11,7 +11,7 @@ def plot_budget_of_unemployed(path_dict, specs, show=False, save=False):
     savings of an unemployed person.
 
     Special emphasis on the area around eligibility for unemployment benefits.
-    
+
     Parameters
     ----------
     path_dict : dict
@@ -20,7 +20,7 @@ def plot_budget_of_unemployed(path_dict, specs, show=False, save=False):
         Dictionary containing model specifications
     show : bool, default False
         Whether to display plots
-    save : bool, default False  
+    save : bool, default False
         Whether to save plots to disk
     """
     colors, _ = set_colors()
@@ -43,18 +43,25 @@ def plot_budget_of_unemployed(path_dict, specs, show=False, save=False):
                 model_specs=specs,
             )
             ax.plot(savings, wealth, label=edu_label, color=colors[edu_var])
-            
+
         ax.set_xlabel("Savings")
         ax.set_ylabel("Wealth")
         ax.legend()
         ax.set_title(f"Unemployment benefits {sex_label}")
-    
+
     plt.tight_layout()
-    
+
     if save:
-        fig.savefig(path_dict["model_plots"] + "wealth_unemployed_budget.pdf", bbox_inches="tight")
-        fig.savefig(path_dict["model_plots"] + "wealth_unemployed_budget.png", bbox_inches="tight", dpi=300)
-        
+        fig.savefig(
+            path_dict["model_plots"] + "wealth_unemployed_budget.pdf",
+            bbox_inches="tight",
+        )
+        fig.savefig(
+            path_dict["model_plots"] + "wealth_unemployed_budget.png",
+            bbox_inches="tight",
+            dpi=300,
+        )
+
     if show:
         plt.show()
     else:

@@ -1,15 +1,15 @@
 ---
 # Utility parameters
-mu_low: 2.5
-mu_high: 2.5
+mu_low: 1.5
+mu_high: 1.5
 
 # ## Full time work dis-utility men - Health specific
-# disutil_ft_work_good_men: 0.6
-# disutil_ft_work_bad_men: 0.6
+disutil_ft_work_good_men: 0.6
+disutil_ft_work_bad_men: 0.6
 
-# # Unemployment dis-utility men - Health specific
-# disutil_unemployed_good_men: 0.3
-# disutil_unemployed_bad_men: 0.1
+# Unemployment dis-utility men - Health specific
+disutil_unemployed_good_men: 0.3
+disutil_unemployed_bad_men: 0.1
 
 # # Full time work dis-utility men - Health and Education specific
 # disutil_ft_work_high_good_men: 0.6
@@ -23,20 +23,18 @@ mu_high: 2.5
 # disutil_unemployed_low_good_men: 0.3
 # disutil_unemployed_low_bad_men: 0.3
 
-disutil_ft_work_partner_good_men: 0.6
-disutil_ft_work_partner_bad_men: 0.6
-disutil_ft_work_single_good_men: 0.6
-disutil_ft_work_single_bad_men: 0.6
-disutil_unemployed_partner_good_men: 0.3
-disutil_unemployed_partner_bad_men: 0.3
-disutil_unemployed_single_good_men: 0.3
-disutil_unemployed_single_bad_men: 0.3
+# disutil_ft_work_partner_good_men: 0.6
+# disutil_ft_work_partner_bad_men: 0.6
+# disutil_ft_work_single_good_men: 0.6
+# disutil_ft_work_single_bad_men: 0.6
+# disutil_unemployed_partner_good_men: 0.3
+# disutil_unemployed_partner_bad_men: 0.3
+# disutil_unemployed_single_good_men: 0.3
+# disutil_unemployed_single_bad_men: 0.3
 
 
-disutil_unemployed_above_58_good_women: 0.0
-disutil_unemployed_above_58_bad_women: 0.0
-disutil_unemployed_above_58_good_men: 0.0
-disutil_unemployed_above_58_bad_men: 0.0
+# disutil_unemployed_above_58_women: 0.0
+# disutil_unemployed_above_58_men: 0.0
 
 # Partner retired dis-utility men
 disutil_partner_retired_men: 0.0
@@ -57,7 +55,7 @@ disutil_unemployed_bad_women: 0.3
 disutil_ft_work_disabled_men: 0.4
 
 # Unemployment dis-utility men - Disabled health
-disutil_unemployed_disabled_men: 0.4
+disutil_unemployed_disabled_men: 0.8
 
 # Full time work dis-utility women - Disabled health
 disutil_ft_work_disabled_women: 0.4
@@ -66,7 +64,7 @@ disutil_ft_work_disabled_women: 0.4
 disutil_pt_work_disabled_women: 0.4
 
 # Unemployment dis-utility women - Disabled health
-disutil_unemployed_disabled_women: 0.4
+disutil_unemployed_disabled_women: 0.8
 
 # Partner retired dis-utility women
 disutil_partner_retired_women: 0.0
@@ -78,46 +76,20 @@ disutil_children_pt_work_low: 0.3
 disutil_children_pt_work_high: 0.3
 
 # Bequest
-bequest_scale: 100
-kappa_high_men: 5
-kappa_high_women: 35
-kappa_low_men: 10
-kappa_low_women: 30
+bequest_scale: 5
+kappa_high_men: 0
+kappa_high_women: 0
+kappa_low_men: 0
+kappa_low_women: 0
 
 # Job separation params are set internally driven by data
 
 # Taste shock scale
-taste_shock_scale_men: 0.5
-taste_shock_scale_women: 0.5
+taste_shock_scale_men: 0.3
+taste_shock_scale_women: 0.3
 
-# SRA firing params - Starting at intercept 4.5 (gives ~57% probability)
-SRA_firing_logit_intercept_men_low: 4.5
-SRA_firing_logit_intercept_men_high: 4.5
-SRA_firing_logit_intercept_women_low: 4.5
-SRA_firing_logit_intercept_women_high: 4.5
-
-# Job finding probability - men
-job_finding_logit_const_men: 0.5
-job_finding_logit_high_educ_men: 0.6
-job_finding_logit_good_health_men: 0.4
-job_finding_logit_age_men: -0.03
-job_finding_logit_age_above_55_men: -0.5
-
-# Job finding probability - women
-job_finding_logit_const_women: 0.5
-job_finding_logit_high_educ_women: 0.6
-job_finding_logit_good_health_women: 0.4
-job_finding_logit_age_women: -0.03
-job_finding_logit_age_above_55_women: -0.5
-
-# Disability probability men
-disability_logit_const_men: -3.0
-disability_logit_age_men: 0.1
-disability_logit_age_above_55_men: 0.5
-disability_logit_high_educ_men: -0.2
-
-# Disability probability women
-disability_logit_const_women: -3.0
-disability_logit_age_women: 0.1
-disability_logit_age_above_55_women: 0.5
-disability_logit_high_educ_women: -0.2
+# # SRA firing params - Starting at intercept 4.5 (gives ~57% probability)
+# SRA_firing_logit_intercept_men_low: 4.5
+# SRA_firing_logit_intercept_men_high: 4.5
+# SRA_firing_logit_intercept_women_low: 4.5
+# SRA_firing_logit_intercept_women_high: 4.5

@@ -3,12 +3,12 @@ mu_low: 5
 mu_high: 5
 
 # Full time work dis-utility men - Health specific
-disutil_ft_work_good_men: 0.8
-disutil_ft_work_bad_men: 0.8
+disutil_ft_work_good_men: 2.0
+disutil_ft_work_bad_men: 2.0
 
 # Unemployment dis-utility men - Health specific
-disutil_unemployed_good_men: 0.8
-disutil_unemployed_bad_men: 0.8
+disutil_unemployed_good_men: 2.0
+disutil_unemployed_bad_men: 2.0
 
 # Full time work dis-utility men - Health and Education specific
 disutil_ft_work_high_good_men: 10.0
@@ -35,17 +35,15 @@ disutil_unemployed_above_58_good_women: 10.0
 disutil_unemployed_above_58_bad_women: 10.0
 disutil_unemployed_above_58_good_men: 10.0
 disutil_unemployed_above_58_bad_men: 10.0
+disutil_unemployed_above_58_men: 10.0
+disutil_unemployed_above_58_men: 10.0
 
 # Full time work dis-utility men - Disabled health
-disutil_ft_work_disabled_men: 4.0
-# Unemployment dis-utility men - Disabled health
-disutil_unemployed_disabled_men: 4.0
-# Full time work dis-utility women - Disabled health
-disutil_ft_work_disabled_women: 4.0
-# Part time work dis-utility women - Disabled health
-disutil_pt_work_disabled_women: 4.0
-# Unemployment dis-utility women - Disabled health
-disutil_unemployed_disabled_women: 4.0
+disutil_ft_work_disabled_men: 10.0
+disutil_unemployed_disabled_men: 10.0
+disutil_ft_work_disabled_women: 10.0
+disutil_pt_work_disabled_women: 10.0
+disutil_unemployed_disabled_women: 10.0
 # Partner retired dis-utility men
 disutil_partner_retired_men: 0.0
 
@@ -88,6 +86,13 @@ job_finding_logit_good_health_men: 5
 job_finding_logit_age_men: 5
 job_finding_logit_age_above_55_men: 5
 
+job_finding_logit_above_50_men: 5
+job_finding_logit_above_55_men: 5
+job_finding_logit_above_60_men: 5
+job_finding_logit_above_50_women: 5
+job_finding_logit_above_55_women: 5
+job_finding_logit_above_60_women: 5
+
 # Job finding women
 job_finding_logit_const_women: 5
 job_finding_logit_high_educ_women: 5
@@ -98,12 +103,18 @@ job_finding_logit_age_above_55_women: 5
 # Disability probability men
 disability_logit_const_men: 5
 disability_logit_high_educ_men: 5
+disability_logit_above_50_men: 5
+disability_logit_above_55_men: 5
+disability_logit_above_60_men: 5
 disability_logit_age_men: 5
 disability_logit_age_above_55_men: 5
 
 # Disability probability women
 disability_logit_const_women: 5
 disability_logit_high_educ_women: 5
+disability_logit_above_50_women: 5
+disability_logit_above_55_women: 5
+disability_logit_above_60_women: 5
 disability_logit_age_women: 5
 disability_logit_age_above_55_women: 5
 

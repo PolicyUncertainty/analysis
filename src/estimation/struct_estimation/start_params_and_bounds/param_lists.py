@@ -9,9 +9,12 @@ wealth_params = ["mu_low", "mu_high", "bequest_scale",
 men_disutil_params = [
     "disutil_ft_work_good_men",
     "disutil_ft_work_bad_men",
+    "disutil_ft_work_disabled_men",  # NEW
     "disutil_unemployed_good_men",
     "disutil_unemployed_bad_men",
-    # "disutil_partner_retired_men",
+    "disutil_unemployed_disabled_men",  # NEW
+    "disutil_partner_retired_men",
+    # "disutil_unemployed_above_58_men",
 ]
 
 # Men - Health and Education specific disutility
@@ -55,23 +58,26 @@ men_taste = [
     "taste_shock_scale_men",
 ]
 
-men_job_offer_old_age_params = [
+men_job_offer_params = [
     "job_finding_logit_const_men",
     "job_finding_logit_high_educ_men",
     "job_finding_logit_good_health_men",
-    "job_finding_logit_age_above_55_men",
+    # "job_finding_logit_above_50_men",
+    # "job_finding_logit_above_55_men",
+    # "job_finding_logit_above_60_men",
+    # "job_finding_logit_age_above_55_men",
+    "job_finding_logit_age_men"
 ]
 
-men_job_offer_params = men_job_offer_old_age_params + ["job_finding_logit_age_men"]
-
-men_disability_old_age_params = [
-    "disability_logit_const_men",
-    "disability_logit_high_educ_men",
-    "disability_logit_age_above_55_men",
-]
 men_disability_params = [
+    "disability_logit_const_men",
     "disability_logit_age_men",
-] + men_disability_old_age_params
+    # "disability_logit_age_above_55_men",
+    # "disability_logit_above_50_men",
+    # "disability_logit_above_55_men",
+    "disability_logit_above_60_men",
+    "disability_logit_high_educ_men",
+]
 
 # Women - Health specific disutility
 women_disutil_params = [
@@ -87,8 +93,8 @@ women_disutil_params = [
     # "disutil_partner_retired_women",
     "disutil_children_ft_work_high",
     "disutil_children_ft_work_low",
-    "disutil_unemployed_above_58_good_women",
-    "disutil_unemployed_above_58_bad_women",
+    # "disutil_unemployed_above_58_good_women",
+    # "disutil_unemployed_above_58_bad_women",
     # "disutil_children_pt_work_high",
     # "disutil_children_pt_work_low",
 ]
@@ -105,22 +111,23 @@ women_taste = [
     "taste_shock_scale_women",
 ]
 
-women_job_offer_old_age_params = [
+women_job_offer_params = [
     "job_finding_logit_const_women",
     "job_finding_logit_high_educ_women",
     "job_finding_logit_good_health_women",
-    "job_finding_logit_age_above_55_women",
-]
-women_job_offer_params = women_job_offer_old_age_params + [
+    # "job_finding_logit_above_50_women",
+    # "job_finding_logit_above_55_women",
+    # "job_finding_logit_above_60_women",
+    # "job_finding_logit_age_above_55_women",
     "job_finding_logit_age_women"
 ]
 
-women_disability_old_age_params = [
+women_disability_params = [
     "disability_logit_const_women",
-    "disability_logit_age_above_55_women",
+    "disability_logit_age_women",
+    # "disability_logit_age_above_55_women",
+    # "disability_logit_above_50_women",
+    # "disability_logit_above_55_women",
+    "disability_logit_above_60_women",
     "disability_logit_high_educ_women",
-]
-
-women_disability_params = women_disability_old_age_params + [
-    "disability_logit_age_women"
 ]

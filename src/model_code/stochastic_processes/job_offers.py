@@ -50,15 +50,16 @@ def job_offer_process_transition(
 
     # # Transition probability
     # prob_value_0 = job_sep_prob * job_sep_case + (1 - job_finding_prob) * job_offer_case
-    
+
     log_job_sep_prob = model_specs["log_job_sep_probs"][
         sex, education, good_health, age
     ]
     job_sep_prob = logit_formula(log_job_sep_prob)
 
     # Transition probability without SRA firing
-    prob_value_0 = job_sep_prob * labor_choice + (1 - job_finding_prob) * unemployment_choice
-
+    prob_value_0 = (
+        job_sep_prob * labor_choice + (1 - job_finding_prob) * unemployment_choice
+    )
 
     return jnp.array([prob_value_0, 1 - prob_value_0])
 
@@ -94,26 +95,37 @@ def job_sep_probability(
 
 def calc_job_finding_prob_men(params, education, good_health, age):
     above_55 = age >= 55
+    above_50 = age >= 50
+    above_60 = age >= 60
+
     exp_factor = (
         params["job_finding_logit_const_men"]
         + params["job_finding_logit_high_educ_men"] * education
         + params["job_finding_logit_good_health_men"] * good_health
         + params["job_finding_logit_age_men"] * age
-        + params["job_finding_logit_age_above_55_men"] * (age - 55) * above_55
+        # + params["job_finding_logit_age_above_55_men"] * (age - 55) * above_55
+        # + params["job_finding_logit_above_50_men"] * above_50
+        # + params["job_finding_logit_above_55_men"] * above_55
+        # + params["job_finding_logit_above_60_men"] * above_60
     )
     prob = logit_formula(exp_factor)
     return prob
 
 
 def calc_job_finding_prob_women(params, education, good_health, age):
-    above_55 = age >= 55
+    # above_55 = age >= 55
+    # above_50 = age >= 50
+    # above_60 = age >= 60
 
     exp_factor = (
         params["job_finding_logit_const_women"]
         + params["job_finding_logit_high_educ_women"] * education
         + params["job_finding_logit_good_health_women"] * good_health
         + params["job_finding_logit_age_women"] * age
-        + params["job_finding_logit_age_above_55_women"] * (age - 55) * above_55
+        # + params["job_finding_logit_age_above_55_women"] * (age - 55) * above_55
+        # + params["job_finding_logit_above_50_women"] * above_50
+        # + params["job_finding_logit_above_55_women"] * above_55
+        # + params["job_finding_logit_above_60_women"] * above_60
     )
     prob = logit_formula(exp_factor)
     return prob

@@ -95,9 +95,7 @@ model_solved = specify_and_solve_model(
 )
 # plot_ret_solution(model_solved, specs, path_dict)
 # plot_solution(model_solved=model_solved, specs=specs, path_dict=path_dict)
-plot_ret_probs_for_state(
-        model_solved=model_solved, specs=specs, path_dict=path_dict
-    )
+plot_ret_probs_for_state(model_solved=model_solved, specs=specs, path_dict=path_dict)
 #     plot_work_probs_for_state(
 #         model_solved=model_solved, specs=specs, path_dict=path_dict
 #     )

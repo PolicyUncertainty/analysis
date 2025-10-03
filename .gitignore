@@ -52,3 +52,7 @@ output/est_results/struct_results/*.pkl
 /output/sim_results/*.csv
 !output/sim_results/fire_old_done/
 df*.csv
+
+# Mac files
+**/.DS_Store
+**/._*

@@ -24,10 +24,10 @@ def est_disability_prob(paths, specs):
     logit_vars = [
         "intercept",
         "education",
-        # "age",
+        "age",
         # "age_above_55",
-        "above_50",
-        "above_55",
+        # "above_50",
+        # "above_55",
         "above_60",
     ]
 
@@ -51,10 +51,10 @@ def est_disability_prob(paths, specs):
 
         gender_params = {
             f"disability_logit_const_{sex_append}": params["intercept"],
-            # f"disability_logit_age_{sex_append}": params["age"],
+            f"disability_logit_age_{sex_append}": params["age"],
             # f"disability_logit_age_above_55_{sex_append}": 0.05,
-            f"disability_logit_above_50_{sex_append}": params["above_50"],
-            f"disability_logit_above_55_{sex_append}": params["above_55"],
+            # f"disability_logit_above_50_{sex_append}": params["above_50"],
+            # f"disability_logit_above_55_{sex_append}": params["above_55"],
             f"disability_logit_above_60_{sex_append}": params["above_60"],
             f"disability_logit_high_educ_{sex_append}": params["education"],
         }

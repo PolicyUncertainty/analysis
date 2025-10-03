@@ -388,19 +388,6 @@ def generate_print_func(
                 f"Job offer prob for 60 year old high educated men in good health: {job_offer_prob_60_high_good}",
                 flush=True,
             )
-            job_sep, _ = job_sep_probability(
-                params=params,
-                policy_state=8,
-                education=0,
-                sex=0,
-                age=66,
-                good_health=1,
-                model_specs=specs,
-            )
-            print(
-                f"Job separation prob for 66 year old low educated men next year at SRA 67: {job_sep}",
-                flush=True,
-            )
 
         if print_women_examples:
             job_offer_prob_60_high_good = calc_job_finding_prob_women(
@@ -411,19 +398,6 @@ def generate_print_func(
             )
             print(
                 f"Job offer prob for 60 year old high educated women in good health: {job_offer_prob_60_high_good}",
-                flush=True,
-            )
-            job_sep, _ = job_sep_probability(
-                params=params,
-                policy_state=8,
-                education=0,
-                sex=1,
-                age=66,
-                good_health=1,
-                model_specs=specs,
-            )
-            print(
-                f"Job separation prob for 66 year old low educated women next year at SRA 67: {job_sep}",
                 flush=True,
             )
 

@@ -23,7 +23,7 @@ from simulation.sim_tools.calc_aggregate_results import add_overall_results
 from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 
 
-def process_gender_results(i, df, result_dfs):
+def process_gender_results(i, df, result_dfs, het_spec_vars, het_var_name):
     """
     Process results for all gender categories (men, women, overall)
 
@@ -36,25 +36,30 @@ def process_gender_results(i, df, result_dfs):
         specs: model specifications
         scenario_name: name for debugging/logging
     """
-    mask_m = df["sex"] == 0
-    mask_w = ~mask_m
-    mask_all = mask_w | mask_m
 
-    result_dict_keys = ["overall", "men", "women"]
-    masks = [mask_all, mask_m, mask_w]
+    het_names = list(het_spec_vars.keys()) + ["overall"]
 
-    for mask, key in zip(masks, result_dict_keys):
+    for het_name in het_names:
+        if het_name != "overall":
+            mask = df[het_var_name] == het_spec_vars[het_name]
+            df_scenario = df[mask]
+        else:
+            df_scenario = df
+
         add_overall_results(
-            result_df=result_dfs[key], index=i, pre_name="cf", df_scenario=df[mask]
+            result_df=result_dfs[het_name],
+            index=i,
+            pre_name="cf",
+            df_scenario=df_scenario,
         )
         if i == 0:
-            all_idxs = result_dfs[key].index
+            all_idxs = result_dfs[het_name].index
             for all_i in all_idxs:
                 add_overall_results(
-                    result_df=result_dfs[key],
+                    result_df=result_dfs[het_name],
                     index=all_i,
                     pre_name="base",
-                    df_scenario=df[mask],
+                    df_scenario=df_scenario,
                 )
 
 
@@ -69,51 +74,61 @@ def save_results(result_dfs, path_dict, model_name):
 
 
 # Initialize result dataframes and baseline storage
-def create_result_dfs(sra_at_63):
+def create_result_dfs(sra_at_63, scenarios, het_spec_vars):
     """Create result dataframes for all scenarios and gender categories"""
     result_dfs = {}
-    for scenario in ["unc", "no_unc"]:  # , "debias"]:
+    for scenario in scenarios:
         result_dfs[scenario] = {}
-        for gender in ["men", "women", "overall"]:
+        heterogeneities = list(het_spec_vars.keys()) + ["overall"]
+        for het in heterogeneities:
             df = pd.DataFrame(dtype=float)
             df["sra_at_63"] = sra_at_63
-            result_dfs[scenario][gender] = df
+            result_dfs[scenario][het] = df
     return result_dfs
 
 
 # %%
 # Set specifications
 seeed = 123
-model_name = specs["model_name"]
+model_name = "test"
 util_type = specs["util_type"]
 load_sol_model = True
 load_solutions = None
 load_df = None
 
+het_var_name = "sex"
+het_spec_vars = {"men": 0, "women": 1}
+scenarios = ["unc", "no_unc"]  # , "debias"]
+
 # Load params
-params = pkl.load(
-    open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
-)
+# params = pkl.load(
+#     open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
+# )
+from estimation.struct_estimation.start_params_and_bounds.set_start_params import load_and_set_start_params
+params = load_and_set_start_params(path_dict)
+
 
 
 # Initialize alpha values and replace 0.04 with subjective alpha
 sra_at_63 = np.arange(67, 70 + 1, 1)
 
-result_dfs = create_result_dfs(sra_at_63)
+result_dfs = create_result_dfs(
+    sra_at_63=sra_at_63, scenarios=scenarios, het_spec_vars=het_spec_vars
+)
 
 # Initialize baseline storage
 
-for unc_scenario in [True, False]:
-    if unc_scenario:
-        df_label = "unc"
+for scenario_label in scenarios:
+    if scenario_label == "unc":
+        subj_unc = True
     else:
-        df_label = "no_unc"
+        subj_unc = False
 
     model_sol = None
 
     for i, sra in enumerate(sra_at_63):
-        print("Start simulation for sra: ", sra)
-        if unc_scenario:
+        print("Start simulation for sra: ", sra, flush=True)
+        if subj_unc:
             SRA_at_start = 67
         else:
             SRA_at_start = sra
@@ -122,7 +137,7 @@ for unc_scenario in [True, False]:
         df, model_sol = solve_and_simulate_scenario(
             path_dict=path_dict,
             params=params,
-            subj_unc=unc_scenario,
+            subj_unc=subj_unc,
             custom_resolution_age=None,
             announcement_age=None,
             only_informed=False,
@@ -133,11 +148,17 @@ for unc_scenario in [True, False]:
             solution_exists=load_solutions,
             sol_model_exists=load_sol_model,
             model_solution=model_sol,
-            util_type=util_type
+            util_type=util_type,
         )
 
         df = df.reset_index()
-        process_gender_results(i, df, result_dfs[df_label])
+        process_gender_results(
+            i=i,
+            df=df,
+            result_dfs=result_dfs[scenario_label],
+            het_spec_vars=het_spec_vars,
+            het_var_name=het_var_name,
+        )
         del df
     # # ========== DEBIAS SCENARIO (COMMENTED OUT) ==========
     # df_debias, _ = solve_and_simulate_scenario(

@@ -41,9 +41,8 @@ load_df_unbiased = False # same as above
 
 
 # Load params
-params = pkl.load(
-    open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
-)
+with open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb") as f:
+    params = pkl.load(f)
 
 
 # Simulate baseline 

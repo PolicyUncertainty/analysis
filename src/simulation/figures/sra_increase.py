@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 
 from set_styles import get_figsize, set_colors
+from src.simulation.run_cf_sra_increase import het_var_name
 
 JET_COLOR_MAP, LINE_STYLES = set_colors()
 
@@ -88,7 +89,7 @@ def plot_retirement_age_changes(ax, df_unc, df_no_unc, title, show_legend=False)
     return ax
 
 
-def sra_increase_aggregate_plot_by_gender(path_dict, het_names, fig_name, model_name):
+def sra_increase_aggregate_plot_by_het(path_dict, het_names, fig_name, model_name):
     """Plot the change in baseline outcomes as a percentage of the baseline outcome by gender."""
 
     het_names = ["overall"] + het_names
@@ -103,16 +104,16 @@ def sra_increase_aggregate_plot_by_gender(path_dict, het_names, fig_name, model_
     prepared_data = {}
     for scenario in ["unc", "no_unc"]:
         prepared_data[scenario] = {}
-        for gender in het_names:
-            df = results[scenario][gender]
-            prepared_data[scenario][gender] = prepare_baseline_data(df)
+        for het_name in het_names:
+            df = results[scenario][het_name]
+            prepared_data[scenario][het_name] = prepare_baseline_data(df)
 
     # Filter for reform SRA values
     reform_SRA = [67, 68, 69, 70]
     for scenario in prepared_data:
-        for gender in prepared_data[scenario]:
-            df = prepared_data[scenario][gender]
-            prepared_data[scenario][gender] = df[df["sra_at_63"].isin(reform_SRA)]
+        for het_name in prepared_data[scenario]:
+            df = prepared_data[scenario][het_name]
+            prepared_data[scenario][het_name] = df[df["sra_at_63"].isin(reform_SRA)]
 
     # Create the main behavioral changes plot (3 rows x 3 columns)
     fig, axs = plt.subplots(nrows=3, ncols=4, figsize=get_figsize(ncols=3, nrows=4))
@@ -125,13 +126,11 @@ def sra_increase_aggregate_plot_by_gender(path_dict, het_names, fig_name, model_
     }
 
     column_titles = ["Savings", "Working Hours", "Working Hours < 63", "Retirement Age"]
-    row_titles = ["Overall", "Men", "Women"]
-    gender_order = ["overall", "men", "women"]
 
     # Plot behavioral changes for each gender (rows) and variable (columns)
-    for row, gender in enumerate(gender_order):
-        df_unc = prepared_data["unc"][gender]
-        df_no_unc = prepared_data["no_unc"][gender]
+    for row, het_name in enumerate(het_names):
+        df_unc = prepared_data["unc"][het_name]
+        df_no_unc = prepared_data["no_unc"][het_name]
 
         # Plot savings and working hours
         for col, (var, ylabel) in enumerate(variables.items()):
@@ -152,7 +151,7 @@ def sra_increase_aggregate_plot_by_gender(path_dict, het_names, fig_name, model_
 
             # Add row labels on the left
             if col == 0:
-                ax.set_ylabel(f"{row_titles[row]}\n{ylabel}")
+                ax.set_ylabel(f"{het_name}\n{ylabel}")
 
         # Plot retirement age changes in third column
         ax = axs[row, 3]
@@ -161,7 +160,7 @@ def sra_increase_aggregate_plot_by_gender(path_dict, het_names, fig_name, model_
             ax,
             df_unc,
             df_no_unc,
-            f"{column_titles[2]}" if row == 0 else "",
+            f"{column_titles[3]}" if row == 0 else "",
             show_legend=show_legend,
         )
 
@@ -170,7 +169,7 @@ def sra_increase_aggregate_plot_by_gender(path_dict, het_names, fig_name, model_
             ax.set_xlabel("SRA Reform")
 
         if col == 0:
-            ax.set_ylabel(f"{row_titles[row]}\nChange Retirement Age")
+            ax.set_ylabel(f"{het_name}\nChange Retirement Age")
 
     # Add legend below the middle row plots
     axs[1, 1].legend(

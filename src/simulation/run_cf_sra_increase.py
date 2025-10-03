@@ -98,13 +98,12 @@ load_df = None
 
 het_var_name = "sex"
 het_spec_vars = {"men": [0], "women": [1]}
-scenarios = ["unc", "no_unc"]  # , "debias"]
+scenarios = ["unc", "no_unc"]
 
 # Load params
 params = pkl.load(
     open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
 )
-
 
 
 # Initialize alpha values and replace 0.04 with subjective alpha

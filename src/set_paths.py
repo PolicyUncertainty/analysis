@@ -5,8 +5,6 @@ from pathlib import Path
 import jax
 
 
-
-
 def create_path_dict(define_user=False, user=None):
     # Set jax to 64 bit
     jax.config.update("jax_enable_x64", True)
@@ -25,7 +23,7 @@ def create_path_dict(define_user=False, user=None):
         if user == "b":
             data_path = "C:/Users/bruno/papers/soep/"
         elif user == "m":
-            data_path = "/home/maxbl/Uni/data/"
+            data_path = "/Users/maxblesch/Uni/data/"
         elif user == "g":
             data_path = "/Users/gregorschuler/GitProjects/soep/"
         else:
@@ -57,9 +55,7 @@ def create_path_dict(define_user=False, user=None):
 
     # Assign est result folders
     paths_dict["est_results"] = analysis_path + "output/est_results/"
-    paths_dict["beliefs_est_results"] = (
-        analysis_path + "output/est_results/beliefs/"
-    )
+    paths_dict["beliefs_est_results"] = analysis_path + "output/est_results/beliefs/"
     paths_dict["first_step_results"] = (
         analysis_path + "output/est_results/first_step/"
     )  # legacxy path
@@ -114,16 +110,13 @@ def create_path_dict(define_user=False, user=None):
 def detect_user_from_path():
     """Detect user from current working directory path."""
     current_path = str(Path.cwd()).lower()
-    user_mapping = {
-        'bruno': 'b',
-        'maxbl': 'm', 
-        'gregorschuler': 'g'
-    }
+    user_mapping = {"bruno": "b", "maxbl": "m", "gregorschuler": "g"}
     for username, user_key in user_mapping.items():
         if username in current_path:
             print(f"Auto-detected user: {username}")
             return user_key
     return None
+
 
 def get_model_results_path(paths_dict, model_name):
     model_folder = paths_dict["intermediate_data"] + "model_" + model_name + "/"

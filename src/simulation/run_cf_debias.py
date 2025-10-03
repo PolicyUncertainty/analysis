@@ -118,7 +118,7 @@ plot_retirement_difference(
     df_cf=df_cf,
     final_SRA=sra_at_63,
     model_name=model_name,
-    left_difference=-4,
+    left_difference=-6,
     right_difference=2,
     base_label=base_label,
     cf_label=cf_label,
@@ -131,6 +131,8 @@ plot_retirement_share(
     df_cf=df_cf,
     final_SRA=sra_at_63,
     model_name=model_name,
+    left_difference=-6,
+    right_difference=2,
     base_label=base_label,
     cf_label=cf_label,
 )

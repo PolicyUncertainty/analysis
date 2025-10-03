@@ -35,6 +35,7 @@ cf_label = "Only Informed"
 
 load_model = False  # informed state as type
 load_unc_solution = False  # baseline solution conntainer
+model_solution = None  # actual baseline model solution object (None = create new)
 load_df_baseline = False # True = load existing df, False = create new df, None = create but do not save
 load_df_unbiased = False # same as above
 
@@ -61,7 +62,7 @@ df_base, model_solved_unc = solve_and_simulate_scenario(
     only_informed=False,
     solution_exists=load_unc_solution,
     sol_model_exists=load_model,
-    model_solution=load_unc_solution,
+    model_solution=model_solution,
     util_type=util_type
 )
 df_base = df_base.reset_index()
@@ -83,7 +84,7 @@ df_cf, _ = solve_and_simulate_scenario(
     only_informed=True,
     solution_exists=load_unc_solution,
     sol_model_exists=load_model,
-    model_solution=model_solved_unc,
+    model_solution=model_solved_unc, # use same solution as baseline
     util_type=util_type
 )
 df_cf = df_cf.reset_index()

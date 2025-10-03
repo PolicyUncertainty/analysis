@@ -32,6 +32,69 @@ def solve_and_simulate_scenario(
     edu_type="all",
     util_type="add",
 ):
+    """
+    Solve and simulate a policy scenario for the retirement model.
+
+    This function either loads existing results or creates new ones by solving the model
+    and simulating agent behavior under specified policy conditions.
+
+    Parameters
+    ----------
+    path_dict : dict
+        Dictionary containing all project paths
+    params : dict
+        Estimated model parameters
+    subj_unc : bool
+        Whether agents face subjective uncertainty about future SRA
+    custom_resolution_age : int, optional
+        Age at which uncertainty resolves (None uses spec default)
+    SRA_at_start : int
+        Initial statutory retirement age at model start
+    SRA_at_retirement : float
+        Final statutory retirement age (what SRA becomes)
+    announcement_age : int, optional
+        Age at which policy change is announced (None = no announcement)
+    model_name : str
+        Model identifier for file naming
+
+    Loading Flags
+    -------------
+    df_exists : bool or None
+        - True: Load existing simulation DataFrame, error if not found
+        - False: Create new simulation DataFrame and save it
+        - None: Create new simulation DataFrame but don't save
+    only_informed : bool, default False
+        Whether to simulate only informed agents (True) or include misinformed (False)
+    solution_exists : bool, default True
+        Whether to load existing model solution (True) or solve from scratch (False)
+    sol_model_exists : bool, default True
+        Whether to load existing model specification (True) or create new (False)
+    model_solution : object, optional
+        Pre-solved model object to reuse (None = solve new or load from disk)
+
+    Demographics
+    ------------
+    sex_type : str, default "all"
+        Which gender to simulate ("all", "male", "female")
+    edu_type : str, default "all"
+        Which education level to simulate ("all", "low", "high")
+    util_type : str, default "add" = additive separable
+        Utility function specification
+
+    Returns
+    -------
+    df : pd.DataFrame
+        Simulated lifecycle data for all agents
+    model_solved : object
+        Solved model object (for reuse in subsequent calls)
+
+    Notes
+    -----
+    Loading flags control computational efficiency:
+    - Set solution_exists=True and pass model_solution from previous call to reuse solutions
+    - Set df_exists=True to skip simulation if results already computed
+    - Use df_exists=None for temporary simulations you don't want to save
+    """
     model_out_folder = get_model_results_path(path_dict, model_name)
 
     # Make intitial SRA only two digits after point

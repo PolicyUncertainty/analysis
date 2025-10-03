@@ -34,15 +34,16 @@ base_label = "Baseline with Uninformed"
 cf_label = "Only Informed"
 
 load_model = False  # informed state as type
-load_unc_solution = False  # baseline solution conntainer
+load_unc_solution = None  # baseline solution conntainer
 model_solution = None  # actual baseline model solution object (None = create new)
 load_df_baseline = False # True = load existing df, False = create new df, None = create but do not save
 load_df_unbiased = False # same as above
 
 
 # Load params
-with open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb") as f:
-    params = pkl.load(f)
+params = pkl.load(
+    open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
+)
 
 
 # Simulate baseline 
@@ -90,7 +91,7 @@ df_cf = df_cf.reset_index()
 
 # calculate aggregate and lifetime results
 result_df = pd.DataFrame(index=[0])
-for df, label in zip([df_base, df_cf], [base_label, cf_label]):
+for df, label in zip([df_base, df_cf], ["baseline", "cf"]):
     result_df = add_overall_results(
         result_df=result_df,
         df_scenario=df, index=0, pre_name=label,

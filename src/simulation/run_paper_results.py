@@ -28,7 +28,7 @@ model_name = specs["model_name"]
 util_type = specs["util_type"]
 
 load_model = True  # informed state as type
-load_unc_solution = None  # baseline solution conntainer
+load_unc_solution = False  # baseline solution conntainer
 
 
 # Load params
@@ -48,5 +48,6 @@ res_df = calc_exp_results(
     util_type=util_type,
 )
 table = generate_latex_table(res_df)
+res_df.to_latex(path_dict["sim_results"] + f"baseline_margins_{model_name}.txt")
 with open(path_dict["simulation_tables"] + "baseline_margins.tex", "w") as f:
     f.write(table)

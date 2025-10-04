@@ -9,16 +9,7 @@ path_dict = create_path_dict()
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 specs = generate_derived_and_data_derived_specs(path_dict)
-import numpy as np
-
-from simulation.sim_tools.calc_aggregate_results import (
-    calc_average_retirement_age,
-    calc_consumption_below_63,
-    calc_working_hours_below_63,
-    expected_lifetime_income,
-    pension_wealth_at_retirement,
-    private_wealth_at_retirement,
-)
+from simulation.sim_tools.calc_aggregate_results import add_overall_results
 from simulation.sim_tools.simulate_exp import simulate_exp
 
 
@@ -51,21 +42,13 @@ def calc_exp_results(
         "policy_state": 8,  # SRA = 67
     }
 
-    res_df = pd.DataFrame(
-        index=[
-            "ExpRetAge",
-            "ExpLifetimeIncome",
-            "PrivWealthRet",
-            "PensWealthRet",
-            "ExpWorkHours",
-            "Consumption",
-        ],
-    )
+    # Initialize empty DataFrame
+    res_df = pd.DataFrame()
+
     for subj_unc in [True, False]:
         model_solution = None
         for informed, informed_label in enumerate(["Uninformed", "Informed"]):
-            col_name = f"{informed_label}_unc_{subj_unc}"
-            res_df[col_name] = np.nan
+            col_prefix = f"{informed_label}_unc_{subj_unc}"
             print(
                 "Eval expectation: ",
                 subj_unc,
@@ -90,64 +73,54 @@ def calc_exp_results(
                 model_solution=model_solution,
                 util_type=util_type,
             )
-            res_df.loc["ExpRetAge", col_name] = calc_average_retirement_age(df)
-            res_df.loc["ExpLifetimeIncome", col_name] = (
-                expected_lifetime_income(df, specs) * 10
+
+            # Use col_prefix as index, empty string as pre_name
+            res_df = add_overall_results(
+                result_df=res_df,
+                df_scenario=df,
+                index=col_prefix,
+                pre_name="",
+                specs=specs,
             )
-            res_df.loc["PrivWealthRet", col_name] = (
-                private_wealth_at_retirement(df) * 10
-            )
-            res_df.loc["PensWealthRet", col_name] = (
-                pension_wealth_at_retirement(df, specs) * 10
-            )
-            res_df.loc["ExpWorkHours", col_name] = calc_working_hours_below_63(df)
-            res_df.loc["Consumption", col_name] = calc_consumption_below_63(df) * 10
 
     return res_df
 
 
 def generate_latex_table(res_df):
-    """
-    Generate LaTeX tabular code from the results DataFrame.
-    Only produces the tabular environment content (no table wrapper, caption, or notes).
+    """Generate LaTeX table comparing informed vs uninformed under different uncertainty scenarios."""
 
-    Parameters
-    ----------
-    res_df : pd.DataFrame
-        DataFrame with outcomes in rows and scenarios in columns
-
-    Returns
-    -------
-    str
-        LaTeX tabular code
-    """
-
-    # Create mapping for expressive row names
-    row_names = {
-        "ExpWorkHours": "Expected Work Hours",
-        "PrivWealthRet": "Private Wealth at Retirement (Tsd.)",
-        "PensWealthRet": "Pension Wealth at Retirement (Tsd.)",
-        "ExpLifetimeIncome": "Expected Lifetime Income (Tsd.)",
-        "ExpRetAge": "Expected Retirement Age",
-        "Consumption": "Consumption (Tsd.)",
+    # Define metrics matching add_overall_results
+    metrics = {
+        # Work Life (<63)
+        "working_hours_below_63": "Annual Labor Supply (hrs)",
+        "consumption_below_63": "Annual Consumption",
+        "savings_below_63": "Annual Savings",
+        # Retirement
+        "ret_age": "Retirement Age",
+        "ret_age_excl_disabled": "Retirement Age (excl. Disability)",
+        "pension_wealth_at_ret": "Pension Wealth (PV at Retirement)",
+        "private_wealth_at_ret": "Financial Wealth at Retirement",
+        # Lifecycle (30+)
+        "lifecycle_working_hours": "Annual Labor Supply (hrs)",
+        "lifecycle_avg_wealth": "Average Financial Wealth",
     }
 
-    # Reorder rows: ExpRetAge first, then wealth variables, then reaction margins
-    row_order = [
-        "ExpRetAge",
-        "PrivWealthRet",
-        "PensWealthRet",
-        "ExpLifetimeIncome",
-        "ExpWorkHours",
-        "Consumption",
-    ]
+    sections = {
+        "Work Life (<63)": [
+            "working_hours_below_63",
+            "consumption_below_63",
+            "savings_below_63",
+        ],
+        "Retirement": [
+            "ret_age",
+            "ret_age_excl_disabled",
+            "pension_wealth_at_ret",
+            "private_wealth_at_ret",
+        ],
+        "Lifecycle (30+)": ["lifecycle_working_hours", "lifecycle_avg_wealth"],
+    }
 
-    # Add any remaining rows that might exist
-    for idx in res_df.index:
-        if idx not in row_order:
-            row_order.append(idx)
-
-    # Reorder columns: No Reform (Informed, Uninformed), then Expected Reform (Informed, Uninformed)
+    # Column order (now used as index)
     col_order = [
         "Informed_unc_False",
         "Uninformed_unc_False",
@@ -155,50 +128,42 @@ def generate_latex_table(res_df):
         "Uninformed_unc_True",
     ]
 
-    # Reorder dataframe
-    df_latex = res_df.copy()
-    df_latex = df_latex.reindex(index=row_order, columns=col_order)
-
-    # Rename index
-    df_latex.index = df_latex.index.map(lambda x: row_names.get(x, x))
-
-    # Start building LaTeX tabular
-    latex_code = []
-    latex_code.append("\\begin{tabular}{lcccc}")
-    latex_code.append("    \\toprule")
-
-    # Header with scenario groups
-    latex_code.append(
+    latex_lines = []
+    latex_lines.append("\\begin{tabular}{lcccc}")
+    latex_lines.append("    \\toprule")
+    latex_lines.append(
         "    \\multirow{2}{*}{\\textbf{Outcome}} & "
-        + "\\multicolumn{2}{c}{\\textbf{No Expected Reform}} & "
-        + "\\multicolumn{2}{c}{\\textbf{Expected Reform}} \\\\"
+        "\\multicolumn{2}{c}{\\textbf{No Expected Reform}} & "
+        "\\multicolumn{2}{c}{\\textbf{Expected Reform}} \\\\"
     )
-    latex_code.append("    \\cmidrule(lr){2-3} \\cmidrule(lr){4-5}")
-
-    # Column headers
-    latex_code.append(
+    latex_lines.append("    \\cmidrule(lr){2-3} \\cmidrule(lr){4-5}")
+    latex_lines.append(
         "     & \\textbf{Informed} & \\textbf{Uninformed} & \\textbf{Informed} & \\textbf{Uninformed} \\\\"
     )
-    latex_code.append("  {}   & (1) & (2) & (3) & (4) \\\\")
-    latex_code.append("    \\midrule")
+    latex_lines.append("  {}   & (1) & (2) & (3) & (4) \\\\")
+    latex_lines.append("    \\midrule")
 
-    # Data rows
-    for idx, row_name in enumerate(df_latex.index):
-        row_data = [row_name]
-        for col in df_latex.columns:
-            val = df_latex.loc[row_name, col]
-            row_data.append(f"{val:.2f}")
+    first_section = True
+    for section_name, section_metrics in sections.items():
+        if not first_section:
+            latex_lines.append("    \\midrule")
+        first_section = False
 
-        # Add extra spacing after ExpRetAge (row 0) and after PensWealthRet (row 2)
-        line = "    " + " & ".join(row_data) + " \\\\"
-        if idx == 0:  # After ExpRetAge
-            line += " \\addlinespace"
-        elif idx == 2:  # After PensWealthRet
-            line += " \\addlinespace"
+        latex_lines.append(
+            f"    \\multicolumn{{5}}{{l}}{{\\textit{{{section_name}}}}} \\\\"
+        )
 
-        latex_code.append(line)
+        for metric_key in section_metrics:
+            outcome_name = metrics[metric_key]
+            row_data = [outcome_name]
 
-    latex_code.append("    \\bottomrule")
-    latex_code.append("\\end{tabular}")
+            for col in col_order:
+                val = res_df.loc[col, f"_{metric_key}"]
+                row_data.append(f"{val:.2f}")
 
-    return "\n".join(latex_code)
+            latex_lines.append("    " + " & ".join(row_data) + " \\\\")
+
+    latex_lines.append("    \\bottomrule")
+    latex_lines.append("\\end{tabular}")
+
+    return "\n".join(latex_lines)

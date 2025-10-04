@@ -1,26 +1,35 @@
 # %%
-import pandas as pd
 import pickle as pkl
+
 import numpy as np
+import pandas as pd
+
 # paths and specs
 from set_paths import create_path_dict
+
 path_dict = create_path_dict()
 from specs.derive_specs import generate_derived_and_data_derived_specs
+
 specs = generate_derived_and_data_derived_specs(path_dict)
 import jax
+
 jax.config.update("jax_enable_x64", True)
-# sim tools 
-from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
-from simulation.sim_tools.simulation_print import start_simulation_print
-from simulation.sim_tools.calc_aggregate_results import add_overall_results
-from simulation.sim_tools.calc_life_cycle_detailed import calc_life_cycle_detailed
+from simulation.figures.detailed_lc_results import plot_detailed_lifecycle_results
+
 # figures and tables
 from simulation.figures.retirement_plot import (
     plot_retirement_difference,
     plot_retirement_share,
 )
-from simulation.figures.detailed_lc_results import plot_detailed_lifecycle_results
-from simulation.tables.aggregate_comparison_baseline_cf import aggregate_comparison_baseline_cf
+from simulation.sim_tools.calc_aggregate_results import add_overall_results
+from simulation.sim_tools.calc_life_cycle_detailed import calc_life_cycle_detailed
+
+# sim tools
+from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
+from simulation.sim_tools.simulation_print import start_simulation_print
+from simulation.tables.aggregate_comparison_baseline_cf import (
+    aggregate_comparison_baseline_cf,
+)
 from simulation.tables.cv import calc_compensated_variation
 
 # %%
@@ -36,8 +45,8 @@ cf_label = "Only Informed"
 load_model = False  # informed state as type
 load_unc_solution = None  # baseline solution conntainer
 model_solution = None  # actual baseline model solution object (None = create new)
-load_df_baseline = None # True = load existing df, False = create new df, None = create but do not save
-load_df_unbiased = None # same as above
+load_df_baseline = None  # True = load existing df, False = create new df, None = create but do not save
+load_df_unbiased = None  # same as above
 
 
 # Load params
@@ -46,8 +55,16 @@ params = pkl.load(
 )
 
 
-# Simulate baseline 
-start_simulation_print(model_name=model_name, sra_63=sra_at_63, uncertainty=True, misinformation=True, load_model=load_model, load_solution=load_unc_solution, load_df=load_df_baseline)
+# Simulate baseline
+start_simulation_print(
+    model_name=model_name,
+    sra_63=sra_at_63,
+    uncertainty=True,
+    misinformation=True,
+    load_model=load_model,
+    load_solution=load_unc_solution,
+    load_df=load_df_baseline,
+)
 
 df_base, model_solved_unc = solve_and_simulate_scenario(
     path_dict=path_dict,
@@ -63,13 +80,21 @@ df_base, model_solved_unc = solve_and_simulate_scenario(
     solution_exists=load_unc_solution,
     sol_model_exists=load_model,
     model_solution=model_solution,
-    util_type=util_type
+    util_type=util_type,
 )
 df_base = df_base.reset_index()
 
 
 # Simulate counterfactual without misinformation
-start_simulation_print(model_name=model_name, sra_63=sra_at_63, uncertainty=True, misinformation=False, load_model=load_model, load_solution=load_unc_solution, load_df=load_df_unbiased)
+start_simulation_print(
+    model_name=model_name,
+    sra_63=sra_at_63,
+    uncertainty=True,
+    misinformation=False,
+    load_model=load_model,
+    load_solution=load_unc_solution,
+    load_df=load_df_unbiased,
+)
 
 df_cf, _ = solve_and_simulate_scenario(
     path_dict=path_dict,
@@ -84,8 +109,8 @@ df_cf, _ = solve_and_simulate_scenario(
     only_informed=True,
     solution_exists=load_unc_solution,
     sol_model_exists=load_model,
-    model_solution=model_solved_unc, # use same solution as baseline
-    util_type=util_type
+    model_solution=model_solved_unc,  # use same solution as baseline
+    util_type=util_type,
 )
 df_cf = df_cf.reset_index()
 
@@ -93,9 +118,7 @@ df_cf = df_cf.reset_index()
 result_df = pd.DataFrame(index=[0])
 for df, label in zip([df_base, df_cf], ["baseline", "cf"]):
     result_df = add_overall_results(
-        result_df=result_df,
-        df_scenario=df, index=0, pre_name=label,
-        specs=specs
+        result_df=result_df, df_scenario=df, index=0, pre_name=label, specs=specs
     )
 
 df_lc_baseline = calc_life_cycle_detailed(df_base)
@@ -107,7 +130,7 @@ aggregate_comparison_baseline_cf(
     base_label=base_label,
     cf_label=cf_label,
     path_dict=path_dict,
-    model_name=model_name
+    model_name=model_name,
 )
 
 # plots

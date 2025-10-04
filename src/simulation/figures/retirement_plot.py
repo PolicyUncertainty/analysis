@@ -1,8 +1,10 @@
+import os
+
 import matplotlib.pyplot as plt
 import numpy as np
 
-from set_styles import get_figsize
-import os
+from set_styles import get_figsize, set_plot_defaults
+
 
 def plot_retirement_difference(
     path_dict,
@@ -16,6 +18,7 @@ def plot_retirement_difference(
     base_label,
     cf_label,
 ):
+    set_plot_defaults(plot_type="paper")
     df_base["SRA_diff"] = df_base["age"] - final_SRA
     df_cf["SRA_diff"] = df_cf["age"] - final_SRA
 
@@ -28,13 +31,28 @@ def plot_retirement_difference(
         & (df_base["SRA_diff"] <= right_difference)
         & (df_base["choice"] == 0)
         & (df_base["lagged_choice"] != 0)
+        & (df_base["health"] != 2)
     ]
     df_cf_plot = df_cf[
         (df_cf["SRA_diff"] >= left_difference)
         & (df_cf["SRA_diff"] <= right_difference)
         & (df_cf["choice"] == 0)
         & (df_cf["lagged_choice"] != 0)
+        & (df_cf["health"] != 2)
     ]
+
+    # assert (df_base["policy_state_value"] == final_SRA).all()
+    # assert (df_cf["policy_state_value"] == final_SRA).all()
+
+    print(df_base_plot["policy_state_value"].value_counts(), flush=True)
+    print(df_cf_plot["policy_state_value"].value_counts(), flush=True)
+
+    # Assign to very long insured SRA_diff equal 0, if they are not
+    # past SRA (SRA diff >0)
+    mask_base = (df_base_plot["SRA_diff"] < 0) & (df_base_plot["very_long_insured"])
+    mask_cf = (df_cf_plot["SRA_diff"] < 0) & (df_cf_plot["very_long_insured"])
+    df_base_plot.loc[mask_base, "SRA_diff"] = 0
+    df_cf_plot.loc[mask_cf, "SRA_diff"] = 0
 
     inflow_shares_base = (
         df_base_plot["SRA_diff"].value_counts(normalize=True).sort_index()
@@ -42,7 +60,7 @@ def plot_retirement_difference(
     inflow_shares_cf = df_cf_plot["SRA_diff"].value_counts(normalize=True).sort_index()
 
     # Make barplot with SRA diff on x-axis and inflow shares on y-axis
-    fig, ax = plt.subplots(figsize=(10, 6))
+    fig, ax = plt.subplots(figsize=get_figsize(1, 1))
     ax.bar(
         inflow_shares_base.index - 0.1,
         inflow_shares_base.values,
@@ -53,17 +71,14 @@ def plot_retirement_difference(
         inflow_shares_cf.index + 0.1, inflow_shares_cf.values, width=0.2, label=cf_label
     )
     ax.legend()
-    ax.set_xlabel("Age - SRA")
-    ax.set_ylabel("Inflow into retirement share")
-    ax.set_title(f"Inflow into retirement by age relative to SRA {final_SRA}")
-    fig.savefig(
-        plot_folder
-        + f"retirement_inflow_comparison_sra_{final_SRA}_{model_name}.png"
-    )
+    ax.set_xlabel("Distance to FRA")
+    ax.set_ylabel("Share of fresh retirees")
+    # ax.set_title(f"Inflow into retirement by age relative to SRA {final_SRA}")
+    fig.savefig(plot_folder + f"retirement_inflow_comparison_sra_{int(final_SRA)}.png")
     plt.close(fig)
 
     # Additional plot: 4 subplots (2x2) for each sex-edu combination
-    fig, axes = plt.subplots(2, 2, figsize=(15, 10))
+    fig, axes = plt.subplots(2, 2, figsize=get_figsize(2, 2))
 
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
         for edu_var, edu_label in enumerate(specs["education_labels"]):
@@ -101,19 +116,18 @@ def plot_retirement_difference(
                 label=cf_label,
             )
 
-            ax.set_xlabel("Age - SRA")
+            ax.set_xlabel("Distance to FRA")
             ax.set_ylabel("Inflow into retirement share")
             ax.set_title(f"{sex_label} - {edu_label}")
             ax.legend()
 
-    plt.suptitle(
-        f"Inflow into retirement by education and sex relative to SRA {final_SRA}"
-    )
+    # plt.suptitle(
+    #     f"Inflow into retirement by education and sex relative to SRA {final_SRA}"
+    # )
+    # Show final SRA in in plot as int not as float
+    plot_name = f"retirement_inflow_by_edu_sex_sra_{int(final_SRA)}.png"
     plt.tight_layout()
-    fig.savefig(
-        plot_folder
-        + f"retirement_inflow_by_edu_sex_sra_{final_SRA}_{model_name}.png"
-    )
+    fig.savefig(plot_folder + plot_name)
     plt.close(fig)
 
 
@@ -129,6 +143,7 @@ def plot_retirement_share(
     base_label,
     cf_label,
 ):
+    set_plot_defaults(plot_type="paper")
     plot_folder = path_dict["simulation_plots"] + model_name + "/"
     if not os.path.exists(plot_folder):
         os.makedirs(plot_folder)
@@ -166,8 +181,7 @@ def plot_retirement_share(
 
     plt.tight_layout()
     fig_all.savefig(
-        plot_folder
-        + f"retirement_share_comparison_sra_{final_SRA}_{model_name}.png"
+        plot_folder + f"retirement_share_comparison_sra_{final_SRA}_{model_name}.png"
     )
     plt.close(fig_all)
 

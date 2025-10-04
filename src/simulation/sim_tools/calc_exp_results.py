@@ -37,7 +37,7 @@ def calc_exp_results(
             (sex, education), "assets_begin_of_period_median"
         ],
         "experience": initial_obs_table.loc[(sex, education), "experience_median"],
-        "partner_state": 0,
+        "partner_state": 1,
         "job_offer": 1,
         "policy_state": 8,  # SRA = 67
     }
@@ -96,7 +96,8 @@ def generate_latex_table(res_df):
         "consumption_below_63": "Annual Consumption",
         "savings_below_63": "Annual Savings",
         # Retirement
-        "ret_age": "Retirement Age",
+        # "ret_age": "Retirement Age",
+        "sra_at_ret": "SRA at Retirement",
         "ret_age_excl_disabled": "Retirement Age (excl. Disability)",
         "pension_wealth_at_ret": "Pension Wealth (PV at Retirement)",
         "private_wealth_at_ret": "Financial Wealth at Retirement",
@@ -106,48 +107,44 @@ def generate_latex_table(res_df):
     }
 
     sections = {
-        "Work Life (<63)": [
-            "working_hours_below_63",
-            "consumption_below_63",
-            "savings_below_63",
-        ],
         "Retirement": [
-            "ret_age",
+            # "ret_age",
+            "sra_at_ret",
             "ret_age_excl_disabled",
             "pension_wealth_at_ret",
             "private_wealth_at_ret",
+        ],
+        "Work Life ($<63$)": [
+            "working_hours_below_63",
+            "consumption_below_63",
+            "savings_below_63",
         ],
         "Lifecycle (30+)": ["lifecycle_working_hours", "lifecycle_avg_wealth"],
     }
 
     # Column order (now used as index)
     col_order = [
-        "Informed_unc_False",
-        "Uninformed_unc_False",
         "Informed_unc_True",
+        "Informed_unc_False",
         "Uninformed_unc_True",
+        "Uninformed_unc_False",
     ]
 
     latex_lines = []
     latex_lines.append("\\begin{tabular}{lcccc}")
     latex_lines.append("    \\toprule")
     latex_lines.append(
-        "    \\multirow{2}{*}{\\textbf{Outcome}} & "
-        "\\multicolumn{2}{c}{\\textbf{No Expected Reform}} & "
-        "\\multicolumn{2}{c}{\\textbf{Expected Reform}} \\\\"
+        "    \\multirow{2}{*}{Expectation at 30} & "
+        "\\multicolumn{2}{c}{Informed} & "
+        "\\multicolumn{2}{c}{Uninformed} \\\\"
     )
     latex_lines.append("    \\cmidrule(lr){2-3} \\cmidrule(lr){4-5}")
-    latex_lines.append(
-        "     & \\textbf{Informed} & \\textbf{Uninformed} & \\textbf{Informed} & \\textbf{Uninformed} \\\\"
-    )
+    latex_lines.append("     & Unc. & No Unc. & Unc. & No Unc. \\\\")
     latex_lines.append("  {}   & (1) & (2) & (3) & (4) \\\\")
     latex_lines.append("    \\midrule")
 
-    first_section = True
     for section_name, section_metrics in sections.items():
-        if not first_section:
-            latex_lines.append("    \\midrule")
-        first_section = False
+        latex_lines.append("    \\midrule")
 
         latex_lines.append(
             f"    \\multicolumn{{5}}{{l}}{{\\textit{{{section_name}}}}} \\\\"

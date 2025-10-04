@@ -16,10 +16,10 @@ def investigate_start_obs(
     # Get table of median and mean for continous variables
     # Get table of median and mean wealth
     median = start_period_data.groupby(["sex", "education"])[
-        ["experience_years", "experience", "assets_begin_of_period"]
+        ["experience_years", "experience", "assets_begin_of_period", "wealth"]
     ].median()
     mean = start_period_data.groupby(["sex", "education"])[
-        ["experience_years", "experience", "assets_begin_of_period"]
+        ["experience_years", "experience", "assets_begin_of_period", "wealth"]
     ].mean()
     rename_median = {col: col + "_median" for col in median.columns}
     rename_mean = {col: col + "_mean" for col in mean.columns}

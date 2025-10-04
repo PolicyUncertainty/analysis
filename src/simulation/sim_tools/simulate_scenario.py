@@ -1,5 +1,6 @@
 import pandas as pd
 
+from model_code.pension_system.early_retirement_paths import check_very_long_insured
 from model_code.specify_model import (
     create_model_config_wo_informed,
     define_alternative_sim_specifications,
@@ -119,7 +120,9 @@ def solve_and_simulate_scenario(
 
     if df_exists:
         data_sim = pd.read_csv(df_file)
-        print("Loading existing simulated dataframe from file. Warning: returns None for model solution.")
+        print(
+            "Loading existing simulated dataframe from file. Warning: returns None for model solution."
+        )
         return data_sim, None
 
     if model_solution is None:
@@ -156,7 +159,7 @@ def solve_and_simulate_scenario(
             alternative_sim_specifications=alternative_sim_specifications,
             alternative_specs=alternative_sim_specs,
         )
-    # Simulate 
+    # Simulate
     data_sim = simulate_scenario(
         path_dict=path_dict,
         initial_SRA=SRA_at_start,
@@ -332,6 +335,19 @@ def _compute_initial_informed_status(df, specs):
     return df
 
 
+def _add_very_long_insured_claim(df, specs):
+    """Add a column indicating whether the individual is classified as 'very long insured'."""
+    retirement_age_difference = df["policy_state_value"] - df["age"]
+
+    df["very_long_insured"] = check_very_long_insured(
+        retirement_age_difference=retirement_age_difference.values,
+        experience_years=df["exp_years"].values,
+        sex=df["sex"].values.astype(int),
+        model_specs=specs,
+    )
+    return df
+
+
 def create_additional_variables(df, specs):
     """Wrapper function to create additional variables in the simulated dataframe."""
     df = df.copy()
@@ -340,5 +356,6 @@ def create_additional_variables(df, specs):
     df = _transform_states_into_variables(df, specs)
     df = _compute_working_hours(df, specs)
     df = _compute_actual_retirement_age(df)
+    df = _add_very_long_insured_claim(df, specs)
     df = _compute_initial_informed_status(df, specs)
     return df

@@ -103,14 +103,16 @@ def estimate_model(
         try:
             condition = lower_bounds[name] <= start_params[name] <= upper_bounds[name]
         except:
-            raise ValueError(f"Start param {name} has invalid bounds or start value. "
-                             f"Upper bound: {upper_bounds[name]}, lower bound: {lower_bounds[name]}, start value: {start_params[name]}")
+            raise ValueError(
+                f"Start param {name} has invalid bounds or start value. "
+                f"Upper bound: {upper_bounds[name]}, lower bound: {lower_bounds[name]}, start value: {start_params[name]}"
+            )
 
         if not condition:
             raise ValueError(
-                    f"Start param {name} with value {start_params[name]} is not within bounds "
-                    f"[{lower_bounds[name]}, {upper_bounds[name]}]"
-                )
+                f"Start param {name} with value {start_params[name]} is not within bounds "
+                f"[{lower_bounds[name]}, {upper_bounds[name]}]"
+            )
 
     bounds = om.Bounds(lower=lower_bounds, upper=upper_bounds)
 
@@ -330,7 +332,10 @@ def load_and_prep_data_estimation(path_dict, model_class):
 
 
 def generate_print_func(
-    params_to_estimate_names, specs, print_men_examples=True, print_women_examples=True
+    params_to_estimate_names,
+    specs=None,
+    print_men_examples=True,
+    print_women_examples=True,
 ):
     men_params = get_gendered_params(params_to_estimate_names, "_men")
     women_params = get_gendered_params(params_to_estimate_names, "_women")

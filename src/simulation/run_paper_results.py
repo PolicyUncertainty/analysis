@@ -28,7 +28,7 @@ model_name = specs["model_name"]
 util_type = specs["util_type"]
 
 load_model = True  # informed state as type
-load_unc_solution = False  # baseline solution conntainer
+load_unc_solution = None  # baseline solution conntainer
 
 
 # Load params
@@ -36,18 +36,22 @@ params = pkl.load(
     open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
 )
 
-res_df = calc_exp_results(
-    path_dict=path_dict,
-    specs=specs,
-    sex=0,
-    education=0,
-    params=params,
-    model_name=model_name,
-    load_solution=load_unc_solution,
-    load_sol_model=load_model,
-    util_type=util_type,
+# res_df = calc_exp_results(
+#     path_dict=path_dict,
+#     specs=specs,
+#     sex=0,
+#     education=0,
+#     params=params,
+#     model_name=model_name,
+#     load_solution=load_unc_solution,
+#     load_sol_model=load_model,
+#     util_type=util_type,
+# )
+# res_df.to_csv(path_dict["sim_results"] + f"baseline_margins_{model_name}.to_csv")
+
+res_df = pd.read_csv(
+    path_dict["sim_results"] + f"baseline_margins_{model_name}.to_csv", index_col=0
 )
 table = generate_latex_table(res_df)
-res_df.to_latex(path_dict["sim_results"] + f"baseline_margins_{model_name}.txt")
 with open(path_dict["simulation_tables"] + "baseline_margins.tex", "w") as f:
     f.write(table)

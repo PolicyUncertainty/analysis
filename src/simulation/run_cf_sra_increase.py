@@ -96,8 +96,8 @@ load_sol_model = None
 load_solutions = None
 load_df = None
 
-het_var_name = "initial_informed"
-het_spec_vars = {"uninformed": [0], "informed": [1]}
+het_var_name = "sex"
+het_spec_vars = {"men": [0], "women": [1]}
 scenarios = ["unc", "no_unc"]
 
 # Load params

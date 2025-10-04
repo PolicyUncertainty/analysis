@@ -42,7 +42,7 @@ sra_at_63 = 69.0
 base_label = "Baseline with Uninformed"
 cf_label = "Only Informed"
 
-load_model = False  # informed state as type
+load_model = True  # informed state as type
 load_unc_solution = None  # baseline solution conntainer
 model_solution = None  # actual baseline model solution object (None = create new)
 load_df_baseline = None  # True = load existing df, False = create new df, None = create but do not save
@@ -114,6 +114,21 @@ df_cf, _ = solve_and_simulate_scenario(
 )
 df_cf = df_cf.reset_index()
 
+# plots
+plot_retirement_difference(
+    path_dict=path_dict,
+    specs=specs,
+    df_base=df_base,
+    df_cf=df_cf,
+    final_SRA=sra_at_63,
+    model_name=model_name,
+    left_difference=-6,
+    right_difference=2,
+    base_label=base_label,
+    cf_label=cf_label,
+)
+
+
 # calculate aggregate and lifetime results
 result_df = pd.DataFrame(index=[0])
 for df, label in zip([df_base, df_cf], ["baseline", "cf"]):
@@ -133,8 +148,8 @@ aggregate_comparison_baseline_cf(
     model_name=model_name,
 )
 
-# plots
-plot_retirement_difference(
+
+plot_retirement_share(
     path_dict=path_dict,
     specs=specs,
     df_base=df_base,
@@ -147,27 +162,14 @@ plot_retirement_difference(
     cf_label=cf_label,
 )
 
-# plot_retirement_share(
+# plot_detailed_lifecycle_results(
 #     path_dict=path_dict,
 #     specs=specs,
-#     df_base=df_base,
-#     df_cf=df_cf,
-#     final_SRA=sra_at_63,
 #     model_name=model_name,
-#     left_difference=-6,
-#     right_difference=2,
-#     base_label=base_label,
-#     cf_label=cf_label,
+#     comparison_name="all_informed",
+#     df_baseline=df_lc_baseline,
+#     df_comparison=df_lc_cf,
+#     show=False,
+#     save=True,
+#     end_age=80,
 # )
-
-plot_detailed_lifecycle_results(
-    path_dict=path_dict,
-    specs=specs,
-    model_name=model_name,
-    comparison_name="all_informed",
-    df_baseline=df_lc_baseline,
-    df_comparison=df_lc_cf,
-    show=False,
-    save=True,
-    end_age=80,
-)

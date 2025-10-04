@@ -28,7 +28,12 @@ def utility_final_consume_all(
         jnp.log(wealth + kappa),
         unscaled_bequest_mu_not_one,
     )
-
+    # bequest_scale = (
+    #     params["bequest_scale_low_men"] * (1 - education) * (1 - sex)
+    #     + params["bequest_scale_low_women"] * (1 - education) * sex
+    #     + params["bequest_scale_high_men"] * education * (1 - sex)
+    #     + params["bequest_scale_high_women"] * education * sex
+    # )
     bequest_scale = params["bequest_scale"]
     return bequest_scale * unscaled_bequest
 
@@ -36,11 +41,18 @@ def utility_final_consume_all(
 def marginal_utility_final_consume_all(wealth, education, sex, params):
 
     mu = jax.lax.select(education == 0, params["mu_low"], params["mu_high"])
-    bequest_scale = params["bequest_scale"]
     kappa = (
         params["kappa_low_men"] * (1 - education) * (1 - sex)
         + params["kappa_low_women"] * (1 - education) * sex
         + params["kappa_high_men"] * education * (1 - sex)
         + params["kappa_high_women"] * education * sex
     )
+    # bequest_scale = (
+    #     params["bequest_scale_low_men"] * (1 - education) * (1 - sex)
+    #     + params["bequest_scale_low_women"] * (1 - education) * sex
+    #     + params["bequest_scale_high_men"] * education * (1 - sex)
+    #     + params["bequest_scale_high_women"] * education * sex
+    # )
+    bequest_scale = params["bequest_scale"]
+
     return bequest_scale * ((wealth + kappa) ** -mu)

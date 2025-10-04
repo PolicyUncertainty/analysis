@@ -5,6 +5,7 @@ import jax
 import matplotlib.pyplot as plt
 import numpy as np
 
+from estimation.struct_estimation.scripts.estimate_setup import generate_print_func
 from set_paths import create_path_dict
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
@@ -23,10 +24,17 @@ load_sol_model = True
 params = pickle.load(
     open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
 )
-params["bequest_scale"] = 5
-params["mu_low"] = 1.5
-params["mu_high"] = 1.5
+from estimation.struct_estimation.scripts.estimate_setup import generate_print_func
 
+# params["bequest_scale_low_men"] = 5
+# params["kappa_low_men"] = 0
+# params["bequest_scale_high_men"] = 5
+# params["kappa_high_men"] = 0
+# params["bequest_scale_low_women"] = 1
+# params["kappa_low_women"] = 30
+# params["bequest_scale_high_women"] = 1
+# params["kappa_high_women"] = 0
+# generate_print_func(params.keys())(params)
 
 # which_plots = input(
 #     "Which plots do you want to show?\n \n"
@@ -38,7 +46,7 @@ params["mu_high"] = 1.5
 #     " - [wc]hoices and wealth\n"
 # )
 # print(jax.devices())
-which_plots = "wc"
+which_plots = "w"
 
 from simulation.figures.simulated_model_fit import (
     plot_choice_shares_single,

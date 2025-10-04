@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from set_styles import get_figsize, set_colors
+from set_styles import get_figsize, set_colors, set_plot_defaults
 
 JET_COLOR_MAP, LINE_STYLES = set_colors()
 
@@ -56,15 +56,19 @@ def plot_behavioral_changes(ax, df_unc, df_no_unc, var, ylabel, title):
     ax.plot(df_no_unc["sra_at_63"], change_no_unc * 100, label="Without Uncertainty")
 
     ax.set_ylabel(ylabel)
-    ax.set_title(title)
+    # ax.set_title(title)
     return ax
 
 
 def plot_retirement_age_changes(ax, df_unc, df_no_unc, title, show_legend=False):
     """Plot retirement age changes"""
     # Change of retirement age
-    change_ret_unc = df_unc["cf_ret_age"] - df_unc["base_ret_age"]
-    change_ret_no_unc = df_no_unc["cf_ret_age"] - df_no_unc["base_ret_age"]
+    change_ret_unc = (
+        df_unc["cf_ret_age_excl_disabled"] - df_unc["base_ret_age_excl_disabled"]
+    )
+    change_ret_no_unc = (
+        df_no_unc["cf_ret_age_excl_disabled"] - df_no_unc["base_ret_age_excl_disabled"]
+    )
 
     ax.plot(df_unc["sra_at_63"], change_ret_unc, label="With Uncertainty")
     ax.plot(df_no_unc["sra_at_63"], change_ret_no_unc, label="Without Uncertainty")
@@ -80,7 +84,7 @@ def plot_retirement_age_changes(ax, df_unc, df_no_unc, title, show_legend=False)
     )
 
     ax.set_ylabel("Change Retirement Age")
-    ax.set_title(title)
+    # ax.set_title(title)
 
     if show_legend:
         ax.legend()
@@ -90,7 +94,7 @@ def plot_retirement_age_changes(ax, df_unc, df_no_unc, title, show_legend=False)
 
 def sra_increase_aggregate_plot_by_het(path_dict, het_names, fig_name, model_name):
     """Plot the change in baseline outcomes as a percentage of the baseline outcome by gender."""
-
+    set_plot_defaults(plot_type="paper")
     het_names = ["overall"] + het_names
     # Load all results
     results = load_het_results(path_dict, het_names, model_name)
@@ -220,17 +224,20 @@ def sra_increase_aggregate_plot_by_het(path_dict, het_names, fig_name, model_nam
 def sra_increase_aggregate_plot(path_dict, model_name):
     """
     Wrapper function to maintain backward compatibility with original function name.
-    Creates both the original overall plots and the new gender-specific plots.
+    Creates four separate single plots for overall results.
     """
+    set_plot_defaults(plot_type="paper")
 
     plot_folder = path_dict["simulation_plots"] + model_name + "/"
     if not os.path.exists(plot_folder):
         os.makedirs(plot_folder)
 
-    # Also create the original overall plots for backward compatibility
-    results = load_het_results(path_dict, het_names=["overall"], model_name=model_name)
+    # Load overall results
+    results = load_het_results(
+        path_dict, het_names=["overall", "men"], model_name=model_name
+    )
 
-    # Use overall results for original plots
+    # Use overall results for plots
     df_unc = prepare_baseline_data(results["unc"]["overall"])
     df_no_unc = prepare_baseline_data(results["no_unc"]["overall"])
 
@@ -238,45 +245,66 @@ def sra_increase_aggregate_plot(path_dict, model_name):
     df_unc = df_unc[df_unc["sra_at_63"].isin(reform_SRA)]
     df_no_unc = df_no_unc[df_no_unc["sra_at_63"].isin(reform_SRA)]
 
-    # Original behavior plot
-    fig, axs = plt.subplots(ncols=3, figsize=get_figsize(ncols=3, nrows=1))
-
-    variables = {
-        "below_sixty_savings": "Perc. Change Savings",
-        "working_hours": "Perc. Change Hours",
-    }
-    labels = ["Savings", "Working Hours"]
-
-    for i, (var, ylabel) in enumerate(variables.items()):
-        ax = axs[i]
-        plot_behavioral_changes(ax, df_unc, df_no_unc, var, ylabel, labels[i])
-        ax.set_xticks(reform_SRA)
-        ax.set_xlabel("SRA Reform")
-
-    # Retirement age plot
-    plot_retirement_age_changes(
-        axs[2], df_unc, df_no_unc, "Retirement Age", show_legend=True
+    # Plot 1: Savings
+    fig1, ax1 = plt.subplots(figsize=get_figsize(ncols=1, nrows=1))
+    plot_behavioral_changes(
+        ax1,
+        df_unc,
+        df_no_unc,
+        "below_sixty_savings",
+        "Perc. Change Savings",
+        "Savings ($< 63$)",
     )
-    axs[2].set_xticks(reform_SRA)
-    axs[2].set_xlabel("SRA Reform")
+    ax1.set_xticks(reform_SRA)
+    ax1.set_xlabel("SRA Reform")
+    ax1.legend()
+    plt.tight_layout()
+    fig1.savefig(plot_folder + f"cf_increase_savings.png", transparent=True)
+    fig1.savefig(plot_folder + f"cf_increase_savings.pdf")
 
-    # Add legend
-    axs[1].legend(loc="lower center", bbox_to_anchor=(0.5, -0.15), ncol=2, frameon=True)
+    # Plot 2: Working Hours Below 63
+    fig2, ax2 = plt.subplots(figsize=get_figsize(ncols=1, nrows=1))
+    plot_behavioral_changes(
+        ax2,
+        df_unc,
+        df_no_unc,
+        "working_hours_below_63",
+        "Perc. Change Labor Supply",
+        "Labor Supply < 63",
+    )
+    ax2.set_xticks(reform_SRA)
+    ax2.set_xlabel("SRA Reform")
+    ax2.legend()
+    plt.tight_layout()
+    fig2.savefig(plot_folder + f"cf_increase_labor_below_63.png", transparent=True)
+    fig2.savefig(plot_folder + f"cf_increase_labor_below_63.pdf")
 
-    fig.align_ylabels(axs)
-    fig.savefig(plot_folder + f"cf_increase_behavior.png", transparent=True)
-    fig.savefig(plot_folder + f"cf_increase_behavior.pdf")
+    # Plot 3: Life Time Working Hours
+    fig3, ax3 = plt.subplots(figsize=get_figsize(ncols=1, nrows=1))
+    plot_behavioral_changes(
+        ax3,
+        df_unc,
+        df_no_unc,
+        "working_hours",
+        "Perc. Labor Supply",
+        "Life Time Labor Supply",
+    )
+    ax3.set_xticks(reform_SRA)
+    ax3.set_xlabel("SRA Reform")
+    ax3.legend()
+    plt.tight_layout()
+    fig3.savefig(plot_folder + f"cf_increase_labor_lifetime.png", transparent=True)
+    fig3.savefig(plot_folder + f"cf_increase_labor_lifetime.pdf")
 
-    # # Original CV plot
-    # fig_cv_orig, ax_cv_orig = plt.subplots()
-    # ax_cv_orig.plot(df_unc["sra_at_63"], df_unc["cv"] * 100,
-    #                 label="Uncertainty and Misinformation")
-    # ax_cv_orig.plot(df_no_unc["sra_at_63"], df_no_unc["cv"] * 100,
-    #                 label="No Uncertainty, Misinformation")
-    # ax_cv_orig.set_xlabel("SRA Reform")
-    # ax_cv_orig.set_ylabel("Compensating Variation")
-    # ax_cv_orig.set_xticks(reform_SRA)
-    # ax_cv_orig.legend()
-    # fig_cv_orig.savefig(path_dict["plots"] + f"cf_increase_cv.png")
+    # Plot 4: Retirement Age
+    fig4, ax4 = plt.subplots(figsize=get_figsize(ncols=1, nrows=1))
+    plot_retirement_age_changes(
+        ax4, df_unc, df_no_unc, "Retirement Age", show_legend=True
+    )
+    ax4.set_xticks(reform_SRA)
+    ax4.set_xlabel("SRA Reform")
+    plt.tight_layout()
+    fig4.savefig(plot_folder + f"cf_increase_retirement_age.png", transparent=True)
+    fig4.savefig(plot_folder + f"cf_increase_retirement_age.pdf")
 
-    return fig
+    return fig1, fig2, fig3, fig4

@@ -36,8 +36,8 @@ cf_label = "Only Informed"
 load_model = False  # informed state as type
 load_unc_solution = None  # baseline solution conntainer
 model_solution = None  # actual baseline model solution object (None = create new)
-load_df_baseline = True # True = load existing df, False = create new df, None = create but do not save
-load_df_unbiased = True # same as above
+load_df_baseline = None # True = load existing df, False = create new df, None = create but do not save
+load_df_unbiased = None # same as above
 
 
 # Load params

@@ -16,9 +16,9 @@ module add cuda/12.4.1
 
 # python run_paper_results.py
 # python run_model_fit_sim.py
-python run_cf_sra_increase.py
-python run_plots_cf.py
-# python run_cf_debias.py
+# python run_cf_sra_increase.py
+# python run_plots_cf.py
+python run_cf_debias.py
 # python eval_expectation.py
 # python run_illustration.py
 # python run_baseline.py

@@ -114,6 +114,13 @@ df_cf, _ = solve_and_simulate_scenario(
 )
 df_cf = df_cf.reset_index()
 
+cv_cf = calc_compensated_variation(
+    df_base=df_base,
+    df_cf=df_cf,
+    params=params,
+    specs=specs,
+)
+
 # plots
 plot_retirement_difference(
     path_dict=path_dict,
@@ -146,6 +153,7 @@ aggregate_comparison_baseline_cf(
     cf_label=cf_label,
     path_dict=path_dict,
     model_name=model_name,
+    cv=cv_cf,
 )
 
 

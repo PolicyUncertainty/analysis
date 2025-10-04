@@ -92,12 +92,12 @@ def create_result_dfs(sra_at_63, scenarios, het_spec_vars):
 seeed = 123
 model_name = specs["model_name"]
 util_type = specs["util_type"]
-load_sol_model = True
+load_sol_model = None
 load_solutions = None
 load_df = None
 
-het_var_name = "sex"
-het_spec_vars = {"men": [0], "women": [1]}
+het_var_name = "initial_informed"
+het_spec_vars = {"uninformed": [0], "informed": [1]}
 scenarios = ["unc", "no_unc"]
 
 # Load params

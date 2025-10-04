@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 
 from set_styles import get_figsize, set_colors
-from src.simulation.run_cf_sra_increase import het_var_name
 
 JET_COLOR_MAP, LINE_STYLES = set_colors()
 
@@ -178,7 +177,7 @@ def sra_increase_aggregate_plot_by_het(path_dict, het_names, fig_name, model_nam
 
     plt.tight_layout()
     fig.savefig(
-        plot_folder + f"cf_increase_behavior_by_gender.png",
+        plot_folder + f"cf_increase_behavior_{fig_name}.png",
         transparent=True,
         bbox_inches="tight",
     )
@@ -229,7 +228,7 @@ def sra_increase_aggregate_plot(path_dict, model_name):
         os.makedirs(plot_folder)
 
     # Also create the original overall plots for backward compatibility
-    results = load_gender_results(path_dict, model_name)
+    results = load_het_results(path_dict, het_names=["overall"], model_name=model_name)
 
     # Use overall results for original plots
     df_unc = prepare_baseline_data(results["unc"]["overall"])

@@ -29,6 +29,7 @@ def aggregate_comparison_baseline_cf(result_df, base_label, cf_label, path_dict,
         'savings_below_63': 'Annual Savings',
         # Retirement
         'ret_age': 'Retirement Age',
+        'ret_age_excl_disabled': 'Retirement Age (excl. Disability)',
         'pension_wealth_at_ret': 'Pension Wealth (PV at Retirement)',
         'private_wealth_at_ret': 'Financial Wealth at Retirement',
         # Lifecycle (30+)
@@ -39,7 +40,7 @@ def aggregate_comparison_baseline_cf(result_df, base_label, cf_label, path_dict,
     # Section definitions
     sections = {
         'Work Life (<63)': ['working_hours_below_63', 'consumption_below_63', 'savings_below_63'],
-        'Retirement': ['ret_age', 'pension_wealth_at_ret', 'private_wealth_at_ret'],
+        'Retirement': ['ret_age', 'ret_age_excl_disabled', 'pension_wealth_at_ret', 'private_wealth_at_ret'],
         'Lifecycle (30+)': ['lifecycle_working_hours', 'lifecycle_avg_wealth'],
     }
     

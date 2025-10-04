@@ -28,6 +28,7 @@ def add_overall_results(result_df, index, pre_name, df_scenario, specs=None):
     
     # Retirement metrics
     result_df.loc[index, f"{pre_name}_ret_age"] = calc_average_retirement_age(df_scenario)
+    result_df.loc[index, f"{pre_name}_ret_age_excl_disabled"] = calc_average_retirement_age_excl_disabled(df_scenario)
     result_df.loc[index, f"{pre_name}_private_wealth_at_ret"] = private_wealth_at_retirement(df_scenario)
     if specs is not None:
         result_df.loc[index, f"{pre_name}_pension_wealth_at_ret"] = pension_wealth_at_retirement(df_scenario, specs)
@@ -71,13 +72,22 @@ def calc_savings_below_63(df):
 # ============================================================================
 
 def calc_average_retirement_age(df):
-    """Calculate average retirement age"""
+    """Calculate average pension claiming age"""
     fresh_retired_mask = (
         (df["choice"] == 0) & (df["lagged_choice"] != 0) & (df["health"] != 3)
     )
     mean_ret_age = df.loc[fresh_retired_mask, "age"].mean()
     return mean_ret_age
 
+def calc_average_retirement_age_excl_disabled(df):
+    """Calculate average pension claiming age excluding disability pensions"""
+    fresh_retired_mask = (
+        (df["choice"] == 0) & (df["lagged_choice"] != 0) & (df["health"] != 3)
+    )
+    non_disabled_mask = df["health"] != 2
+    combined_mask = fresh_retired_mask & non_disabled_mask
+    mean_ret_age = df.loc[combined_mask, "age"].mean()
+    return mean_ret_age
 
 def private_wealth_at_retirement(df):
     """Calculate mean private/financial wealth at retirement"""
@@ -92,7 +102,7 @@ def pension_wealth_at_retirement(df, specs):
     """Calculate mean pension wealth (PV) at retirement"""
     first_time_pension_payment = (
         (df["lagged_choice"] == 0)
-        & (df["policy_state_value"] != 29)
+        & (df["policy_state"] != 29)
         & (df["health"] != 3)
     )
     df_first = df.loc[first_time_pension_payment, :]
@@ -106,7 +116,6 @@ def pension_wealth_at_retirement(df, specs):
         interest_rate=specs["interest_rate"],
     )
     return annuity_value.mean()
-
 
 # ============================================================================
 # Lifecycle (30+) functions

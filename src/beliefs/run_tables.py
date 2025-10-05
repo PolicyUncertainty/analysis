@@ -8,6 +8,13 @@ save_tables = True
 
 # SRA belief parameters table
 from beliefs.sra_beliefs.params_table import create_sra_params_table_latex
+
 create_sra_params_table_latex(path_dict, save=save_tables)
+
+# ERP belief parameters table
+from beliefs.erp_beliefs.param_table import create_erp_params_table_latex
+
+create_erp_params_table_latex(path_dict, save=save_tables)
+
 
 print("Table generation completed.")

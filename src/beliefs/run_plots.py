@@ -36,6 +36,7 @@ from beliefs.sra_beliefs.sra_plots import (
     plot_expected_sra_vs_birth_year,
     plot_truncated_normal_for_response,
 )
+from beliefs.sra_beliefs.truncated_fit_ar1 import plot_ar1_fit
 from beliefs.sra_beliefs.zepplin import plot_example_sra_evolution
 from set_paths import create_path_dict
 from set_styles import set_plot_defaults
@@ -57,6 +58,11 @@ plot_erp_violin_plots_by_age(
 )
 plot_predicted_informed_shares_by_education(
     path_dict, specs, show=show_plots, save=save_plots, by_education=False
+)
+plot_ar1_fit(
+    path_dict,
+    show=show_plots,
+    save=save_plots,
 )
 
 if paper_graphs_only:

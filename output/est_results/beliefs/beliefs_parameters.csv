@@ -1,9 +1,9 @@
 parameter,estimate,std_error,type
 alpha,0.04008962029726433,0.001351368316961604,
 sigma_sq,0.029906500635170377,0.0009803010274176609,
-initial_informed_share,0.07416348470729696,,Low Education
-hazard_rate,0.011212492207512895,,Low Education
-initial_informed_share,0.2878481452281457,,High Education
-hazard_rate,0.007292831169274055,,High Education
+initial_informed_share,0.07416348470729696,0.04760312913653246,Low Education
+hazard_rate,0.011212492207512895,0.002831389790015076,Low Education
+initial_informed_share,0.2878481452281457,0.06185303762366226,High Education
+hazard_rate,0.007292831169274055,0.004411513400468282,High Education
 erp_uninformed_belief,18.91949152542373,0.9535693223673349,Low Education
 erp_uninformed_belief,16.246445497630333,0.7787690701312983,High Education

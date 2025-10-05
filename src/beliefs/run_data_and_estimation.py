@@ -15,7 +15,7 @@ df = load_and_filter_soep_is(paths=path_dict)
 df = add_covariates(df, paths=path_dict, specs=specs)
 df.to_csv(path_dict["beliefs_data"] + "soep_is_clean.csv")
 
-from beliefs.sra_beliefs.random_walk import est_SRA_params, est_alpha_heterogeneity
+from beliefs.sra_beliefs.random_walk import est_alpha_heterogeneity, est_SRA_params
 
 # estimate SRA belief parameters (fitting truncated normals takes a while, load_data=True to speed up)
 from beliefs.sra_beliefs.truncated_normals import estimate_truncated_normal
@@ -34,19 +34,24 @@ from beliefs.erp_beliefs.informed_state_transition import (
 from beliefs.erp_beliefs.uninformed_erp_beliefs import calculate_uninformed_erp_beliefs
 
 uninformed_params_df = calibrate_uninformed_hazard_rate_with_se(
-    df, specs, calculate_se=False
+    df, specs, calculate_se=True
 )
 
 # Calculate uninformed ERP beliefs (conditional averages)
 uninformed_erp_beliefs_df = calculate_uninformed_erp_beliefs(df, specs)
-
 # save results to beliefs_est_results
-params_df = pd.concat([sra_params_df, uninformed_params_df, uninformed_erp_beliefs_df], ignore_index=True)
-params_df.to_csv(path_dict["beliefs_est_results"] + "beliefs_parameters.csv", index=False)
+params_df = pd.concat(
+    [sra_params_df, uninformed_params_df, uninformed_erp_beliefs_df], ignore_index=True
+)
+params_df.to_csv(
+    path_dict["beliefs_est_results"] + "beliefs_parameters.csv", index=False
+)
 
 print("FINAL PARAMETER SUMMARY")
-print("="*60)
+print("=" * 60)
 print(params_df)
 
 # save heterogeneity results
-alpha_heterogeneity_df.to_csv(path_dict["beliefs_est_results"] + "alpha_heterogeneity_results.csv", index=False)
+alpha_heterogeneity_df.to_csv(
+    path_dict["beliefs_est_results"] + "alpha_heterogeneity_results.csv", index=False
+)

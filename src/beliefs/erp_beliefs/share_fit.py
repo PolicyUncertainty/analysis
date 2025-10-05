@@ -142,24 +142,25 @@ def plot_predicted_informed_shares_by_education(
                     mean_val = avg_shares.loc[i]
                     sem_val = sem_shares.loc[i] if i in sem_shares.index else 0
 
-                    # Plot horizontal line for the mean
-                    ax.hlines(
-                        y=mean_val,
-                        xmin=age_start,
-                        xmax=age_end,
-                        color=color,
-                        linewidth=2,
-                        linestyle="-",
-                        alpha=0.6,
-                    )
+                    # # Plot horizontal line for the mean
+                    # ax.hlines(
+                    #     y=mean_val,
+                    #     xmin=age_start,
+                    #     xmax=age_end,
+                    #     color=color,
+                    #     linewidth=2,
+                    #     linestyle="-",
+                    #     alpha=0.6,
+                    # )
 
                     # Plot error bars at the midpoint of the age range
+                    # Use diamond markers as midpoint
                     age_midpoint = (age_start + age_end) / 2
                     ax.errorbar(
                         x=age_midpoint,
                         y=mean_val,
                         yerr=sem_val * 1.96,  # 95% confidence interval
-                        fmt="o",
+                        fmt="D",
                         color=color,
                         ecolor=color,
                         capsize=4,
@@ -176,17 +177,17 @@ def plot_predicted_informed_shares_by_education(
                     sem_shares_pooled.loc[i] if i in sem_shares_pooled.index else 0
                 )
 
-                # Plot horizontal line for the mean (in gray/black)
-                ax.hlines(
-                    y=mean_val,
-                    xmin=age_start,
-                    xmax=age_end,
-                    color="black",
-                    linewidth=2.5,
-                    linestyle="-",
-                    alpha=0.6,
-                    label="Overall observed" if i == 0 else "",
-                )
+                # # Plot horizontal line for the mean (in gray/black)
+                # ax.hlines(
+                #     y=mean_val,
+                #     xmin=age_start,
+                #     xmax=age_end,
+                #     color="black",
+                #     linewidth=2.5,
+                #     linestyle="-",
+                #     alpha=0.6,
+                #     label="Overall observed" if i == 0 else "",
+                # )
 
                 # Plot error bars at the midpoint of the age range
                 age_midpoint = (age_start + age_end) / 2
@@ -194,7 +195,7 @@ def plot_predicted_informed_shares_by_education(
                     x=age_midpoint,
                     y=mean_val,
                     yerr=sem_val * 1.96,  # 95% confidence interval
-                    fmt="o",
+                    fmt="D",
                     color="black",
                     ecolor="gray",
                     capsize=4,
@@ -206,7 +207,7 @@ def plot_predicted_informed_shares_by_education(
     ax.set_xlabel("Age")
     ax.set_ylabel("Share Informed")
     ax.set_xlim([25, 65])
-    ax.set_ylim([0, 1])
+    ax.set_ylim([0, 0.8])
     ax.set_yticks(np.arange(0, 1.1, 0.1))
 
     # Create legend

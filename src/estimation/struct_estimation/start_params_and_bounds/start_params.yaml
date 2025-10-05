@@ -32,7 +32,6 @@ disutil_unemployed_bad_men: 0.1
 # disutil_unemployed_single_good_men: 0.3
 # disutil_unemployed_single_bad_men: 0.3
 
-
 # disutil_unemployed_above_58_women: 0.0
 # disutil_unemployed_above_58_men: 0.0
 
@@ -76,10 +75,13 @@ disutil_children_pt_work_low: 0.3
 disutil_children_pt_work_high: 0.3
 
 # Bequest
-bequest_scale: 5
+bequest_scale_low_men: 5
+bequest_scale_high_men: 5
+bequest_scale_low_women: 1
+bequest_scale_high_women: 2
 kappa_high_men: 0
 kappa_high_women: 0
-kappa_low_men: 0
+kappa_low_men: 10
 kappa_low_women: 0
 
 # Job separation params are set internally driven by data

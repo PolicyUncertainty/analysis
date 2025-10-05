@@ -32,6 +32,7 @@ def calc_early_retirement_pension_points(
           So we only check if very long insured path is better than disability pension.
 
     """
+
     # Check if the individual gets disability pension
     disability_pension_bool = health == model_specs["disabled_health_var"]
     # Check if the individual is eligible for very long insured pension
@@ -47,7 +48,7 @@ def calc_early_retirement_pension_points(
         SRA_at_retirement=SRA_at_retirement,
         actual_retirement_age=actual_retirement_age,
         total_pension_points=total_pension_points,
-        model_specs=model_specs
+        model_specs=model_specs,
     )
 
     # Choose deduction factor according to information state
@@ -55,11 +56,11 @@ def calc_early_retirement_pension_points(
         informed * model_specs["ERP"]
         + (1 - informed) * model_specs["uninformed_ERP"][education]
     )
-    
+
     # Create early retirement factor
-    early_retirement_factor = (1 - early_retirement_penalty * retirement_age_difference).clip(
-        min=0.0, max=1.0
-    )
+    early_retirement_factor = (
+        1 - early_retirement_penalty * retirement_age_difference
+    ).clip(min=0.0, max=1.0)
 
     # Early retirement pension points
     early_retirement_pension_points = early_retirement_factor * total_pension_points
@@ -82,10 +83,7 @@ def calc_early_retirement_pension_points(
 
 
 def calc_disability_pension_points(
-    total_pension_points,
-    actual_retirement_age,
-    SRA_at_retirement,
-    model_specs
+    total_pension_points, actual_retirement_age, SRA_at_retirement, model_specs
 ):
     """Calculate the disability pension points."""
     average_points_work_span = total_pension_points / (actual_retirement_age - 18)
@@ -93,7 +91,7 @@ def calc_disability_pension_points(
     total_points_disability = 47 * average_points_work_span
     # Penalty years. If disability pension(then limit to 3 years) and only until 63
     penalty_years_disability = (63.0 - actual_retirement_age).clip(max=3.0, min=0.0)
-    disability_reduction_factor = (1 -  penalty_years_disability * model_specs["ERP"])
+    disability_reduction_factor = 1 - penalty_years_disability * model_specs["ERP"]
     return total_points_disability * disability_reduction_factor
 
 

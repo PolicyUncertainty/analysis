@@ -18,6 +18,11 @@ from specs.income_specs import add_income_specs
 def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     """This function reads in specs and adds derived and data estimated specs."""
     specs = read_and_derive_specs(path_dict["specs"])
+    # family transitions
+    specs["children_by_state"], specs["max_children"] = predict_children_by_state(
+        path_dict, specs
+    )
+
     # Add belief process specs (both SRA and ERP parameters)
     specs = add_belief_process_specs(specs, path_dict)
 
@@ -26,9 +31,6 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
 
     # Add experience specs
     specs = add_experience_and_pp_specs(specs, path_dict, load_precomputed)
-
-    # family transitions
-    specs["children_by_state"] = predict_children_by_state(path_dict, specs)
 
     # Read in family transitions
     (

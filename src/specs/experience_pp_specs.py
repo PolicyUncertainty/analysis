@@ -49,6 +49,7 @@ def create_max_pension_point(path_dict, specs, load_precomputed=False):
                             period=period,
                             sex=sex_var,
                             experience_years=max_exp_period,
+                            partner_state=np.array(1),
                             education=edu_var,
                             policy_state=0,
                             informed=1,

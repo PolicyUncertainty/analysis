@@ -12,6 +12,7 @@ def calc_pension_points_for_experience(
     sex,
     experience_years,
     education,
+    partner_state,
     policy_state,
     informed,
     health,
@@ -31,6 +32,12 @@ def calc_pension_points_for_experience(
         sex=sex,
         model_specs=model_specs,
     )
+
+    has_partner_int = (partner_state > 0).astype(int)
+    mothers_pension = (
+        sex * model_specs["max_children"][1, education, has_partner_int] * 3
+    )
+    total_pension_points += mothers_pension
     # retirement age is last periods age
     actual_retirement_age = jnp.minimum(model_specs["start_age"] + period - 1, 72)
     # SRA at retirement, difference to actual retirement age and boolean for early retirement

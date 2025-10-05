@@ -30,7 +30,8 @@ def predict_children_by_state(path_dict, specs):
                     children[sex, edu, has_partner, period] = np.maximum(
                         0, predicted_nb_children
                     )
-    return children
+    max_children = np.max(children, axis=-1)
+    return children, max_children
 
 
 def read_in_partner_transition_specs(paths_dict, specs):

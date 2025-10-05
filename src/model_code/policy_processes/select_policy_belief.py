@@ -97,7 +97,10 @@ def select_sim_policy_function_and_update_specs(
             )
         transition_func_sim = realized_policy_step_function
     else:
-        specs["resolution_age"] = None
+        if "resolution_age" in specs.keys():
+            pass
+        else:
+            specs["resolution_age"] = None
         transition_func_sim = announce_policy_state
         specs = update_specs_for_policy_announcement(
             specs=specs,

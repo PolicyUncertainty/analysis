@@ -11,6 +11,7 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 specs = generate_derived_and_data_derived_specs(path_dict)
 from simulation.sim_tools.calc_aggregate_results import add_overall_results
 from simulation.sim_tools.simulate_exp import simulate_exp
+from simulation.tables.cv import calc_compensated_variation
 
 
 def calc_exp_results(
@@ -45,9 +46,11 @@ def calc_exp_results(
     # Initialize empty DataFrame
     res_df = pd.DataFrame()
 
+    df_base = None
     for subj_unc in [True, False]:
         model_solution = None
-        for informed, informed_label in enumerate(["Uninformed", "Informed"]):
+        for informed_label in ["Informed", "Uninformed"]:
+            informed = int(informed_label == "Informed")
             col_prefix = f"{informed_label}_unc_{subj_unc}"
             print(
                 "Eval expectation: ",
@@ -73,6 +76,19 @@ def calc_exp_results(
                 model_solution=model_solution,
                 util_type=util_type,
             )
+            if (informed_label == "Informed") and subj_unc:
+                df_base = df.copy()
+                res_df.loc[col_prefix, "_cv"] = 0.0
+            else:
+                res_df.loc[col_prefix, "_cv"] = (
+                    calc_compensated_variation(
+                        df_base=df_base,
+                        df_cf=df,
+                        params=params,
+                        specs=specs,
+                    )
+                    * 100
+                )
 
             # Use col_prefix as index, empty string as pre_name
             res_df = add_overall_results(
@@ -104,6 +120,7 @@ def generate_latex_table(res_df):
         # Lifecycle (30+)
         "lifecycle_working_hours": "Annual Labor Supply (hrs)",
         "lifecycle_avg_wealth": "Average Financial Wealth",
+        "cv": "Compensated Variation",
     }
 
     sections = {
@@ -120,6 +137,7 @@ def generate_latex_table(res_df):
             "savings_below_63",
         ],
         "Lifecycle (30+)": ["lifecycle_working_hours", "lifecycle_avg_wealth"],
+        "Welfare": ["cv"],
     }
 
     # Column order (now used as index)

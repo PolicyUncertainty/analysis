@@ -1,0 +1,10 @@
+\begin{tabular}{lrrrrrrrrrrrr}
+\toprule
+ & _working_hours_below_63 & _consumption_below_63 & _savings_below_63 & _ret_age & _ret_age_excl_disabled & _private_wealth_at_ret & _pension_wealth_at_ret & _lifecycle_working_hours & _lifecycle_avg_wealth & _below_sixty_savings & _sra_at_ret & _working_hours \\
+\midrule
+Uninformed_unc_True & 1821.630969 & 2.976029 & 0.438926 & 67.377069 & 67.631579 & 20.554716 & 16.369642 & 1314.686785 & 9.905936 & 0.434462 & 68.220154 & 1314.686785 \\
+Informed_unc_True & 1775.973989 & 2.927207 & 0.470828 & 64.292463 & 65.521905 & 21.463212 & 18.934422 & 1227.317393 & 10.211789 & 0.475231 & 68.220191 & 1227.317393 \\
+Uninformed_unc_False & 1830.126672 & 2.985820 & 0.429935 & 66.738372 & 66.770642 & 20.534885 & 17.516968 & 1301.991073 & 9.602643 & 0.423675 & 67.000000 & 1301.991073 \\
+Informed_unc_False & 1769.697118 & 2.933068 & 0.457009 & 64.033520 & 65.405769 & 21.034575 & 19.672134 & 1220.178006 & 9.985722 & 0.462333 & 67.000000 & 1220.178006 \\
+\bottomrule
+\end{tabular}

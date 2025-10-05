@@ -157,18 +157,18 @@ aggregate_comparison_baseline_cf(
 )
 
 
-plot_retirement_share(
-    path_dict=path_dict,
-    specs=specs,
-    df_base=df_base,
-    df_cf=df_cf,
-    final_SRA=sra_at_63,
-    model_name=model_name,
-    left_difference=-6,
-    right_difference=2,
-    base_label=base_label,
-    cf_label=cf_label,
-)
+# plot_retirement_share(
+#     path_dict=path_dict,
+#     specs=specs,
+#     df_base=df_base,
+#     df_cf=df_cf,
+#     final_SRA=sra_at_63,
+#     model_name=model_name,
+#     left_difference=-6,
+#     right_difference=2,
+#     base_label=base_label,
+#     cf_label=cf_label,
+# )
 
 # plot_detailed_lifecycle_results(
 #     path_dict=path_dict,

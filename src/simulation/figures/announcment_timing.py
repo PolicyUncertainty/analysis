@@ -46,3 +46,8 @@ def announcement_timing_lc_plot(path_dict, model_name):
     #     ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda x, pos: f"{x:.3f}"))
     for i in range(len(axs)):
         axs[i].legend()
+
+    plot_folder = path_dict["simulation_plots"] + model_name + "/"
+    fig1.savefig(plot_folder + "announcement_timing_savings_rate_diff.png")
+    fig2.savefig(plot_folder + "announcement_timing_employment_rate_diff.png")
+    fig3.savefig(plot_folder + "announcement_timing_retirement_rate_diff.png")

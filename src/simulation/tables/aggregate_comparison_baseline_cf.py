@@ -44,7 +44,7 @@ def aggregate_comparison_baseline_cf(
 
     # Section definitions
     sections = {
-        "Work Life (<63)": [
+        "Work Life ($<63$)": [
             "working_hours_below_63",
             "consumption_below_63",
             "savings_below_63",
@@ -75,6 +75,7 @@ def aggregate_comparison_baseline_cf(
 
         # Add metrics for this section
         for metric_key in section_metrics:
+
             outcome_name = metrics[metric_key]
 
             baseline_val = result_df.loc[0, f"baseline_{metric_key}"]
@@ -129,11 +130,15 @@ def aggregate_comparison_baseline_cf(
                     f"    {row['outcome']} & {baseline_str} & {cf_str} & {diff_str} \\\\"
                 )
 
-    # Add CV row if provided
+    # Add compensating variation if provided
     if cv is not None:
         latex_lines.append(r"    \midrule")
+        # Add Welfare as section header
+        latex_lines.append(f"    \\multicolumn{{4}}{{l}}{{\\textit{{Welfare}}}} \\\\")
         cv_pct = cv * 100
-        latex_lines.append(f"    Compensating Variation & & & {cv_pct:+.2f}\\% \\\\")
+        latex_lines.append(
+            f"    Compensating Variation (\\%) & & & {cv_pct:+.2f}\\% \\\\"
+        )
 
     # Table footer
     latex_lines.append(r"    \bottomrule")

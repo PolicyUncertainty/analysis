@@ -39,7 +39,7 @@ model_name = specs["model_name"]
 util_type = specs["util_type"]
 sra_at_63 = 69.0
 
-base_label = "Baseline with Uninformed"
+base_label = "Baseline with Misinformed"
 cf_label = "Only Informed"
 
 load_model = True  # informed state as type

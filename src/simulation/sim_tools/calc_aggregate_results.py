@@ -59,6 +59,7 @@ def add_overall_results(result_df, index, pre_name, df_scenario, specs=None):
     result_df.loc[index, f"{pre_name}_below_sixty_savings"] = below_sixty_savings(
         df_scenario
     )
+    result_df.loc[index, f"{pre_name}_sra_at_63"] = sra_at_63(df_scenario)
     result_df.loc[index, f"{pre_name}_sra_at_ret"] = sra_at_retirement(df_scenario)
     result_df.loc[index, f"{pre_name}_working_hours"] = calc_overall_working_hours(
         df_scenario
@@ -93,6 +94,12 @@ def calc_savings_below_63(df):
 # ============================================================================
 # Retirement functions
 # ============================================================================
+
+
+def sra_at_63(df):
+    """Calculate mean SRA at age 63"""
+    mask = (df["age"] == 63) & (df["policy_state"] != 29)
+    return df.loc[mask, "policy_state_value"].mean()
 
 
 def calc_average_retirement_age(df):

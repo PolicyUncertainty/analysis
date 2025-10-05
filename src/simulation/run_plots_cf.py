@@ -21,7 +21,7 @@ model_name = specs["model_name"]
 het_names = ["men", "women"]
 
 # # Exclude the first rpw
-# sra_increase_aggregate_plot(path_dict, model_name)
+sra_increase_aggregate_plot(path_dict, model_name)
 # sra_increase_aggregate_plot_by_het(
 #     path_dict=path_dict, het_names=het_names, fig_name="by_gender", model_name=model_name
 # )

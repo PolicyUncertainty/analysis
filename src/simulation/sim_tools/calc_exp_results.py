@@ -98,6 +98,8 @@ def calc_exp_results(
                 pre_name="",
                 specs=specs,
             )
+            if subj_unc:
+                res_df.loc[col_prefix, "_sra_at_63"] = 68.23
 
     return res_df
 
@@ -113,20 +115,20 @@ def generate_latex_table(res_df):
         "savings_below_63": "Annual Savings",
         # Retirement
         # "ret_age": "Retirement Age",
-        "sra_at_ret": "SRA at Retirement",
+        "sra_at_63": "SRA at 63",
         "ret_age_excl_disabled": "Retirement Age (excl. Disability)",
         "pension_wealth_at_ret": "Pension Wealth (PV at Retirement)",
         "private_wealth_at_ret": "Financial Wealth at Retirement",
         # Lifecycle (30+)
         "lifecycle_working_hours": "Annual Labor Supply (hrs)",
         "lifecycle_avg_wealth": "Average Financial Wealth",
-        "cv": "Compensated Variation",
+        "cv": "Compensated Variation (\\%)",
     }
 
     sections = {
         "Retirement": [
             # "ret_age",
-            "sra_at_ret",
+            "sra_at_63",
             "ret_age_excl_disabled",
             "pension_wealth_at_ret",
             "private_wealth_at_ret",
@@ -139,7 +141,6 @@ def generate_latex_table(res_df):
         "Lifecycle (30+)": ["lifecycle_working_hours", "lifecycle_avg_wealth"],
         "Welfare": ["cv"],
     }
-
     # Column order (now used as index)
     col_order = [
         "Informed_unc_True",
@@ -152,9 +153,9 @@ def generate_latex_table(res_df):
     latex_lines.append("\\begin{tabular}{lcccc}")
     latex_lines.append("    \\toprule")
     latex_lines.append(
-        "    \\multirow{2}{*}{Expectation at 30} & "
+        "    \\multirow{2}{*}{Expected Outcome} & "
         "\\multicolumn{2}{c}{Informed} & "
-        "\\multicolumn{2}{c}{Uninformed} \\\\"
+        "\\multicolumn{2}{c}{Misinformed} \\\\"
     )
     latex_lines.append("    \\cmidrule(lr){2-3} \\cmidrule(lr){4-5}")
     latex_lines.append("     & Unc. & No Unc. & Unc. & No Unc. \\\\")

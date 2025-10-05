@@ -19,7 +19,6 @@ set_plot_defaults()
 # data plots
 from beliefs.soep_is.belief_data_plots import (
     plot_erp_beliefs_by_cohort,
-    plot_erp_violin_plots_by_cohort,
     plot_informed_share_by_cohort,
     plot_sra_beliefs_by_cohort,
 )
@@ -32,9 +31,12 @@ plot_erp_violin_plots_by_cohort(
 plot_informed_share_by_cohort(path_dict, show=show_plots, save=save_plots)
 
 
+from beliefs.erp_beliefs.violins import (
+    plot_erp_violin_plots_by_age,
+    plot_erp_violin_plots_by_cohort,
+)
 from beliefs.soep_is.belief_data_plots_by_age import (
     plot_erp_beliefs_by_age,
-    plot_erp_violin_plots_by_age,
     plot_informed_share_by_age,
     plot_sra_beliefs_by_age,
 )

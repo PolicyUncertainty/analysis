@@ -30,9 +30,8 @@ def create_erp_params_table_latex(path_dict, save=False):
     erp_params = params[~params["parameter"].isin(["alpha", "sigma_sq"])].copy()
 
     # Define parameter order and display names
-    param_order = ["initial_informed_share", "hazard_rate", "erp_uninformed_belief"]
+    param_order = ["hazard_rate", "erp_uninformed_belief"]
     param_names = {
-        "initial_informed_share": "Initial informed share",
         "hazard_rate": "Hazard rate",
         "erp_uninformed_belief": "ERP uninformed belief",
     }

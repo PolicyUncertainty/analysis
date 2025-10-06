@@ -57,7 +57,7 @@ plot_erp_violin_plots_by_age(
     path_dict, censor_above=20, show=show_plots, save=save_plots
 )
 plot_predicted_informed_shares_by_education(
-    path_dict, specs, show=show_plots, save=save_plots, by_education=False
+    path_dict, specs, show=show_plots, save=save_plots, by_education=True
 )
 plot_ar1_fit(
     path_dict,

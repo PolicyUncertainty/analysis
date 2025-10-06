@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from beliefs.erp_beliefs.informed_state_transition import predict_informed_shares
 from beliefs.soep_is.belief_data_plots import create_gebjahr_groups
 from set_styles import set_colors
 
@@ -286,26 +287,12 @@ def generate_observed_informed_shares(df):
 
 
 def predicted_shares_by_age(params, ages_to_predict):
-    age_span = np.arange(ages_to_predict.min(), ages_to_predict.max() + 1)
-    # This could be more complicated with age specific hazard rates
-
+    max_age = int(ages_to_predict.max())
     hazard_rate = params[params["parameter"] == "hazard_rate"]["estimate"].values[0]
-    predicted_hazard_rate = hazard_rate * np.ones_like(age_span, dtype=float)
 
-    informed_shares = np.zeros_like(age_span, dtype=float)
-    initial_informed_share = params[params["parameter"] == "initial_informed_share"][
-        "estimate"
-    ].values[0]
-    informed_shares[0] = initial_informed_share
-    uninformed_shares = 1 - informed_shares
+    informed_shares = predict_informed_shares(hazard_rate, max_age)
 
-    for period in range(1, len(age_span)):
-        uninformed_shares[period] = uninformed_shares[period - 1] * (
-            1 - predicted_hazard_rate[period - 1]
-        )
-        informed_shares[period] = 1 - uninformed_shares[period]
-
-    relevant_shares = pd.Series(index=age_span, data=informed_shares).loc[
+    relevant_shares = pd.Series(index=np.arange(max_age + 1), data=informed_shares).loc[
         ages_to_predict
     ]
     return relevant_shares

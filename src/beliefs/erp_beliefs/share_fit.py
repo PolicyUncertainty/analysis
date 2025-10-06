@@ -156,10 +156,11 @@ def plot_predicted_informed_shares_by_education(
                     # Plot error bars at the midpoint of the age range
                     # Use diamond markers as midpoint
                     age_midpoint = (age_start + age_end) / 2
+                    age_midpoint += 0.5 * edu_val  # slight offset for visibility
                     ax.errorbar(
                         x=age_midpoint,
                         y=mean_val,
-                        yerr=sem_val * 1.96,  # 95% confidence interval
+                        yerr=sem_val,  # 95% confidence interval
                         fmt="D",
                         color=color,
                         ecolor=color,
@@ -194,7 +195,7 @@ def plot_predicted_informed_shares_by_education(
                 ax.errorbar(
                     x=age_midpoint,
                     y=mean_val,
-                    yerr=sem_val * 1.96,  # 95% confidence interval
+                    yerr=sem_val,  # 95% confidence interval
                     fmt="D",
                     color="black",
                     ecolor="gray",

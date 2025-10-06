@@ -145,7 +145,6 @@ def draw_initial_states(
                 sex=jnp.ones_like(lagged_choice_edu) * sex_var,
                 model_specs=specs,
                 education=jnp.ones_like(lagged_choice_edu) * edu,
-                policy_state=jnp.ones_like(lagged_choice_edu) * initial_policy_state,
                 period=jnp.zeros_like(lagged_choice_edu),
                 choice=lagged_choice_edu,
             ).T

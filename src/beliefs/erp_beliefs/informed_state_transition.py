@@ -59,9 +59,9 @@ def calibrate_uninformed_hazard_rate_with_se(
         )
         results_edu = pd.DataFrame(
             {
-                "parameter": ["initial_informed_share", "hazard_rate"],
-                "type": [edu_label, edu_label],
-                "estimate": params.values,
+                "parameter": ["hazard_rate"],
+                "type": [edu_label],
+                "estimate": [params],
                 "std_error": bootstrap_se,
             }
         )
@@ -105,10 +105,10 @@ def generate_observed_informed_shares_age_bins(df):
 
 
 def fit_moments(moments, weights):
-    params_guess = np.array([0.1, 0.01])
+    params_guess = np.array([0.01])  # Only hazard rate
     partial_obj = partial(objective_function_age_bins, moments=moments, weights=weights)
     result = minimize(fun=partial_obj, x0=params_guess, method="BFGS")
-    params = pd.Series(index=["initial_informed_share", "hazard_rate"], data=result.x)
+    params = result.x[0]  # Return scalar
     return params
 
 
@@ -122,25 +122,13 @@ def objective_function_age_bins(params, moments, weights):
 
 def predicted_shares_by_age_bins(params, age_bins_to_predict):
     # Get individual ages spanning all bins
-    min_age = age_bins_to_predict.min()
-    max_age = age_bins_to_predict.max() + 4  # +4 to cover the full last bin
-    age_span = np.arange(min_age, max_age + 1)
+    max_age = age_bins_to_predict.max() + 4
+    age_span = np.arange(0, max_age + 1)
 
-    # Use constant hazard rate
-    hazard_rate = params[1]
-    predicted_hazard_rate = hazard_rate * np.ones_like(age_span, dtype=float)
+    # Use constant hazard rate (params is now a scalar)
+    hazard_rate = params if np.isscalar(params) else params[0]
 
-    # Calculate informed shares at individual age level
-    informed_shares = np.zeros_like(age_span, dtype=float)
-    initial_informed_share = params[0]
-    informed_shares[0] = initial_informed_share
-    uninformed_shares = 1 - informed_shares
-
-    for period in range(1, len(age_span)):
-        uninformed_shares[period] = uninformed_shares[period - 1] * (
-            1 - predicted_hazard_rate[period - 1]
-        )
-        informed_shares[period] = 1 - uninformed_shares[period]
+    informed_shares = predict_informed_shares(hazard_rate, max_age)
 
     # Aggregate to bins by taking the mean of ages within each bin
     age_df = pd.DataFrame({"age": age_span, "informed_share": informed_shares})
@@ -150,6 +138,18 @@ def predicted_shares_by_age_bins(params, age_bins_to_predict):
     # Return only the requested bins
     relevant_shares = binned_shares.loc[age_bins_to_predict]
     return relevant_shares
+
+
+def predict_informed_shares(hazard_rate, max_age):
+    # Calculate informed shares at individual age level
+    # Everyone starts uninformed at age 0
+    informed_shares = np.zeros(max_age + 1, dtype=float)
+    uninformed_shares = 1 - informed_shares
+
+    for period in range(1, max_age + 1):
+        uninformed_shares[period] = uninformed_shares[period - 1] * (1 - hazard_rate)
+        informed_shares[period] = 1 - uninformed_shares[period]
+    return informed_shares
 
 
 def bootstrap_standard_errors(
@@ -169,10 +169,10 @@ def bootstrap_standard_errors(
 
     Returns:
     --------
-    dict : Dictionary with standard errors for 'initial_informed_share' and 'hazard_rate'
+    list : List with standard error for 'hazard_rate'
     """
     if not calculate_se:
-        return [pd.NA, pd.NA]
+        return [pd.NA]
 
     np.random.seed(random_state)
 
@@ -198,11 +198,11 @@ def bootstrap_standard_errors(
             # Fit moments for this bootstrap sample
             params = fit_moments(moments=observed_informed_shares, weights=weights)
 
-            # Store the parameter estimates
-            bootstrap_estimates.append(params.values)
+            # Store the parameter estimate (now just a scalar)
+            bootstrap_estimates.append(params)
         except:
             fail_count += 1
             continue
     print(f"  Successful bootstrap samples: {n_bootstrap - fail_count}/{n_bootstrap}")
-    std_errors = np.std(bootstrap_estimates, axis=0, ddof=1)
-    return std_errors
+    std_error = np.std(bootstrap_estimates, ddof=1)
+    return [std_error]

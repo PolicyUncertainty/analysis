@@ -37,10 +37,8 @@ def create_fit_plots(
     sex_type="all",
     edu_type="all",
     util_type="add",
-    skip_model_plots=True,
+    skip_model_plots=False,
 ):
-    # check if folder of model objects exits:
-    model_folder = get_model_results_path(path_dict, model_name)
 
     folder_name_plots = path_dict["estimation_plots"] + model_name + "/"
     # Check if folder exists, if not create it
@@ -66,7 +64,7 @@ def create_fit_plots(
 
     if load_data_from_sol:
         data_decision = pd.read_csv(
-            model_folder["model_results"] + "data_with_probs.csv", index_col=0
+            folder_name_plots + "data_with_probs.csv", index_col=0
         )
 
     else:
@@ -82,7 +80,7 @@ def create_fit_plots(
             util_type=util_type,
         )
 
-        data_decision.to_csv(model_folder["model_results"] + "data_with_probs.csv")
+        data_decision.to_csv(folder_name_plots + "data_with_probs.csv")
 
     specs["sex_grid"], specs["education_grid"] = specify_type_grids(
         sex_type=sex_type,
@@ -134,12 +132,10 @@ def plot_job_offers(
     periods = ages - specs["start_age"]
 
     # Iterate over sex and education combinations
-    for sex_idx, (sex_label, sex_var) in enumerate(specs["sex_labels"].items()):
-        for edu_idx, (edu_label, edu_var) in enumerate(
-            specs["education_labels"].items()
-        ):
+    for sex_var, sex_label in enumerate(specs["sex_labels"]):
+        for edu_var, edu_label in enumerate(specs["education_labels"]):
             # Select the appropriate subplot
-            ax = axs[sex_idx, edu_idx]
+            ax = axs[sex_var, edu_var]
 
             # Initialize arrays to store probabilities
             good_health_probs = []
@@ -194,7 +190,7 @@ def plot_job_offers(
             ax.set_ylabel("Job Offer Probability")
             ax.legend()
             ax.grid(True, alpha=0.3)
-            ax.set_ylim([0, 1])
+            ax.set_ylim([0, 0.5])
 
     fig.tight_layout()
     fig.savefig(
@@ -234,12 +230,10 @@ def plot_disability_probability(params, specs, save_folder):
     periods = ages - specs["start_age"]
 
     # Iterate over sex and education combinations
-    for sex_idx, (sex_label, sex_var) in enumerate(specs["sex_labels"].items()):
-        for edu_idx, (edu_label, edu_var) in enumerate(
-            specs["education_labels"].items()
-        ):
+    for sex_var, sex_label in enumerate(specs["sex_labels"]):
+        for edu_var, edu_label in enumerate(specs["education_labels"]):
             # Select the appropriate subplot
-            ax = axs[sex_idx, edu_idx]
+            ax = axs[sex_var, edu_var]
 
             # Initialize array to store disability probabilities
             disability_probs = []
@@ -260,7 +254,7 @@ def plot_disability_probability(params, specs, save_folder):
             ax.plot(
                 ages,
                 disability_probs,
-                color=colors[sex_idx * 2 + edu_idx],
+                color=colors[sex_var * 2 + edu_var],
                 linewidth=2,
                 label="Disability Prob.",
             )
@@ -271,7 +265,7 @@ def plot_disability_probability(params, specs, save_folder):
             ax.set_ylabel("Disability Probability")
             ax.legend()
             ax.grid(True, alpha=0.3)
-            ax.set_ylim([0, 1])
+            ax.set_ylim([0, 1.1])
 
     plt.tight_layout()
     fig.savefig(save_folder + "disability_prob_by_type.pdf", bbox_inches="tight")
@@ -316,6 +310,9 @@ def create_df_with_probs(
 
     data_decision = calc_choice_probs_for_df(
         df=data_decision, params=params, model_solved=model_solved
+    )
+    data_decision["SRA_diff"] = (
+        data_decision["age"] - data_decision["policy_state_value"]
     )
     if unobs_choice_probs:
         data_decision = calc_unobserved_choice_probs_for_df(
@@ -581,10 +578,6 @@ def plot_retirement_fit(
     data_decision,
     save_folder,
 ):
-    data_decision["SRA_diff"] = (
-        data_decision["age"] - data_decision["policy_state_value"]
-    )
-
     diffs = np.arange(-4, 1.25, 0.25)
     pos = np.arange(0, len(diffs))
 

@@ -21,14 +21,12 @@ disutil_unemployed_high_good_men: 1.0e-12
 disutil_unemployed_high_bad_men: 1.0e-12
 disutil_unemployed_low_good_men: 1.0e-12
 disutil_unemployed_low_bad_men: 1.0e-12
-
 disutil_unemployed_above_58_good_women: -2
 disutil_unemployed_above_58_bad_women: -2
 disutil_unemployed_above_58_good_men: -2
 disutil_unemployed_above_58_bad_men: -2
 disutil_unemployed_above_58_women: -2
 disutil_unemployed_above_58_men: -2
-
 
 # Full time work dis-utility men - Disabled health
 disutil_ft_work_disabled_men: 0
@@ -68,8 +66,6 @@ disutil_children_ft_work_low: 0.0
 disutil_children_ft_work_high: 0.0
 disutil_children_pt_work_low: 0.0
 disutil_children_pt_work_high: 0.0
-
-
 disutil_ft_work_partner_good_men: 0.0
 disutil_ft_work_partner_bad_men: 0.0
 disutil_ft_work_single_good_men: 0.0
@@ -103,8 +99,6 @@ job_finding_logit_high_educ_women: -5
 job_finding_logit_good_health_women: -5
 job_finding_logit_age_women: -5
 job_finding_logit_age_above_55_women: -5
-
-
 job_finding_logit_above_50_men: -5
 job_finding_logit_above_55_men: -5
 job_finding_logit_above_60_men: -5
@@ -120,6 +114,7 @@ disability_logit_above_55_men: -5
 disability_logit_above_60_men: -5
 disability_logit_age_above_55_men: -5
 disability_logit_high_educ_men: -5
+disability_logit_low_educ_men: -5
 
 # Disability probability women
 disability_logit_const_women: -30
@@ -129,6 +124,7 @@ disability_logit_above_55_women: -5
 disability_logit_above_60_women: -5
 disability_logit_age_above_55_women: -5
 disability_logit_high_educ_women: -5
+disability_logit_low_educ_women: -5
 
 # SRA firing params
 SRA_firing_logit_intercept_men_low: 2.0

@@ -71,8 +71,8 @@ disutil_partner_retired_women: 0.0
 # Children dis-utility
 disutil_children_ft_work_low: 0.3
 disutil_children_ft_work_high: 0.3
-disutil_children_pt_work_low: 0.3
-disutil_children_pt_work_high: 0.3
+# disutil_children_pt_work_low: 0.3
+# disutil_children_pt_work_high: 0.3
 
 # Bequest
 bequest_scale_low_men: 5

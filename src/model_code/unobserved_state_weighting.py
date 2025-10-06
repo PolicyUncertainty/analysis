@@ -20,7 +20,7 @@ def create_unobserved_state_specs(data_decision):
             health=kwargs["lagged_health"],
             model_specs=kwargs["model_specs"],
             education=kwargs["education"],
-            policy_state=kwargs["policy_state"],
+            # policy_state=kwargs["policy_state"],
             period=kwargs["period"],
             choice=kwargs["lagged_choice"],
         )[job_offer_new]

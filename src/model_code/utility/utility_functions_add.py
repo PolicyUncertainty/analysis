@@ -200,8 +200,8 @@ def disutility_work(
     above_58 = age >= 58
 
     good_health = health == model_specs["good_health_var"]
-    bad_health = health == model_specs["bad_health_var"]
-    disabled_health = health == model_specs["disabled_health_var"]
+    # bad_health = health == model_specs["bad_health_var"]
+    # disabled_health = health == model_specs["disabled_health_var"]
 
     # # Men's disutility parameters by health (no longer education-specific)
     # disutil_ft_work_men = (
@@ -243,15 +243,15 @@ def disutility_work(
 
     # Men's disutility parameters by health (no longer education-specific)
     disutil_ft_work_men = (
-        params["disutil_ft_work_bad_men"] * bad_health
+        params["disutil_ft_work_bad_men"] * (1 - good_health)
         + params["disutil_ft_work_good_men"] * good_health
-        + params["disutil_ft_work_disabled_men"] * disabled_health
+        # + params["disutil_ft_work_disabled_men"] * disabled_health
     )
 
     disutil_unemployment_men = (
         params["disutil_unemployed_good_men"] * good_health
-        + params["disutil_unemployed_bad_men"] * bad_health
-        + params["disutil_unemployed_disabled_men"] * disabled_health
+        + params["disutil_unemployed_bad_men"] * (1 - good_health)
+        # + params["disutil_unemployed_disabled_men"] * disabled_health
         # + params["disutil_unemployed_above_58_men"] * above_58
     )
 
@@ -266,14 +266,14 @@ def disutility_work(
     # Women's disutility parameters by health (no longer education-specific)
     disutil_ft_work_women = (
         params["disutil_ft_work_good_women"] * good_health
-        + params["disutil_ft_work_bad_women"] * bad_health
-        + params["disutil_ft_work_disabled_women"] * disabled_health
+        + params["disutil_ft_work_bad_women"] * (1 - good_health)
+        # + params["disutil_ft_work_disabled_women"] * disabled_health
     )
 
     disutil_pt_work_women = (
         params["disutil_pt_work_good_women"] * good_health
-        + params["disutil_pt_work_bad_women"] * bad_health
-        + params["disutil_pt_work_disabled_women"] * disabled_health
+        + params["disutil_pt_work_bad_women"] * (1 - good_health)
+        # + params["disutil_pt_work_disabled_women"] * disabled_health
     )
 
     # Children disutility remains education-specific as it's conceptually different
@@ -281,22 +281,22 @@ def disutility_work(
         "disutil_children_ft_work_low"
     ] * (1 - education)
 
-    # Children disutility remains education-specific as it's conceptually different
-    disutil_children_pt = params["disutil_children_pt_work_high"] * education + params[
-        "disutil_children_pt_work_low"
-    ] * (1 - education)
+    # # Children disutility remains education-specific as it's conceptually different
+    # disutil_children_pt = params["disutil_children_pt_work_high"] * education + params[
+    #     "disutil_children_pt_work_low"
+    # ] * (1 - education)
 
     has_partner_int = (partner_state > 0).astype(int)
     nb_children = model_specs["children_by_state"][
         sex, education, has_partner_int, period
     ]
     disutil_children_ft = disutil_children_ft * nb_children
-    disutil_children_pt = disutil_children_pt * nb_children
+    # disutil_children_pt = disutil_children_pt * nb_children
 
     disutil_unemployment_women = (
         params["disutil_unemployed_good_women"] * good_health
-        + params["disutil_unemployed_bad_women"] * bad_health
-        + params["disutil_unemployed_disabled_women"] * disabled_health
+        + params["disutil_unemployed_bad_women"] * (1 - good_health)
+        # + params["disutil_unemployed_disabled_women"] * disabled_health
         # + above_58 * params["disutil_unemployed_above_58_women"]
         # + above_58 * params["disutil_unemployed_above_58_good_women"] * good_health
     )
@@ -305,7 +305,7 @@ def disutility_work(
 
     disutil_women = (
         disutil_unemployment_women * is_unemployed
-        + (disutil_pt_work_women + disutil_children_pt) * is_working_part_time
+        + disutil_pt_work_women * is_working_part_time
         + (disutil_ft_work_women + disutil_children_ft) * is_working_full_time
         + partner_retired * disutil_retirement_women * retired
     )

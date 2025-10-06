@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from model_code.specify_model import specify_model
 from set_paths import create_path_dict
 from simulation.sim_tools.investigate_start_obs import investigate_start_obs
+from simulation.sim_tools.start_obs_for_sim import generate_start_states_from_obs
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 path_dict = create_path_dict()
@@ -28,7 +29,15 @@ model = specify_model(
     load_model=load_sol_model,
     util_type=util_type,
 )
-
+generate_start_states_from_obs(
+    path_dict=path_dict,
+    params=pickle.load(
+        open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
+    ),
+    model_class=model,
+    inital_SRA=65,
+    only_informed=False,
+)
 initial_obs_table = investigate_start_obs(
     model_class=model,
     path_dict=path_dict,

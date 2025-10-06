@@ -207,8 +207,8 @@ def plot_predicted_informed_shares_by_education(
     ax.set_xlabel("Age")
     ax.set_ylabel("Share Informed")
     ax.set_xlim([25, 65])
-    ax.set_ylim([0, 0.8])
-    ax.set_yticks(np.arange(0, 1.1, 0.1))
+    ax.set_ylim([0, 0.6])
+    ax.set_yticks(np.arange(0, 0.7, 0.1))
 
     # Create legend
     ax.legend(loc="best")

@@ -1,24 +1,29 @@
 import os
-import pickle
 
-import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 
 from set_styles import get_figsize, set_colors
 
 JET_COLOR_MAP, LINE_STYLES = set_colors()
+import matplotlib.pyplot as plt
+import numpy as np
+
 from estimation.struct_estimation.scripts.estimate_setup import (
     filter_data_by_type,
     generate_print_func,
 )
 from model_code.specify_model import specify_and_solve_model, specify_type_grids
+from model_code.stochastic_processes.health_transition import (
+    calc_disability_probability,
+)
+from model_code.stochastic_processes.job_offers import job_offer_process_transition
 from model_code.transform_data_from_model import (
     calc_choice_probs_for_df,
     calc_unobserved_choice_probs_for_df,
     load_scale_and_correct_data,
 )
 from set_paths import get_model_results_path
+from set_styles import get_figsize, set_colors
 
 
 def create_fit_plots(
@@ -32,9 +37,32 @@ def create_fit_plots(
     sex_type="all",
     edu_type="all",
     util_type="add",
+    skip_model_plots=True,
 ):
     # check if folder of model objects exits:
     model_folder = get_model_results_path(path_dict, model_name)
+
+    folder_name_plots = path_dict["estimation_plots"] + model_name + "/"
+    # Check if folder exists, if not create it
+    if not os.path.exists(folder_name_plots):
+        os.makedirs(folder_name_plots)
+
+    generate_print_func(params.keys(), specs)(params)
+
+    plot_job_offers(
+        save_folder=folder_name_plots,
+        params=params,
+        specs=specs,
+    )
+
+    plot_disability_probability(
+        params=params,
+        specs=specs,
+        save_folder=folder_name_plots,
+    )
+
+    if skip_model_plots:
+        return None
 
     if load_data_from_sol:
         data_decision = pd.read_csv(
@@ -42,7 +70,6 @@ def create_fit_plots(
         )
 
     else:
-        generate_print_func(params.keys(), specs)(params)
 
         data_decision = create_df_with_probs(
             path_dict=path_dict,
@@ -61,10 +88,6 @@ def create_fit_plots(
         sex_type=sex_type,
         edu_type=edu_type,
     )
-    folder_name_plots = path_dict["estimation_plots"] + model_name + "/"
-    # Check if folder exists, if not create it
-    if not os.path.exists(folder_name_plots):
-        os.makedirs(folder_name_plots)
 
     plot_ret_fit_age(
         specs=specs,
@@ -93,6 +116,168 @@ def create_fit_plots(
 
     # plt.show()
     # plt.close("all")
+
+
+def plot_job_offers(
+    save_folder,
+    params,
+    specs,
+):
+    # Initialize colors
+    colors, _ = set_colors()
+
+    # Create figure with 2x2 subplots
+    fig, axs = plt.subplots(nrows=2, ncols=2, figsize=get_figsize(2, 2))
+
+    # Create age array from start_age to max_ret_age
+    ages = np.arange(specs["start_age"], specs["max_ret_age"] + 1)
+    periods = ages - specs["start_age"]
+
+    # Iterate over sex and education combinations
+    for sex_idx, (sex_label, sex_var) in enumerate(specs["sex_labels"].items()):
+        for edu_idx, (edu_label, edu_var) in enumerate(
+            specs["education_labels"].items()
+        ):
+            # Select the appropriate subplot
+            ax = axs[sex_idx, edu_idx]
+
+            # Initialize arrays to store probabilities
+            good_health_probs = []
+            bad_health_probs = []
+
+            # Calculate probabilities for each age
+            for period in periods:
+                # Good health (health=0 typically)
+                prob_good = job_offer_process_transition(
+                    params=params,
+                    sex=sex_var,
+                    health=np.array(specs["good_health_var"]),
+                    model_specs=specs,
+                    education=edu_var,
+                    period=period,
+                    choice=1,  # unemployment choice for job finding probability
+                )
+                good_health_probs.append(prob_good[1])  # probability of job offer
+
+                # Bad health (health=1 typically)
+                prob_bad = job_offer_process_transition(
+                    params=params,
+                    sex=sex_var,
+                    health=np.array(specs["bad_health_var"]),
+                    model_specs=specs,
+                    education=edu_var,
+                    period=period,
+                    choice=1,
+                )
+                bad_health_probs.append(prob_bad[1])
+
+            # Plot the two curves
+            ax.plot(
+                ages,
+                good_health_probs,
+                label="Good Health",
+                color=colors[0],
+                linewidth=2,
+            )
+            ax.plot(
+                ages,
+                bad_health_probs,
+                label="Bad Health",
+                color=colors[1],
+                linewidth=2,
+                linestyle="--",
+            )
+
+            # Formatting
+            ax.set_title(f"{sex_label} - {edu_label}")
+            ax.set_xlabel("Age")
+            ax.set_ylabel("Job Offer Probability")
+            ax.legend()
+            ax.grid(True, alpha=0.3)
+            ax.set_ylim([0, 1])
+
+    fig.tight_layout()
+    fig.savefig(
+        save_folder + "job_offer_probabilities.png",
+        transparent=True,
+        dpi=300,
+    )
+    fig.savefig(
+        save_folder + "job_offer_probabilities.pdf",
+        transparent=True,
+        dpi=300,
+    )
+
+
+def plot_disability_probability(params, specs, save_folder):
+    """Plot disability probability conditional on bad health by age, education and sex.
+
+    Parameters
+    ----------
+    params : dict
+        Model parameters including disability logit coefficients
+    specs : dict
+        Model specifications including age ranges and labels
+    save_folder : str
+        Path to folder where plots should be saved
+    show : bool, default False
+        Whether to display the plot
+    """
+    # Initialize colors
+    colors, _ = set_colors()
+
+    # Create figure with 2x2 subplots
+    fig, axs = plt.subplots(nrows=2, ncols=2, figsize=get_figsize(2, 2))
+
+    # Create age array from start_age to max_ret_age
+    ages = np.arange(specs["start_age"], specs["max_ret_age"] + 1)
+    periods = ages - specs["start_age"]
+
+    # Iterate over sex and education combinations
+    for sex_idx, (sex_label, sex_var) in enumerate(specs["sex_labels"].items()):
+        for edu_idx, (edu_label, edu_var) in enumerate(
+            specs["education_labels"].items()
+        ):
+            # Select the appropriate subplot
+            ax = axs[sex_idx, edu_idx]
+
+            # Initialize array to store disability probabilities
+            disability_probs = []
+
+            # Calculate disability probability for each age
+            # (conditional on being in bad health)
+            for period in periods:
+                prob_disability = calc_disability_probability(
+                    params=params,
+                    sex=sex_var,
+                    education=edu_var,
+                    period=period,
+                    model_specs=specs,
+                )
+                disability_probs.append(prob_disability)
+
+            # Plot the disability probability curve
+            ax.plot(
+                ages,
+                disability_probs,
+                color=colors[sex_idx * 2 + edu_idx],
+                linewidth=2,
+                label="Disability Prob.",
+            )
+
+            # Formatting
+            ax.set_title(f"{sex_label} - {edu_label}")
+            ax.set_xlabel("Age")
+            ax.set_ylabel("Disability Probability")
+            ax.legend()
+            ax.grid(True, alpha=0.3)
+            ax.set_ylim([0, 1])
+
+    plt.tight_layout()
+    fig.savefig(save_folder + "disability_prob_by_type.pdf", bbox_inches="tight")
+    fig.savefig(
+        save_folder + "disability_prob_by_type.png", bbox_inches="tight", dpi=300
+    )
 
 
 def create_df_with_probs(

@@ -5,7 +5,7 @@ from model_code.stochastic_processes.math_funcs import logit_formula
 
 
 def job_offer_process_transition(
-    params, policy_state, sex, health, model_specs, education, period, choice
+    params, sex, health, model_specs, education, period, choice
 ):
     """Transition probability for next period job offer state.
 

@@ -45,15 +45,20 @@ def add_erp_belief_specs(specs, path_dict):
     n_edu_types = len(specs["education_labels"])
     informed_hazard_rate = np.zeros(n_edu_types)
     uninformed_penalties = np.zeros(n_edu_types)
-    initial_shares = np.zeros(n_edu_types)
 
     # Fill arrays directly from CSV data
     for edu_val, edu_label in enumerate(specs["education_labels"]):
         edu_params = beliefs_params_df[beliefs_params_df["type"] == edu_label]
 
-        uninformed_penalties[edu_val] = edu_params[edu_params["parameter"] == "erp_uninformed_belief"]["estimate"].iloc[0] / 100
-        informed_hazard_rate[edu_val] = edu_params[edu_params["parameter"] == "hazard_rate"]["estimate"].iloc[0]
-        initial_shares[edu_val] = edu_params[edu_params["parameter"] == "initial_informed_share"]["estimate"].iloc[0]
+        uninformed_penalties[edu_val] = (
+            edu_params[edu_params["parameter"] == "erp_uninformed_belief"][
+                "estimate"
+            ].iloc[0]
+            / 100
+        )
+        informed_hazard_rate[edu_val] = edu_params[
+            edu_params["parameter"] == "hazard_rate"
+        ]["estimate"].iloc[0]
 
     # Create age-indexed array (ages 0 to max_ret_age)
     ages_until_max_ret = np.arange(0, specs["max_ret_age"] + 1)
@@ -61,18 +66,10 @@ def add_erp_belief_specs(specs, path_dict):
 
     # Fill informed shares by age (initial share is for age 17)
     for edu_val in range(n_edu_types):
-        for age in ages_until_max_ret:
-            if age < 17:
-                # For ages below 17, assume 0 informed (no data)
-                informed_shares_in_ages[age, edu_val] = 0
-            else:
-                # Calculate from age 17 using hazard rate model
-                periods_since_17 = age - 17
-                uninformed_prob = (1 - initial_shares[edu_val]) * (1 - informed_hazard_rate[edu_val]) ** periods_since_17
-                informed_shares_in_ages[age, edu_val] = 1 - uninformed_prob
+        uninformed_prob = (1 - informed_hazard_rate[edu_val]) ** ages_until_max_ret
+        informed_shares_in_ages[:, edu_val] = 1 - uninformed_prob
 
     specs["uninformed_ERP"] = uninformed_penalties
     specs["informed_hazard_rate"] = informed_hazard_rate
-    specs["initial_informed_share"] = initial_shares
     specs["informed_shares_in_ages"] = informed_shares_in_ages
     return specs

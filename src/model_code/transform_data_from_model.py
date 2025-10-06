@@ -204,15 +204,11 @@ def create_informed_probability(df, specs):
             continue
 
         ages = df.loc[mask, "age"].values
-        initial_informed_share = specs["initial_informed_share"][edu_val]
         hazard_rate = specs["informed_hazard_rate"][edu_val]
 
-        # Calculate periods since initial age (minimum age in belief data, i.e., 17)
-        periods = ages - 17
-
         # Calculate uninformed probability
-        initial_uninformed_share = 1 - initial_informed_share
-        prob_uninformed = initial_uninformed_share * (1 - hazard_rate) ** periods
+        # Initial share is 1
+        prob_uninformed = (1 - hazard_rate) ** ages
         prob_informed = 1 - prob_uninformed
 
         probs[mask] = prob_informed

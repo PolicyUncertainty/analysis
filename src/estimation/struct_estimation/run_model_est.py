@@ -4,10 +4,10 @@ import sys
 
 from estimation.struct_estimation.start_params_and_bounds.param_lists import (  # men_disutil_firing,
     men_disability_params,
-    men_disutil_params_partner,
     men_disutil_firing_edu,
     men_disutil_params,
     men_disutil_params_edu,
+    men_disutil_params_partner,
     men_job_offer_params,
     men_SRA_firing,
     women_disability_params,
@@ -24,8 +24,13 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
     load_and_set_start_params,
 )
 
-model_name = "all_age_women"
-params_to_estimate_names = women_disutil_params + women_disability_params + women_job_offer_params
+model_name = "mom_taste_women"
+params_to_estimate_names = (
+    women_disutil_params
+    + women_disability_params
+    + women_job_offer_params
+    + ["taste_shock_scale_women"]
+)
 sex_type = "women"
 edu_type = "all"
 util_type = "add"

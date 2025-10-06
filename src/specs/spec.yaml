@@ -1,9 +1,8 @@
 ---
 ################
 # Current model name:
-model_name: all_age_taste
+model_name: final
 util_type: add
-
 
 ###############################################################################
 # Model specification

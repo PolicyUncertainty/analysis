@@ -25,7 +25,7 @@ sra_increase_aggregate_plot(path_dict, model_name)
 # sra_increase_aggregate_plot_by_het(
 #     path_dict=path_dict, het_names=het_names, fig_name="by_gender", model_name=model_name
 # )
-announcement_timing_lc_plot(path_dict, model_name)
+# announcement_timing_lc_plot(path_dict, model_name)
 # debias_lc_plot(path_dict, model_name)
 # commitment_lc_plot(path_dict, model_name)
 

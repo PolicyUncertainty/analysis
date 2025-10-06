@@ -26,14 +26,14 @@ params = pickle.load(
 )
 from estimation.struct_estimation.scripts.estimate_setup import generate_print_func
 
-params["bequest_scale_low_men"] = 5
-params["kappa_low_men"] = 0
-params["bequest_scale_high_men"] = 5
-params["kappa_high_men"] = 0
-params["bequest_scale_low_women"] = 1
-params["kappa_low_women"] = 10
-params["bequest_scale_high_women"] = 2
-params["kappa_high_women"] = 0
+# params["bequest_scale_low_men"] = 5
+# params["kappa_low_men"] = 0
+# params["bequest_scale_high_men"] = 5
+# params["kappa_high_men"] = 0
+# params["bequest_scale_low_women"] = 1
+# params["kappa_low_women"] = 10
+# params["bequest_scale_high_women"] = 2
+# params["kappa_high_women"] = 0
 generate_print_func(params.keys())(params)
 
 # which_plots = input(

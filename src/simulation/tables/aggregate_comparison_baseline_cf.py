@@ -42,6 +42,7 @@ def aggregate_comparison_baseline_cf(
         "pensions": "Annual Pension Income",
         "pensions_excl_disability": "Annual Pension Income (excl. Disability)",
         "share_disability_pensions": "Share with Disability Pension",
+        "pensions_share_below_63": "Share with Pension before 63",
         # Lifecycle (30+)
         "lifecycle_working_hours": "Annual Labor Supply (hrs)",
         "lifecycle_avg_wealth": "Average Financial Wealth",
@@ -64,6 +65,7 @@ def aggregate_comparison_baseline_cf(
             "pensions",
             "pensions_excl_disability",
             "share_disability_pensions",
+            "pensions_share_below_63",
         ],
         "Lifecycle (30+)": ["lifecycle_working_hours", "lifecycle_avg_wealth"],
     }

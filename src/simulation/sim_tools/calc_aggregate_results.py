@@ -63,6 +63,10 @@ def add_overall_results(result_df, index, pre_name, df_scenario, specs):
         share_disability_pensions(df_scenario)
     )
 
+    result_df.loc[index, f"{pre_name}_pensions_share_below_63"] = (
+        share_disability_pensions_below_63(df_scenario)
+    )
+
     # Lifecycle (30+) metrics
     result_df.loc[index, f"{pre_name}_lifecycle_working_hours"] = (
         calc_lifecycle_working_hours(df_scenario)
@@ -223,6 +227,17 @@ def share_disability_pensions(df):
     n_pensions = np.sum(first_time_pension_payment & disability_mask)
     total_pensions = np.sum(first_time_pension_payment)
     return n_pensions / total_pensions
+
+
+def share_disability_pensions_below_63(df):
+    """Calculate share of fresh retired before 63."""
+    first_time_pension_payment = (
+        (df["lagged_choice"] == 0) & (df["policy_state"] != 29) & (df["health"] != 3)
+    )
+    below_63_mask = df["age"] < 63
+    n_pensions_below = np.sum(first_time_pension_payment & below_63_mask)
+    total_pensions = np.sum(first_time_pension_payment)
+    return n_pensions_below / total_pensions
 
 
 # ============================================================================

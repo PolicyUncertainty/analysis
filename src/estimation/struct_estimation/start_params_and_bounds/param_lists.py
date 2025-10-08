@@ -45,11 +45,11 @@ men_job_offer_params = [
 men_disability_params = [
     "disability_logit_const_men",
     # "disability_logit_age_men",
-    # "disability_logit_age_above_55_men",
+    "disability_logit_age_above_55_men",
     # "disability_logit_above_50_men",
     # "disability_logit_above_55_men",
     # "disability_logit_above_60_men",
-    # "disability_logit_high_educ_men",
+    "disability_logit_high_educ_men",
     # "disability_logit_low_educ_men",
 ]
 
@@ -99,10 +99,10 @@ women_job_offer_params = [
 women_disability_params = [
     "disability_logit_const_women",
     # "disability_logit_age_women",
-    # "disability_logit_age_above_55_women",
+    "disability_logit_age_above_55_women",
     # "disability_logit_above_50_women",
     # "disability_logit_above_55_women",
     # "disability_logit_above_60_women",
-    # "disability_logit_high_educ_women",
+    "disability_logit_high_educ_women",
     # "disability_logit_low_educ_women",
 ]

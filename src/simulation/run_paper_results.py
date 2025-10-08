@@ -47,10 +47,10 @@ res_df = calc_exp_results(
     load_sol_model=load_model,
     util_type=util_type,
 )
-res_df.to_csv(path_dict["sim_results"] + f"baseline_margins_{model_name}.to_csv")
+res_df.to_csv(path_dict["sim_results"] + f"baseline_margins_{model_name}.csv")
 
 res_df = pd.read_csv(
-    path_dict["sim_results"] + f"baseline_margins_{model_name}.to_csv", index_col=0
+    path_dict["sim_results"] + f"baseline_margins_{model_name}.csv", index_col=0
 )
 table = generate_latex_table(res_df)
 with open(path_dict["simulation_tables"] + "baseline_margins.tex", "w") as f:

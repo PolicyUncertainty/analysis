@@ -4,12 +4,12 @@ mu_low: 1.5
 mu_high: 1.5
 
 # ## Full time work dis-utility men - Health specific
-disutil_ft_work_good_men: 1.0
-disutil_ft_work_bad_men: 1.0
+disutil_ft_work_good_men: 0.1
+disutil_ft_work_bad_men: 0.1
 
 # Unemployment dis-utility men - Health specific
-disutil_unemployed_good_men: 1.0
-disutil_unemployed_bad_men: 1.0
+disutil_unemployed_good_men: 0.1
+disutil_unemployed_bad_men: 0.1
 
 # # Full time work dis-utility men - Health and Education specific
 # disutil_ft_work_high_good_men: 0.6
@@ -50,20 +50,20 @@ disutil_pt_work_bad_women: 0.6
 disutil_unemployed_good_women: 0.3
 disutil_unemployed_bad_women: 0.3
 
-# Full time work dis-utility men - Disabled health
-disutil_ft_work_disabled_men: 0.4
+# # Full time work dis-utility men - Disabled health
+# disutil_ft_work_disabled_men: 0.4
 
-# Unemployment dis-utility men - Disabled health
-disutil_unemployed_disabled_men: 0.8
+# # Unemployment dis-utility men - Disabled health
+# disutil_unemployed_disabled_men: 0.8
 
-# Full time work dis-utility women - Disabled health
-disutil_ft_work_disabled_women: 0.4
+# # Full time work dis-utility women - Disabled health
+# disutil_ft_work_disabled_women: 0.4
 
-# Part time work dis-utility women - Disabled health
-disutil_pt_work_disabled_women: 0.4
+# # Part time work dis-utility women - Disabled health
+# disutil_pt_work_disabled_women: 0.4
 
-# Unemployment dis-utility women - Disabled health
-disutil_unemployed_disabled_women: 0.8
+# # Unemployment dis-utility women - Disabled health
+# disutil_unemployed_disabled_women: 0.8
 
 # Partner retired dis-utility women
 disutil_partner_retired_women: 0.0

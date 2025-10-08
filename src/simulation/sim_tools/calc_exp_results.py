@@ -118,7 +118,13 @@ def generate_latex_table(res_df):
         "sra_at_63": "SRA at 63",
         "ret_age_excl_disabled": "Retirement Age (excl. Disability)",
         "pension_wealth_at_ret": "Pension Wealth (PV at Retirement)",
+        "pension_wealth_at_ret_excl_disability": "Pension Wealth (excl. Disability)",
         "private_wealth_at_ret": "Financial Wealth at Retirement",
+        "private_wealth_at_ret_excl_disability": "Financial Wealth (excl. Disability)",
+        "pensions": "Annual Pension Income",
+        "pensions_excl_disability": "Annual Pension Income (excl. Disability)",
+        "share_disability_pensions": "Share with Disability Pension",
+        "pensions_share_below_63": "Share with Pension before 63",
         # Lifecycle (30+)
         "lifecycle_working_hours": "Annual Labor Supply (hrs)",
         "lifecycle_avg_wealth": "Average Financial Wealth",
@@ -128,10 +134,16 @@ def generate_latex_table(res_df):
     sections = {
         "Retirement": [
             # "ret_age",
-            "sra_at_63",
-            "ret_age_excl_disabled",
-            "pension_wealth_at_ret",
-            "private_wealth_at_ret",
+            "sra_at_63"
+            "ret_age_excl_disabled"
+            "pension_wealth_at_ret"
+            "pension_wealth_at_ret_excl_disability"
+            "private_wealth_at_ret"
+            "private_wealth_at_ret_excl_disability"
+            "pensions"
+            "pensions_excl_disability"
+            "share_disability_pensions"
+            "pensions_share_below_63"
         ],
         "Work Life ($<63$)": [
             "working_hours_below_63",

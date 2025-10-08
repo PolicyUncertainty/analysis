@@ -35,23 +35,31 @@ load_unc_solution = None  # baseline solution conntainer
 params = pkl.load(
     open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
 )
+edu_append = ["low", "high"]
+for sex_var, sex_label in enumerate(specs["sex_labels"]):
+    for edu_var, edu_label in enumerate(specs["edu_labels"]):
 
-res_df = calc_exp_results(
-    path_dict=path_dict,
-    specs=specs,
-    sex=0,
-    education=0,
-    params=params,
-    model_name=model_name,
-    load_solution=load_unc_solution,
-    load_sol_model=load_model,
-    util_type=util_type,
-)
-res_df.to_csv(path_dict["sim_results"] + f"baseline_margins_{model_name}.csv")
+        res_df = calc_exp_results(
+            path_dict=path_dict,
+            specs=specs,
+            sex=sex_var,
+            education=edu_var,
+            params=params,
+            model_name=model_name,
+            load_solution=load_unc_solution,
+            load_sol_model=load_model,
+            util_type=util_type,
+        )
+        file_append = model_name + sex_label + edu_append[edu_var]
 
-res_df = pd.read_csv(
-    path_dict["sim_results"] + f"baseline_margins_{model_name}.csv", index_col=0
-)
-table = generate_latex_table(res_df)
-with open(path_dict["simulation_tables"] + "baseline_margins.tex", "w") as f:
-    f.write(table)
+        res_df.to_csv(path_dict["sim_results"] + f"baseline_margins_{file_append}.csv")
+
+        res_df = pd.read_csv(
+            path_dict["sim_results"] + f"baseline_margins_{file_append}.csv",
+            index_col=0,
+        )
+        table = generate_latex_table(res_df)
+        with open(
+            path_dict["simulation_tables"] + f"baseline_margins_{file_append}.tex", "w"
+        ) as f:
+            f.write(table)

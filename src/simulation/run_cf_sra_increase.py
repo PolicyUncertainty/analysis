@@ -51,6 +51,7 @@ def process_gender_results(i, df, result_dfs, het_spec_vars, het_var_name):
             index=i,
             pre_name="cf",
             df_scenario=df_scenario,
+            specs=specs,
         )
         if i == 0:
             all_idxs = result_dfs[het_name].index
@@ -60,6 +61,7 @@ def process_gender_results(i, df, result_dfs, het_spec_vars, het_var_name):
                     index=all_i,
                     pre_name="base",
                     df_scenario=df_scenario,
+                    specs=specs,
                 )
 
 

@@ -1,9 +1,10 @@
+import numpy as np
 import pandas as pd
 
 from model_code.pension_system.pension_wealth import calc_pension_annuity_value
 
 
-def add_overall_results(result_df, index, pre_name, df_scenario, specs=None):
+def add_overall_results(result_df, index, pre_name, df_scenario, specs):
     """
     Add aggregate results to result_df for a given scenario.
 
@@ -42,10 +43,25 @@ def add_overall_results(result_df, index, pre_name, df_scenario, specs=None):
     result_df.loc[index, f"{pre_name}_private_wealth_at_ret"] = (
         private_wealth_at_retirement(df_scenario)
     )
-    if specs is not None:
-        result_df.loc[index, f"{pre_name}_pension_wealth_at_ret"] = (
-            pension_wealth_at_retirement(df_scenario, specs)
-        )
+    result_df.loc[index, f"{pre_name}_private_wealth_at_ret_excl_disability"] = (
+        private_wealth_excl_disability(df_scenario)
+    )
+
+    result_df.loc[index, f"{pre_name}_pension_wealth_at_ret"] = (
+        pension_wealth_at_retirement(df_scenario, specs)
+    )
+
+    result_df.loc[index, f"{pre_name}_pension_wealth_at_ret_excl_disability"] = (
+        pension_wealth_excl_disability(df_scenario, specs)
+    )
+
+    result_df.loc[index, f"{pre_name}_pensions"] = pensions(df_scenario)
+    result_df.loc[index, f"{pre_name}_pensions_excl_disability"] = (
+        pensions_excl_disability(df_scenario)
+    )
+    result_df.loc[index, f"{pre_name}_share_disability_pensions"] = (
+        share_disability_pensions(df_scenario)
+    )
 
     # Lifecycle (30+) metrics
     result_df.loc[index, f"{pre_name}_lifecycle_working_hours"] = (
@@ -131,6 +147,17 @@ def private_wealth_at_retirement(df):
     return mean_wealth * 10
 
 
+def private_wealth_excl_disability(df):
+    """Calculate mean private/financial wealth at retirement excluding disability pensions"""
+    fresh_retired_mask = (
+        (df["choice"] == 0) & (df["lagged_choice"] != 0) & (df["health"] != 3)
+    )
+    non_disabled_mask = df["health"] != 2
+    combined_mask = fresh_retired_mask & non_disabled_mask
+    mean_wealth = df.loc[combined_mask, "assets_begin_of_period"].mean()
+    return mean_wealth * 10
+
+
 def pension_wealth_at_retirement(df, specs):
     """Calculate mean pension wealth (PV) at retirement"""
     first_time_pension_payment = (
@@ -147,6 +174,55 @@ def pension_wealth_at_retirement(df, specs):
         interest_rate=specs["interest_rate"],
     )
     return annuity_value.mean() * 10
+
+
+def pension_wealth_excl_disability(df, specs):
+    """Calculate mean pension wealth (PV) at retirement without disability pensions."""
+    first_time_pension_payment = (
+        (df["lagged_choice"] == 0)
+        & (df["policy_state"] != 29)
+        & (~df["health"].isin([2, 3]))
+    )
+    df_first = df.loc[first_time_pension_payment, :]
+    pension_payments = df_first["gross_retirement_income"]
+    ret_age = df_first["age"] - 1
+    life_exp = specs["life_exp"][df_first["sex"].values, df_first["education"].values]
+    payment_years = life_exp - ret_age
+    annuity_value = calc_pension_annuity_value(
+        pension_payments=pension_payments,
+        payment_years=payment_years,
+        interest_rate=specs["interest_rate"],
+    )
+    return annuity_value.mean() * 10
+
+
+def pensions_excl_disability(df):
+    """Calculate mean pension at retirement without disability pensions."""
+    first_time_pension_payment = (
+        (df["lagged_choice"] == 0)
+        & (df["policy_state"] != 29)
+        & (~df["health"].isin([2, 3]))
+    )
+    return df.loc[first_time_pension_payment, "gross_retirement_income"].mean() * 10
+
+
+def pensions(df):
+    """Calculate mean pension at retirement."""
+    first_time_pension_payment = (
+        (df["lagged_choice"] == 0) & (df["policy_state"] != 29) & (df["health"] != 3)
+    )
+    return df.loc[first_time_pension_payment, "gross_retirement_income"].mean() * 10
+
+
+def share_disability_pensions(df):
+    """Calculate share of disability pensions at retirement."""
+    first_time_pension_payment = (
+        (df["lagged_choice"] == 0) & (df["policy_state"] != 29) & (df["health"] != 3)
+    )
+    disability_mask = df["health"] == 2
+    n_pensions = np.sum(first_time_pension_payment & disability_mask)
+    total_pensions = np.sum(first_time_pension_payment)
+    return n_pensions / total_pensions
 
 
 # ============================================================================

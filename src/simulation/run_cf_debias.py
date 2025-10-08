@@ -135,27 +135,40 @@ plot_retirement_difference(
     cf_label=cf_label,
 )
 
+mask_func_m = lambda df_int: df_int["sex"] == 0
+mask_func_f = lambda df_int: df_int["sex"] == 1
+mask_func_all = lambda df_int: df_int["sex"].isin([0, 1])
 
-# calculate aggregate and lifetime results
-result_df = pd.DataFrame(index=[0])
-for df, label in zip([df_base, df_cf], ["baseline", "cf"]):
-    result_df = add_overall_results(
-        result_df=result_df, df_scenario=df, index=0, pre_name=label, specs=specs
+label_dict = {
+    "all": mask_func_all,
+    "men": mask_func_m,
+    "women": mask_func_f,
+}
+
+
+for group_label, mask_func in label_dict.items():
+    df_base_group = df_base[mask_func(df_base)].copy()
+    df_cf_group = df_cf[mask_func(df_cf)].copy()
+
+    # calculate aggregate and lifetime results
+    result_df = pd.DataFrame(index=[0])
+    for df, label in zip([df_base_group, df_cf_group], ["baseline", "cf"]):
+        result_df = add_overall_results(
+            result_df=result_df, df_scenario=df, index=0, pre_name=label, specs=specs
+        )
+
+    # Create aggregate comparison table
+    aggregate_comparison_baseline_cf(
+        result_df=result_df,
+        base_label=base_label,
+        cf_label=cf_label,
+        path_dict=path_dict,
+        file_append=model_name + f"_{group_label}",
+        cv=cv_cf,
     )
 
-df_lc_baseline = calc_life_cycle_detailed(df_base)
-df_lc_cf = calc_life_cycle_detailed(df_cf)
-
-# Create aggregate comparison table
-aggregate_comparison_baseline_cf(
-    result_df=result_df,
-    base_label=base_label,
-    cf_label=cf_label,
-    path_dict=path_dict,
-    model_name=model_name,
-    cv=cv_cf,
-)
-
+# df_lc_baseline = calc_life_cycle_detailed(df_base)
+# df_lc_cf = calc_life_cycle_detailed(df_cf)
 
 # plot_retirement_share(
 #     path_dict=path_dict,

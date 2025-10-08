@@ -5,7 +5,7 @@ import pandas as pd
 
 
 def aggregate_comparison_baseline_cf(
-    result_df, base_label, cf_label, path_dict, model_name, cv=None
+    result_df, base_label, cf_label, path_dict, file_append, cv=None
 ):
     """
     Create LaTeX table comparing baseline and counterfactual aggregate results.
@@ -36,7 +36,12 @@ def aggregate_comparison_baseline_cf(
         "ret_age": "Retirement Age",
         "ret_age_excl_disabled": "Retirement Age (excl. Disability)",
         "pension_wealth_at_ret": "Pension Wealth (PV at Retirement)",
+        "pension_wealth_at_ret_excl_disability": "Pension Wealth (excl. Disability)",
         "private_wealth_at_ret": "Financial Wealth at Retirement",
+        "private_wealth_at_ret_excl_disability": "Financial Wealth (excl. Disability)",
+        "pensions": "Annual Pension Income",
+        "pensions_excl_disability": "Annual Pension Income (excl. Disability)",
+        "share_disability_pensions": "Share with Disability Pension",
         # Lifecycle (30+)
         "lifecycle_working_hours": "Annual Labor Supply (hrs)",
         "lifecycle_avg_wealth": "Average Financial Wealth",
@@ -53,7 +58,12 @@ def aggregate_comparison_baseline_cf(
             "ret_age",
             "ret_age_excl_disabled",
             "pension_wealth_at_ret",
+            "pension_wealth_at_ret_excl_disability",
             "private_wealth_at_ret",
+            "private_wealth_at_ret_excl_disability",
+            "pensions",
+            "pensions_excl_disability",
+            "share_disability_pensions",
         ],
         "Lifecycle (30+)": ["lifecycle_working_hours", "lifecycle_avg_wealth"],
     }
@@ -153,7 +163,7 @@ def aggregate_comparison_baseline_cf(
         os.makedirs(table_dir)
 
     output_path = os.path.join(
-        table_dir, f"cf_debias_aggregate_results_{model_name}.tex"
+        table_dir, f"cf_debias_aggregate_results_{file_append}.tex"
     )
 
     with open(output_path, "w") as f:

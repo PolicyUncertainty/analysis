@@ -49,6 +49,9 @@ def create_choice_variable_from_artkalen(
     df.loc[nan_mask & cont_choice, "choice"] = df.loc[
         nan_mask & cont_choice, "pgen_choice"
     ]
+    ret_mask = df["choice"] == 0
+    not_receive_pension = df["plc0232_v1"] != 1
+    df.loc[ret_mask & not_receive_pension, "choice"] = np.nan
 
     df["lagged_choice"] = df.groupby("pid")["choice"].shift(1)
     return df

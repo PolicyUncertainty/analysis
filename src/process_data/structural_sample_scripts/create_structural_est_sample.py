@@ -189,9 +189,10 @@ def create_structural_est_sample(
     df = create_pseudo_ids(df)
 
     # Drop civil servants and self-employed
-    df = df[~(df["self_employed"] | df["civil_servant"])]
-    print(f"Dropping civil servants and self-employed, {len(df)} observations left.")
+    df = df[~df["self_employed"]]
+    df = df[~df.groupby("pid")["civil_servant"].transform("any")]
 
+    print(f"Dropping civil servants and self-employed, {len(df)} observations left.")
     # Rename to monthly wage
     df.rename(
         columns={
@@ -291,7 +292,16 @@ def load_and_merge_soep_core(path_dict, use_processed_pl):
         # Add pl data
         pl_data_reader = pd.read_stata(
             f"{soep_c38_path}/pl.dta",
-            columns=["pid", "hid", "syear", "plb0304_h", "iyear", "pmonin", "ptagin"],
+            columns=[
+                "pid",
+                "hid",
+                "syear",
+                "plb0304_h",
+                "iyear",
+                "pmonin",
+                "ptagin",
+                "plc0232_v1",
+            ],
             chunksize=100000,
             convert_categoricals=False,
         )

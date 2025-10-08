@@ -34,7 +34,9 @@ def calc_early_retirement_pension_points(
     """
 
     # Check if the individual gets disability pension
-    disability_pension_bool = health == model_specs["disabled_health_var"]
+    disability_pension_bool = (health == model_specs["disabled_health_var"]) & (
+        actual_retirement_age < model_specs["min_long_insured_age"]
+    )
     # Check if the individual is eligible for very long insured pension
     very_long_insured_bool = check_very_long_insured(
         retirement_age_difference=retirement_age_difference,

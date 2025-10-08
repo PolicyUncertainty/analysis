@@ -134,16 +134,16 @@ def generate_latex_table(res_df):
     sections = {
         "Retirement": [
             # "ret_age",
-            "sra_at_63"
-            "ret_age_excl_disabled"
-            "pension_wealth_at_ret"
-            "pension_wealth_at_ret_excl_disability"
-            "private_wealth_at_ret"
-            "private_wealth_at_ret_excl_disability"
-            "pensions"
-            "pensions_excl_disability"
-            "share_disability_pensions"
-            "pensions_share_below_63"
+            "sra_at_63",
+            "ret_age_excl_disabled",
+            "pension_wealth_at_ret",
+            "pension_wealth_at_ret_excl_disability",
+            "private_wealth_at_ret",
+            "private_wealth_at_ret_excl_disability",
+            "pensions",
+            "pensions_excl_disability",
+            "share_disability_pensions",
+            "pensions_share_below_63",
         ],
         "Work Life ($<63$)": [
             "working_hours_below_63",

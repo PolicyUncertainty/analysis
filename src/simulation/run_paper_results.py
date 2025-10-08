@@ -37,7 +37,7 @@ params = pkl.load(
 )
 edu_append = ["low", "high"]
 for sex_var, sex_label in enumerate(specs["sex_labels"]):
-    for edu_var, edu_label in enumerate(specs["edu_labels"]):
+    for edu_var, edu_label in enumerate(specs["education_labels"]):
 
         res_df = calc_exp_results(
             path_dict=path_dict,

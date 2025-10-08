@@ -21,7 +21,7 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
     load_and_set_start_params,
 )
 
-model_name = "age_55_men"
+model_name = "em1_men"
 params_to_estimate_names = (
     men_disutil_params + men_disability_params + men_job_offer_params + men_taste
 )

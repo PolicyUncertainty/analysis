@@ -4,12 +4,12 @@ mu_low: 1.5
 mu_high: 1.5
 
 # ## Full time work dis-utility men - Health specific
-disutil_ft_work_good_men: 0.1
-disutil_ft_work_bad_men: 0.1
+disutil_ft_work_good_men: 1.0
+disutil_ft_work_bad_men: 1.0
 
 # Unemployment dis-utility men - Health specific
-disutil_unemployed_good_men: 0.1
-disutil_unemployed_bad_men: 0.1
+disutil_unemployed_good_men: 1.0
+disutil_unemployed_bad_men: 1.0
 
 # # Full time work dis-utility men - Health and Education specific
 # disutil_ft_work_high_good_men: 0.6

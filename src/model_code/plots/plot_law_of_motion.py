@@ -70,6 +70,7 @@ def plot_ret_experience_multi(path_dict, specs, show=False, save=False):
                             lagged_choice=0,
                             policy_state=8,  # Policy state 8 as in original
                             sex=sex,
+                            partner_state=np.array(1),
                             education=education,
                             experience=exp,
                             informed=informed,

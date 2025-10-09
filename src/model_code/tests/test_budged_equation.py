@@ -98,19 +98,21 @@ def test_budget_unemployed(
         net_partner + nb_children * specs_internal["annual_child_benefits"]
     )
 
-    unemployment_benefits = (1 + has_partner) * specs_internal[
-        "annual_unemployment_benefits"
-    ]
+    own_unemployment_benefits = (
+        specs_internal["annual_unemployment_benefits"]
+        + specs_internal["annual_unemployment_benefits"]
+    )
+    unemployment_benefits_partner = has_partner * (
+        specs_internal["annual_unemployment_benefits"]
+        + 0.5 * specs_internal["annual_unemployment_benefits_housing"]
+    )
     unemployment_benefits_children = (
         specs_internal["annual_child_unemployment_benefits"] * nb_children
     )
-    unemployment_benefits_housing = specs_internal[
-        "annual_unemployment_benefits_housing"
-    ] * (1 + 0.5 * has_partner)
     potential_unemployment_benefits = (
-        unemployment_benefits
+        own_unemployment_benefits
         + unemployment_benefits_children
-        + unemployment_benefits_housing
+        + unemployment_benefits_partner
     )
 
     means_test = savings_scaled < specs_internal["unemployment_wealth_thresh"]
@@ -118,6 +120,9 @@ def test_budget_unemployed(
         specs_internal["unemployment_wealth_thresh"] + potential_unemployment_benefits
     )
     reduced_benefits_means_test = savings_scaled < reduced_means_test_threshold
+    above_58 = period >= 58 - specs_internal["start_age"]
+    if above_58:
+        net_partner_plus_child_benefits += own_unemployment_benefits
     if means_test:
         income = np.maximum(
             potential_unemployment_benefits, net_partner_plus_child_benefits
@@ -200,9 +205,10 @@ def test_budget_worker(
     )
 
     savings_scaled = savings * specs_internal["wealth_unit"]
+    above_50_age = specs_internal["start_age"] + period >= 50
     hourly_wage = np.exp(
         gamma_array[sex, education]
-        + gamma_array[sex, education] * experience
+        + gamma_array[sex, education] * np.log(experience + 1)
         + (gamma_array[sex, education] - 1) * experience**2
         + income_shock
     )
@@ -323,6 +329,7 @@ def test_retiree(
         policy_state=np.array(29),
         sex=sex,
         education=education,
+        partner_state=partner_state,
         experience=scaled_pension_point_last_period,
         informed=0,
         health=2,

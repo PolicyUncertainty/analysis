@@ -67,27 +67,28 @@ def sparsity_condition(
             }
             return state_proxy
         elif lagged_choice == 0:
-            # If retirement is already chosen we proxy all states to job offer 0. Also, if you are
-            # retired, it does not matter if you are in the bad health state or disabled. We proxy
-            # the health state of those two by bad health.
-            if health == model_specs["good_health_var"]:
-                proxy_health = health
-            else:
-                proxy_health = model_specs["bad_health_var"]
+            # If retirement is already chosen we proxy all states to job offer 0.
+            job_offer_proxy = 0
 
-            # Until age max_ret_age + 1 the individual could also be freshly retired.
-            # Therefore, we check if the agent already is longer retired. If so, we proxy
-            # informed only by 1 and policy state only by the degenerate policy state. Otherwise
-            # the agent is freshly retired and we need informed and policy state.
+            # If you already longer retired, i.e. either past max_ret_age + 1 or in the
+            # degenerate policy state, we do not need informed and policy state anymore.
+            # Before you can always be fresh retired, where we need this information.
+            # Also now disabled and bad health are the same
             already_longer_retired = (age > max_ret_age + 1) | (
                 policy_state == degenerate_policy_state
             )
             if already_longer_retired:
                 informed_proxy = 1
                 policy_state_proxy = degenerate_policy_state
+                # We already know that the agent is not dead
+                if health == model_specs["good_health_var"]:
+                    proxy_health = health
+                else:
+                    proxy_health = model_specs["bad_health_var"]
             else:
                 informed_proxy = informed
                 policy_state_proxy = policy_state
+                proxy_health = health
             state_proxy = {
                 "period": period,
                 "lagged_choice": lagged_choice,
@@ -96,7 +97,7 @@ def sparsity_condition(
                 "informed": informed_proxy,
                 "sex": sex,
                 "partner_state": partner_state,
-                "job_offer": 0,
+                "job_offer": job_offer_proxy,
                 "policy_state": policy_state_proxy,
             }
             return state_proxy

@@ -10,28 +10,25 @@ from set_styles import get_figsize
 
 def plot_ret_probs_for_state(model_solved, specs, path_dict):
 
-    policy_states = np.arange(specs["n_policy_states"] - 1, dtype=int)
-    policy_state_values = specs["min_SRA"] + policy_states * specs["SRA_grid_size"]
-    period = 37
+    periods = np.arange(30, 40)
 
     # Low educated men not retired
     education = 0
-    sex = 1
+    sex = 0
     lagged_choice = 3
     # Job offer and single
     job_offer = 1
     partner_state = 1
     assets = 22
+    policy_state = 8
 
-    n_obs = len(policy_states)
+    n_obs = len(periods)
     int_array = np.ones(n_obs, dtype=int)
     float_array = np.ones(n_obs, dtype=float)
 
-    periods = int_array * period
-
     states = {
         "period": periods,
-        "policy_state": policy_states,
+        "policy_state": int_array * policy_state,
         "lagged_choice": int_array * lagged_choice,
         "education": int_array * education,
         "sex": int_array * sex,
@@ -48,7 +45,7 @@ def plot_ret_probs_for_state(model_solved, specs, path_dict):
 
     for id_exp, very_str in enumerate(["Very Long Insured", "Long Insured"]):
 
-        exp_years = [45, 25][id_exp]
+        exp_years = [45, 35][id_exp]
 
         exp_grid_float = scale_experience_years(
             experience_years=exp_years,
@@ -87,17 +84,21 @@ def plot_ret_probs_for_state(model_solved, specs, path_dict):
                     states=states
                 )
 
+                values = model_solved.choice_values_for_states(states=states)
+                print(f"Values for {title_labels[id]}, informed {informed}")
+                print(values[0, :])
+
                 ax.plot(
-                    specs["start_age"] + period - policy_state_values,
-                    np.nan_to_num(choice_probs[:, 0], nan=0.0),
+                    specs["start_age"] + periods,
+                    np.nan_to_num(choice_probs[:, 0], nan=2.0),
                     label=f"{inform_labels[informed]}",
                 )
                 ax.set_ylabel("Probability of retirement")
 
             ax.set_title(title_labels[id])
 
-    axs[1, 0].set_xlabel("SRA difference")
-    axs[1, 1].set_xlabel("SRA difference")
+    axs[1, 0].set_xlabel("Age")
+    axs[1, 1].set_xlabel("Age")
 
     axs[0, 0].legend()
     fig.savefig(path_dict["plots"] + f"retirement_probs_state_period_.png")

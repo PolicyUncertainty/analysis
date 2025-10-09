@@ -11,20 +11,20 @@ def plot_ret_solution(model_solved, specs, path_dict):
     # asset_grid = np.arange(1, 5)
     # n_obs = len(asset_grid)
     # exp_years_grid = np.linspace(10, 50, 5)
-    period_grid = np.arange(0, 10, 3)
+    period_grid = np.arange(30, 36)
     asset_grid = np.arange(10, 100, 10)
     n_obs = len(asset_grid)
     prototype_array = np.arange(n_obs)
 
     choice = 0
-    choice_2 = 0
     lagged_choice = 0
     policy_state = 8
     job_offer = 1
     sex = 0
-    informed = 1
+    informed = 0
     health = 2
     partner_state = 1
+    education = 0
 
     n_plots = 6
     exp_grids = np.arange(n_plots)
@@ -44,7 +44,7 @@ def plot_ret_solution(model_solved, specs, path_dict):
             states = {
                 "period": np.ones_like(prototype_array) * period,
                 "lagged_choice": np.ones_like(prototype_array) * lagged_choice,
-                "education": np.zeros_like(prototype_array),
+                "education": np.ones_like(prototype_array) * education,
                 "sex": np.ones_like(prototype_array) * sex,
                 "informed": np.ones_like(prototype_array) * informed,
                 "policy_state": np.ones_like(prototype_array) * policy_state,

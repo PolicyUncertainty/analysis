@@ -231,12 +231,12 @@ def share_disability_pensions(df):
 
 def share_disability_pensions_below_63(df):
     """Calculate share of fresh retired before 63."""
-    first_time_pension_payment = (
+    fresh_retired = (
         (df["lagged_choice"] != 0) & (df["choice"] == 0) & (df["health"] != 3)
     )
     below_63_mask = df["age"] < 63
-    n_pensions_below = np.sum(first_time_pension_payment & below_63_mask)
-    total_pensions = np.sum(first_time_pension_payment)
+    n_pensions_below = np.sum(fresh_retired & below_63_mask)
+    total_pensions = np.sum(fresh_retired)
     return n_pensions_below / total_pensions
 
 

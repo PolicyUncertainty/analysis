@@ -12,7 +12,7 @@ path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict)
 
 # Set run specs
-model_name = "age_55"
+model_name = "start"
 print(f"Running model: {model_name}")
 load_sol_model = True
 load_solution = None
@@ -23,33 +23,36 @@ util_type = "add"
 #     open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
 # )
 
-from estimation.struct_estimation.map_params_to_current import merge_params
+params = load_and_set_start_params(path_dict)
 
-params_dict = {}
-params_dict["default"] = load_and_set_start_params(path_dict)
-params_dict["women"] = {}
-params_dict["men"] = {}
-# Load start params
-params_dict["women"]["params"] = pkl.load(
-    open(path_dict["struct_results"] + f"est_params_{model_name}_women.pkl", "rb")
-)
-params_dict["women"]["names"] = [
-    key for key in params_dict["default"].keys() if "_women" in key or "children" in key
-]
 
-params_dict["men"]["params"] = pkl.load(
-    open(path_dict["struct_results"] + f"est_params_{model_name}_men.pkl", "rb")
-)
-params_dict["men"]["names"] = [
-    key
-    for key in params_dict["default"].keys()
-    if ("_men" in key) and ("bequest" not in key)
-]
-params = merge_params(params_dict)
-pkl.dump(
-    params,
-    open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "wb"),
-)
+# from estimation.struct_estimation.map_params_to_current import merge_params
+
+# params_dict = {}
+# params_dict["default"] = load_and_set_start_params(path_dict)
+# params_dict["women"] = {}
+# params_dict["men"] = {}
+# # Load start params
+# params_dict["women"]["params"] = pkl.load(
+#     open(path_dict["struct_results"] + f"est_params_em2_women.pkl", "rb")
+# )
+# params_dict["women"]["names"] = [
+#     key for key in params_dict["default"].keys() if "_women" in key or "children" in key
+# ]
+
+# params_dict["men"]["params"] = pkl.load(
+#     open(path_dict["struct_results"] + f"est_params_em_men.pkl", "rb")
+# )
+# params_dict["men"]["names"] = [
+#     key
+#     for key in params_dict["default"].keys()
+#     if ("_men" in key)
+# ]
+# params = merge_params(params_dict)
+# pkl.dump(
+#     params,
+#     open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "wb"),
+# )
 
 
 create_fit_plots(

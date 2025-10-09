@@ -45,6 +45,7 @@ CLAUDE.md
 # Ignore est and sim files. Add only single ones
 output/est_results/struct_results/*.pkl
 !output/est_results/struct_results/*all_age*.pkl
+output/tables/simulation/*.tex
 
 /output/sim_results/*.csv
 !output/sim_results/fire_old_done/

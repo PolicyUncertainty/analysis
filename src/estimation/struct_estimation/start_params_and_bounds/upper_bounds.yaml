@@ -11,23 +11,23 @@ disutil_unemployed_good_men: 2.0
 disutil_unemployed_bad_men: 2.0
 
 # Full time work dis-utility men - Health and Education specific
-disutil_ft_work_high_good_men: 10.0
-disutil_ft_work_high_bad_men: 10.0
-disutil_ft_work_low_good_men: 10.0
-disutil_ft_work_low_bad_men: 10.0
+disutil_ft_work_high_good_men: 2.0
+disutil_ft_work_high_bad_men: 2.0
+disutil_ft_work_low_good_men: 2.0
+disutil_ft_work_low_bad_men: 2.0
 
 # Unemployment dis-utility men - Health and Education specific
-disutil_unemployed_high_good_men: 10.0
-disutil_unemployed_high_bad_men: 10.0
-disutil_unemployed_low_good_men: 10.0
-disutil_unemployed_low_bad_men: 10.0
-disutil_ft_work_partner_good_men: 2
-disutil_ft_work_partner_bad_men: 2
-disutil_ft_work_single_good_men: 2
-disutil_ft_work_single_bad_men: 2
-disutil_unemployed_partner_good_men: 2
-disutil_unemployed_partner_bad_men: 2
-disutil_unemployed_single_good_men: 2
+disutil_unemployed_high_good_men: 2.0
+disutil_unemployed_high_bad_men: 2.0
+disutil_unemployed_low_good_men: 2.0
+disutil_unemployed_low_bad_men: 2.0
+disutil_ft_work_partner_good_men: 2.0
+disutil_ft_work_partner_bad_men: 2.0
+disutil_ft_work_single_good_men: 2.0
+disutil_ft_work_single_bad_men: 2.0
+disutil_unemployed_partner_good_men: 2.0
+disutil_unemployed_partner_bad_men: 2.0
+disutil_unemployed_single_good_men: 2.0
 disutil_unemployed_single_bad_men: 2
 
 # Full time work dis-utility men - Disabled health

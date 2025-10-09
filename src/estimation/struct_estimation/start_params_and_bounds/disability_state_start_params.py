@@ -52,7 +52,7 @@ def est_disability_prob(paths, specs):
 
         gender_params = {
             # f"disability_logit_low_educ_{sex_append}": params["low_edu"],
-            f"disability_logit_const_{sex_append}": -1.36,
+            f"disability_logit_const_{sex_append}": params["intercept"],
             # f"disability_logit_age_{sex_append}": params["age"],
             f"disability_logit_age_above_55_{sex_append}": params["age_above_55"],
             # f"disability_logit_above_50_{sex_append}": params["above_50"],

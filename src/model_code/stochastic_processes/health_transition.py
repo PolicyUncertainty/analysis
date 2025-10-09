@@ -30,23 +30,30 @@ def health_transition(
     disabled_health_prob = prob_vector[bad_health_var] * cond_prob_disabled
 
     # Now set the probabilities in the vector(jax.numpy style)
-    prob_vector = prob_vector.at[disabled_health_var].set(disabled_health_prob)
-    prob_vector = prob_vector.at[bad_health_var].set(bad_health_prob)
+    new_prob_vector = prob_vector.at[disabled_health_var].set(disabled_health_prob)
+    new_prob_vector = new_prob_vector.at[bad_health_var].set(bad_health_prob)
 
-    # We need to ensure, that if the agent is disabled and chooses retirement, she has to stay one period disabled
-    # and cannot transition to good/bad health. The agent can still die.
-    fresh_disability_pension = (
-        (lagged_choice != 0) & (health == disabled_health_var) & (choice == 0)
-    )
+    # We need to ensure, that if the agent is disabled and chooses retirement, she has to stay
+    # one period disabled and cannot transition to good/bad health. The agent can still die.
+    # Vice versa she can also not transition to disability if she is not disabled and chooses not to retire.
+    # First construct the probability vector for fresh disability pensioners.
+    # The one for not disabled fresh retirees is just the original prob_vector.
     fresh_disability_pension_prob = construct_fresh_disability_pension_prob_vector(
         prob_vector=prob_vector, model_specs=model_specs
     )
-    prob_vector = jax.lax.select(
-        fresh_disability_pension,
+    in_disability = health == disabled_health_var
+    prob_vec_for_fresh = jax.lax.select(
+        in_disability,
         on_true=fresh_disability_pension_prob,
         on_false=prob_vector,
     )
 
+    fresh_retired = (lagged_choice != 0) & (choice == 0)
+    prob_vector = jax.lax.select(
+        fresh_retired,
+        on_true=prob_vec_for_fresh,
+        on_false=new_prob_vector,
+    )
     return prob_vector
 
 

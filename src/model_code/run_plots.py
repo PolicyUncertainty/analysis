@@ -65,20 +65,20 @@ model = specify_model(
     subj_unc=True,
     custom_resolution_age=None,
     sim_specs=None,
-    load_model=False,
+    load_model=True,
     debug_info="all",
     sex_type="all",
     edu_type="all",
     util_type="add",
 )
 state = {
-    "period": 30,
+    "period": 33,
     "education": 0,
     "sex": 0,
     "lagged_choice": 3,
     "job_offer": 1,
     "partner_state": 1,
-    "health": 2,
+    "health": 1,
     "informed": 0,
     "policy_state": 8,
 }

@@ -3,5 +3,6 @@ def create_informed_state(df):
     df["informed"] = -99
 
     # # Individuals choosing retirement are informed
-    df.loc[df["choice"] == 0, "informed"] = 1
+    retired_past_63 = (df["choice"] == 0) & (df["age"] >= 63)
+    df.loc[retired_past_63, "informed"] = 1
     return df

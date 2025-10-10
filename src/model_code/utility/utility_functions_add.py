@@ -75,7 +75,7 @@ def utility_func_alive(
         params=params,
         model_specs=model_specs,
     )
-    cons_scale = consumption_scale(
+    cons_scale, hh_size = consumption_scale(
         partner_state=partner_state,
         sex=sex,
         education=education,
@@ -91,7 +91,7 @@ def utility_func_alive(
         jnp.log(consumption / cons_scale),
         utility_cons_not_one,
     )
-    return utility_cons - disutil_work
+    return hh_size * utility_cons - disutil_work
 
 
 def marginal_utility_func(
@@ -135,7 +135,7 @@ def marginal_utility_function_alive(
     params,
     model_specs,
 ):
-    cons_scale = consumption_scale(
+    cons_scale, hh_size = consumption_scale(
         partner_state=partner_state,
         sex=sex,
         education=education,
@@ -146,11 +146,11 @@ def marginal_utility_function_alive(
         education == 1, on_true=params["mu_high"], on_false=params["mu_low"]
     )
 
-    marg_util_mu_not_one = (consumption / cons_scale) ** (-mu) / cons_scale
+    marg_util_mu_not_one = hh_size * (consumption / cons_scale) ** (-mu) / cons_scale
 
     marg_util = jax.lax.select(
         jnp.allclose(mu, 1),
-        1 / consumption,
+        hh_size / consumption,
         marg_util_mu_not_one,
     )
 
@@ -166,7 +166,7 @@ def inverse_marginal_func(
     params,
     model_specs,
 ):
-    cons_scale = consumption_scale(
+    cons_scale, hh_size = consumption_scale(
         partner_state=partner_state,
         sex=sex,
         education=education,
@@ -177,9 +177,11 @@ def inverse_marginal_func(
         education == 1, on_true=params["mu_high"], on_false=params["mu_low"]
     )
 
-    consumption_mu_not_one = (marginal_utility * cons_scale) ** (-1 / mu) * cons_scale
+    consumption_mu_not_one = cons_scale * (marginal_utility * cons_scale / hh_size) ** (
+        -1 / mu
+    )
     consumption = jax.lax.select(
-        jnp.allclose(mu, 1), 1 / marginal_utility, consumption_mu_not_one
+        jnp.allclose(mu, 1), hh_size / marginal_utility, consumption_mu_not_one
     )
     return consumption
 
@@ -320,4 +322,4 @@ def consumption_scale(partner_state, sex, education, period, model_specs):
     has_partner = (partner_state > 0).astype(int)
     nb_children = model_specs["children_by_state"][sex, education, has_partner, period]
     hh_size = 1 + has_partner + nb_children
-    return jnp.sqrt(hh_size)
+    return jnp.sqrt(hh_size), hh_size

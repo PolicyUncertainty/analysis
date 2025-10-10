@@ -45,7 +45,7 @@ def paths_and_specs():
 )
 def test_consumption_cale(partner_state, sex, education, period, paths_and_specs):
     model_specs = paths_and_specs[1]
-    cons_scale = consumption_scale(
+    cons_scale, hh_size_calc = consumption_scale(
         partner_state=partner_state,
         sex=sex,
         education=education,
@@ -56,6 +56,7 @@ def test_consumption_cale(partner_state, sex, education, period, paths_and_specs
     nb_children = model_specs["children_by_state"][sex, education, has_partner, period]
     hh_size = 1 + has_partner + nb_children
     np.testing.assert_almost_equal(cons_scale, np.sqrt(hh_size))
+    np.testing.assert_almost_equal(hh_size_calc, hh_size)
 
 
 @pytest.mark.parametrize(
@@ -105,12 +106,18 @@ def test_utility_func(
         "disutil_partner_retired_women": -disutil_unemployed - 1,
         "disutil_children_ft_work_low": 0.1,
         "disutil_children_ft_work_high": 0.1,
-        "bequest_scale": 2,
-        "kappa": 21,
+        "bequest_scale_low_men": 2,
+        "bequest_scale_high_men": 1.5,
+        "bequest_scale_low_women": 1.8,
+        "bequest_scale_high_women": 1.3,
+        "kappa_low_men": 21,
+        "kappa_high_men": 19,
+        "kappa_low_women": 20,
+        "kappa_high_women": 18,
     }
 
     model_specs = paths_and_specs[1]
-    cons_scale = consumption_scale(
+    cons_scale, hh_size = consumption_scale(
         partner_state=partner_state,
         sex=sex,
         education=education,
@@ -141,10 +148,13 @@ def test_utility_func(
     mu_edu = mu + education
 
     if mu_edu == 1:
-        utility_lambda = lambda disutil: np.log(consumption / cons_scale) - disutil
+        utility_lambda = (
+            lambda disutil: hh_size * np.log(consumption / cons_scale) - disutil
+        )
     else:
         utility_lambda = (
-            lambda disutil: ((consumption / cons_scale) ** (1 - mu_edu) - 1)
+            lambda disutil: hh_size
+            * ((consumption / cons_scale) ** (1 - mu_edu) - 1)
             / (1 - mu_edu)
             - disutil
         )
@@ -266,8 +276,14 @@ def test_marginal_utility(
         "disutil_partner_retired_women": -disutil_unemployed - 1,
         "disutil_children_ft_work_low": 0.1,
         "disutil_children_ft_work_high": 0.1,
-        "bequest_scale": 2,
-        "kappa": 21,
+        "bequest_scale_low_men": 2,
+        "bequest_scale_high_men": 1.5,
+        "bequest_scale_low_women": 1.8,
+        "bequest_scale_high_women": 1.3,
+        "kappa_low_men": 21,
+        "kappa_high_men": 19,
+        "kappa_low_women": 20,
+        "kappa_high_women": 18,
     }
 
     random_choice = np.random.choice(np.array([0, 1, 2, 3]))
@@ -341,8 +357,14 @@ def test_inv_marginal_utility(
         "disutil_partner_retired_women": -disutil_unemployed - 1,
         "disutil_children_ft_work_low": 0.1,
         "disutil_children_ft_work_high": 0.1,
-        "bequest_scale": 2,
-        "kappa": 21,
+        "bequest_scale_low_men": 2,
+        "bequest_scale_high_men": 1.5,
+        "bequest_scale_low_women": 1.8,
+        "bequest_scale_high_women": 1.3,
+        "kappa_low_men": 21,
+        "kappa_high_men": 19,
+        "kappa_low_women": 20,
+        "kappa_high_women": 18,
     }
 
     model_specs = paths_and_specs[1]
@@ -370,43 +392,57 @@ def test_inv_marginal_utility(
 
 
 @pytest.mark.parametrize(
-    "consumption, mu, education, bequest_scale",
-    list(product(CONSUMPTION_GRID, MU_GRID, EDUCATION_GRID, BEQUEST_SCALE)),
+    "consumption, sex, mu, education, bequest_scale",
+    list(product(CONSUMPTION_GRID, SEX_GRID, MU_GRID, EDUCATION_GRID, BEQUEST_SCALE)),
 )
-def test_bequest(consumption, mu, education, bequest_scale):
+def test_bequest(consumption, sex, mu, education, bequest_scale):
     params = {
         "mu_low": mu + 1,
         "mu_high": mu,
-        "bequest_scale": bequest_scale,
-        "kappa": 21,
+        "bequest_scale_low_men": bequest_scale,
+        "bequest_scale_high_men": bequest_scale + 1,
+        "bequest_scale_low_women": bequest_scale + 1,
+        "bequest_scale_high_women": bequest_scale + 2,
+        "kappa_low_men": 21,
+        "kappa_high_men": 22,
+        "kappa_low_women": 22,
+        "kappa_high_women": 23,
     }
+    bequest_scale += sex + education
+    kappa = 21 + sex + education
     mu += 1 - education
     if mu == 1:
-        bequest = bequest_scale * np.log(consumption + 21)
+        bequest = bequest_scale * np.log(consumption + kappa)
     else:
-        bequest = bequest_scale * ((((consumption + 21) ** (1 - mu)) - 1) / (1 - mu))
+        bequest = bequest_scale * ((((consumption + kappa) ** (1 - mu)) - 1) / (1 - mu))
     np.testing.assert_almost_equal(
-        utility_final_consume_all(consumption, education, params), bequest
+        utility_final_consume_all(consumption, education, sex, params), bequest
     )
 
 
 @pytest.mark.parametrize(
-    "consumption, mu, education, bequest_scale",
-    list(product(CONSUMPTION_GRID, MU_GRID, EDUCATION_GRID, BEQUEST_SCALE)),
+    "consumption, sex, mu, education, bequest_scale",
+    list(product(CONSUMPTION_GRID, SEX_GRID, MU_GRID, EDUCATION_GRID, BEQUEST_SCALE)),
 )
-def test_bequest_marginal(consumption, mu, education, bequest_scale):
+def test_bequest_marginal(consumption, sex, mu, education, bequest_scale):
     params = {
         "mu_low": mu + 1,
         "mu_high": mu,
-        "bequest_scale": bequest_scale,
-        "kappa": 21,
+        "bequest_scale_low_men": bequest_scale,
+        "bequest_scale_high_men": bequest_scale + 1,
+        "bequest_scale_low_women": bequest_scale + 1,
+        "bequest_scale_high_women": bequest_scale + 2,
+        "kappa_low_men": 21,
+        "kappa_high_men": 22,
+        "kappa_low_women": 22,
+        "kappa_high_women": 23,
     }
     if education == 0:
         mu += 1
     bequest = jax.jacfwd(utility_final_consume_all, argnums=0)(
-        consumption, education, params
+        consumption, education, sex, params
     )
     np.testing.assert_almost_equal(
-        marginal_utility_final_consume_all(consumption, education, params),
+        marginal_utility_final_consume_all(consumption, education, sex, params),
         bequest,
     )

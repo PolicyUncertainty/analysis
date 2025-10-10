@@ -4,7 +4,6 @@ import pickle as pkl
 
 import jax
 import pandas as pd
-import os
 
 from set_paths import create_path_dict
 from simulation.sim_tools.calc_life_cycle_detailed import calc_life_cycle_detailed
@@ -24,6 +23,17 @@ load_no_unc_df = None
 params = pkl.load(
     open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
 )
+
+# params["mu_high"] = 1.01
+# params["mu_low"] = 1.01
+# params["bequest_scale_low_women"] = 1.0
+# params["kappa_low_women"] = 0.0
+# params["bequest_scale_high_women"] = 2.0
+# params["kappa_high_women"] = 0.0
+# params["kappa_high_men"] = 3.0
+# params["kappa_low_men"] = 3.0
+# params["bequest_scale_high_men"] = 4.0
+# params["bequest_scale_low_men"] = 3.0
 
 # %%
 # baseline: sra 67, with uncertainty and misinformation

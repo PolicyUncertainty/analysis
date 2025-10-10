@@ -16,7 +16,7 @@ men_disutil_params = [
     "disutil_unemployed_good_men",
     "disutil_unemployed_bad_men",
     # "disutil_unemployed_disabled_men",  # NEW
-    "disutil_partner_retired_men",
+    # "disutil_partner_retired_men",
     # "disutil_unemployed_above_58_men",
 ]
 
@@ -34,7 +34,7 @@ men_taste = [
 men_job_offer_params = [
     "job_finding_logit_const_men",
     "job_finding_logit_high_educ_men",
-    "job_finding_logit_good_health_men",
+    # "job_finding_logit_good_health_men",
     # "job_finding_logit_above_50_men",
     # "job_finding_logit_above_55_men",
     # "job_finding_logit_above_60_men",
@@ -45,7 +45,7 @@ men_job_offer_params = [
 men_disability_params = [
     "disability_logit_const_men",
     # "disability_logit_age_men",
-    "disability_logit_age_above_55_men",
+    "disability_logit_age_above_50_men",
     # "disability_logit_above_50_men",
     # "disability_logit_above_55_men",
     # "disability_logit_above_60_men",
@@ -64,9 +64,9 @@ women_disutil_params = [
     "disutil_unemployed_good_women",
     "disutil_unemployed_bad_women",
     # "disutil_unemployed_disabled_women",  # NEW
-    "disutil_partner_retired_women",
-    "disutil_children_ft_work_high",
-    "disutil_children_ft_work_low",
+    # "disutil_partner_retired_women",
+    # "disutil_children_ft_work_high",
+    # "disutil_children_ft_work_low",
     # "disutil_unemployed_above_58_good_women",
     # "disutil_unemployed_above_58_bad_women",
     # "disutil_children_pt_work_high",
@@ -88,7 +88,7 @@ women_taste = [
 women_job_offer_params = [
     "job_finding_logit_const_women",
     "job_finding_logit_high_educ_women",
-    "job_finding_logit_good_health_women",
+    # "job_finding_logit_good_health_women",
     # "job_finding_logit_above_50_women",
     # "job_finding_logit_above_55_women",
     # "job_finding_logit_above_60_women",
@@ -99,7 +99,7 @@ women_job_offer_params = [
 women_disability_params = [
     "disability_logit_const_women",
     # "disability_logit_age_women",
-    "disability_logit_age_above_55_women",
+    "disability_logit_age_above_50_women",
     # "disability_logit_above_50_women",
     # "disability_logit_above_55_women",
     # "disability_logit_above_60_women",

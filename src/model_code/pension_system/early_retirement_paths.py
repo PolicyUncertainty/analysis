@@ -34,9 +34,7 @@ def calc_early_retirement_pension_points(
     """
 
     # Check if the individual gets disability pension
-    disability_pension_bool = (health == model_specs["disabled_health_var"]) & (
-        actual_retirement_age < model_specs["min_long_insured_age"]
-    )
+    disability_pension_bool = health == model_specs["disabled_health_var"]
     # Check if the individual is eligible for very long insured pension
     very_long_insured_bool = check_very_long_insured(
         retirement_age_difference=retirement_age_difference,
@@ -116,4 +114,10 @@ def retirement_age_long_insured(SRA, model_specs):
     Versicherte" only differs with respect to deductions. Not with respect to entry age. We introduce the
     lower bound of 63 as this is the current law, even for individuals with SRA below 67.
     """
-    return model_specs["min_long_insured_age"]
+    if model_specs["ERA_moves"]:
+        return jnp.maximum(
+            SRA - model_specs["years_before_SRA_long_insured"],
+            model_specs["min_long_insured_age"],
+        )
+    else:
+        return model_specs["min_long_insured_age"]

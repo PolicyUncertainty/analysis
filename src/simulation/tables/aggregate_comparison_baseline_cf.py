@@ -5,7 +5,7 @@ import pandas as pd
 
 
 def aggregate_comparison_baseline_cf(
-    result_df, base_label, cf_label, path_dict, file_append, cv=None
+    result_df, base_label, cf_label, path_dict, model_name, file_append, cv=None
 ):
     """
     Create LaTeX table comparing baseline and counterfactual aggregate results.
@@ -160,7 +160,7 @@ def aggregate_comparison_baseline_cf(
     latex_table = "\n".join(latex_lines)
 
     # Save to file
-    table_dir = path_dict["simulation_tables"]
+    table_dir = path_dict["simulation_tables"] + model_name + "/"
     if not os.path.exists(table_dir):
         os.makedirs(table_dir)
 

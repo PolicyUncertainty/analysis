@@ -42,7 +42,7 @@ sra_at_63 = 69.0
 base_label = "Baseline with Misinformed"
 cf_label = "Only Informed"
 
-load_model = True  # informed state as type
+load_model = False  # informed state as type
 load_unc_solution = None  # baseline solution conntainer
 model_solution = None  # actual baseline model solution object (None = create new)
 load_df_baseline = None  # True = load existing df, False = create new df, None = create but do not save
@@ -129,8 +129,8 @@ plot_retirement_difference(
     df_cf=df_cf,
     final_SRA=sra_at_63,
     model_name=model_name,
-    left_difference=-6,
-    right_difference=4,
+    left_difference=6,
+    right_difference=2,
     base_label=base_label,
     cf_label=cf_label,
 )
@@ -163,7 +163,8 @@ for group_label, mask_func in label_dict.items():
         base_label=base_label,
         cf_label=cf_label,
         path_dict=path_dict,
-        file_append=model_name + f"_{group_label}",
+        model_name=model_name,
+        file_append=group_label,
         cv=cv_cf,
     )
 

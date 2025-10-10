@@ -94,7 +94,7 @@ def create_result_dfs(sra_at_63, scenarios, het_spec_vars):
 seeed = 123
 model_name = specs["model_name"]
 util_type = specs["util_type"]
-load_sol_model = None
+load_sol_model = True
 load_solutions = None
 load_df = None
 

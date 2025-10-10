@@ -47,7 +47,7 @@ def calc_exp_results(
     res_df = pd.DataFrame()
 
     df_base = None
-    for subj_unc in [True, False]:
+    for subj_unc in [False, True]:
         model_solution = None
         for informed_label in ["Informed", "Uninformed"]:
             informed = int(informed_label == "Informed")
@@ -76,7 +76,7 @@ def calc_exp_results(
                 model_solution=model_solution,
                 util_type=util_type,
             )
-            if (informed_label == "Informed") and subj_unc:
+            if (informed_label == "Informed") and (not subj_unc):
                 df_base = df.copy()
                 res_df.loc[col_prefix, "_cv"] = 0.0
             else:
@@ -155,10 +155,10 @@ def generate_latex_table(res_df):
     }
     # Column order (now used as index)
     col_order = [
-        "Informed_unc_True",
         "Informed_unc_False",
-        "Uninformed_unc_True",
+        "Informed_unc_True",
         "Uninformed_unc_False",
+        "Uninformed_unc_True",
     ]
 
     latex_lines = []

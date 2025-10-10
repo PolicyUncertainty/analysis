@@ -46,6 +46,7 @@ CLAUDE.md
 output/est_results/struct_results/*.pkl
 !output/est_results/struct_results/*all_age*.pkl
 output/tables/simulation/*.tex
+output/tables
 
 /output/sim_results/*.csv
 !output/sim_results/fire_old_done/

@@ -28,11 +28,11 @@ def est_disability_prob(paths, specs):
         # "age",
         # "age_above_55",
         # "above_50",
-        "age_above_55",
+        "age_above_50",
         # "above_60",
     ]
 
-    logit_df["age_above_55"] = (logit_df["age"] >= 55) * (logit_df["age"] - 55)
+    logit_df["age_above_50"] = (logit_df["age"] >= 50) * (logit_df["age"] - 50)
     # logit_df["above_50"] = (logit_df["age"] >= 50).astype(float)
     # logit_df["above_55"] = (logit_df["age"] >= 55).astype(float)
     # logit_df["above_60"] = (logit_df["age"] >= 60).astype(float)
@@ -54,7 +54,7 @@ def est_disability_prob(paths, specs):
             # f"disability_logit_low_educ_{sex_append}": params["low_edu"],
             f"disability_logit_const_{sex_append}": params["intercept"],
             # f"disability_logit_age_{sex_append}": params["age"],
-            f"disability_logit_age_above_55_{sex_append}": params["age_above_55"],
+            f"disability_logit_age_above_50_{sex_append}": params["age_above_50"],
             # f"disability_logit_above_50_{sex_append}": params["above_50"],
             # f"disability_logit_above_55_{sex_append}": params["above_55"],
             # f"disability_logit_above_60_{sex_append}": params["above_60"],

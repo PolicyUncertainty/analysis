@@ -123,7 +123,15 @@ def specify_model(
     else:
         raise ValueError("unknown utility type")
 
-    model_path = path_dict["intermediate_data"] + f"model_{sex_type}_{edu_type}.pkl"
+    if specs["ERA_moves"]:
+        file_append = "ERA_moves"
+    else:
+        file_append = "ERA_stays"
+
+    model_path = (
+        path_dict["intermediate_data"]
+        + f"model_{sex_type}_{edu_type}_{file_append}.pkl"
+    )
 
     if load_model:
         model = dcegm.setup_model(

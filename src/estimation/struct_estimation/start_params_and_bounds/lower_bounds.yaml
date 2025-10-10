@@ -64,16 +64,16 @@ disutil_partner_retired_women: -2.0
 # Children dis-utility
 disutil_children_ft_work_low: 0.0
 disutil_children_ft_work_high: 0.0
-disutil_children_pt_work_low: 0.0
-disutil_children_pt_work_high: 0.0
-disutil_ft_work_partner_good_men: 0.0
-disutil_ft_work_partner_bad_men: 0.0
-disutil_ft_work_single_good_men: 0.0
-disutil_ft_work_single_bad_men: 0.0
-disutil_unemployed_partner_good_men: 0.0
-disutil_unemployed_partner_bad_men: 0.0
-disutil_unemployed_single_good_men: 0.0
-disutil_unemployed_single_bad_men: 0.0
+# disutil_children_pt_work_low: 0.0
+# disutil_children_pt_work_high: 0.0
+# disutil_ft_work_partner_good_men: 0.0
+# disutil_ft_work_partner_bad_men: 0.0
+# disutil_ft_work_single_good_men: 0.0
+# disutil_ft_work_single_bad_men: 0.0
+# disutil_unemployed_partner_good_men: 0.0
+# disutil_unemployed_partner_bad_men: 0.0
+# disutil_unemployed_single_good_men: 0.0
+# disutil_unemployed_single_bad_men: 0.0
 
 # Taste shocks
 taste_shock_scale_men: 0.05
@@ -89,45 +89,27 @@ kappa_low_women: 0
 # Job finding probability - men
 job_finding_logit_const_men: -5
 job_finding_logit_high_educ_men: -5
-job_finding_logit_good_health_men: -5
+# job_finding_logit_good_health_men: -5
 job_finding_logit_age_men: -5
-job_finding_logit_age_above_55_men: -5
 
 # Job finding probability - women
 job_finding_logit_const_women: -5
 job_finding_logit_high_educ_women: -5
-job_finding_logit_good_health_women: -5
+# job_finding_logit_good_health_women: -5
 job_finding_logit_age_women: -5
-job_finding_logit_age_above_55_women: -5
-job_finding_logit_above_50_men: -5
-job_finding_logit_above_55_men: -5
-job_finding_logit_above_60_men: -5
-job_finding_logit_above_50_women: -5
-job_finding_logit_above_55_women: -5
-job_finding_logit_above_60_women: -5
 
 # Disability probability men
 disability_logit_const_men: -30
-disability_logit_age_men: -5
-disability_logit_above_50_men: -5
-disability_logit_above_55_men: -5
-disability_logit_above_60_men: -5
-disability_logit_age_above_55_men: -5
+disability_logit_age_above_50_men: -5
 disability_logit_high_educ_men: -5
-disability_logit_low_educ_men: -5
 
 # Disability probability women
 disability_logit_const_women: -30
-disability_logit_age_women: -5
-disability_logit_above_50_women: -5
-disability_logit_above_55_women: -5
-disability_logit_above_60_women: -5
-disability_logit_age_above_55_women: -5
+disability_logit_age_above_50_women: -5
 disability_logit_high_educ_women: -5
-disability_logit_low_educ_women: -5
 
-# SRA firing params
-SRA_firing_logit_intercept_men_low: 2.0
-SRA_firing_logit_intercept_men_high: 2.0
-SRA_firing_logit_intercept_women_low: 2.0
-SRA_firing_logit_intercept_women_high: 2.0
+# # SRA firing params
+# SRA_firing_logit_intercept_men_low: 2.0
+# SRA_firing_logit_intercept_men_high: 2.0
+# SRA_firing_logit_intercept_women_low: 2.0
+# SRA_firing_logit_intercept_women_high: 2.0

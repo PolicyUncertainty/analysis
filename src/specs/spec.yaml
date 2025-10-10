@@ -1,8 +1,9 @@
 ---
 ################
 # Current model name:
-model_name: em_ft_men
+model_name: old_mu8_men
 util_type: add
+ERA_moves: false
 
 ###############################################################################
 # Model specification

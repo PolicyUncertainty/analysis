@@ -21,17 +21,20 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
     load_and_set_start_params,
 )
 
-model_name = "em_ft_men"
+model_name = "old_mu8_women"
 params_to_estimate_names = (
-    men_disutil_params + men_disability_params + men_job_offer_params
+    women_disutil_params
+    + women_disability_params
+    + women_job_offer_params
+    + women_taste
 )
-sex_type = "men"
+sex_type = "women"
 edu_type = "all"
 util_type = "add"
-old_sample_only = False
+old_sample_only = True
 
 LOAD_LAST_ESTIMATE = False
-LOAD_SOL_MODEL = True
+LOAD_SOL_MODEL = False
 SAVE_RESULTS = True
 USE_WEIGHTS = False
 
@@ -74,26 +77,26 @@ estimation_results, end_params = estimate_model(
 )
 print(estimation_results)
 
-# %% Set paths of project
-from specs.derive_specs import generate_derived_and_data_derived_specs
+# # %% Set paths of project
+# from specs.derive_specs import generate_derived_and_data_derived_specs
 
-specs = generate_derived_and_data_derived_specs(paths_dict)
-
-
-create_fit_plots(
-    path_dict=paths_dict,
-    specs=specs,
-    params=end_params,
-    model_name=model_name,
-    load_sol_model=LOAD_SOL_MODEL,
-    load_solution=None,
-    load_data_from_sol=False,
-    sex_type="all",
-    edu_type="all",
-    util_type=util_type,
-    skip_model_plots=False,
-)
+# specs = generate_derived_and_data_derived_specs(paths_dict)
 
 
-# %%
-#
+# create_fit_plots(
+#     path_dict=paths_dict,
+#     specs=specs,
+#     params=end_params,
+#     model_name=model_name,
+#     load_sol_model=LOAD_SOL_MODEL,
+#     load_solution=None,
+#     load_data_from_sol=False,
+#     sex_type="all",
+#     edu_type="all",
+#     util_type=util_type,
+#     skip_model_plots=False,
+# )
+
+
+# # %%
+# #

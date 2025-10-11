@@ -21,20 +21,20 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
     load_and_set_start_params,
 )
 
-model_name = "old_mu8_women"
+model_name = "ftsc_men"
 params_to_estimate_names = (
-    women_disutil_params
-    + women_disability_params
-    + women_job_offer_params
-    + women_taste
+    men_disutil_params
+    + men_disability_params
+    + men_job_offer_params
+    # + men_taste
 )
-sex_type = "women"
+sex_type = "men"
 edu_type = "all"
 util_type = "add"
-old_sample_only = True
+old_sample_only = False
 
 LOAD_LAST_ESTIMATE = False
-LOAD_SOL_MODEL = False
+LOAD_SOL_MODEL = True
 SAVE_RESULTS = True
 USE_WEIGHTS = False
 

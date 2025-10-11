@@ -1,7 +1,7 @@
 ---
 ################
 # Current model name:
-model_name: old_mu8_men
+model_name: nu_fjo
 util_type: add
 ERA_moves: false
 

@@ -320,6 +320,6 @@ def disutility_work(
 
 def consumption_scale(partner_state, sex, education, period, model_specs):
     has_partner = (partner_state > 0).astype(int)
-    nb_children = model_specs["children_by_state"][sex, education, has_partner, period]
-    hh_size = 1 + has_partner + nb_children
+    # nb_children = model_specs["children_by_state"][sex, education, has_partner, period]
+    hh_size = 1 + has_partner
     return jnp.sqrt(hh_size), hh_size

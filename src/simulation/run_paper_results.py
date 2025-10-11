@@ -1,5 +1,7 @@
 # %%
 # Set paths of project
+import os
+
 import pandas as pd
 
 from set_paths import create_path_dict
@@ -50,7 +52,7 @@ for sex_var, sex_label in enumerate(specs["sex_labels"]):
             load_sol_model=load_model,
             util_type=util_type,
         )
-        file_append = model_name + sex_label + edu_append[edu_var]
+        file_append = sex_label + edu_append[edu_var]
 
         res_df.to_csv(path_dict["sim_results"] + f"baseline_margins_{file_append}.csv")
 
@@ -58,8 +60,8 @@ for sex_var, sex_label in enumerate(specs["sex_labels"]):
             path_dict["sim_results"] + f"baseline_margins_{file_append}.csv",
             index_col=0,
         )
+        table_folder = path_dict["simulation_tables"] + model_name + "/"
+        os.makedirs(table_folder, exist_ok=True)
         table = generate_latex_table(res_df)
-        with open(
-            path_dict["simulation_tables"] + f"baseline_margins_{file_append}.tex", "w"
-        ) as f:
+        with open(table_folder + f"baseline_margins_{file_append}.tex", "w") as f:
             f.write(table)

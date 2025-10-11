@@ -42,7 +42,7 @@ sra_at_63 = 69.0
 base_label = "Baseline with Misinformed"
 cf_label = "Only Informed"
 
-load_model = False  # informed state as type
+load_model = True  # informed state as type
 load_unc_solution = None  # baseline solution conntainer
 model_solution = None  # actual baseline model solution object (None = create new)
 load_df_baseline = None  # True = load existing df, False = create new df, None = create but do not save

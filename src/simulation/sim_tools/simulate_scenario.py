@@ -23,6 +23,7 @@ def solve_and_simulate_scenario(
     SRA_at_retirement,
     announcement_age,
     model_name,
+    initial_states=None,
     df_exists=True,
     only_informed=False,
     solution_exists=True,
@@ -164,6 +165,7 @@ def solve_and_simulate_scenario(
         initial_SRA=SRA_at_start,
         model_solved=model_solved,
         only_informed=only_informed,
+        initial_states=initial_states,
     )
     if df_exists is None:
         # do not save df
@@ -179,15 +181,17 @@ def simulate_scenario(
     model_solved,
     initial_SRA,
     only_informed=False,
+    initial_states=None,
 ):
-
-    initial_states = generate_start_states_from_obs(
-        path_dict=path_dict,
-        params=model_solved.params,
-        model_class=model_solved,
-        inital_SRA=initial_SRA,
-        only_informed=only_informed,
-    )
+    if initial_states is None:
+        # Generate initial states from observed data
+        initial_states = generate_start_states_from_obs(
+            path_dict=path_dict,
+            params=model_solved.params,
+            model_class=model_solved,
+            inital_SRA=initial_SRA,
+            only_informed=only_informed,
+        )
     specs = generate_derived_and_data_derived_specs(path_dict)
 
     df = model_solved.simulate(

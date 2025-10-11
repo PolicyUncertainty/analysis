@@ -126,8 +126,8 @@ def sra_increase_aggregate_plot_by_het(path_dict, fig_name, model_name, het_name
 
     # Variables to plot
     variables = {
-        "below_sixty_savings": "Perc. Change Savings",
-        "working_hours": "Perc. Change Hours",
+        "savings_below_63": "Perc. Change Savings",
+        "lifecycle_working_hours": "Perc. Change Lfc Hours",
         "working_hours_below_63": "Perc. Change Hours < 63",
     }
 

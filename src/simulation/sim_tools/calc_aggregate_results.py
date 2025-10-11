@@ -34,6 +34,8 @@ def add_overall_results(result_df, index, pre_name, df_scenario, specs):
     )
 
     # Retirement metrics
+    result_df.loc[index, f"{pre_name}_sra_at_63"] = sra_at_63(df_scenario)
+
     result_df.loc[index, f"{pre_name}_ret_age"] = calc_average_retirement_age(
         df_scenario
     )
@@ -74,17 +76,6 @@ def add_overall_results(result_df, index, pre_name, df_scenario, specs):
     result_df.loc[index, f"{pre_name}_lifecycle_avg_wealth"] = (
         calc_lifecycle_avg_wealth(df_scenario)
     )
-
-    # Keep some existing metrics that might be used elsewhere
-    result_df.loc[index, f"{pre_name}_below_sixty_savings"] = below_sixty_savings(
-        df_scenario
-    )
-    result_df.loc[index, f"{pre_name}_sra_at_63"] = sra_at_63(df_scenario)
-    result_df.loc[index, f"{pre_name}_sra_at_ret"] = sra_at_retirement(df_scenario)
-    result_df.loc[index, f"{pre_name}_working_hours"] = calc_overall_working_hours(
-        df_scenario
-    )
-
     return result_df
 
 
@@ -257,48 +248,3 @@ def calc_lifecycle_avg_wealth(df):
     """Calculate mean financial wealth for age >= 30"""
     mask = df["age"] >= 30
     return df.loc[mask, "savings"].mean() * 10
-
-
-# ============================================================================
-# Legacy/other functions (kept for backward compatibility)
-# ============================================================================
-
-
-def calc_overall_working_hours(df):
-    """Calculate mean working hours across all ages"""
-    return df["working_hours"].mean()
-
-
-def sra_at_retirement(df):
-    """Calculate mean SRA at retirement"""
-    fresh_retired_mask = (
-        (df["choice"] == 0) & (df["lagged_choice"] != 0) & (df["health"] != 3)
-    )
-    mean_sra = df.loc[fresh_retired_mask, "policy_state_value"].mean()
-    return mean_sra
-
-
-def below_sixty_savings(df):
-    """Calculate mean savings for age <= 60 (legacy function)"""
-    below_sixty = df["age"] <= 60
-    mean_savings = df.loc[below_sixty, "savings_dec"].mean()
-    return mean_savings * 10
-
-
-def expected_lifetime_income(df, specs):
-    """Calculate expected discounted lifetime income"""
-    df["disc_income"] = specs["discount_factor"] ** (df["period"]) * df["total_income"]
-    return df.groupby("agent")["disc_income"].sum().mean() * 10
-
-
-def expected_working_lifetime_income(df, specs):
-    """Calculate expected discounted working lifetime income (age < 63)"""
-    mask = df["age"] < 63
-    df["disc_income"] = specs["discount_factor"] ** (df["period"]) * df["total_income"]
-    return df.loc[mask, :].groupby("agent")["disc_income"].sum().mean() * 10
-
-
-def expected_pension(df):
-    """Calculate mean pension payment"""
-    mask = df["lagged_choice"] == 0
-    return df.loc[mask, "gross_retirement_income"].mean() * 10

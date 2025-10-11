@@ -39,7 +39,6 @@ def sra_increase_table(path_dict, model_name):
 
     sections = {
         "Retirement": [
-            "sra_at_63",
             "ret_age",
             "ret_age_excl_disabled",
             "pension_wealth_at_ret",

@@ -19,12 +19,6 @@ import jax
 import numpy as np
 
 from set_styles import get_figsize
-from simulation.sim_tools.calc_aggregate_results import (
-    calc_average_retirement_age,
-    expected_lifetime_income,
-    expected_pension,
-    expected_working_lifetime_income,
-)
 from simulation.sim_tools.simulate_exp import simulate_exp
 
 # %%
@@ -111,12 +105,7 @@ for subj_unc in [True, False]:
                     model_solution=model_solution,
                     util_type=util_type,
                 )
-                exp_ret_age[id_SRA] = calc_average_retirement_age(df)
-                exp_income[id_SRA] = expected_lifetime_income(df, specs)
-                exp_pension[id_SRA] = expected_pension(df)
-                exp_work_income[id_SRA] = expected_working_lifetime_income(df, specs)
-                # df_dict[SRA] = df
-
+                raise ValueError("Need to adapt code to new overall result function")
             print(exp_ret_age, flush=True)
             if subj_unc:
                 exp_label = "expected reform"

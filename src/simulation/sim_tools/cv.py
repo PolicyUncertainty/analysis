@@ -7,18 +7,12 @@ def calc_compensated_variation(df_base, df_cf, params, specs):
     df_base = create_real_utility(df_base, specs)
     df_cf = create_real_utility(df_cf, specs)
 
-    df_base = add_number_cons_scale(df_base, specs)
-    df_cf = add_number_cons_scale(df_cf, specs)
+    df_base = add_cons_scale_and_adult_hh_size(df_base, specs)
+    df_cf = add_cons_scale_and_adult_hh_size(df_cf, specs)
 
     n_agents = df_base["agent"].nunique()
     cv = calc_adjusted_scale(df_base, df_cf, params, specs, n_agents)
     return cv
-
-
-def create_real_utility(df, specs):
-    df = create_realized_taste_shock(df, specs)
-    df.loc[:, "real_util"] = df["utility"] + df["real_taste_shock"]
-    return df
 
 
 def calc_adjusted_scale(df_base, df_count, params, specs, n_agents):
@@ -32,7 +26,7 @@ def calc_adjusted_scale(df_base, df_count, params, specs, n_agents):
 
     # Generate the part of the realized utility which is not to be sccaled, i.e. which remains
     # constant. This is the taste shock and the disutility paramters. First generate consumption utility.
-    util_cons = (
+    util_cons = df_base["hh_size"](
         (df_base["consumption"] / df_base["cons_scale"]) ** (1 - mu_vector)
     ) / (1 - mu_vector)
     # Then substract to get constant utility
@@ -83,14 +77,15 @@ def create_disc_sum(df, specs):
     return df.groupby("agent")["disc_util"].sum().mean()
 
 
-def add_number_cons_scale(df, specs):
-    education = df["education"].values
+def add_cons_scale_and_adult_hh_size(df, specs):
     has_partner_int = (df["partner_state"].values > 0).astype(int)
-    period = df["period"].values
-    sex = df["sex"].values
-    nb_children = specs["children_by_state"][sex, education, has_partner_int, period]
-    hh_size = 1 + has_partner_int + nb_children
+    # education = df["education"].values
+    # period = df["period"].values
+    # sex = df["sex"].values
+    # nb_children = specs["children_by_state"][sex, education, has_partner_int, period]
+    hh_size = 1 + has_partner_int
     df.loc[:, "cons_scale"] = np.sqrt(hh_size)
+    df.loc[:, "hh_size"] = hh_size
     return df
 
 
@@ -100,4 +95,10 @@ def create_realized_taste_shock(df, specs):
         df.loc[df["choice"] == choice, "real_taste_shock"] = df.loc[
             df["choice"] == choice, f"taste_shocks_{choice}"
         ]
+    return df
+
+
+def create_real_utility(df, specs):
+    df = create_realized_taste_shock(df, specs)
+    df.loc[:, "real_util"] = df["utility"] + df["real_taste_shock"]
     return df

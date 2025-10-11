@@ -20,10 +20,13 @@ import pickle as pkl
 import numpy as np
 
 from simulation.sim_tools.calc_aggregate_results import add_overall_results
+from simulation.sim_tools.cv import calc_compensated_variation
 from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 
 
-def process_gender_results(i, df, result_dfs, het_spec_vars, het_var_name):
+def process_gender_results(
+    i, df, result_dfs, het_spec_vars, het_var_name, df_base=None, params=None
+):
     """
     Process results for all gender categories (men, women, overall)
 
@@ -63,6 +66,23 @@ def process_gender_results(i, df, result_dfs, het_spec_vars, het_var_name):
                     df_scenario=df_scenario,
                     specs=specs,
                 )
+
+        if df_base is not None:
+            if het_name != "overall":
+                mask_base = df_base[het_var_name].isin(het_spec_vars[het_name])
+                df_base_het = df_base[mask_base]
+            else:
+                df_base_het = df_base
+
+            cv = calc_compensated_variation(
+                df_base=df_base_het,
+                df_cf=df_scenario,
+                specs=specs,
+                params=params,
+            )
+            result_dfs[het_name].loc[i, "cv"] = cv
+        else:
+            result_dfs[het_name].loc[i, "cv"] = np.nan
 
 
 # Save all results
@@ -124,6 +144,7 @@ for scenario_label in scenarios:
         subj_unc = False
 
     model_sol = None
+    df_base = None
 
     for i, sra in enumerate(sra_at_63):
         print("Start simulation for sra: ", sra, flush=True)
@@ -157,7 +178,12 @@ for scenario_label in scenarios:
             result_dfs=result_dfs[scenario_label],
             het_spec_vars=het_spec_vars,
             het_var_name=het_var_name,
+            df_base=df_base,
+            params=params,
         )
-        del df
+        if i == 0:
+            df_base = df.copy()
+        else:
+            del df
 
 save_results(result_dfs, path_dict, model_name)

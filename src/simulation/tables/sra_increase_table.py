@@ -12,9 +12,9 @@ def sra_increase_table(path_dict, model_name):
     for scenario in ["unc", "no_unc"]:
         result_dfs[scenario] = {}
         for het in het_labels:
-            filename = f"sra_increase_aggregate_{scenario}_{het}_{model_name}.csv"
+            filename = f"sra_increase_aggregate_{scenario}_{het}.csv"
             result_dfs[scenario][het] = pd.read_csv(
-                path_dict["sim_results"] + filename, index_col=0
+                path_dict["sim_results"] + model_name + "/" + filename, index_col=0
             )
 
     metrics = {

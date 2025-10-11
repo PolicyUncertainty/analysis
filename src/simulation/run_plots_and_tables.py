@@ -10,6 +10,7 @@ from simulation.figures.sra_increase import (
 from simulation.tables.baseline_expectation import (
     generate_baseline_expectation_table_for_all_types,
 )
+from simulation.tables.ex_post import generate_ex_post_table_for_all_types
 from simulation.tables.sra_increase_table import sra_increase_table
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
@@ -21,7 +22,7 @@ model_name = specs["model_name"]
 # Generate tables
 sra_increase_table(path_dict, model_name)
 generate_baseline_expectation_table_for_all_types(path_dict, specs, model_name)
-
+generate_ex_post_table_for_all_types(path_dict, specs, model_name)
 
 # Generate plots
 sra_increase_aggregate_plot(path_dict, model_name)

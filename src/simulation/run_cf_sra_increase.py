@@ -1,5 +1,7 @@
 # %%
 # Set paths of project
+import os
+
 import pandas as pd
 
 from set_paths import create_path_dict
@@ -45,7 +47,7 @@ def process_gender_results(
     for het_name in het_names:
         if het_name != "overall":
             mask = df[het_var_name].isin(het_spec_vars[het_name])
-            df_scenario = df[mask]
+            df_scenario = df[mask].copy()
         else:
             df_scenario = df
 
@@ -70,9 +72,9 @@ def process_gender_results(
         if df_base is not None:
             if het_name != "overall":
                 mask_base = df_base[het_var_name].isin(het_spec_vars[het_name])
-                df_base_het = df_base[mask_base]
+                df_base_het = df_base[mask_base].copy()
             else:
-                df_base_het = df_base
+                df_base_het = df_base.copy()
 
             cv = calc_compensated_variation(
                 df_base=df_base_het,
@@ -88,10 +90,12 @@ def process_gender_results(
 # Save all results
 def save_results(result_dfs, path_dict, model_name):
     """Save all result dataframes to CSV files"""
+    save_folder = path_dict["sim_results"] + model_name + "/"
+    os.makedirs(save_folder, exist_ok=True)
     for scenario in result_dfs:
         for het_name in result_dfs[scenario]:
-            filename = f"sra_increase_aggregate_{scenario}_{het_name}_{model_name}.csv"
-            result_dfs[scenario][het_name].to_csv(path_dict["sim_results"] + filename)
+            filename = f"sra_increase_aggregate_{scenario}_{het_name}.csv"
+            result_dfs[scenario][het_name].to_csv(save_folder + filename)
             print(f"Saved: {filename}")
 
 

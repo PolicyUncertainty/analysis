@@ -1,7 +1,7 @@
 ---
 ################
 # Current model name:
-model_name: ftsc
+model_name: ftsc_lb
 util_type: add
 ERA_moves: false
 

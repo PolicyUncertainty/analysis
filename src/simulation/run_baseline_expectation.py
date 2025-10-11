@@ -37,6 +37,7 @@ load_model = True  # informed state as type
 load_unc_solution = None  # baseline solution conntainer
 
 n_multiply = 1_000
+# Be aware: Starting at 67 is hardcoded everywhere
 
 # Load params
 params = pkl.load(
@@ -70,7 +71,7 @@ def specify_state(sex, education):
     return states
 
 
-expected_SRA = 33 * specs["sra_belief_alpha"]
+expected_SRA = 67 + 33 * specs["sra_belief_alpha"]
 
 for sex_var, sex_label in enumerate(specs["sex_labels"]):
     for edu_var, edu_label in enumerate(specs["education_labels"]):
@@ -140,13 +141,16 @@ for sex_var, sex_label in enumerate(specs["sex_labels"]):
         res_df_ex_ante.to_csv(
             sim_results_folder + f"ex_ante_expected_margins_{file_append}.csv"
         )
+        print("Wrote ex ante results for: ", file_append, flush=True)
 
         res_df_ex_post = pd.DataFrame()
         for reform_scenario in ["no_reform", "reform"]:
-            for initial_informed, initial_informed_label in [
-                "initial_uninf",
-                "initial_inf",
-            ]:
+            for initial_informed, initial_informed_label in enumerate(
+                [
+                    "initial_uninf",
+                    "initial_inf",
+                ]
+            ):
                 if reform_scenario == "no_reform":
                     SRA_at_63 = 67.0
                 else:
@@ -156,7 +160,7 @@ for sex_var, sex_label in enumerate(specs["sex_labels"]):
                 print("Eval ex post: ", table_column_prefix, flush=True)
                 state = {
                     **fixed_states,
-                    "informed": informed,
+                    "informed": initial_informed,
                 }
                 initial_states = {
                     key: np.ones(n_multiply) * value for key, value in state.items()

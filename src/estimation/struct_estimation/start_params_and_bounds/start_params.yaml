@@ -39,12 +39,12 @@ disutil_unemployed_bad_men: 1.0
 disutil_partner_retired_men: 0.0
 
 # Full time work dis-utility women - Health specific
-disutil_ft_work_good_women: 1.0
-disutil_ft_work_bad_women: 1.0
+disutil_ft_work_good_women: 3.0
+disutil_ft_work_bad_women: 3.0
 
 # Part time dis-utility women - Health specific
-disutil_pt_work_good_women: 1.0
-disutil_pt_work_bad_women: 1.0
+disutil_pt_work_good_women: 2.0
+disutil_pt_work_bad_women: 2.0
 
 # Unemployment dis-utility women - Health specific
 disutil_unemployed_good_women: 1.0

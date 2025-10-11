@@ -283,7 +283,7 @@ def disutility_work(
         "disutil_children_ft_work_low"
     ] * (1 - education)
 
-    # # Children disutility remains education-specific as it's conceptually different
+    # Children disutility remains education-specific as it's conceptually different
     disutil_children_pt = params["disutil_children_pt_work_high"] * education + params[
         "disutil_children_pt_work_low"
     ] * (1 - education)

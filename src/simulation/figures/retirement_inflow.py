@@ -34,9 +34,6 @@ def plot_retirement_difference(
     # assert (df_base["policy_state_value"] == final_SRA).all()
     # assert (df_cf["policy_state_value"] == final_SRA).all()
 
-    print(df_base_plot["policy_state_value"].value_counts(), flush=True)
-    print(df_cf_plot["policy_state_value"].value_counts(), flush=True)
-
     # Assign to very long insured SRA_diff equal 0, if they are not
     # past SRA (SRA diff >0)
     # mask_base = (df_base_plot["SRA_diff"] < 0) & (df_base_plot["very_long_insured"])

@@ -48,7 +48,7 @@ output/est_results/struct_results/*.pkl
 output/tables/simulation/*.tex
 output/tables
 
-/output/sim_results/*.csv
+/output/sim_results/*/*.csv
 !output/sim_results/fire_old_done/
 df*.csv
 

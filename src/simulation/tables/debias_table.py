@@ -147,10 +147,7 @@ def aggregate_comparison_baseline_cf(
         latex_lines.append(r"    \midrule")
         # Add Welfare as section header
         latex_lines.append(f"    \\multicolumn{{4}}{{l}}{{\\textit{{Welfare}}}} \\\\")
-        cv_pct = cv * 100
-        latex_lines.append(
-            f"    Compensating Variation (\\%) & & & {cv_pct:+.2f}\\% \\\\"
-        )
+        latex_lines.append(f"    Compensating Variation (\\%) & & & {cv:+.2f}\\% \\\\")
 
     # Table footer
     latex_lines.append(r"    \bottomrule")

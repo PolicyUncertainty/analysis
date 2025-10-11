@@ -8,16 +8,15 @@ def calc_compensated_variation(df_base, df_cf, params, specs):
     df_cf = create_real_utility(df_cf, specs)
 
     df_base = add_cons_scale_and_adult_hh_size(df_base, specs)
-    df_cf = add_cons_scale_and_adult_hh_size(df_cf, specs)
 
     n_agents = df_base["agent"].nunique()
     cv = calc_adjusted_scale(df_base, df_cf, params, specs, n_agents)
-    return cv
+    return cv * 100  # return in percent
 
 
-def calc_adjusted_scale(df_base, df_count, params, specs, n_agents):
+def calc_adjusted_scale(df_base, df_cf, params, specs, n_agents):
     # First construct the discounted sum of utilities for the counterfactual scenario
-    disc_sum_cf = create_disc_sum(df_count, specs)
+    disc_sum_cf = create_disc_sum(df_cf, specs)
 
     # Then we construct the relevant objects to be able to scale consumption,
     # such that it matches the discounted sum from above
@@ -26,9 +25,11 @@ def calc_adjusted_scale(df_base, df_count, params, specs, n_agents):
 
     # Generate the part of the realized utility which is not to be sccaled, i.e. which remains
     # constant. This is the taste shock and the disutility paramters. First generate consumption utility.
-    util_cons = df_base["hh_size"](
-        (df_base["consumption"] / df_base["cons_scale"]) ** (1 - mu_vector)
-    ) / (1 - mu_vector)
+    util_cons = (
+        df_base["hh_size"]
+        * ((df_base["consumption"] / df_base["cons_scale"]) ** (1 - mu_vector))
+        / (1 - mu_vector)
+    )
     # Then substract to get constant utility
     utility_base_stays_constant = df_base["real_util"].values - util_cons
     # If I now mutlitiply consumption with 1 + gamma, then bring the 1 + gamma out of the equation.

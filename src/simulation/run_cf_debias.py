@@ -110,13 +110,6 @@ df_cf, _ = solve_and_simulate_scenario(
 )
 df_cf = df_cf.reset_index()
 
-cv_cf = calc_compensated_variation(
-    df_base=df_base,
-    df_cf=df_cf,
-    params=params,
-    specs=specs,
-)
-
 # plots
 plot_retirement_difference(
     path_dict=path_dict,
@@ -152,6 +145,13 @@ for group_label, mask_func in label_dict.items():
         result_df = add_overall_results(
             result_df=result_df, df_scenario=df, index=0, pre_name=label, specs=specs
         )
+
+    cv_cf = calc_compensated_variation(
+        df_base=df_base_group,
+        df_cf=df_cf_group,
+        params=params,
+        specs=specs,
+    )
 
     # Create aggregate comparison table
     aggregate_comparison_baseline_cf(

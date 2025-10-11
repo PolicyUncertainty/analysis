@@ -1,6 +1,7 @@
 import jax
 import jax.numpy as jnp
 import numpy as np
+import pandas as pd
 from dcegm.pre_processing.shared import create_array_with_smallest_int_dtype
 
 from model_code.stochastic_processes.health_transition import (
@@ -140,3 +141,38 @@ def generate_start_states_from_obs(
     initial_states = jax.tree.map(create_array_with_smallest_int_dtype, states_dict)
 
     return initial_states
+
+
+def investigate_start_obs(
+    path_dict,
+    model_class,
+    load=False,
+):
+    if load:
+        initial_obs_table = pd.read_csv(
+            path_dict["data_tables"] + "initial_obs_table.csv", index_col=[0, 1]
+        )
+        return initial_obs_table
+
+    observed_data = load_scale_and_correct_data(
+        path_dict=path_dict, model_class=model_class
+    )
+
+    # Define start data and adjust wealth
+    min_period = observed_data["period"].min()
+    start_period_data = observed_data[observed_data["period"].isin([min_period])].copy()
+    # Get table of median and mean for continous variables
+    # Get table of median and mean wealth
+    median = start_period_data.groupby(["sex", "education"])[
+        ["experience_years", "experience", "assets_begin_of_period", "wealth"]
+    ].median()
+    mean = start_period_data.groupby(["sex", "education"])[
+        ["experience_years", "experience", "assets_begin_of_period", "wealth"]
+    ].mean()
+    rename_median = {col: col + "_median" for col in median.columns}
+    rename_mean = {col: col + "_mean" for col in mean.columns}
+    median = median.rename(columns=rename_median)
+    mean = mean.rename(columns=rename_mean)
+    initial_obs_table = median.merge(mean, left_index=True, right_index=True)
+    initial_obs_table.to_csv(path_dict["data_tables"] + "initial_obs_table.csv")
+    return initial_obs_table

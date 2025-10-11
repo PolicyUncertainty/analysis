@@ -3,10 +3,10 @@ import pickle
 
 from model_code.specify_model import specify_model
 from set_paths import create_path_dict
-from simulation.internal_runs.internal_sim_tools.start_obs_for_sim import (
+from simulation.sim_tools.calc_exp_results import investigate_start_obs
+from simulation.sim_tools.start_obs_for_sim import (
     generate_start_states_from_obs,
 )
-from simulation.sim_tools.calc_exp_results import investigate_start_obs
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 path_dict = create_path_dict()

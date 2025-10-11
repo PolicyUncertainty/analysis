@@ -7,7 +7,7 @@ from model_code.specify_model import (
 )
 from model_code.state_space.experience import construct_experience_years
 from set_paths import get_model_results_path
-from simulation.internal_runs.internal_sim_tools import generate_start_states_from_obs
+from simulation.sim_tools.start_obs_for_sim import generate_start_states_from_obs
 from specs.derive_specs import (
     generate_derived_and_data_derived_specs,
     read_and_derive_specs,

@@ -3,7 +3,6 @@ import pandas as pd
 
 from set_paths import create_path_dict
 from set_styles import set_plot_defaults
-from simulation.sim_tools.calc_life_cycle_detailed import calc_life_cycle_detailed
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 # %%
@@ -22,7 +21,9 @@ model_name = specs["model_name"]
 
 # %%
 # Create detailed lifecycle plots for baseline scenario (SRA 67, with uncertainty and misinformation vs. no uncertainty)
-from simulation.figures.detailed_lc_results import plot_detailed_lifecycle_results
+from simulation.internal_runs.figures.detailed_lc_results import (
+    plot_detailed_lifecycle_results,
+)
 
 baseline_data_path = (
     path_dict["simulation_data"] + "/baseline/" + f"baseline_lc_{model_name}.csv"

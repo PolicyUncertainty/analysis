@@ -1,6 +1,5 @@
 # %%
 # Set paths of project
-import pandas as pd
 
 from set_paths import create_path_dict
 
@@ -17,24 +16,22 @@ jax.config.update("jax_enable_x64", True)
 
 import pickle as pkl
 
-import numpy as np
-
-from simulation.sim_tools.calc_life_time_results import add_new_life_cycle_results
+from simulation.internal_runs.internal_sim_tools.calc_life_time_results import (
+    add_new_life_cycle_results,
+)
 from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 
 # %%
 # Set specifications
-seeed = 123
 model_name = specs["model_name"]
 util_type = specs["util_type"]
-
-load_sol_model = True  # informed state as type
-load_unc_solution = None  # baseline solution conntainer
-load_no_unc_solution = None  # counterfactual solution conntainer
+seed = 123
+load_sol_model = True  # informed state as types
+load_unc_solution = None  # baseline solution container
 load_df = (
     None  # True = load existing df, False = create new df, None = create but not save
 )
-
+load_df_base = load_df
 
 # Load params
 params = pkl.load(
@@ -45,16 +42,13 @@ params = pkl.load(
 # The result function will then initialize in the first iteration.
 res_df_life_cycle = None
 
-# Initialize alpha values and replace 0.04 with subjective alpha(0.041...)
-# sra_at_63 = np.arange(67, 70 + specs["SRA_grid_size"], specs["SRA_grid_size"])
-# sra_at_63 = np.arange(67, 70 + specs["SRA_grid_size"], 1)
-sra_at_63 = [67.0, 68.0, 69.0, 70.0]
-
-for i, sra in enumerate(sra_at_63):
+# initiaize announcement ages
+announcement_ages = [35, 45, 55]
+for announcement_age in announcement_ages:
     if load_df:
-        print("Load existing dfs for sra: ", sra)
+        print("Load existing dfs for announcement age: ", announcement_age)
     else:
-        print("Start simulation for sra: ", sra)
+        print("Start simulation for announcement age: ", announcement_age)
 
     # Simulate baseline with subjective belief
     df_base, _ = solve_and_simulate_scenario(
@@ -62,49 +56,47 @@ for i, sra in enumerate(sra_at_63):
         params=params,
         subj_unc=True,
         custom_resolution_age=None,
-        announcement_age=None,
-        SRA_at_retirement=sra,
+        announcement_age=63,  # earliest age is 31
+        SRA_at_retirement=69,
+        SRA_at_start=67,
+        model_name=model_name,
+        df_exists=load_df_base,
+        solution_exists=load_unc_solution,
+        sol_model_exists=load_sol_model,
+        util_type=util_type,
+    )
+
+    df_base = df_base.reset_index()
+
+    load_df_base = True if load_df_base is not None else load_df_base
+
+    load_sol_model = True
+    load_unc_solution = True if load_unc_solution is not None else load_unc_solution
+
+    # Simulate counterfactual
+    df_cf, _ = solve_and_simulate_scenario(
+        path_dict=path_dict,
+        params=params,
+        subj_unc=True,
+        custom_resolution_age=None,
+        announcement_age=announcement_age,  # Let's earliest age is 31
+        SRA_at_retirement=69,
         SRA_at_start=67,
         model_name=model_name,
         df_exists=load_df,
         solution_exists=load_unc_solution,
         sol_model_exists=load_sol_model,
-        util_type=util_type
-    )
-
-    df_base = df_base.reset_index()
-
-    load_unc_solution = True if load_unc_solution is not None else load_unc_solution
-    load_sol_model = True
-
-    # Simulate counterfactual with no uncertainty and expected increase
-    # same as simulated alpha_sim
-    df_cf, _ = solve_and_simulate_scenario(
-        path_dict=path_dict,
-        params=params,
-        subj_unc=False,
-        custom_resolution_age=None,
-        announcement_age=None,
-        SRA_at_retirement=sra,
-        SRA_at_start=sra,
-        model_name=model_name,
-        df_exists=load_df,
-        solution_exists=load_no_unc_solution,
-        sol_model_exists=load_sol_model,
-        util_type=util_type
+        util_type=util_type,
     )
 
     df_cf = df_cf.reset_index()
 
-    load_no_unc_solution = (
-        True if load_no_unc_solution is not None else load_no_unc_solution
-    )
-
     res_df_life_cycle = add_new_life_cycle_results(
         df_base=df_base,
         df_cf=df_cf,
-        scenatio_indicator=sra,
+        scenatio_indicator=announcement_age,
         res_df_life_cycle=res_df_life_cycle,
     )
 
-res_df_life_cycle.to_csv(path_dict["sim_results"] + f"commitment_lc_{model_name}.csv")
+
+res_df_life_cycle.to_csv(path_dict["sim_results"] + f"announcement_lc_{model_name}.csv")

@@ -1,7 +1,6 @@
 # %%
 import pickle as pkl
 
-import numpy as np
 import pandas as pd
 
 # paths and specs
@@ -14,23 +13,20 @@ specs = generate_derived_and_data_derived_specs(path_dict)
 import jax
 
 jax.config.update("jax_enable_x64", True)
-from simulation.figures.detailed_lc_results import plot_detailed_lifecycle_results
 
 # figures and tables
-from simulation.figures.retirement_plot import (
+from simulation.figures.retirement_inflow import (
     plot_retirement_difference,
-    plot_retirement_share,
 )
 from simulation.sim_tools.calc_aggregate_results import add_overall_results
-from simulation.sim_tools.calc_life_cycle_detailed import calc_life_cycle_detailed
+from simulation.sim_tools.cv import calc_compensated_variation
 
 # sim tools
 from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 from simulation.sim_tools.simulation_print import start_simulation_print
-from simulation.tables.aggregate_comparison_baseline_cf import (
+from simulation.tables.debias_table import (
     aggregate_comparison_baseline_cf,
 )
-from simulation.tables.cv import calc_compensated_variation
 
 # %%
 # Set specifications

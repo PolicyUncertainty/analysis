@@ -1,13 +1,14 @@
 # %%
-import pandas as pd
 import pickle as pkl
+
 import jax
-import os
 
 from set_paths import create_path_dict
-from specs.derive_specs import generate_derived_and_data_derived_specs
+from simulation.internal_runs.internal_sim_tools.calc_life_cycle_detailed import (
+    calc_life_cycle_detailed,
+)
 from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
-from simulation.sim_tools.calc_life_cycle_detailed import calc_life_cycle_detailed
+from specs.derive_specs import generate_derived_and_data_derived_specs
 
 jax.config.update("jax_enable_x64", True)
 
@@ -72,6 +73,6 @@ df_lc_detailed_no_uncertainty = calc_life_cycle_detailed(df_baseline_no_uncertai
 
 # Save detailed results
 output_path = path_dict["simulation_data"] + "/sra_69/"
-df_lc_detailed_no_uncertainty.to_csv(output_path + f"sra_69_lc_{model_name}_no_uncertainty.csv")
-
-
+df_lc_detailed_no_uncertainty.to_csv(
+    output_path + f"sra_69_lc_{model_name}_no_uncertainty.csv"
+)

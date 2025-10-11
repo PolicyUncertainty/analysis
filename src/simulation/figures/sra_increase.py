@@ -92,8 +92,11 @@ def plot_retirement_age_changes(ax, df_unc, df_no_unc, title, show_legend=False)
     return ax
 
 
-def sra_increase_aggregate_plot_by_het(path_dict, het_names, fig_name, model_name):
+def sra_increase_aggregate_plot_by_het(path_dict, fig_name, model_name, het_names=None):
     """Plot the change in baseline outcomes as a percentage of the baseline outcome by gender."""
+    if het_names is None:
+        het_names = ["men", "women"]
+
     set_plot_defaults(plot_type="paper")
     het_names = ["overall"] + het_names
     # Load all results

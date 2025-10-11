@@ -1,8 +1,8 @@
 # %%
 # Set paths of project
 import pandas as pd
-from matplotlib import pyplot as plt
 
+from model_code.transform_data_from_model import load_scale_and_correct_data
 from set_paths import create_path_dict
 
 path_dict = create_path_dict()
@@ -10,8 +10,8 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 
 specs = generate_derived_and_data_derived_specs(path_dict)
 from simulation.sim_tools.calc_aggregate_results import add_overall_results
+from simulation.sim_tools.cv import calc_compensated_variation
 from simulation.sim_tools.simulate_exp import simulate_exp
-from simulation.tables.cv import calc_compensated_variation
 
 
 def calc_exp_results(
@@ -25,8 +25,8 @@ def calc_exp_results(
     load_sol_model,
     util_type,
 ):
-    initial_obs_table = pd.read_csv(
-        path_dict["data_tables"] + "initial_obs_table.csv", index_col=[0, 1]
+    initial_obs_table = investigate_start_obs(
+        path_dict=path_dict, model_class=None, load=True
     )
     fixed_states = {
         "period": 0,
@@ -104,94 +104,36 @@ def calc_exp_results(
     return res_df
 
 
-def generate_latex_table(res_df):
-    """Generate LaTeX table comparing informed vs uninformed under different uncertainty scenarios."""
-
-    # Define metrics matching add_overall_results
-    metrics = {
-        # Work Life (<63)
-        "working_hours_below_63": "Annual Labor Supply (hrs)",
-        "consumption_below_63": "Annual Consumption",
-        "savings_below_63": "Annual Savings",
-        # Retirement
-        # "ret_age": "Retirement Age",
-        "sra_at_63": "SRA at 63",
-        "ret_age_excl_disabled": "Retirement Age (excl. Disability)",
-        "pension_wealth_at_ret": "Pension Wealth (PV at Retirement)",
-        "pension_wealth_at_ret_excl_disability": "Pension Wealth (excl. Disability)",
-        "private_wealth_at_ret": "Financial Wealth at Retirement",
-        "private_wealth_at_ret_excl_disability": "Financial Wealth (excl. Disability)",
-        "pensions": "Annual Pension Income",
-        "pensions_excl_disability": "Annual Pension Income (excl. Disability)",
-        "share_disability_pensions": "Share with Disability Pension",
-        "pensions_share_below_63": "Share with Pension before 63",
-        # Lifecycle (30+)
-        "lifecycle_working_hours": "Annual Labor Supply (hrs)",
-        "lifecycle_avg_wealth": "Average Financial Wealth",
-        "cv": "Compensated Variation (\\%)",
-    }
-
-    sections = {
-        "Retirement": [
-            # "ret_age",
-            "sra_at_63",
-            "ret_age_excl_disabled",
-            "pension_wealth_at_ret",
-            "pension_wealth_at_ret_excl_disability",
-            "private_wealth_at_ret",
-            "private_wealth_at_ret_excl_disability",
-            "pensions",
-            "pensions_excl_disability",
-            "share_disability_pensions",
-            "pensions_share_below_63",
-        ],
-        "Work Life ($<63$)": [
-            "working_hours_below_63",
-            "consumption_below_63",
-            "savings_below_63",
-        ],
-        "Lifecycle (30+)": ["lifecycle_working_hours", "lifecycle_avg_wealth"],
-        "Welfare": ["cv"],
-    }
-    # Column order (now used as index)
-    col_order = [
-        "Informed_unc_False",
-        "Informed_unc_True",
-        "Uninformed_unc_False",
-        "Uninformed_unc_True",
-    ]
-
-    latex_lines = []
-    latex_lines.append("\\begin{tabular}{lcccc}")
-    latex_lines.append("    \\toprule")
-    latex_lines.append(
-        "    \\multirow{2}{*}{Expected Outcome} & "
-        "\\multicolumn{2}{c}{Informed} & "
-        "\\multicolumn{2}{c}{Misinformed} \\\\"
-    )
-    latex_lines.append("    \\cmidrule(lr){2-3} \\cmidrule(lr){4-5}")
-    latex_lines.append("     & No Unc. & Unc. & No Unc. & Unc. \\\\")
-    latex_lines.append("  {}   & (1) & (2) & (3) & (4) \\\\")
-    latex_lines.append("    \\midrule")
-
-    for section_name, section_metrics in sections.items():
-        latex_lines.append("    \\midrule")
-
-        latex_lines.append(
-            f"    \\multicolumn{{5}}{{l}}{{\\textit{{{section_name}}}}} \\\\"
+def investigate_start_obs(
+    path_dict,
+    model_class,
+    load=False,
+):
+    if load:
+        initial_obs_table = pd.read_csv(
+            path_dict["data_tables"] + "initial_obs_table.csv", index_col=[0, 1]
         )
+        return initial_obs_table
 
-        for metric_key in section_metrics:
-            outcome_name = metrics[metric_key]
-            row_data = [outcome_name]
+    observed_data = load_scale_and_correct_data(
+        path_dict=path_dict, model_class=model_class
+    )
 
-            for col in col_order:
-                val = res_df.loc[col, f"_{metric_key}"]
-                row_data.append(f"{val:.2f}")
-
-            latex_lines.append("    " + " & ".join(row_data) + " \\\\")
-
-    latex_lines.append("    \\bottomrule")
-    latex_lines.append("\\end{tabular}")
-
-    return "\n".join(latex_lines)
+    # Define start data and adjust wealth
+    min_period = observed_data["period"].min()
+    start_period_data = observed_data[observed_data["period"].isin([min_period])].copy()
+    # Get table of median and mean for continous variables
+    # Get table of median and mean wealth
+    median = start_period_data.groupby(["sex", "education"])[
+        ["experience_years", "experience", "assets_begin_of_period", "wealth"]
+    ].median()
+    mean = start_period_data.groupby(["sex", "education"])[
+        ["experience_years", "experience", "assets_begin_of_period", "wealth"]
+    ].mean()
+    rename_median = {col: col + "_median" for col in median.columns}
+    rename_mean = {col: col + "_mean" for col in mean.columns}
+    median = median.rename(columns=rename_median)
+    mean = mean.rename(columns=rename_mean)
+    initial_obs_table = median.merge(mean, left_index=True, right_index=True)
+    initial_obs_table.to_csv(path_dict["data_tables"] + "initial_obs_table.csv")
+    return initial_obs_table

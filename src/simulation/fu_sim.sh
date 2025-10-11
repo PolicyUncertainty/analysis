@@ -17,7 +17,7 @@ module add CUDA/12.0.0
 source ~/virts/bin/activate
 
 # python run_cf_debias.py
-# python eval_expectation.py
+# python run_eval_expectation_graphs.py
 # python run_cf_sra_increase.py
 # python run_baseline.py
 # python run_figures.py

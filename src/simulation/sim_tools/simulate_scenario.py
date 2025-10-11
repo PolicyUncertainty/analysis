@@ -2,13 +2,12 @@ import pandas as pd
 
 from model_code.pension_system.early_retirement_paths import check_very_long_insured
 from model_code.specify_model import (
-    create_model_config_wo_informed,
     define_alternative_sim_specifications,
     specify_and_solve_model,
 )
 from model_code.state_space.experience import construct_experience_years
 from set_paths import get_model_results_path
-from simulation.sim_tools.start_obs_for_sim import generate_start_states_from_obs
+from simulation.internal_runs.internal_sim_tools import generate_start_states_from_obs
 from specs.derive_specs import (
     generate_derived_and_data_derived_specs,
     read_and_derive_specs,

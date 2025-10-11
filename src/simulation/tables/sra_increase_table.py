@@ -3,7 +3,7 @@ import os
 import pandas as pd
 
 
-def generate_latex_table(path_dict, model_name):
+def sra_increase_table(path_dict, model_name):
     """Generate LaTeX table comparing SRA 67 vs 69 under uncertainty scenarios."""
 
     het_labels = ["men", "women", "overall"]
@@ -67,7 +67,7 @@ def generate_latex_table(path_dict, model_name):
         latex_lines.append(
             "    \\multirow{2}{*}{Expected Outcome} & "
             "\\multicolumn{2}{c}{SRA 67} & "
-            "\\multicolumn{2}{c}{SRA 69} \\\\"
+            "\\multicolumn{2}{c}{SRA 68.25} \\\\"
         )
         latex_lines.append("    \\cmidrule(lr){2-3} \\cmidrule(lr){4-5}")
         latex_lines.append("     & No Unc. & Unc. & No Unc. & Unc. \\\\")
@@ -86,8 +86,8 @@ def generate_latex_table(path_dict, model_name):
 
                 unc_df = result_dfs["unc"][het_label]
                 no_unc_df = result_dfs["no_unc"][het_label]
-                mask_unc = unc_df["sra_at_63"] == 69
-                mask_no_unc = no_unc_df["sra_at_63"] == 69
+                mask_unc = unc_df["sra_at_63"] == 68.25
+                mask_no_unc = no_unc_df["sra_at_63"] == 68.25
 
                 # No Uncertainty SRA 67 (base_)
                 row_data.append(
@@ -97,11 +97,11 @@ def generate_latex_table(path_dict, model_name):
                 row_data.append(
                     f"{unc_df.loc[mask_unc, f'base_{metric_key}'].values[0]:.2f}"
                 )
-                # No Uncertainty SRA 69 (cf_)
+                # No Uncertainty SRA 68.25 (cf_)
                 row_data.append(
                     f"{no_unc_df.loc[mask_no_unc, f'cf_{metric_key}'].values[0]:.2f}"
                 )
-                # Uncertainty SRA 69 (cf_)
+                # Uncertainty SRA 68.25 (cf_)
                 row_data.append(
                     f"{unc_df.loc[mask_unc, f'cf_{metric_key}'].values[0]:.2f}"
                 )

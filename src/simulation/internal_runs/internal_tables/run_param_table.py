@@ -6,6 +6,7 @@
 import pickle
 
 import pandas as pd
+
 from set_paths import create_path_dict
 
 path_dict = create_path_dict()
@@ -46,12 +47,12 @@ for sex_var, sex_label in enumerate(specs["sex_labels"]):
             continue
         elif choice_var == 1:
             param_name_pre = f"disutil_unemployed_{param_append}"
-            util_df.loc[
-                f"{work_label}", sex_label
-            ] = f"{params_all[param_name_pre]:.4f}"
-            util_df.loc[
-                f"{work_label}_se", sex_label
-            ] = f"({std_errors[param_name_pre]:.4f})"
+            util_df.loc[f"{work_label}", sex_label] = (
+                f"{params_all[param_name_pre]:.4f}"
+            )
+            util_df.loc[f"{work_label}_se", sex_label] = (
+                f"({std_errors[param_name_pre]:.4f})"
+            )
         else:
             for health_var in specs["alive_health_vars"]:
                 health_param = param_appends_health[health_var]
@@ -59,33 +60,33 @@ for sex_var, sex_label in enumerate(specs["sex_labels"]):
                 param_name_pre = f"disutil_{work_param}_{health_param}_{param_append}"
 
                 health_label = specs["health_labels"][health_var]
-                util_df.loc[
-                    f"{work_label}; {health_label}", sex_label
-                ] = f"{params_all[param_name_pre]:.4f}"
-                util_df.loc[
-                    f"{work_label}; {health_label}_se", sex_label
-                ] = f"({std_errors[param_name_pre]:.4f})"
+                util_df.loc[f"{work_label}; {health_label}", sex_label] = (
+                    f"{params_all[param_name_pre]:.4f}"
+                )
+                util_df.loc[f"{work_label}; {health_label}_se", sex_label] = (
+                    f"({std_errors[param_name_pre]:.4f})"
+                )
 
 edu_param_labels = ["low", "high"]
 for edu_var, edu_label in enumerate(specs["education_labels"]):
     param_name_pre = f"disutil_children_ft_work_{edu_param_labels[edu_var]}"
     if param_name_pre in params_all.keys():
-        util_df.loc[
-            f"Children; Full-time; {edu_label}", "Women"
-        ] = f"{params_all[param_name_pre]:.4f}"
-        util_df.loc[
-            f"Children; Full-time; {edu_label}_se", "Women"
-        ] = f"({std_errors['disutil_children_ft_work_low']:.4f})"
+        util_df.loc[f"Children; Full-time; {edu_label}", "Women"] = (
+            f"{params_all[param_name_pre]:.4f}"
+        )
+        util_df.loc[f"Children; Full-time; {edu_label}_se", "Women"] = (
+            f"({std_errors['disutil_children_ft_work_low']:.4f})"
+        )
 
 taste_shock_scale_name = "lambda"
 util_df.loc["Taste shock scale", "Women"] = f"{params_all[taste_shock_scale_name]:.4f}"
-util_df.loc[
-    "Taste shock scale_se", "Women"
-] = f"({std_errors[taste_shock_scale_name]:.4f})"
+util_df.loc["Taste shock scale_se", "Women"] = (
+    f"({std_errors[taste_shock_scale_name]:.4f})"
+)
 util_df.loc["Taste shock scale", "Men"] = f"{params_all[taste_shock_scale_name]:.4f}"
-util_df.loc[
-    "Taste shock scale_se", "Men"
-] = f"({std_errors[taste_shock_scale_name]:.4f})"
+util_df.loc["Taste shock scale_se", "Men"] = (
+    f"({std_errors[taste_shock_scale_name]:.4f})"
+)
 
 
 def transform_df_to_latex_body(param_df):
@@ -121,9 +122,9 @@ for param_append in param_appends_sex:
     for param_name_pre, row_name in row_names.items():
         param_name = f"{param_name_pre}_{param_append}"
         job_offer_df.loc[row_name, param_append] = f"{params_all[param_name]:.4f}"
-        job_offer_df.loc[
-            row_name + "_se", param_append
-        ] = f"({std_errors[param_name]:.4f})"
+        job_offer_df.loc[row_name + "_se", param_append] = (
+            f"({std_errors[param_name]:.4f})"
+        )
 
 
 latex_body = transform_df_to_latex_body(job_offer_df)

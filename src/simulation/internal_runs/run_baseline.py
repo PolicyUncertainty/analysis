@@ -2,11 +2,10 @@
 import os
 import pickle as pkl
 
-import jax
-import pandas as pd
-
 from set_paths import create_path_dict
-from simulation.sim_tools.calc_life_cycle_detailed import calc_life_cycle_detailed
+from simulation.internal_runs.internal_sim_tools.calc_life_cycle_detailed import (
+    calc_life_cycle_detailed,
+)
 from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 from specs.derive_specs import generate_derived_and_data_derived_specs
 

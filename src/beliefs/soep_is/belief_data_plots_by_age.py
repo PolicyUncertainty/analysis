@@ -163,7 +163,7 @@ def create_age_groups(data, age_bins):
     )
 
 
-# Keep the old cohort-based function names for backwards compatibility
+# Keep the figures cohort-based function names for backwards compatibility
 def create_gebjahr_groups(data, age_bins):
     """Deprecated: Use create_age_groups instead."""
     return pd.cut(

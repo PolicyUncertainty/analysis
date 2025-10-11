@@ -1,10 +1,5 @@
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# NOTE: This file has been moved from export_results to simulation. Check if still needed
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 import numpy as np
 import scipy.optimize as opt
-
-from simulation.tables.tools import create_realized_taste_shock
 
 
 def calc_compensated_variation(df_base, df_cf, params, specs):
@@ -96,4 +91,13 @@ def add_number_cons_scale(df, specs):
     nb_children = specs["children_by_state"][sex, education, has_partner_int, period]
     hh_size = 1 + has_partner_int + nb_children
     df.loc[:, "cons_scale"] = np.sqrt(hh_size)
+    return df
+
+
+def create_realized_taste_shock(df, specs):
+    df.loc[:, "real_taste_shock"] = np.nan
+    for choice in range(specs["n_choices"]):
+        df.loc[df["choice"] == choice, "real_taste_shock"] = df.loc[
+            df["choice"] == choice, f"taste_shocks_{choice}"
+        ]
     return df

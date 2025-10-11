@@ -84,7 +84,7 @@ def filter_dataset(df, specs):
     df["age"] = df["age"].astype(int)
     # missing education
     df = df[df["education"].notna()]
-    # filter out individuals that are too old
+    # filter out individuals that are too figures
     df = df[df["age"] <= specs["max_ret_age"]]
     return df
 

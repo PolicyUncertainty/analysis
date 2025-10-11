@@ -32,7 +32,7 @@ from simulation.sim_tools.simulate_exp import simulate_exp
 model_name = specs["model_name"]
 util_type = specs["util_type"]
 load_sol_model = True
-load_solution = None 
+load_solution = None
 
 # Load params
 params = pkl.load(

@@ -21,7 +21,7 @@ from model_code.state_space.experience import scale_experience_years
 from process_data.structural_sample_scripts.create_structural_est_sample import (
     CORE_TYPE_DICT,
 )
-from simulation.sim_tools.start_obs_for_sim import generate_start_states_from_obs
+from simulation.internal_runs.internal_sim_tools import generate_start_states_from_obs
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 jax.config.update("jax_enable_x64", True)

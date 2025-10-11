@@ -159,23 +159,5 @@ for scenario_label in scenarios:
             het_var_name=het_var_name,
         )
         del df
-    # # ========== DEBIAS SCENARIO (COMMENTED OUT) ==========
-    # df_debias, _ = solve_and_simulate_scenario(
-    #     path_dict=path_dict,
-    #     params=params,
-    #     subj_unc=False,
-    #     custom_resolution_age=None,
-    #     announcement_age=None,
-    #     SRA_at_retirement=sra,
-    #     SRA_at_start=sra,
-    #     only_informed=True,
-    #     model_name=model_name,
-    #     df_exists=load_df,
-    #     solution_exists=load_no_unc_solution,
-    #     sol_model_exists=load_sol_model,
-    # )
-
-    # df_debias = df_debias.reset_index()
-    # process_gender_results(i, df_debias, result_dfs["debias"], df_bases_debias, params, specs, "debias")
 
 save_results(result_dfs, path_dict, model_name)

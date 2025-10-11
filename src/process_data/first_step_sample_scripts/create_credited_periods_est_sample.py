@@ -98,8 +98,8 @@ def load_and_merge_soep_core(soep_c38_path, soep_rv_path):
             "AUAZ",  # Anrechnungszeiten because of sickness
             "EZ",  # "Ersatzzeiten", replacement periods (military service, etc.)
             "KIMOBO",  #
-            "RTAT",  # "Rentenart", type of pension (1: disability, 2: old age)
-            "LEAT",  # "Leistungsart", type of pension (1: does not apply, 2: disability, 3-7: old age special cases, 8: old age)
+            "RTAT",  # "Rentenart", type of pension (1: disability, 2: figures age)
+            "LEAT",  # "Leistungsart", type of pension (1: does not apply, 2: disability, 3-7: figures age special cases, 8: figures age)
         ],
         convert_categoricals=False,
     )

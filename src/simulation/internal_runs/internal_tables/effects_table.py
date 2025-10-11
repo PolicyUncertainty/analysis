@@ -5,7 +5,8 @@
 
 import numpy as np
 import pandas as pd
-from simulation.tables.cv import calc_compensated_variation
+
+from simulation.sim_tools.cv import calc_compensated_variation
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 """TODO: ROunding everywhere instead of cutting off decimals"""
@@ -40,44 +41,44 @@ def create_effects_table(df_base, df_cf, params, path_dict, scenario_name):
     perc_change_labor_supply = labor_supply_diff / labor_supply_base * 100
 
     if labor_supply_diff > 0:
-        sol_table.loc[
-            "labor supply", "perc_change"
-        ] = f"+{perc_change_labor_supply:.2f}\%"
+        sol_table.loc["labor supply", "perc_change"] = (
+            f"+{perc_change_labor_supply:.2f}\%"
+        )
     else:
-        sol_table.loc[
-            "labor supply", "perc_change"
-        ] = f"{perc_change_labor_supply:.2f}\%"
+        sol_table.loc["labor supply", "perc_change"] = (
+            f"{perc_change_labor_supply:.2f}\%"
+        )
 
     # Average retirement age
     average_retirement_age_base = av_ret_age(df_base)
     average_retirement_age_cf = av_ret_age(df_cf)
-    sol_table.loc[
-        "average retirement age", "baseline"
-    ] = f"{average_retirement_age_base:.2f}"
-    sol_table.loc[
-        "average retirement age", "counterfactual"
-    ] = f"{average_retirement_age_cf:.2f}"
+    sol_table.loc["average retirement age", "baseline"] = (
+        f"{average_retirement_age_base:.2f}"
+    )
+    sol_table.loc["average retirement age", "counterfactual"] = (
+        f"{average_retirement_age_cf:.2f}"
+    )
     average_retirement_age_diff = (
         average_retirement_age_cf - average_retirement_age_base
     )
     av_ret_age_diff_month = average_retirement_age_diff * 12
 
-    sol_table.loc[
-        "average retirement age", "diff"
-    ] = f"{av_ret_age_diff_month:.2f} months"
+    sol_table.loc["average retirement age", "diff"] = (
+        f"{av_ret_age_diff_month:.2f} months"
+    )
 
     av_ret_age_perc_change = (
         average_retirement_age_diff / average_retirement_age_base * 100
     )
 
     if average_retirement_age_diff > 0:
-        sol_table.loc[
-            "average retirement age", "perc_change"
-        ] = f"+{av_ret_age_perc_change:.2f}\%"
+        sol_table.loc["average retirement age", "perc_change"] = (
+            f"+{av_ret_age_perc_change:.2f}\%"
+        )
     else:
-        sol_table.loc[
-            "average retirement age", "perc_change"
-        ] = f"{av_ret_age_perc_change:.2f}\%"
+        sol_table.loc["average retirement age", "perc_change"] = (
+            f"{av_ret_age_perc_change:.2f}\%"
+        )
 
     # Consumption variation
     cv = np.round(

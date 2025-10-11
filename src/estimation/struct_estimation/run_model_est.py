@@ -38,7 +38,7 @@ LOAD_SOL_MODEL = True
 SAVE_RESULTS = True
 USE_WEIGHTS = False
 
-sample_name = "old" if old_sample_only else "full"
+sample_name = "figures" if old_sample_only else "full"
 
 print(
     f"Running estimation for model: {model_name}; sample: {sample_name}, {sex_type}, {edu_type}, {util_type}",

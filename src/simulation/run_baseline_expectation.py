@@ -21,7 +21,8 @@ import pickle as pkl
 
 import numpy as np
 
-from simulation.sim_tools.calc_exp_results import calc_exp_results, generate_latex_table
+from simulation.sim_tools.calc_exp_results import calc_exp_results
+from simulation.tables.baseline_expectation import generate_baseline_expectation_table
 
 # %%
 # Set specifications
@@ -54,14 +55,7 @@ for sex_var, sex_label in enumerate(specs["sex_labels"]):
         )
         file_append = sex_label + edu_append[edu_var]
 
-        res_df.to_csv(path_dict["sim_results"] + f"baseline_margins_{file_append}.csv")
+        sim_results_folder = path_dict["sim_results"] + model_name + "/"
+        os.makedirs(sim_results_folder, exist_ok=True)
 
-        res_df = pd.read_csv(
-            path_dict["sim_results"] + f"baseline_margins_{file_append}.csv",
-            index_col=0,
-        )
-        table_folder = path_dict["simulation_tables"] + model_name + "/"
-        os.makedirs(table_folder, exist_ok=True)
-        table = generate_latex_table(res_df)
-        with open(table_folder + f"baseline_margins_{file_append}.tex", "w") as f:
-            f.write(table)
+        res_df.to_csv(sim_results_folder + f"baseline_margins_{file_append}.csv")

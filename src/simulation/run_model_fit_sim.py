@@ -1,11 +1,8 @@
 # %% Set paths of project
 import pickle
 
-import jax
 import matplotlib.pyplot as plt
-import numpy as np
 
-from estimation.struct_estimation.scripts.estimate_setup import generate_print_func
 from set_paths import create_path_dict
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
@@ -104,7 +101,7 @@ if which_plots in ["a", "s"]:
     load_sol_model = True
 
 if which_plots in ["a", "i"]:
-    from simulation.figures.net_incomes import net_incomes
+    from simulation.internal_runs.figures import net_incomes
 
     net_incomes(
         path_dict=path_dict,

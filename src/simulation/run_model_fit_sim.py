@@ -26,17 +26,6 @@ params = pickle.load(
 )
 from estimation.struct_estimation.scripts.estimate_setup import generate_print_func
 
-# params["mu_high"] = 1.01
-# params["mu_low"] = 1.01
-params["bequest_scale_low_women"] = 3.0
-params["kappa_low_women"] = 3.0
-params["bequest_scale_high_women"] = 5.0
-params["kappa_high_women"] = 5.0
-
-params["bequest_scale_low_men"] = 4.0
-params["kappa_low_men"] = 3.0
-params["bequest_scale_high_men"] = 7.0
-params["kappa_high_men"] = 5.0
 generate_print_func(params.keys())(params)
 
 # which_plots = input(

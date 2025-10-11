@@ -136,7 +136,7 @@ def calc_average_retirement_age_excl_disabled(df):
     fresh_retired_mask = (
         (df["choice"] == 0) & (df["lagged_choice"] != 0) & (df["health"] != 3)
     )
-    non_disabled_mask = df["health"] != 2
+    non_disabled_mask = df["age"] >= 63
     combined_mask = fresh_retired_mask & non_disabled_mask
     mean_ret_age = df.loc[combined_mask, "age"].mean()
     return mean_ret_age
@@ -156,7 +156,7 @@ def private_wealth_excl_disability(df):
     fresh_retired_mask = (
         (df["choice"] == 0) & (df["lagged_choice"] != 0) & (df["health"] != 3)
     )
-    non_disabled_mask = df["health"] != 2
+    non_disabled_mask = df["age"] >= 63
     combined_mask = fresh_retired_mask & non_disabled_mask
     mean_wealth = df.loc[combined_mask, "assets_begin_of_period"].mean()
     return mean_wealth * 10
@@ -185,7 +185,8 @@ def pension_wealth_excl_disability(df, specs):
     first_time_pension_payment = (
         (df["lagged_choice"] == 0)
         & (df["policy_state"] != 29)
-        & (~df["health"].isin([2, 3]))
+        & (df["health"] != 3)
+        & (df["age"] >= 63)
     )
     df_first = df.loc[first_time_pension_payment, :]
     pension_payments = df_first["gross_retirement_income"]
@@ -205,7 +206,8 @@ def pensions_excl_disability(df):
     first_time_pension_payment = (
         (df["lagged_choice"] == 0)
         & (df["policy_state"] != 29)
-        & (~df["health"].isin([2, 3]))
+        & (df["health"] != 3)
+        & (df["age"] >= 63)
     )
     return df.loc[first_time_pension_payment, "gross_retirement_income"].mean() * 10
 

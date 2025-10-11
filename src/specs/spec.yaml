@@ -1,7 +1,7 @@
 ---
 ################
 # Current model name:
-model_name: nu_fjo
+model_name: ftsc_men
 util_type: add
 ERA_moves: false
 

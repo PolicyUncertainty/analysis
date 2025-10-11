@@ -109,7 +109,7 @@ params = pkl.load(
 
 
 # Initialize alpha values and replace 0.04 with subjective alpha
-sra_at_63 = np.arange(67, 70 + 1, 1)
+sra_at_63 = [67, 68, 68.25, 69, 70]
 
 result_dfs = create_result_dfs(
     sra_at_63=sra_at_63, scenarios=scenarios, het_spec_vars=het_spec_vars

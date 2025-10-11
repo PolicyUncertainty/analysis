@@ -22,6 +22,7 @@ def generate_latex_table(path_dict, model_name):
         "consumption_below_63": "Annual Consumption",
         "savings_below_63": "Annual Savings",
         "sra_at_63": "SRA at 63",
+        "ret_age": "Retirement Age",
         "ret_age_excl_disabled": "Retirement Age (excl. Disability)",
         "pension_wealth_at_ret": "Pension Wealth (PV at Retirement)",
         "pension_wealth_at_ret_excl_disability": "Pension Wealth (excl. Disability)",
@@ -39,6 +40,7 @@ def generate_latex_table(path_dict, model_name):
     sections = {
         "Retirement": [
             "sra_at_63",
+            "ret_age",
             "ret_age_excl_disabled",
             "pension_wealth_at_ret",
             "pension_wealth_at_ret_excl_disability",

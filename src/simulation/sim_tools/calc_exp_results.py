@@ -170,7 +170,7 @@ def generate_latex_table(res_df):
         "\\multicolumn{2}{c}{Misinformed} \\\\"
     )
     latex_lines.append("    \\cmidrule(lr){2-3} \\cmidrule(lr){4-5}")
-    latex_lines.append("     & Unc. & No Unc. & Unc. & No Unc. \\\\")
+    latex_lines.append("     & No Unc. & Unc. & No Unc. & Unc. \\\\")
     latex_lines.append("  {}   & (1) & (2) & (3) & (4) \\\\")
     latex_lines.append("    \\midrule")
 

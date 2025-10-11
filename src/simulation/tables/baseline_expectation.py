@@ -11,13 +11,15 @@ def generate_baseline_expectation_table_for_all_types(path_dict, specs, model_na
             sim_results_folder = path_dict["sim_results"] + model_name + "/"
 
             res_df = pd.read_csv(
-                sim_results_folder + f"baseline_margins_{file_append}.csv",
+                sim_results_folder + f"ex_ante_expected_margins_{file_append}.csv",
                 index_col=0,
             )
             table_folder = path_dict["simulation_tables"] + model_name + "/"
             os.makedirs(table_folder, exist_ok=True)
             table = generate_baseline_expectation_table(res_df)
-            with open(table_folder + f"baseline_margins_{file_append}.tex", "w") as f:
+            with open(
+                table_folder + f"ex_ante_expected_margins_{file_append}.tex", "w"
+            ) as f:
                 f.write(table)
 
 

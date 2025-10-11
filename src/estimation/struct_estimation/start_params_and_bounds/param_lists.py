@@ -69,8 +69,8 @@ women_disutil_params = [
     "disutil_children_ft_work_low",
     # "disutil_unemployed_above_58_good_women",
     # "disutil_unemployed_above_58_bad_women",
-    # "disutil_children_pt_work_high",
-    # "disutil_children_pt_work_low",
+    "disutil_children_pt_work_high",
+    "disutil_children_pt_work_low",
 ]
 
 # women_SRA_firing = [

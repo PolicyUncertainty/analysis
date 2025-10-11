@@ -91,7 +91,13 @@ def estimate_model(
     lower_bounds_all = yaml.safe_load(
         open(path_dict["start_params_and_bounds"] + "lower_bounds.yaml", "rb")
     )
-    lower_bounds = {name: lower_bounds_all[name] for name in params_to_estimate_names}
+    lower_bounds = {}
+    for param in params_to_estimate_names:
+        if "job_finding" in param:
+            # Set lower bound for job finding params to start values
+            lower_bounds[param] = start_params_all[param]
+        else:
+            lower_bounds[param] = lower_bounds_all[param]
 
     upper_bounds_all = yaml.safe_load(
         open(path_dict["start_params_and_bounds"] + "upper_bounds.yaml", "rb")

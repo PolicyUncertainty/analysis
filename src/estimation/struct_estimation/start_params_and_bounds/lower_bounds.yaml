@@ -64,8 +64,8 @@ disutil_partner_retired_women: -2.0
 # Children dis-utility
 disutil_children_ft_work_low: 0.0
 disutil_children_ft_work_high: 0.0
-# disutil_children_pt_work_low: 0.0
-# disutil_children_pt_work_high: 0.0
+disutil_children_pt_work_low: 0.0
+disutil_children_pt_work_high: 0.0
 # disutil_ft_work_partner_good_men: 0.0
 # disutil_ft_work_partner_bad_men: 0.0
 # disutil_ft_work_single_good_men: 0.0
@@ -86,17 +86,17 @@ kappa_high_women: 0
 kappa_low_men: 0
 kappa_low_women: 0
 
-# Job finding probability - men
-job_finding_logit_const_men: -5
-job_finding_logit_high_educ_men: -5
-# job_finding_logit_good_health_men: -5
-job_finding_logit_age_men: -5
+# # Job finding probability - men
+# job_finding_logit_const_men: -5
+# job_finding_logit_high_educ_men: -5
+# # job_finding_logit_good_health_men: -5
+# job_finding_logit_age_men: -5
 
-# Job finding probability - women
-job_finding_logit_const_women: -5
-job_finding_logit_high_educ_women: -5
-# job_finding_logit_good_health_women: -5
-job_finding_logit_age_women: -5
+# # Job finding probability - women
+# job_finding_logit_const_women: -5
+# job_finding_logit_high_educ_women: -5
+# # job_finding_logit_good_health_women: -5
+# job_finding_logit_age_women: -5
 
 # Disability probability men
 disability_logit_const_men: -30

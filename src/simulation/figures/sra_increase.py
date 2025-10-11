@@ -73,11 +73,10 @@ def plot_retirement_age_changes(ax, df_unc, df_no_unc, title, show_legend=False)
     ax.plot(df_unc["sra_at_63"], change_ret_unc, label="With Uncertainty")
     ax.plot(df_no_unc["sra_at_63"], change_ret_no_unc, label="Without Uncertainty")
 
-    # Change of SRA (45 degree line reference)
-    change_sra_unc = df_unc["cf_sra_at_ret"] - df_unc["base_sra_at_ret"]
+    base_sra = df_unc["sra_at_63"].iloc[0]
     ax.plot(
         df_unc["sra_at_63"],
-        change_sra_unc,
+        df_unc["sra_at_63"] - base_sra,
         color=JET_COLOR_MAP[0],
         ls="--",
         label="45 degree",
@@ -254,7 +253,7 @@ def sra_increase_aggregate_plot(path_dict, model_name):
         ax1,
         df_unc,
         df_no_unc,
-        "below_sixty_savings",
+        "savings_below_63",
         "Perc. Change Savings",
         "Savings ($< 63$)",
     )
@@ -288,7 +287,7 @@ def sra_increase_aggregate_plot(path_dict, model_name):
         ax3,
         df_unc,
         df_no_unc,
-        "working_hours",
+        "lifecycle_working_hours",
         "Perc. Labor Supply",
         "Life Time Labor Supply",
     )

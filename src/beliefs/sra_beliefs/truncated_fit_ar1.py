@@ -80,6 +80,16 @@ def plot_ar1_fit(
         end_age_plot - ages
     )
 
+    age_30_mask = ages == 30
+    expect_at_30 = {
+        "lower_bound": ar1_lower[age_30_mask][0],
+        "expectation": ar1_prediction[age_30_mask][0],
+        "upper_bound": ar1_upper[age_30_mask][0],
+    }
+    pd.Series(data=expect_at_30).to_csv(
+        path_dict["beliefs_est_results"] + "expect_at_30.csv"
+    )
+
     # Create the plot
     fig, ax = plt.subplots()
 

@@ -86,6 +86,9 @@ def plot_ar1_fit(
         "expectation": ar1_prediction[age_30_mask][0],
         "upper_bound": ar1_upper[age_30_mask][0],
     }
+    expect_at_30["deviation"] = (
+        expect_at_30["upper_bound"] - expect_at_30["expectation"]
+    )
     pd.Series(data=expect_at_30).to_csv(
         path_dict["beliefs_est_results"] + "expect_at_30.csv"
     )

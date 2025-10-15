@@ -33,10 +33,7 @@ def generate_derived_and_data_derived_specs(path_dict, load_precomputed=False):
     specs = add_experience_and_pp_specs(specs, path_dict, load_precomputed)
 
     # Read in family transitions
-    (
-        specs["partner_trans_mat"],
-        specs["n_partner_states"],
-    ) = read_in_partner_transition_specs(path_dict, specs)
+    specs = read_in_partner_transition_specs(path_dict, specs)
 
     # Read in health transition matrix
     specs["health_trans_mat"] = read_in_health_transition_specs(path_dict, specs)

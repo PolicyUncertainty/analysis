@@ -23,33 +23,48 @@ paths_dict = create_path_dict(define_user=define_user)
 specs = read_and_derive_specs(paths_dict["specs"])
 
 if input_str in ["a", "w"]:
-    from first_step_estimation.estimation.wage_estimation import estimate_wage_parameters
+    from first_step_estimation.estimation.wage_estimation import (
+        estimate_wage_parameters,
+    )
+
     estimate_wage_parameters(paths_dict, specs)
 
 if input_str in ["a", "p"]:
-    from first_step_estimation.estimation.partner_wage_estimation import estimate_partner_wage_parameters
+    from first_step_estimation.estimation.partner_wage_estimation import (
+        estimate_partner_wage_parameters,
+    )
+
     estimate_partner_wage_parameters(paths_dict, specs)
 
 if input_str in ["a", "j"]:
     from first_step_estimation.estimation.job_sep_estimation import est_job_sep
+
     est_job_sep(paths_dict, specs, load_data=LOAD_DATA)
 
 if input_str in ["a", "f"]:
+    from first_step_estimation.estimation.children import estimate_nb_children
     from first_step_estimation.estimation.family_estimation import (
-        estimate_nb_children,
         estimate_partner_transitions,
     )
+
     estimate_partner_transitions(paths_dict, specs, load_data=LOAD_DATA)
     estimate_nb_children(paths_dict, specs)
 
 if input_str in ["a", "h"]:
-    from first_step_estimation.estimation.health_estimation import estimate_health_transitions_parametric
+    from first_step_estimation.estimation.health_estimation import (
+        estimate_health_transitions_parametric,
+    )
+
     estimate_health_transitions_parametric(paths_dict, specs)
 
 if input_str in ["a", "m"]:
     from first_step_estimation.estimation.mortality_estimation import estimate_mortality
+
     estimate_mortality(paths_dict, specs)
 
 if input_str in ["a", "c"]:
-    from first_step_estimation.estimation.credited_periods_estimation import calibrate_credited_periods
+    from first_step_estimation.estimation.credited_periods_estimation import (
+        calibrate_credited_periods,
+    )
+
     calibrate_credited_periods(paths_dict, load_data=LOAD_DATA)

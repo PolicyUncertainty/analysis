@@ -18,11 +18,11 @@ def est_job_offer_params_full_obs(df, specs):
         ["sex", "period", "education", "health", "work_start"]
     ].copy()
     logit_df["age"] = logit_df["period"] + specs["start_age"]
-    # logit_df["good_health"] = (logit_df["health"] == 0).astype(float)
+    logit_df["good_health"] = (logit_df["health"] == 0).astype(float)
     # Only use ages below 65
     logit_df = logit_df[logit_df["age"] < 65]
     logit_df["intercept"] = 1
-
+    logit_df["education"] = (logit_df["education"] == 1).astype(float)
     logit_vars = ["intercept", "education", "age"]
 
     job_offer_params = {}
@@ -57,17 +57,17 @@ def est_job_offer_params_full_obs(df, specs):
         }
         job_offer_params.update(gender_params)
 
-        # for j, (educ_val, educ_label) in enumerate([(0, "low"), (1, "high")]):
-        #     ax = axs[sex_var, educ_val]
-        #
+    #     for j, (educ_val, educ_label) in enumerate([(0, "low"), (1, "high")]):
+    #         ax = axs[sex_var, educ_val]
+    #
     #         # Plot predicted vs observed by health type
     #         for h_val, h_label, color in [
     #             (1, "Good health", "blue"),
     #             (0, "Bad health", "red"),
     #         ]:
-    #             tmp = sub_df[sub_df["good_health"] == h_val]
-    #             pred = tmp.groupby("age")["predicted_probs"].mean()
-    #             ages = np.sort(sub_df.age.unique())
+    #             tmp = sub_df[(sub_df["good_health"] == h_val) & (sub_df["education"] == educ_val)]
+    #             # pred = tmp.groupby("age")["predicted_probs"].mean()
+    #             ages = np.sort(sub_df.age.unique()).astype(float)
     #             pred = job_func(
     #                 params=gender_params,
     #                 education=educ_val,
@@ -85,5 +85,6 @@ def est_job_offer_params_full_obs(df, specs):
     #     "Job Offer Probabilities by Gender, Education, and Health", fontsize=14
     # )
     # plt.tight_layout()
+    # plt.show()
 
     return job_offer_params

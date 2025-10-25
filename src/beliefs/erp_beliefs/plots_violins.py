@@ -12,6 +12,7 @@ def plot_erp_violin_plots_by_age(paths_dict, show=False, save=False, censor_abov
     """
     Plot violin plots of ERP beliefs by age groups.
     Shows the distribution density of beliefs within each age group.
+    When censoring is applied, violins show censored data but means are calculated from uncensored data.
 
     Parameters:
     -----------
@@ -21,6 +22,7 @@ def plot_erp_violin_plots_by_age(paths_dict, show=False, save=False, censor_abov
         Whether to display the plot
     censor_above : float or None, default None
         If specified, values above this threshold will be censored (capped at this value)
+        for the violin display, but means will be calculated from uncensored data
     """
     # Load and prepare the data
     df_soep_is = pd.read_csv(
@@ -35,22 +37,25 @@ def plot_erp_violin_plots_by_age(paths_dict, show=False, save=False, censor_abov
     ]
     data_deduction = df_soep_is[~df_soep_is["belief_pens_deduct"].isnull()][
         relevant_columns
-    ]
-
-    # Apply censoring if specified
-    if censor_above is not None:
-        data_deduction = data_deduction.copy()
-        data_deduction["belief_pens_deduct"] = data_deduction[
-            "belief_pens_deduct"
-        ].clip(upper=censor_above)
+    ].copy()
 
     age_bins = list(range(25, 71, 5))
     data_deduction["age_group"] = create_age_groups(data_deduction, age_bins=age_bins)
 
+    # Create censored column if specified
+    if censor_above is not None:
+        data_deduction["belief_pens_deduct_censored"] = data_deduction[
+            "belief_pens_deduct"
+        ].clip(upper=censor_above)
+    else:
+        data_deduction["belief_pens_deduct_censored"] = data_deduction[
+            "belief_pens_deduct"
+        ]
+
     # Create the violin plot
     fig, ax = plt.subplots()
 
-    # Prepare data for violin plot
+    # Prepare data for violin plot (censored)
     violin_data = []
     age_labels = [
         f"{age_bins[i]}-\n{age_bins[i + 1] - 1}" for i in range(len(age_bins) - 1)
@@ -59,19 +64,19 @@ def plot_erp_violin_plots_by_age(paths_dict, show=False, save=False, censor_abov
     # Extract data for each age group
     for group_id in range(len(age_bins) - 1):
         group_data = data_deduction[data_deduction["age_group"] == group_id][
-            "belief_pens_deduct"
+            "belief_pens_deduct_censored"
         ]
         if not group_data.empty:
             violin_data.append(group_data.values)
         else:
             violin_data.append([])
 
-    # Create violin plot
+    # Create violin plot (without showing means, we'll add them manually)
     vp = ax.violinplot(
         violin_data,
         positions=range(1, len(age_labels) + 1),
         widths=0.8,
-        showmeans=True,
+        showmeans=False,  # Changed to False
         showmedians=True,
         bw_method=0.2,
     )
@@ -84,8 +89,6 @@ def plot_erp_violin_plots_by_age(paths_dict, show=False, save=False, censor_abov
         pc.set_linewidth(2)
 
     # Customize the statistical lines
-    vp["cmeans"].set_color(JET_COLOR_MAP[3])
-    vp["cmeans"].set_linewidth(3)
     vp["cmedians"].set_color(JET_COLOR_MAP[1])
     vp["cmedians"].set_linewidth(3)
     vp["cbars"].set_color(JET_COLOR_MAP[7])
@@ -97,6 +100,24 @@ def plot_erp_violin_plots_by_age(paths_dict, show=False, save=False, censor_abov
 
     # Add horizontal line at 3.6% pension deduction (true ERP)
     ax.axhline(y=3.6, color="black", linestyle="--", linewidth=2, label="true ERP")
+
+    # Manually add means from uncensored data as horizontal lines
+    for group_id in range(len(age_bins) - 1):
+        group_data_uncensored = data_deduction[data_deduction["age_group"] == group_id][
+            "belief_pens_deduct"
+        ]
+        if not group_data_uncensored.empty:
+            mean_val = group_data_uncensored.mean()
+            # Get the violin width for this position
+            pos = group_id + 1
+            # Draw horizontal line for mean
+            ax.plot(
+                [pos - 0.18, pos + 0.18],
+                [mean_val, mean_val],
+                color=JET_COLOR_MAP[3],
+                linewidth=3,
+                zorder=3,
+            )
 
     # Add legend entries for mean and median lines
     import matplotlib.lines as mlines

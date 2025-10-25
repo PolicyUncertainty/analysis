@@ -102,7 +102,7 @@ def plot_ar1_fit(
         ar1_prediction,
         color=JET_COLOR_MAP[0],
         linewidth=3,
-        label="Expected SRA (AR1)",
+        label="expected SRA",
     )
 
     # Plot AR1 standard deviation bounds with dashed lines (like zeppelin graph)
@@ -112,7 +112,7 @@ def plot_ar1_fit(
         color=JET_COLOR_MAP[0],
         linestyle="--",
         linewidth=2,
-        label="95% CI (AR1)",
+        label="95% ci SRA",
     )
     ax.plot(ages, ar1_lower, color=JET_COLOR_MAP[0], linestyle="--", linewidth=2)
 
@@ -137,7 +137,7 @@ def plot_ar1_fit(
             marker="D",
             color=JET_COLOR_MAP[3],
             markersize=8,
-            label="Mean (Trunc. Normal)" if i == 0 else "",
+            label="mean trunc. normals" if i == 0 else "",
         )
 
         # Dotted lines for standard deviation
@@ -147,14 +147,14 @@ def plot_ar1_fit(
             color=JET_COLOR_MAP[3],
             linestyle=":",
             linewidth=2,
-            label="Std (Trunc. Normal)" if i == 0 else "",
+            label="95% ci trunc. normals" if i == 0 else "",
         )
 
     # Customize plot
     ax.set_xlabel("Age")
     ax.set_ylabel("Expected SRA")
     ax.set_ylim([65, 72])
-    ax.legend(loc="best")
+    ax.legend(loc="best", frameon=False)
 
     plt.tight_layout()
 

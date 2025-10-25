@@ -123,13 +123,16 @@ def plot_predicted_informed_shares_by_education(
     for edu_val, edu_label in enumerate(specs["education_labels"]):
         color = JET_COLOR_MAP[edu_val]
 
+        # format edu label to lower letters only
+        edu_label_lower = edu_label.lower()
+
         # Plot predicted shares as continuous line
         ax.plot(
             ages_to_predict,
             predicted_shares[edu_label],
             color=color,
             linewidth=2,
-            label=f"{edu_label} (predicted)",
+            label=f"{edu_label_lower}",
         )
 
         if by_education:
@@ -212,7 +215,7 @@ def plot_predicted_informed_shares_by_education(
     ax.set_yticks(np.arange(0, 0.7, 0.1))
 
     # Create legend
-    ax.legend(loc="best")
+    ax.legend(loc="best", frameon=False)
 
     fig.tight_layout()
 

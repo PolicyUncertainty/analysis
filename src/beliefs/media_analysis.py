@@ -4,6 +4,14 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import requests
 
+from set_paths import create_path_dict
+
+path_dict = create_path_dict()
+
+from set_styles import set_plot_defaults
+
+set_plot_defaults()
+
 # =========
 # PARAMETERS
 # =========
@@ -158,32 +166,31 @@ if len(group_results) >= 2:
     )
 
     # Plot
-    plt.figure(figsize=(12, 6))
-    plt.plot(
+    fig, ax = plt.subplots()
+    ax.plot(
         combined["datetime"],
         combined["Renteneintrittsalter_Debatte_7Tage"],
-        label="Debatte über Renteneintrittsalter",
+        label="Retirement Age",
         linewidth=2,
     )
-    plt.plot(
+    ax.plot(
         combined["datetime"],
         combined["Abschlag_3_6_7Tage"],
-        label="Diskussion über Rentenabschlag",
+        label="ERP",
         linewidth=2,
     )
 
-    plt.title(
-        "Medienberichterstattung in Deutschland: Renteneintrittsalter vs. Rentenabschlag"
-    )
-    plt.xlabel("Datum")
-    plt.ylabel("Artikel aus deutschen Medien (7-Tage-Durchschnitt)")
-    plt.legend()
-    plt.grid(True, alpha=0.3)
-    plt.tight_layout()
-    plt.show()
-
+    ax.set_xlabel("Date")
+    ax.set_ylabel("Average Daily Article Count (7-day MA)")
+    ax.legend()
+    ax.grid(True, alpha=0.3)
+    fig.tight_layout()
     print(
         f"\n✅ Analysis complete! Date range: {combined['datetime'].min()} to {combined['datetime'].max()}"
+    )
+    fig.savefig(
+        path_dict["beliefs_plots"] + "media_comparison.png",
+        bbox_inches="tight",
     )
 else:
     print("\n❌ Not enough data to create comparison plot")

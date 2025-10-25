@@ -32,15 +32,23 @@ def create_erp_params_table_latex(path_dict, save=False):
     # Define parameter order and display names
     param_order = ["hazard_rate", "erp_uninformed_belief"]
     param_names = {
-        "hazard_rate": "Hazard rate",
-        "erp_uninformed_belief": "ERP uninformed belief",
+        "hazard_rate": "Hazard Rate",
+        "erp_uninformed_belief": "ERP Misinformed Belief",
+    }
+    param_symbols = {
+        "hazard_rate": r"$\lambda$",
+        "erp_uninformed_belief": r"$\tilde{ERP}$",
     }
 
     # Start LaTeX table
     latex_lines = []
-    latex_lines.append("\\begin{tabular}{lcc}")
+    latex_lines.append("\\begin{tabular}{lccc}")
     latex_lines.append("\\toprule")
-    latex_lines.append("Parameter & Low Education & High Education \\\\")
+    # Add multi-level header
+    latex_lines.append(
+        "Parameter Name & Parameter & \\multicolumn{2}{c}{Estimates} \\\\"
+    )
+    latex_lines.append(" & & Low Educ. & High Educ. \\\\")
     latex_lines.append("\\midrule")
 
     # Process each parameter
@@ -49,35 +57,16 @@ def create_erp_params_table_latex(path_dict, save=False):
         low_row = erp_params[
             (erp_params["parameter"] == param) & (erp_params["type"] == "Low Education")
         ]
+        low_est = low_row["estimate"].values[0]
+        low_se = low_row["std_error"].values[0]
 
         # Get High Education values
         high_row = erp_params[
             (erp_params["parameter"] == param)
             & (erp_params["type"] == "High Education")
         ]
-
-        # Extract values
-        if not low_row.empty:
-            low_est = low_row["estimate"].values[0]
-            low_se = (
-                low_row["std_error"].values[0]
-                if "std_error" in low_row.columns
-                else None
-            )
-        else:
-            low_est = None
-            low_se = None
-
-        if not high_row.empty:
-            high_est = high_row["estimate"].values[0]
-            high_se = (
-                high_row["std_error"].values[0]
-                if "std_error" in high_row.columns
-                else None
-            )
-        else:
-            high_est = None
-            high_se = None
+        high_est = high_row["estimate"].values[0]
+        high_se = high_row["std_error"].values[0]
 
         # Format estimates
         low_est_str = f"{low_est:.3f}" if pd.notna(low_est) else ""
@@ -89,13 +78,14 @@ def create_erp_params_table_latex(path_dict, save=False):
 
         # Add parameter name and estimates
         param_display_name = param_names.get(param, param)
+        param_symbol = param_symbols.get(param, param)
         latex_lines.append(
-            f"  {param_display_name} & {low_est_str} & {high_est_str} \\\\"
+            f"  {param_display_name} & {param_symbol} & {low_est_str} & {high_est_str} \\\\"
         )
 
         # Add standard errors row (only if at least one SE exists)
         if low_se_str or high_se_str:
-            latex_lines.append(f"    {{}} & {low_se_str} & {high_se_str} \\\\")
+            latex_lines.append(f"    {{}} & {{}} & {low_se_str} & {high_se_str} \\\\")
 
     # Close table
     latex_lines.append("\\bottomrule")

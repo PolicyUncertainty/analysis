@@ -7,15 +7,11 @@ def create_state_space_functions():
         "state_specific_choice_set": state_specific_choice_set,
         "next_period_experience": get_next_period_experience,
         "sparsity_condition": sparsity_condition,
-        "next_period_deterministic_state"
+        "next_period_deterministic_state": next_period_deterministic_state,
     }
 
-def next_period_deterministic_state(
-    period,
-    lagged_choice,
-    choice,
-    alg_1_claim
-):
+
+def next_period_deterministic_state(period, lagged_choice, choice, alg_1_claim):
     next_period = period + 1
     lagged_choice_next = choice
 
@@ -36,7 +32,7 @@ def sparsity_condition(
     period,
     lagged_choice,
     sex,
-    alg_1_periods_left,
+    alg_1_claim,
     informed,
     health,
     partner_state,
@@ -65,7 +61,7 @@ def sparsity_condition(
     ):
         return False
 
-    elif (alg_1_periods_left == 1) & (lagged_choice in [0, 2, 3]):
+    elif (alg_1_claim == 1) & (lagged_choice in [0, 2, 3]):
         # We dont need alg_1 claim if not unemployed in last period
         return False
     else:
@@ -85,7 +81,7 @@ def sparsity_condition(
                 "period": last_period,
                 "lagged_choice": lagged_choice,
                 "education": education,
-                "alg_1_periods_left": alg_1_periods_left,
+                "alg_1_claim": alg_1_claim,
                 "health": health,
                 "informed": informed,
                 "sex": sex,
@@ -122,7 +118,7 @@ def sparsity_condition(
                 "lagged_choice": lagged_choice,
                 "education": education,
                 "health": proxy_health,
-                "alg_1_periods_left": alg_1_periods_left,
+                "alg_1_claim": alg_1_claim,
                 "informed": informed_proxy,
                 "sex": sex,
                 "partner_state": partner_state,

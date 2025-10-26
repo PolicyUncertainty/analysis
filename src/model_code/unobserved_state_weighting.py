@@ -1,4 +1,5 @@
 import jax
+import jax.numpy as jnp
 
 from model_code.stochastic_processes.health_transition import (
     calc_disability_probability,
@@ -20,7 +21,7 @@ def create_unobserved_state_specs(data_decision):
             health=kwargs["lagged_health"],
             model_specs=kwargs["model_specs"],
             education=kwargs["education"],
-            # policy_state=kwargs["policy_state"],
+            policy_state=kwargs["policy_state"],
             period=kwargs["period"],
             choice=kwargs["lagged_choice"],
         )[job_offer_new]
@@ -46,7 +47,9 @@ def create_unobserved_state_specs(data_decision):
         disabled = kwargs["health_new"] == 2
         bad_health = kwargs["health_new"] == 1
         # If the health is observed, we set the weight to 1
-        health_weight = jax.lax.select(disabled, on_true=disability_prob, on_false=1.0)
+        health_weight = jax.lax.select(
+            disabled, on_true=disability_prob, on_false=jnp.ones_like(disability_prob)
+        )
         health_weight = jax.lax.select(
             bad_health, on_true=1 - disability_prob, on_false=health_weight
         )

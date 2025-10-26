@@ -152,7 +152,9 @@ def estimate_model(
         add_kwargs["scaling"] = om.ScalingOptions(method="bounds")
 
     if multistart:
-        add_kwargs["multistart"] = om.MultistartOptions(n_samples=5, seed=0)
+        add_kwargs["multistart"] = om.MultistartOptions(
+            n_samples=50, stopping_maxopt=2, seed=0
+        )
 
     result = om.minimize(
         fun=est_class.crit_func,

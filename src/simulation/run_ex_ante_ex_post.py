@@ -81,15 +81,16 @@ for sex_var, sex_label in enumerate(specs["sex_labels"]):
 
         # Initialize empty DataFrame
         res_df_ex_ante = pd.DataFrame()
+        res_df_ex_post = pd.DataFrame()
 
         df_base = None
-        # The order of this loop matters for the cv calculation, but also
-        # for re-using the solution in the ex post part below
+        # The order of this loop matters for the cv calculation
         for subj_unc in [False, True]:
             model_solution = None
+            # The order of this loop matters for the cv calculation
             for informed_label in ["Informed", "Uninformed"]:
                 informed = int(informed_label == "Informed")
-                table_col_prefix = f"{informed_label}_unc_{subj_unc}"
+                ex_ante_table_col_prefix = f"{informed_label}_unc_{subj_unc}"
                 print(
                     "Eval expectation: ",
                     subj_unc,
@@ -116,9 +117,9 @@ for sex_var, sex_label in enumerate(specs["sex_labels"]):
                 )
                 if (informed_label == "Informed") and (not subj_unc):
                     df_base = df.copy()
-                    res_df_ex_ante.loc[table_col_prefix, "_cv"] = 0.0
+                    res_df_ex_ante.loc[ex_ante_table_col_prefix, "_cv"] = 0.0
                 else:
-                    res_df_ex_ante.loc[table_col_prefix, "_cv"] = (
+                    res_df_ex_ante.loc[ex_ante_table_col_prefix, "_cv"] = (
                         calc_compensated_variation(
                             df_base=df_base,
                             df_cf=df,
@@ -131,77 +132,80 @@ for sex_var, sex_label in enumerate(specs["sex_labels"]):
                 res_df_ex_ante = add_overall_results(
                     result_df=res_df_ex_ante,
                     df_scenario=df,
-                    index=table_col_prefix,
+                    index=ex_ante_table_col_prefix,
                     pre_name="",
                     specs=specs,
                 )
                 if subj_unc:
-                    res_df_ex_ante.loc[table_col_prefix, "_sra_at_63"] = expected_SRA
-
-        res_df_ex_ante.to_csv(
-            sim_results_folder + f"ex_ante_expected_margins_{file_append}.csv"
-        )
-        print("Wrote ex ante results for: ", file_append, flush=True)
-
-        res_df_ex_post = pd.DataFrame()
-        for reform_scenario in ["no_reform", "reform"]:
-            for initial_informed, initial_informed_label in enumerate(
-                [
-                    "initial_uninf",
-                    "initial_inf",
-                ]
-            ):
-                if reform_scenario == "no_reform":
-                    SRA_at_63 = 67.0
-                else:
-                    SRA_at_63 = expected_SRA
-
-                table_column_prefix = f"{initial_informed_label}_{reform_scenario}"
-                print("Eval ex post: ", table_column_prefix, flush=True)
-                state = {
-                    **fixed_states,
-                    "informed": initial_informed,
-                }
-                initial_states = {
-                    key: np.ones(n_multiply) * value for key, value in state.items()
-                }
-
-                df, model_solution = solve_and_simulate_scenario(
-                    path_dict=path_dict,
-                    params=params,
-                    subj_unc=True,
-                    custom_resolution_age=None,
-                    SRA_at_start=67,
-                    SRA_at_retirement=SRA_at_63,
-                    announcement_age=None,
-                    model_name=model_name,
-                    initial_states=initial_states,
-                    df_exists=False,
-                    only_informed=False,
-                    solution_exists=True,
-                    sol_model_exists=True,
-                    model_solution=model_solution,
-                    util_type="add",
-                )
-
-                res_df_ex_post.loc[table_column_prefix, "_cv"] = (
-                    calc_compensated_variation(
-                        df_base=df_base,
-                        df_cf=df,
-                        params=params,
-                        specs=specs,
+                    res_df_ex_ante.loc[ex_ante_table_col_prefix, "_sra_at_63"] = (
+                        expected_SRA
                     )
-                )
 
-                # Use col_prefix as index, empty string as pre_name
-                res_df_ex_post = add_overall_results(
-                    result_df=res_df_ex_post,
-                    df_scenario=df,
-                    index=table_column_prefix,
-                    pre_name="",
-                    specs=specs,
-                )
+            for reform_scenario in ["no_reform", "reform"]:
+                for initial_informed, initial_informed_label in enumerate(
+                    [
+                        "initial_uninf",
+                        "initial_inf",
+                    ]
+                ):
+                    if reform_scenario == "no_reform":
+                        SRA_at_63 = 67.0
+                    else:
+                        SRA_at_63 = expected_SRA
+
+                    ex_post_table_column_prefix = (
+                        f"{initial_informed_label}_{reform_scenario}_unc_{subj_unc}"
+                    )
+                    print("Eval ex post: ", ex_post_table_column_prefix, flush=True)
+                    state = {
+                        **fixed_states,
+                        "informed": initial_informed,
+                    }
+                    initial_states = {
+                        key: np.ones(n_multiply) * value for key, value in state.items()
+                    }
+
+                    df, model_solution = solve_and_simulate_scenario(
+                        path_dict=path_dict,
+                        params=params,
+                        subj_unc=subj_unc,
+                        custom_resolution_age=None,
+                        SRA_at_start=67,
+                        SRA_at_retirement=SRA_at_63,
+                        announcement_age=None,
+                        model_name=model_name,
+                        initial_states=initial_states,
+                        df_exists=False,
+                        only_informed=None,  # Initial states important only
+                        solution_exists=None,
+                        sol_model_exists=True,
+                        model_solution=model_solution,
+                        util_type="add",
+                    )
+
+                    res_df_ex_post.loc[ex_post_table_column_prefix, "_cv"] = (
+                        calc_compensated_variation(
+                            df_base=df_base,
+                            df_cf=df,
+                            params=params,
+                            specs=specs,
+                        )
+                    )
+
+                    # # Use col_prefix as index, empty string as pre_name
+                    # res_df_ex_post = add_overall_results(
+                    #     result_df=res_df_ex_post,
+                    #     df_scenario=df,
+                    #     index=ex_post_table_column_prefix,
+                    #     pre_name="",
+                    #     specs=specs,
+                    # )
 
         res_df_ex_post.to_csv(
             sim_results_folder + f"ex_post_realized_margins_{file_append}.csv"
         )
+        print("Wrote ex post results for: ", file_append, flush=True)
+        res_df_ex_ante.to_csv(
+            sim_results_folder + f"ex_ante_expected_margins_{file_append}.csv"
+        )
+        print("Wrote ex ante results for: ", file_append, flush=True)

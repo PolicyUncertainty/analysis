@@ -54,6 +54,7 @@ def calc_pension_points_for_experience(
         SRA_at_retirement=SRA_at_retirement,
         actual_retirement_age=actual_retirement_age,
         experience_years=experience_years,
+        policy_state=policy_state,
         informed=informed,
         education=education,
         health=health,

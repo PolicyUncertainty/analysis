@@ -59,6 +59,7 @@ def generate_start_states_from_obs(
             health=health,
             model_specs=model_specs,
             education=education,
+            policy_state=initial_policy_state,
             period=jnp.array(-1, dtype=int),
             choice=lagged_choice,
         ).T

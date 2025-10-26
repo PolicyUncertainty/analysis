@@ -22,8 +22,7 @@ from model_code.transform_data_from_model import (
     calc_unobserved_choice_probs_for_df,
     load_scale_and_correct_data,
 )
-from set_paths import get_model_results_path
-from set_styles import get_figsize, set_colors
+from set_styles import get_figsize, set_colors, set_plot_defaults
 
 
 def create_fit_plots(
@@ -110,6 +109,12 @@ def create_fit_plots(
         save_folder=folder_name_plots,
     )
 
+    plot_life_cycle_choice_probs_paper(
+        specs=specs,
+        data_decision=data_decision,
+        save_folder=folder_name_plots,
+    )
+
     # print_choice_probs_by_group(df=data_decision, specs=specs, path_dict=path_dict)
 
     # plt.show()
@@ -148,6 +153,7 @@ def plot_job_offers(
                     params=params,
                     sex=sex_var,
                     health=np.array(specs["good_health_var"]),
+                    policy_state=np.array(0),  # dummy, not used in calculation
                     model_specs=specs,
                     education=edu_var,
                     period=period,
@@ -160,6 +166,7 @@ def plot_job_offers(
                     params=params,
                     sex=sex_var,
                     health=np.array(specs["bad_health_var"]),
+                    policy_state=np.array(0),  # dummy, not used in calculation
                     model_specs=specs,
                     education=edu_var,
                     period=period,
@@ -496,12 +503,93 @@ def plot_life_cycle_choice_probs_health(
         )
 
 
+def plot_life_cycle_choice_probs_paper(
+    specs,
+    data_decision,
+    save_folder,
+):
+    set_plot_defaults()
+    df_int = data_decision[data_decision["age"] < 75].copy()
+
+    # Get a single figsize for all plots
+    figsize = get_figsize(ncols=1, nrows=1)
+
+    for sex_var in specs["sex_grid"]:
+        sex_label = specs["sex_labels"][sex_var]
+
+        labels = specs["choice_labels"]
+
+        for choice in range(specs["n_choices"]):
+            # Skip men and part-time combination
+            men_and_part_time = (sex_var == 0) and (choice == 2)
+            if men_and_part_time:
+                continue
+
+            # Create a new figure for this choice
+            fig, ax = plt.subplots(figsize=figsize)
+
+            for edu_var in specs["education_grid"]:
+                edu_label = specs["education_labels"][edu_var]
+                data_subset = df_int[
+                    (df_int["education"] == edu_var) & (df_int["sex"] == sex_var)
+                ]
+                all_choice_shares_obs = (
+                    data_subset.groupby(["age"])["choice"]
+                    .value_counts(normalize=True)
+                    .unstack()
+                )
+
+                choice_shares_predicted = data_subset.groupby(["age"])[
+                    f"choice_{choice}"
+                ].mean()
+
+                lower_edu_label = edu_label.lower()
+
+                ax.plot(
+                    choice_shares_predicted,
+                    label=f"pred. {lower_edu_label}",
+                    color=JET_COLOR_MAP[edu_var],
+                )
+                ax.plot(
+                    all_choice_shares_obs[choice],
+                    label=f"obs. {lower_edu_label}",
+                    color=JET_COLOR_MAP[edu_var],
+                    linestyle="--",
+                )
+
+            ax.set_ylim([-0.05, 1.05])
+            ax.set_xlabel("Age")
+            ax.set_ylabel("Choice Share")
+
+            # Only add legend to retirement plots (choice == 0)
+            if choice == 0:
+                ax.legend(loc="upper left")
+
+            fig.tight_layout()
+
+            # Save with choice name in filename
+            choice_name = labels[choice].replace(" ", "_").lower()
+
+            paper_plots_folder = save_folder + "paper_fits/"
+            os.makedirs(paper_plots_folder, exist_ok=True)
+
+            fig.savefig(
+                paper_plots_folder
+                + f"observed_model_fit_{sex_label}_{choice_name}.png",
+                transparent=True,
+                dpi=300,
+            )
+            plt.close(fig)
+
+
 def plot_life_cycle_choice_probs(
     specs,
     data_decision,
     save_folder,
 ):
-    df_int = data_decision[data_decision["age"] < 75].copy()
+    df_int = data_decision[
+        (data_decision["age"] < 75) & (data_decision["lagged_choice"] != 0)
+    ].copy()
 
     choice_share_labels = ["Choice Share Men", "Choice Share Women"]
     for sex_var in specs["sex_grid"]:

@@ -11,25 +11,29 @@ from simulation.tables.baseline_expectation import (
     generate_baseline_expectation_table_for_all_types,
 )
 from simulation.tables.ex_post import generate_ex_post_table_for_all_types
-from simulation.tables.sra_increase_table import sra_increase_table
+from simulation.tables.sra_increase_table import sra_increase_table, welfare_table
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict)
 
 model_name = specs["model_name"]
+het_names = ["men", "women"]
+het_label = "gender"
 
 # Generate tables
-sra_increase_table(path_dict, model_name)
-generate_baseline_expectation_table_for_all_types(path_dict, specs, model_name)
-generate_ex_post_table_for_all_types(path_dict, specs, model_name)
+sra_increase_table(path_dict, model_name, het_names=het_names)
+# generate_baseline_expectation_table_for_all_types(path_dict, specs, model_name)
+# generate_ex_post_table_for_all_types(path_dict, specs, model_name)
 
 # Generate plots
 sra_increase_aggregate_plot(path_dict, model_name)
+welfare_table(path_dict, model_name)
 sra_increase_aggregate_plot_by_het(
     path_dict=path_dict,
-    fig_name="by_gender",
+    fig_name="by_" + het_label,
     model_name=model_name,
+    het_names=het_names,
 )
 # Generate and print table
 # announcement_timing_lc_plot(path_dict, model_name)

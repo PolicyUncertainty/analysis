@@ -36,7 +36,7 @@ disutil_unemployed_bad_men: 1.0
 # disutil_unemployed_above_58_men: 0.0
 
 # Partner retired dis-utility men
-disutil_partner_retired_men: 0.0
+disutil_partner_retired_men: -0.2
 
 # Full time work dis-utility women - Health specific
 disutil_ft_work_good_women: 3.0
@@ -66,7 +66,7 @@ disutil_unemployed_bad_women: 1.0
 # disutil_unemployed_disabled_women: 0.8
 
 # Partner retired dis-utility women
-disutil_partner_retired_women: 0.0
+disutil_partner_retired_women: -0.2
 
 # Children dis-utility
 disutil_children_ft_work_low: 0.2
@@ -76,12 +76,12 @@ disutil_children_pt_work_high: 0.3
 
 # Bequest
 bequest_scale_low_men: 3
-bequest_scale_high_men: 4
-bequest_scale_low_women: 1
-bequest_scale_high_women: 2
-kappa_high_men: 3
+bequest_scale_high_men: 3
+bequest_scale_low_women: 2
+bequest_scale_high_women: 3
+kappa_high_men: 0
 kappa_high_women: 0
-kappa_low_men: 3
+kappa_low_men: 0
 kappa_low_women: 0
 
 # Job separation params are set internally driven by data

@@ -101,7 +101,11 @@ def budget_constraint(
     )
 
     # Unemployed after 58. We use this rule to proxy the extended alg1 claim
-    was_old_age_unemployed = (lagged_choice == 1) & (age >= 58)
+    was_old_age_unemployed = lagged_choice == 1
+    # Option 1: Whole money from 58 onwards
+    was_old_age_unemployed *= age >= 58
+    # Option 2: Gradual increase from 50 to 58
+    # was_old_age_unemployed *= ((age - 50) / 8).clip(min=0, max=1)
     total_net_income += (
         child_benefits + was_old_age_unemployed * own_unemployemnt_benefits
     )

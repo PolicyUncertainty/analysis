@@ -33,7 +33,7 @@ from simulation.tables.debias_table import (
 seeed = 123
 model_name = specs["model_name"]
 util_type = specs["util_type"]
-sra_at_63 = 69.0
+sra_at_63 = 67.0
 
 base_label = "Baseline with Misinformed"
 cf_label = "Only Informed"
@@ -49,7 +49,6 @@ load_df_unbiased = None  # same as above
 params = pkl.load(
     open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
 )
-
 
 # Simulate baseline
 start_simulation_print(

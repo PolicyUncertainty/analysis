@@ -17,11 +17,54 @@ def generate_ex_post_table_for_all_types(path_dict, specs, model_name):
             )
             table_folder = path_dict["simulation_tables"] + model_name + "/"
             os.makedirs(table_folder, exist_ok=True)
-            table = generate_ex_post_table(res_df)
+            table = generate_ex_post_table_2(res_df)
+
             with open(
                 table_folder + f"ex_post_realized_margins_{file_append}.tex", "w"
             ) as f:
                 f.write(table)
+
+
+def generate_ex_post_table_2(res_df):
+    """Generate LaTeX table with welfare (CV) for SRA 67-70 under uncertainty scenarios."""
+
+    # Column order for ex post scenarios
+    col_order = [
+        "initial_inf_no_reform",
+        "initial_inf_reform",
+        "initial_uninf_no_reform",
+        "initial_uninf_reform",
+    ]
+    latex_lines = []
+    latex_lines.append("\\begin{tabular}{lcccc}")
+    latex_lines.append("    \\toprule")
+    latex_lines.append(
+        "    \\multirow{2}{*}{Policy Expectations} & "
+        "\\multicolumn{2}{c}{Initially Informed} & "
+        "\\multicolumn{2}{c}{Initially Misinformed} \\\\"
+    )
+    latex_lines.append("    \\cmidrule(lr){2-3} \\cmidrule(lr){4-5}")
+    latex_lines.append("     & No Reform & Reform & No Reform & Reform \\\\")
+    latex_lines.append("  {}   & (1) & (2) & (3) & (4) \\\\")
+    latex_lines.append("    \\midrule")
+
+    # No Uncertainty row
+    row_names = ["No Uncertainty", "Uncertainty"]
+    res_df_row_appends = ["unc_False", "unc_True"]
+
+    for row_name, row_append in zip(row_names, res_df_row_appends):
+        row_data = [row_name]
+        for column in col_order:
+            res_df_row_name = f"{column}_{row_append}"
+            cv_value = res_df.loc[res_df_row_name, "_cv"]
+            row_data.append(f"{cv_value:.2f}")
+        latex_lines.append("    " + " & ".join(row_data) + " \\\\")
+
+    latex_lines.append("    \\bottomrule")
+    latex_lines.append("\\end{tabular}")
+
+    latex_table = "\n".join(latex_lines)
+    return latex_table
 
 
 def generate_ex_post_table(res_df):

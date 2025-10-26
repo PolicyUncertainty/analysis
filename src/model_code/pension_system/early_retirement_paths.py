@@ -9,6 +9,7 @@ def calc_early_retirement_pension_points(
     SRA_at_retirement,
     actual_retirement_age,
     experience_years,
+    policy_state,
     informed,
     education,
     health,
@@ -39,6 +40,7 @@ def calc_early_retirement_pension_points(
     very_long_insured_bool = check_very_long_insured(
         retirement_age_difference=retirement_age_difference,
         experience_years=experience_years,
+        policy_state=policy_state,
         sex=sex,
         model_specs=model_specs,
     )
@@ -86,8 +88,12 @@ def calc_disability_pension_points(
     total_pension_points, actual_retirement_age, SRA_at_retirement, model_specs
 ):
     """Calculate the disability pension points."""
-    average_points_work_span = total_pension_points / (actual_retirement_age - 18)
+    # Average points per year worked. Ensure that we do not divide by more than 47 years.
+    # Otherwise disability gets worse past 65.
+    work_span_so_far = jnp.minimum(actual_retirement_age - 18, 47)
+    average_points_work_span = total_pension_points / work_span_so_far
     # Fill up for span 65 - 18 = 47
+    # total_work_span =  SRA_at_retirement - 18
     total_points_disability = 47 * average_points_work_span
     # Penalty years. If disability pension(then limit to 3 years) and only until 63
     penalty_years_disability = (63.0 - actual_retirement_age).clip(max=3.0, min=0.0)
@@ -96,10 +102,16 @@ def calc_disability_pension_points(
 
 
 def check_very_long_insured(
-    retirement_age_difference, experience_years, sex, model_specs
+    retirement_age_difference, experience_years, sex, policy_state, model_specs
 ):
     """Test if the individual qualifies for pension for very long insured
     (Rente besonders für langjährig Versicherte)."""
+
+    policy_state_value = (
+        model_specs["min_SRA"] + policy_state * model_specs["SRA_grid_size"]
+    )
+    # Get diff of SRA value to 67
+    sra_diff_67 = jnp.maximum(67 - policy_state_value, 0)
 
     experience_threshold = model_specs["experience_threshold_very_long_insured"][sex]
     enough_years = experience_years >= experience_threshold

@@ -27,7 +27,7 @@ from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 
 
 def process_gender_results(
-    i, df, result_dfs, het_spec_vars, het_var_name, df_base=None, params=None
+    i, df, result_dfs, het_spec_vars, het_var_name, df_base_cv, params=None
 ):
     """
     Process results for all gender categories (men, women, overall)
@@ -69,12 +69,12 @@ def process_gender_results(
                     specs=specs,
                 )
 
-        if df_base is not None:
+        if df_base_cv is not None:
             if het_name != "overall":
-                mask_base = df_base[het_var_name].isin(het_spec_vars[het_name])
-                df_base_het = df_base[mask_base].copy()
+                mask_base = df_base_cv[het_var_name].isin(het_spec_vars[het_name])
+                df_base_het = df_base_cv[mask_base].copy()
             else:
-                df_base_het = df_base.copy()
+                df_base_het = df_base_cv.copy()
 
             cv = calc_compensated_variation(
                 df_base=df_base_het,
@@ -124,7 +124,8 @@ load_df = None
 
 het_var_name = "sex"
 het_spec_vars = {"men": [0], "women": [1]}
-scenarios = ["unc", "no_unc"]
+# For welfare it is important that no_unc comes first
+scenarios = ["no_unc", "unc"]
 
 # Load params
 params = pkl.load(
@@ -139,8 +140,8 @@ result_dfs = create_result_dfs(
     sra_at_63=sra_at_63, scenarios=scenarios, het_spec_vars=het_spec_vars
 )
 
-# Initialize baseline storage
-
+# Initialize baseline cv overall
+df_base_cv = None
 for scenario_label in scenarios:
     if scenario_label == "unc":
         subj_unc = True
@@ -152,10 +153,6 @@ for scenario_label in scenarios:
 
     for i, sra in enumerate(sra_at_63):
         print("Start simulation for sra: ", sra, flush=True)
-        if subj_unc:
-            SRA_at_start = 67
-        else:
-            SRA_at_start = sra
 
         # ========== UNCERTAINTY SCENARIO ==========
         df, model_sol = solve_and_simulate_scenario(
@@ -166,7 +163,7 @@ for scenario_label in scenarios:
             announcement_age=None,
             only_informed=False,
             SRA_at_retirement=sra,
-            SRA_at_start=SRA_at_start,
+            SRA_at_start=67,
             model_name=model_name,
             df_exists=load_df,
             solution_exists=load_solutions,
@@ -182,11 +179,11 @@ for scenario_label in scenarios:
             result_dfs=result_dfs[scenario_label],
             het_spec_vars=het_spec_vars,
             het_var_name=het_var_name,
-            df_base=df_base,
+            df_base_cv=df_base_cv,
             params=params,
         )
-        if i == 0:
-            df_base = df.copy()
+        if (i == 0) and (scenario_label == "no_unc"):
+            df_base_cv = df.copy()
         else:
             del df
 

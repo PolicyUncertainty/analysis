@@ -3,10 +3,13 @@ import os
 import pandas as pd
 
 
-def sra_increase_table(path_dict, model_name):
+def sra_increase_table(path_dict, model_name, het_names=None):
     """Generate LaTeX table comparing SRA 67 vs 69 under uncertainty scenarios."""
+    if het_names is None:
+        het_labels = ["men", "women", "overall"]
+    else:
+        het_labels = het_names + ["overall"]
 
-    het_labels = ["men", "women", "overall"]
     # Load results
     result_dfs = {}
     for scenario in ["unc", "no_unc"]:
@@ -32,9 +35,10 @@ def sra_increase_table(path_dict, model_name):
         "pensions_excl_disability": "Annual Pension Income (excl. Disability)",
         "share_disability_pensions": "Share with Disability Pension",
         "pensions_share_below_63": "Share with Pension before 63",
+        "share_below_SRA": "Share Retiring below SRA",
+        "share_very_long_insured": "Share with Very Long Insured",
         "lifecycle_working_hours": "Annual Labor Supply (hrs)",
         "lifecycle_avg_wealth": "Average Financial Wealth",
-        "cv": "Compensated Variation (\\%)",
     }
 
     sections = {
@@ -49,6 +53,8 @@ def sra_increase_table(path_dict, model_name):
             "pensions_excl_disability",
             "share_disability_pensions",
             "pensions_share_below_63",
+            "share_below_SRA",
+            "share_very_long_insured",
         ],
         "Work Life ($<63$)": [
             "working_hours_below_63",
@@ -123,3 +129,65 @@ def sra_increase_table(path_dict, model_name):
             f.write(latex_table)
 
         print(f"Table saved to: {output_path}")
+
+
+def welfare_table(path_dict, model_name):
+    """Generate LaTeX table with welfare (CV) for SRA 67-70 under uncertainty scenarios."""
+
+    het_label = "overall"
+
+    # Load results
+    result_dfs = {}
+    for scenario in ["unc", "no_unc"]:
+        filename = f"sra_increase_aggregate_{scenario}_{het_label}.csv"
+        result_dfs[scenario] = pd.read_csv(
+            path_dict["sim_results"] + model_name + "/" + filename, index_col=0
+        )
+
+    # SRA levels
+    sra_levels = [67, 68, 69, 70]
+
+    latex_lines = []
+    latex_lines.append("\\begin{tabular}{lcccc}")
+    latex_lines.append("    \\toprule")
+    latex_lines.append("    Scenario & SRA 67 & SRA 68 & SRA 69 & SRA 70 \\\\")
+    latex_lines.append("    \\midrule")
+
+    # No Uncertainty row
+    row_data = ["No Uncertainty"]
+    no_unc_df = result_dfs["no_unc"]
+    # Reformat nans to 0
+    no_unc_df = no_unc_df.fillna(0)
+    for sra in sra_levels:
+        mask = no_unc_df["sra_at_63"] == sra
+        cv_value = no_unc_df.loc[mask, "cv"].values[0]
+        row_data.append(f"{cv_value:.2f}")
+    latex_lines.append("    " + " & ".join(row_data) + " \\\\")
+
+    # Uncertainty row
+    row_data = ["Uncertainty"]
+    unc_df = result_dfs["unc"]
+    # Reformat nans to 0
+    unc_df = unc_df.fillna(0)
+    for sra in sra_levels:
+        mask = unc_df["sra_at_63"] == sra
+        cv_value = unc_df.loc[mask, "cv"].values[0]
+        row_data.append(f"{cv_value:.2f}")
+    latex_lines.append("    " + " & ".join(row_data) + " \\\\")
+
+    latex_lines.append("    \\bottomrule")
+    latex_lines.append("\\end{tabular}")
+
+    latex_table = "\n".join(latex_lines)
+
+    # Save to file
+    table_dir = path_dict["simulation_tables"] + model_name + "/"
+    if not os.path.exists(table_dir):
+        os.makedirs(table_dir)
+
+    output_path = os.path.join(table_dir, "welfare_table_overall.tex")
+
+    with open(output_path, "w") as f:
+        f.write(latex_table)
+
+    print(f"Welfare table saved to: {output_path}")

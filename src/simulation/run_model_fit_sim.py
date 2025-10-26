@@ -14,7 +14,7 @@ model_name = specs["model_name"]
 util_type = specs["util_type"]
 
 load_df = None
-load_solution = None
+load_solution = False
 load_sol_model = True
 
 
@@ -22,6 +22,12 @@ params = pickle.load(
     open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
 )
 from estimation.struct_estimation.scripts.estimate_setup import generate_print_func
+
+# params["bequest_scale_low_men"] = 3
+# params["bequest_scale_high_men"] = 3
+# pickle.dump(
+#     params, open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "wb")
+# )
 
 generate_print_func(params.keys())(params)
 
@@ -38,10 +44,23 @@ generate_print_func(params.keys())(params)
 which_plots = "wc"
 
 from simulation.figures.simulated_model_fit import (
+    create_paper_wealth_fit,
     plot_choice_shares_single,
     plot_quantiles,
     plot_states,
 )
+
+if which_plots in ["p", "wc"]:
+    create_paper_wealth_fit(
+        path_dict=path_dict,
+        specs=specs,
+        params=params,
+        model_name=model_name,
+        load_df=load_df,
+        load_solution=load_solution,
+        load_sol_model=load_sol_model,
+        util_type=util_type,
+    )
 
 if which_plots in ["a", "c", "wc"]:
     plot_choice_shares_single(

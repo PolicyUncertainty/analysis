@@ -345,6 +345,7 @@ def _add_very_long_insured_claim(df, specs):
     df["very_long_insured"] = check_very_long_insured(
         retirement_age_difference=retirement_age_difference.values,
         experience_years=df["exp_years"].values,
+        policy_state=df["policy_state"].values,
         sex=df["sex"].values.astype(int),
         model_specs=specs,
     )

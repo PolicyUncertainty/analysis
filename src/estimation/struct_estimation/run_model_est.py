@@ -21,7 +21,7 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
     load_and_set_start_params,
 )
 
-model_name = "ftsc_lb2_women"
+model_name = "em3_women"
 params_to_estimate_names = (
     women_disutil_params
     + women_disability_params
@@ -33,7 +33,7 @@ edu_type = "all"
 util_type = "add"
 old_sample_only = False
 
-LOAD_LAST_ESTIMATE = False
+LOAD_LAST_ESTIMATE = True
 LOAD_SOL_MODEL = True
 SAVE_RESULTS = True
 USE_WEIGHTS = False
@@ -47,13 +47,24 @@ print(
 
 if LOAD_LAST_ESTIMATE:
     last_estimate = pkl.load(
-        open(paths_dict["struct_results"] + f"est_params_nf.pkl", "rb")
+        open(paths_dict["struct_results"] + f"est_params_informed_fixed3.pkl", "rb")
     )
 else:
     last_estimate = None
 
+# Get list of disability logit params and remove them
+disability_logit_params = [
+    name for name in last_estimate.keys() if "disability_logit" in name
+]
+
+for param_name in disability_logit_params:
+    last_estimate.pop(param_name)
+
 # Load start params
 start_params_all = load_and_set_start_params(paths_dict)
+for param_name in start_params_all.keys():
+    if "disability_logit" in param_name:
+        last_estimate[param_name] = start_params_all[param_name]
 
 # Run estimation
 estimation_results, end_params = estimate_model(

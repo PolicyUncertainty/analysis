@@ -78,11 +78,6 @@ def select_sim_policy_function_and_update_specs(
         if SRA_at_retirement == SRA_at_start:
             specs["policy_step_periods"] = np.array([])
         else:
-            if not subj_unc:
-                raise ValueError(
-                    "If there is no subjective uncertainty, the SRA at start should be the same as at retirement."
-                )
-
             if custom_resolution_age is None:
                 specs["resolution_age"] = specs["resolution_age_estimation"]
             else:

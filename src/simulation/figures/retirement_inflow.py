@@ -43,9 +43,12 @@ def plot_retirement_difference(
 
     inflow_shares_base = (
         df_base_plot["age"].value_counts(normalize=True).sort_index()
-    ).loc[ages_to_plot]
+    ).reindex(ages_to_plot, fill_value=0)
     inflow_shares_cf = (
-        df_cf_plot["age"].value_counts(normalize=True).sort_index().loc[ages_to_plot]
+        df_cf_plot["age"]
+        .value_counts(normalize=True)
+        .sort_index()
+        .reindex(ages_to_plot, fill_value=0)
     )
 
     # Make barplot with SRA diff on x-axis and inflow shares on y-axis
@@ -82,13 +85,13 @@ def plot_retirement_difference(
                 df_base_plot[mask_base]["age"]
                 .value_counts(normalize=True)
                 .sort_index()
-                .loc[ages_to_plot]
+                .reindex(ages_to_plot, fill_value=0)
             )
             inflow_shares_cf_subset = (
                 df_cf_plot[mask_cf]["age"]
                 .value_counts(normalize=True)
                 .sort_index()
-                .loc[ages_to_plot]
+                .reindex(ages_to_plot, fill_value=0)
             )
 
             # Plot bars

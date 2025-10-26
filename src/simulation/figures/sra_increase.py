@@ -18,7 +18,9 @@ def load_het_results(path_dict, het_names, model_name):
         for gender in het_names:
             filepath = (
                 path_dict["sim_results"]
-                + f"sra_increase_aggregate_{scenario}_{gender}_{model_name}.csv"
+                + model_name
+                + "/"
+                + f"sra_increase_aggregate_{scenario}_{gender}.csv"
             )
             results[scenario][gender] = pd.read_csv(filepath, index_col=0)
 
@@ -235,9 +237,7 @@ def sra_increase_aggregate_plot(path_dict, model_name):
         os.makedirs(plot_folder)
 
     # Load overall results
-    results = load_het_results(
-        path_dict, het_names=["overall", "men"], model_name=model_name
-    )
+    results = load_het_results(path_dict, het_names=["overall"], model_name=model_name)
 
     # Use overall results for plots
     df_unc = prepare_baseline_data(results["unc"]["overall"])

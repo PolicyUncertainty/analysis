@@ -4,26 +4,22 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from set_styles import get_figsize, set_colors
+from set_styles import get_figsize, set_colors, set_plot_defaults
 
 JET_COLOR_MAP, LINE_STYLES = set_colors()
 from model_code.transform_data_from_model import load_scale_and_correct_data
 from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 
 
-def plot_quantiles(
+def create_paper_wealth_fit(
     path_dict,
     specs,
     params,
     model_name,
-    quantiles,
-    sim_col_name,
-    obs_col_name,
-    file_name,
     load_df=True,
     load_solution=True,
     load_sol_model=True,
-    util_type="add"
+    util_type="add",
 ):
     # Simulate baseline with subjective belief
     data_sim, model_solved = solve_and_simulate_scenario(
@@ -38,7 +34,96 @@ def plot_quantiles(
         df_exists=load_df,
         solution_exists=load_solution,
         sol_model_exists=load_sol_model,
-        util_type=util_type
+        util_type=util_type,
+    )
+
+    data_sim = data_sim.reset_index()
+
+    data_decision = load_scale_and_correct_data(
+        path_dict=path_dict, model_class=model_solved
+    )
+
+    set_plot_defaults()
+    figsize = get_figsize(ncols=1, nrows=1)
+
+    fig, ax = plt.subplots(figsize=figsize)
+    max_wealth = 50
+    for edu_var, edu_label in enumerate(specs["education_labels"]):
+        mask_sim = data_sim["education"] == edu_var
+        data_sim_edu = data_sim[mask_sim]
+        mask_obs = data_decision["education"] == edu_var
+        data_decision_edu = data_decision[mask_obs]
+
+        ages = np.arange(specs["start_age"] + 1, 90)
+
+        average_wealth_sim = (
+            data_sim_edu.groupby("age")["assets_begin_of_period"].median().loc[ages]
+        ) * 10
+        average_wealth_obs = (
+            data_decision_edu.groupby("age")["assets_begin_of_period"]
+            .median()
+            .loc[ages]
+        ) * 10
+        max_wealth = max(
+            max_wealth,
+            average_wealth_sim.max(),
+            average_wealth_obs.max(),
+        )
+
+        lower_edu_label = edu_label.lower()
+
+        ax.plot(
+            ages,
+            average_wealth_sim,
+            label=f"sim. {lower_edu_label}",
+            color=JET_COLOR_MAP[edu_var],
+        )
+        ax.plot(
+            ages,
+            average_wealth_obs,
+            label=f"obs. {lower_edu_label}",
+            ls="--",
+            color=JET_COLOR_MAP[edu_var],
+        )
+
+    ax.legend(frameon=False)
+    ax.set_ylim([0, max_wealth * 1.4])
+
+    plot_folder = path_dict["simulation_plots"] + model_name + "/paper_plots/"
+    os.makedirs(plot_folder, exist_ok=True)
+
+    fig.savefig(plot_folder + f"wealth_fit.png", transparent=True, dpi=300)
+    # fig.savefig(plot_folder + f"{file_name}.pdf", dpi=300)
+
+
+def plot_quantiles(
+    path_dict,
+    specs,
+    params,
+    model_name,
+    quantiles,
+    sim_col_name,
+    obs_col_name,
+    file_name,
+    load_df=True,
+    load_solution=True,
+    load_sol_model=True,
+    util_type="add",
+):
+    # Simulate baseline with subjective belief
+    data_sim, model_solved = solve_and_simulate_scenario(
+        announcement_age=None,
+        path_dict=path_dict,
+        params=params,
+        subj_unc=True,
+        custom_resolution_age=None,
+        SRA_at_retirement=67,
+        SRA_at_start=67,
+        model_name=model_name,
+        df_exists=load_df,
+        solution_exists=load_solution,
+        sol_model_exists=load_sol_model,
+        util_type=util_type,
     )
 
     data_sim = data_sim.reset_index()
@@ -121,7 +206,7 @@ def plot_choice_shares_single(
     load_df=True,
     load_solution=True,
     load_sol_model=True,
-    util_type="add"
+    util_type="add",
 ):
     # alpha_belief = float(np.loadtxt(
     # path_dict["est_results"] + "exp_val_params.txt"))
@@ -139,7 +224,7 @@ def plot_choice_shares_single(
         df_exists=load_df,
         solution_exists=load_solution,
         sol_model_exists=load_sol_model,
-        util_type=util_type
+        util_type=util_type,
     )
 
     data_sim = data_sim.reset_index()
@@ -215,7 +300,7 @@ def plot_states(
     load_df=True,
     load_solution=True,
     load_sol_model=True,
-    util_type="add"
+    util_type="add",
 ):
     # Simulate baseline with subjective belief
     data_sim, model_solved = solve_and_simulate_scenario(
@@ -230,7 +315,7 @@ def plot_states(
         df_exists=load_df,
         solution_exists=load_solution,
         sol_model_exists=load_sol_model,
-        util_type=util_type
+        util_type=util_type,
     )
 
     data_sim = data_sim.reset_index()

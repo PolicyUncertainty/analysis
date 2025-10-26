@@ -15,7 +15,7 @@ path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict)
 
 # Set run specs
-model_name = "ftsc_lb"
+model_name = "em3"
 print(f"Running model: {model_name}")
 load_sol_model = True
 load_solution = None
@@ -25,7 +25,17 @@ util_type = "add"
 # params = pkl.load(
 #     open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
 # )
-# params = load_and_set_start_params(path_dict)
+
+# for param in params.keys():
+#     if "disutil" in param:
+# params[param] = 0.0
+# elif "job_finding" in param:
+#     params[param] = 10.0
+# elif "taste_shock" in param:
+#     params[param] = 0.1
+# elif "disability" in param:
+#     params[param] = 11
+
 
 from estimation.struct_estimation.map_params_to_current import merge_params
 

@@ -3,10 +3,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from set_styles import get_figsize, set_colors
+from set_styles import get_figsize, set_colors, set_plot_defaults
 
 
-def plot_partner_wage_results(path_dict, specs, show=False, save=False):
+def plot_partner_wage_results(
+    path_dict, specs, show=False, save=False, paper_plots=False
+):
     """Plot partner wage estimation results comparing observed vs estimated wages by age.
 
     Parameters
@@ -23,6 +25,7 @@ def plot_partner_wage_results(path_dict, specs, show=False, save=False):
     """
     # Get colors and labels
     JET_COLOR_MAP, _ = set_colors()
+    set_plot_defaults()
     edu_labels = specs["education_labels"]
     sex_labels = specs["sex_labels"]
     file_appends = ["men", "women"]
@@ -70,6 +73,7 @@ def plot_partner_wage_results(path_dict, specs, show=False, save=False):
         ax.legend(frameon=False)
         ax.set_xlabel("Age")
         ax.set_ylabel("Monthly Wage")
+        ax.set_ylim([500, 7000])
 
         if save:
             fig.savefig(
@@ -77,11 +81,12 @@ def plot_partner_wage_results(path_dict, specs, show=False, save=False):
                 + f"partner_wages_{file_appends[sex_val]}.png",
                 bbox_inches="tight",
             )
-            fig.savefig(
-                path_dict["first_step_plots"]
-                + f"partner_wages_{file_appends[sex_val]}.pdf",
-                bbox_inches="tight",
-            )
+            if not paper_plots:
+                fig.savefig(
+                    path_dict["first_step_plots"]
+                    + f"partner_wages_{file_appends[sex_val]}.pdf",
+                    bbox_inches="tight",
+                )
 
     if show:
         plt.show()

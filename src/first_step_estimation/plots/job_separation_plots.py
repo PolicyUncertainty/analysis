@@ -6,10 +6,10 @@ import pandas as pd
 from process_data.first_step_sample_scripts.create_job_sep_sample import (
     create_job_sep_sample,
 )
-from set_styles import set_colors, get_figsize
+from set_styles import get_figsize, set_colors, set_plot_defaults
 
 
-def plot_job_separations(path_dict, specs, show=False, save=False):
+def plot_job_separations(path_dict, specs, show=False, save=False, paper_plot=False):
     """Plot job separation probabilities.
 
     Parameters
@@ -22,7 +22,10 @@ def plot_job_separations(path_dict, specs, show=False, save=False):
         Whether to display plots
     save : bool, default False
         Whether to save plots to disk
+    paper_plot : bool, default False
+        Whether to create separate figures for paper
     """
+    set_plot_defaults()
     n_working_periods = 65 - specs["start_age"]
     working_ages = np.arange(n_working_periods) + specs["start_age"]
 
@@ -38,56 +41,89 @@ def plot_job_separations(path_dict, specs, show=False, save=False):
         df_job["age"].values,
     ]
 
-    fig, axs = plt.subplots(ncols=2, nrows=2, figsize=get_figsize(2, 2))
+    if paper_plot:
+        figs = []
+        axs = []
+        for _ in range(2):
+            fig, ax = plt.subplots()
+            figs.append(fig)
+            axs.append(ax)
+    else:
+        fig, axs = plt.subplots(ncols=2, figsize=get_figsize(ncols=2))
+
     colors, _ = set_colors()
 
-    obs_shares = df_job.groupby(["sex", "education", "good_health", "age"])[
-        "job_sep"
-    ].mean()
-    predicted_probs = df_job.groupby(["sex", "education", "good_health", "age"])[
+    obs_shares = df_job.groupby(["sex", "education", "age"])["job_sep"].mean()
+    predicted_probs = df_job.groupby(["sex", "education", "age"])[
         "predicted_probs"
     ].mean()
-    health_labels = ["Bad Health", "Good Health"]
-    for edu_var, edu_label in enumerate(specs["education_labels"]):
-        for sex_var, sex_label in enumerate(specs["sex_labels"]):
-            ax = axs[sex_var, edu_var]
-            for good_health in [0, 1]:
-                ax.plot(
-                    working_ages,
-                    predicted_probs.loc[(sex_var, edu_var, good_health, working_ages)],
-                    label=f"Est. {health_labels[good_health]}",
-                    color=colors[good_health],
-                )
-                ax.plot(
-                    working_ages,
-                    obs_shares.loc[(sex_var, edu_var, good_health, working_ages)],
-                    # label=f"Obs. {edu_label}; {health_labels[good_health]}",
-                    linestyle="--",
-                    color=colors[good_health],
-                )
 
-        axs[0, edu_var].set_title(f"{edu_label}")
-    axs[1, 0].set_xlabel("Age")
-    axs[1, 1].set_xlabel("Age")
+    # Create state labels combining education and health
+    state_labels = []
+    for edu_label in specs["education_labels"]:
+        for health_label in ["bad health", "good health"]:
+            state_labels.append(f"{edu_label.lower()}, {health_label}")
 
-    axs[0, 0].set_ylabel("Job Separation Probability")
-    axs[1, 0].set_ylabel("Job Separation Probability")
-    axs[0, 0].legend()
-    axs[0, 1].legend()
+    titles = []
+    for sex_var, sex_label in enumerate(specs["sex_labels"]):
+        if paper_plot:
+            ax = axs[sex_var]
+            sex_label_lower = sex_label.lower()
+            titles.append(f"job_sep_{sex_label_lower}")
+        else:
+            ax = axs[sex_var]
 
-    fig.tight_layout()
+        color_idx = 0
+        for edu_var, edu_label in enumerate(specs["education_labels"]):
+            ax.plot(
+                working_ages,
+                predicted_probs.loc[(sex_var, edu_var, working_ages)],
+                label=f"est. {state_labels[color_idx]}",
+                color=colors[color_idx],
+            )
+            ax.plot(
+                working_ages,
+                obs_shares.loc[(sex_var, edu_var, working_ages)],
+                label=f"obs. {state_labels[color_idx]}",
+                linestyle="--",
+                color=colors[color_idx],
+            )
+            color_idx += 1
 
-    if save:
-        fig.savefig(
-            path_dict["first_step_plots"] + "job_separations.pdf", bbox_inches="tight"
-        )
-        fig.savefig(
-            path_dict["first_step_plots"] + "job_separations.png",
-            bbox_inches="tight",
-            dpi=300,
-        )
+        ax.set_ylim([0, 0.08])
+        ax.legend(frameon=False)
+        ax.set_xlabel("Age")
+        ax.set_ylabel("Job Separation Probability")
+
+        if not paper_plot:
+            ax.set_title(f"{sex_label}")
+
+    if paper_plot:
+        for fig, title in zip(figs, titles):
+            fig.tight_layout()
+            fig.savefig(
+                path_dict["first_step_plots"] + f"{title}.png",
+                bbox_inches="tight",
+                dpi=300,
+            )
+    else:
+        fig.tight_layout()
+        if save:
+            fig.savefig(
+                path_dict["first_step_plots"] + "job_separations.pdf",
+                bbox_inches="tight",
+            )
+            fig.savefig(
+                path_dict["first_step_plots"] + "job_separations.png",
+                bbox_inches="tight",
+                dpi=300,
+            )
 
     if show:
         plt.show()
     else:
-        plt.close(fig)
+        if paper_plot:
+            for fig in figs:
+                plt.close(fig)
+        else:
+            plt.close(fig)

@@ -1,495 +1,195 @@
-# Description: This file contains plotting functions for family transition estimation results.
-import matplotlib.pyplot as plt
+import pickle as pkl
+
 import numpy as np
 import pandas as pd
+from matplotlib import pyplot as plt
 
-from set_styles import get_figsize, set_colors
+from first_step_estimation.estimation.family_estimation import (
+    calc_trans_mat_vectorized,
+    predicted_shares_for_sample,
+)
+from process_data.first_step_sample_scripts.create_partner_transition_sample import (
+    create_partner_transition_sample,
+)
+from set_styles import get_figsize, set_colors, set_plot_defaults
 
 
-def plot_family_transition_results(
-    path_dict, specs, show=False, save=False, est_df=None
+def plot_partner_shares(
+    paths_dict, specs, load_data=False, show=False, save=False, paper_plot=False
 ):
-    """Plot family transition estimation results including transition matrices and predicted vs empirical shares."""
+    """Plot predicted vs empirical partner state shares.
 
-    if est_df is None:
-        # Load the transition matrix results
-        full_df = pd.read_csv(
-            path_dict["first_step_results"] + "partner_transition_matrix.csv",
-            index_col=[0, 1, 2, 3, 4],
-        )
-    else:
-        full_df = est_df
-    # Check if full_df index corresponds to expected levels
-    expected_index_levels = [
-        "sex",
-        "education",
-        "age",
-        "partner_state",
-        "lead_partner_state",
+    Parameters
+    ----------
+    paths_dict : dict
+        Dictionary containing paths to data and output directories
+    specs : dict
+        Dictionary containing model specifications
+    load_data : bool, default False
+        Whether to load data from disk
+    show : bool, default False
+        Whether to display plots
+    save : bool, default False
+        Whether to save plots to disk
+    paper_plot : bool, default False
+        Whether to create separate figures for paper
+    """
+    param_name_states = ["single", "working_age", "retirement"]
+
+    est_data = create_partner_transition_sample(paths_dict, specs, load_data=load_data)
+    est_data = est_data[
+        (est_data["age"] >= specs["start_age"]) & (est_data["age"] <= specs["end_age"])
     ]
 
-    if list(full_df.index.names) != expected_index_levels:
-        raise ValueError(
-            f"Index levels of full_df do not match expected levels: {expected_index_levels}"
-        )
-    # Set up colors
-    colors, line_styles = set_colors()
-
-    # Determine relevant ages
     all_ages = np.arange(specs["start_age"], specs["end_age"])
+    old_ages = np.arange(specs["end_age_transition_estimation"] + 1, specs["end_age"])
 
-    # Labels
-    all_partner_labels = specs["partner_labels"]
     partner_state_vals = list(range(specs["n_partner_states"]))
 
-    col_count = 0
-    fig2, axs2 = plt.subplots(nrows=3, ncols=3, figsize=get_figsize(3, 3))
+    jet_color_map, _ = set_colors()
+    set_plot_defaults()
 
-    for sex_var, sex_label in enumerate(specs["sex_labels"]):
-        for edu_var, edu_label in enumerate(specs["education_labels"]):
-
-            # Plot transition matrix elements
-            for current_partner_state, partner_label in enumerate(all_partner_labels):
-                for next_partner_state, next_partner_label in enumerate(
-                    all_partner_labels
-                ):
-                    axs2[current_partner_state, next_partner_state].plot(
-                        all_ages,
-                        full_df.loc[
-                            (
-                                sex_label,
-                                edu_label,
-                                all_ages,
-                                partner_label,
-                                next_partner_label,
-                            )
-                        ].values,
-                        label=f"{sex_label}; {edu_label}",
-                        color=colors[col_count % len(colors)],
-                    )
-
-            # Note: Predicted vs empirical shares plotting would require additional data
-            # that's currently generated during estimation. This can be added later
-            # if the estimation functions are modified to save intermediate results.
-
-            col_count += 1
-
-    axs2[0, 0].legend()
-
-    # Set titles for transition matrix subplots
-    for i, from_state in enumerate(all_partner_labels):
-        for j, to_state in enumerate(all_partner_labels):
-            axs2[i, j].set_title(f"From {from_state} to {to_state}")
-            axs2[i, j].set_xlabel("Age")
-            axs2[i, j].set_ylabel("Transition Probability")
-
-    fig2.suptitle("Partner State Transition Probabilities by Age")
-    plt.tight_layout()
-
-    if save:
-        fig2.savefig(
-            path_dict["first_step_plots"] + "family_transition_matrices.pdf",
-            bbox_inches="tight",
-        )
-        fig2.savefig(
-            path_dict["first_step_plots"] + "family_transition_matrices.png",
-            bbox_inches="tight",
-            dpi=300,
-        )
-
-    if show:
-        plt.show()
-
-    plt.close(fig2)
-
-
-def plot_marriage_and_divorce(path_dict, specs, show=False, save=False):
-    """Illustrate the marriage and divorce rates by age.
-
-    Parameters
-    ----------
-    path_dict : dict
-        Dictionary containing paths to data and output directories
-    specs : dict
-        Dictionary containing model specifications
-    show : bool, default False
-        Whether to display plots
-    save : bool, default False
-        Whether to save plots to disk
-    """
-    start_age = specs["start_age"]
-    end_age = specs["end_age_transition_estimation"]
-    df = pd.read_pickle(
-        path_dict["first_step_data"] + "partner_transition_estimation_sample.pkl"
-    )
-    grouped_shares = df.groupby(["sex", "education", "age"])[
-        "partner_state"
-    ].value_counts(normalize=True)
-    partner_shares_obs = grouped_shares.loc[
-        (slice(None), slice(None), slice(None), slice(None))
-    ]
-
-    ages = np.arange(start_age, end_age + 1 - 10)
-    initial_dist = np.zeros(specs["n_partner_states"])
-
-    fig, axs = plt.subplots(
-        nrows=2,
-        ncols=specs["n_partner_states"],
-        figsize=get_figsize(2, specs["n_partner_states"]),
-    )
-    colors, _ = set_colors()
-
-    for partner_state, partner_label in enumerate(specs["partner_labels"]):
-        for sex_var, sex_label in enumerate(specs["sex_labels"]):
-            ax = axs[sex_var, partner_state]
-            for edu, edu_label in enumerate(specs["education_labels"]):
-                edu_shares_obs = partner_shares_obs.loc[
-                    (sex_var, edu, slice(None), partner_state)
-                ]
-                # Assign only single and married shares at start
-                initial_dist[0] = partner_shares_obs.loc[(sex_var, edu, 30, 0)]
-                initial_dist[1] = 1 - initial_dist[0]
-                shares_over_time = markov_simulator_family(
-                    initial_dist,
-                    specs["partner_trans_mat"][sex_var, edu, :, :, :],
-                    n_periods=len(ages),
-                )
-                relev_share = shares_over_time[:, partner_state]
-
-                # Use fifty percent as default if not available in the data. Just for plotting
-                share_data_container = pd.Series(data=0.0, index=ages, dtype=float)
-                share_data_container.update(edu_shares_obs)
-
-                ax.plot(
-                    ages,
-                    relev_share,
-                    color=colors[edu],
-                    label=f"Est. {edu_label}",
-                )
-                ax.plot(
-                    ages,
-                    share_data_container,
-                    color=colors[edu],
-                    linestyle="--",
-                    label=f"Obs. {edu_label}",
-                )
-                ax.set_ylim([0, 1])
-
-            ax.set_title(f"{sex_label}; {partner_label}")
-
-    axs[0, 0].legend(loc="upper center")
-    plt.tight_layout()
-
-    if save:
-        fig.savefig(
-            path_dict["first_step_plots"] + "partner_lifecycle.pdf", bbox_inches="tight"
-        )
-        fig.savefig(
-            path_dict["first_step_plots"] + "partner_lifecycle.png",
-            bbox_inches="tight",
-            dpi=300,
-        )
-
-    if show:
-        plt.show()
+    if paper_plot:
+        figs = []
+        axs_list = []
+        for _ in range(6):  # 2 sexes × 3 partner states
+            fig, ax = plt.subplots()
+            figs.append(fig)
+            axs_list.append(ax)
     else:
-        plt.close(fig)
+        fig, axs = plt.subplots(2, 3, figsize=get_figsize(2, 3))
 
-
-def markov_simulator_family(initial_dist, trans_probs, n_periods=None):
-    """Simulate a Markov process for family transitions."""
-    if n_periods is None:
-        n_periods = trans_probs.shape[0]
-    else:
-        # Check if n_periods is integer
-        if not isinstance(n_periods, int):
-            raise ValueError("n_periods must be an integer.")
-
-    n_states = initial_dist.shape[0]
-    final_dist = np.zeros((n_periods, n_states))
-    final_dist[0, :] = initial_dist
-
-    for t in range(n_periods - 1):
-        current_dist = final_dist[t, :]
-        for state in range(n_states - 1):
-            final_dist[t + 1, state] = current_dist @ trans_probs[t, :, state]
-
-        final_dist[t + 1, -1] = 1 - final_dist[t + 1, :-1].sum()
-
-    return final_dist
-    plt.close(fig2)
-
-
-def plot_predicted_vs_empirical_shares(
-    path_dict,
-    specs,
-    predicted_shares_data,
-    empirical_shares_data,
-    show=False,
-    save=False,
-):
-    """Plot predicted vs empirical partner state shares by age.
-
-    This function is designed to be called from the estimation module
-    when the intermediate data is available.
-    """
-
-    # Set up colors
-    colors, line_styles = set_colors()
-
-    # Determine relevant ages
-    all_ages = np.arange(specs["start_age"], specs["end_age"])
-    partner_state_vals = list(range(specs["n_partner_states"]))
-
-    fig, axs = plt.subplots(nrows=2, ncols=2, figsize=get_figsize(2, 2))
-    col_count = 0
-
+    titles = []
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
+        for i in range(3):
+            sex_label_lower = sex_label.lower()
+            state_label = param_name_states[i]
+            titles.append(f"partner_lifecycle_{sex_label_lower}_{state_label}")
         for edu_var, edu_label in enumerate(specs["education_labels"]):
-            ax = axs[col_count // 2, col_count % 2]
+            df = est_data[
+                (est_data["sex"] == sex_var) & (est_data["education"] == edu_var)
+            ].copy()
 
-            pred_shares = predicted_shares_data[(sex_label, edu_label)]
-            emp_shares = empirical_shares_data[(sex_label, edu_label)]
+            # Calculate empirical shares
+            empirical_counts = df.groupby("age")["partner_state"].value_counts()
+            mulitindex = pd.MultiIndex.from_product(
+                [all_ages, [0, 1, 2]], names=["age", "partner_state"]
+            )
+            empirical_counts = empirical_counts.reindex(mulitindex, fill_value=0)
+            n_obs = empirical_counts.groupby("age").transform("sum")
+            empirical_shares = empirical_counts / n_obs
+            # We manipulate the empirical shares and assign to all ages above end_age_transition_estimation
+            # and older the empirical single share of the end_age_transition_estimation. Marriage shares,
+            # we set to zero and put the whole share to retirement.
+            empirical_shares.loc[(old_ages, 0)] = empirical_shares.loc[
+                (specs["end_age_transition_estimation"], 0)
+            ]
+            empirical_shares.loc[(old_ages, 1)] = 0.0
+            empirical_shares.loc[(old_ages, 2)] = (
+                1 - empirical_shares.loc[(specs["end_age_transition_estimation"], 0)]
+            )
 
-            for current_partner_state in partner_state_vals:
-                # Predicted shares (solid line)
+            params = pkl.load(
+                open(
+                    paths_dict["first_step_results"]
+                    + f"result_{sex_label}_{edu_label}.pkl",
+                    "rb",
+                )
+            )
+
+            initial_shares = empirical_shares.loc[
+                (all_ages[0], partner_state_vals)
+            ].values
+
+            sra_weights = df.groupby("age")["SRA"].value_counts(normalize=True)
+            unique_sras = df["SRA"].unique()
+            sra_weights_dict = {
+                sra: sra_weights.xs(sra, level="SRA")
+                .reindex(all_ages, fill_value=0)
+                .values
+                for sra in unique_sras
+            }
+            pred_shares = predicted_shares_for_sample(
+                params, all_ages, initial_shares, sra_weights_dict
+            )
+
+            for i in range(3):
+                if paper_plot:
+                    plot_idx = sex_var * 3 + i
+                    ax = axs_list[plot_idx]
+
+                else:
+                    ax = axs[sex_var, i]
+
+                edu_label_lower = edu_label.lower()
                 ax.plot(
                     all_ages,
-                    pred_shares.loc[(all_ages, current_partner_state)],
-                    label=f"Pred: {current_partner_state}",
-                    color=colors[current_partner_state % len(colors)],
-                    linestyle="-",
+                    empirical_shares.xs(i, level="partner_state"),
+                    label=f"obs. {edu_label_lower}",
+                    ls="--",
+                    color=jet_color_map[edu_var],
                 )
-                # Empirical shares (dashed line)
                 ax.plot(
                     all_ages,
-                    emp_shares.loc[(all_ages, current_partner_state)],
-                    label=f"Emp: {current_partner_state}",
-                    color=colors[current_partner_state % len(colors)],
-                    linestyle="--",
+                    pred_shares[:, i],
+                    label=f"pred. {edu_label_lower}",
+                    color=jet_color_map[edu_var],
                 )
-
-            ax.set_title(f"{sex_label}, {edu_label}")
-            ax.set_xlabel("Age")
-            ax.set_ylabel("Share")
-            ax.legend()
-            col_count += 1
-
-    fig.suptitle("Predicted vs Empirical Partner State Shares")
-    plt.tight_layout()
-
-    if save:
-        fig.savefig(
-            path_dict["first_step_plots"] + "family_predicted_vs_empirical.pdf",
-            bbox_inches="tight",
-        )
-        fig.savefig(
-            path_dict["first_step_plots"] + "family_predicted_vs_empirical.png",
-            bbox_inches="tight",
-            dpi=300,
-        )
-
-    if show:
-        plt.show()
-
-    plt.close(fig)
-
-
-def plot_children(path_dict, specs, show=False, save=False):
-    """Plot the number of children by age.
-
-    Parameters
-    ----------
-    path_dict : dict
-        Dictionary containing paths to data and output directories
-    specs : dict
-        Dictionary containing model specifications
-    show : bool, default False
-        Whether to display plots
-    save : bool, default False
-        Whether to save plots to disk
-    """
-    # Calculate the number of children in the household for each individual conditional
-    # on sex, education and age bin.
-    df = pd.read_pickle(
-        path_dict["first_step_data"] + "partner_transition_estimation_sample.pkl"
-    )
-
-    start_age = specs["start_age"]
-    end_age = specs["end_age"]
-    df = df[df["age"] <= end_age]
-
-    df["has_partner"] = (df["partner_state"] > 0).astype(int)
-
-    # calculate average hours worked by partner by age, sex and education
-    cov_list = ["sex", "education", "has_partner", "age"]
-    nb_children_data = df.groupby(cov_list)["children"].mean()
-
-    nb_children_est = specs["children_by_state"]
-    ages = np.arange(start_age, end_age + 1)
-
-    fig, axs = plt.subplots(ncols=4, figsize=get_figsize(ncols=4))
-    i = 0
-
-    colors, _ = set_colors()
-    sex_labels = ["Men", "Women"]
-    partner_labels = ["Single", "Partnered"]
-
-    for sex, sex_label in enumerate(sex_labels):
-        for has_partner, partner_label in enumerate(partner_labels):
-            ax = axs[i]
-            i += 1
-            for edu, edu_label in enumerate(specs["education_labels"]):
-                nb_children_data_edu = nb_children_data.loc[
-                    (sex, edu, has_partner, slice(None))
-                ]
-                nb_children_container = pd.Series(data=0, index=ages, dtype=float)
-                nb_children_container.update(nb_children_data_edu)
-
-                nb_children_est_edu = nb_children_est[sex, edu, has_partner, :]
-                ax.plot(
-                    ages,
-                    nb_children_container,
-                    color=colors[edu],
-                    linestyle="--",
-                    label=f"Obs. {edu_label}",
-                )
-                ax.plot(
-                    ages,
-                    nb_children_est_edu,
-                    color=colors[edu],
-                    label=f"Est. {edu_label}",
-                )
-
-            ax.set_ylim([0, 2.5])
-            ax.set_title(f"{sex_label}, {partner_label}")
-
-    axs[0].legend()
-    plt.tight_layout()
-
-    if save:
-        fig.savefig(path_dict["first_step_plots"] + "children.pdf", bbox_inches="tight")
-        fig.savefig(
-            path_dict["first_step_plots"] + "children.png", bbox_inches="tight", dpi=300
-        )
-
-    if show:
-        plt.show()
-    else:
-        plt.close(fig)
-
-
-def plot_marriage_and_divorce(path_dict, specs, show=False, save=False):
-    """Illustrate the marriage and divorce rates by age.
-
-    Parameters
-    ----------
-    path_dict : dict
-        Dictionary containing paths to data and output directories
-    specs : dict
-        Dictionary containing model specifications
-    show : bool, default False
-        Whether to display plots
-    save : bool, default False
-        Whether to save plots to disk
-    """
-    start_age = specs["start_age"]
-    end_age = specs["end_age"]
-    df = pd.read_pickle(
-        path_dict["first_step_data"] + "partner_transition_estimation_sample.pkl"
-    )
-    grouped_shares = df.groupby(["sex", "education", "age"])[
-        "partner_state"
-    ].value_counts(normalize=True)
-    partner_shares_obs = grouped_shares.loc[
-        (slice(None), slice(None), slice(None), slice(None))
-    ]
-
-    ages = np.arange(start_age, end_age + 1 - 10)
-    initial_dist = np.zeros(specs["n_partner_states"])
-
-    fig, axs = plt.subplots(
-        nrows=2,
-        ncols=specs["n_partner_states"],
-        figsize=get_figsize(2, specs["n_partner_states"]),
-    )
-    colors, _ = set_colors()
-
-    for partner_state, partner_label in enumerate(specs["partner_labels"]):
-        for sex_var, sex_label in enumerate(specs["sex_labels"]):
-            ax = axs[sex_var, partner_state]
-            for edu, edu_label in enumerate(specs["education_labels"]):
-                edu_shares_obs = partner_shares_obs.loc[
-                    (sex_var, edu, slice(None), partner_state)
-                ]
-                # Assign only single and married shares at start
-                initial_dist[0] = partner_shares_obs.loc[(sex_var, edu, 30, 0)]
-                initial_dist[1] = 1 - initial_dist[0]
-                shares_over_time = markov_simulator_family(
-                    initial_dist,
-                    specs["partner_trans_mat"][sex_var, edu, :, :, :],
-                    n_periods=len(ages),
-                )
-                relev_share = shares_over_time[:, partner_state]
-
-                # Use fifty percent as default if not available in the data. Just for plotting
-                share_data_container = pd.Series(data=0.0, index=ages, dtype=float)
-                share_data_container.update(edu_shares_obs)
-
-                ax.plot(
-                    ages,
-                    relev_share,
-                    color=colors[edu],
-                    label=f"Est. {edu_label}",
-                )
-                ax.plot(
-                    ages,
-                    share_data_container,
-                    color=colors[edu],
-                    linestyle="--",
-                    label=f"Obs. {edu_label}",
-                )
+                ax.legend(frameon=False)
                 ax.set_ylim([0, 1])
+                ax.set_xlabel("Age")
+                ax.set_ylabel("Share")
 
-            ax.set_title(f"{sex_label}; {partner_label}")
+                if not paper_plot:
+                    ax.set_title(f"{sex_label}, {param_name_states[i].capitalize()}")
 
-    axs[0, 0].legend(loc="upper center")
-    plt.tight_layout()
-
-    if save:
-        fig.savefig(
-            path_dict["first_step_plots"] + "partner_lifecycle.pdf", bbox_inches="tight"
-        )
-        fig.savefig(
-            path_dict["first_step_plots"] + "partner_lifecycle.png",
-            bbox_inches="tight",
-            dpi=300,
-        )
+    if paper_plot:
+        for fig, title in zip(figs, titles):
+            fig.tight_layout()
+            fig.savefig(
+                paths_dict["first_step_plots"] + f"{title}.png",
+                bbox_inches="tight",
+                dpi=300,
+            )
+    else:
+        fig.tight_layout()
+        if save:
+            fig.savefig(
+                paths_dict["first_step_plots"] + "partner_lifecycle.pdf",
+                bbox_inches="tight",
+            )
+            fig.savefig(
+                paths_dict["first_step_plots"] + "partner_lifecycle.png",
+                bbox_inches="tight",
+                dpi=300,
+            )
 
     if show:
         plt.show()
     else:
-        plt.close(fig)
+        if paper_plot:
+            for fig in figs:
+                plt.close(fig)
+        else:
+            plt.close(fig)
 
 
-def markov_simulator_family(initial_dist, trans_probs, n_periods=None):
-    """Simulate a Markov process for family transitions."""
-    if n_periods is None:
-        n_periods = trans_probs.shape[0]
-    else:
-        # Check if n_periods is integer
-        if not isinstance(n_periods, int):
-            raise ValueError("n_periods must be an integer.")
+def plot_trans_probs(ages, sra, params, param_state_names):
+    trans_probs = calc_trans_mat_vectorized(
+        params=params,
+        age=ages,
+        sra=sra,
+    )
 
-    n_states = initial_dist.shape[0]
-    final_dist = np.zeros((n_periods, n_states))
-    final_dist[0, :] = initial_dist
+    n_states = len(param_state_names)
+    fig, axs = plt.subplots(n_states, n_states)
+    for current_state, current_state_label in enumerate(param_state_names):
+        axs[current_state, 0].set_ylabel(f"Prob. from {current_state_label}")
+        for next_state, next_state_label in enumerate(param_state_names):
+            axs[current_state, next_state].plot(
+                ages, trans_probs[:, current_state, next_state]
+            )
 
-    for t in range(n_periods - 1):
-        current_dist = final_dist[t, :]
-        for state in range(n_states - 1):
-            final_dist[t + 1, state] = current_dist @ trans_probs[t, :, state]
-
-        final_dist[t + 1, -1] = 1 - final_dist[t + 1, :-1].sum()
-
-    return final_dist
+    for next_state, next_state_label in enumerate(param_state_names):
+        axs[-1, next_state].set_xlabel(f"Age")
+        axs[0, next_state].set_title(f"to {next_state_label}")

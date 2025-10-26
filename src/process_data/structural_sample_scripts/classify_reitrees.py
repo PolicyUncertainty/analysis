@@ -7,16 +7,16 @@ def add_very_long_insured_classification(df, path_dict, specs):
     Add a column to the DataFrame indicating whether the individual is classified as
     'very long insured' based on their retirement age and experience years.
     """
-    fresh_mask = (df["choice"] == 0) & (df["lagged_choice"] != 0)
+    not_retired_mask = df["lagged_choice"] != 0
 
     df["very_long_insured"] = False
 
-    df_fresh = df.loc[fresh_mask].copy()
+    df_fresh = df.loc[not_retired_mask].copy()
     retirement_age_difference = df_fresh["policy_state_value"] - df_fresh["age"]
 
     specs = add_very_long_insured_specs(specs, path_dict)
 
-    df.loc[fresh_mask, "very_long_insured"] = check_very_long_insured(
+    df.loc[not_retired_mask, "very_long_insured"] = check_very_long_insured(
         retirement_age_difference=retirement_age_difference.values,
         experience_years=df_fresh["experience"].values,
         sex=df_fresh["sex"].values.astype(int),

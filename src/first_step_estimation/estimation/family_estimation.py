@@ -2,7 +2,6 @@
 # For each sex, education level and age bin (10 years), we estimate P(partner_state | lagged_partner_state) non-parametrically.
 import pickle as pkl
 
-import matplotlib.pyplot as plt
 import numpy as np
 import optimagic as om
 import pandas as pd
@@ -22,7 +21,6 @@ def estimate_partner_transitions(paths_dict, specs, load_data=True):
     all_ages = np.arange(specs["start_age"], specs["end_age"])
     old_ages = np.arange(specs["end_age_transition_estimation"] + 1, specs["end_age"])
 
-    param_name_states = ["single", "working_age", "retirement"]
     partner_state_vals = list(range(specs["n_partner_states"]))
 
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
@@ -65,28 +63,6 @@ def estimate_partner_transitions(paths_dict, specs, load_data=True):
             params_combined = {**params_step1, **params_step2}
 
             print(calc_exp_ret_age_difference(params_combined, specs, initial_shares))
-            print(params_combined)
-
-            plot_trans_probs(
-                all_ages,
-                sra=67,
-                params=params_combined,
-                param_state_names=param_name_states,
-            )
-
-            sra_weights = df.groupby("age")["SRA"].value_counts(normalize=True)
-            unique_sras = df["SRA"].unique()
-            sra_weights_dict = {
-                sra: sra_weights.xs(sra, level="SRA")
-                .reindex(all_ages, fill_value=0)
-                .values
-                for sra in unique_sras
-            }
-            pred_shares = predicted_shares_for_sample(
-                params_combined, all_ages, initial_shares, sra_weights_dict
-            )
-            plot_predicted_vs_empirical_shares(all_ages, empirical_shares, pred_shares)
-
             pkl.dump(
                 params_combined,
                 open(
@@ -373,27 +349,6 @@ def exp_val_single_to_working_age(params, age):
     return val
 
 
-def plot_trans_probs(ages, sra, params, param_state_names):
-    trans_probs = calc_trans_mat_vectorized(
-        params=params,
-        age=ages,
-        sra=sra,
-    )
-
-    n_states = len(param_state_names)
-    fig, axs = plt.subplots(n_states, n_states)
-    for current_state, current_state_label in enumerate(param_state_names):
-        axs[current_state, 0].set_ylabel(f"Prob. from {current_state_label}")
-        for next_state, next_state_label in enumerate(param_state_names):
-            axs[current_state, next_state].plot(
-                ages, trans_probs[:, current_state, next_state]
-            )
-
-    for next_state, next_state_label in enumerate(param_state_names):
-        axs[-1, next_state].set_xlabel(f"Age")
-        axs[0, next_state].set_title(f"to {next_state_label}")
-
-
 def calc_exp_ret_age_difference(params, specs, initial_shares):
     all_ages = np.arange(specs["start_age"], specs["end_age"])
     pred_shares_67 = predict_shares_for_sra(params, all_ages, 67, initial_shares)
@@ -411,19 +366,6 @@ def calc_exp_ret_age(pred_shares, all_ages):
         (partnered_shares[1:, 1] - partnered_shares[:-1, 1]) * all_ages[1:]
     )
     return ret_age
-
-
-def plot_predicted_vs_empirical_shares(all_ages, empirical_shares, pred_shares):
-    fig, axs = plt.subplots(1, 3, figsize=(15, 5))
-    for i in range(3):
-        axs[i].plot(
-            all_ages, empirical_shares.xs(i, level="partner_state"), label="Empirical"
-        )
-        axs[i].plot(all_ages, pred_shares[:, i], label="Predicted")
-        axs[i].set_title(f"Partner State {i}")
-        axs[i].legend()
-        axs[i].set_ylim([0, 1])
-    # plt.show()
 
 
 def predicted_shares_for_sample(params, est_ages, start_shares, sra_weights):

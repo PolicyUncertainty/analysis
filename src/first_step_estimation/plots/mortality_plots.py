@@ -3,10 +3,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from set_styles import set_colors, get_figsize
+from set_styles import get_figsize, set_colors, set_plot_defaults
 
 
-def plot_mortality(path_dict, specs, show=False, save=False):
+def plot_mortality(path_dict, specs, show=False, save=False, paper_plot=False):
     """Plot mortality characteristics.
 
     Parameters
@@ -19,7 +19,10 @@ def plot_mortality(path_dict, specs, show=False, save=False):
         Whether to display plots
     save : bool, default False
         Whether to save plots to disk
+    paper_plot : bool, default False
+        Whether to create separate figures for paper
     """
+    set_plot_defaults()
     # Load the data
     # Mortality estimation sample
     df = pd.read_pickle(
@@ -71,13 +74,30 @@ def plot_mortality(path_dict, specs, show=False, save=False):
                 )
 
     # Create plots showing survival probabilities
-    fig, axs = plt.subplots(nrows=2, ncols=2, figsize=get_figsize(2, 2))
+    if paper_plot:
+        figs = []
+        axs = []
+        for _ in range(4):
+            fig, ax = plt.subplots()
+            figs.append(fig)
+            axs.append(ax)
+    else:
+        fig, axs = plt.subplots(nrows=2, ncols=2, figsize=get_figsize(2, 2))
 
+    titles = []
+    i = 0
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
         for health, health_label in enumerate(
             specs["health_labels"][:2]
         ):  # Only observed health states
-            ax = axs[sex_var, health]
+            if paper_plot:
+                ax = axs[i]
+                sex_label_lower = sex_label.lower()
+                health_label_lower = health_label.lower().replace(" ", "_")
+                titles.append(f"mortality_{sex_label_lower}_{health_label_lower}")
+                i += 1
+            else:
+                ax = axs[sex_var, health]
 
             for edu_var, edu_label in enumerate(specs["education_labels"]):
                 mask = (
@@ -97,30 +117,43 @@ def plot_mortality(path_dict, specs, show=False, save=False):
                         linewidth=2,
                     )
 
-            ax.set_title(f"{sex_label}, {health_label}")
             ax.set_xlabel("Age")
             ax.set_ylabel("Survival Probability")
             ax.set_ylim(0, 1)
-            ax.legend()
-            ax.grid(True, alpha=0.3)
+            ax.legend(frameon=False)
 
-    fig.tight_layout()
+            if not paper_plot:
+                ax.set_title(f"{sex_label}, {health_label}")
 
-    if save:
-        fig.savefig(
-            path_dict["first_step_plots"] + "mortality_survival.pdf",
-            bbox_inches="tight",
-        )
-        fig.savefig(
-            path_dict["first_step_plots"] + "mortality_survival.png",
-            bbox_inches="tight",
-            dpi=300,
-        )
+    if paper_plot:
+        for fig, title in zip(figs, titles):
+            fig.tight_layout()
+            fig.savefig(
+                path_dict["first_step_plots"] + f"{title}.png",
+                bbox_inches="tight",
+                dpi=300,
+            )
+    else:
+        fig.tight_layout()
+        if save:
+            fig.savefig(
+                path_dict["first_step_plots"] + "mortality_survival.pdf",
+                bbox_inches="tight",
+            )
+            fig.savefig(
+                path_dict["first_step_plots"] + "mortality_survival.png",
+                bbox_inches="tight",
+                dpi=300,
+            )
 
     if show:
         plt.show()
     else:
-        plt.close(fig)
+        if paper_plot:
+            for fig in figs:
+                plt.close(fig)
+        else:
+            plt.close(fig)
 
 
 def plot_mortality_hazard_ratios(path_dict, specs, show=False, save=False):
@@ -147,7 +180,9 @@ def plot_mortality_hazard_ratios(path_dict, specs, show=False, save=False):
 
     for sex_var, (param_file, sex_label) in enumerate(zip(param_files, sex_labels)):
         try:
-            df_params = pd.read_csv(path_dict["first_step_results"] + param_file, index_col=0)
+            df_params = pd.read_csv(
+                path_dict["first_step_results"] + param_file, index_col=0
+            )
 
             ax = axs[sex_var]
 

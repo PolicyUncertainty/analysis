@@ -2,12 +2,13 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from set_styles import set_colors, get_figsize
+
+from set_styles import get_figsize, set_colors, set_plot_defaults
 
 
-def plot_healthy_unhealthy(path_dict, specs, show=False, save=False):
+def plot_healthy_unhealthy(path_dict, specs, show=False, save=False, paper_plot=False):
     """Illustrate the health rates by age (actual vs. estimated by markov chain).
-    
+
     Parameters
     ----------
     path_dict : dict
@@ -16,9 +17,12 @@ def plot_healthy_unhealthy(path_dict, specs, show=False, save=False):
         Dictionary containing model specifications
     show : bool, default False
         Whether to display plots
-    save : bool, default False  
+    save : bool, default False
         Whether to save plots to disk
+    paper_plot : bool, default False
+        Whether to create separate figures for paper
     """
+    set_plot_defaults()
     # Load the data and define age range
     start_age = specs["start_age"]
     end_age = specs["end_age"]
@@ -56,11 +60,26 @@ def plot_healthy_unhealthy(path_dict, specs, show=False, save=False):
     initial_dist = np.zeros(specs["n_all_health_states"])
 
     # Create the plot
-    fig, axs = plt.subplots(ncols=2, figsize=get_figsize(ncols=2))
+    if paper_plot:
+        figs = []
+        axs = []
+        for _ in range(2):
+            fig, ax = plt.subplots()
+            figs.append(fig)
+            axs.append(ax)
+    else:
+        fig, axs = plt.subplots(ncols=2, figsize=get_figsize(ncols=2))
+
     colors, _ = set_colors()
-    
+    titles = []
+
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
         ax = axs[sex_var]
+
+        if paper_plot:
+            sex_label_lower = sex_label.lower()
+            titles.append(f"health_states_{sex_label_lower}")
+
         for edu_var, edu_label in enumerate(specs["education_labels"]):
             # Set the initial distribution for the Markov simulation
             # and assume nobody is dead
@@ -80,54 +99,76 @@ def plot_healthy_unhealthy(path_dict, specs, show=False, save=False):
                 (sex_var, edu_var, slice(None))
             ].values
 
+            edu_label_lower = edu_label.lower()
+
             # Plot the estimates and the data
             ax.plot(
                 est_ages[:max_period_physical],
                 healthy_share_type_est[:max_period_physical],
                 color=colors[edu_var],
-                label=f"Est. {edu_label}",
+                label=f"est. {edu_label_lower}",
             )
             ax.plot(
                 est_ages[:max_period_physical],
                 healthy_share_type_data[:max_period_physical],
                 color=colors[edu_var],
                 linestyle="--",
-                label=f"Obs. {edu_label}",
+                label=f"obs. {edu_label_lower}",
             )
 
             # Adjust the x-axis ticks and labels
             x_ticks = np.arange(start_age, max_age_est_physical + 1, 10)
             ax.set_xticks(x_ticks)
             # Set font size for x-axis labels
-            ax.set_xticklabels(x_ticks, fontsize=12)
+            ax.set_xticklabels(x_ticks)
 
         # Set y-axis limits and ticks
         ax.set_ylim(0, 1)  # Set y-axis limits from 0 to 1
         ax.set_yticks(np.arange(0.0, 1.1, 0.1))
-        # Set yticks labels and fontsize
-        ax.set_yticklabels([f"{i:.0%}" for i in np.arange(0.0, 1.1, 0.1)], fontsize=12)
+        # Set yticks labels without percent
+        ax.set_yticklabels([f"{i:.1f}" for i in np.arange(0.0, 1.1, 0.1)])
 
-        # Add title and legend
-        ax.set_title(f"{sex_label}", fontsize=14)
+        # Add legend to each plot
+        ax.legend(frameon=False)
         ax.set_xlabel("Age", fontsize=12)
-        ax.set_ylabel("Probability of being Healthy", fontsize=12)
-        
-    axs[0].legend()
-    plt.tight_layout()
-    
-    if save:
-        fig.savefig(path_dict["first_step_plots"] + "health_states.pdf", bbox_inches="tight")
-        fig.savefig(path_dict["first_step_plots"] + "health_states.png", bbox_inches="tight", dpi=300)
-        
+        ax.set_ylabel("Share Healthy")
+
+        if not paper_plot:
+            ax.set_title(f"{sex_label}")
+
+    if paper_plot:
+        for fig, title in zip(figs, titles):
+            fig.tight_layout()
+            fig.savefig(
+                path_dict["first_step_plots"] + f"{title}.png",
+                bbox_inches="tight",
+                dpi=300,
+            )
+    else:
+        plt.tight_layout()
+        if save:
+            fig.savefig(
+                path_dict["first_step_plots"] + "health_states.pdf", bbox_inches="tight"
+            )
+            fig.savefig(
+                path_dict["first_step_plots"] + "health_states.png",
+                bbox_inches="tight",
+                dpi=300,
+            )
+
     if show:
         plt.show()
     else:
-        plt.close(fig)
+        if paper_plot:
+            for fig in figs:
+                plt.close(fig)
+        else:
+            plt.close(fig)
 
 
 def plot_health_transition_prob(path_dict, specs, show=False, save=False):
     """Plot health transition probabilities by age.
-    
+
     Parameters
     ----------
     path_dict : dict
@@ -136,7 +177,7 @@ def plot_health_transition_prob(path_dict, specs, show=False, save=False):
         Dictionary containing model specifications
     show : bool, default False
         Whether to display plots
-    save : bool, default False  
+    save : bool, default False
         Whether to save plots to disk
     """
     # Load the transition probabilities
@@ -185,13 +226,20 @@ def plot_health_transition_prob(path_dict, specs, show=False, save=False):
                 ax.set_xticklabels(age_ticks)
                 ax.grid(False)
                 color_id += 1
-                
+
     plt.tight_layout()
-    
+
     if save:
-        fig.savefig(path_dict["first_step_plots"] + "health_transition_probs.pdf", bbox_inches="tight")
-        fig.savefig(path_dict["first_step_plots"] + "health_transition_probs.png", bbox_inches="tight", dpi=300)
-        
+        fig.savefig(
+            path_dict["first_step_plots"] + "health_transition_probs.pdf",
+            bbox_inches="tight",
+        )
+        fig.savefig(
+            path_dict["first_step_plots"] + "health_transition_probs.png",
+            bbox_inches="tight",
+            dpi=300,
+        )
+
     if show:
         plt.show()
     else:

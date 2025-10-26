@@ -6,7 +6,9 @@ import pandas as pd
 from set_styles import set_colors, set_plot_defaults
 
 
-def plot_wage_regression_results(path_dict, specs, show=False, save=False):
+def plot_wage_regression_results(
+    path_dict, specs, show=False, save=False, paper_plots=False
+):
     """Plot wage regression results comparing observed vs estimated log wages by age.
 
     Parameters
@@ -81,10 +83,12 @@ def plot_wage_regression_results(path_dict, specs, show=False, save=False):
                 path_dict["first_step_plots"] + f"wages_{file_appends[sex_val]}.png",
                 bbox_inches="tight",
             )
-            fig.savefig(
-                path_dict["first_step_plots"] + f"wages_{file_appends[sex_val]}.pdf",
-                bbox_inches="tight",
-            )
+            if not paper_plots:
+                fig.savefig(
+                    path_dict["first_step_plots"]
+                    + f"wages_{file_appends[sex_val]}.pdf",
+                    bbox_inches="tight",
+                )
 
     if show:
         plt.show()

@@ -11,16 +11,34 @@ def create_state_space_functions():
     }
 
 
-def next_period_deterministic_state(period, lagged_choice, choice, alg_1_claim):
+def next_period_deterministic_state(
+    period, lagged_choice, choice, alg_1_claim, model_specs
+):
+    # First assign standard updates
     next_period = period + 1
     lagged_choice_next = choice
 
-    not_already_unemployed = lagged_choice != 1
-    becoming_unemployed = choice == 1
+    # Determine age
+    age = model_specs["start_age"] + period
 
-    alg_1_claim_next = not_already_unemployed & becoming_unemployed
-    # Transform to int
-    alg_1_claim_next = int(alg_1_claim_next)
+    # Create max periods. The first time you can have to periods is with age 58. That
+    # means it can first be updated to be calim 2 at age 57
+    max_periods_alg_1 = (age < 57) + (age >= 57) * 2
+
+    # Alg 1 claim for longer
+    already_alg_1_claim = alg_1_claim > 0
+    # Use min to avoid overflow
+    alg_1_claim_longer = already_alg_1_claim * (max(alg_1_claim, 1) - 1)
+
+    # Alg 1 claim. First check if already unemployed
+    not_already_unemployed = lagged_choice != 1
+    alg_1_claim_next = (
+        not_already_unemployed * max_periods_alg_1
+        + (1 - not_already_unemployed) * alg_1_claim_longer
+    )
+    choose_unemployment = choice == 1
+    alg_1_claim_next = alg_1_claim_next * choose_unemployment
+
     return {
         "period": next_period,
         "lagged_choice": lagged_choice_next,
@@ -61,8 +79,15 @@ def sparsity_condition(
     ):
         return False
 
-    elif (alg_1_claim == 1) & (lagged_choice in [0, 2, 3]):
-        # We dont need alg_1 claim if not unemployed in last period
+    elif (alg_1_claim > 0) & (lagged_choice in [0, 2, 3]):
+        # We don't need alg_1 claim if not unemployed in last period
+        return False
+    elif (alg_1_claim == 2) & (age < 58):
+        # We don't need alg_1 claim if not unemployed in last period
+        return False
+    elif (alg_1_claim == 1) & (age == 58):
+        # At age 58 you can not have claim = 1, as if you decided with 57, you get
+        # 2 and there was no one in 2 at age 57 who gets substracted 1
         return False
     else:
         # Now turn to the states, where it is decided by the value of an exogenous
@@ -81,7 +106,7 @@ def sparsity_condition(
                 "period": last_period,
                 "lagged_choice": lagged_choice,
                 "education": education,
-                "alg_1_claim": alg_1_claim,
+                "alg_1_claim": 0,
                 "health": health,
                 "informed": informed,
                 "sex": sex,
@@ -118,7 +143,7 @@ def sparsity_condition(
                 "lagged_choice": lagged_choice,
                 "education": education,
                 "health": proxy_health,
-                "alg_1_claim": alg_1_claim,
+                "alg_1_claim": 0,
                 "informed": informed_proxy,
                 "sex": sex,
                 "partner_state": partner_state,

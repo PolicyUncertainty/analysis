@@ -11,8 +11,8 @@ path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict)
 
 # Set run specs
-model_name = "stable"
-load_sol_model = True
+model_name = "start"
+load_sol_model = False
 
 if model_name == "start":
     from estimation.struct_estimation.start_params_and_bounds.set_start_params import (
@@ -33,6 +33,8 @@ model = specify_model(
     load_model=load_sol_model,
     sim_specs=None,
 )
+
+idx_per_period = model.get_n_state_choices_per_period()
 
 # # First validate all exogenous processes
 # model.validate_exogenous(

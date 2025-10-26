@@ -23,23 +23,12 @@ params = pkl.load(
     open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
 )
 
-# params["mu_high"] = 1.01
-# params["mu_low"] = 1.01
-# params["bequest_scale_low_women"] = 1.0
-# params["kappa_low_women"] = 0.0
-# params["bequest_scale_high_women"] = 2.0
-# params["kappa_high_women"] = 0.0
-# params["kappa_high_men"] = 3.0
-# params["kappa_low_men"] = 3.0
-# params["bequest_scale_high_men"] = 4.0
-# params["bequest_scale_low_men"] = 3.0
-
 # %%
 # baseline: sra 67, with uncertainty and misinformation
 df_baseline, model = solve_and_simulate_scenario(
     path_dict=path_dict,
     params=params,
-    subj_unc=True,
+    subj_unc=False,
     custom_resolution_age=None,
     announcement_age=None,
     SRA_at_retirement=67,
@@ -53,6 +42,8 @@ df_baseline, model = solve_and_simulate_scenario(
 )
 
 df_baseline = df_baseline.reset_index()
+# filter by sex
+df_baseline = df_baseline[df_baseline["sex"] == 1]
 
 # %%
 # Generate detailed life cycle results
@@ -66,17 +57,17 @@ output_path = path_dict["simulation_data"] + "baseline/"
 if not os.path.exists(output_path):
     os.makedirs(output_path)
 
-df_lc_detailed.to_csv(output_path + f"baseline_lc_{model_name}.csv")
+df_lc_detailed.to_csv(output_path + f"67_no_unc_lc_{model_name}.csv")
 
 
 # baseline: sra 67, without uncertainty but with misinformation
-df_baseline_no_uncertainty, _ = solve_and_simulate_scenario(
+df_cf, _ = solve_and_simulate_scenario(
     path_dict=path_dict,
     params=params,
     subj_unc=False,
     custom_resolution_age=None,
     announcement_age=None,
-    SRA_at_retirement=67,
+    SRA_at_retirement=69,
     SRA_at_start=67,
     model_name=model_name,
     df_exists=load_no_unc_df,
@@ -86,11 +77,11 @@ df_baseline_no_uncertainty, _ = solve_and_simulate_scenario(
     util_type=specs["util_type"],
 )
 
-df_baseline_no_uncertainty = df_baseline_no_uncertainty.reset_index()
+df_cf = df_cf.reset_index()
+df_cf = df_cf[df_cf["sex"] == 1]
+
 
 # Generate detailed life cycle results
-df_lc_detailed_no_uncertainty = calc_life_cycle_detailed(df_baseline_no_uncertainty)
+df_cf_lc_detailed = calc_life_cycle_detailed(df_cf)
 
-df_lc_detailed_no_uncertainty.to_csv(
-    output_path + f"baseline_lc_{model_name}_no_uncertainty.csv"
-)
+df_cf_lc_detailed.to_csv(output_path + f"69_no_unc_lc_{model_name}.csv")

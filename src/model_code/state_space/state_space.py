@@ -7,6 +7,28 @@ def create_state_space_functions():
         "state_specific_choice_set": state_specific_choice_set,
         "next_period_experience": get_next_period_experience,
         "sparsity_condition": sparsity_condition,
+        "next_period_deterministic_state"
+    }
+
+def next_period_deterministic_state(
+    period,
+    lagged_choice,
+    choice,
+    alg_1_claim
+):
+    next_period = period + 1
+    lagged_choice_next = choice
+
+    not_already_unemployed = lagged_choice != 1
+    becoming_unemployed = choice == 1
+
+    alg_1_claim_next = not_already_unemployed & becoming_unemployed
+    # Transform to int
+    alg_1_claim_next = int(alg_1_claim_next)
+    return {
+        "period": next_period,
+        "lagged_choice": lagged_choice_next,
+        "alg_1_claim": alg_1_claim_next,
     }
 
 
@@ -14,6 +36,7 @@ def sparsity_condition(
     period,
     lagged_choice,
     sex,
+    alg_1_periods_left,
     informed,
     health,
     partner_state,
@@ -41,6 +64,10 @@ def sparsity_condition(
         & (health != model_specs["death_health_var"])
     ):
         return False
+
+    elif (alg_1_periods_left == 1) & (lagged_choice in [0, 2, 3]):
+        # We dont need alg_1 claim if not unemployed in last period
+        return False
     else:
         # Now turn to the states, where it is decided by the value of an exogenous
         # state if it is valid or not. For invalid states we provide a proxy state
@@ -58,6 +85,7 @@ def sparsity_condition(
                 "period": last_period,
                 "lagged_choice": lagged_choice,
                 "education": education,
+                "alg_1_periods_left": alg_1_periods_left,
                 "health": health,
                 "informed": informed,
                 "sex": sex,
@@ -94,6 +122,7 @@ def sparsity_condition(
                 "lagged_choice": lagged_choice,
                 "education": education,
                 "health": proxy_health,
+                "alg_1_periods_left": alg_1_periods_left,
                 "informed": informed_proxy,
                 "sex": sex,
                 "partner_state": partner_state,

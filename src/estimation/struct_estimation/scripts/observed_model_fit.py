@@ -96,6 +96,11 @@ def create_fit_plots(
         data_decision=data_decision,
         save_folder=folder_name_plots,
     )
+    plot_life_cycle_choice_probs_partner(
+        specs=specs,
+        data_decision=data_decision,
+        save_folder=folder_name_plots,
+    )
 
     plot_life_cycle_choice_probs(
         specs=specs,
@@ -411,6 +416,92 @@ def plot_ret_fit_age(
         )
         fig.savefig(  # fig.suptitle(f"Choice shares {specs['education_labels'][edu]}")
             save_folder + f"ret_age_fit_{sex_label}.pdf",
+            transparent=True,
+            dpi=300,
+        )
+
+
+def plot_life_cycle_choice_probs_partner(
+    specs,
+    data_decision,
+    save_folder,
+):
+    df_int = data_decision[data_decision["age"] < 75].copy()
+
+    df_int["has_partner"] = (df_int["partner_state"] > 0).astype(int)
+    has_partner_labels = ["Single", "Partnered"]
+
+    choice_share_labels = ["Choice Share Men", "Choice Share Women"]
+    for sex_var in specs["sex_grid"]:
+        sex_label = specs["sex_labels"][sex_var]
+        if sex_var == 0:
+            n_choices = 3
+        else:
+            n_choices = 4
+        fig, axes = plt.subplots(
+            ncols=n_choices, figsize=get_figsize(ncols=n_choices, nrows=1)
+        )
+        count = -1
+        for edu_var in specs["education_grid"]:
+            edu_label = specs["education_labels"][edu_var]
+
+            for partner_state, partner_label in enumerate(has_partner_labels):
+                count += 1
+                data_subset = df_int[
+                    (df_int["education"] == edu_var)
+                    & (df_int["sex"] == sex_var)
+                    & (df_int["has_partner"] == partner_state)
+                ]
+                all_choice_shares_obs = (
+                    data_subset.groupby(["age"])["choice"]
+                    .value_counts(normalize=True)
+                    .unstack()
+                )
+
+                labels = specs["choice_labels"]
+                for choice in range(specs["n_choices"]):
+
+                    choice_shares_predicted = data_subset.groupby(["age"])[
+                        f"choice_{choice}"
+                    ].mean()
+
+                    # Only plot if we are not in men and part-time
+                    men_and_part_time = (sex_var == 0) and (choice == 2)
+                    if not men_and_part_time:
+                        men_and_full_time = (sex_var == 0) and (choice == 3)
+                        if men_and_full_time:
+                            ax = axes[choice - 1]
+                        else:
+                            ax = axes[choice]
+
+                        ax.plot(
+                            choice_shares_predicted,
+                            label=f"Pred. {edu_label} - {partner_label}",
+                            color=JET_COLOR_MAP[count],
+                        )
+                        ax.plot(
+                            all_choice_shares_obs[choice],
+                            label=f"Obs. {edu_label} - {partner_label}",
+                            color=JET_COLOR_MAP[count],
+                            linestyle="--",
+                        )
+
+                        ax.set_ylim([-0.05, 1.05])
+                        ax.set_title(f"{labels[choice]}")
+                        ax.set_xlabel("Age")
+
+        axes[1].legend(loc="upper left")
+        axes[0].set_ylabel(choice_share_labels[sex_var])
+        # Fig title
+        fig.tight_layout()
+
+        fig.savefig(  # fig.suptitle(f"Choice shares {specs['education_labels'][edu]}")
+            save_folder + f"observed_model_fit_partner_{sex_label}.png",
+            transparent=True,
+            dpi=300,
+        )
+        fig.savefig(  # fig.suptitle(f"Choice shares {specs['education_labels'][edu]}")
+            save_folder + f"observed_model_fit_partner_{sex_label}.pdf",
             transparent=True,
             dpi=300,
         )

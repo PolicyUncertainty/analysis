@@ -26,12 +26,10 @@ from simulation.internal_runs.figures.detailed_lc_results import (
 )
 
 baseline_data_path = (
-    path_dict["simulation_data"] + "/baseline/" + f"baseline_lc_{model_name}.csv"
+    path_dict["simulation_data"] + "/baseline/" + f"67_no_unc_lc_{model_name}.csv"
 )
 comparison_data_path = (
-    path_dict["simulation_data"]
-    + "/baseline/"
-    + f"baseline_lc_{model_name}_no_uncertainty.csv"
+    path_dict["simulation_data"] + "/baseline/" + f"69_no_unc_lc_{model_name}.csv"
 )
 
 df_baseline = pd.read_csv(baseline_data_path, index_col=[0, 1, 2])
@@ -43,7 +41,7 @@ plot_detailed_lifecycle_results(
     path_dict=path_dict,
     model_name=model_name,
     specs=specs,
-    comparison_name="true_SRA_known",
+    comparison_name="69_no_uncertainty",
     show=show_plots,
     save=save_plots,
 )

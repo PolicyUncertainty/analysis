@@ -19,6 +19,7 @@ def budget_constraint(
     experience,
     sex,
     partner_state,
+    alg_1_claim,
     asset_end_of_previous_period,  # A_{t-1}
     income_shock_previous_period,  # epsilon_{t - 1}
     model_specs,
@@ -79,10 +80,13 @@ def budget_constraint(
     # bools of last period decision: income is paid in following period!
     was_worker = lagged_choice >= 2
     was_retired = lagged_choice == 0
+    was_unemployed = lagged_choice == 1
 
     # Aggregate over choice own income
     own_income_after_ssc = (
-        was_worker * labor_income_after_ssc + was_retired * retirement_income_after_ssc
+        was_worker * labor_income_after_ssc
+        + was_retired * retirement_income_after_ssc
+        + (alg_1_claim > 0) * was_unemployed * 0.67 * labor_income_after_ssc
     )
 
     # Calculate total houshold net income
@@ -106,9 +110,7 @@ def budget_constraint(
     was_old_age_unemployed *= age >= 58
     # Option 2: Gradual increase from 50 to 58
     # was_old_age_unemployed *= ((age - 50) / 8).clip(min=0, max=1)
-    total_net_income += (
-        child_benefits + was_old_age_unemployed * own_unemployemnt_benefits
-    )
+    total_net_income += child_benefits
 
     total_income = jnp.maximum(total_net_income, unemployment_benefits)
     interest_rate = model_specs["interest_rate"]

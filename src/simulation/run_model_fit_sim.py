@@ -45,6 +45,7 @@ which_plots = "wc"
 
 from simulation.figures.simulated_model_fit import (
     create_paper_wealth_fit,
+    plot_choice_shares_by_partner,
     plot_choice_shares_single,
     plot_quantiles,
     plot_states,
@@ -63,11 +64,20 @@ if which_plots in ["p", "wc"]:
     )
 
 if which_plots in ["a", "c", "wc"]:
+    plot_choice_shares_by_partner(
+        path_dict=path_dict,
+        specs=specs,
+        params=params,
+        model_name=model_name,
+        load_df=load_df,
+        load_solution=load_solution,
+        load_sol_model=load_sol_model,
+        util_type=util_type,
+    )
     plot_choice_shares_single(
         path_dict=path_dict,
         specs=specs,
         params=params,
-        file_name="sim_choices",
         model_name=model_name,
         load_df=load_df,
         load_solution=load_solution,

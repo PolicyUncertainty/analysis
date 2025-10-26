@@ -45,6 +45,7 @@ def create_model_config_wo_informed(specs, sex_type, edu_type):
         "deterministic_states": {
             "education": edu_grid,
             "sex": sex_grid,
+            "alg_1_claim": np.arange(2, dtype=int),
         },
         "stochastic_states": {
             "policy_state": np.arange(specs["n_policy_states"], dtype=int),

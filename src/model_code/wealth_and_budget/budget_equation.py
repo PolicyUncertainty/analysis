@@ -2,6 +2,7 @@ import jax
 from jax import numpy as jnp
 
 from model_code.state_space.experience import construct_experience_years
+from model_code.wealth_and_budget.alg_1 import calc_potential_alg_1
 from model_code.wealth_and_budget.partner_income import calc_partner_income_after_ssc
 from model_code.wealth_and_budget.pension_payments import calc_pensions_after_ssc
 from model_code.wealth_and_budget.tax_and_ssc import calc_net_household_income
@@ -80,13 +81,10 @@ def budget_constraint(
     # bools of last period decision: income is paid in following period!
     was_worker = lagged_choice >= 2
     was_retired = lagged_choice == 0
-    was_unemployed = lagged_choice == 1
 
     # Aggregate over choice own income
     own_income_after_ssc = (
-        was_worker * labor_income_after_ssc
-        + was_retired * retirement_income_after_ssc
-        + (alg_1_claim > 0) * was_unemployed * 0.67 * labor_income_after_ssc
+        was_worker * labor_income_after_ssc + was_retired * retirement_income_after_ssc
     )
 
     # Calculate total houshold net income
@@ -104,13 +102,18 @@ def budget_constraint(
         model_specs=model_specs,
     )
 
-    # Unemployed after 58. We use this rule to proxy the extended alg1 claim
-    was_old_age_unemployed = lagged_choice == 1
-    # Option 1: Whole money from 58 onwards
-    was_old_age_unemployed *= age >= 58
-    # Option 2: Gradual increase from 50 to 58
-    # was_old_age_unemployed *= ((age - 50) / 8).clip(min=0, max=1)
-    total_net_income += child_benefits
+    # Alg 1 is tax free as well. Calc potential alg_1 for unemployed
+    potential_alg_1 = calc_potential_alg_1(
+        age=age,
+        education=education,
+        sex=sex,
+        experience_years=experience_years,
+        model_specs=model_specs,
+    )
+    was_unemployed = lagged_choice == 1
+    alg_1 = (alg_1_claim > 0) * was_unemployed * potential_alg_1
+
+    total_net_income += child_benefits + alg_1
 
     total_income = jnp.maximum(total_net_income, unemployment_benefits)
     interest_rate = model_specs["interest_rate"]

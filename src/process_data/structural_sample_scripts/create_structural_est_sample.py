@@ -33,6 +33,7 @@ from process_data.soep_vars.wealth.flow_savings import create_flow_savings
 from process_data.soep_vars.wealth.linear_interpolation import (
     add_wealth_interpolate_and_deflate,
 )
+from process_data.structural_sample_scripts.alg_1 import assign_alg_1_claim
 from process_data.structural_sample_scripts.classify_reitrees import (
     add_very_long_insured_classification,
 )
@@ -104,6 +105,7 @@ def create_structural_est_sample(
     df = create_choice_variable_from_artkalen(
         path_dict=paths, specs=specs, df=df, load_artkalen_choice=load_artkalen_choice
     )
+    df = assign_alg_1_claim(df)
 
     # Having a spanned dataframe we can correct the partner state
     # (missing partner observation in a single year).
@@ -337,12 +339,27 @@ def load_and_merge_soep_core(path_dict, use_processed_pl):
             "m11124",
             "igrv1",
             "i11102",
+            "iunby",
+            "alg2",
         ],
         convert_categoricals=False,
     )
     merged_data = pd.merge(merged_data, pequiv_data, on=["pid", "syear"], how="left")
     merged_data.rename(columns={"d11107": "children"}, inplace=True)
-
+    pkal_data = pd.read_stata(
+        f"{soep_c38_path}/pkal.dta",
+        columns=[
+            "pid",
+            "syear",
+            "kal2f01_h",
+        ],
+        convert_categoricals=False,
+    )
+    pkal_data.rename(
+        columns={"kal2f01_h": "alg1_last_year", "kal2f03_h": "alg_1_payment"},
+        inplace=True,
+    )
+    merged_data = pd.merge(merged_data, pkal_data, on=["pid", "syear"], how="left")
     merged_data.set_index(["pid", "syear"], inplace=True)
     print(str(len(merged_data)) + " observations in SOEP C38 core.")
     return merged_data

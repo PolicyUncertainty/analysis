@@ -39,7 +39,7 @@ def create_model_config_wo_informed(specs, sex_type, edu_type):
     )
 
     model_config = {
-        "min_period_batch_segments": [29, 33, 43, 44],
+        "min_period_batch_segments": [43, 44],
         "n_periods": specs["n_periods"],
         "choices": np.arange(specs["n_choices"], dtype=int),
         "deterministic_states": {

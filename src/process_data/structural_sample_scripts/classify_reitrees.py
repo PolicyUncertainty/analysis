@@ -19,6 +19,7 @@ def add_very_long_insured_classification(df, path_dict, specs):
     df.loc[not_retired_mask, "very_long_insured"] = check_very_long_insured(
         retirement_age_difference=retirement_age_difference.values,
         experience_years=df_fresh["experience"].values,
+        policy_state=df_fresh["policy_state"].values,
         sex=df_fresh["sex"].values.astype(int),
         model_specs=specs,
     )

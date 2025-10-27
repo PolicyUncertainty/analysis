@@ -35,6 +35,7 @@ def create_choice_variable_from_artkalen(
         df[["art_choice", "corrected_age"]] = pd.read_pickle(
             path_dict["struct_data"] + "art_choice.pkl"
         )
+
     df["corrected_age"] = df["corrected_age"].fillna(df["age"].astype(float))
     df["lagged_art_choice"] = df.groupby("pid")["art_choice"].shift(1)
 
@@ -50,7 +51,10 @@ def create_choice_variable_from_artkalen(
         nan_mask & cont_choice, "pgen_choice"
     ]
     ret_mask = df["choice"] == 0
-    not_receive_pension = df["plc0232_v1"] != 1
+    df["pension_payment_this_year"] = df.groupby("pid")["igrv1"].shift(-1)
+    df["pension_received_this_year"] = df["pension_payment_this_year"] > 0
+    receive_pension = (df["plc0232_v1"] == 1) | (df["pension_received_this_year"])
+    not_receive_pension = ~receive_pension
     df.loc[ret_mask & not_receive_pension, "choice"] = np.nan
 
     df["lagged_choice"] = df.groupby("pid")["choice"].shift(1)

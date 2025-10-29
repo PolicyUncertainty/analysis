@@ -64,6 +64,7 @@ CORE_TYPE_DICT = {
     "education": "int8",
     "sex": "int8",
     "health": "int8",
+    "alg_1_claim": "int8",
 }
 
 

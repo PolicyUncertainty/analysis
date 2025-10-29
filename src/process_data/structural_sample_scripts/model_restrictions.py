@@ -54,9 +54,9 @@ def enforce_model_choice_restriction(df, specs):
     # just_after_SRA = (SRA_diff >= 0) & (SRA_diff < 1)
     # df.loc[fresh_retired_mask & just_after_SRA, "job_offer"] = -99
     # Set all people to job_offer zero after sra
-    after_SRA = SRA_diff >= 0
-    df.loc[after_SRA, "job_offer"] = 0
-    df.loc[after_SRA, "choice"] = 0
-    one_after_SRA = SRA_diff >= 1
-    df.loc[one_after_SRA, "lagged_choice"] = 0
+    # after_SRA = SRA_diff >= 0
+    # df.loc[after_SRA, "job_offer"] = 0
+    # df.loc[after_SRA, "choice"] = 0
+    # one_after_SRA = SRA_diff >= 1
+    # df.loc[one_after_SRA, "lagged_choice"] = 0
     return df

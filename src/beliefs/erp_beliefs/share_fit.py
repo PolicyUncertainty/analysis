@@ -226,10 +226,7 @@ def plot_predicted_informed_shares_by_education(
         filename = "predicted_informed_shares_overall.png"
 
     if save:
-        plt.savefig(
-            path_dict["beliefs_plots"] + filename,
-            bbox_inches="tight",
-        )
+        plt.savefig(path_dict["beliefs_plots"] + filename, bbox_inches="tight", dpi=100)
     if show:
         plt.show()
     else:

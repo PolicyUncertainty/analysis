@@ -162,6 +162,7 @@ def plot_ar1_fit(
         plt.savefig(
             path_dict["beliefs_plots"] + "ar1_fit_plot.png",
             bbox_inches="tight",
+            dpi=100,
         )
     if show:
         plt.show()

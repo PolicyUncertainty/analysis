@@ -33,8 +33,8 @@ edu_type = "all"
 util_type = "add"
 old_sample_only = False
 
-LOAD_LAST_ESTIMATE = True
-LOAD_SOL_MODEL = True
+LOAD_LAST_ESTIMATE = False
+LOAD_SOL_MODEL = False
 SAVE_RESULTS = True
 USE_WEIGHTS = False
 
@@ -52,21 +52,9 @@ if LOAD_LAST_ESTIMATE:
 else:
     last_estimate = None
 
-# Get list of disability logit params and remove them
-disability_logit_params = [
-    name for name in last_estimate.keys() if "disability_logit" in name
-]
-
-for param_name in disability_logit_params:
-    last_estimate.pop(param_name)
-
 # Load start params
 start_params_all = load_and_set_start_params(paths_dict)
-for param_name in start_params_all.keys():
-    if "disability_logit" in param_name:
-        last_estimate[param_name] = start_params_all[param_name]
 
-# Run estimation
 estimation_results, end_params = estimate_model(
     paths_dict,
     params_to_estimate_names=params_to_estimate_names,

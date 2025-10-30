@@ -169,6 +169,7 @@ def plot_erp_violin_plots_by_age(paths_dict, show=False, save=False, censor_abov
         plt.savefig(
             paths_dict["beliefs_plots"] + "erp_violin_plots_by_age.png",
             bbox_inches="tight",
+            dpi=100,
         )
     if show:
         plt.show()

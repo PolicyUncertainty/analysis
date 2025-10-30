@@ -110,12 +110,14 @@ def plot_pension_claims(path_dict, show=False, save=True):
     max_val = bottom.max()
     ax.set_ylim(0, max_val * 1.4)
 
-    ax.legend(loc="upper center", ncol=2, columnspacing=0.5)
+    ax.legend(loc="upper center", ncol=2, columnspacing=0.5, frameon=False)
 
     plt.tight_layout()
 
     if save:
-        fig.savefig(path_dict["misc_plots"] + "pension_claims.png", bbox_inches="tight")
+        fig.savefig(
+            path_dict["misc_plots"] + "pension_claims.png", bbox_inches="tight", dpi=100
+        )
         fig.savefig(path_dict["misc_plots"] + "pension_claims.pdf", bbox_inches="tight")
     if show:
         plt.show()

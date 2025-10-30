@@ -97,14 +97,14 @@ def plot_children(path_dict, specs, show=False, paper_plot=False):
             fig.savefig(
                 path_dict["first_step_plots"] + f"children_{title}.png",
                 bbox_inches="tight",
-                dpi=300,
+                dpi=100,
             )
 
     else:
         fig.tight_layout()
         fig.savefig(path_dict["first_step_plots"] + "children.pdf", bbox_inches="tight")
         fig.savefig(
-            path_dict["first_step_plots"] + "children.png", bbox_inches="tight", dpi=300
+            path_dict["first_step_plots"] + "children.png", bbox_inches="tight", dpi=100
         )
 
     if show:

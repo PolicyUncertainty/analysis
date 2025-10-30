@@ -149,7 +149,7 @@ def plot_partner_shares(
             fig.savefig(
                 paths_dict["first_step_plots"] + f"{title}.png",
                 bbox_inches="tight",
-                dpi=300,
+                dpi=100,
             )
     else:
         fig.tight_layout()
@@ -161,7 +161,7 @@ def plot_partner_shares(
             fig.savefig(
                 paths_dict["first_step_plots"] + "partner_lifecycle.png",
                 bbox_inches="tight",
-                dpi=300,
+                dpi=100,
             )
 
     if show:

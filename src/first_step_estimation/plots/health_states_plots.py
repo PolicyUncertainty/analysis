@@ -142,7 +142,7 @@ def plot_healthy_unhealthy(path_dict, specs, show=False, save=False, paper_plot=
             fig.savefig(
                 path_dict["first_step_plots"] + f"{title}.png",
                 bbox_inches="tight",
-                dpi=300,
+                dpi=100,
             )
     else:
         plt.tight_layout()
@@ -153,7 +153,7 @@ def plot_healthy_unhealthy(path_dict, specs, show=False, save=False, paper_plot=
             fig.savefig(
                 path_dict["first_step_plots"] + "health_states.png",
                 bbox_inches="tight",
-                dpi=300,
+                dpi=100,
             )
 
     if show:

@@ -69,7 +69,9 @@ def plot_sra_beliefs_by_age(paths_dict, show=False, save=False):
     fig.tight_layout()
     if save:
         plt.savefig(
-            paths_dict["beliefs_plots"] + "sra_beliefs_by_age.png", bbox_inches="tight"
+            paths_dict["beliefs_plots"] + "sra_beliefs_by_age.png",
+            bbox_inches="tight",
+            dpi=100,
         )
     if show:
         plt.show()

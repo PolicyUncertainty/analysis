@@ -104,7 +104,7 @@ def plot_job_separations(path_dict, specs, show=False, save=False, paper_plot=Fa
             fig.savefig(
                 path_dict["first_step_plots"] + f"{title}.png",
                 bbox_inches="tight",
-                dpi=300,
+                dpi=100,
             )
     else:
         fig.tight_layout()
@@ -116,7 +116,7 @@ def plot_job_separations(path_dict, specs, show=False, save=False, paper_plot=Fa
             fig.savefig(
                 path_dict["first_step_plots"] + "job_separations.png",
                 bbox_inches="tight",
-                dpi=300,
+                dpi=100,
             )
 
     if show:

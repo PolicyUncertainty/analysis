@@ -82,6 +82,7 @@ def plot_wage_regression_results(
             fig.savefig(
                 path_dict["first_step_plots"] + f"wages_{file_appends[sex_val]}.png",
                 bbox_inches="tight",
+                dpi=100,
             )
             if not paper_plots:
                 fig.savefig(

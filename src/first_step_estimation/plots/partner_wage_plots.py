@@ -80,6 +80,7 @@ def plot_partner_wage_results(
                 path_dict["first_step_plots"]
                 + f"partner_wages_{file_appends[sex_val]}.png",
                 bbox_inches="tight",
+                dpi=100,
             )
             if not paper_plots:
                 fig.savefig(

@@ -108,12 +108,14 @@ def plot_mortality(path_dict, specs, show=False, save=False, paper_plot=False):
 
                 filtered_data = estimated_mortality.loc[mask]
 
+                lower_edu_label = edu_label.lower()
+
                 if not filtered_data.empty:
                     ax.plot(
                         filtered_data["age"],
                         filtered_data["survival_prob"],
                         color=colors[edu_var],
-                        label=f"{edu_label}",
+                        label=f"{lower_edu_label}",
                         linewidth=2,
                     )
 
@@ -131,7 +133,7 @@ def plot_mortality(path_dict, specs, show=False, save=False, paper_plot=False):
             fig.savefig(
                 path_dict["first_step_plots"] + f"{title}.png",
                 bbox_inches="tight",
-                dpi=300,
+                dpi=100,
             )
     else:
         fig.tight_layout()
@@ -143,7 +145,7 @@ def plot_mortality(path_dict, specs, show=False, save=False, paper_plot=False):
             fig.savefig(
                 path_dict["first_step_plots"] + "mortality_survival.png",
                 bbox_inches="tight",
-                dpi=300,
+                dpi=100,
             )
 
     if show:
@@ -232,7 +234,7 @@ def plot_mortality_hazard_ratios(path_dict, specs, show=False, save=False):
         fig.savefig(
             path_dict["first_step_plots"] + "mortality_hazard_ratios.png",
             bbox_inches="tight",
-            dpi=300,
+            dpi=100,
         )
 
     if show:

@@ -44,9 +44,9 @@ def create_paper_wealth_fit(
     )
 
     set_plot_defaults()
-    figsize = get_figsize(ncols=1, nrows=1)
+    # figsize = get_figsize(ncols=1, nrows=1)
 
-    fig, ax = plt.subplots(figsize=figsize)
+    fig, ax = plt.subplots()
     max_wealth = 50
     for edu_var, edu_label in enumerate(specs["education_labels"]):
         mask_sim = data_sim["education"] == edu_var
@@ -86,13 +86,16 @@ def create_paper_wealth_fit(
             color=JET_COLOR_MAP[edu_var],
         )
 
-    ax.legend(frameon=False)
+    # ax.legend(frameon=False)
     ax.set_ylim([0, max_wealth * 1.4])
+    ax.set_ylabel("Median Wealth (Tsd.)")
+    ax.set_xlabel("Age")
 
     plot_folder = path_dict["simulation_plots"] + model_name + "/paper_plots/"
     os.makedirs(plot_folder, exist_ok=True)
+    fig.tight_layout()
 
-    fig.savefig(plot_folder + f"wealth_fit.png", transparent=True, dpi=300)
+    fig.savefig(plot_folder + f"wealth_fit.png", transparent=True, dpi=100)
     # fig.savefig(plot_folder + f"{file_name}.pdf", dpi=300)
 
 
@@ -533,6 +536,6 @@ def plot_states(
                     ax.set_title(f"{sex_label}; {edu_label}")
             fig.suptitle(state_name)
             fig.savefig(
-                path_dict["plots"] + f"{state_name}.png", transparent=True, dpi=300
+                path_dict["plots"] + f"{state_name}.png", transparent=True, dpi=100
             )
-            fig.savefig(path_dict["plots"] + f"{state_name}.pdf", dpi=300)
+            fig.savefig(path_dict["plots"] + f"{state_name}.pdf", dpi=100)

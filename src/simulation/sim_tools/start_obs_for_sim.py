@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 from dcegm.pre_processing.shared import create_array_with_smallest_int_dtype
 
+from model_code.specify_model import specify_model
 from model_code.stochastic_processes.health_transition import (
     calc_disability_probability,
 )
@@ -12,8 +13,18 @@ from model_code.transform_data_from_model import load_scale_and_correct_data
 
 
 def generate_start_states_from_obs(
-    path_dict, params, model_class, inital_SRA, only_informed=False
+    path_dict, params, inital_SRA, model_class=None, only_informed=False
 ):
+    if model_class is None:
+        from specs.derive_specs import generate_derived_and_data_derived_specs
+
+        specs = generate_derived_and_data_derived_specs(path_dict)
+        model_class = specify_model(
+            path_dict,
+            specs,
+            subj_unc=True,
+            custom_resolution_age=None,
+        )
     model_specs = model_class.model_specs
     model_structure = model_class.model_structure
 

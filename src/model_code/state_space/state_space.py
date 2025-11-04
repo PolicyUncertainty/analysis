@@ -1,3 +1,5 @@
+import jax.numpy as jnp
+
 from model_code.state_space.choice_set import state_specific_choice_set
 from model_code.state_space.experience import get_next_period_experience
 
@@ -28,7 +30,7 @@ def next_period_deterministic_state(
     # Alg 1 claim for longer
     already_alg_1_claim = alg_1_claim > 0
     # Use min to avoid overflow
-    alg_1_claim_longer = already_alg_1_claim * (max(alg_1_claim, 1) - 1)
+    alg_1_claim_longer = already_alg_1_claim * (alg_1_claim.clip(min=1) - 1)
 
     # Alg 1 claim. First check if already unemployed
     not_already_unemployed = lagged_choice != 1
@@ -115,7 +117,7 @@ def sparsity_condition(
                 "policy_state": policy_state,
             }
             return state_proxy
-        elif lagged_choice == 0:
+        elif (lagged_choice == 0) | (policy_state == degenerate_policy_state):
             # If retirement is already chosen we proxy all states to job offer 0.
             job_offer_proxy = 0
 
@@ -140,7 +142,7 @@ def sparsity_condition(
                 proxy_health = health
             state_proxy = {
                 "period": period,
-                "lagged_choice": lagged_choice,
+                "lagged_choice": 0,
                 "education": education,
                 "health": proxy_health,
                 "alg_1_claim": 0,

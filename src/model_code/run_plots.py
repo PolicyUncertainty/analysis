@@ -102,13 +102,46 @@ model_solved = specify_and_solve_model(
     load_model=False,
     load_solution=None,
     sim_specs=None,
-    sex_type="all",
-    edu_type="all",
-    util_type="add",
 )
+pickle.dump(
+    model_solved.value,
+    open("value_new.pkl", "wb"),
+)
+pickle.dump(
+    model_solved.policy,
+    open("policy_new.pkl", "wb"),
+)
+pickle.dump(
+    model_solved.endog_grid,
+    open("endog_grid_new.pkl", "wb"),
+)
+pickle.dump(
+    model_solved.model_structure,
+    open("model_structure_new.pkl", "wb"),
+)
+# Load data and compare to newly solved model
+# value_old = pickle.load(
+#     open("value.pkl", "rb"),
+# )
+# policy_old = pickle.load(
+#     open("policy.pkl", "rb"),
+# )
+# endog_grid_old = pickle.load(
+#     open("endog_grid.pkl", "rb"),
+# )
+# # Generate difference and print max difference
+# value_diff = np.abs(model_solved.value - value_old)
+# policy_diff = np.abs(model_solved.policy - policy_old)
+# endog_grid_diff = np.abs(model_solved.endog_grid - endog_grid_old)
+
+value = model_solved.value
+nan_mask_value = ~np.isnan(value)
+# Print max differences
+print(f"Max value difference: {np.max(np.abs(value[nan_mask_value]))}")
+
 # plot_ret_solution(model_solved, specs, path_dict)
 # plot_solution(model_solved=model_solved, specs=specs, path_dict=path_dict)
-plot_ret_probs_for_state(model_solved=model_solved, specs=specs, path_dict=path_dict)
+# plot_ret_probs_for_state(model_solved=model_solved, specs=specs, path_dict=path_dict)
 #     plot_work_probs_for_state(
 #         model_solved=model_solved, specs=specs, path_dict=path_dict
 #     )

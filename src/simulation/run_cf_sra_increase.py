@@ -26,9 +26,7 @@ from simulation.sim_tools.cv import calc_compensated_variation
 from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 
 
-def process_gender_results(
-    i, df, result_dfs, het_spec_vars, het_var_name, df_base_cv, params=None
-):
+def process_gender_results(i, df, result_dfs, het_mask_dict, df_base_cv, params=None):
     """
     Process results for all gender categories (men, women, overall)
 
@@ -42,12 +40,13 @@ def process_gender_results(
         scenario_name: name for debugging/logging
     """
 
-    het_names = list(het_spec_vars.keys()) + ["overall"]
+    het_names = list(het_mask_dict.keys()) + ["overall"]
 
     for het_name in het_names:
         if het_name != "overall":
-            mask = df[het_var_name].isin(het_spec_vars[het_name])
+            mask = het_mask_dict[het_name](df)
             df_scenario = df[mask].copy()
+            print(f"  {het_name}: {len(df_scenario)} individuals", flush=True)
         else:
             df_scenario = df
 
@@ -71,7 +70,7 @@ def process_gender_results(
 
         if df_base_cv is not None:
             if het_name != "overall":
-                mask_base = df_base_cv[het_var_name].isin(het_spec_vars[het_name])
+                mask_base = het_mask_dict[het_name](df_base_cv)
                 df_base_het = df_base_cv[mask_base].copy()
             else:
                 df_base_het = df_base_cv.copy()
@@ -84,7 +83,7 @@ def process_gender_results(
             )
             result_dfs[het_name].loc[i, "cv"] = cv
         else:
-            result_dfs[het_name].loc[i, "cv"] = np.nan
+            result_dfs[het_name].loc[i, "cv"] = 0.0
 
 
 # Save all results
@@ -100,12 +99,12 @@ def save_results(result_dfs, path_dict, model_name):
 
 
 # Initialize result dataframes and baseline storage
-def create_result_dfs(sra_at_63, scenarios, het_spec_vars):
+def create_result_dfs(sra_at_63, scenarios, het_mask_dict):
     """Create result dataframes for all scenarios and gender categories"""
     result_dfs = {}
     for scenario in scenarios:
         result_dfs[scenario] = {}
-        heterogeneities = list(het_spec_vars.keys()) + ["overall"]
+        heterogeneities = list(het_mask_dict.keys()) + ["overall"]
         for het in heterogeneities:
             df = pd.DataFrame(dtype=float)
             df["sra_at_63"] = sra_at_63
@@ -118,12 +117,23 @@ def create_result_dfs(sra_at_63, scenarios, het_spec_vars):
 seeed = 123
 model_name = specs["model_name"]
 util_type = specs["util_type"]
-load_sol_model = True
+load_unc_model = True
+load_no_unc_model = True
 load_solutions = None
 load_df = None
 
-het_var_name = "sex"
-het_spec_vars = {"men": [0], "women": [1]}
+het_mask_dict = {
+    "men": lambda df: df["sex"] == 0,
+    "women": lambda df: df["sex"] == 1,
+    "low_edu": lambda df: df["education"] == 0,
+    "high_edu": lambda df: df["education"] == 1,
+    "low_men": lambda df: (df["sex"] == 0) & (df["education"] == 0),
+    "high_men": lambda df: (df["sex"] == 0) & (df["education"] == 1),
+    "low_women": lambda df: (df["sex"] == 1) & (df["education"] == 0),
+    "high_women": lambda df: (df["sex"] == 1) & (df["education"] == 1),
+    "initial_informed": lambda df: df["initial_informed"] == "Informed",
+    "initial_uninformed": lambda df: df["initial_informed"] == "Uninformed",
+}
 # For welfare it is important that no_unc comes first
 scenarios = ["no_unc", "unc"]
 
@@ -137,16 +147,18 @@ params = pkl.load(
 sra_at_63 = [67, 68, 69, 70]
 
 result_dfs = create_result_dfs(
-    sra_at_63=sra_at_63, scenarios=scenarios, het_spec_vars=het_spec_vars
+    sra_at_63=sra_at_63, scenarios=scenarios, het_mask_dict=het_mask_dict
 )
 
 # Initialize baseline cv overall
-df_base_cv = None
 for scenario_label in scenarios:
+    df_base_cv = None
     if scenario_label == "unc":
         subj_unc = True
+        load_sol_model = load_unc_model
     else:
         subj_unc = False
+        load_sol_model = load_no_unc_model
 
     model_sol = None
     df_base = None
@@ -177,12 +189,11 @@ for scenario_label in scenarios:
             i=i,
             df=df,
             result_dfs=result_dfs[scenario_label],
-            het_spec_vars=het_spec_vars,
-            het_var_name=het_var_name,
+            het_mask_dict=het_mask_dict,
             df_base_cv=df_base_cv,
             params=params,
         )
-        if (i == 0) and (scenario_label == "no_unc"):
+        if i == 0:
             df_base_cv = df.copy()
         else:
             del df

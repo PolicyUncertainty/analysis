@@ -3,26 +3,99 @@ import os
 import pandas as pd
 
 
+def create_ex_post_ex_ante_table(path_dict, specs):
+    """
+    Create LaTeX table for ex-post and ex-ante compensated variations.
+
+    Parameters
+    ----------
+    path_dict : dict
+        Dictionary with paths
+    specs : dict
+        Specifications dictionary
+
+    Returns
+    -------
+    str
+        LaTeX table as string
+    """
+    import pandas as pd
+
+    # Calculate expected SRA
+    expected_SRA = 67 + 33 * specs["sra_belief_alpha"]
+
+    # Read the CSV
+    model_name = specs["model_name"]
+    sim_results_folder = path_dict["sim_results"] + model_name + "/"
+    res_df = pd.read_csv(sim_results_folder + "ex_post_ex_ante.csv", index_col=0)
+
+    # Create LaTeX table
+    latex_lines = []
+    latex_lines.append("\\begin{tabular}{lcc}")
+    latex_lines.append("\\toprule")
+    latex_lines.append(
+        f"    & \\makecell{{SRA \\\\ 67}} & \\makecell{{SRA \\\\ {expected_SRA:.2f}}} \\\\"
+    )
+    latex_lines.append("\\midrule")
+
+    # Full Sample
+    latex_lines.append(f"\\textit{{Full Sample}} & & \\\\")
+    latex_lines.append(
+        f"    Ex post & 0.00 & {res_df.loc['full_ex_post', 'cv']:.2f} \\\\"
+    )
+    latex_lines.append(f"    Ex ante & & {res_df.loc['full_ex_ante', 'cv']:.2f} \\\\")
+    latex_lines.append("\\midrule")
+
+    # Initially Informed
+    latex_lines.append(f"\\textit{{Initially Informed}} & & \\\\")
+    latex_lines.append(
+        f"    Ex post & 0.00 & {res_df.loc['informed_ex_post', 'cv']:.2f} \\\\"
+    )
+    latex_lines.append(
+        f"    Ex ante & & {res_df.loc['informed_ex_ante', 'cv']:.2f} \\\\"
+    )
+    latex_lines.append("\\midrule")
+
+    # Initially Misinformed
+    latex_lines.append(f"\\textit{{Initially Misinformed}} & & \\\\")
+    latex_lines.append(
+        f"    Ex post & 0.00 & {res_df.loc['uninformed_ex_post', 'cv']:.2f} \\\\"
+    )
+    latex_lines.append(
+        f"    Ex ante & & {res_df.loc['uninformed_ex_ante', 'cv']:.2f} \\\\"
+    )
+
+    latex_lines.append("\\bottomrule")
+    latex_lines.append("\\end{tabular}")
+
+    # Join and save
+    latex_table = "\n".join(latex_lines)
+    # Save to file
+    table_dir = path_dict["simulation_tables"] + model_name + "/"
+    if not os.path.exists(table_dir):
+        os.makedirs(table_dir)
+
+    # Save to file
+    with open(table_dir + "ex_post_ex_ante_table.tex", "w") as f:
+        f.write(latex_table)
+
+    return latex_table
+
+
 def generate_ex_post_table_for_all_types(path_dict, specs, model_name):
     """Generate ex post tables for all sex/education combinations."""
-    edu_append = ["low", "high"]
-    for sex_var, sex_label in enumerate(specs["sex_labels"]):
-        for edu_var, edu_label in enumerate(specs["education_labels"]):
-            file_append = sex_label + edu_append[edu_var]
-            sim_results_folder = path_dict["sim_results"] + model_name + "/"
+    sim_results_folder = path_dict["sim_results"] + model_name + "/"
 
-            res_df = pd.read_csv(
-                sim_results_folder + f"ex_post_realized_margins_{file_append}.csv",
-                index_col=0,
-            )
-            table_folder = path_dict["simulation_tables"] + model_name + "/"
-            os.makedirs(table_folder, exist_ok=True)
-            table = generate_ex_post_table_2(res_df)
+    res_df = pd.read_csv(
+        sim_results_folder + f"ex_post_realized_margins.csv",
+        index_col=0,
+    )
+    table_folder = path_dict["simulation_tables"] + model_name + "/"
+    os.makedirs(table_folder, exist_ok=True)
+    table = generate_ex_post_table_2(res_df)
 
-            with open(
-                table_folder + f"ex_post_realized_margins_{file_append}.tex", "w"
-            ) as f:
-                f.write(table)
+    with open(table_folder + f"ex_post_realized_margins.tex", "w") as f:
+        f.write(table)
 
 
 def generate_ex_post_table_2(res_df):

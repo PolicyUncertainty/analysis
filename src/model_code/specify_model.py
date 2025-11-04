@@ -38,8 +38,13 @@ def create_model_config_wo_informed(specs, sex_type, edu_type):
         edu_type=edu_type,
     )
 
+    if sex_type == "all":
+        batch_seps = [44]  # Full model
+    else:
+        batch_seps = [33, 43, 44]  # Fastest model single
+
     model_config = {
-        "min_period_batch_segments": [43, 44],
+        "min_period_batch_segments": batch_seps,
         "n_periods": specs["n_periods"],
         "choices": np.arange(specs["n_choices"], dtype=int),
         "deterministic_states": {
@@ -68,6 +73,7 @@ def specify_model(
     subj_unc,
     custom_resolution_age,
     sim_specs=None,
+    simulate_expectations=False,
     load_model=False,
     debug_info=None,
     sex_type="all",
@@ -98,7 +104,9 @@ def specify_model(
 
     if sim_specs is not None:
         alternative_sim_specifications, specs = define_alternative_sim_specifications(
+            path_dict=path_dict,
             sim_specs=sim_specs,
+            simulate_expectations=simulate_expectations,
             specs=specs,
             custom_resolution_age=custom_resolution_age,
             subj_unc=subj_unc,
@@ -125,13 +133,18 @@ def specify_model(
         raise ValueError("unknown utility type")
 
     if specs["ERA_moves"]:
-        file_append = "ERA_moves"
+        era_append = "ERA_moves"
     else:
-        file_append = "ERA_stays"
+        era_append = "ERA_stays"
+
+    if subj_unc:
+        exp_append = "unc"
+    else:
+        exp_append = "no_unc"
 
     model_path = (
         path_dict["intermediate_data"]
-        + f"model_{sex_type}_{edu_type}_{file_append}.pkl"
+        + f"model_{sex_type}_{edu_type}_{era_append}_{exp_append}.pkl"
     )
 
     if load_model:
@@ -147,6 +160,7 @@ def specify_model(
             model_load_path=model_path,
             alternative_sim_specifications=alternative_sim_specifications,
             debug_info=debug_info,
+            use_stochastic_sparsity=True,
         )
 
     else:
@@ -162,14 +176,22 @@ def specify_model(
             model_save_path=model_path,
             alternative_sim_specifications=alternative_sim_specifications,
             debug_info=debug_info,
+            use_stochastic_sparsity=True,
         )
 
-    print("Model specified.")
+    print("Model specified.", flush=True)
     return model
 
 
 def define_alternative_sim_specifications(
-    sim_specs, specs, subj_unc, custom_resolution_age, sex_type, edu_type
+    path_dict,
+    sim_specs,
+    simulate_expectations,
+    specs,
+    subj_unc,
+    custom_resolution_age,
+    sex_type,
+    edu_type,
 ):
     stochastic_states_transitions = {
         "job_offer": job_offer_process_transition,
@@ -186,16 +208,37 @@ def define_alternative_sim_specifications(
     # Now as stochastic in the sim objects
     model_config["stochastic_states"]["informed"] = np.arange(2, dtype=int)
 
-    stochastic_states_transitions["informed"] = informed_transition
+    if simulate_expectations:
 
-    transition_func_sim, specs = select_sim_policy_function_and_update_specs(
-        specs=specs,
-        subj_unc=subj_unc,
-        announcement_age=sim_specs["announcement_age"],
-        SRA_at_start=sim_specs["SRA_at_start"],
-        SRA_at_retirement=sim_specs["SRA_at_retirement"],
-        custom_resolution_age=custom_resolution_age,
-    )
+        def degenerate_informed_transition(informed):
+            informed_prob = jax.lax.select(
+                informed == 1,
+                on_true=jnp.array([0.0, 1.0]),
+                on_false=jnp.array([1.0, 0.0]),
+            )
+            return informed_prob
+
+        stochastic_states_transitions["informed"] = degenerate_informed_transition
+
+        transition_func_sim, specs = select_solution_transition_func_and_update_specs(
+            path_dict=path_dict,
+            specs=specs,
+            subj_unc=subj_unc,
+            custom_resolution_age=custom_resolution_age,
+        )
+
+    else:
+        stochastic_states_transitions["informed"] = informed_transition
+
+        transition_func_sim, specs = select_sim_policy_function_and_update_specs(
+            specs=specs,
+            subj_unc=subj_unc,
+            announcement_age=sim_specs["announcement_age"],
+            SRA_at_start=sim_specs["SRA_at_start"],
+            SRA_at_retirement=sim_specs["SRA_at_retirement"],
+            custom_resolution_age=custom_resolution_age,
+        )
+
     stochastic_states_transitions["policy_state"] = transition_func_sim
 
     # Now specify the dict:
@@ -218,6 +261,7 @@ def specify_and_solve_model(
     load_model,
     load_solution,
     sim_specs=None,
+    simulate_expectations=False,
     sex_type="all",
     edu_type="all",
     util_type="add",
@@ -240,6 +284,7 @@ def specify_and_solve_model(
         custom_resolution_age=custom_resolution_age,
         load_model=load_model,
         sim_specs=sim_specs,
+        simulate_expectations=simulate_expectations,
         debug_info=debug_info,
         sex_type=sex_type,
         edu_type=edu_type,

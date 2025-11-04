@@ -21,7 +21,7 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
     load_and_set_start_params,
 )
 
-model_name = "em3_women"
+model_name = "alg1_sparse_inf_women"
 params_to_estimate_names = (
     women_disutil_params
     + women_disability_params
@@ -34,11 +34,10 @@ util_type = "add"
 old_sample_only = False
 
 LOAD_LAST_ESTIMATE = False
-LOAD_SOL_MODEL = False
 SAVE_RESULTS = True
 USE_WEIGHTS = False
 
-sample_name = "figures" if old_sample_only else "full"
+sample_name = "old" if old_sample_only else "full"
 
 print(
     f"Running estimation for model: {model_name}; sample: {sample_name}, {sex_type}, {edu_type}, {util_type}",
@@ -47,7 +46,7 @@ print(
 
 if LOAD_LAST_ESTIMATE:
     last_estimate = pkl.load(
-        open(paths_dict["struct_results"] + f"est_params_informed_fixed3.pkl", "rb")
+        open(paths_dict["struct_results"] + f"est_params_alg1_informed_men.pkl", "rb")
     )
 else:
     last_estimate = None

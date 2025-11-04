@@ -87,8 +87,8 @@ kappa_low_women: 0
 # Job separation params are set internally driven by data
 
 # Taste shock scale
-taste_shock_scale_men: 1.0
-taste_shock_scale_women: 1.0
+taste_shock_scale_men: 0.3
+taste_shock_scale_women: 0.3
 
 # # SRA firing params - Starting at intercept 4.5 (gives ~57% probability)
 # SRA_firing_logit_intercept_men_low: 4.5

@@ -38,7 +38,7 @@ sra_at_63 = 67.0
 base_label = "Baseline with Misinformed"
 cf_label = "Only Informed"
 
-load_model = True  # informed state as type
+load_unc_model = True  # informed state as type
 load_unc_solution = None  # baseline solution conntainer
 model_solution = None  # actual baseline model solution object (None = create new)
 load_df_baseline = None  # True = load existing df, False = create new df, None = create but do not save
@@ -56,7 +56,7 @@ start_simulation_print(
     sra_63=sra_at_63,
     uncertainty=True,
     misinformation=True,
-    load_model=load_model,
+    load_model=load_unc_model,
     load_solution=load_unc_solution,
     load_df=load_df_baseline,
 )
@@ -73,7 +73,7 @@ df_base, model_solved_unc = solve_and_simulate_scenario(
     df_exists=load_df_baseline,
     only_informed=False,
     solution_exists=load_unc_solution,
-    sol_model_exists=load_model,
+    sol_model_exists=load_unc_model,
     model_solution=model_solution,
     util_type=util_type,
 )
@@ -86,7 +86,7 @@ start_simulation_print(
     sra_63=sra_at_63,
     uncertainty=True,
     misinformation=False,
-    load_model=load_model,
+    load_model=load_unc_model,
     load_solution=load_unc_solution,
     load_df=load_df_unbiased,
 )
@@ -103,7 +103,7 @@ df_cf, _ = solve_and_simulate_scenario(
     df_exists=load_df_unbiased,
     only_informed=True,
     solution_exists=load_unc_solution,
-    sol_model_exists=load_model,
+    sol_model_exists=load_unc_model,
     model_solution=model_solved_unc,  # use same solution as baseline
     util_type=util_type,
 )
@@ -151,16 +151,19 @@ for group_label, mask_func in label_dict.items():
         params=params,
         specs=specs,
     )
+    result_df.at[0, "cv_cf"] = cv_cf
+
+    filename = f"debias_{group_label}.csv"
+    save_folder = path_dict["sim_results"] + model_name + "/"
+    result_df.to_csv(save_folder + filename)
+    print(f"Saved: {filename}")
 
     # Create aggregate comparison table
     aggregate_comparison_baseline_cf(
-        result_df=result_df,
-        base_label=base_label,
-        cf_label=cf_label,
         path_dict=path_dict,
         model_name=model_name,
         file_append=group_label,
-        cv=cv_cf,
+        result_df=result_df,
     )
 
 # df_lc_baseline = calc_life_cycle_detailed(df_base)

@@ -4,23 +4,17 @@ import pandas as pd
 
 
 def generate_baseline_expectation_table_for_all_types(path_dict, specs, model_name):
-    edu_append = ["low", "high"]
-    for sex_var, sex_label in enumerate(specs["sex_labels"]):
-        for edu_var, edu_label in enumerate(specs["education_labels"]):
-            file_append = sex_label + edu_append[edu_var]
-            sim_results_folder = path_dict["sim_results"] + model_name + "/"
+    sim_results_folder = path_dict["sim_results"] + model_name + "/"
 
-            res_df = pd.read_csv(
-                sim_results_folder + f"ex_ante_expected_margins_{file_append}.csv",
-                index_col=0,
-            )
-            table_folder = path_dict["simulation_tables"] + model_name + "/"
-            os.makedirs(table_folder, exist_ok=True)
-            table = generate_baseline_expectation_table(res_df)
-            with open(
-                table_folder + f"ex_ante_expected_margins_{file_append}.tex", "w"
-            ) as f:
-                f.write(table)
+    res_df = pd.read_csv(
+        sim_results_folder + f"ex_ante_expected_margins.csv",
+        index_col=0,
+    )
+    table_folder = path_dict["simulation_tables"] + model_name + "/"
+    os.makedirs(table_folder, exist_ok=True)
+    table = generate_baseline_expectation_table(res_df)
+    with open(table_folder + f"ex_ante_expected_margins.tex", "w") as f:
+        f.write(table)
 
 
 def generate_baseline_expectation_table(res_df):

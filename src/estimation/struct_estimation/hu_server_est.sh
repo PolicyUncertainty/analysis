@@ -8,7 +8,7 @@
 #SBATCH --time=15:00:00
 #SBATCH --mem=120GB
 #SBATCH --partition=gpu
-#SBATCH --gres=gpu:h100nvl:1
+#SBATCH --gres=gpu:a10080gb:1
 #SBATCH --qos=standard
 
 module add cuda/12.4.1

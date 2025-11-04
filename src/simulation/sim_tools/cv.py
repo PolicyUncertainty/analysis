@@ -4,8 +4,6 @@ import scipy.optimize as opt
 
 def calc_compensated_variation(df_base, df_cf, params, specs):
     """We assume the dfs have resetted index."""
-    df_base = create_real_utility(df_base, specs)
-    df_cf = create_real_utility(df_cf, specs)
 
     df_base = add_cons_scale_and_adult_hh_size(df_base, specs)
 
@@ -87,19 +85,4 @@ def add_cons_scale_and_adult_hh_size(df, specs):
     hh_size = 1 + has_partner_int
     df.loc[:, "cons_scale"] = np.sqrt(hh_size)
     df.loc[:, "hh_size"] = hh_size
-    return df
-
-
-def create_realized_taste_shock(df, specs):
-    df.loc[:, "real_taste_shock"] = np.nan
-    for choice in range(specs["n_choices"]):
-        df.loc[df["choice"] == choice, "real_taste_shock"] = df.loc[
-            df["choice"] == choice, f"taste_shocks_{choice}"
-        ]
-    return df
-
-
-def create_real_utility(df, specs):
-    df = create_realized_taste_shock(df, specs)
-    df.loc[:, "real_util"] = df["utility"] + df["real_taste_shock"]
     return df

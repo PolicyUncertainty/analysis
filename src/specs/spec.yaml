@@ -1,7 +1,7 @@
 ---
 ################
 # Current model name:
-model_name: em3
+model_name: alg1_sparse
 util_type: add
 ERA_moves: false
 
@@ -128,7 +128,7 @@ end_age_transition_estimation: 75
 ###############################################################################
 n_agents: 100_000
 # We have around 500 30-year olds in the data. This yields then 50_000
-n_multiply_start_obs: 100
+n_multiply_start_obs: 1000
 seed: 123
 ###############################################################################
 # Life expectancy parameters from simulation

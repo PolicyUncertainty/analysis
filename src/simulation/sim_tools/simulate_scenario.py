@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 from model_code.pension_system.early_retirement_paths import check_very_long_insured
@@ -23,6 +24,7 @@ def solve_and_simulate_scenario(
     SRA_at_retirement,
     announcement_age,
     model_name,
+    simulate_expectations=False,
     initial_states=None,
     df_exists=True,
     only_informed=False,
@@ -32,6 +34,7 @@ def solve_and_simulate_scenario(
     sex_type="all",
     edu_type="all",
     util_type="add",
+    seed=None,
 ):
     """
     Solve and simulate a policy scenario for the retirement model.
@@ -136,6 +139,7 @@ def solve_and_simulate_scenario(
             load_model=sol_model_exists,
             load_solution=solution_exists,
             sim_specs=sim_specs,
+            simulate_expectations=simulate_expectations,
             sex_type=sex_type,
             edu_type=edu_type,
             util_type=util_type,
@@ -147,7 +151,9 @@ def solve_and_simulate_scenario(
         model_solved = model_solution
         alternative_sim_specifications, alternative_sim_specs = (
             define_alternative_sim_specifications(
+                path_dict=path_dict,
                 sim_specs=sim_specs,
+                simulate_expectations=simulate_expectations,
                 specs=specs,
                 subj_unc=subj_unc,
                 custom_resolution_age=model_solved.model_specs["resolution_age"],
@@ -166,6 +172,7 @@ def solve_and_simulate_scenario(
         model_solved=model_solved,
         only_informed=only_informed,
         initial_states=initial_states,
+        seed=seed,
     )
     if df_exists is None:
         # do not save df
@@ -182,6 +189,7 @@ def simulate_scenario(
     initial_SRA,
     only_informed=False,
     initial_states=None,
+    seed=None,
 ):
     if initial_states is None:
         # Generate initial states from observed data
@@ -194,9 +202,12 @@ def simulate_scenario(
         )
     specs = generate_derived_and_data_derived_specs(path_dict)
 
+    if seed is None:
+        seed = specs["seed"]
+
     df = model_solved.simulate(
         states_initial=initial_states,
-        seed=specs["seed"],
+        seed=seed,
     )
     # Kick out dead people
     df = df[df["health"] != 3].copy()
@@ -216,9 +227,9 @@ def create_df_name(
 ):
     # Create df name
     if only_informed:
-        name_append = "debiased.csv"
+        name_append = "informed.csv"
     else:
-        name_append = "biased.csv"
+        name_append = "baseline.csv"
 
     if custom_resolution_age is None:
         specs = read_and_derive_specs(path_dict["specs"])
@@ -352,6 +363,21 @@ def _add_very_long_insured_claim(df, specs):
     return df
 
 
+def create_realized_taste_shock(df, specs):
+    df.loc[:, "real_taste_shock"] = np.nan
+    for choice in range(specs["n_choices"]):
+        df.loc[df["choice"] == choice, "real_taste_shock"] = df.loc[
+            df["choice"] == choice, f"taste_shocks_{choice}"
+        ]
+    return df
+
+
+def create_real_utility(df, specs):
+    df = create_realized_taste_shock(df, specs)
+    df.loc[:, "real_util"] = df["utility"] + df["real_taste_shock"]
+    return df
+
+
 def create_additional_variables(df, specs):
     """Wrapper function to create additional variables in the simulated dataframe."""
     df = df.copy()
@@ -362,4 +388,5 @@ def create_additional_variables(df, specs):
     df = _compute_actual_retirement_age(df)
     df = _add_very_long_insured_claim(df, specs)
     df = _compute_initial_informed_status(df, specs)
+    df = create_real_utility(df, specs)
     return df

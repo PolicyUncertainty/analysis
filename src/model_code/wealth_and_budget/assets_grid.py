@@ -3,11 +3,12 @@ import numpy as np
 
 def create_end_of_period_assets():
     """Create a saving grid with sections."""
-    section_1 = np.arange(start=0, stop=10, step=1)  # 10
-    section_2 = np.arange(start=10, stop=20, step=5)  # 4
-    section_3 = np.arange(start=20, stop=50, step=15)  # 2
-    section_4 = np.arange(start=50, stop=100, step=30)  # 2
-    section_5 = [100, 500, 10_000]  # 1
+    section_1 = np.arange(start=0, stop=20, step=5)  # 4
+    section_2 = np.arange(start=20, stop=50, step=10)  # 3
+    section_3 = np.arange(start=50, stop=300, step=25)  # 10
+    section_4 = np.arange(start=300, stop=500, step=50)  # 4
+    section_5 = np.arange(start=500, stop=1000, step=100)  # 5
+    section_6 = [5_000, 10_000]  # 2
     savings_grid = np.concatenate(
         [
             section_1,
@@ -15,6 +16,7 @@ def create_end_of_period_assets():
             section_3,
             section_4,
             section_5,
+            section_6,
         ]
     ).astype(float)
     # The steps above are made in thousands, so we multiply by 1000

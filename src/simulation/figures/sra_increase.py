@@ -54,8 +54,8 @@ def plot_behavioral_changes(ax, df_unc, df_no_unc, var, ylabel, title):
     change_unc = df_unc["cf_" + var] / df_unc["base_" + var] - 1
     change_no_unc = df_no_unc["cf_" + var] / df_no_unc["base_" + var] - 1
 
-    ax.plot(df_unc["sra_at_63"], change_unc * 100, label="With Uncertainty")
-    ax.plot(df_no_unc["sra_at_63"], change_no_unc * 100, label="Without Uncertainty")
+    ax.plot(df_unc["sra_at_63"], change_unc * 100, label="with uncertainty")
+    ax.plot(df_no_unc["sra_at_63"], change_no_unc * 100, label="without uncertainty")
 
     ax.set_ylabel(ylabel)
     # ax.set_title(title)
@@ -72,8 +72,8 @@ def plot_retirement_age_changes(ax, df_unc, df_no_unc, title, show_legend=False)
         df_no_unc["cf_ret_age_excl_disabled"] - df_no_unc["base_ret_age_excl_disabled"]
     )
 
-    ax.plot(df_unc["sra_at_63"], change_ret_unc, label="With Uncertainty")
-    ax.plot(df_no_unc["sra_at_63"], change_ret_no_unc, label="Without Uncertainty")
+    ax.plot(df_unc["sra_at_63"], change_ret_unc, label="with uncertainty")
+    ax.plot(df_no_unc["sra_at_63"], change_ret_no_unc, label="without uncertainty")
 
     base_sra = df_unc["sra_at_63"].iloc[0]
     ax.plot(
@@ -88,7 +88,7 @@ def plot_retirement_age_changes(ax, df_unc, df_no_unc, title, show_legend=False)
     # ax.set_title(title)
 
     if show_legend:
-        ax.legend()
+        ax.legend(frameon=False)
 
     return ax
 
@@ -180,7 +180,7 @@ def sra_increase_aggregate_plot_by_het(path_dict, fig_name, model_name, het_name
 
     # Add legend below the middle row plots
     axs[1, 1].legend(
-        loc="lower center", bbox_to_anchor=(0.5, -0.2), ncol=2, frameon=True
+        loc="lower center", bbox_to_anchor=(0.5, -0.2), ncol=2, frameon=False
     )
 
     plt.tight_layout()
@@ -259,9 +259,9 @@ def sra_increase_aggregate_plot(path_dict, model_name):
     )
     ax1.set_xticks(reform_SRA)
     ax1.set_xlabel("SRA Reform")
-    ax1.legend()
+    ax1.legend(frameon=False)
     plt.tight_layout()
-    fig1.savefig(plot_folder + f"cf_increase_savings.png", transparent=True)
+    fig1.savefig(plot_folder + f"cf_increase_savings.png", transparent=True, dpi=100)
     fig1.savefig(plot_folder + f"cf_increase_savings.pdf")
 
     # Plot 2: Working Hours Below 63
@@ -276,9 +276,11 @@ def sra_increase_aggregate_plot(path_dict, model_name):
     )
     ax2.set_xticks(reform_SRA)
     ax2.set_xlabel("SRA Reform")
-    ax2.legend()
+    ax2.legend(frameon=False)
     plt.tight_layout()
-    fig2.savefig(plot_folder + f"cf_increase_labor_below_63.png", transparent=True)
+    fig2.savefig(
+        plot_folder + f"cf_increase_labor_below_63.png", transparent=True, dpi=100
+    )
     fig2.savefig(plot_folder + f"cf_increase_labor_below_63.pdf")
 
     # Plot 3: Life Time Working Hours
@@ -293,9 +295,11 @@ def sra_increase_aggregate_plot(path_dict, model_name):
     )
     ax3.set_xticks(reform_SRA)
     ax3.set_xlabel("SRA Reform")
-    ax3.legend()
+    ax3.legend(frameon=False)
     plt.tight_layout()
-    fig3.savefig(plot_folder + f"cf_increase_labor_lifetime.png", transparent=True)
+    fig3.savefig(
+        plot_folder + f"cf_increase_labor_lifetime.png", transparent=True, dpi=100
+    )
     fig3.savefig(plot_folder + f"cf_increase_labor_lifetime.pdf")
 
     # Plot 4: Retirement Age
@@ -306,7 +310,9 @@ def sra_increase_aggregate_plot(path_dict, model_name):
     ax4.set_xticks(reform_SRA)
     ax4.set_xlabel("SRA Reform")
     plt.tight_layout()
-    fig4.savefig(plot_folder + f"cf_increase_retirement_age.png", transparent=True)
+    fig4.savefig(
+        plot_folder + f"cf_increase_retirement_age.png", transparent=True, dpi=100
+    )
     fig4.savefig(plot_folder + f"cf_increase_retirement_age.pdf")
 
     return fig1, fig2, fig3, fig4

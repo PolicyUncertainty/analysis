@@ -654,7 +654,7 @@ def plot_life_cycle_choice_probs_paper(
 
             # Only add legend to retirement plots (choice == 0)
             if choice == 0:
-                ax.legend(loc="upper left")
+                ax.legend(loc="upper left", frameon=False)
 
             fig.tight_layout()
 
@@ -668,7 +668,7 @@ def plot_life_cycle_choice_probs_paper(
                 paper_plots_folder
                 + f"observed_model_fit_{sex_label}_{choice_name}.png",
                 transparent=True,
-                dpi=300,
+                dpi=100,
             )
             plt.close(fig)
 
@@ -678,9 +678,7 @@ def plot_life_cycle_choice_probs(
     data_decision,
     save_folder,
 ):
-    df_int = data_decision[
-        (data_decision["age"] < 75) & (data_decision["lagged_choice"] != 0)
-    ].copy()
+    df_int = data_decision[(data_decision["age"] < 75)].copy()
 
     choice_share_labels = ["Choice Share Men", "Choice Share Women"]
     for sex_var in specs["sex_grid"]:

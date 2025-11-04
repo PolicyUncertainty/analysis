@@ -5,7 +5,7 @@ import pandas as pd
 
 
 def aggregate_comparison_baseline_cf(
-    result_df, base_label, cf_label, path_dict, model_name, file_append, cv=None
+    path_dict, model_name, file_append, result_df=None
 ):
     """
     Create LaTeX table comparing baseline and counterfactual aggregate results.
@@ -25,6 +25,12 @@ def aggregate_comparison_baseline_cf(
     cv : float, optional
         Compensating variation value to display at bottom
     """
+    if result_df is None:
+        load_folder = path_dict["sim_results"] + model_name + "/"
+        filename = f"debias_{file_append}.csv"
+        result_df = pd.read_csv(load_folder + filename, index_col=0)
+
+    cv = result_df.at[0, "cv_cf"]
 
     # Define the metrics we want to display
     metrics = {
@@ -33,19 +39,19 @@ def aggregate_comparison_baseline_cf(
         "consumption_below_63": "Annual Consumption",
         "savings_below_63": "Annual Savings",
         # Retirement
-        "ret_age": "Retirement Age",
-        "ret_age_excl_disabled": "Retirement Age (excl. Disability)",
-        "pension_wealth_at_ret": "Pension Wealth (PV at Retirement)",
-        "pension_wealth_at_ret_excl_disability": "Pension Wealth (excl. Disability)",
-        "private_wealth_at_ret": "Financial Wealth at Retirement",
-        "private_wealth_at_ret_excl_disability": "Financial Wealth (excl. Disability)",
-        "pensions": "Annual Pension Income",
-        "pensions_excl_disability": "Annual Pension Income (excl. Disability)",
-        "share_disability_pensions": "Share with Disability Pension",
-        "pensions_share_below_63": "Share with Pension before 63",
-        "share_below_SRA": "Share Retiring below SRA",
-        "share_very_long_insured": "Share with Very Long Insured",
-        "share_rejected_disability_pensions": "Share Rejected Disability Pensions",
+        # "ret_age": "Retirement Age",
+        "ret_age_excl_disabled": "Retirement Age",
+        # "pension_wealth_at_ret": "Pension Wealth (PV at Retirement)",
+        "pension_wealth_at_ret_excl_disability": "Pension Wealth",
+        # "private_wealth_at_ret": "Financial Wealth at Retirement",
+        "private_wealth_at_ret_excl_disability": "Financial Wealth",
+        # "pensions": "Annual Pension Income",
+        # "pensions_excl_disability": "Annual Pension Income (excl. Disability)",
+        # "share_disability_pensions": "Share with Disability Pension",
+        # "pensions_share_below_63": "Share with Pension before 63",
+        # "share_below_SRA": "Share Retiring below SRA",
+        # "share_very_long_insured": "Share with Very Long Insured",
+        # "share_rejected_disability_pensions": "Share Rejected Disability Pensions",
         # Lifecycle (30+)
         "lifecycle_working_hours": "Annual Labor Supply (hrs)",
         "lifecycle_avg_wealth": "Average Financial Wealth",
@@ -59,19 +65,19 @@ def aggregate_comparison_baseline_cf(
             "savings_below_63",
         ],
         "Retirement": [
-            "ret_age",
+            # "ret_age",
             "ret_age_excl_disabled",
-            "pension_wealth_at_ret",
+            # "pension_wealth_at_ret",
             "pension_wealth_at_ret_excl_disability",
-            "private_wealth_at_ret",
+            # "private_wealth_at_ret",
             "private_wealth_at_ret_excl_disability",
-            "pensions",
-            "pensions_excl_disability",
-            "share_disability_pensions",
-            "pensions_share_below_63",
-            "share_below_SRA",
-            "share_very_long_insured",
-            "share_rejected_disability_pensions",
+            # "pensions",
+            # "pensions_excl_disability",
+            # "share_disability_pensions",
+            # "pensions_share_below_63",
+            # "share_below_SRA",
+            # "share_very_long_insured",
+            # "share_rejected_disability_pensions",
         ],
         "Lifecycle (30+)": ["lifecycle_working_hours", "lifecycle_avg_wealth"],
     }
@@ -122,7 +128,7 @@ def aggregate_comparison_baseline_cf(
     latex_lines.append(r"  \begin{tabular}{lccc}")
     latex_lines.append(r"    \toprule")
     latex_lines.append(
-        f"    Outcome & {base_label} & {cf_label} & Difference (\\%) \\\\"
+        f"    Outcome & \\makecell{{Baseline with \\\\ Misinformed}} & \\makecell{{Only \\\\ Informed}} & Difference (\\%) \\\\"
     )
     latex_lines.append(r"    \midrule")
 

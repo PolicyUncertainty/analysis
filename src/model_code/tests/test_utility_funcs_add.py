@@ -54,7 +54,7 @@ def test_consumption_cale(partner_state, sex, education, period, paths_and_specs
     )
     has_partner = int(partner_state > 0)
     nb_children = model_specs["children_by_state"][sex, education, has_partner, period]
-    hh_size = 1 + has_partner + nb_children
+    hh_size = 1 + has_partner
     np.testing.assert_almost_equal(cons_scale, np.sqrt(hh_size))
     np.testing.assert_almost_equal(hh_size_calc, hh_size)
 
@@ -106,6 +106,8 @@ def test_utility_func(
         "disutil_partner_retired_women": -disutil_unemployed - 1,
         "disutil_children_ft_work_low": 0.1,
         "disutil_children_ft_work_high": 0.1,
+        "disutil_children_pt_work_low": 0.2,
+        "disutil_children_pt_work_high": 0.2,
         "bequest_scale_low_men": 2,
         "bequest_scale_high_men": 1.5,
         "bequest_scale_low_women": 1.8,
@@ -195,6 +197,16 @@ def test_utility_func(
     # Test part-time work for women (choice = 2)
     if sex == 1:
         disutil_factor_pt_work = params[f"disutil_pt_work_{health_str}_{sex_str}"]
+        has_partner_int = int(partner_state > 0)
+        nb_children = model_specs["children_by_state"][
+            sex, education, has_partner_int, period
+        ]
+        disutil_factor_pt_work += (
+            params[f"disutil_children_pt_work_high"] * nb_children * education
+        )
+        disutil_factor_pt_work += (
+            params["disutil_children_pt_work_low"] * nb_children * (1 - education)
+        )
 
         np.testing.assert_almost_equal(
             utility_func(
@@ -276,6 +288,8 @@ def test_marginal_utility(
         "disutil_partner_retired_women": -disutil_unemployed - 1,
         "disutil_children_ft_work_low": 0.1,
         "disutil_children_ft_work_high": 0.1,
+        "disutil_children_pt_work_low": 0.2,
+        "disutil_children_pt_work_high": 0.2,
         "bequest_scale_low_men": 2,
         "bequest_scale_high_men": 1.5,
         "bequest_scale_low_women": 1.8,
@@ -357,6 +371,8 @@ def test_inv_marginal_utility(
         "disutil_partner_retired_women": -disutil_unemployed - 1,
         "disutil_children_ft_work_low": 0.1,
         "disutil_children_ft_work_high": 0.1,
+        "disutil_children_pt_work_low": 0.2,
+        "disutil_children_pt_work_high": 0.2,
         "bequest_scale_low_men": 2,
         "bequest_scale_high_men": 1.5,
         "bequest_scale_low_women": 1.8,

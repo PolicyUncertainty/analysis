@@ -71,6 +71,7 @@ def test_budget_unemployed(
         partner_state=partner_state,
         education=education,
         sex=sex,
+        alg_1_claim=0,
         lagged_choice=1,
         experience=exp_cont,
         asset_end_of_previous_period=savings,
@@ -120,9 +121,7 @@ def test_budget_unemployed(
         specs_internal["unemployment_wealth_thresh"] + potential_unemployment_benefits
     )
     reduced_benefits_means_test = savings_scaled < reduced_means_test_threshold
-    above_58 = period >= 58 - specs_internal["start_age"]
-    if above_58:
-        net_partner_plus_child_benefits += own_unemployment_benefits
+
     if means_test:
         income = np.maximum(
             potential_unemployment_benefits, net_partner_plus_child_benefits
@@ -182,8 +181,8 @@ def test_budget_worker(
     specs_internal = copy.deepcopy(specs)
     gamma_array = np.array([[gamma, gamma - 0.01], [gamma / 2, gamma / 2 - 0.01]])
     specs_internal["gamma_0"] = gamma_array
-    specs_internal["gamma_1"] = gamma_array
-    specs_internal["gamma_2"] = gamma_array - 1
+    specs_internal["gamma_ln_exp"] = gamma_array
+    specs_internal["gamma_above_50"] = gamma_array - 1
 
     exp_cont = scale_experience_years(
         experience_years=experience,
@@ -198,18 +197,19 @@ def test_budget_worker(
         education=education,
         lagged_choice=working_choice,
         sex=sex,
+        alg_1_claim=0,
         experience=exp_cont,
         asset_end_of_previous_period=savings,
         income_shock_previous_period=income_shock,
         model_specs=specs_internal,
     )
+    age = specs_internal["start_age"] + period
 
     savings_scaled = savings * specs_internal["wealth_unit"]
-    above_50_age = specs_internal["start_age"] + period >= 50
     hourly_wage = np.exp(
         gamma_array[sex, education]
         + gamma_array[sex, education] * np.log(experience + 1)
-        + (gamma_array[sex, education] - 1) * experience**2
+        + (gamma_array[sex, education] - 1) * (age - 50) * (age >= 50)
         + income_shock
     )
     if working_choice == 2:
@@ -234,7 +234,7 @@ def test_budget_worker(
     income_after_ssc = labor_income_year - sscs_worker
 
     has_partner_int = (partner_state > 0).astype(int)
-    unemployment_benefits = calc_unemployment_benefits(
+    unemployment_benefits, _ = calc_unemployment_benefits(
         assets=savings_scaled,
         education=education,
         sex=sex,
@@ -344,6 +344,7 @@ def test_retiree(
         partner_state=partner_state,
         education=education,
         lagged_choice=0,
+        alg_1_claim=0,
         sex=sex,
         experience=scaled_pension_points,
         asset_end_of_previous_period=savings,
@@ -356,7 +357,7 @@ def test_retiree(
     income_after_ssc = pension_year - calc_health_ltc_contr(pension_year)
 
     has_partner_int = (partner_state > 0).astype(int)
-    unemployment_benefits = calc_unemployment_benefits(
+    unemployment_benefits, _ = calc_unemployment_benefits(
         assets=savings_scaled,
         education=education,
         sex=sex,
@@ -468,6 +469,7 @@ def test_fresh_retiree(
         lagged_choice=0,
         policy_state=policy_state,
         sex=sex,
+        partner_state=partner_state,
         education=education,
         experience=exp_cont_prev,
         informed=informed,
@@ -480,6 +482,7 @@ def test_fresh_retiree(
         partner_state=partner_state,
         education=education,
         lagged_choice=0,
+        alg_1_claim=0,
         sex=sex,
         experience=pension_points_scaled,
         asset_end_of_previous_period=savings,
@@ -513,6 +516,12 @@ def test_fresh_retiree(
     # We have only integer experience. So total_pension points should be equal to pp_exp_int
     np.testing.assert_array_almost_equal(total_pens_points, pp_exp_int)
 
+    has_partner_int = (partner_state > 0).astype(int)
+    mothers_pension = (
+        sex * specs_internal["max_children"][1, education, has_partner_int] * 3
+    )
+    total_pens_points += mothers_pension
+
     if early_retirement:
         if informed == 1:
             ERP = specs_internal["ERP"]
@@ -520,12 +529,12 @@ def test_fresh_retiree(
             ERP = specs_internal["uninformed_ERP"][education]
 
         if health == 2:
-            retirement_age_difference = np.minimum(3, retirement_age_difference)
+            penalty_years_disability = np.minimum(63 - actual_retirement_age, 3)
             average_points_work_span = total_pens_points / (actual_retirement_age - 18)
-            disability_pens_points = average_points_work_span * (SRA_at_retirement - 18)
+            disability_pens_points = average_points_work_span * (65 - 18)
 
             reduced_pension_points = (
-                1 - retirement_age_difference * ERP
+                1 - penalty_years_disability * specs_internal["ERP"]
             ) * disability_pens_points
         else:
             reduced_pension_points = (
@@ -548,7 +557,7 @@ def test_fresh_retiree(
     income_after_ssc = pension_year - calc_health_ltc_contr(pension_year)
 
     has_partner_int = (partner_state > 0).astype(int)
-    unemployment_benefits = calc_unemployment_benefits(
+    unemployment_benefits, _ = calc_unemployment_benefits(
         assets=savings_scaled,
         education=education,
         sex=sex,
@@ -628,6 +637,7 @@ def test_informed(
         lagged_choice=np.array(0),
         policy_state=np.array(8),
         sex=0,
+        partner_state=0,
         education=0,
         experience=exp_cont_prev,
         informed=0,
@@ -640,6 +650,7 @@ def test_informed(
         lagged_choice=np.array(0),
         policy_state=np.array(8),
         sex=0,
+        partner_state=0,
         education=0,
         experience=exp_cont_prev,
         informed=1,

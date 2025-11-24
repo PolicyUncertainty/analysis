@@ -4,6 +4,7 @@ This module contains the estimation logic for health state transition probabilit
 using parametric logit regression. The module supports both kernel smoothing
 (commented out) and parametric estimation approaches.
 """
+
 import numpy as np
 import pandas as pd
 import statsmodels.formula.api as smf
@@ -147,6 +148,22 @@ def estimate_health_transitions_parametric(paths_dict, specs):
     health_transition_matrix = pd.DataFrame(
         index=index, data=None, columns=["transition_prob"]
     )
+
+    # Create DataFrame to store parameters and standard errors
+    param_index = pd.MultiIndex.from_product(
+        [
+            specs["sex_labels"],
+            specs["education_labels"],
+            observed_health_labels,
+        ],
+        names=["sex", "education", "health"],
+    )
+
+    health_params = pd.DataFrame(
+        index=param_index,
+        columns=["const", "age", "const_ser", "age_ser"],
+    )
+
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
         for edu_var, edu_label in enumerate(specs["education_labels"]):
             for observed_health_var in observed_health_vars:
@@ -164,6 +181,20 @@ def estimate_health_transitions_parametric(paths_dict, specs):
                 formula = y_var + " ~ " + " + ".join(x_vars)
                 model = smf.logit(formula=formula, data=data)
                 result = model.fit()
+
+                # Save parameters and standard errors
+                health_params.loc[
+                    (sex_label, edu_label, observed_health_label), "const"
+                ] = result.params["Intercept"]
+                health_params.loc[
+                    (sex_label, edu_label, observed_health_label), "age"
+                ] = result.params["age"]
+                health_params.loc[
+                    (sex_label, edu_label, observed_health_label), "const_ser"
+                ] = result.bse["Intercept"]
+                health_params.loc[
+                    (sex_label, edu_label, observed_health_label), "age_ser"
+                ] = result.bse["age"]
 
                 # Compute the transition probabilities
                 transition_probabilities = result.predict(
@@ -198,8 +229,11 @@ def estimate_health_transitions_parametric(paths_dict, specs):
                     "transition_prob",
                 ] = transition_probabilities
 
-    # Save the results to a CSV file
+    # Save the results to CSV files
     out_file_path = paths_dict["first_step_results"] + "health_transition_matrix.csv"
     health_transition_matrix.to_csv(out_file_path)
+
+    params_file_path = paths_dict["first_step_results"] + "health_transition_params.csv"
+    health_params.to_csv(params_file_path)
 
     return health_transition_matrix

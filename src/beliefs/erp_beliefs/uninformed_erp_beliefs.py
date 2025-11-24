@@ -33,7 +33,16 @@ def calculate_uninformed_erp_beliefs(df, specs):
             std_error = np.nan
         else:
             avg_belief = df_uninformed["belief_pens_deduct"].median()
-            std_error = df_uninformed["belief_pens_deduct"].sem()
+            # Standard error of median
+            # Bootstrap standard error of median
+            n_bootstrap = 10000
+            bootstrap_medians = [
+                df_uninformed["belief_pens_deduct"]
+                .sample(n=len(df_uninformed), replace=True)
+                .median()
+                for _ in range(n_bootstrap)
+            ]
+            std_error = np.std(bootstrap_medians)
 
         # Add results
         results = pd.concat(

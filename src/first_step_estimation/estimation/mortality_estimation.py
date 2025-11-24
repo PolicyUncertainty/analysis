@@ -4,6 +4,7 @@ This module contains the estimation logic for mortality probabilities
 using proportional hazard models with demographic controls.
 The estimation follows Kroll Lampert 2008 / Haan Schaller et al. 2024.
 """
+
 import itertools
 
 import matplotlib.pyplot as plt
@@ -47,14 +48,13 @@ def estimate_mortality(paths_dict, specs):
     )
 
     mortality_df.reset_index(drop=True, inplace=True)
-
     # plain life table data
     lifetable_df = mortality_df[["age", "sex", "death_prob"]].copy()
     lifetable_df.drop_duplicates(inplace=True)
 
     # estimation sample - as in Kroll Lampert 2008 / Haan Schaller et al. 2024
     df = pd.read_pickle(
-        paths_dict["intermediate_data"]
+        paths_dict["first_step_data"]
         + "mortality_transition_estimation_sample_duplicated.pkl"
     )
     # df initial values i.e. first observations (+ sex column)
@@ -134,11 +134,37 @@ def estimate_mortality(paths_dict, specs):
         print(res)
         print(res.params)
 
+        # Compute standard errors using numerical Hessian
+        print(f"Computing standard errors for {sex_label}...")
+        hessian = numerical_hessian(
+            func=loglike,
+            params=res.params,
+            epsilon=1e-5,
+            data=filtered_df,
+            start_data=filtered_start_df,
+        )
+        # Invert Hessian to get variance-covariance matrix
+        # Note: Hessian is already negative of the second derivative for maximization
+        inv_hess = np.linalg.inv(-hessian)
+        std_errors = np.sqrt(np.abs(np.diag(inv_hess)))
+
+        # Add standard errors to results
+        res.params["std_error"] = std_errors
+        print("Standard errors computed successfully")
+
         # save the results
         to_csv_summary = res.params.copy()
         to_csv_summary["hazard_ratio"] = np.exp(to_csv_summary["value"])
+
+        # Calculate standard errors for hazard ratios using delta method
+        # SE(exp(beta)) = exp(beta) * SE(beta)
+        to_csv_summary["hazard_ratio_std_error"] = (
+            to_csv_summary["hazard_ratio"] * to_csv_summary["std_error"]
+        )
+
         to_csv_summary.to_csv(
-            paths_dict["first_step_results"] + f"est_params_mortality_{sex_label.lower()}.csv"
+            paths_dict["first_step_results"]
+            + f"est_params_mortality_{sex_label.lower()}.csv"
         )
 
         # update mortality_df with the estimated parameters
@@ -240,3 +266,67 @@ def loglike(params, data, start_data):
         + log_survival_function(data[~death], params).sum()
         - log_survival_function(start_data, params).sum()
     )
+
+
+def numerical_hessian(func, params, epsilon=1e-5, **func_kwargs):
+    """
+    Calculate the Hessian matrix numerically using finite differences.
+
+    Parameters
+    ----------
+    func : callable
+        The function to compute the Hessian for
+    params : pd.DataFrame
+        DataFrame with parameter values and bounds
+    epsilon : float
+        Step size for numerical differentiation
+    **func_kwargs : dict
+        Additional keyword arguments to pass to func
+
+    Returns
+    -------
+    np.ndarray
+        Hessian matrix
+    """
+    param_names = params.index.tolist()
+    n_params = len(param_names)
+    hessian = np.zeros((n_params, n_params))
+
+    # Extract parameter values
+    param_values = params["value"].values
+
+    # Compute Hessian using central differences
+    for i in range(n_params):
+        for j in range(i, n_params):
+            # Create parameter perturbations
+            params_pp = params.copy()
+            params_pm = params.copy()
+            params_mp = params.copy()
+            params_mm = params.copy()
+
+            params_pp.loc[param_names[i], "value"] += epsilon
+            params_pp.loc[param_names[j], "value"] += epsilon
+
+            params_pm.loc[param_names[i], "value"] += epsilon
+            params_pm.loc[param_names[j], "value"] -= epsilon
+
+            params_mp.loc[param_names[i], "value"] -= epsilon
+            params_mp.loc[param_names[j], "value"] += epsilon
+
+            params_mm.loc[param_names[i], "value"] -= epsilon
+            params_mm.loc[param_names[j], "value"] -= epsilon
+
+            # Compute finite difference approximation
+            # Note: we need negative of the function since we're maximizing
+            f_pp = -func(params_pp, **func_kwargs)
+            f_pm = -func(params_pm, **func_kwargs)
+            f_mp = -func(params_mp, **func_kwargs)
+            f_mm = -func(params_mm, **func_kwargs)
+
+            hessian[i, j] = (f_pp - f_pm - f_mp + f_mm) / (4 * epsilon * epsilon)
+
+            # Hessian is symmetric
+            if i != j:
+                hessian[j, i] = hessian[i, j]
+
+    return hessian

@@ -33,7 +33,10 @@ def estimate_nb_children(paths_dict, specs):
     )
 
     columns = ["const", "period", "period_sq"]
-    estimates = pd.DataFrame(index=multiindex, columns=columns)
+    # Add columns for standard errors
+    all_columns = columns + [f"{col}_ser" for col in columns]
+    estimates = pd.DataFrame(index=multiindex, columns=all_columns)
+
     for sex in sexes:
         for education in edu_states:
             for has_partner in partner_states:
@@ -46,7 +49,13 @@ def estimate_nb_children(paths_dict, specs):
                 X = sm.add_constant(X)
                 Y = df_reduced["children"]
                 model = sm.OLS(Y, X).fit()
+                # Save parameters
                 estimates.loc[(sex, education, has_partner), columns] = model.params
+                # Save standard errors
+                for col in columns:
+                    estimates.loc[(sex, education, has_partner), f"{col}_ser"] = (
+                        model.bse[col]
+                    )
 
     out_file_path = paths_dict["first_step_results"] + "nb_children_estimates.csv"
     estimates.to_csv(out_file_path)

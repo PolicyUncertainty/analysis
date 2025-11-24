@@ -174,22 +174,81 @@ def plot_partner_shares(
             plt.close(fig)
 
 
-def plot_trans_probs(ages, sra, params, param_state_names):
-    trans_probs = calc_trans_mat_vectorized(
-        params=params,
-        age=ages,
-        sra=sra,
-    )
+def plot_trans_probs(paths_dict, specs, sra=67):
+    """Plot transition probabilities for all demographic types.
 
-    n_states = len(param_state_names)
-    fig, axs = plt.subplots(n_states, n_states)
-    for current_state, current_state_label in enumerate(param_state_names):
-        axs[current_state, 0].set_ylabel(f"Prob. from {current_state_label}")
-        for next_state, next_state_label in enumerate(param_state_names):
-            axs[current_state, next_state].plot(
-                ages, trans_probs[:, current_state, next_state]
+    Parameters
+    ----------
+    paths_dict : dict
+        Dictionary containing paths to data and output directories
+    specs : dict
+        Dictionary containing model specifications
+    sra : int, default 67
+        Statutory retirement age for transition probability calculation
+    """
+    param_name_states = ["single", "working_age", "retirement"]
+    n_states = len(param_name_states)
+    all_ages = np.arange(30, 81)
+
+    jet_color_map, _ = set_colors()
+    set_plot_defaults()
+
+    fig, axs = plt.subplots(n_states, n_states, figsize=get_figsize(n_states, n_states))
+
+    # Loop over all demographic types (sex × education)
+    for sex_var, sex_label in enumerate(specs["sex_labels"]):
+        for edu_var, edu_label in enumerate(specs["education_labels"]):
+            # Load parameters for this type
+            params = pkl.load(
+                open(
+                    paths_dict["first_step_results"]
+                    + f"result_{sex_label}_{edu_label}.pkl",
+                    "rb",
+                )
             )
 
-    for next_state, next_state_label in enumerate(param_state_names):
-        axs[-1, next_state].set_xlabel(f"Age")
+            # Calculate transition probabilities
+            trans_probs = calc_trans_mat_vectorized(
+                params=params,
+                age=all_ages,
+                sra=sra,
+            )
+
+            # Determine color and label for this type
+            type_idx = sex_var * len(specs["education_labels"]) + edu_var
+            color = jet_color_map[type_idx]
+            label = f"{sex_label}, {edu_label}"
+
+            # Plot transition probabilities in the n_states × n_states grid
+            for current_state, current_state_label in enumerate(param_name_states):
+                for next_state, next_state_label in enumerate(param_name_states):
+                    ax = axs[current_state, next_state]
+                    ax.plot(
+                        all_ages,
+                        trans_probs[:, current_state, next_state],
+                        color=color,
+                        label=label,
+                    )
+
+    # Set labels and titles
+    for current_state, current_state_label in enumerate(param_name_states):
+        axs[current_state, 0].set_ylabel(f"Prob. from {current_state_label}")
+
+    for next_state, next_state_label in enumerate(param_name_states):
+        axs[-1, next_state].set_xlabel("Age")
         axs[0, next_state].set_title(f"to {next_state_label}")
+
+    # Add legend to one of the subplots
+    axs[0, -1].legend(frameon=False, fontsize="small")
+
+    fig.tight_layout()
+
+    fig.savefig(
+        paths_dict["first_step_plots"] + "transition_probabilities.pdf",
+        bbox_inches="tight",
+    )
+    fig.savefig(
+        paths_dict["first_step_plots"] + "transition_probabilities.png",
+        bbox_inches="tight",
+        dpi=100,
+    )

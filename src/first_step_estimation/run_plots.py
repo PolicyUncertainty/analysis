@@ -12,7 +12,7 @@ path_dict = create_path_dict(define_user=True)
 specs = generate_derived_and_data_derived_specs(path_dict)
 show_plots = False
 save_plots = True
-paper_plots = True
+paper_plots = False
 
 # Set plot defaults
 set_plot_defaults()
@@ -51,9 +51,15 @@ from first_step_estimation.plots.children import plot_children
 
 plot_children(path_dict, specs, show=show_plots, paper_plot=paper_plots)
 
-from first_step_estimation.plots.family_plots import plot_partner_shares
+from first_step_estimation.plots.family_plots import (
+    plot_partner_shares,
+    plot_trans_probs,
+)
 
 plot_partner_shares(path_dict, specs, load_data=True, paper_plot=paper_plots)
+
+if not paper_plots:
+    plot_trans_probs(path_dict, specs, sra=67)
 
 # health state plots (requires health_transition_estimation_sample.pkl)
 from first_step_estimation.plots.health_states_plots import (

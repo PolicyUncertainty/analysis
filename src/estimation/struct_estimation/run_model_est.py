@@ -33,6 +33,7 @@ edu_type = "all"
 util_type = "add"
 old_sample_only = False
 
+LOAD_SOL_MODEL = False
 LOAD_LAST_ESTIMATE = False
 SAVE_RESULTS = True
 USE_WEIGHTS = False

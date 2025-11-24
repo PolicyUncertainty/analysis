@@ -53,8 +53,9 @@ def est_job_for_sample(df_job, specs):
         "above_60",
     ]
 
-    # Create solution containers
-    job_sep_params = pd.DataFrame(index=specs["sex_labels"], columns=logit_cols)
+    # Create solution containers - now including standard errors
+    param_cols = logit_cols + [f"{col}_ser" for col in logit_cols]
+    job_sep_params = pd.DataFrame(index=specs["sex_labels"], columns=param_cols)
 
     # Loop over sexes
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
@@ -66,7 +67,10 @@ def est_job_for_sample(df_job, specs):
         model = sm.Logit(endog=df_job_subset["job_sep"].astype(float), exog=exog)
         results = model.fit()
         # Save params
-        job_sep_params.loc[sex_label] = results.params
+        job_sep_params.loc[sex_label, logit_cols] = results.params
+        # Save standard errors
+        for col in logit_cols:
+            job_sep_params.loc[sex_label, f"{col}_ser"] = results.bse[col]
         # Calculate job sep for each age
         df_job.loc[sub_mask, "predicted_probs"] = results.predict(exog)
 
@@ -83,7 +87,7 @@ def est_job_for_sample(df_job, specs):
     above_60 = predicted_ages >= 60
 
     for sex_var, sex_label in enumerate(specs["sex_labels"]):
-        params = job_sep_params.loc[sex_label]
+        params = job_sep_params.loc[sex_label, logit_cols]
         for edu_var in range(specs["n_education_types"]):
             for good_health in [0, 1]:
                 exp_factor = (

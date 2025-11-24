@@ -63,10 +63,10 @@ def estimate_partner_wage_parameters(paths_dict, specs):
         else:
             covs = ["constant", "period", "period_sq"]
 
-        # Initialize empty container for coefficients
+        # Initialize empty container for coefficients and standard errors
         wage_parameters = pd.DataFrame(
             index=pd.Index(data=edu_labels, name="education"),
-            columns=covs,
+            columns=covs + [f"{cov}_ser" for cov in covs],
         )
 
         for edu_val, edu_label in enumerate(edu_labels):
@@ -88,8 +88,12 @@ def estimate_partner_wage_parameters(paths_dict, specs):
             # Assign prediction
             wage_data_edu["wage_pred"] = fitted_model.predict()
 
-            # Assign estimated parameters (column list corresponds to model params, so only these are assigned)
-            wage_parameters.loc[edu_label] = fitted_model.params
+            # Assign estimated parameters
+            wage_parameters.loc[edu_label, covs] = fitted_model.params
+
+            # Assign standard errors
+            for cov in covs:
+                wage_parameters.loc[edu_label, f"{cov}_ser"] = fitted_model.bse[cov]
 
             # Store this data for plotting
             all_wage_data_with_predictions.append(wage_data_edu)

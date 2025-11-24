@@ -11,6 +11,82 @@ from process_data.first_step_sample_scripts.create_partner_transition_sample imp
 )
 
 
+def numerical_hessian(func, params, base_epsilon=1e-5):
+    """
+    Calculate the Hessian matrix numerically using finite differences.
+    Uses adaptive step sizes based on parameter magnitudes.
+
+    Parameters
+    ----------
+    func : callable
+        The function to compute the Hessian for
+    params : dict
+        Dictionary of parameter values
+    base_epsilon : float
+        Base step size for numerical differentiation (will be scaled)
+
+    Returns
+    -------
+    np.ndarray
+        Hessian matrix
+    """
+    param_names = list(params.keys())
+    n_params = len(param_names)
+    hessian = np.zeros((n_params, n_params))
+
+    # Convert params dict to array for easier manipulation
+    param_values = np.array([params[name] for name in param_names])
+
+    # Compute adaptive epsilon for each parameter
+    # Use relative step size: epsilon_i = base_epsilon * max(|param_i|, 1)
+    epsilons = base_epsilon * np.maximum(np.abs(param_values), 1.0)
+
+    # Compute Hessian using central differences
+    for i in range(n_params):
+        for j in range(i, n_params):
+            # Use geometric mean of the two epsilons for cross-derivatives
+            eps_i = epsilons[i]
+            eps_j = epsilons[j]
+
+            # Create parameter perturbations
+            params_pp = param_values.copy()
+            params_pm = param_values.copy()
+            params_mp = param_values.copy()
+            params_mm = param_values.copy()
+
+            params_pp[i] += eps_i
+            params_pp[j] += eps_j
+
+            params_pm[i] += eps_i
+            params_pm[j] -= eps_j
+
+            params_mp[i] -= eps_i
+            params_mp[j] += eps_j
+
+            params_mm[i] -= eps_i
+            params_mm[j] -= eps_j
+
+            # Convert back to dict
+            params_pp_dict = {name: params_pp[k] for k, name in enumerate(param_names)}
+            params_pm_dict = {name: params_pm[k] for k, name in enumerate(param_names)}
+            params_mp_dict = {name: params_mp[k] for k, name in enumerate(param_names)}
+            params_mm_dict = {name: params_mm[k] for k, name in enumerate(param_names)}
+
+            # Compute finite difference approximation
+            f_pp = func(params_pp_dict)
+            f_pm = func(params_pm_dict)
+            f_mp = func(params_mp_dict)
+            f_mm = func(params_mm_dict)
+
+            hessian[i, j] = (f_pp - f_pm - f_mp + f_mm) / (4 * eps_i * eps_j)
+
+            # Hessian is symmetric
+            if i != j:
+                hessian[j, i] = hessian[i, j]
+
+    return hessian
+
+
 def estimate_partner_transitions(paths_dict, specs, load_data=True):
     """Two-step estimation: first single/working_age, then working_age/retirement."""
     est_data = create_partner_transition_sample(paths_dict, specs, load_data=load_data)
@@ -52,22 +128,35 @@ def estimate_partner_transitions(paths_dict, specs, load_data=True):
                 (all_ages[0], partner_state_vals)
             ].values
             # Step 1: Estimate single/working_age transition
-            params_step1 = estimate_single_working_age(df)
+            params_step1, se_step1 = estimate_single_working_age(df)
 
             # Step 2: Estimate working_age/retirement transition using full likelihood
-            params_step2 = estimate_working_retirement_full(
+            params_step2, se_step2 = estimate_working_retirement_full(
                 df, empirical_shares, params_step1
             )
 
-            # Combine parameters
+            # Combine parameters and standard errors
             params_combined = {**params_step1, **params_step2}
+            se_combined = {**se_step1, **se_step2}
 
             print(calc_exp_ret_age_difference(params_combined, specs, initial_shares))
+
+            # Save parameters
             pkl.dump(
                 params_combined,
                 open(
                     paths_dict["first_step_results"]
                     + f"result_{sex_label}_{edu_label}.pkl",
+                    "wb",
+                ),
+            )
+
+            # Save standard errors
+            pkl.dump(
+                se_combined,
+                open(
+                    paths_dict["first_step_results"]
+                    + f"result_{sex_label}_{edu_label}_se.pkl",
                     "wb",
                 ),
             )
@@ -142,7 +231,20 @@ def estimate_single_working_age(df):
     )
     print(result)
 
-    return result.params
+    # Compute Hessian numerically
+    se = {}
+    print("Computing Hessian for step 1...")
+    hessian = numerical_hessian(ll_function, result.params)
+    # Invert Hessian to get variance-covariance matrix
+    inv_hess = np.linalg.inv(hessian)
+    std_errors = np.sqrt(np.abs(np.diag(inv_hess)))
+
+    param_names = list(params_start.keys())
+    for i, key in enumerate(param_names):
+        se[key] = std_errors[i]
+    print("Standard errors computed successfully for step 1")
+
+    return result.params, se
 
 
 def estimate_working_retirement_full(df, empirical_shares, params_step1):
@@ -219,7 +321,21 @@ def estimate_working_retirement_full(df, empirical_shares, params_step1):
     )
     print(result)
 
-    return result.params
+    # Compute Hessian numerically
+    se = {}
+    print("Computing Hessian for step 2...")
+    hessian = numerical_hessian(ll_function, result.params)
+
+    # Invert Hessian to get variance-covariance matrix
+    inv_hess = np.linalg.inv(hessian)
+    std_errors = np.sqrt(np.abs(np.diag(inv_hess)))
+
+    param_names = list(params_start.keys())
+    for i, key in enumerate(param_names):
+        se[key] = std_errors[i]
+    print("Standard errors computed successfully for step 2")
+
+    return result.params, se
 
 
 def calc_trans_mat_step1(params, age):

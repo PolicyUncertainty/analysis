@@ -79,6 +79,18 @@ def plot_ar1_fit(
     ar1_lower = exp_SRA_resolution - 1.96 * np.sqrt(sigma_sq) * np.sqrt(
         end_age_plot - ages
     )
+    expected_df = pd.DataFrame(
+        {
+            "age": ages,
+            "ar1_prediction": ar1_prediction,
+            "ar1_upper": ar1_upper,
+            "ar1_lower": ar1_lower,
+            "upper_difference": ar1_upper - ar1_prediction,
+            "lower_difference": ar1_prediction - ar1_lower,
+        }
+    )
+    expected_df.set_index("age", inplace=True)
+    print(expected_df.loc[[30, 45, 60]])
 
     age_30_mask = ages == 30
     expect_at_30 = {

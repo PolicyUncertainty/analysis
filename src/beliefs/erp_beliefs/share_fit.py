@@ -68,6 +68,14 @@ def plot_predicted_informed_shares_by_education(
         )
         predicted_shares[edu_label] = predicted_shares_edu
 
+    share_low = 0.694501
+    total_shares = predicted_shares[
+        specs["education_labels"][0]
+    ] * share_low + predicted_shares[specs["education_labels"][1]] * (1 - share_low)
+    # Make data frame of total shares of age 30, 45 and 60
+    df_selected_shares = total_shares.loc[[30, 45, 60]]
+    print(df_selected_shares)
+
     # Calculate observed average shares by age groups
     age_bins = list(range(25, 66, 5))  # 5-year age bins from 25 to 70
 

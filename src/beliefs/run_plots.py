@@ -40,11 +40,11 @@ from beliefs.sra_beliefs.truncated_fit_ar1 import plot_ar1_fit
 from beliefs.sra_beliefs.zepplin import plot_example_sra_evolution
 from set_paths import create_path_dict
 from set_styles import set_plot_defaults
-from specs.derive_specs import read_and_derive_specs
+from specs.derive_specs import generate_derived_and_data_derived_specs
 
 # paths, specs, create directories
 path_dict = create_path_dict(define_user=True)
-specs = read_and_derive_specs(path_dict["specs"])
+specs = generate_derived_and_data_derived_specs(path_dict)
 show_plots = False
 save_plots = True
 
@@ -57,7 +57,7 @@ plot_erp_violin_plots_by_age(
     path_dict, censor_above=20, show=show_plots, save=save_plots
 )
 plot_predicted_informed_shares_by_education(
-    path_dict, specs, show=show_plots, save=save_plots, by_education=True
+    path_dict, specs, show=show_plots, save=save_plots, by_education=False
 )
 plot_ar1_fit(
     path_dict,

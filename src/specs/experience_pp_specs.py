@@ -1,7 +1,7 @@
-import jax.numpy as jnp
+import pickle as pkl
+
 import numpy as np
 import pandas as pd
-from jax import numpy as jnp
 
 from model_code.pension_system.experience_stock import (
     calc_pension_points_for_experience,
@@ -12,7 +12,7 @@ from model_code.wealth_and_budget.wages import calc_hourly_wage
 def add_experience_and_pp_specs(specs, path_dict, load_precomputed):
     specs = add_very_long_insured_specs(specs, path_dict)
     specs = create_max_experience_working(path_dict, specs, load_precomputed)
-    specs = create_pension_points_per_exp(path_dict, specs)
+    specs = create_pension_points_per_exp(path_dict, specs, load_precomputed)
     specs = create_max_pension_point(path_dict, specs, load_precomputed)
     return specs
 
@@ -143,7 +143,13 @@ def add_very_long_insured_specs(specs, path_dict):
     return specs
 
 
-def create_pension_points_per_exp(path_dict, specs):
+def create_pension_points_per_exp(path_dict, specs, load_precomputed=False):
+    if load_precomputed:
+        pp_per_exp = pkl.load(
+            open(path_dict["first_step_incomes"] + "pp_per_exp.pkl", "rb")
+        )
+        specs["pp_for_exp_by_sex_edu"] = pp_per_exp
+        return specs
     # Create grid for experience to pension points mapping
     max_exp = specs["max_exps_period_working"].max() + 2
     exp_grid = np.arange(0, max_exp)
@@ -190,5 +196,6 @@ def create_pension_points_per_exp(path_dict, specs):
                     / mean_hourly_wage
                 )
 
+    pkl.dump(pp_per_exp, open(path_dict["first_step_incomes"] + "pp_per_exp.pkl", "wb"))
     specs["pp_for_exp_by_sex_edu"] = pp_per_exp
     return specs

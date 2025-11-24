@@ -233,7 +233,7 @@ def test_budget_worker(
     )
     income_after_ssc = labor_income_year - sscs_worker
 
-    has_partner_int = (partner_state > 0).astype(int)
+    has_partner_int = int(partner_state > 0).astype(int)
     unemployment_benefits, _ = calc_unemployment_benefits(
         assets=savings_scaled,
         education=education,
@@ -637,7 +637,7 @@ def test_informed(
         lagged_choice=np.array(0),
         policy_state=np.array(8),
         sex=0,
-        partner_state=0,
+        partner_state=np.array(0),
         education=0,
         experience=exp_cont_prev,
         informed=0,
@@ -650,7 +650,7 @@ def test_informed(
         lagged_choice=np.array(0),
         policy_state=np.array(8),
         sex=0,
-        partner_state=0,
+        partner_state=np.array(0),
         education=0,
         experience=exp_cont_prev,
         informed=1,

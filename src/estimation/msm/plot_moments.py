@@ -18,21 +18,21 @@ load_df = None
 load_solution = None
 load_sol_model = True
 
+# plot_empirical_only = input("Plot empirical moments only? (y/n): ") == "y"
 
-params = pickle.load(
-    open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
-)
+plot_empirical_only = False
 
-data_decision = load_and_prep_data(path_dict, params)
+data_decision = load_and_prep_data(path_dict)
 data_decision["age"] = data_decision["period"] + specs["start_age"]
-
-plot_empirical_only = input("Plot empirical moments only? (y/n): ") == "y"
-
 
 if plot_empirical_only:
     df_list = [data_decision]
     label_list = ["empirical"]
 else:
+
+    params = pickle.load(
+        open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
+    )
 
     data_sim, model_solved = solve_and_simulate_scenario(
         announcement_age=None,

@@ -8,17 +8,22 @@ import numpy as np
 import optimagic as om
 import pandas as pd
 import yaml
-from dcegm.asset_correction import adjust_observed_assets
 
 from estimation.struct_estimation.scripts.std_errors import (
     calc_and_save_standard_errors,
     calc_scores,
 )
 from model_code.specify_model import specify_model
-from model_code.unobserved_state_weighting import create_unobserved_state_specs
-from process_data.structural_sample_scripts.create_structural_est_sample import (
-    CORE_TYPE_DICT,
+from model_code.stochastic_processes.job_offers import (
+    calc_job_finding_prob_men,
+    calc_job_finding_prob_women,
+    job_sep_probability,
 )
+from model_code.transform_data_from_model import (
+    create_states_dict,
+    load_scale_and_correct_data,
+)
+from model_code.unobserved_state_weighting import create_unobserved_state_specs
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
@@ -32,8 +37,27 @@ def estimate_model(
     use_weights=True,
     last_estimate=None,
     save_results=True,
+    print_men_examples=True,
+    print_women_examples=False,
+    use_observed_data=True,
+    sim_data=None,
+    old_only=False,
+    sex_type="all",
+    edu_type="all",
+    util_type="add",
+    scale_opt=False,
+    multistart=False,
+    slow_version=False,
 ):
-    print_function = generate_print_func(params_to_estimate_names)
+
+    specs = generate_derived_and_data_derived_specs(path_dict)
+
+    print_function = generate_print_func(
+        params_to_estimate_names,
+        specs,
+        print_men_examples=print_men_examples,
+        print_women_examples=print_women_examples,
+    )
 
     # # Assign start params from before
     if last_estimate is not None:
@@ -51,35 +75,86 @@ def estimate_model(
             start_params_all[key] = last_estimate[key]
 
     start_params = {name: start_params_all[name] for name in params_to_estimate_names}
-    print_function(start_params)
+    print("Complete params vector at start:", flush=True)
+
+    generate_print_func(
+        start_params_all.keys(),
+        specs,
+        print_men_examples=print_men_examples,
+        print_women_examples=print_women_examples,
+    )(start_params_all)
+
+    print("Params to be estimated at start:", flush=True)
+
+    print_function(start_params_all)
 
     lower_bounds_all = yaml.safe_load(
         open(path_dict["start_params_and_bounds"] + "lower_bounds.yaml", "rb")
     )
-    lower_bounds = {name: lower_bounds_all[name] for name in params_to_estimate_names}
+    lower_bounds = {}
+    for param in params_to_estimate_names:
+        if "job_finding" in param:
+            # Set lower bound for job finding params to start values
+            lower_bounds[param] = start_params_all[param]
+        else:
+            lower_bounds[param] = lower_bounds_all[param]
 
     upper_bounds_all = yaml.safe_load(
         open(path_dict["start_params_and_bounds"] + "upper_bounds.yaml", "rb")
     )
     upper_bounds = {name: upper_bounds_all[name] for name in params_to_estimate_names}
 
+    # check that start params are within bounds
+    for name in params_to_estimate_names:
+        try:
+            condition = lower_bounds[name] <= start_params[name] <= upper_bounds[name]
+        except:
+            raise ValueError(
+                f"Start param {name} has invalid bounds or start value. "
+                f"Upper bound: {upper_bounds[name]}, lower bound: {lower_bounds[name]}, start value: {start_params[name]}"
+            )
+
+        if not condition:
+            raise ValueError(
+                f"Start param {name} with value {start_params[name]} is not within bounds "
+                f"[{lower_bounds[name]}, {upper_bounds[name]}]"
+            )
+
     bounds = om.Bounds(lower=lower_bounds, upper=upper_bounds)
 
     # Initialize estimation class
     est_class = est_class_from_paths(
         path_dict=path_dict,
+        specs=specs,
         start_params_all=start_params_all,
         print_function=print_function,
         file_append=file_append,
         load_model=load_model,
         use_weights=use_weights,
         save_results=save_results,
+        print_men_examples=print_men_examples,
+        print_women_examples=print_women_examples,
+        use_observed_data=use_observed_data,
+        old_only=old_only,
+        sim_data=sim_data,
+        sex_type=sex_type,
+        edu_type=edu_type,
+        slow_version=slow_version,
+        util_type=util_type,
     )
 
     if supply_jacobian:
         add_kwargs = {"jac": est_class.jacobian_func}
     else:
         add_kwargs = {}
+
+    if scale_opt:
+        add_kwargs["scaling"] = om.ScalingOptions(method="bounds")
+
+    if multistart:
+        add_kwargs["multistart"] = om.MultistartOptions(
+            n_samples=50, stopping_maxopt=2, seed=0
+        )
 
     result = om.minimize(
         fun=est_class.crit_func,
@@ -109,22 +184,35 @@ def estimate_model(
         weights=est_class.weights,
         file_append=file_append,
     )
-    return result
+    return result, start_params_all
 
 
 class est_class_from_paths:
     def __init__(
         self,
         path_dict,
+        specs,
         start_params_all,
         file_append,
         load_model,
         use_weights,
         print_function=None,
+        print_men_examples=True,
+        print_women_examples=True,
         save_results=True,
+        sim_data=None,
+        use_observed_data=True,
+        slow_version=False,
+        old_only=False,
+        sex_type="all",
+        edu_type="all",
+        util_type="add",
     ):
         self.iter_count = 0
         self.save_results = save_results
+        self.print_men_examples = print_men_examples
+        self.print_women_examples = print_women_examples
+        self.start_params_all = start_params_all
 
         if print_function is None:
             self.print_function = lambda params: print("Params, ", pd.Series(params))
@@ -139,10 +227,7 @@ class est_class_from_paths:
                 os.makedirs(intermediate_est_data)
 
         self.intermediate_est_data = intermediate_est_data
-
-        from specs.derive_specs import generate_derived_and_data_derived_specs
-
-        specs = generate_derived_and_data_derived_specs(path_dict)
+        self.specs = specs
 
         model = specify_model(
             path_dict=path_dict,
@@ -151,16 +236,36 @@ class est_class_from_paths:
             custom_resolution_age=None,
             load_model=load_model,
             sim_specs=None,
+            sex_type=sex_type,
+            edu_type=edu_type,
+            util_type=util_type,
         )
 
-        # Load data
-        data_decision, states_dict = load_and_prep_data(
-            path_dict, start_params_all, model, drop_retirees=True
+        if use_observed_data:
+            # Load data
+            data_decision = load_and_prep_data_estimation(
+                path_dict=path_dict, model_class=model
+            )
+        else:
+            if not isinstance(sim_data, pd.DataFrame):
+                raise ValueError("If not using observed data, sim_data must be given.")
+            data_decision = sim_data.copy()
+
+        data_decision = filter_data_by_type(
+            df=data_decision, sex_type=sex_type, edu_type=edu_type
         )
+        # Already retired individuals hold no identification
+        data_decision = data_decision[data_decision["lagged_choice"] != 0]
+        if old_only:
+            data_decision = data_decision[data_decision["age"] >= 60]
+
+        # Create states dict
+        states_dict = create_states_dict(data_decision, model_class=model)
 
         if use_weights:
-            self.weights = data_decision["age_weights"].values
-            self.weight_sum = np.sum(self.weights)
+            raise ValueError("Weights currently not supported.")
+            # self.weights = data_decision["age_weights"].values
+            # self.weight_sum = np.sum(self.weights)
         else:
             self.weights = np.ones(data_decision.shape[0])
             self.weight_sum = data_decision.shape[0]
@@ -177,6 +282,7 @@ class est_class_from_paths:
             unobserved_state_specs=unobserved_state_specs,
             params_all=start_params_all,
             return_model_solution=False,
+            slow_version=slow_version,
         )
         self.ll_func = individual_likelihood
 
@@ -184,10 +290,12 @@ class est_class_from_paths:
         start = time.time()
         ll_value_individual = self.ll_func(params)
         ll_value = jnp.dot(self.weights, ll_value_individual) / self.weight_sum
+        full_params = self.start_params_all.copy()
+        full_params.update(params)
         if self.save_results:
             alternate_save_count = self.iter_count % 2
             pkl.dump(
-                params,
+                full_params,
                 open(
                     self.intermediate_est_data + f"params_{alternate_save_count}.pkl",
                     "wb",
@@ -196,7 +304,8 @@ class est_class_from_paths:
 
         end = time.time()
         self.iter_count += 1
-        self.print_function(params)
+        self.print_function(full_params)
+
         print("Likelihood value: ", ll_value)
         print("Likelihood evaluation took, ", end - start)
 
@@ -213,58 +322,29 @@ class est_class_from_paths:
         return self.weights @ scores / self.weight_sum
 
 
-def load_and_prep_data(path_dict, start_params, model_class, drop_retirees=True):
-    specs = generate_derived_and_data_derived_specs(path_dict)
-    # Load data
-    data_decision = pd.read_csv(path_dict["struct_est_sample"])
-    data_decision = data_decision.astype(CORE_TYPE_DICT)
+def load_and_prep_data_estimation(path_dict, model_class):
 
-    # Also already retired individuals hold no identification
-    if drop_retirees:
-        data_decision = data_decision[data_decision["lagged_choice"] != 0]
-
-    model_specs = model_class.model_specs
-
-    data_decision["age"] = data_decision["period"] + model_specs["start_age"]
-    data_decision["age_bin"] = np.floor(data_decision["age"] / 10)
-    data_decision.loc[data_decision["age_bin"] > 6, "age_bin"] = 6
-    age_bin_av_size = data_decision.shape[0] / data_decision["age_bin"].nunique()
-    data_decision.loc[:, "age_weights"] = 1.0
-    data_decision.loc[:, "age_weights"] = age_bin_av_size / data_decision.groupby(
-        "age_bin"
-    )["age_weights"].transform("sum")
-
-    # Transform experience
-    max_init_exp = model_specs["max_exp_diffs_per_period"][
-        data_decision["period"].values
-    ]
-    exp_denominator = data_decision["period"].values + max_init_exp
-    data_decision["experience"] = data_decision["experience"] / exp_denominator
-
-    # We can adjust wealth outside, as it does not depend on estimated parameters
-    # (only on interest rate)
-    # Now transform for dcegm
-    states_dict = {
-        name: data_decision[name].values
-        for name in model_class.model_structure["discrete_states_names"]
-    }
-    states_dict["experience"] = data_decision["experience"].values
-    states_dict["assets_begin_of_period"] = (
-        data_decision["wealth"].values / specs["wealth_unit"]
+    data_decision = load_scale_and_correct_data(
+        path_dict=path_dict, model_class=model_class
     )
 
-    assets_begin_of_period = adjust_observed_assets(
-        observed_states_dict=states_dict,
-        params=start_params,
-        model_class=model_class,
-    )
-    data_decision["assets_begin_of_period"] = assets_begin_of_period
-    states_dict["assets_begin_of_period"] = assets_begin_of_period
+    # data_decision["age_bin"] = np.floor(data_decision["age"] / 10)
+    # data_decision.loc[data_decision["age_bin"] > 6, "age_bin"] = 6
+    # age_bin_av_size = data_decision.shape[0] / data_decision["age_bin"].nunique()
+    # data_decision.loc[:, "age_weights"] = 1.0
+    # data_decision.loc[:, "age_weights"] = age_bin_av_size / data_decision.groupby(
+    #     "age_bin"
+    # )["age_weights"].transform("sum")
 
-    return data_decision, states_dict
+    return data_decision
 
 
-def generate_print_func(params_to_estimate_names):
+def generate_print_func(
+    params_to_estimate_names,
+    specs=None,
+    print_men_examples=True,
+    print_women_examples=True,
+):
     men_params = get_gendered_params(params_to_estimate_names, "_men")
     women_params = get_gendered_params(params_to_estimate_names, "_women")
     for param_dict in [men_params, women_params]:
@@ -273,6 +353,9 @@ def generate_print_func(params_to_estimate_names):
 
     for param in ["disutil_children_ft_work_low", "disutil_children_ft_work_high"]:
         if param in params_to_estimate_names:
+            # Inialize full-time if not existing
+            if "full-time" not in women_params.keys():
+                women_params["full-time"] = []
             women_params["all"] += [param]
             women_params["full-time"] += [param]
     neutral_params = [
@@ -288,6 +371,7 @@ def generate_print_func(params_to_estimate_names):
     #     for param_name in params_to_estimate_names
     #     if "taste_shock" in param_name
     # ]
+    gender_labels = ["Men", "Women"]
 
     def print_function(params):
         print("Gender neutral parameters:")
@@ -296,17 +380,39 @@ def generate_print_func(params_to_estimate_names):
         # print("\nTaste shock parameters:")
         # for param_name in taste_shock_params:
         #     print(f"{param_name}: {params[param_name]}")
-        print("\nMen model params are:")
-        for gender_params in [men_params, women_params]:
+        for i, gender_params in enumerate([men_params, women_params]):
+            print(f"{gender_labels[i]} parameters are:")
             for group_name in gender_params.keys():
                 print(f"Group: {group_name}")
                 for param_name in gender_params[group_name]:
-                    if "disutil" in param_name:
-                        print(
-                            f"{param_name}: {params[param_name]} and in probability: {np.exp(-params[param_name])}"
-                        )
-                    else:
-                        print(f"{param_name}: {params[param_name]}")
+                    print(
+                        f"{param_name}: {params[param_name]}",
+                        flush=True,
+                    )
+
+        if print_men_examples:
+            job_offer_prob_60_high_good = calc_job_finding_prob_men(
+                params=params,
+                education=1,
+                good_health=1,
+                age=60,
+            )
+            print(
+                f"Job offer prob for 60 year old high educated men in good health: {job_offer_prob_60_high_good}",
+                flush=True,
+            )
+
+        if print_women_examples:
+            job_offer_prob_60_high_good = calc_job_finding_prob_women(
+                params=params,
+                education=1,
+                good_health=1,
+                age=60,
+            )
+            print(
+                f"Job offer prob for 60 year old high educated women in good health: {job_offer_prob_60_high_good}",
+                flush=True,
+            )
 
     return print_function
 
@@ -338,6 +444,13 @@ def get_gendered_params(params_to_estimate_names, append):
     disutil_params_ft_params = [
         param_name for param_name in disutil_params if "ft_work" in param_name
     ]
+    disutil_params_partner = [
+        param_name for param_name in disutil_params if "partner" in param_name
+    ]
+    SRA_firing_params = [
+        param_name for param_name in gender_params if "SRA_firing" in param_name
+    ]
+
     # We do it this weird way for printing order
     params = {}
     # Assign all gender params. This will be dropped afterwards
@@ -358,14 +471,49 @@ def get_gendered_params(params_to_estimate_names, append):
         params["job_finding"] = job_finding_params
 
     if len(disability_params) > 0:
-        params["disability"] = disability_params
+        params["disability_logit"] = disability_params
+
+    if len(disutil_params_partner) > 0:
+        params["partner"] = disutil_params_partner
+
+    if len(SRA_firing_params) > 0:
+        params["SRA_firing"] = SRA_firing_params
 
     other_params = []
     for param in gender_params:
-        if param not in job_finding_params + disability_params + disutil_params:
+        if (
+            param
+            not in job_finding_params
+            + disability_params
+            + disutil_params
+            + SRA_firing_params
+            + disutil_params_partner
+        ):
             other_params += [param]
 
     if len(other_params) > 0:
         params["other_params"] = other_params
 
     return params
+
+
+def filter_data_by_type(df, sex_type, edu_type):
+    if sex_type == "men":
+        df = df[df["sex"] == 0]
+    elif sex_type == "women":
+        df = df[df["sex"] == 1]
+    elif sex_type == "all":
+        pass
+    else:
+        raise ValueError("sex_type not recognized.")
+
+    if edu_type == "low":
+        df = df[df["education"] == 0]
+    elif edu_type == "high":
+        df = df[df["education"] == 1]
+    elif edu_type == "all":
+        pass
+    else:
+        raise ValueError("edu_type not recognized.")
+
+    return df

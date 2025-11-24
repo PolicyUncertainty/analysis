@@ -19,51 +19,43 @@ def calc_net_household_income(own_income, partner_income, has_partner_int, model
 
 def calc_inc_tax_for_single_income(gross_income, model_specs):
     thresholds = model_specs["income_tax_brackets"]
-    rates = model_specs["income_tax_rates"]
-
-    # In bracket 0 no taxes are paid
-    poss_tax_bracket_0 = 0.0
-
-    # In bracket 1 taxes are paid on income above the threshold
-    poss_tax_bracket_1 = rates[0] * (gross_income - thresholds[0])
-    tax_above_1 = (thresholds[1] - thresholds[0]) * rates[0]
-
-    # In bracket 2 taxes are paid on income above the threshold and the tax paid in
-    # bracket 1
-    poss_tax_bracket_2 = (rates[1] * (gross_income - thresholds[1])) + tax_above_1
-    tax_above_2 = (thresholds[2] - thresholds[1]) * rates[1]
-
-    # In bracket 3 taxes are paid on income above the threshold and the tax paid in
-    # brackets 1+2
-    poss_tax_bracket_3 = (
-        rates[2] * (gross_income - thresholds[2]) + tax_above_2 + tax_above_1
-    )
-    tax_above_3 = (thresholds[3] - thresholds[2]) * rates[2]
-
-    # In bracket 4 taxes are paid on income above the threshold and the tax paid in
-    # brackets 1+2+3
-    poss_tax_bracket_4 = (
-        rates[3] * (gross_income - thresholds[3])
-        + tax_above_1
-        + tax_above_2
-        + tax_above_3
-    )
+    linear_rates = model_specs["linear_income_tax_rates"]
+    quadratic_rates = model_specs["quadratic_income_tax_rates"]
+    intercepts = model_specs["intercepts_income_tax"]
+    # Formula directly taken from
+    # https://esth.bundesfinanzministerium.de/esth/2020
+    # /A-Einkommensteuergesetz/IV-Tarif/Paragraf-32a/inhalt.html
 
     # Check in which bracket the income falls and calculate the tax
-    in_bracket_0 = gross_income < thresholds[0]
-    in_bracket_1 = (gross_income >= thresholds[0]) & (gross_income < thresholds[1])
-    in_bracket_2 = (gross_income >= thresholds[1]) & (gross_income < thresholds[2])
-    in_bracket_3 = (gross_income >= thresholds[2]) & (gross_income < thresholds[3])
-    in_bracket_4 = gross_income >= thresholds[3]
+    in_bracket_1 = (gross_income > thresholds[1]) & (gross_income <= thresholds[2])
+    in_bracket_2 = (gross_income > thresholds[2]) & (gross_income <= thresholds[3])
+    in_bracket_3 = (gross_income > thresholds[3]) & (gross_income <= thresholds[4])
+    in_bracket_4 = gross_income > thresholds[4]
 
-    income_tax = (
-        in_bracket_0 * poss_tax_bracket_0
-        + in_bracket_1 * poss_tax_bracket_1
-        + in_bracket_2 * poss_tax_bracket_2
-        + in_bracket_3 * poss_tax_bracket_3
-        + in_bracket_4 * poss_tax_bracket_4
+    income_for_formula_1 = (gross_income - thresholds[1]) / 10_000
+    tax_bracket_1 = (
+        income_for_formula_1 * linear_rates[1]
+        + (income_for_formula_1**2) * quadratic_rates[1]
     )
-    return income_tax
+    income_for_formula_2 = (gross_income - thresholds[2]) / 10_000
+    tax_bracket_2 = (
+        income_for_formula_2 * linear_rates[2]
+        + (income_for_formula_2**2) * quadratic_rates[2]
+        + intercepts[2]
+    )
+    tax_bracket_3 = gross_income * linear_rates[3] + intercepts[3]
+    tax_bracket_4 = gross_income * linear_rates[4] + intercepts[4]
+    income_tax = (
+        in_bracket_1 * tax_bracket_1
+        + in_bracket_2 * tax_bracket_2
+        + in_bracket_3 * tax_bracket_3
+        + in_bracket_4 * tax_bracket_4
+    )
+    # Soli is five percent of income tax
+    soli = income_tax * 0.05
+    # Church tax is nine percent of income tax, but only if the person is a member (50% of population in 2020)
+    church_tax = income_tax * (0.09 * 0.5)
+    return income_tax + soli + church_tax
 
 
 def calc_after_ssc_income_worker(gross_wage):

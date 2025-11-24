@@ -1,0 +1,187 @@
+import os
+import pickle
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import yaml
+
+from estimation.struct_estimation.scripts.estimate_setup import generate_print_func
+from estimation.struct_estimation.start_params_and_bounds.set_start_params import (
+    load_and_set_start_params,
+)
+from model_code.specify_model import specify_and_solve_model, specify_model
+from model_code.specify_simple_model import specify_and_solve_simple_model
+from set_paths import create_path_dict
+from set_styles import set_plot_defaults
+from specs.derive_specs import generate_derived_and_data_derived_specs
+
+# paths, specs, create directories
+path_dict = create_path_dict(define_user=False)
+specs = generate_derived_and_data_derived_specs(path_dict)
+show_plots = False
+save_plots = True
+
+# Set plot defaults
+set_plot_defaults()
+
+# from model_code.wealth_and_budget.tax_and_ssc import calc_inc_tax_for_single_income
+# incomes = np.arange(0, 300_000, 2000)
+# plt.plot(incomes, calc_inc_tax_for_single_income(incomes, specs))
+
+# Load model parameters - try estimated params first, fall back to start params
+model_name = specs["model_name"]
+estimated_params_path = path_dict["struct_results"] + f"est_params_{model_name}.pkl"
+
+if os.path.exists(estimated_params_path):
+    params = pickle.load(open(estimated_params_path, "rb"))
+    params_source = "estimated"
+else:
+    print(f"WARNING: Estimated parameters file '{estimated_params_path}' not found.")
+    print(
+        "Using start values from estimation/struct_estimation/start_params_and_bounds/start_params.yaml"
+    )
+
+    # Load start parameters
+    params = load_and_set_start_params(path_dict)
+    params_source = "start_values"
+
+generate_print_func(
+    params.keys(), specs, print_men_examples=True, print_women_examples=True
+)(params)
+
+from model_code.plots.plot_sollution import plot_ret_solution, plot_solution
+from model_code.plots.retirement_probs_illustration import (
+    plot_ret_probs_for_state,
+    plot_work_probs_for_state,
+)
+
+# Model solution plots (require solved model)
+# from model_code.plots.plot_law_of_motion import plot_ret_experience_multi
+#
+# plot_ret_experience_multi(path_dict, specs, show=show_plots, save=save_plots)
+# #
+# from model_code.plots.weights import plot_weights
+#
+# model = specify_model(
+#     path_dict,
+#     specs,
+#     subj_unc=True,
+#     custom_resolution_age=None,
+#     sim_specs=None,
+#     load_model=True,
+#     debug_info="all",
+#     sex_type="all",
+#     edu_type="all",
+#     util_type="add",
+# )
+# state = {
+#     "period": 33,
+#     "education": 0,
+#     "sex": 0,
+#     "lagged_choice": 3,
+#     "job_offer": 1,
+#     "partner_state": 1,
+#     "health": 1,
+#     "informed": 0,
+#     "policy_state": 8,
+# }
+
+# df = model.get_full_child_states_by_asset_id_and_probs(
+#     state=state, choice=0, params=params, asset_id=10, second_continuous_id=5
+# )
+
+
+# try:
+model_solved = specify_and_solve_model(
+    path_dict=path_dict,
+    file_append=model_name,
+    params=params,
+    subj_unc=True,
+    custom_resolution_age=None,
+    load_model=False,
+    load_solution=None,
+    sim_specs=None,
+)
+pickle.dump(
+    model_solved.value,
+    open("value_new.pkl", "wb"),
+)
+pickle.dump(
+    model_solved.policy,
+    open("policy_new.pkl", "wb"),
+)
+pickle.dump(
+    model_solved.endog_grid,
+    open("endog_grid_new.pkl", "wb"),
+)
+pickle.dump(
+    model_solved.model_structure,
+    open("model_structure_new.pkl", "wb"),
+)
+# Load data and compare to newly solved model
+# value_old = pickle.load(
+#     open("value.pkl", "rb"),
+# )
+# policy_old = pickle.load(
+#     open("policy.pkl", "rb"),
+# )
+# endog_grid_old = pickle.load(
+#     open("endog_grid.pkl", "rb"),
+# )
+# # Generate difference and print max difference
+# value_diff = np.abs(model_solved.value - value_old)
+# policy_diff = np.abs(model_solved.policy - policy_old)
+# endog_grid_diff = np.abs(model_solved.endog_grid - endog_grid_old)
+
+value = model_solved.value
+nan_mask_value = ~np.isnan(value)
+# Print max differences
+print(f"Max value difference: {np.max(np.abs(value[nan_mask_value]))}")
+
+# plot_ret_solution(model_solved, specs, path_dict)
+# plot_solution(model_solved=model_solved, specs=specs, path_dict=path_dict)
+# plot_ret_probs_for_state(model_solved=model_solved, specs=specs, path_dict=path_dict)
+#     plot_work_probs_for_state(
+#         model_solved=model_solved, specs=specs, path_dict=path_dict
+#     )
+#
+#     if params_source == "start_values":
+#         print(f"Model plots generated using start parameter values.")
+#
+# except Exception as e:
+#     print(f"ERROR: Could not solve model: {str(e)}")
+#     print("Skipping model solution plots.")
+#
+# # Income plots (uses model specifications - can run without solved model)
+# from model_code.plots.income_plots import plot_incomes
+#
+# plot_incomes(path_dict, show=show_plots, save=save_plots)
+#
+# # Wealth plots (uses model specifications - can run without solved model)
+# from model_code.plots.wealth_plots import plot_budget_of_unemployed
+#
+# plot_budget_of_unemployed(path_dict, specs, show=show_plots, save=save_plots)
+#
+# # Utility plots (require model parameters, if estimated parameters not available, uses start params. if start params incomplete, skips utility plots)
+# from model_code.plots.utility_plots import plot_bequest, plot_cons_scale, plot_utility
+#
+# try:
+#     plot_utility(path_dict, params, specs, show=show_plots, save=save_plots)
+#     plot_bequest(path_dict, params, specs, show=show_plots, save=save_plots)
+# except KeyError as e:
+#     if params_source == "start_values":
+#         print(
+#             f"WARNING: Some utility plots skipped - missing parameters, e.g., {e} in start_params.yaml"
+#         )
+#     else:
+#         raise e
+#
+#
+# plot_cons_scale(path_dict, specs, show=show_plots, save=save_plots)
+#
+# print("Model plotting completed.")
+# if params_source == "start_values":
+#     print(
+#         "Note: Some plots used start parameter values instead of estimated parameters."
+#     )

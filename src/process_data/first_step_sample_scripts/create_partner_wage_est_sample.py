@@ -2,7 +2,7 @@ import os
 
 import pandas as pd
 
-from process_data.aux_and_plots.filter_data import (
+from process_data.auxiliary.filter_data import (
     filter_below_age,
     filter_years,
     recode_sex,
@@ -15,7 +15,7 @@ def create_partner_wage_est_sample(paths, specs, load_data=False):
     if not os.path.exists(paths["intermediate_data"]):
         os.makedirs(paths["intermediate_data"])
 
-    out_file_path = paths["intermediate_data"] + "partner_wage_estimation_sample.pkl"
+    out_file_path = paths["first_step_data"] + "partner_wage_estimation_sample.csv"
 
     if load_data:
         data = pd.read_pickle(out_file_path)
@@ -33,14 +33,13 @@ def create_partner_wage_est_sample(paths, specs, load_data=False):
 
     # Create partner state and drop if partner is absent or in non-working age
     df = create_partner_state(df)
-    df = df[df["partner_state"] == 1]
 
     df = filter_below_age(df, specs["start_age"])
     df = recode_sex(df)
     df = filter_years(df, specs["start_year"], specs["end_year"])
 
     df.reset_index(inplace=True)
-    df.to_pickle(out_file_path)
+    df.to_csv(out_file_path)
     return df
 
 
@@ -72,6 +71,23 @@ def load_and_merge_soep_core(soep_c38_path):
     merged_data = pd.merge(
         pgen_data, pathl_data, on=["pid", "hid", "syear"], how="inner"
     )
+    pequiv_data = pd.read_stata(
+        f"{soep_c38_path}/pequiv.dta",
+        columns=[
+            "pid",
+            "syear",
+            "igrv1",
+            "ioldy",
+            "icomp",
+        ],
+        convert_categoricals=False,
+    )
+
+    pequiv_data.rename(columns={"igrv1": "public_pension"}, inplace=True)
+    pequiv_data["all_pensions"] = pequiv_data["ioldy"] + pequiv_data["icomp"]
+
+    # Merge pgen data with pathl data and hl data
+    merged_data = pd.merge(merged_data, pequiv_data, on=["pid", "syear"], how="left")
 
     merged_data["age"] = merged_data["syear"] - merged_data["gebjahr"]
     del pgen_data, pathl_data

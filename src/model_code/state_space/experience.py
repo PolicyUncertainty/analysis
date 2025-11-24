@@ -1,8 +1,29 @@
 import jax
+import jax.numpy as jnp
+import numpy as np
 
 from model_code.pension_system.experience_stock import (
-    calc_experience_years_for_pension_adjustment,
+    calc_pension_points_for_experience,
 )
+
+
+def define_experience_grid(specs):
+    # Experience grid
+    experience_grid = np.linspace(0, 1, 11)
+    # Add very long insured threshold to experience grid and sort
+    experience_grid = np.append(experience_grid, specs["very_long_insured_grid_points"])
+    # Delete 0.5
+    experience_grid = experience_grid[
+        (~np.isclose(experience_grid, 0.5))
+        & ~np.isclose(experience_grid, 0.6)
+        & (~np.isclose(experience_grid, 0))
+    ]
+
+    experience_grid = np.sort(experience_grid)
+    experience_grid[0] = 0
+    experience_grid[1] = 0.15
+    experience_grid[-3] = 0.85
+    return jnp.asarray(experience_grid)
 
 
 def get_next_period_experience(
@@ -10,6 +31,7 @@ def get_next_period_experience(
     lagged_choice,
     policy_state,
     sex,
+    partner_state,
     education,
     experience,
     informed,
@@ -17,27 +39,38 @@ def get_next_period_experience(
     model_specs,
 ):
     """Update experience based on lagged choice and period."""
+    # Check if already longer retired. If it is not degenerated you could have not been
+    # retired last period.
+    degenerate_state_id = model_specs["n_policy_states"] - 1
+    retired_last_period = degenerate_state_id == policy_state
+    retired_this_period = lagged_choice == 0
+    # Fresh retirement means not retired last period and retired this period.
+    fresh_retired = ~retired_last_period & retired_this_period
 
-    max_exp_diffs_per_period = model_specs["max_exp_diffs_per_period"]
+    last_period = period - 1
+    # If period is 0, then last period is also 0.
+    last_period = last_period * (period != 0) + (period == 0) * (-1)
+
     exp_years_last_period = construct_experience_years(
-        experience=experience,
-        period=period - 1,
-        max_exp_diffs_per_period=max_exp_diffs_per_period,
+        float_experience=experience,
+        period=last_period,
+        is_retired=retired_last_period,
+        model_specs=model_specs,
     )
 
     # Update if working part or full time
     exp_update = (lagged_choice == 3) + (lagged_choice == 2) * model_specs[
         "exp_increase_part_time"
     ]
-    exp_new_period = exp_years_last_period + exp_update
-
+    exp_years_this_period = exp_years_last_period + exp_update
     # Calculate experience in the case of fresh retirement
     # We track all deductions and bonuses of the retirement decision through an adjusted
     # experience stock
-    adjusted_exp_years = calc_experience_years_for_pension_adjustment(
+    pension_points = calc_pension_points_for_experience(
         period=period,
         experience_years=exp_years_last_period,
         sex=sex,
+        partner_state=partner_state,
         education=education,
         policy_state=policy_state,
         informed=informed,
@@ -45,26 +78,41 @@ def get_next_period_experience(
         model_specs=model_specs,
     )
 
-    # Check for fresh retirement. Not that we degenerate the policy state after the first period of
-    # retirement and thus don't need to track when retired.
-    degenerate_state_id = model_specs["n_policy_states"] - 1
-    fresh_retired = (degenerate_state_id != policy_state) & (lagged_choice == 0)
-    exp_new_period = jax.lax.select(fresh_retired, adjusted_exp_years, exp_new_period)
+    # If fresh retired, the experience function returns pension points. Now the value and policy function
+    # are calculated on a pension point grid. We do not need experience any more.
+    exp_years_this_period = jax.lax.select(
+        fresh_retired, on_true=pension_points, on_false=exp_years_this_period
+    )
 
     # Now scale between 0 and 1
     exp_scaled = scale_experience_years(
-        experience=exp_new_period,
+        experience_years=exp_years_this_period,
         period=period,
-        max_exp_diffs_per_period=max_exp_diffs_per_period,
+        is_retired=retired_this_period,
+        model_specs=model_specs,
     )
+
     return exp_scaled
 
 
-def construct_experience_years(experience, period, max_exp_diffs_per_period):
-    """Experience and period can also be arrays."""
-    return experience * (period + max_exp_diffs_per_period[period])
+def construct_experience_years(float_experience, period, is_retired, model_specs):
+    """Experience and period can also be arrays. We have to distinguish between the phases where individals are already
+    longer retired or not."""
+    # If period is past the last working period, then we take the maximum experience
+    scale_not_retired = jnp.take(
+        model_specs["max_exps_period_working"], period, mode="clip"
+    )
+    scale_retired = model_specs["max_pp_retirement"]
+    scale = is_retired * scale_retired + (1 - is_retired) * scale_not_retired
+    return float_experience * scale
 
 
-def scale_experience_years(experience, period, max_exp_diffs_per_period):
+def scale_experience_years(experience_years, period, is_retired, model_specs):
     """Scale experience between 0 and 1."""
-    return (1 / (period + max_exp_diffs_per_period[period])) * experience
+    # If period is past the last working period, then we take the maximum experience
+    scale_not_retired = jnp.take(
+        model_specs["max_exps_period_working"], period, mode="clip"
+    )
+    scale_retired = model_specs["max_pp_retirement"]
+    scale = is_retired * scale_retired + (1 - is_retired) * scale_not_retired
+    return experience_years / scale

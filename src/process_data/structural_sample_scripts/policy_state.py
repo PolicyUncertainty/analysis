@@ -2,6 +2,11 @@ import numpy as np
 import pandas as pd
 
 
+def _print_filter(before, after, msg):
+    pct = (after - before) / before * 100 if before > 0 else 0
+    print(f"{after} {msg} ({pct:+.2f}%)")
+
+
 def create_SRA_by_gebjahr(gebjahr):
     """This function creates the policy state according to the 2007 reform."""
 
@@ -44,12 +49,11 @@ def create_policy_state(df, specs):
     df["age_diff"] = df["age"] - df["corrected_age"]
     # Drop pids with age diff larger than 1
     # First read out pids
+    before = len(df)
     pids_to_drop = df[df["age_diff"].abs() > 1].index.get_level_values("pid").unique()
     # Now drop them
     df = df[~df.index.get_level_values("pid").isin(pids_to_drop)].copy()
-    print(
-        f"{len(df)} observations left after dropping pids with age diff larger than 1"
-    )
+    _print_filter(before, len(df), "observations left after dropping pids with age diff larger than 1")
 
     # Manipulate the SRA with the age difference to conserve the distance to the SRA for
     # model ages (integers)

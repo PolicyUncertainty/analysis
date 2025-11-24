@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 from process_data.soep_vars.artkalen import prepare_artkalen_data
-from process_data.soep_vars.work_choices import create_choice_variable
+from process_data.soep_vars.work_choices import create_choice_and_employment_status
 
 
 def create_choice_variable_from_artkalen(
@@ -18,6 +18,8 @@ def create_choice_variable_from_artkalen(
     )
 
     if not load_artkalen_choice:
+        print("Creating artkalen choice variable. This might take a while...")
+        # Initialize columns
         df["choice"] = np.nan
         df["corrected_age"] = df["age"].astype(float)
         # With create artkalen choice
@@ -27,17 +29,18 @@ def create_choice_variable_from_artkalen(
         df = df.groupby("pid").apply(partial_select)
         df["art_choice"] = df["choice"].copy()
         df[["art_choice", "corrected_age"]].to_pickle(
-            path_dict["intermediate_data"] + "art_choice.pkl"
+            path_dict["struct_data"] + "art_choice.pkl"
         )
     else:
         df[["art_choice", "corrected_age"]] = pd.read_pickle(
-            path_dict["intermediate_data"] + "art_choice.pkl"
+            path_dict["struct_data"] + "art_choice.pkl"
         )
 
+    df["corrected_age"] = df["corrected_age"].fillna(df["age"].astype(float))
     df["lagged_art_choice"] = df.groupby("pid")["art_choice"].shift(1)
 
     # Create pgen choice and overwrite
-    df = create_choice_variable(df, filter_missings=False)
+    df = create_choice_and_employment_status(df, filter_missings=False)
     df["pgen_choice"] = df["choice"].copy()
     df["lagged_pgen_choice"] = df.groupby("pid")["pgen_choice"].shift(1)
 
@@ -47,6 +50,12 @@ def create_choice_variable_from_artkalen(
     df.loc[nan_mask & cont_choice, "choice"] = df.loc[
         nan_mask & cont_choice, "pgen_choice"
     ]
+    ret_mask = df["choice"] == 0
+    df["pension_payment_this_year"] = df.groupby("pid")["igrv1"].shift(-1)
+    df["pension_received_this_year"] = df["pension_payment_this_year"] > 0
+    receive_pension = (df["plc0232_v1"] == 1) | (df["pension_received_this_year"])
+    not_receive_pension = ~receive_pension
+    df.loc[ret_mask & not_receive_pension, "choice"] = np.nan
 
     df["lagged_choice"] = df.groupby("pid")["choice"].shift(1)
     return df

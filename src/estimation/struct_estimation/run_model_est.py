@@ -1,72 +1,53 @@
 # Set paths of project
 import pickle as pkl
+import sys
 
+from estimation.struct_estimation.start_params_and_bounds.param_lists import (  # men_disutil_firing,
+    men_disability_params,
+    men_disutil_params,
+    men_job_offer_params,
+    men_taste,
+    women_disability_params,
+    women_disutil_params,
+    women_job_offer_params,
+    women_taste,
+)
 from set_paths import create_path_dict
 
 paths_dict = create_path_dict(define_user=False)
 from estimation.struct_estimation.scripts.estimate_setup import estimate_model
+from estimation.struct_estimation.scripts.observed_model_fit import create_fit_plots
 from estimation.struct_estimation.start_params_and_bounds.set_start_params import (
     load_and_set_start_params,
 )
 
-params_to_estimate_names = [
-    # "mu_men",
-    # "mu_bequest_high",
-    # "mu_bequest_low",
-    # Men Full-time - 4 parameters
-    "disutil_ft_work_good_men",
-    "disutil_ft_work_bad_men",
-    "disutil_unemployed_good_men",
-    "disutil_unemployed_bad_men",
-    # Taste shock men - 1 parameter
-    "taste_shock_scale_men",
-    # "bequest_scale",
-    # # Men job finding - 3 parameters
-    "job_finding_logit_const_men",
-    "job_finding_logit_high_educ_men",
-    "job_finding_logit_good_health_men",
-    "job_finding_logit_above_50_men",
-    "job_finding_logit_above_55_men",
-    # "job_finding_logit_above_60_men",
-    # Disability probability men - 3 parameters
-    "disability_logit_const_men",
-    "disability_logit_age_men",
-    "disability_logit_high_educ_men",
-    # "mu_women",
-    # # # Women Full-time - 4 parameters
-    # "disutil_ft_work_good_women",
-    # "disutil_ft_work_bad_women",
-    # # # Women Part-time - 4 parameters
-    # "disutil_pt_work_good_women",
-    # "disutil_pt_work_bad_women",
-    # # Women Unemployment - 2 parameters
-    # "disutil_unemployed_good_women",
-    # "disutil_unemployed_bad_women",
-    # # Children - 2 parameters
-    # "disutil_children_ft_work_high",
-    # "disutil_children_ft_work_low",
-    # # Taste shock women - 1 parameter
-    # "taste_shock_scale_women",
-    # # Women job finding - 3 parameters
-    # "job_finding_logit_const_women",
-    # "job_finding_logit_high_educ_women",
-    # "job_finding_logit_good_health_women",
-    # "job_finding_logit_above_50_women",
-    # "job_finding_logit_above_55_women",
-    # # Disability probability women - 3 parameters
-    # "disability_logit_const_women",
-    # "disability_logit_age_women",
-    # "disability_logit_high_educ_women",
-]
-model_name = "ucl"
-LOAD_LAST_ESTIMATE = True
-LOAD_SOL_MODEL = True
+model_name = "alg1_sparse_inf_women"
+params_to_estimate_names = (
+    women_disutil_params
+    + women_disability_params
+    + women_job_offer_params
+    # + women_taste
+)
+sex_type = "women"
+edu_type = "all"
+util_type = "add"
+old_sample_only = False
+
+LOAD_SOL_MODEL = False
+LOAD_LAST_ESTIMATE = False
 SAVE_RESULTS = True
 USE_WEIGHTS = False
 
+sample_name = "old" if old_sample_only else "full"
+
+print(
+    f"Running estimation for model: {model_name}; sample: {sample_name}, {sex_type}, {edu_type}, {util_type}",
+    flush=True,
+)
+
 if LOAD_LAST_ESTIMATE:
     last_estimate = pkl.load(
-        open(paths_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
+        open(paths_dict["struct_results"] + f"est_params_alg1_informed_men.pkl", "rb")
     )
 else:
     last_estimate = None
@@ -74,7 +55,7 @@ else:
 # Load start params
 start_params_all = load_and_set_start_params(paths_dict)
 
-estimation_results = estimate_model(
+estimation_results, end_params = estimate_model(
     paths_dict,
     params_to_estimate_names=params_to_estimate_names,
     file_append=model_name,
@@ -83,8 +64,38 @@ estimation_results = estimate_model(
     use_weights=USE_WEIGHTS,
     last_estimate=last_estimate,
     save_results=SAVE_RESULTS,
+    sex_type=sex_type,
+    edu_type=edu_type,
+    util_type=util_type,
+    old_only=old_sample_only,
+    print_men_examples=True,
+    print_women_examples=True,
+    slow_version=False,
+    scale_opt=True,
+    multistart=True,
 )
 print(estimation_results)
 
+# # %% Set paths of project
+# from specs.derive_specs import generate_derived_and_data_derived_specs
 
-# %%
+# specs = generate_derived_and_data_derived_specs(paths_dict)
+
+
+# create_fit_plots(
+#     path_dict=paths_dict,
+#     specs=specs,
+#     params=end_params,
+#     model_name=model_name,
+#     load_sol_model=LOAD_SOL_MODEL,
+#     load_solution=None,
+#     load_data_from_sol=False,
+#     sex_type="all",
+#     edu_type="all",
+#     util_type=util_type,
+#     skip_model_plots=False,
+# )
+
+
+# # %%
+# #

@@ -1,9 +1,11 @@
 import jax
 import jax.numpy as jnp
 
+from model_code.stochastic_processes.math_funcs import logit_formula
+
 
 def job_offer_process_transition(
-    params, sex, health, model_specs, education, period, choice
+    params, sex, health, model_specs, education, policy_state, period, choice
 ):
     """Transition probability for next period job offer state.
 
@@ -19,53 +21,124 @@ def job_offer_process_transition(
     age = model_specs["start_age"] + period
     good_health = (health == model_specs["good_health_var"]).astype(int)
 
-    # Probability of job destruction
-    job_sep_prob = model_specs["job_sep_probs"][sex, education, good_health, age]
-
     job_finding_prob_men = calc_job_finding_prob_men(
-        params, education, good_health, period, model_specs
+        params=params,
+        education=education,
+        good_health=good_health,
+        age=age,
     )
     job_finding_prob_women = calc_job_finding_prob_women(
-        params, education, good_health, period, model_specs
+        params=params,
+        education=education,
+        good_health=good_health,
+        age=age,
     )
     job_finding_prob = jax.lax.select(
         sex == 0, job_finding_prob_men, job_finding_prob_women
     )
 
-    # Transition probability
+    log_job_sep_prob = model_specs["log_job_sep_probs"][
+        sex, education, good_health, age
+    ]
+    job_sep_prob = logit_formula(log_job_sep_prob)
+
+    # Transition probability without SRA firing
     prob_value_0 = (
         job_sep_prob * labor_choice + (1 - job_finding_prob) * unemployment_choice
     )
+    # job_sep_prob, after_SRA_next_before_now = job_sep_probability(
+    #     params=params,
+    #     policy_state=policy_state,
+    #     education=education,
+    #     sex=sex,
+    #     age=age,
+    #     good_health=good_health,
+    #     model_specs=model_specs,
+    # )
+    # job_sep_case = labor_choice | after_SRA_next_before_now
+    # job_offer_case = unemployment_choice & (~after_SRA_next_before_now)
 
-    return jnp.array([prob_value_0, 1 - prob_value_0])
+    # # Transition probability
+    # prob_value_0 = job_sep_prob * job_sep_case + (1 - job_finding_prob) * job_offer_case
+    job_offer_vec = jnp.array([prob_value_0, 1 - prob_value_0])
+
+    # policy_state_value = (
+    #     model_specs["min_SRA"] + policy_state * model_specs["SRA_grid_size"]
+    # )
+
+    # one_year_before_SRA = (policy_state_value - 1) <= age
+    # no_job_offer_prob = jnp.array([1, 0], dtype=prob_value_0.dtype)
+    # job_offer_vec = jax.lax.select(
+    #     one_year_before_SRA,
+    #     on_true=no_job_offer_prob,
+    #     on_false=job_offer_vec,
+    # )
+
+    return job_offer_vec
 
 
-def calc_job_finding_prob_men(params, education, good_health, period, model_specs):
-    age = model_specs["start_age"] + period
-    exp_value = jnp.exp(
-        params["job_finding_logit_const_men"]
-        # + params["job_finding_logit_age_men"] * age
-        + params["job_finding_logit_high_educ_men"] * education
-        + params["job_finding_logit_good_health_men"] * good_health
-        + params["job_finding_logit_above_50_men"] * (age >= 50)
-        + params["job_finding_logit_above_55_men"] * (age >= 55)
-        # + params["job_finding_logit_above_60_men"] * (age >= 60)
+def job_sep_probability(
+    params, policy_state, education, sex, age, good_health, model_specs
+):
+
+    # Probability of job destruction
+    log_job_sep_prob = model_specs["log_job_sep_probs"][
+        sex, education, good_health, age
+    ]
+    SRA_interecpt = (
+        params["SRA_firing_logit_intercept_men_low"] * (1 - education) * (1 - sex)
+        + params["SRA_firing_logit_intercept_men_high"] * education * (1 - sex)
+        + params["SRA_firing_logit_intercept_women_low"] * (1 - education) * sex
+        + params["SRA_firing_logit_intercept_women_high"] * education * sex
     )
-    prob = exp_value / (1 + exp_value)
+
+    policy_state_value = (
+        model_specs["min_SRA"] + policy_state * model_specs["SRA_grid_size"]
+    )
+    # # Check if next period (when age increases by 1) the agent is at the policy state or above. So this period policy
+    # # state value -1 should be <= age and policy state value > age
+    after_SRA_next_before_now = ((policy_state_value - 1) <= age) & (
+        policy_state_value > age
+    )
+
+    logit_intercept = log_job_sep_prob + SRA_interecpt * after_SRA_next_before_now
+    job_sep_prob = logit_formula(logit_intercept)
+    return job_sep_prob, after_SRA_next_before_now
+
+
+def calc_job_finding_prob_men(params, education, good_health, age):
+    above_55 = age >= 55
+    above_50 = age >= 50
+    above_60 = age >= 60
+
+    exp_factor = (
+        params["job_finding_logit_const_men"]
+        + params["job_finding_logit_high_educ_men"] * education
+        # + params["job_finding_logit_good_health_men"] * good_health
+        # + params["job_finding_logit_age_men"] * age
+        # + params["job_finding_logit_age_above_55_men"] * (age - 55) * above_55
+        + params["job_finding_logit_above_50_men"] * above_50
+        + params["job_finding_logit_above_55_men"] * above_55
+        + params["job_finding_logit_above_60_men"] * above_60
+    )
+    prob = logit_formula(exp_factor)
     return prob
 
 
-def calc_job_finding_prob_women(params, education, good_health, period, model_specs):
-    age = model_specs["start_age"] + period
+def calc_job_finding_prob_women(params, education, good_health, age):
+    above_55 = age >= 55
+    above_50 = age >= 50
+    above_60 = age >= 60
 
-    exp_value = jnp.exp(
+    exp_factor = (
         params["job_finding_logit_const_women"]
-        # + params["job_finding_logit_age_women"] * age
         + params["job_finding_logit_high_educ_women"] * education
-        + params["job_finding_logit_good_health_women"] * good_health
-        + params["job_finding_logit_above_50_women"] * (age >= 50)
-        + params["job_finding_logit_above_55_women"] * (age >= 55)
-        # + params["job_finding_logit_above_60_women"] * (age >= 60)
+        # + params["job_finding_logit_good_health_women"] * good_health
+        # + params["job_finding_logit_age_women"] * age
+        # + params["job_finding_logit_age_above_55_women"] * (age - 55) * above_55
+        + params["job_finding_logit_above_50_women"] * above_50
+        + params["job_finding_logit_above_55_women"] * above_55
+        + params["job_finding_logit_above_60_women"] * above_60
     )
-    prob = exp_value / (1 + exp_value)
+    prob = logit_formula(exp_factor)
     return prob

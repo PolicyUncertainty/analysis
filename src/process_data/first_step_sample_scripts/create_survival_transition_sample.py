@@ -5,13 +5,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from process_data.aux_and_plots.filter_data import (
+from process_data.auxiliary.filter_data import (
     filter_above_age,
     filter_below_age,
     filter_years,
     recode_sex,
 )
-from process_data.aux_and_plots.lagged_and_lead_vars import span_dataframe
+from process_data.auxiliary.lagged_and_lead_vars import span_dataframe
 from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.health import correct_health_state, create_health_var
 
@@ -23,7 +23,7 @@ def create_survival_transition_sample(paths, specs, load_data=False):
 
     # cleaned sample
     out_file_path = (
-        paths["intermediate_data"] + "mortality_transition_estimation_sample.pkl"
+        paths["first_step_data"] + "mortality_transition_estimation_sample.pkl"
     )
 
     if load_data:
@@ -81,7 +81,7 @@ def create_survival_transition_sample(paths, specs, load_data=False):
 
     # duplicate the sample - Kroll and Lampert (2009)
     out_file_path_dupli = (
-        paths["intermediate_data"]
+        paths["first_step_data"]
         + "mortality_transition_estimation_sample_duplicated.pkl"
     )
 

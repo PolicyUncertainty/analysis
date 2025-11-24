@@ -9,6 +9,7 @@ def calc_early_retirement_pension_points(
     SRA_at_retirement,
     actual_retirement_age,
     experience_years,
+    policy_state,
     informed,
     education,
     health,
@@ -32,12 +33,14 @@ def calc_early_retirement_pension_points(
           So we only check if very long insured path is better than disability pension.
 
     """
+
     # Check if the individual gets disability pension
     disability_pension_bool = health == model_specs["disabled_health_var"]
     # Check if the individual is eligible for very long insured pension
     very_long_insured_bool = check_very_long_insured(
         retirement_age_difference=retirement_age_difference,
         experience_years=experience_years,
+        policy_state=policy_state,
         sex=sex,
         model_specs=model_specs,
     )
@@ -47,15 +50,7 @@ def calc_early_retirement_pension_points(
         SRA_at_retirement=SRA_at_retirement,
         actual_retirement_age=actual_retirement_age,
         total_pension_points=total_pension_points,
-    )
-
-    # Penalty years. If disability pension(then limit to 3 years)
-    penalty_years_disability = retirement_age_difference.clip(max=3)
-    max_penalty_years = retirement_age_difference.clip(max=4)
-    penalty_years = jax.lax.select(
-        disability_pension_bool,
-        on_true=penalty_years_disability,
-        on_false=max_penalty_years,
+        model_specs=model_specs,
     )
 
     # Choose deduction factor according to information state
@@ -63,49 +58,60 @@ def calc_early_retirement_pension_points(
         informed * model_specs["ERP"]
         + (1 - informed) * model_specs["uninformed_ERP"][education]
     )
-    early_retirement_factor = 1 - early_retirement_penalty * penalty_years
 
-    # Assign disability pension points if eligible. These are always higher in
-    # case of early retirement.
-    total_pension_points_checked = jax.lax.select(
-        disability_pension_bool,
-        on_true=total_points_disability,
-        on_false=total_pension_points,
-    )
-    reduced_pension_points = early_retirement_factor * total_pension_points_checked
+    # Create early retirement factor
+    early_retirement_factor = (
+        1 - early_retirement_penalty * retirement_age_difference
+    ).clip(min=0.0, max=1.0)
 
-    # In case of disability these could be higher than total pension points now. So check
-    # which is higher. In case of long insured pension, these are definetly lower.
-    pension_points_very_long_insured = jnp.maximum(
-        reduced_pension_points, total_pension_points
-    )
+    # Early retirement pension points
+    early_retirement_pension_points = early_retirement_factor * total_pension_points
 
-    # If very long insured, we take the maximum from before.
-    # Otherwise it is the reduced pension points.
+    # Now first select by very long insured.
     pension_points_early_retired = jax.lax.select(
         very_long_insured_bool,
-        on_true=pension_points_very_long_insured,
-        on_false=reduced_pension_points,
+        on_true=total_pension_points,
+        on_false=early_retirement_pension_points,
     )
+
+    # If disabled the pension points are always the highest.
+    pension_points_early_retired = jax.lax.select(
+        disability_pension_bool,
+        on_true=total_points_disability,
+        on_false=pension_points_early_retired,
+    )
+
     return pension_points_early_retired
 
 
 def calc_disability_pension_points(
-    total_pension_points,
-    actual_retirement_age,
-    SRA_at_retirement,
+    total_pension_points, actual_retirement_age, SRA_at_retirement, model_specs
 ):
     """Calculate the disability pension points."""
-    average_points_work_span = total_pension_points / (actual_retirement_age - 18)
-    total_points_disability = (SRA_at_retirement - 18) * average_points_work_span
-    return total_points_disability
+    # Average points per year worked. Ensure that we do not divide by more than 47 years.
+    # Otherwise disability gets worse past 65.
+    work_span_so_far = jnp.minimum(actual_retirement_age - 18, 47)
+    average_points_work_span = total_pension_points / work_span_so_far
+    # Fill up for span 65 - 18 = 47
+    # total_work_span =  SRA_at_retirement - 18
+    total_points_disability = 47 * average_points_work_span
+    # Penalty years. If disability pension(then limit to 3 years) and only until 63
+    penalty_years_disability = (63.0 - actual_retirement_age).clip(max=3.0, min=0.0)
+    disability_reduction_factor = 1 - penalty_years_disability * model_specs["ERP"]
+    return total_points_disability * disability_reduction_factor
 
 
 def check_very_long_insured(
-    retirement_age_difference, experience_years, sex, model_specs
+    retirement_age_difference, experience_years, sex, policy_state, model_specs
 ):
     """Test if the individual qualifies for pension for very long insured
     (Rente besonders für langjährig Versicherte)."""
+
+    policy_state_value = (
+        model_specs["min_SRA"] + policy_state * model_specs["SRA_grid_size"]
+    )
+    # Get diff of SRA value to 67
+    sra_diff_67 = jnp.maximum(67 - policy_state_value, 0)
 
     experience_threshold = model_specs["experience_threshold_very_long_insured"][sex]
     enough_years = experience_years >= experience_threshold
@@ -120,7 +126,10 @@ def retirement_age_long_insured(SRA, model_specs):
     Versicherte" only differs with respect to deductions. Not with respect to entry age. We introduce the
     lower bound of 63 as this is the current law, even for individuals with SRA below 67.
     """
-    return np.maximum(
-        SRA - model_specs["years_before_SRA_long_insured"],
-        model_specs["min_long_insured_age"],
-    )
+    if model_specs["ERA_moves"]:
+        return jnp.maximum(
+            SRA - model_specs["years_before_SRA_long_insured"],
+            model_specs["min_long_insured_age"],
+        )
+    else:
+        return model_specs["min_long_insured_age"]

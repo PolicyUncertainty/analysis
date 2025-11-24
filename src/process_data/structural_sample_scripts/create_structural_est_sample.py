@@ -1,15 +1,17 @@
 import os
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from process_data.aux_and_plots.filter_data import (
+from process_data.auxiliary.filter_data import (
     drop_missings,
+    filter_above_age,
     filter_below_age,
     filter_years,
     recode_sex,
 )
-from process_data.aux_and_plots.lagged_and_lead_vars import (
+from process_data.auxiliary.lagged_and_lead_vars import (
     span_dataframe,
 )
 from process_data.soep_vars.age import calc_age_at_interview
@@ -27,8 +29,13 @@ from process_data.soep_vars.partner_code import (
     correct_partner_state,
     create_partner_state,
 )
+from process_data.soep_vars.wealth.flow_savings import create_flow_savings
 from process_data.soep_vars.wealth.linear_interpolation import (
     add_wealth_interpolate_and_deflate,
+)
+from process_data.structural_sample_scripts.alg_1 import assign_alg_1_claim
+from process_data.structural_sample_scripts.classify_reitrees import (
+    add_very_long_insured_classification,
 )
 from process_data.structural_sample_scripts.disability_pension_health import (
     modify_health_for_disability_pension,
@@ -57,6 +64,7 @@ CORE_TYPE_DICT = {
     "education": "int8",
     "sex": "int8",
     "health": "int8",
+    "alg_1_claim": "int8",
 }
 
 
@@ -87,16 +95,18 @@ def create_structural_est_sample(
     # Filter data to estimation years. Leave additional years for lagging and leading
     df = filter_years(df, specs["start_year"] - 1, specs["end_year"] + 1)
 
-    # Create type variables. They should not be missing anyway
+    # Create type variables and age
     df = recode_sex(df)
     df = create_education_type(df, filter_missings=False)
+    df = calc_age_at_interview(df, drop_invalid=True)
 
+    # Span dataframe to have continuous panel for lagged and lead variables
+    # (needed for choice, partner state, job offer, health)
     df = span_dataframe(df, specs["start_year"] - 1, specs["end_year"] + 1)
-
-    df = calc_age_at_interview(df)
-
-    # Filter ages below
-    df = filter_below_age(df, specs["start_age"] - 1)
+    df = create_choice_variable_from_artkalen(
+        path_dict=paths, specs=specs, df=df, load_artkalen_choice=load_artkalen_choice
+    )
+    df = assign_alg_1_claim(df)
 
     # Having a spanned dataframe we can correct the partner state
     # (missing partner observation in a single year).
@@ -106,23 +116,42 @@ def create_structural_est_sample(
     df = create_health_var(df, filter_missings=False)
     df = correct_health_state(df)
 
-    df = create_choice_variable_from_artkalen(
-        path_dict=paths, specs=specs, df=df, load_artkalen_choice=load_artkalen_choice
+    # Generate job separation variable
+    df = generate_job_separation_var(df)
+
+    # Now use this information to determine job offer state
+    df["job_sep_this_year"] = df.groupby(["pid"])["job_sep"].shift(-1)
+    was_fired_last_period = (df["job_sep"] == 1) | (df["job_sep_this_year"] == 1)
+    df = determine_observed_job_offers(
+        df, was_fired_last_period=was_fired_last_period, working_choices=[2, 3]
     )
 
     # Create informed state
     df = create_informed_state(df)
 
-    # Generare job separation variable
-    df = generate_job_separation_var(df)
-
-    # Now use this information to determine job offer state
-    # df["job_sep_this_year"] = df.groupby(["pid"])["job_sep"].shift(-1)
-    # was_fired_last_period = (df["job_sep"] == 1) | (df["job_sep_this_year"] == 1)
-    df = determine_observed_job_offers(df, working_choices=[2, 3])
-
     # We are done with lagging and leading and drop the buffer years
     df = filter_years(df, specs["start_year"], specs["end_year"])
+
+    # create experience and working years
+    df = create_experience_and_working_years(df.copy(), filter_missings=True)
+    print_data_description(
+        df, choice_breakdown=True, id_breakdown=True, state_description=False
+    )
+
+    # Add wealth and flow savings
+    df = add_wealth_interpolate_and_deflate(
+        df,
+        paths,
+        specs,
+        load_wealth=load_wealth,
+        use_processed_pl=use_processed_pl,
+        filter_missings=True,
+    )
+
+    df = create_flow_savings(df, specs)
+
+    # Now we can also kick out the buffer age for lagging
+    df = filter_below_age(df, specs["start_age"])
 
     # We also delete now the observations with invalid data, which we left before to have a continuous panel
     df = drop_missings(
@@ -134,22 +163,16 @@ def create_structural_est_sample(
             "lagged_health",
             "education",
             "age",
+            "wealth",
         ],
-    )
-
-    # Add wealth
-    df = add_wealth_interpolate_and_deflate(
-        df, paths, specs, load_wealth=load_wealth, use_processed_pl=use_processed_pl
     )
 
     # Correct policy state
     df = create_policy_state(df, specs)
-
-    df = create_experience_and_working_years(df.copy(), filter_missings=True)
-
-    # Now we can also kick out the buffer age for lagging
-    df = filter_below_age(df, specs["start_age"])
+    # Now all age manipulations are done, we can also create the period
     df["period"] = df["age"] - specs["start_age"]
+
+    df = filter_above_age(df, specs["end_age"])
 
     # enforce choice restrictions based on model setup
     df = enforce_model_choice_restriction(df, specs)
@@ -158,30 +181,62 @@ def create_structural_est_sample(
     df["surveyed_health"] = df["health"].copy()
     df = modify_health_for_disability_pension(df, specs)
 
+    # Add very long insured classification
+    df = add_very_long_insured_classification(
+        df=df,
+        path_dict=paths,
+        specs=specs,
+    )
+
+    # Create pseudo ids
+    df = create_pseudo_ids(df)
+
+    # Drop civil servants and self-employed
+    df = df[~df["self_employed"]]
+    df = df[~df.groupby("pid")["civil_servant"].transform("any")]
+
+    print(f"Dropping civil servants and self-employed, {len(df)} observations left.")
     # Rename to monthly wage
     df.rename(
         columns={
             "pglabgro": "monthly_wage",
+            "pglabgro_p": "monthly_wage_partner",
             "hlc0005_v2": "hh_net_income",
+            "i11102": "last_year_hh_net_income",
+            "igrv1": "last_year_pension",
         },
         inplace=True,
     )
 
     type_dict_add = {
         "monthly_wage": "float64",
+        "monthly_wage_partner": "float64",
         "hh_net_income": "float64",
+        "last_year_hh_net_income": "float64",
+        "savings_dec": "float64",
         "working_years": "float64",
         "children": "float64",
         # "surveyed_health": "int8",
+        "last_year_pension": "float64",
+        "pseudo_pid": "Int32",
+        "pseudo_hid": "Int32",
+        "very_long_insured": "bool",
     }
 
     df["hh_net_income"] /= specs["wealth_unit"]
 
     # Drop observations if any of core variables are nan
     # We also delete now the observations with invalid data, which we left before to have a continuous panel
+    print("-" * 30)
+    print("Double check for missings in core variables:")
     df = drop_missings(
         df=df,
         vars_to_check=list(CORE_TYPE_DICT.keys()),
+    )
+
+    print(str(len(df)) + " left in final estimation sample.")
+    print_data_description(
+        df, choice_breakdown=True, id_breakdown=True, state_description=False
     )
 
     all_type_dict = {
@@ -191,14 +246,10 @@ def create_structural_est_sample(
     df = df[list(all_type_dict.keys())]
     df = df.astype(all_type_dict)
 
-    print_data_description(df)
-
     # Anonymize and save data
+    df["year"] = df.index.get_level_values("syear").values
     df.reset_index(drop=True, inplace=True)
     df.to_csv(paths["struct_est_sample"])
-
-    # median wealth by age
-    # df["median_wealth"] = df.groupby("age")["wealth"].transform("median")
 
     return df
 
@@ -236,14 +287,24 @@ def load_and_merge_soep_core(path_dict, use_processed_pl):
         ppathl_data, pgen_data, on=["pid", "hid", "syear"], how="left"
     )
 
-    pl_intermediate_file = path_dict["intermediate_data"] + "pl_structural.pkl"
+    pl_intermediate_file = path_dict["struct_data"] + "pl_structural.pkl"
     if use_processed_pl:
         pl_data = pd.read_pickle(pl_intermediate_file)
     else:
+        print("Loading and merging pl data. This might take a while...")
         # Add pl data
         pl_data_reader = pd.read_stata(
             f"{soep_c38_path}/pl.dta",
-            columns=["pid", "hid", "syear", "plb0304_h", "iyear", "pmonin", "ptagin"],
+            columns=[
+                "pid",
+                "hid",
+                "syear",
+                "plb0304_h",
+                "iyear",
+                "pmonin",
+                "ptagin",
+                "plc0232_v1",
+            ],
             chunksize=100000,
             convert_categoricals=False,
         )
@@ -270,39 +331,135 @@ def load_and_merge_soep_core(path_dict, use_processed_pl):
         # m11126: Self-Rated Health Status
         # m11124: Disability Status of Individual
         f"{soep_c38_path}/pequiv.dta",
-        columns=["pid", "syear", "d11107", "d11101", "m11126", "m11124", "igrv1"],
+        columns=[
+            "pid",
+            "syear",
+            "d11107",
+            "d11101",
+            "m11126",
+            "m11124",
+            "igrv1",
+            "i11102",
+            "iunby",
+            "alg2",
+        ],
         convert_categoricals=False,
     )
     merged_data = pd.merge(merged_data, pequiv_data, on=["pid", "syear"], how="left")
     merged_data.rename(columns={"d11107": "children"}, inplace=True)
-
+    pkal_data = pd.read_stata(
+        f"{soep_c38_path}/pkal.dta",
+        columns=[
+            "pid",
+            "syear",
+            "kal2f01_h",
+        ],
+        convert_categoricals=False,
+    )
+    pkal_data.rename(
+        columns={"kal2f01_h": "alg1_last_year", "kal2f03_h": "alg_1_payment"},
+        inplace=True,
+    )
+    merged_data = pd.merge(merged_data, pkal_data, on=["pid", "syear"], how="left")
     merged_data.set_index(["pid", "syear"], inplace=True)
     print(str(len(merged_data)) + " observations in SOEP C38 core.")
     return merged_data
 
 
-def print_data_description(df):
-    n_retirees = df.groupby("choice").size().loc[0]
-    n_unemployed = df.groupby("choice").size().loc[1]
-    n_part_time = df.groupby("choice").size().loc[2]
-    n_full_time = df.groupby("choice").size().loc[3]
-    n_fresh_retirees = (
-        df.groupby(["choice", "lagged_choice"]).size().get((0, 1), 0)
-        + df.groupby(["choice", "lagged_choice"]).size().get((0, 2), 0)
-        + df.groupby(["choice", "lagged_choice"]).size().get((0, 3), 0)
-    )
-    print(str(len(df)) + " left in final estimation sample.")
-    print("---------------------------")
-    print(
-        "Breakdown by choice:\n" + str(n_retirees) + " retirees [0] \n"
-        "--"
-        + str(n_fresh_retirees)
-        + " thereof fresh retirees [0, lagged =!= 0] \n"
-        + str(n_unemployed)
-        + " unemployed [1] \n"
-        + str(n_part_time)
-        + " part-time [2] \n"
-        + str(n_full_time)
-        + " full time [3]."
-    )
-    print("---------------------------")
+def print_data_description(
+    df, choice_breakdown=False, id_breakdown=False, state_description=False
+):
+    print("-" * 30)
+
+    if choice_breakdown:
+        n_retirees = df.groupby("choice").size().loc[0]
+        n_unemployed = df.groupby("choice").size().loc[1]
+        n_part_time = df.groupby("choice").size().loc[2]
+        n_full_time = df.groupby("choice").size().loc[3]
+        n_fresh_retirees = (
+            df.groupby(["choice", "lagged_choice"]).size().get((0, 1), 0)
+            + df.groupby(["choice", "lagged_choice"]).size().get((0, 2), 0)
+            + df.groupby(["choice", "lagged_choice"]).size().get((0, 3), 0)
+        )
+        print(
+            "Breakdown by choice:\n" + str(n_retirees) + " retirees [0] \n"
+            "--"
+            + str(n_fresh_retirees)
+            + " thereof fresh retirees [0, lagged =!= 0] \n"
+            + str(n_unemployed)
+            + " unemployed [1] \n"
+            + str(n_part_time)
+            + " part-time [2] \n"
+            + str(n_full_time)
+            + " full time [3]."
+        )
+        print("-" * 30)
+
+    if id_breakdown:
+        print(
+            "Unique number of individuals (pid), individuals linked with pension records (rv_id), and households (hid):"
+        )
+        print(
+            "Number of unique pid: " + str(df.index.get_level_values("pid").nunique())
+        )
+        print(
+            "Number of unique rv_id (linked pension records): "
+            + str(df["rv_id"].nunique())
+        )
+        print("Number of unique hid: " + str(df["hid"].nunique()))
+        print("-" * 30)
+
+    if state_description:
+        print("Detailed description of choice and state variables:")
+        choice_vars = ["choice", "lagged_choice"]
+        state_vars = [
+            "period",
+            "education",
+            "sex",
+            "job_offer",
+            "partner_state",
+            "health",
+            "policy_state",
+            "wealth",
+        ]
+        for var in choice_vars + state_vars:
+            print(f"\nDescription of {var}:")
+            print(df[var].describe())
+            # value counts for non-float variables
+            if var in choice_vars + state_vars and not pd.api.types.is_float_dtype(
+                df[var]
+            ):
+                print(f"Value counts of {var}:")
+                print(df[var].value_counts().sort_index())
+
+        print("-" * 30)
+        print("---------------------------")
+
+
+def create_pseudo_ids(df):
+    """This function creates a pseudo pid and a pseudo hid for each individual and household.
+    Pseudo ids are ascending integers starting from 1.
+    """
+    import numpy as np
+
+    # If pid/hid are in the index, get them from there
+    if "pid" in df.index.names:
+        pid_vals = df.index.get_level_values("pid")
+    else:
+        pid_vals = df["pid"]
+    if "hid" in df.index.names:
+        hid_vals = df.index.get_level_values("hid")
+    else:
+        hid_vals = df["hid"]
+
+    # Use numpy array to avoid index alignment issues
+    pseudo_pid = pd.Series(pid_vals).astype("category").cat.codes.to_numpy()
+    pseudo_hid = pd.Series(hid_vals).astype("category").cat.codes.to_numpy()
+
+    # Replace -1 (for missing) with np.nan, then add 1
+    pseudo_pid = np.where(pseudo_pid == -1, np.nan, pseudo_pid + 1)
+    pseudo_hid = np.where(pseudo_hid == -1, np.nan, pseudo_hid + 1)
+
+    df["pseudo_pid"] = pseudo_pid
+    df["pseudo_hid"] = pseudo_hid
+    return df

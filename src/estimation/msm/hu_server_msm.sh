@@ -8,10 +8,10 @@
 #SBATCH --time=9:00:00
 #SBATCH --mem=50GB
 #SBATCH --partition=gpu_h100
-#SBATCH --gres=gpu:h100nvl:1
+#SBATCH --gres=gpu:h100nvl:2
 #SBATCH --qos=standard
 
-module add cuda/12.4.1
+module add cuda/12.8.1
 
 #python run_msm.py
 python plot_moments.py

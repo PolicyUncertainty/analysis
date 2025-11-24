@@ -1,0 +1,185 @@
+import os
+
+import numpy as np
+import pandas as pd
+
+
+def aggregate_comparison_baseline_cf(
+    path_dict, model_name, file_append, result_df=None
+):
+    """
+    Create LaTeX table comparing baseline and counterfactual aggregate results.
+
+    Parameters:
+    -----------
+    result_df : pd.DataFrame
+        DataFrame with columns like 'baseline_ret_age', 'cf_ret_age', etc.
+    base_label : str
+        Label for baseline scenario
+    cf_label : str
+        Label for counterfactual scenario
+    path_dict : dict
+        Dictionary with paths including 'simulation_tables'
+    model_name : str
+        Model name for file naming
+    cv : float, optional
+        Compensating variation value to display at bottom
+    """
+    if result_df is None:
+        load_folder = path_dict["sim_results"] + model_name + "/"
+        filename = f"debias_{file_append}.csv"
+        result_df = pd.read_csv(load_folder + filename, index_col=0)
+
+    cv = result_df.at[0, "cv_cf"]
+
+    # Define the metrics we want to display
+    metrics = {
+        # Work Life (<63)
+        "working_hours_below_63": "Annual Labor Supply (hrs)",
+        "consumption_below_63": "Annual Consumption",
+        "savings_below_63": "Annual Savings",
+        # Retirement
+        # "ret_age": "Retirement Age",
+        "ret_age_excl_disabled": "Retirement Age",
+        # "pension_wealth_at_ret": "Pension Wealth (PV at Retirement)",
+        "pension_wealth_at_ret_excl_disability": "Pension Wealth",
+        # "private_wealth_at_ret": "Financial Wealth at Retirement",
+        "private_wealth_at_ret_excl_disability": "Financial Wealth",
+        # "pensions": "Annual Pension Income",
+        # "pensions_excl_disability": "Annual Pension Income (excl. Disability)",
+        # "share_disability_pensions": "Share with Disability Pension",
+        # "pensions_share_below_63": "Share with Pension before 63",
+        # "share_below_SRA": "Share Retiring below SRA",
+        # "share_very_long_insured": "Share with Very Long Insured",
+        # "share_rejected_disability_pensions": "Share Rejected Disability Pensions",
+        # Lifecycle (30+)
+        "lifecycle_working_hours": "Annual Labor Supply (hrs)",
+        "lifecycle_avg_wealth": "Average Financial Wealth",
+    }
+
+    # Section definitions
+    sections = {
+        "Work Life ($<63$)": [
+            "working_hours_below_63",
+            "consumption_below_63",
+            "savings_below_63",
+        ],
+        "Retirement": [
+            # "ret_age",
+            "ret_age_excl_disabled",
+            # "pension_wealth_at_ret",
+            "pension_wealth_at_ret_excl_disability",
+            # "private_wealth_at_ret",
+            "private_wealth_at_ret_excl_disability",
+            # "pensions",
+            # "pensions_excl_disability",
+            # "share_disability_pensions",
+            # "pensions_share_below_63",
+            # "share_below_SRA",
+            # "share_very_long_insured",
+            # "share_rejected_disability_pensions",
+        ],
+        "Lifecycle (30+)": ["lifecycle_working_hours", "lifecycle_avg_wealth"],
+    }
+
+    # Extract values and calculate percentage differences
+    table_rows = []
+
+    for section_name, section_metrics in sections.items():
+        # Add section header
+        table_rows.append(
+            {
+                "section": section_name,
+                "outcome": "",
+                "baseline": "",
+                "cf": "",
+                "diff": "",
+            }
+        )
+
+        # Add metrics for this section
+        for metric_key in section_metrics:
+
+            outcome_name = metrics[metric_key]
+
+            baseline_val = result_df.loc[0, f"baseline_{metric_key}"]
+            cf_val = result_df.loc[0, f"cf_{metric_key}"]
+
+            # Calculate percentage difference
+            if baseline_val != 0:
+                pct_diff = ((cf_val - baseline_val) / baseline_val) * 100
+            else:
+                pct_diff = np.nan
+
+            table_rows.append(
+                {
+                    "section": "",
+                    "outcome": outcome_name,
+                    "baseline": baseline_val,
+                    "cf": cf_val,
+                    "diff": pct_diff,
+                }
+            )
+
+    # Create LaTeX table
+    latex_lines = []
+
+    # Table header
+    latex_lines.append(r"  \begin{tabular}{lccc}")
+    latex_lines.append(r"    \toprule")
+    latex_lines.append(
+        f"    Outcome & \\makecell{{Baseline with \\\\ Misinformed}} & \\makecell{{Only \\\\ Informed}} & Difference (\\%) \\\\"
+    )
+    latex_lines.append(r"    \midrule")
+
+    # Table body
+    for row in table_rows:
+        if row["outcome"] == "":  # Section header
+            latex_lines.append(r"    \midrule")
+            latex_lines.append(
+                f"    \\multicolumn{{4}}{{l}}{{\\textit{{{row['section']}}}}} \\\\"
+            )
+        else:  # Data row
+            # Format numbers appropriately
+            if pd.notna(row["baseline"]):
+                baseline_str = f"{row['baseline']:.2f}"
+                cf_str = f"{row['cf']:.2f}"
+
+                if pd.notna(row["diff"]):
+                    diff_str = f"{row['diff']:+.2f}"
+                else:
+                    diff_str = "---"
+
+                latex_lines.append(
+                    f"    {row['outcome']} & {baseline_str} & {cf_str} & {diff_str} \\\\"
+                )
+
+    # Add compensating variation if provided
+    if cv is not None:
+        latex_lines.append(r"    \midrule")
+        # Add Welfare as section header
+        latex_lines.append(f"    \\multicolumn{{4}}{{l}}{{\\textit{{Welfare}}}} \\\\")
+        latex_lines.append(f"    Compensating Variation (\\%) & & & {cv:+.2f}\\% \\\\")
+
+    # Table footer
+    latex_lines.append(r"    \bottomrule")
+    latex_lines.append(r"  \end{tabular}")
+
+    # Join lines
+    latex_table = "\n".join(latex_lines)
+
+    # Save to file
+    table_dir = path_dict["simulation_tables"] + model_name + "/"
+    if not os.path.exists(table_dir):
+        os.makedirs(table_dir)
+
+    output_path = os.path.join(
+        table_dir, f"cf_debias_aggregate_results_{file_append}.tex"
+    )
+
+    with open(output_path, "w") as f:
+        f.write(latex_table)
+
+    print(f"Table saved to: {output_path}")
+
+    return latex_table

@@ -5,11 +5,11 @@ from jax import numpy as jnp
 
 def read_in_health_transition_specs(paths_dict, specs):
     trans_probs_df = pd.read_csv(
-        paths_dict["est_results"] + "health_transition_matrix.csv",
+        paths_dict["first_step_results"] + "health_transition_matrix.csv",
     )
 
     death_prob_df = pd.read_csv(
-        paths_dict["est_results"] + "mortality_transition_matrix.csv",
+        paths_dict["first_step_results"] + "mortality_transition_matrix.csv",
     )
 
     observed_health_vars = specs["observed_health_vars"]
@@ -83,7 +83,7 @@ def read_in_health_transition_specs(paths_dict, specs):
         :, :, :, bad_health_var, :
     ]
 
-    return jnp.asarray(health_trans_mat)
+    return health_trans_mat
 
 
 def process_health_labels(specs):

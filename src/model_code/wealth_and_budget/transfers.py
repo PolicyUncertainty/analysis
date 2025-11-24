@@ -20,20 +20,21 @@ def calc_unemployment_benefits(
         nb_children * model_specs["annual_child_unemployment_benefits"]
     )
 
-    # Unemployment benefits for adults living in the household
-    unemployment_benefits_adults = (1 + has_partner_int) * model_specs[
-        "annual_unemployment_benefits"
-    ]
-    # For housing, second adult gets only half
-    unemployment_benefits_housing = (1 + 0.5 * has_partner_int) * model_specs[
-        "annual_unemployment_benefits_housing"
-    ]
+    own_unemployemnt_benefits = (
+        model_specs["annual_unemployment_benefits"]
+        + model_specs["annual_unemployment_benefits_housing"]
+    )
+
+    partner_unemployment_benefits = has_partner_int * (
+        model_specs["annual_unemployment_benefits"]
+        + model_specs["annual_unemployment_benefits_housing"] * 0.5
+    )
 
     # Total unemployment benefits
     total_unemployment_benefits = (
-        unemployment_benefits_adults
+        own_unemployemnt_benefits
+        + partner_unemployment_benefits
         + unemployment_benefits_children
-        + unemployment_benefits_housing
     )
 
     # reduced benefits for savings slightly above threshold
@@ -49,4 +50,4 @@ def calc_unemployment_benefits(
         means_test * total_unemployment_benefits
         + reduced_benefits_means_test * reduced_benefits
     )
-    return unemployment_benefits
+    return unemployment_benefits, own_unemployemnt_benefits

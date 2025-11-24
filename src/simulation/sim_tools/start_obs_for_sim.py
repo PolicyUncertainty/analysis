@@ -1,26 +1,41 @@
 import jax
 import jax.numpy as jnp
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import scipy.stats as stats
-import seaborn as sns
-from dcegm.asset_correction import adjust_observed_assets
 from dcegm.pre_processing.shared import create_array_with_smallest_int_dtype
 
+from model_code.specify_model import specify_model
 from model_code.stochastic_processes.health_transition import (
     calc_disability_probability,
 )
 from model_code.stochastic_processes.job_offers import job_offer_process_transition
+from model_code.transform_data_from_model import load_scale_and_correct_data
 
 
 def generate_start_states_from_obs(
-    path_dict, params, model_class, inital_SRA, only_informed=False
+    path_dict, params, inital_SRA, model_class=None, only_informed=False
 ):
+    if model_class is None:
+        from specs.derive_specs import generate_derived_and_data_derived_specs
+
+        specs = generate_derived_and_data_derived_specs(path_dict)
+        model_class = specify_model(
+            path_dict,
+            specs,
+            subj_unc=True,
+            custom_resolution_age=None,
+        )
     model_specs = model_class.model_specs
     model_structure = model_class.model_structure
 
-    observed_data = pd.read_csv(path_dict["struct_est_sample"])
+    observed_data = load_scale_and_correct_data(
+        path_dict=path_dict, model_class=model_class
+    )
+
+    # Generate start policy state from initial SRA
+    initial_policy_state = np.floor(
+        (inital_SRA - model_specs["min_SRA"]) / model_specs["SRA_grid_size"]
+    )
 
     # Define start data and adjust wealth
     min_period = observed_data["period"].min()
@@ -31,22 +46,12 @@ def generate_start_states_from_obs(
         name: start_period_data[name].values
         for name in model_structure["discrete_states_names"]
     }
-    # Transform experience for wealth adjustment
+    states_dict["assets_begin_of_period"] = start_period_data[
+        "assets_begin_of_period"
+    ].values
+    states_dict["experience"] = start_period_data["experience"].values
     periods = start_period_data["period"].values
-    max_init_exp = model_specs["max_exp_diffs_per_period"][periods]
-    exp_denominator = periods + max_init_exp
-    states_dict["experience"] = start_period_data["experience"].values / exp_denominator
-    states_dict["assets_begin_of_period"] = (
-        start_period_data["wealth"].values / model_specs["wealth_unit"]
-    )
 
-    states_dict["assets_begin_of_period"] = jnp.asarray(
-        adjust_observed_assets(
-            observed_states_dict=states_dict,
-            params=params,
-            model_class=model_class,
-        )
-    )
     n_individuals = periods.shape[0]
     n_multiply_start_obs = model_specs["n_multiply_start_obs"]
 
@@ -65,6 +70,7 @@ def generate_start_states_from_obs(
             health=health,
             model_specs=model_specs,
             education=education,
+            policy_state=initial_policy_state,
             period=jnp.array(-1, dtype=int),
             choice=lagged_choice,
         ).T
@@ -132,26 +138,53 @@ def generate_start_states_from_obs(
     # Assign job offers, informed agents and health
     # If only informed should be simulated assign 1 everywhere
     if only_informed:
-        states_dict["informed"] = jnp.ones_like(states_dict["period"])
+        states_dict["informed"] = np.ones_like(states_dict["period"])
     else:
         states_dict["informed"] = informed_agents.flatten()
 
     states_dict["job_offer"] = job_offers.flatten()
     states_dict["health"] = health_agents.flatten()
 
-    # Generate start policy state from initial SRA
-    initial_policy_state = np.floor(
-        (inital_SRA - model_specs["min_SRA"]) / model_specs["SRA_grid_size"]
-    )
-
     policy_state_agents = (
-        jnp.ones_like(states_dict["health"]) * initial_policy_state
-    ).astype(jnp.uint8)
+        np.ones_like(states_dict["health"]) * initial_policy_state
+    ).astype(np.uint8)
     states_dict["policy_state"] = policy_state_agents
 
     initial_states = jax.tree.map(create_array_with_smallest_int_dtype, states_dict)
 
-    # df = pd.DataFrame(initial_states)
-    # df["wealth"] = initial_wealth
-
     return initial_states
+
+
+def investigate_start_obs(
+    path_dict,
+    model_class,
+    load=False,
+):
+    if load:
+        initial_obs_table = pd.read_csv(
+            path_dict["data_tables"] + "initial_obs_table.csv", index_col=[0, 1]
+        )
+        return initial_obs_table
+
+    observed_data = load_scale_and_correct_data(
+        path_dict=path_dict, model_class=model_class
+    )
+
+    # Define start data and adjust wealth
+    min_period = observed_data["period"].min()
+    start_period_data = observed_data[observed_data["period"].isin([min_period])].copy()
+    # Get table of median and mean for continous variables
+    # Get table of median and mean wealth
+    median = start_period_data.groupby(["sex", "education"])[
+        ["experience_years", "experience", "assets_begin_of_period", "wealth"]
+    ].median()
+    mean = start_period_data.groupby(["sex", "education"])[
+        ["experience_years", "experience", "assets_begin_of_period", "wealth"]
+    ].mean()
+    rename_median = {col: col + "_median" for col in median.columns}
+    rename_mean = {col: col + "_mean" for col in mean.columns}
+    median = median.rename(columns=rename_median)
+    mean = mean.rename(columns=rename_mean)
+    initial_obs_table = median.merge(mean, left_index=True, right_index=True)
+    initial_obs_table.to_csv(path_dict["data_tables"] + "initial_obs_table.csv")
+    return initial_obs_table

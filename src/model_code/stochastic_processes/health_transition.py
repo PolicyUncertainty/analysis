@@ -1,6 +1,8 @@
 import jax
 import jax.numpy as jnp
 
+from model_code.stochastic_processes.math_funcs import logit_formula
+
 
 def health_transition(
     sex, health, education, period, params, choice, lagged_choice, model_specs
@@ -28,44 +30,67 @@ def health_transition(
     disabled_health_prob = prob_vector[bad_health_var] * cond_prob_disabled
 
     # Now set the probabilities in the vector(jax.numpy style)
-    prob_vector = prob_vector.at[disabled_health_var].set(disabled_health_prob)
-    prob_vector = prob_vector.at[bad_health_var].set(bad_health_prob)
+    new_prob_vector = prob_vector.at[disabled_health_var].set(disabled_health_prob)
+    new_prob_vector = new_prob_vector.at[bad_health_var].set(bad_health_prob)
 
-    # We need to ensure, that if the agent is disabled and chooses retirement, she has to stay one period disabled
-    # and cannot transition to good/bad health. The agent can still die.
-    fresh_disability_pension = (
-        (lagged_choice != 0) & (health == disabled_health_var) & (choice == 0)
-    )
+    # We need to ensure, that if the agent is disabled and chooses retirement, she has to stay
+    # one period disabled and cannot transition to good/bad health. The agent can still die.
+    # Vice versa she can also not transition to disability if she is not disabled and chooses not to retire.
+    # First construct the probability vector for fresh disability pensioners.
+    # The one for not disabled fresh retirees is just the original prob_vector.
     fresh_disability_pension_prob = construct_fresh_disability_pension_prob_vector(
         prob_vector=prob_vector, model_specs=model_specs
     )
-    prob_vector = jax.lax.select(
-        fresh_disability_pension,
+    in_disability = health == disabled_health_var
+    prob_vec_for_fresh = jax.lax.select(
+        in_disability,
         on_true=fresh_disability_pension_prob,
         on_false=prob_vector,
     )
 
+    fresh_retired = (lagged_choice != 0) & (choice == 0)
+    prob_vector = jax.lax.select(
+        fresh_retired,
+        on_true=prob_vec_for_fresh,
+        on_false=new_prob_vector,
+    )
     return prob_vector
 
 
 def calc_disability_probability(params, sex, education, period, model_specs):
-    age = model_specs["start_age"] + period
+    age = (model_specs["start_age"] + period).astype(float)
+    above_50 = age >= 50
+    above_55 = age >= 55
+    above_60 = age >= 60
 
     # Calculate exp value for men and women
-    exp_value_men = jnp.exp(
+    logit_factor_men = (
         params["disability_logit_const_men"]
-        + params["disability_logit_age_men"] * age
-        + params["disability_logit_high_educ_men"] * education
+        # + params["disability_logit_age_men"] * age
+        # + params["disability_logit_age_above_50_men"] * (age - 50) * above_50
+        + params["disability_logit_above_50_men"] * above_50
+        + params["disability_logit_above_55_men"] * above_55
+        + params["disability_logit_above_60_men"] * above_60
+        # params["disability_logit_low_educ_men"] * (1 - education)
+        # + params["disability_logit_high_educ_men"] * education
     )
-    exp_value_women = jnp.exp(
+    logit_factor_women = (
         params["disability_logit_const_women"]
-        + params["disability_logit_age_women"] * age
-        + params["disability_logit_high_educ_women"] * education
+        # + params["disability_logit_age_women"] * age
+        # + params["disability_logit_age_above_50_women"] * (age - 50) * above_50
+        + params["disability_logit_above_50_women"] * above_50
+        + params["disability_logit_above_55_women"] * above_55
+        + params["disability_logit_above_60_women"] * above_60
+        # params["disability_logit_low_educ_women"] * (1 - education)
+        # + params["disability_logit_high_educ_women"] * education
     )
     # Now select based on sex state
     is_men = sex == 0
-    exp_value = jax.lax.select(is_men, on_true=exp_value_men, on_false=exp_value_women)
-    prob = exp_value / (1 + exp_value)
+
+    logit_factor = jax.lax.select(
+        is_men, on_true=logit_factor_men, on_false=logit_factor_women
+    )
+    prob = logit_formula(logit_factor)
 
     return prob
 

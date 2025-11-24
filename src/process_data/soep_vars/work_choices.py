@@ -15,7 +15,7 @@ def create_working_status(df):
     return df
 
 
-def create_choice_variable(data, filter_missings=True):
+def create_choice_and_employment_status(data, filter_missings=True):
     """This function creates the choice variable for the structural model.
 
     0: retirement, 1: unemployed, 2: part-time, 3: full-time
@@ -36,6 +36,9 @@ def create_choice_variable(data, filter_missings=True):
     # assign retirement choice
     data.loc[soep_empl_status == 13, "choice"] = 0
     # merged_data.loc[rv_ret_choice == "RTB"] = 2y
+
+    data["self_employed"] = data["pgstib"].isin(range(400, 480))
+    data["civil_servant"] = data["pgstib"].isin(range(600, 650))
 
     if filter_missings:
         data = data[data["choice"].notna()]

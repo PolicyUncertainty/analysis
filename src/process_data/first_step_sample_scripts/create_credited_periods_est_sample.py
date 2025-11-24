@@ -2,8 +2,8 @@ import os
 
 import pandas as pd
 
-from process_data.aux_and_plots.filter_data import recode_sex
-from process_data.aux_and_plots.plot_credited_periods_vs_exp import (
+from process_data.auxiliary.filter_data import recode_sex
+from process_data.data_plots.plot_credited_periods_vs_exp import (
     plot_credited_periods_vs_exp,
 )
 from process_data.soep_rv_vars.credited_periods import create_credited_periods
@@ -16,12 +16,11 @@ def create_credited_periods_est_sample(paths, load_data=False, plot_data=False):
     if not os.path.exists(paths["intermediate_data"]):
         os.makedirs(paths["intermediate_data"])
 
-    out_file_path = paths["intermediate_data"] + "credited_periods_est_sample.pkl"
+    out_file_path = paths["first_step_data"] + "credited_periods_est_sample.pkl"
 
     if load_data:
         df = pd.read_pickle(out_file_path)
         return df
-
     df = load_and_merge_soep_core(
         soep_c38_path=paths["soep_c38"], soep_rv_path=paths["soep_rv"]
     )
@@ -99,8 +98,8 @@ def load_and_merge_soep_core(soep_c38_path, soep_rv_path):
             "AUAZ",  # Anrechnungszeiten because of sickness
             "EZ",  # "Ersatzzeiten", replacement periods (military service, etc.)
             "KIMOBO",  #
-            "RTAT",  # "Rentenart", type of pension (1: disability, 2: old age)
-            "LEAT",  # "Leistungsart", type of pension (1: does not apply, 2: disability, 3-7: old age special cases, 8: old age)
+            "RTAT",  # "Rentenart", type of pension (1: disability, 2: figures age)
+            "LEAT",  # "Leistungsart", type of pension (1: does not apply, 2: disability, 3-7: figures age special cases, 8: figures age)
         ],
         convert_categoricals=False,
     )

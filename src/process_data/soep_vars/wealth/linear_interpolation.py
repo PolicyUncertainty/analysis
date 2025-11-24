@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 
 from process_data.soep_vars.age import calc_age_at_interview
+from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.wealth.deflate_wealth import deflate_wealth
 
 
@@ -17,16 +18,20 @@ def add_wealth_interpolate_and_deflate(
     observation for each household, and deflates wealth using the consumer price
     index."""
     # Dump wealth data or load
-    file_name = path_dict["intermediate_data"] + "wealth_data.pkl"
+    file_name = path_dict["struct_data"] + "wealth_data.pkl"
     if load_wealth:
         wealth_data_full = pd.read_pickle(file_name)
     else:
+        print("Processing wealth data. This might take a while...")
         wealth_data = load_wealth_data(path_dict["soep_c38"])
         wealth_data_full = span_full_wealth_panel(wealth_data, specs)
         # Merge wealth data with pid/syear information
         wealth_data_full = add_personal_data(
             path_dict, specs, wealth_data_full, use_processed_pl
         )
+        df = create_education_type(wealth_data_full, filter_missings=False)
+        import matplotlib.pyplot as plt
+
         # Interpolate wealth for each household (consistent hh size)
         wealth_data_full = interpolate_and_extrapolate_wealth(wealth_data_full)
         # Deflate wealth
@@ -47,9 +52,15 @@ def add_wealth_interpolate_and_deflate(
     data = data.merge(wealth_data_full, on=["hid", "syear"], how="left")
     data.set_index(["pid", "syear"], inplace=True)
     if filter_missings:
-        data = data[(data["wealth"].notna())]
-        print(str(len(data)) + " left after dropping people with missing wealth.")
+        before = len(data)
+        data = data[data["wealth"].notna()]
+        _print_filter(before, len(data), "left after dropping people with missing wealth")
     return data
+
+
+def _print_filter(before, after, msg):
+    pct = (after - before) / before * 100 if before > 0 else 0
+    print(f"{after} {msg} ({pct:+.2f}%)")
 
 
 # hid 167, 302, 930, 981, 1031, 2046, 5240, 9474, 3490091, 3503398 show some edge cases and how they are handled
@@ -343,7 +354,29 @@ def add_personal_data(path_dict, specs, wealth_data_full, use_processed_pl=True)
     ppathl_data.dropna(inplace=True)  # drop if most basic data is missing
     ppathl_data["hid"] = ppathl_data["hid"].astype(int)
 
-    pl_intermediate_file = path_dict["intermediate_data"] + "pl_structural_w.pkl"
+    # Load SOEP core data
+    pgen_data = pd.read_stata(
+        f"{soep_c38_path}/pgen.dta",
+        columns=[
+            "syear",
+            "pid",
+            "hid",
+            "pgemplst",
+            "pgexpft",
+            "pgexppt",
+            "pgstib",
+            "pgpartz",
+            "pglabgro",
+            "pgpsbil",
+        ],
+        convert_categoricals=False,
+    )
+    # Merge pgen data with pathl data and hl data
+    merged_data = pd.merge(
+        ppathl_data, pgen_data, on=["pid", "hid", "syear"], how="left"
+    )
+
+    pl_intermediate_file = path_dict["struct_data"] + "pl_structural_w.pkl"
     if use_processed_pl:
         pl_data = pd.read_pickle(pl_intermediate_file)
     else:
@@ -367,7 +400,7 @@ def add_personal_data(path_dict, specs, wealth_data_full, use_processed_pl=True)
         pl_data["hid"] = pl_data["hid"].astype(int)
         pl_data.to_pickle(pl_intermediate_file)
 
-    merged_data = pd.merge(ppathl_data, pl_data, on=["pid", "syear", "hid"], how="left")
+    merged_data = pd.merge(merged_data, pl_data, on=["pid", "syear", "hid"], how="left")
 
     # set index to pid and syear, create age and filter by age, drop pids
     merged_data.set_index(["pid", "syear"], inplace=True)

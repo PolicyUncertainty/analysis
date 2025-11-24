@@ -15,8 +15,12 @@ probs_*.txt
 # Maxis survival probability model
 data_mort_estim.dta
 
+# pension data
+output/open_access_data/rentenzugaenge
+
 # Ignore intermediate data pickle files
 output/intermediate_data/
+output/plots/
 
 # Ignore estimation log files, but not the md files
 src/estimation/struct_estimation/scripts/log/
@@ -31,3 +35,24 @@ ll*.txt
 
 # Debug files
 src/*/debug/
+
+# Server files
+*.out
+
+# Claude Code configuration
+CLAUDE.md
+
+# Ignore est and sim files. Add only single ones
+output/est_results/struct_results/*.pkl
+!output/est_results/struct_results/*all_age*.pkl
+output/tables/simulation/*.tex
+output/tables
+
+/output/sim_results/*/*.csv
+!output/sim_results/fire_old_done/
+df*.csv
+data_with_probs.csv
+
+# Mac files
+**/.DS_Store
+**/._*

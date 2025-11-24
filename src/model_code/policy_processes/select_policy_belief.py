@@ -21,7 +21,7 @@ def select_solution_transition_func_and_update_specs(
     custom_resolution_age,
 ):
     """Select the solution SRA belief transition function and update the model specs accordingly.
-    There are only two cases weather subjective uncertainty exists or not.
+    There are only two cases: either subjective uncertainty exists or it does not.
     """
 
     # There can be two cases. Either subjective uncertainty exists or there is no uncertainty.
@@ -41,6 +41,8 @@ def select_solution_transition_func_and_update_specs(
             raise ValueError(
                 "custom_resolution_age can only be given in case of subjective uncertainty"
             )
+
+        specs["resolution_age"] = None
         # Assign empty step periods as we have no increase in expectation, because of the equality of
         # the value function if there is no uncertainty about the future of the SRA.
         specs["policy_step_periods"] = np.array([])
@@ -51,7 +53,12 @@ def select_solution_transition_func_and_update_specs(
 
 
 def select_sim_policy_function_and_update_specs(
-    specs, subj_unc, announcement_age, SRA_at_start, SRA_at_retirement
+    specs,
+    subj_unc,
+    announcement_age,
+    SRA_at_start,
+    SRA_at_retirement,
+    custom_resolution_age,
 ):
 
     # Check if subjective uncertainty is given and if announcment is given.
@@ -71,10 +78,10 @@ def select_sim_policy_function_and_update_specs(
         if SRA_at_retirement == SRA_at_start:
             specs["policy_step_periods"] = np.array([])
         else:
-            if not subj_unc:
-                raise ValueError(
-                    "If there is no subjective uncertainty, the SRA at start should be the same as at retirement."
-                )
+            if custom_resolution_age is None:
+                specs["resolution_age"] = specs["resolution_age_estimation"]
+            else:
+                specs["resolution_age"] = custom_resolution_age
 
             # We are in the case of subjective uncertainty and a gradual increase in the SRA.
             sim_alpha = (SRA_at_retirement - SRA_at_start) / (
@@ -85,6 +92,10 @@ def select_sim_policy_function_and_update_specs(
             )
         transition_func_sim = realized_policy_step_function
     else:
+        if "resolution_age" in specs.keys():
+            pass
+        else:
+            specs["resolution_age"] = None
         transition_func_sim = announce_policy_state
         specs = update_specs_for_policy_announcement(
             specs=specs,

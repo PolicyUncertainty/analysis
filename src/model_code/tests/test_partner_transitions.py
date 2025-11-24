@@ -29,6 +29,8 @@ def test_vec_shape(education, sex, period, partner_state, paths_and_specs):
     res = partner_transition(
         period=period,
         education=education,
+        policy_state=partner_state,
+        lagged_choice=education,
         sex=sex,
         partner_state=partner_state,
         model_specs=specs,

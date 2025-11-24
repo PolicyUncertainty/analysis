@@ -3,17 +3,15 @@ import pickle
 
 import matplotlib.pyplot as plt
 
-from estimation.msm.scripts.calc_moments import (
-    calc_labor_supply_choice,
-    calc_labor_transitions_by_age_bins,
-    calc_median_wealth_by_age,
-)
+from estimation.msm.scripts.labor_supply_moments import calc_labor_supply_choice
+from estimation.msm.scripts.labor_transition_moments import calc_transition_to_work
 from estimation.msm.scripts.msm_estimation_setup import load_and_prep_data
 from estimation.msm.scripts.plot_moment_fit import (
     plot_choice_moments,
     plot_transition_moments,
     plot_wealth_moments,
 )
+from estimation.msm.scripts.wealth_moments import calc_wealth_moment
 from set_paths import create_path_dict
 from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 from specs.derive_specs import generate_derived_and_data_derived_specs
@@ -61,11 +59,11 @@ load_sol_model = True
 #
 # pickle.dump(
 #     iterations,
-#     open(path_dict["intermediate_data"] + f"msm_bequest_scale_iterations.pkl", "wb"),
+#     open(path_dict["struct_data"] + f"msm_bequest_scale_iterations.pkl", "wb"),
 # )
 
 iterations = pickle.load(
-    open(path_dict["intermediate_data"] + f"msm_mu_iterations.pkl", "rb")
+    open(path_dict["struct_data"] + f"msm_mu_iterations.pkl", "rb")
 )
 
 wealth_moments = []

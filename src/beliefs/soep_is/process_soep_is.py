@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from process_data.aux_and_plots.filter_data import recode_sex
+from process_data.auxiliary.filter_data import recode_sex
 from process_data.soep_vars.age import calc_age_at_interview
 from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.health import create_health_var
@@ -76,11 +76,12 @@ def add_covariates(df, paths, specs, filter_missings=False):
     df.set_index(["pid", "syear"], inplace=True)
     df = rename_and_reformat_is_covariates(df)
     df = recode_sex(df)
-    df = calc_age_at_interview(df, drop_missing_month=filter_missings)
+    df = calc_age_at_interview(df, drop_invalid=filter_missings)
     df = create_education_type(df, filter_missings=filter_missings)
     df = create_health_var(df, filter_missings=filter_missings)
     df = classify_informed(df, specs)
     df["current_SRA"] = create_SRA_by_gebjahr(df["gebjahr"])
+    df = expected_time_to_ret(df)
     # cleanup
     raw_columns = ["pmonin", "ptagin", "pgpsbil", "m11126", "m11124"]
     df = df.drop(columns=raw_columns)
@@ -140,4 +141,10 @@ def rename_and_reformat_is_covariates(df):
 def classify_informed(df, specs):
     """Informed means ERP beliefs <= threshhold (e.g. 5)."""
     df["informed"] = df["belief_pens_deduct"] <= specs["informed_threshhold"]
+    return df
+
+def expected_time_to_ret(df):
+    """Calculate expected time to retirement in years."""
+    df["time_to_ret"] = df["exp_pens_uptake"] - df["float_age"]
+    df.loc[df["time_to_ret"] < 0, "time_to_ret"] = np.nan
     return df

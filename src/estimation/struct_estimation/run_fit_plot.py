@@ -1,8 +1,10 @@
 # %% Set paths of project
-import pickle
+import pickle as pkl
 
-import matplotlib.pyplot as plt
-
+from estimation.struct_estimation.scripts.observed_model_fit import create_fit_plots
+from estimation.struct_estimation.start_params_and_bounds.param_lists import (
+    women_disutil_params,
+)
 from estimation.struct_estimation.start_params_and_bounds.set_start_params import (
     load_and_set_start_params,
 )
@@ -13,29 +15,58 @@ path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict)
 
 # Set run specs
-model_name = specs["model_name"]
+model_name = "alg1_sparse"
+print(f"Running model: {model_name}")
 load_sol_model = True
 load_solution = None
+load_data_from_sol = True
+util_type = "add"
 
-if model_name == "start":
+params = pkl.load(
+    open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
+)
 
-    params = load_and_set_start_params(path_dict)
-else:
-    params = pickle.load(
-        open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
-    )
 
-from estimation.struct_estimation.scripts.observed_model_fit import observed_model_fit
+# from estimation.struct_estimation.map_params_to_current import merge_params
 
-observed_model_fit(
-    paths_dict=path_dict,
+# params_dict = {}
+# params_dict["default"] = load_and_set_start_params(path_dict)
+# params_dict["women"] = {}
+# params_dict["men"] = {}
+# # Load start params
+# params_dict["women"]["params"] = pkl.load(
+#     open(path_dict["struct_results"] + f"est_params_{model_name}_women.pkl", "rb")
+# )
+# params_dict["women"]["names"] = [
+#     key for key in params_dict["default"].keys() if "_women" in key or "children" in key
+# ]
+
+# params_dict["men"]["params"] = pkl.load(
+#     open(path_dict["struct_results"] + f"est_params_{model_name}_men.pkl", "rb")
+# )
+# params_dict["men"]["names"] = [
+#     key for key in params_dict["default"].keys() if ("_men" in key)
+# ]
+# params = merge_params(params_dict)
+# pkl.dump(
+#     params,
+#     open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "wb"),
+# )
+
+
+create_fit_plots(
+    path_dict=path_dict,
     specs=specs,
     params=params,
     model_name=model_name,
     load_sol_model=load_sol_model,
     load_solution=load_solution,
+    load_data_from_sol=load_data_from_sol,
+    sex_type="all",
+    edu_type="all",
+    util_type=util_type,
+    skip_model_plots=False,
 )
-plt.show()
-plt.close("all")
+
 
 # %%

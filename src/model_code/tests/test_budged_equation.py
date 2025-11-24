@@ -4,7 +4,10 @@ from itertools import product
 import numpy as np
 import pytest
 
-from model_code.state_space.experience import get_next_period_experience
+from model_code.state_space.experience import (
+    get_next_period_experience,
+    scale_experience_years,
+)
 from model_code.wealth_and_budget.budget_equation import budget_constraint
 from model_code.wealth_and_budget.partner_income import calc_partner_income_after_ssc
 from model_code.wealth_and_budget.tax_and_ssc import (
@@ -16,10 +19,10 @@ from model_code.wealth_and_budget.transfers import calc_unemployment_benefits
 from set_paths import create_path_dict
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
-SAVINGS_GRID_UNEMPLOYED = np.linspace(10, 25, 5)
+SAVINGS_GRID_UNEMPLOYED = np.linspace(10, 25, 7)
 PARTNER_STATES = np.array([0, 1, 2], dtype=int)
 PERIOD_GRID = np.arange(0, 65, 15, dtype=int)
-OLD_AGE_PERIOD_GRID = np.arange(25, 43, 5, dtype=int)
+OLD_AGE_PERIOD_GRID = np.arange(25, 43, 8, dtype=int)
 VERY_OLD_AGE_PERIOD_GRID = np.arange(35, 43, 3, dtype=int)
 EDUCATION_GRID = [0, 1]
 SEX_GRID = [0, 1]
@@ -56,15 +59,19 @@ def test_budget_unemployed(
 
     specs_internal = copy.deepcopy(specs)
 
-    max_init_exp_period = period + specs_internal["max_exp_diffs_per_period"][period]
-    exp_cont = 2 / max_init_exp_period
+    exp_cont = scale_experience_years(
+        experience_years=2,
+        period=period,
+        is_retired=False,
+        model_specs=specs_internal,
+    )
 
-    wealth = budget_constraint(
+    wealth, _ = budget_constraint(
         period=period,
         partner_state=partner_state,
         education=education,
         sex=sex,
-        health=1,
+        alg_1_claim=0,
         lagged_choice=1,
         experience=exp_cont,
         asset_end_of_previous_period=savings,
@@ -75,7 +82,7 @@ def test_budget_unemployed(
     savings_scaled = savings * specs_internal["wealth_unit"]
     has_partner = int(partner_state > 0)
     nb_children = specs["children_by_state"][sex, education, has_partner, period]
-    income_partner = calc_partner_income_after_ssc(
+    income_partner, _, _ = calc_partner_income_after_ssc(
         partner_state=partner_state,
         sex=sex,
         model_specs=specs_internal,
@@ -92,19 +99,21 @@ def test_budget_unemployed(
         net_partner + nb_children * specs_internal["annual_child_benefits"]
     )
 
-    unemployment_benefits = (1 + has_partner) * specs_internal[
-        "annual_unemployment_benefits"
-    ]
+    own_unemployment_benefits = (
+        specs_internal["annual_unemployment_benefits"]
+        + specs_internal["annual_unemployment_benefits"]
+    )
+    unemployment_benefits_partner = has_partner * (
+        specs_internal["annual_unemployment_benefits"]
+        + 0.5 * specs_internal["annual_unemployment_benefits_housing"]
+    )
     unemployment_benefits_children = (
         specs_internal["annual_child_unemployment_benefits"] * nb_children
     )
-    unemployment_benefits_housing = specs_internal[
-        "annual_unemployment_benefits_housing"
-    ] * (1 + 0.5 * has_partner)
     potential_unemployment_benefits = (
-        unemployment_benefits
+        own_unemployment_benefits
         + unemployment_benefits_children
-        + unemployment_benefits_housing
+        + unemployment_benefits_partner
     )
 
     means_test = savings_scaled < specs_internal["unemployment_wealth_thresh"]
@@ -112,6 +121,7 @@ def test_budget_unemployed(
         specs_internal["unemployment_wealth_thresh"] + potential_unemployment_benefits
     )
     reduced_benefits_means_test = savings_scaled < reduced_means_test_threshold
+
     if means_test:
         income = np.maximum(
             potential_unemployment_benefits, net_partner_plus_child_benefits
@@ -131,9 +141,9 @@ def test_budget_unemployed(
     )
 
 
-SAVINGS_GRID = np.linspace(8, 25, 3)
-GAMMA_GRID = np.linspace(0.1, 0.9, 3)
-EXP_GRID = np.linspace(10, 60, 10, dtype=int)
+SAVINGS_GRID = np.linspace(8, 25, 4)
+GAMMA_GRID = np.linspace(0.1, 0.9, 2)
+EXP_GRID = np.linspace(10, 40, 10, dtype=int)
 INCOME_SHOCK_GRID = np.linspace(-0.5, 0.5, 2)
 WORKER_CHOICES = [2, 3]
 
@@ -171,28 +181,35 @@ def test_budget_worker(
     specs_internal = copy.deepcopy(specs)
     gamma_array = np.array([[gamma, gamma - 0.01], [gamma / 2, gamma / 2 - 0.01]])
     specs_internal["gamma_0"] = gamma_array
-    specs_internal["gamma_1"] = gamma_array
+    specs_internal["gamma_ln_exp"] = gamma_array
+    specs_internal["gamma_above_50"] = gamma_array - 1
 
-    max_init_exp_period = period + specs_internal["max_exp_diffs_per_period"][period]
-    exp_cont = experience / max_init_exp_period
+    exp_cont = scale_experience_years(
+        experience_years=experience,
+        period=period,
+        is_retired=False,
+        model_specs=specs_internal,
+    )
 
-    wealth = budget_constraint(
+    wealth, aux_budget = budget_constraint(
         period=period,
         partner_state=partner_state,
         education=education,
         lagged_choice=working_choice,
         sex=sex,
-        health=1,
+        alg_1_claim=0,
         experience=exp_cont,
         asset_end_of_previous_period=savings,
         income_shock_previous_period=income_shock,
         model_specs=specs_internal,
     )
+    age = specs_internal["start_age"] + period
 
     savings_scaled = savings * specs_internal["wealth_unit"]
     hourly_wage = np.exp(
         gamma_array[sex, education]
         + gamma_array[sex, education] * np.log(experience + 1)
+        + (gamma_array[sex, education] - 1) * (age - 50) * (age >= 50)
         + income_shock
     )
     if working_choice == 2:
@@ -217,7 +234,7 @@ def test_budget_worker(
     income_after_ssc = labor_income_year - sscs_worker
 
     has_partner_int = (partner_state > 0).astype(int)
-    unemployment_benefits = calc_unemployment_benefits(
+    unemployment_benefits, _ = calc_unemployment_benefits(
         assets=savings_scaled,
         education=education,
         sex=sex,
@@ -227,7 +244,7 @@ def test_budget_worker(
     )
 
     nb_children = specs_internal["children_by_state"][
-        sex, education, partner_state, period
+        sex, education, has_partner_int, period
     ]
     child_benefits = nb_children * specs_internal["monthly_child_benefits"] * 12
     if partner_state == 0:
@@ -298,53 +315,49 @@ def test_retiree(
 ):
     path_dict, specs_internal = paths_and_specs
 
-    last_period = period - 1
-    max_exp_last_period = (
-        specs_internal["max_exp_diffs_per_period"][last_period] + last_period
+    # exp is the pension points here
+    scaled_pension_point_last_period = scale_experience_years(
+        experience_years=exp,
+        period=period - 1,
+        is_retired=True,
+        model_specs=specs_internal,
     )
-    exp_cont_last_period = exp / max_exp_last_period
 
-    exp_cont = get_next_period_experience(
+    scaled_pension_points = get_next_period_experience(
         period=period,
-        lagged_choice=0,
-        policy_state=29,
+        lagged_choice=np.array(0),
+        policy_state=np.array(29),
         sex=sex,
         education=education,
-        experience=exp_cont_last_period,
+        partner_state=partner_state,
+        experience=scaled_pension_point_last_period,
         informed=0,
         health=2,
         model_specs=specs_internal,
     )
     # Check that experience does not get updated or added any penalty
-    max_exp_this_period = period + specs_internal["max_exp_diffs_per_period"][period]
-    np.testing.assert_allclose(exp_cont * max_exp_this_period, exp)
+    pension_points = scaled_pension_points * specs_internal["max_pp_retirement"]
+    np.testing.assert_allclose(pension_points, exp)
 
-    wealth = budget_constraint(
+    wealth, aux_budget = budget_constraint(
         period=period,
         partner_state=partner_state,
         education=education,
         lagged_choice=0,
+        alg_1_claim=0,
         sex=sex,
-        health=1,
-        experience=exp_cont,
+        experience=scaled_pension_points,
         asset_end_of_previous_period=savings,
         income_shock_previous_period=0,
         model_specs=specs_internal,
     )
 
     savings_scaled = savings * specs_internal["wealth_unit"]
-
-    mean_wage_all = specs_internal["mean_hourly_ft_wage"][sex, education]
-    gamma_0 = specs_internal["gamma_0"][sex, education]
-    gamma_1_plus_1 = specs_internal["gamma_1"][sex, education] + 1
-    total_pens_points = (
-        (np.exp(gamma_0) / gamma_1_plus_1) * ((exp + 1) ** gamma_1_plus_1 - 1)
-    ) / mean_wage_all
-    pension_year = specs_internal["annual_pension_point_value"] * total_pens_points
+    pension_year = specs_internal["annual_pension_point_value"] * pension_points
     income_after_ssc = pension_year - calc_health_ltc_contr(pension_year)
 
     has_partner_int = (partner_state > 0).astype(int)
-    unemployment_benefits = calc_unemployment_benefits(
+    unemployment_benefits, _ = calc_unemployment_benefits(
         assets=savings_scaled,
         education=education,
         sex=sex,
@@ -354,7 +367,7 @@ def test_retiree(
     )
 
     nb_children = specs_internal["children_by_state"][
-        sex, education, partner_state, period
+        sex, education, has_partner_int, period
     ]
     child_benefits = nb_children * specs_internal["monthly_child_benefits"] * 12
     if partner_state == 0:
@@ -441,17 +454,22 @@ def test_fresh_retiree(
 
     actual_retirement_age = specs_internal["start_age"] + period - 1
 
-    last_period = period - 1
-    max_init_exp_prev_period = (
-        last_period + specs_internal["max_exp_diffs_per_period"][last_period]
+    # Last the person was not retired. So exp is here really experience years
+    exp_cont_prev = scale_experience_years(
+        experience_years=exp,
+        period=period - 1,
+        is_retired=False,
+        model_specs=specs_internal,
     )
-    exp_cont_prev = exp / max_init_exp_prev_period
 
-    exp_cont = get_next_period_experience(
+    # This period the person retires, so lagged choice is 0. So this function returns
+    # scaled pension points
+    pension_points_scaled = get_next_period_experience(
         period=period,
         lagged_choice=0,
         policy_state=policy_state,
         sex=sex,
+        partner_state=partner_state,
         education=education,
         experience=exp_cont_prev,
         informed=informed,
@@ -459,14 +477,14 @@ def test_fresh_retiree(
         model_specs=specs_internal,
     )
 
-    wealth = budget_constraint(
+    wealth, aux_budget = budget_constraint(
         period=period,
         partner_state=partner_state,
         education=education,
         lagged_choice=0,
-        health=1,
+        alg_1_claim=0,
         sex=sex,
-        experience=exp_cont,
+        experience=pension_points_scaled,
         asset_end_of_previous_period=savings,
         income_shock_previous_period=0,
         model_specs=specs_internal,
@@ -479,12 +497,30 @@ def test_fresh_retiree(
     retirement_age_difference = SRA_at_retirement - actual_retirement_age
     early_retirement = retirement_age_difference > 0
 
-    mean_wage_all = specs_internal["mean_hourly_ft_wage"][sex, education]
-    gamma_0 = specs_internal["gamma_0"][sex, education]
-    gamma_1_plus_1 = specs_internal["gamma_1"][sex, education] + 1
-    total_pens_points = (
-        (np.exp(gamma_0) / gamma_1_plus_1) * ((exp + 1) ** gamma_1_plus_1 - 1)
-    ) / mean_wage_all
+    # mean_wage_all = specs_internal["mean_hourly_ft_wage"][sex, education]
+    # gamma_0 = specs_internal["gamma_0"][sex, education]
+    # gamma_1_plus_1 = specs_internal["gamma_1"][sex, education] + 1
+    # total_pens_points = (
+    #     (np.exp(gamma_0) / gamma_1_plus_1) * ((exp + 1) ** gamma_1_plus_1 - 1)
+    # ) / mean_wage_all
+
+    exp_int = exp.astype(int)
+    pp_exp_int = specs_internal["pp_for_exp_by_sex_edu"][sex, education, exp_int]
+
+    exp_frac = exp - exp_int
+    pp_difference = (
+        specs_internal["pp_for_exp_by_sex_edu"][sex, education, exp_int + 1]
+        - pp_exp_int
+    )
+    total_pens_points = pp_exp_int + exp_frac * pp_difference
+    # We have only integer experience. So total_pension points should be equal to pp_exp_int
+    np.testing.assert_array_almost_equal(total_pens_points, pp_exp_int)
+
+    has_partner_int = (partner_state > 0).astype(int)
+    mothers_pension = (
+        sex * specs_internal["max_children"][1, education, has_partner_int] * 3
+    )
+    total_pens_points += mothers_pension
 
     if early_retirement:
         if informed == 1:
@@ -493,12 +529,12 @@ def test_fresh_retiree(
             ERP = specs_internal["uninformed_ERP"][education]
 
         if health == 2:
-            retirement_age_difference = np.minimum(3, retirement_age_difference)
+            penalty_years_disability = np.minimum(63 - actual_retirement_age, 3)
             average_points_work_span = total_pens_points / (actual_retirement_age - 18)
-            disability_pens_points = average_points_work_span * (SRA_at_retirement - 18)
+            disability_pens_points = average_points_work_span * (65 - 18)
 
             reduced_pension_points = (
-                1 - retirement_age_difference * ERP
+                1 - penalty_years_disability * specs_internal["ERP"]
             ) * disability_pens_points
         else:
             reduced_pension_points = (
@@ -521,7 +557,7 @@ def test_fresh_retiree(
     income_after_ssc = pension_year - calc_health_ltc_contr(pension_year)
 
     has_partner_int = (partner_state > 0).astype(int)
-    unemployment_benefits = calc_unemployment_benefits(
+    unemployment_benefits, _ = calc_unemployment_benefits(
         assets=savings_scaled,
         education=education,
         sex=sex,
@@ -531,7 +567,7 @@ def test_fresh_retiree(
     )
 
     nb_children = specs_internal["children_by_state"][
-        sex, education, partner_state, period
+        sex, education, has_partner_int, period
     ]
     child_benefits = nb_children * specs_internal["annual_child_benefits"]
     if partner_state == 0:
@@ -579,3 +615,48 @@ def test_fresh_retiree(
             np.testing.assert_almost_equal(
                 wealth, scaled_wealth / specs_internal["wealth_unit"]
             )
+
+
+def test_informed(
+    paths_and_specs,
+):
+
+    path_dict, specs_internal = paths_and_specs
+
+    period = 36
+
+    exp_cont_prev = scale_experience_years(
+        experience_years=45,
+        period=period - 1,
+        is_retired=False,
+        model_specs=specs_internal,
+    )
+
+    exp_cont_uninf = get_next_period_experience(
+        period=period,
+        lagged_choice=np.array(0),
+        policy_state=np.array(8),
+        sex=0,
+        partner_state=np.array(0),
+        education=0,
+        experience=exp_cont_prev,
+        informed=0,
+        health=1,
+        model_specs=specs_internal,
+    )
+
+    exp_cont_inf = get_next_period_experience(
+        period=period,
+        lagged_choice=np.array(0),
+        policy_state=np.array(8),
+        sex=0,
+        partner_state=np.array(0),
+        education=0,
+        experience=exp_cont_prev,
+        informed=1,
+        health=1,
+        model_specs=specs_internal,
+    )
+
+    # Test if experience is the same
+    np.testing.assert_allclose(exp_cont_inf, exp_cont_uninf)

@@ -5,7 +5,9 @@ from scipy.stats import truncnorm
 
 from beliefs.sra_beliefs.random_walk import filter_df
 from beliefs.sra_beliefs.truncated_normals import estimate_truncated_normal_parameters
-from export_results.figures.color_map import JET_COLOR_MAP
+from set_styles import set_colors
+
+JET_COLOR_MAP, LINE_STYLES = set_colors()
 
 
 def plot_truncated_normal_for_response(
@@ -15,9 +17,13 @@ def plot_truncated_normal_for_response(
     sigma: float = None,
     upper_trunc_limit: float = None,
     show: bool = False,
+    save: bool = False,
+    path_dict: dict = None,
 ) -> None:
     """
-    Plot the truncated normal subjective expectation distribution for a given set (triple) of SRA responses. If parameters are not provided, the truncated normal distribution has to be estimated. In that case, there is the possibility to overwrite upper truncation limit.
+    Plot the truncated normal subjective expectation distribution for a given set (triple) of SRA responses.
+    If parameters are not provided, the truncated normal distribution has to be estimated. In that case, there
+    is the possibility to overwrite upper truncation limit.
 
     Args:
         responses (list[float]): List of response values.
@@ -70,7 +76,7 @@ def plot_truncated_normal_for_response(
     # plot pdf
     x = np.linspace(lower, upper, 1000)
     pdf = truncnorm.pdf(x, a, b, loc=mu, scale=sigma)
-    fig, ax = plt.subplots(figsize=(10, 6))
+    fig, ax = plt.subplots()
     ax.plot(x, pdf, color=JET_COLOR_MAP[0], label="Truncated Normal PDF")
 
     # Divide responses by 100
@@ -128,12 +134,24 @@ def plot_truncated_normal_for_response(
     #     color="black",
     #     bbox=dict(facecolor="white", alpha=0.8, edgecolor="black"),
     # )
+    if save:
+        if path_dict is None:
+            raise ValueError("path_dict must be provided when save=True")
+        response_str = "_".join(map(str, responses))
+        plt.savefig(
+            path_dict["beliefs_plots"]
+            + f"truncated_normal_for_response_{response_str}.png",
+            bbox_inches="tight",
+        )
     if show:
         plt.show()
 
 
 def plot_expected_sra_vs_birth_year(
-    df: pd.DataFrame = None, path_dict: dict = None, show: bool = False
+    df: pd.DataFrame = None,
+    path_dict: dict = None,
+    show: bool = False,
+    save: bool = False,
 ) -> None:
     """
     Plot the expected SRA against the birth year with a linear trendline.
@@ -142,15 +160,13 @@ def plot_expected_sra_vs_birth_year(
         df (pd.DataFrame): DataFrame containing 'gebjahr' and 'ex_val' columns.
     """
     if df is None and path_dict is not None:
-        df = pd.read_csv(
-            path_dict["intermediate_data"] + "beliefs/soep_is_truncated_normals.csv"
-        )
+        df = pd.read_csv(path_dict["beliefs_data"] + "soep_is_truncated_normals.csv")
     elif df is None and path_dict is None:
         raise ValueError("Either df or paths_dict must be provided.")
 
     df = filter_df(df)
 
-    plt.figure(figsize=(10, 6))
+    plt.figure()
     plt.scatter(df["gebjahr"], df["ex_val"], alpha=0.5, s=3, color=JET_COLOR_MAP[0])
     plt.title("Expected Value vs Birth Year")
     plt.xlabel("Birth Year")
@@ -164,14 +180,23 @@ def plot_expected_sra_vs_birth_year(
         linewidth=2,
         label="OLS fit",
     )
-    plt.grid()
     plt.legend()
+    if save:
+        if path_dict is None:
+            raise ValueError("path_dict must be provided when save=True")
+        plt.savefig(
+            path_dict["beliefs_plots"] + "expected_sra_vs_birth_year.png",
+            bbox_inches="tight",
+        )
     if show:
         plt.show()
 
 
 def plot_alpha_heterogeneity_coefficients_combined(
-    results_df: pd.DataFrame = None, path_dict: dict = None, show: bool = False
+    results_df: pd.DataFrame = None,
+    path_dict: dict = None,
+    show: bool = False,
+    save: bool = False,
 ) -> None:
     """
     Create a coefficient plot showing heterogeneity in alpha (expected SRA increase)
@@ -185,7 +210,7 @@ def plot_alpha_heterogeneity_coefficients_combined(
     # Load data if not provided
     if results_df is None and path_dict is not None:
         results_df = pd.read_csv(
-            path_dict["beliefs_data"] + "alpha_heterogeneity_results.csv"
+            path_dict["beliefs_est_results"] + "alpha_heterogeneity_results.csv"
         )
     elif results_df is None and path_dict is None:
         raise ValueError("Either results_df or path_dict must be provided.")
@@ -194,7 +219,7 @@ def plot_alpha_heterogeneity_coefficients_combined(
     covariates = results_df["covariate"].unique()
     specifications = results_df["specification"].unique()
 
-    fig, ax = plt.subplots(1, 1, figsize=(12, 8))
+    fig, ax = plt.subplots()
 
     # Define positions and colors
     x_positions = np.arange(len(covariates))
@@ -251,7 +276,6 @@ def plot_alpha_heterogeneity_coefficients_combined(
     ax.set_xticks(x_positions)
     ax.set_xticklabels([cov.capitalize() for cov in covariates])
     ax.legend(fontsize=11)
-    ax.grid(True, alpha=0.3, axis="y")
 
     # Add value labels on bars
     for i, spec in enumerate(["univariate", "with_age_control"]):
@@ -272,60 +296,13 @@ def plot_alpha_heterogeneity_coefficients_combined(
 
     plt.tight_layout()
 
-    if show:
-        plt.show()
-
-
-def plot_example_sra_evolution(
-    alpha_star,
-    SRA_30,
-    resolution_age,
-    alpha=None,
-    sigma_sq=None,
-    use_estimated_params=False,
-    path_dict=None,
-    show=False,
-):
-    """Plot the evolution of true policy and SRA expectations over age with confidence intervals."""
-
-    if use_estimated_params:
-        # Load estimated parameters from the beliefs data
-        df = pd.read_csv(path_dict["beliefs_data"] + "beliefs_parameters.csv")
-        alpha = df[df["parameter"] == "alpha"]["estimate"].values[0]
-        sigma_sq = df[df["parameter"] == "sigma_sq"]["estimate"].values[0]
-
-    if alpha is None or sigma_sq is None:
-        raise ValueError("Alpha and sigma_sq must be provided or estimated from data.")
-
-    ages = np.arange(30, resolution_age + 1, 1)
-    SRA_t = np.ones(ages.shape) * SRA_30
-    SRA_t = SRA_t + (ages - 30) * alpha_star
-    exp_SRA_resolution = SRA_t + (resolution_age - ages) * alpha
-    ci_upper = exp_SRA_resolution + 1.96 * np.sqrt(sigma_sq) * np.sqrt(
-        resolution_age - ages
-    )
-    ci_lower = exp_SRA_resolution - 1.96 * np.sqrt(sigma_sq) * np.sqrt(
-        resolution_age - ages
-    )
-    fig, ax = plt.subplots(figsize=(16, 9))
-    ax.plot(ages, SRA_t, label="$SRA_t$", color=JET_COLOR_MAP[3])
-    ax.plot(
-        ages,
-        exp_SRA_resolution,
-        label=f"$E[SRA_{{{resolution_age}}}|SRA_t]$",
-        color="C0",
-    )
-    ax.plot(ages, ci_upper, label="95% CI", linestyle="--", color=JET_COLOR_MAP[0])
-    ax.plot(ages, ci_lower, label="", linestyle="--", color=JET_COLOR_MAP[0])
-    ax.set_xlabel("Age")
-    ax.set_ylabel("SRA")
-    ax.legend()
-
-    # ax.set_title(
-    #    f"Evolution of SRA Expectations with $\\alpha^*={alpha_star}$, $SRA_{{30}}={SRA_30}$, $\\alpha={alpha}$, $\\sigma^2={sigma_sq}$"
-    # )
-    # ax.grid()
-    plt.tight_layout()
-
+    if save:
+        if path_dict is None:
+            raise ValueError("path_dict must be provided when save=True")
+        plt.savefig(
+            path_dict["beliefs_plots"]
+            + "alpha_heterogeneity_coefficients_combined.png",
+            bbox_inches="tight",
+        )
     if show:
         plt.show()

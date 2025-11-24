@@ -1,0 +1,232 @@
+import os
+
+import pandas as pd
+
+
+def create_ex_post_ex_ante_table(path_dict, specs):
+    """
+    Create LaTeX table for ex-post and ex-ante compensated variations.
+
+    Parameters
+    ----------
+    path_dict : dict
+        Dictionary with paths
+    specs : dict
+        Specifications dictionary
+
+    Returns
+    -------
+    str
+        LaTeX table as string
+    """
+    import pandas as pd
+
+    # Calculate expected SRA
+    expected_SRA = 67 + 33 * specs["sra_belief_alpha"]
+
+    # Read the CSV
+    model_name = specs["model_name"]
+    sim_results_folder = path_dict["sim_results"] + model_name + "/"
+    res_df = pd.read_csv(sim_results_folder + "ex_post_ex_ante.csv", index_col=0)
+
+    # Create LaTeX table
+    latex_lines = []
+    latex_lines.append("\\begin{tabular}{lcc}")
+    latex_lines.append("\\toprule")
+    latex_lines.append(
+        f"    & \\makecell{{SRA \\\\ 67}} & \\makecell{{SRA \\\\ {expected_SRA:.2f}}} \\\\"
+    )
+    latex_lines.append("\\midrule")
+
+    # Full Sample
+    latex_lines.append(f"\\textit{{Full Sample}} & & \\\\")
+    latex_lines.append(
+        f"    Ex post & 0.00 & {res_df.loc['full_ex_post', 'cv']:.2f} \\\\"
+    )
+    latex_lines.append(f"    Ex ante & & {res_df.loc['full_ex_ante', 'cv']:.2f} \\\\")
+    latex_lines.append("\\midrule")
+
+    # Initially Informed
+    latex_lines.append(f"\\textit{{Initially Informed}} & & \\\\")
+    latex_lines.append(
+        f"    Ex post & 0.00 & {res_df.loc['informed_ex_post', 'cv']:.2f} \\\\"
+    )
+    latex_lines.append(
+        f"    Ex ante & & {res_df.loc['informed_ex_ante', 'cv']:.2f} \\\\"
+    )
+    latex_lines.append("\\midrule")
+
+    # Initially Misinformed
+    latex_lines.append(f"\\textit{{Initially Misinformed}} & & \\\\")
+    latex_lines.append(
+        f"    Ex post & 0.00 & {res_df.loc['uninformed_ex_post', 'cv']:.2f} \\\\"
+    )
+    latex_lines.append(
+        f"    Ex ante & & {res_df.loc['uninformed_ex_ante', 'cv']:.2f} \\\\"
+    )
+
+    latex_lines.append("\\bottomrule")
+    latex_lines.append("\\end{tabular}")
+
+    # Join and save
+    latex_table = "\n".join(latex_lines)
+    # Save to file
+    table_dir = path_dict["simulation_tables"] + model_name + "/"
+    if not os.path.exists(table_dir):
+        os.makedirs(table_dir)
+
+    # Save to file
+    with open(table_dir + "ex_post_ex_ante_table.tex", "w") as f:
+        f.write(latex_table)
+
+    return latex_table
+
+
+def generate_ex_post_table_for_all_types(path_dict, specs, model_name):
+    """Generate ex post tables for all sex/education combinations."""
+    sim_results_folder = path_dict["sim_results"] + model_name + "/"
+
+    res_df = pd.read_csv(
+        sim_results_folder + f"ex_post_realized_margins.csv",
+        index_col=0,
+    )
+    table_folder = path_dict["simulation_tables"] + model_name + "/"
+    os.makedirs(table_folder, exist_ok=True)
+    table = generate_ex_post_table_2(res_df)
+
+    with open(table_folder + f"ex_post_realized_margins.tex", "w") as f:
+        f.write(table)
+
+
+def generate_ex_post_table_2(res_df):
+    """Generate LaTeX table with welfare (CV) for SRA 67-70 under uncertainty scenarios."""
+
+    # Column order for ex post scenarios
+    col_order = [
+        "initial_inf_no_reform",
+        "initial_inf_reform",
+        "initial_uninf_no_reform",
+        "initial_uninf_reform",
+    ]
+    latex_lines = []
+    latex_lines.append("\\begin{tabular}{lcccc}")
+    latex_lines.append("    \\toprule")
+    latex_lines.append(
+        "    \\multirow{2}{*}{Policy Expectations} & "
+        "\\multicolumn{2}{c}{Initially Informed} & "
+        "\\multicolumn{2}{c}{Initially Misinformed} \\\\"
+    )
+    latex_lines.append("    \\cmidrule(lr){2-3} \\cmidrule(lr){4-5}")
+    latex_lines.append("     & No Reform & Reform & No Reform & Reform \\\\")
+    latex_lines.append("  {}   & (1) & (2) & (3) & (4) \\\\")
+    latex_lines.append("    \\midrule")
+
+    # No Uncertainty row
+    row_names = ["No Uncertainty", "Uncertainty"]
+    res_df_row_appends = ["unc_False", "unc_True"]
+
+    for row_name, row_append in zip(row_names, res_df_row_appends):
+        row_data = [row_name]
+        for column in col_order:
+            res_df_row_name = f"{column}_{row_append}"
+            cv_value = res_df.loc[res_df_row_name, "_cv"]
+            row_data.append(f"{cv_value:.2f}")
+        latex_lines.append("    " + " & ".join(row_data) + " \\\\")
+
+    latex_lines.append("    \\bottomrule")
+    latex_lines.append("\\end{tabular}")
+
+    latex_table = "\n".join(latex_lines)
+    return latex_table
+
+
+def generate_ex_post_table(res_df):
+    """Generate LaTeX table comparing ex post realized outcomes under reform scenarios."""
+
+    # Define metrics matching add_overall_results
+    metrics = {
+        # Work Life (<63)
+        "working_hours_below_63": "Annual Labor Supply (hrs)",
+        "consumption_below_63": "Annual Consumption",
+        "savings_below_63": "Annual Savings",
+        # Retirement
+        "sra_at_63": "SRA at 63",
+        "ret_age_excl_disabled": "Retirement Age (excl. Disability)",
+        "pension_wealth_at_ret": "Pension Wealth (PV at Retirement)",
+        "pension_wealth_at_ret_excl_disability": "Pension Wealth (excl. Disability)",
+        "private_wealth_at_ret": "Financial Wealth at Retirement",
+        "private_wealth_at_ret_excl_disability": "Financial Wealth (excl. Disability)",
+        "pensions": "Annual Pension Income",
+        "pensions_excl_disability": "Annual Pension Income (excl. Disability)",
+        "share_disability_pensions": "Share with Disability Pension",
+        "pensions_share_below_63": "Share with Pension before 63",
+        # Lifecycle (30+)
+        "lifecycle_working_hours": "Annual Labor Supply (hrs)",
+        "lifecycle_avg_wealth": "Average Financial Wealth",
+        "cv": "Compensated Variation (\\%)",
+    }
+
+    sections = {
+        "Retirement": [
+            "sra_at_63",
+            "ret_age_excl_disabled",
+            "pension_wealth_at_ret",
+            "pension_wealth_at_ret_excl_disability",
+            "private_wealth_at_ret",
+            "private_wealth_at_ret_excl_disability",
+            "pensions",
+            "pensions_excl_disability",
+            "share_disability_pensions",
+            "pensions_share_below_63",
+        ],
+        "Work Life ($<63$)": [
+            "working_hours_below_63",
+            "consumption_below_63",
+            "savings_below_63",
+        ],
+        "Lifecycle (30+)": ["lifecycle_working_hours", "lifecycle_avg_wealth"],
+        "Welfare": ["cv"],
+    }
+
+    # Column order for ex post scenarios
+    col_order = [
+        "initial_inf_no_reform",
+        "initial_inf_reform",
+        "initial_uninf_no_reform",
+        "initial_uninf_reform",
+    ]
+
+    latex_lines = []
+    latex_lines.append("\\begin{tabular}{lcccc}")
+    latex_lines.append("    \\toprule")
+    latex_lines.append(
+        "    \\multirow{2}{*}{Realized Outcome} & "
+        "\\multicolumn{2}{c}{Initially Informed} & "
+        "\\multicolumn{2}{c}{Initially Misinformed} \\\\"
+    )
+    latex_lines.append("    \\cmidrule(lr){2-3} \\cmidrule(lr){4-5}")
+    latex_lines.append("     & No Reform & Reform & No Reform & Reform \\\\")
+    latex_lines.append("  {}   & (1) & (2) & (3) & (4) \\\\")
+    latex_lines.append("    \\midrule")
+
+    for section_name, section_metrics in sections.items():
+        latex_lines.append("    \\midrule")
+
+        latex_lines.append(
+            f"    \\multicolumn{{5}}{{l}}{{\\textit{{{section_name}}}}} \\\\"
+        )
+
+        for metric_key in section_metrics:
+            outcome_name = metrics[metric_key]
+            row_data = [outcome_name]
+
+            for col in col_order:
+                val = res_df.loc[col, f"_{metric_key}"]
+                row_data.append(f"{val:.2f}")
+
+            latex_lines.append("    " + " & ".join(row_data) + " \\\\")
+
+    latex_lines.append("    \\bottomrule")
+    latex_lines.append("\\end{tabular}")
+
+    return "\n".join(latex_lines)

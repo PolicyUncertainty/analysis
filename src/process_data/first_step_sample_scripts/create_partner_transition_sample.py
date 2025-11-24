@@ -4,16 +4,17 @@ import os
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from process_data.aux_and_plots.filter_data import (
+from process_data.auxiliary.filter_data import (
     drop_missings,
     filter_below_age,
     filter_years,
     recode_sex,
 )
-from process_data.aux_and_plots.lagged_and_lead_vars import span_dataframe
+from process_data.auxiliary.lagged_and_lead_vars import span_dataframe
 from process_data.soep_vars.age import calc_age_at_interview
 from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.partner_code import create_partner_state
+from process_data.structural_sample_scripts.policy_state import create_SRA_by_gebjahr
 
 
 # %%
@@ -22,7 +23,7 @@ def create_partner_transition_sample(paths, specs, load_data=False):
         os.makedirs(paths["intermediate_data"])
 
     out_file_path = (
-        paths["intermediate_data"] + "partner_transition_estimation_sample.pkl"
+        paths["first_step_data"] + "partner_transition_estimation_sample.pkl"
     )
 
     if load_data:
@@ -47,6 +48,8 @@ def create_partner_transition_sample(paths, specs, load_data=False):
 
     df["age"] = df.index.get_level_values("syear") - df["gebjahr"]
 
+    df["SRA"] = create_SRA_by_gebjahr(df["gebjahr"])
+
     # Filter age and sex
     df = filter_below_age(df, specs["start_age"])
 
@@ -57,6 +60,7 @@ def create_partner_transition_sample(paths, specs, load_data=False):
         "partner_state": "int8",
         "lead_partner_state": "int8",
         "children": "int8",
+        "SRA": "float32",
     }
     # Drop observations if any of core variables are nan
     # We also delete now the observations with invalid data, which we left before to have a continuous panel

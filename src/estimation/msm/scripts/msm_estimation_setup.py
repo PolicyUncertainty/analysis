@@ -11,13 +11,17 @@ import pandas as pd
 import yaml
 from dcegm.asset_correction import adjust_observed_assets
 
-from estimation.msm.scripts.calc_moments import calc_all_moments
+from estimation.msm.scripts.calc_moments import (
+    calc_all_moments,
+    calc_variance_of_moments,
+)
 from estimation.struct_estimation.scripts.estimate_setup import generate_print_func
 from model_code.specify_model import specify_model
+from model_code.state_space.experience import scale_experience_years
 from process_data.structural_sample_scripts.create_structural_est_sample import (
     CORE_TYPE_DICT,
 )
-from simulation.sim_tools.start_obs_for_sim import generate_start_states_from_obs
+from simulation.internal_runs.internal_sim_tools import generate_start_states_from_obs
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 jax.config.update("jax_enable_x64", True)
@@ -33,7 +37,9 @@ def estimate_model(
     last_estimate: Optional[Dict[str, Any]] = None,
 ):
     """Estimate the model based on empirical data and starting parameters."""
-    print_function = generate_print_func(params_to_estimate_names)
+    specs = generate_derived_and_data_derived_specs(path_dict)
+
+    print_function = generate_print_func(params_to_estimate_names, specs)
 
     # # Assign start params from before
     if last_estimate is not None:
@@ -70,7 +76,6 @@ def estimate_model(
         "SRA_at_start": 67,
         "SRA_at_retirement": 67,
     }
-    specs = generate_derived_and_data_derived_specs(path_dict)
 
     model = specify_model(
         path_dict=path_dict,
@@ -81,16 +86,23 @@ def estimate_model(
         sim_specs=sim_specs,
     )
 
-    data_decision = load_and_prep_data(path_dict=path_dict, start_params=start_params)
+    data_decision = load_and_prep_data(path_dict=path_dict)
 
     # Load empirical data
     empirical_moments = calc_all_moments(data_decision, empirical=True)
 
     if weighting_method == "identity":
-        weights = np.identity(empirical_moments.shape[0])
-    # elif weighting_method == "diagonal":
-    #     empirical_variances_reg = np.maximum(empirical_variances, 1e-4)
-    #     weights = np.diag(1 / empirical_variances_reg)
+        n_obs = empirical_moments.shape[0]
+        weights = np.identity(n_obs) / n_obs
+    elif weighting_method == "diagonal":
+        empirical_variances_reg = calc_variance_of_moments(data_decision)
+        close_to_zero = empirical_variances_reg < 1e-12
+        close_to_zero = np.isnan(empirical_variances_reg) | close_to_zero
+        weight_elements = 1 / empirical_variances_reg
+        weight_elements[close_to_zero] = 0.0
+        weights_sum = np.sum(weight_elements)
+        weight_elements = np.sqrt(weight_elements / weights_sum)
+        weights = np.diag(weight_elements)
     else:
         raise ValueError(f"Unknown weighting method: {weighting_method}")
 
@@ -165,8 +177,6 @@ def get_msm_optimization_function(
     weights: np.ndarray,
 ) -> np.ndarray:
 
-    chol_weights = np.linalg.cholesky(weights)
-
     criterion = om.mark.least_squares(
         partial(
             msm_criterion,
@@ -174,7 +184,7 @@ def get_msm_optimization_function(
             print_function=print_function,
             start_params_all=start_params_all,
             flat_empirical_moments=empirical_moments,
-            chol_weights=chol_weights,
+            weights=weights,
         )
     )
 
@@ -187,7 +197,7 @@ def msm_criterion(
     print_function: Callable,
     simulate_moments: callable,
     flat_empirical_moments: np.ndarray,
-    chol_weights: np.ndarray,
+    weights: np.ndarray,
 ) -> np.ndarray:
     """Calculate the raw criterion based on simulated and empirical moments."""
 
@@ -197,10 +207,10 @@ def msm_criterion(
     simulated_flat = simulate_moments(params_int)
 
     difference = simulated_flat - flat_empirical_moments
-    deviations = difference / flat_empirical_moments
-    mask = ~np.isfinite(deviations)
-    deviations[mask] = difference[mask]
-    residuals = deviations @ chol_weights
+    # deviations = difference / flat_empirical_moments
+    # mask = ~np.isfinite(deviations)
+    # deviations[mask] = difference[mask]
+    residuals = difference @ weights
     # Print squared sum of residuals
     print(f"Sum of squared residuals: {np.sum(residuals**2):.4f} ")
     print_function(params)
@@ -212,7 +222,7 @@ def msm_criterion(
 # =====================================================================================
 
 
-def load_and_prep_data(path_dict, start_params):
+def load_and_prep_data(path_dict):
     specs = generate_derived_and_data_derived_specs(path_dict)
     # Load data
     data_decision = pd.read_csv(path_dict["struct_est_sample"])
@@ -229,9 +239,12 @@ def load_and_prep_data(path_dict, start_params):
     # )["age_weights"].transform("sum")
     #
     # # Transform experience
-    max_init_exp = specs["max_exp_diffs_per_period"][data_decision["period"].values]
-    exp_denominator = data_decision["period"].values + max_init_exp
-    data_decision["experience"] = data_decision["experience"] / exp_denominator
+    data_decision["experience"] = scale_experience_years(
+        period=data_decision["period"].values,
+        experience_years=data_decision["experience"].values,
+        is_retired=data_decision["lagged_choice"].values == 0,
+        model_specs=specs,
+    )
 
     # Load model
     model = specify_model(
@@ -258,7 +271,7 @@ def load_and_prep_data(path_dict, start_params):
 
     assets_begin_of_period = adjust_observed_assets(
         observed_states_dict=states_dict,
-        params=start_params,
+        params={},
         model_class=model,
     )
     data_decision["assets_begin_of_period"] = assets_begin_of_period

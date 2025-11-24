@@ -111,7 +111,7 @@ def test_choice_set_over_63_under_72(
         assert (choice_set == [0]).all()
     else:
         if age < ret_age_long_insured:
-            # Not old enough to retire. Check if job is offered
+            # Not figures enough to retire. Check if job is offered
             if job_offer == 1:
                 if sex == 0:
                     if health == 2:
@@ -129,7 +129,7 @@ def test_choice_set_over_63_under_72(
                 else:
                     assert (choice_set == [1]).all()
         else:
-            # old enough to retire. Check if job is offered
+            # figures enough to retire. Check if job is offered
             if (age >= SRA) & (age < specs["max_ret_age"]):
                 if job_offer == 1:
                     if sex == 0:

@@ -4,17 +4,17 @@ import os
 import numpy as np
 import pandas as pd
 
-from process_data.aux_and_plots.filter_data import (
+from process_data.auxiliary.filter_data import (
     drop_missings,
     filter_above_age,
     filter_below_age,
     filter_years,
     recode_sex,
 )
-from process_data.aux_and_plots.lagged_and_lead_vars import span_dataframe
+from process_data.auxiliary.lagged_and_lead_vars import span_dataframe
 from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.health import correct_health_state, create_health_var
-from process_data.soep_vars.work_choices import create_choice_variable
+from process_data.soep_vars.work_choices import create_choice_and_employment_status
 
 
 # %%
@@ -23,7 +23,7 @@ def create_disability_pension_sample(paths, specs, load_data=False):
         os.makedirs(paths["intermediate_data"])
 
     out_file_path = (
-        paths["intermediate_data"] + "disability_pension_estimation_sample.csv"
+        paths["first_step_data"] + "disability_pension_estimation_sample.csv"
     )
 
     if load_data:
@@ -37,7 +37,7 @@ def create_disability_pension_sample(paths, specs, load_data=False):
     # Create education type
     df = create_education_type(df)
 
-    df = create_choice_variable(df)
+    df = create_choice_and_employment_status(df)
 
     df = filter_years(df, specs["start_year"] - 1, specs["end_year"] + 1)
 
@@ -66,7 +66,7 @@ def create_disability_pension_sample(paths, specs, load_data=False):
 
     df["retirement"] = (df["choice"] == 0).astype(float)
 
-    out_cols = ["age", "education", "sex", "retirement"]
+    out_cols = ["age", "education", "sex", "retirement", "health"]
 
     df = drop_missings(df, out_cols)
     df = df[out_cols]

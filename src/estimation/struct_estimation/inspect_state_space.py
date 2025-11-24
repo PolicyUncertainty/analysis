@@ -1,7 +1,6 @@
 # %% Set paths of project
 import pickle
 
-from estimation.struct_estimation.map_params_to_current import map_period_to_age
 from estimation.struct_estimation.scripts.observed_model_fit import (
     load_and_prep_data_for_model_fit,
 )
@@ -26,8 +25,6 @@ else:
     params = pickle.load(
         open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
     )
-    params = map_period_to_age(params)
-
 
 model = specify_model(
     path_dict=path_dict,

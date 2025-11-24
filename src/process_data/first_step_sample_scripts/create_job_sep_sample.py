@@ -3,26 +3,26 @@ import os
 import numpy as np
 import pandas as pd
 
-from process_data.aux_and_plots.filter_data import (
+from process_data.auxiliary.filter_data import (
     drop_missings,
     filter_below_age,
     filter_years,
     recode_sex,
 )
-from process_data.aux_and_plots.lagged_and_lead_vars import (
+from process_data.auxiliary.lagged_and_lead_vars import (
     span_dataframe,
 )
 from process_data.soep_vars.education import create_education_type
 from process_data.soep_vars.health import correct_health_state, create_health_var
 from process_data.soep_vars.job_hire_and_fire import generate_job_separation_var
-from process_data.soep_vars.work_choices import create_choice_variable
+from process_data.soep_vars.work_choices import create_choice_and_employment_status
 
 
 def create_job_sep_sample(paths, specs, load_data=False):
     if not os.path.exists(paths["intermediate_data"]):
         os.makedirs(paths["intermediate_data"])
 
-    out_file_path = paths["intermediate_data"] + "job_sep_sample.pkl"
+    out_file_path = paths["first_step_data"] + "job_sep_sample.pkl"
 
     if load_data:
         data = pd.read_pickle(out_file_path)
@@ -43,7 +43,7 @@ def create_job_sep_sample(paths, specs, load_data=False):
     df = filter_years(df, specs["start_year"] - 1, specs["end_year"] + 1)
 
     # create choice and lagged choice variable
-    df = create_choice_variable(df)
+    df = create_choice_and_employment_status(df)
     # lagged choice
     df = span_dataframe(df, specs["start_year"] - 1, specs["end_year"] + 1)
 

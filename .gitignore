@@ -60,3 +60,4 @@ data_with_probs.csv
 # jmp results
 !output/sim_results/alg1_sparse/*
 !output/est_results/struct_results/*alg1_sparse*
+output/est_results/struct_results/archive/

@@ -5,6 +5,8 @@ Reports parameters for all sex x education x health state combinations.
 
 import pandas as pd
 
+from first_step_estimation.tables.utils import write_latex_table
+
 
 def create_health_transition_params_latex_table(paths_dict, specs):
     """
@@ -125,8 +127,7 @@ def create_health_transition_params_latex_table(paths_dict, specs):
 
     output_path = paths_dict["first_step_tables"] + "health_transition_params_table.tex"
     # Save to file
-    with open(output_path, "w") as f:
-        f.write(latex_table)
+    write_latex_table(latex_table, output_path)
 
     print(f"LaTeX tabular saved to: {output_path}")
 

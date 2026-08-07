@@ -53,8 +53,10 @@ data_with_probs.csv
 
 # Mac files
 **/.DS_Store
+*.DS_Store
 **/._*
 
 
 # jmp results
 !output/sim_results/alg1_sparse/*
+!output/est_results/*alg1_sparse*

@@ -92,7 +92,9 @@ def get_next_period_experience(
         model_specs=model_specs,
     )
 
-    return exp_scaled
+    return {
+        "experience": exp_scaled,
+    }
 
 
 def construct_experience_years(float_experience, period, is_retired, model_specs):

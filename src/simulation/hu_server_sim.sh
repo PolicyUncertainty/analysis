@@ -8,7 +8,7 @@
 #SBATCH --time=3:30:00
 #SBATCH --mem=120GB
 #SBATCH --partition=gpu
-#SBATCH --gres=gpu:a10080gb:1
+#SBATCH --gres=gpu:h100nvl:1
 #SBATCH --qos=standard
 
 module add cuda/12.4.1
@@ -16,8 +16,8 @@ module add cuda/12.4.1
 
 # python run_cf_debias.py
 # python run_ex_ante_ex_post.py
-python run_bunching.py
-# python run_cf_sra_increase.py
+# python run_bunching.py
+python run_cf_sra_increase.py
 # python run_plots_and_tables.py
 # python run_model_fit_sim.py
 

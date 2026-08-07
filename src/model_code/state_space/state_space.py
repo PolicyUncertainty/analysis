@@ -7,7 +7,7 @@ from model_code.state_space.experience import get_next_period_experience
 def create_state_space_functions():
     return {
         "state_specific_choice_set": state_specific_choice_set,
-        "next_period_experience": get_next_period_experience,
+        "next_period_continuous_state": get_next_period_experience,
         "sparsity_condition": sparsity_condition,
         "next_period_deterministic_state": next_period_deterministic_state,
     }

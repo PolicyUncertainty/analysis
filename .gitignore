@@ -61,3 +61,4 @@ data_with_probs.csv
 !output/tables/*/alg1_sparse/
 
 output/est_results/struct_results/archive/
+output/tables/simulation/old/

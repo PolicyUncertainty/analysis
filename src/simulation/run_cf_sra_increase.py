@@ -117,8 +117,8 @@ def create_result_dfs(sra_at_63, scenarios, het_mask_dict):
 seeed = 123
 model_name = specs["model_name"]
 util_type = specs["util_type"]
-load_unc_model = True
-load_no_unc_model = True
+load_unc_model = False
+load_no_unc_model = False
 load_solutions = None
 load_df = None
 

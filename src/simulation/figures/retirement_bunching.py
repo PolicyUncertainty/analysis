@@ -20,46 +20,29 @@ def plot_retirement_bunching(
 
     save_folder = path_dict["sim_results"] + model_name + "/"
 
-    df_base_plot = pd.read_csv(save_folder + "df_bunching_base.csv")
-    df_cf_plot = pd.read_csv(save_folder + "df_bunching_cf.csv")
-    df_base_plot["SRA_diff"] = df_base_plot["policy_state_value"] - df_base_plot["age"]
-    df_cf_plot["SRA_diff"] = df_cf_plot["policy_state_value"] - df_cf_plot["age"]
+    # Pre-aggregated shares (see simulation.sim_tools.bunching.compute_bunching_shares)
+    # sex == -1 and education == -1 denote the pooled (all groups) rows.
+    shares_base_df = pd.read_csv(save_folder + "bunching_shares_base.csv")
+    shares_cf_df = pd.read_csv(save_folder + "bunching_shares_cf.csv")
 
-    ages_to_plot = np.arange(63, 69)
+    ages_to_plot = np.sort(shares_base_df["age"].unique())
 
-    # Create retirement type categories
-    def categorize_retirement(df):
-        condition_very_long_insured = (df["SRA_diff"] > 0) & df["very_long_insured"]
-        condition_disability = (df["SRA_diff"] > 0) & (df["health"] == 2)
-        condition_standard = ~condition_very_long_insured & ~condition_disability
-        conditions = [
-            (df["SRA_diff"] > 0) & df["very_long_insured"],  # very long insured (early)
-            (df["SRA_diff"] > 0) & (df["health"] == 2),  # disability (early)
-            condition_standard,
+    def get_shares(df, sex, education, ret_type):
+        subset = df[
+            (df["sex"] == sex)
+            & (df["education"] == education)
+            & (df["retirement_type"] == ret_type)
         ]
-        choices = ["very_long_insured", "disability", "standard"]
-        df["retirement_type"] = np.select(conditions, choices, default="standard")
-        return df
+        return subset.set_index("age")["share"].reindex(ages_to_plot, fill_value=0)
 
-    df_base_plot = categorize_retirement(df_base_plot)
-    df_cf_plot = categorize_retirement(df_cf_plot)
-
-    # Calculate shares for each retirement type by age (normalized by total population)
-    def calculate_shares_by_type(df, ages):
-        total_count = len(df)
-        shares_dict = {}
-
-        for ret_type in ["standard", "very_long_insured", "disability"]:
-            type_age_counts = df[df["retirement_type"] == ret_type][
-                "age"
-            ].value_counts()
-            shares = (type_age_counts / total_count).reindex(ages, fill_value=0)
-            shares_dict[ret_type] = shares
-
-        return shares_dict
-
-    shares_base = calculate_shares_by_type(df_base_plot, ages_to_plot)
-    shares_cf = calculate_shares_by_type(df_cf_plot, ages_to_plot)
+    shares_base = {
+        ret_type: get_shares(shares_base_df, -1, -1, ret_type)
+        for ret_type in ["standard", "very_long_insured", "disability"]
+    }
+    shares_cf = {
+        ret_type: get_shares(shares_cf_df, -1, -1, ret_type)
+        for ret_type in ["standard", "very_long_insured", "disability"]
+    }
 
     # Main plot with stacked bars
     fig, ax = plt.subplots()
@@ -148,19 +131,14 @@ def plot_retirement_bunching(
         for edu_var, edu_label in enumerate(specs["education_labels"]):
             ax = axes[sex_var, edu_var]
 
-            mask_base = (df_base_plot["sex"] == sex_var) & (
-                df_base_plot["education"] == edu_var
-            )
-            mask_cf = (df_cf_plot["sex"] == sex_var) & (
-                df_cf_plot["education"] == edu_var
-            )
-
-            shares_base_subset = calculate_shares_by_type(
-                df_base_plot[mask_base], ages_to_plot
-            )
-            shares_cf_subset = calculate_shares_by_type(
-                df_cf_plot[mask_cf], ages_to_plot
-            )
+            shares_base_subset = {
+                ret_type: get_shares(shares_base_df, sex_var, edu_var, ret_type)
+                for ret_type in plot_order
+            }
+            shares_cf_subset = {
+                ret_type: get_shares(shares_cf_df, sex_var, edu_var, ret_type)
+                for ret_type in plot_order
+            }
 
             # Base model bars (left)
             bottom_base = np.zeros(len(ages_to_plot))

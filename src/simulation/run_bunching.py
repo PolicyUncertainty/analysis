@@ -16,6 +16,7 @@ import jax
 jax.config.update("jax_enable_x64", True)
 
 # sim tools
+from simulation.sim_tools.bunching import compute_bunching_shares
 from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 from simulation.sim_tools.simulation_print import start_simulation_print
 from simulation.tables.debias_table import (
@@ -78,7 +79,8 @@ if not os.path.exists(save_folder):
     os.makedirs(save_folder)
 
 # df_base_plot = df_base[(df_base["choice"] == 0) & (df_base["lagged_choice"] != 0)]
-# df_base_plot.to_csv(save_folder + "df_bunching_base.csv", index=False)
+# bunching_shares_base = compute_bunching_shares(df_base_plot, specs)
+# bunching_shares_base.to_csv(save_folder + "bunching_shares_base.csv", index=False)
 
 # del df_base_plot
 # del df_base
@@ -124,7 +126,8 @@ df_cf, _ = solve_and_simulate_scenario(
 df_cf = df_cf.reset_index()
 
 df_cf_plot = df_cf[(df_cf["choice"] == 0) & (df_cf["lagged_choice"] != 0)]
-df_cf_plot.to_csv(save_folder + "df_bunching_cf.csv", index=False)
+bunching_shares_cf = compute_bunching_shares(df_cf_plot, specs)
+bunching_shares_cf.to_csv(save_folder + "bunching_shares_cf.csv", index=False)
 
 # mask_func_m = lambda df_int: df_int["sex"] == 0
 # mask_func_f = lambda df_int: df_int["sex"] == 1

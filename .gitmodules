@@ -1,3 +1,6 @@
 [submodule "submodules/dcegm"]
 	path = submodules/dcegm
 	url = https://github.com/OpenSourceEconomics/dcegm.git
+[submodule "submodules/paper"]
+	path = submodules/paper
+	url = https://github.com/PolicyUncertainty/paper.git

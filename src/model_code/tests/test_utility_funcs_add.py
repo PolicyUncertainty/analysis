@@ -45,7 +45,7 @@ def paths_and_specs():
 )
 def test_consumption_cale(partner_state, sex, education, period, paths_and_specs):
     model_specs = paths_and_specs[1]
-    cons_scale, hh_size_calc = consumption_scale(
+    cons_scale = consumption_scale(
         partner_state=partner_state,
         sex=sex,
         education=education,
@@ -54,9 +54,8 @@ def test_consumption_cale(partner_state, sex, education, period, paths_and_specs
     )
     has_partner = int(partner_state > 0)
     nb_children = model_specs["children_by_state"][sex, education, has_partner, period]
-    hh_size = 1 + has_partner
+    hh_size = 1 + has_partner + nb_children
     np.testing.assert_almost_equal(cons_scale, np.sqrt(hh_size))
-    np.testing.assert_almost_equal(hh_size_calc, hh_size)
 
 
 @pytest.mark.parametrize(
@@ -119,7 +118,7 @@ def test_utility_func(
     }
 
     model_specs = paths_and_specs[1]
-    cons_scale, hh_size = consumption_scale(
+    cons_scale = consumption_scale(
         partner_state=partner_state,
         sex=sex,
         education=education,
@@ -150,13 +149,10 @@ def test_utility_func(
     mu_edu = mu + education
 
     if mu_edu == 1:
-        utility_lambda = (
-            lambda disutil: hh_size * np.log(consumption / cons_scale) - disutil
-        )
+        utility_lambda = lambda disutil: np.log(consumption / cons_scale) - disutil
     else:
         utility_lambda = (
-            lambda disutil: hh_size
-            * ((consumption / cons_scale) ** (1 - mu_edu) - 1)
+            lambda disutil: ((consumption / cons_scale) ** (1 - mu_edu) - 1)
             / (1 - mu_edu)
             - disutil
         )

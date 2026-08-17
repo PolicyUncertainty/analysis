@@ -1,0 +1,67 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage{booktabs}
+
+\title{Consumption Tilt Across Periods with Different Equivalence Scales}
+\author{Divorce branch -- modeling note}
+\date{\today}
+
+\begin{document}
+\sloppy
+\maketitle
+
+\section{Setup}
+
+Two periods with equivalence scales $s_1 = \sqrt{\text{hh\_size}_1}$,
+$s_2 = \sqrt{\text{hh\_size}_2}$ and utility
+$u(C_t) = \big((C_t/s_t)^{1-\mu} - 1\big)/(1-\mu)$ (no household-size
+multiplier in front, per \texttt{utility\_functions\_add.py}). Maximizing
+$u(C_1) + \beta u(C_2)$ subject to $C_1 + C_2/R = W$ gives the Euler
+equation
+\begin{equation}
+  \frac{C_2}{C_1} = (\beta R)^{1/\mu} \left(\frac{s_1}{s_2}\right)^{(1-\mu)/\mu}.
+\end{equation}
+For comparison, with the $\text{hh\_size}_t = s_t^2$ multiplier back in
+front ($\tilde u(C_t) = \text{hh\_size}_t \cdot u(C_t)$, the pre-fix
+version), the same steps give
+\begin{equation}
+  \frac{C_2}{C_1} = (\beta R)^{1/\mu} \left(\frac{s_1}{s_2}\right)^{-(\mu+1)/\mu}.
+\end{equation}
+
+\section{Result}
+
+The sign of the exponent on $(s_1/s_2)$ determines which period the tilt
+favors. Without the multiplier the sign depends on $\mu$; with it, the
+exponent $-(\mu+1)/\mu$ is negative for every $\mu>0$, so it \emph{never}
+flips -- it always favors the larger household. Table~\ref{tab:tilt} gives
+the direction for each regime, independent of which period happens to be
+larger.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}llll@{}}
+\toprule
+$\mu$ & Pre-fix (with $\text{hh\_size}_t$ multiplier) & Post-fix (no multiplier) & example ($s_1>s_2$) \\
+\midrule
+$\mu > 1$ & larger scale & larger scale & period 1 (partnered) \\
+$\mu = 1$ & larger scale & no tilt, $C_2/C_1=\beta R$ & period 1 (partnered) \\
+$\mu < 1$ & larger scale & smaller scale & period 2 (alone) \\
+\bottomrule
+\end{tabular}
+\caption{Direction of the equivalence-scale tilt in the Euler equation:
+which period's total consumption gets the extra share, beyond what
+$\beta R$ alone prescribes.}
+\label{tab:tilt}
+\end{table}
+
+The estimated model has $\mu_{\text{low}} = \mu_{\text{high}} = 0.8 < 1$
+(\texttt{est\_params\_alg1\_sparse.pkl}). Pre-fix, consumption always tilted
+toward the \emph{larger}-household period, regardless of $\mu$. Post-fix
+(current code), it tilts toward the \emph{smaller}-household period --
+toward being alone -- because removing the multiplier is what made the
+tilt direction $\mu$-dependent, and the estimated $\mu<1$ lands on the
+reversed side.
+
+\end{document}

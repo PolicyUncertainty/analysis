@@ -263,6 +263,23 @@ def _create_income_variables(df, specs):
     df.loc[:, "savings_dec"] = df["total_income"] - df["consumption"]
     df.loc[:, "savings_rate"] = df["savings_dec"] / df["total_income"]
 
+    # "consumption" (and assets_begin_of_period) are dcegm's own choice/state
+    # variable, tracked in individual bookkeeping units: for a partnered
+    # person a dollar of it is drawn from a jointly funded (pooled) account,
+    # so real (household-scale) spending/wealth is wealth_mult times larger.
+    # wealth_mult is keyed off the row's own partner_state, matching
+    # budget_equation.py / utility_functions_add.py. See the dcegm guide
+    # "Implementing a divorce/marriage transition without a lagged partner
+    # state" (docs/source/guides/, submodules/dcegm) for the underlying
+    # mechanism.
+    has_partner_int = (df["partner_state"] > 0).astype(int)
+    wealth_mult = 1 + has_partner_int
+    df.loc[:, "real_consumption"] = df["consumption"] * wealth_mult
+    df.loc[:, "real_assets_begin_of_period"] = (
+        df["assets_begin_of_period"] * wealth_mult
+    )
+    df.loc[:, "real_savings"] = df["savings"] * wealth_mult
+
     # Create gross own income (without pension income)
     df.loc[:, "gross_own_income"] = (
         (df["choice"] == 0) * df["gross_retirement_income"]  # Retired

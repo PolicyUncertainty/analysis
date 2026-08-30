@@ -99,9 +99,13 @@ def calc_working_hours_below_63(df):
 
 
 def calc_consumption_below_63(df):
-    """Calculate mean annual consumption for age < 63"""
+    """Calculate mean annual (household-scale) consumption for age < 63.
+
+    Uses real_consumption, not the individual-bookkeeping consumption
+    dcegm solves over -- see simulate_scenario.py's _create_income_variables.
+    """
     mask = df["age"] < 63
-    return df.loc[mask, "consumption"].mean() * 10
+    return df.loc[mask, "real_consumption"].mean() * 10
 
 
 def calc_savings_below_63(df):
@@ -146,7 +150,7 @@ def private_wealth_at_retirement(df):
     fresh_retired_mask = (
         (df["choice"] == 0) & (df["lagged_choice"] != 0) & (df["health"] != 3)
     )
-    mean_wealth = df.loc[fresh_retired_mask, "savings"].mean()
+    mean_wealth = df.loc[fresh_retired_mask, "real_savings"].mean()
     return mean_wealth * 10
 
 
@@ -157,7 +161,7 @@ def private_wealth_excl_disability(df):
     )
     non_disabled_mask = df["age"] >= 63
     combined_mask = fresh_retired_mask & non_disabled_mask
-    mean_wealth = df.loc[combined_mask, "savings"].mean()
+    mean_wealth = df.loc[combined_mask, "real_savings"].mean()
     return mean_wealth * 10
 
 
@@ -288,6 +292,10 @@ def calc_lifecycle_working_hours(df):
 
 
 def calc_lifecycle_avg_wealth(df):
-    """Calculate mean financial wealth for age >= 30"""
+    """Calculate mean (household-scale) financial wealth for age >= 30.
+
+    Uses real_savings, not the individual-bookkeeping savings dcegm solves
+    over -- see simulate_scenario.py's _create_income_variables.
+    """
     mask = df["age"] >= 30
-    return df.loc[mask, "savings"].mean() * 10
+    return df.loc[mask, "real_savings"].mean() * 10

@@ -27,6 +27,21 @@ def budget_constraint(
 ):
     assets_scaled = asset_end_of_previous_period * model_specs["wealth_unit"]
 
+    # asset_end_of_previous_period is tracked in *individual* bookkeeping
+    # units: for a partnered person its real-dollar value is wealth_mult
+    # times the state's own number (partner's matching wealth pooled in).
+    # wealth_mult is keyed off *this period's own* partner_state only (no
+    # lagged_partner_state needed) -- doubling the asset term below and then
+    # dividing the whole M_t by the same wealth_mult again leaves
+    # d(wealth)/d(asset_end_of_previous_period) = 1 + interest_rate exactly,
+    # which is what dcegm's Euler-equation solver hardcodes. See the dcegm
+    # guide "Implementing a divorce/marriage transition without a lagged
+    # partner state" (docs/source/guides/) for the full derivation and the
+    # exact-equivalence proof against a transition-based (halve on divorce,
+    # double on marriage) rule.
+    has_partner_int = (partner_state > 0).astype(int)
+    wealth_mult = 1 + has_partner_int
+
     age = model_specs["start_age"] + period
     # Recalculate experience
     experience_years = construct_experience_years(
@@ -53,8 +68,6 @@ def budget_constraint(
         pension_points=experience_years,
         model_specs=model_specs,
     )
-
-    has_partner_int = (partner_state > 0).astype(int)
 
     # Income lagged choice 1
     unemployment_benefits, own_unemployemnt_benefits = calc_unemployment_benefits(
@@ -117,14 +130,17 @@ def budget_constraint(
 
     total_income = jnp.maximum(total_net_income, unemployment_benefits)
     interest_rate = model_specs["interest_rate"]
-    interest = interest_rate * assets_scaled
+    # Interest accrues on the pooled (household-scale) asset stock,
+    # wealth_mult * assets_scaled -- total_income already is household-scale
+    # (calc_net_household_income pools own and partner income).
+    interest = interest_rate * wealth_mult * assets_scaled
     income_plus_interest = total_income + interest
-    # calculate beginning of period wealth M_t
-    assets_begin_of_period = assets_scaled + income_plus_interest
+    # calculate beginning of period wealth M_t, household terms
+    assets_begin_of_period_hh = wealth_mult * assets_scaled + income_plus_interest
 
     # death = health == model_specs["death_health_var"]
-    # assets_begin_of_period = jax.lax.select(
-    #     death, on_true=assets_scaled, on_false=assets_begin_of_period
+    # assets_begin_of_period_hh = jax.lax.select(
+    #     death, on_true=assets_scaled, on_false=assets_begin_of_period_hh
     # )
 
     aux = {
@@ -140,5 +156,13 @@ def budget_constraint(
         "gross_labor_income": gross_labor_income / model_specs["wealth_unit"],
         "gross_retirement_income": gross_retirement_income / model_specs["wealth_unit"],
     }
+
+    # Divide the whole household-scale M_t back down by wealth_mult to
+    # return to individual bookkeeping units. This is what makes the *asset*
+    # return collapse to exactly wealth_unit * (1 + interest_rate)
+    # regardless of partner_state, since wealth_mult cancels out of the
+    # asset term but not the income term (partner income is effectively
+    # shared 50/50 through this division).
+    assets_begin_of_period = assets_begin_of_period_hh / wealth_mult
 
     return assets_begin_of_period / model_specs["wealth_unit"], aux

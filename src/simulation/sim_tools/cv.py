@@ -23,9 +23,17 @@ def calc_adjusted_scale(df_base, df_cf, params, specs, n_agents):
 
     # Generate the part of the realized utility which is not to be sccaled, i.e. which remains
     # constant. This is the taste shock and the disutility paramters. First generate consumption utility.
+    # consumption is dcegm's individual-bookkeeping choice variable;
+    # utility_func_alive evaluates felicity at wealth_mult * consumption /
+    # cons_scale (household-scale spending), not consumption / cons_scale --
+    # see utility_functions_add.py. Must match here to correctly isolate the
+    # consumption-utility component of real_util.
     util_cons = (
         df_base["hh_size"]
-        * ((df_base["consumption"] / df_base["cons_scale"]) ** (1 - mu_vector))
+        * (
+            (df_base["wealth_mult"] * df_base["consumption"] / df_base["cons_scale"])
+            ** (1 - mu_vector)
+        )
         / (1 - mu_vector)
     )
     # Then substract to get constant utility
@@ -85,4 +93,5 @@ def add_cons_scale_and_adult_hh_size(df, specs):
     hh_size = 1 + has_partner_int
     df.loc[:, "cons_scale"] = np.sqrt(hh_size)
     df.loc[:, "hh_size"] = hh_size
+    df.loc[:, "wealth_mult"] = 1 + has_partner_int
     return df

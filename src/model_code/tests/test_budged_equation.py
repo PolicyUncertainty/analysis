@@ -134,9 +134,13 @@ def test_budget_unemployed(
     else:
         income = net_partner_plus_child_benefits
 
+    # wealth_mult = 1 + has_partner (see budget_equation.py): the asset
+    # return collapses to plain (1+r) regardless of partner_state, but
+    # income is effectively shared 50/50 through the wealth_mult division.
+    wealth_mult = 1 + has_partner
     np.testing.assert_almost_equal(
         wealth,
-        (savings_scaled * (1 + specs["interest_rate"]) + income)
+        (savings_scaled * (1 + specs["interest_rate"]) + income / wealth_mult)
         / specs_internal["wealth_unit"],
     )
 
@@ -281,9 +285,14 @@ def test_budget_worker(
         total_net_income = total_income_after_ssc + child_benefits - tax_toal
 
         checked_income = np.maximum(total_net_income, unemployment_benefits)
+        # wealth_mult = 2 here (partner_state != 0): income is effectively
+        # shared 50/50 through the wealth_mult division in budget_equation.py.
         np.testing.assert_almost_equal(
             wealth,
-            (savings_scaled * (1 + specs_internal["interest_rate"]) + checked_income)
+            (
+                savings_scaled * (1 + specs_internal["interest_rate"])
+                + checked_income / 2
+            )
             / specs_internal["wealth_unit"],
         )
 
@@ -405,8 +414,9 @@ def test_retiree(
         total_net_income = total_income_after_ssc + child_benefits - tax_toal
 
         checked_income = np.maximum(total_net_income, unemployment_benefits)
+        # wealth_mult = 2 here (partner_state != 0).
         scaled_wealth = (
-            savings_scaled * (1 + specs_internal["interest_rate"]) + checked_income
+            savings_scaled * (1 + specs_internal["interest_rate"]) + checked_income / 2
         )
         np.testing.assert_almost_equal(
             wealth, scaled_wealth / specs_internal["wealth_unit"]
@@ -606,8 +616,9 @@ def test_fresh_retiree(
         total_net_income = total_income_after_ssc + child_benefits - tax_toal
 
         checked_income = np.maximum(total_net_income, unemployment_benefits)
+        # wealth_mult = 2 here (partner_state hardcoded to 1 in this test).
         scaled_wealth = (
-            savings_scaled * (1 + specs_internal["interest_rate"]) + checked_income
+            savings_scaled * (1 + specs_internal["interest_rate"]) + checked_income / 2
         )
         if early_retirement & (retirement_age_difference > 4) & (health != 2):
             pass

@@ -21,13 +21,13 @@ def add_new_life_cycle_results(df_base, df_cf, scenatio_indicator, res_df_life_c
             df_scenario.groupby("age")["savings_dec"].aggregate("mean")
         )
         res_df_life_cycle[f"consumption_{scenatio_indicator}_{append}"] = (
-            df_scenario.groupby("age")["consumption"].aggregate("mean")
+            df_scenario.groupby("age")["real_consumption"].aggregate("mean")
         )
         res_df_life_cycle[f"income_{scenatio_indicator}_{append}"] = (
             df_scenario.groupby("age")["total_income"].aggregate("mean")
         )
         res_df_life_cycle[f"assets_{scenatio_indicator}_{append}"] = (
-            df_scenario.groupby("age")["savings"].aggregate("mean")
+            df_scenario.groupby("age")["real_savings"].aggregate("mean")
         )
 
         # Generate rates

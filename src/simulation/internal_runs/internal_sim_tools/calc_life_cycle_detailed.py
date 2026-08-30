@@ -45,8 +45,8 @@ def calc_life_cycle_detailed(df):
             {
                 "savings_rate": grouped["savings_dec"].sum()
                 / grouped["total_income"].sum(),
-                "avg_wealth": grouped["savings"].mean(),
-                "consumption": grouped["consumption"].mean(),
+                "avg_wealth": grouped["real_savings"].mean(),
+                "consumption": grouped["real_consumption"].mean(),
                 "gross_own_income": (
                     grouped["gross_own_income"].mean()
                     if "gross_own_income" in df.columns

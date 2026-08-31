@@ -1,7 +1,7 @@
-"""Aggregate per-case results from run_benchmark.py into comparison tables.
+"""Aggregate per-spec results from run_benchmark.py into comparison tables.
 
-Run after all four cases (see CASES in run_benchmark.py) have been benchmarked --
-i.e. src/benchmarks/results/*.pkl contains one file per case.
+Run after all three specs (see SPEC_LIST in run_benchmark.py) have been
+benchmarked -- i.e. src/benchmarks/results/*.pkl contains one file per spec.
 """
 
 import pickle as pkl
@@ -11,10 +11,10 @@ import pandas as pd
 
 BENCHMARK_DIR = Path(__file__).resolve().parent
 RESULTS_DIR = BENCHMARK_DIR / "results"
-OUTPUT_DIR = BENCHMARK_DIR / "output"
+OUTPUT_DIR = BENCHMARK_DIR / "output_v2_production_grid_method_check"
 
 # Canonical case order (falls back to discovery order for any case not listed here).
-CASE_ORDER = ["main_fues", "main_dj", "new_dj", "new_fues"]
+CASE_ORDER = ["production", "new_fues", "new_dj"]
 
 
 def load_results():

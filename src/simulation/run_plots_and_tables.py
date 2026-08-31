@@ -33,12 +33,12 @@ het_label = "gender"
 sra_increase_table(path_dict, model_name)
 create_ex_post_ex_ante_table(path_dict, specs)
 
-# # Bunching
-# plot_retirement_bunching(
-#     path_dict=path_dict,
-#     specs=specs,
-#     model_name=model_name,
-# )
+# Bunching
+plot_retirement_bunching(
+    path_dict=path_dict,
+    specs=specs,
+    model_name=model_name,
+)
 
 
 # # Generate plots

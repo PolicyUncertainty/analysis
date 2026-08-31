@@ -62,3 +62,8 @@ data_with_probs.csv
 
 output/est_results/struct_results/archive/
 output/tables/simulation/old/
+
+# dcegm engine benchmark: per-case raw results + model cache are regenerable
+# scratch (rerun run_benchmark.py); only src/benchmarks/output/ (make_table.py's
+# comparison tables) is tracked.
+src/benchmarks/results/

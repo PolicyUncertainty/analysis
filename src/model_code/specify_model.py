@@ -26,12 +26,29 @@ from set_paths import get_model_results_path
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 
-def create_model_config_wo_informed(specs, sex_type, edu_type):
+def create_model_config_wo_informed(
+    specs,
+    sex_type,
+    edu_type,
+    upper_envelope_method=None,
+    assets_end_of_period_grid=None,
+    assets_begin_of_period_grid=None,
+    experience_grid=None,
+):
+    """Build the model config.
+
+    The four ``*_grid``/``upper_envelope_method`` arguments default to the production
+    grids/upper-envelope method and only exist so benchmarks (see
+    ``src/benchmarks/``) can override them without duplicating this function.
+
+    """
     # Create savings grid
-    savings_grid = create_end_of_period_assets()
+    if assets_end_of_period_grid is None:
+        assets_end_of_period_grid = create_end_of_period_assets()
 
     # Experience grid
-    experience_grid = define_experience_grid(specs)
+    if experience_grid is None:
+        experience_grid = define_experience_grid(specs)
 
     sex_grid, edu_grid = specify_type_grids(
         sex_type=sex_type,
@@ -42,6 +59,13 @@ def create_model_config_wo_informed(specs, sex_type, edu_type):
         batch_seps = [44]  # Full model
     else:
         batch_seps = [33, 43, 44]  # Fastest model single
+
+    continuous_states = {
+        "assets_end_of_period": assets_end_of_period_grid / specs["wealth_unit"],
+        "experience": experience_grid,
+    }
+    if assets_begin_of_period_grid is not None:
+        continuous_states["assets_begin_of_period"] = assets_begin_of_period_grid
 
     model_config = {
         "min_period_batch_segments": batch_seps,
@@ -58,12 +82,11 @@ def create_model_config_wo_informed(specs, sex_type, edu_type):
             "partner_state": np.arange(specs["n_partner_states"], dtype=int),
             "health": np.arange(specs["n_all_health_states"], dtype=int),
         },
-        "continuous_states": {
-            "assets_end_of_period": savings_grid / specs["wealth_unit"],
-            "experience": experience_grid,
-        },
+        "continuous_states": continuous_states,
         "n_quad_points": specs["n_quad_points"],
     }
+    if upper_envelope_method is not None:
+        model_config["upper_envelope"] = {"method": upper_envelope_method}
     return model_config
 
 
@@ -79,8 +102,17 @@ def specify_model(
     sex_type="all",
     edu_type="all",
     util_type="add",
+    upper_envelope_method=None,
+    assets_end_of_period_grid=None,
+    assets_begin_of_period_grid=None,
+    experience_grid=None,
 ):
-    """Generate model class."""
+    """Generate model class.
+
+    ``upper_envelope_method``/``*_grid`` let benchmarks (see ``src/benchmarks/``)
+    override the production model config; leave them at ``None`` for normal use.
+
+    """
 
     SRA_belief_solution, specs = select_solution_transition_func_and_update_specs(
         path_dict=path_dict,
@@ -100,6 +132,10 @@ def specify_model(
         specs=specs,
         sex_type=sex_type,
         edu_type=edu_type,
+        upper_envelope_method=upper_envelope_method,
+        assets_end_of_period_grid=assets_end_of_period_grid,
+        assets_begin_of_period_grid=assets_begin_of_period_grid,
+        experience_grid=experience_grid,
     )
 
     if sim_specs is not None:

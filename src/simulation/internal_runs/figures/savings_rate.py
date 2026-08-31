@@ -14,6 +14,7 @@ def plot_savings(
     params,
     model_name,
     file_name,
+    seed,
     load_df=True,
     load_solution=True,
     load_sol_model=True,
@@ -33,6 +34,7 @@ def plot_savings(
         solution_exists=load_solution,
         sol_model_exists=load_sol_model,
         util_type=util_type,
+        seed=seed,
     )
 
     data_sim = data_sim.reset_index()

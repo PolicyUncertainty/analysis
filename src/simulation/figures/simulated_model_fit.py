@@ -16,6 +16,7 @@ def create_paper_wealth_fit(
     specs,
     params,
     model_name,
+    seed,
     load_df=True,
     load_solution=True,
     load_sol_model=True,
@@ -35,6 +36,7 @@ def create_paper_wealth_fit(
         solution_exists=load_solution,
         sol_model_exists=load_sol_model,
         util_type=util_type,
+        seed=seed,
     )
 
     data_sim = data_sim.reset_index()
@@ -108,6 +110,7 @@ def plot_quantiles(
     sim_col_name,
     obs_col_name,
     file_name,
+    seed,
     load_df=True,
     load_solution=True,
     load_sol_model=True,
@@ -127,6 +130,7 @@ def plot_quantiles(
         solution_exists=load_solution,
         sol_model_exists=load_sol_model,
         util_type=util_type,
+        seed=seed,
     )
 
     data_sim = data_sim.reset_index()
@@ -205,6 +209,7 @@ def plot_choice_shares_by_partner(
     specs,
     params,
     model_name,
+    seed,
     load_df=True,
     load_solution=True,
     load_sol_model=True,
@@ -227,6 +232,7 @@ def plot_choice_shares_by_partner(
         solution_exists=load_solution,
         sol_model_exists=load_sol_model,
         util_type=util_type,
+        seed=seed,
     )
 
     data_sim = data_sim.reset_index()
@@ -307,6 +313,7 @@ def plot_choice_shares_single(
     specs,
     params,
     model_name,
+    seed,
     load_df=True,
     load_solution=True,
     load_sol_model=True,
@@ -329,6 +336,7 @@ def plot_choice_shares_single(
         solution_exists=load_solution,
         sol_model_exists=load_sol_model,
         util_type=util_type,
+        seed=seed,
     )
 
     data_sim = data_sim.reset_index()
@@ -400,6 +408,7 @@ def plot_states(
     specs,
     params,
     model_name,
+    seed,
     load_df=True,
     load_solution=True,
     load_sol_model=True,
@@ -419,6 +428,7 @@ def plot_states(
         solution_exists=load_solution,
         sol_model_exists=load_sol_model,
         util_type=util_type,
+        seed=seed,
     )
 
     data_sim = data_sim.reset_index()

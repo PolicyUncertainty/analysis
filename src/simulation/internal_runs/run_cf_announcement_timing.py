@@ -64,6 +64,7 @@ for announcement_age in announcement_ages:
         solution_exists=load_unc_solution,
         sol_model_exists=load_sol_model,
         util_type=util_type,
+        seed=seed,
     )
 
     df_base = df_base.reset_index()
@@ -87,6 +88,7 @@ for announcement_age in announcement_ages:
         solution_exists=load_unc_solution,
         sol_model_exists=load_sol_model,
         util_type=util_type,
+        seed=seed,
     )
 
     df_cf = df_cf.reset_index()

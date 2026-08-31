@@ -12,6 +12,7 @@ from specs.derive_specs import generate_derived_and_data_derived_specs
 # %%
 path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict)
+seed = 123
 model_name = specs["model_name"]
 load_sol_model = True
 load_unc_sol = None  # baseline solution conntainer
@@ -39,6 +40,7 @@ df_baseline, model = solve_and_simulate_scenario(
     solution_exists=load_unc_sol,
     sol_model_exists=load_sol_model,
     util_type=specs["util_type"],
+    seed=seed,
 )
 
 df_baseline = df_baseline.reset_index()
@@ -75,6 +77,7 @@ df_cf, _ = solve_and_simulate_scenario(
     solution_exists=load_no_unc_solution,
     sol_model_exists=load_sol_model,
     util_type=specs["util_type"],
+    seed=seed,
 )
 
 df_cf = df_cf.reset_index()

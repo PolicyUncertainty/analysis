@@ -15,6 +15,7 @@ def net_incomes(
     params,
     model_name,
     file_name,
+    seed,
     load_df=True,
     load_solution=True,
     load_sol_model=True,
@@ -35,6 +36,7 @@ def net_incomes(
         df_exists=load_df,
         solution_exists=load_solution,
         sol_model_exists=load_sol_model,
+        seed=seed,
     )
 
     data_sim = data_sim.reset_index()

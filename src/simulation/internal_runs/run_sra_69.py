@@ -15,6 +15,7 @@ jax.config.update("jax_enable_x64", True)
 # %%
 path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict)
+seed = 123
 model_name = specs["model_name"]
 
 params = pkl.load(
@@ -37,6 +38,7 @@ df_baseline, _ = solve_and_simulate_scenario(
     only_informed=False,
     solution_exists=False,
     sol_model_exists=False,
+    seed=seed,
 )
 
 df_baseline = df_baseline.reset_index()
@@ -64,6 +66,7 @@ df_baseline_no_uncertainty, _ = solve_and_simulate_scenario(
     only_informed=False,
     solution_exists=False,
     sol_model_exists=False,
+    seed=seed,
 )
 
 df_baseline_no_uncertainty = df_baseline_no_uncertainty.reset_index()

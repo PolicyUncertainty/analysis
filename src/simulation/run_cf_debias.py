@@ -30,7 +30,7 @@ from simulation.tables.debias_table import (
 
 # %%
 # Set specifications
-seeed = 123
+seed = 123
 model_name = specs["model_name"]
 util_type = specs["util_type"]
 sra_at_63 = 67.0
@@ -76,6 +76,7 @@ df_base, model_solved_unc = solve_and_simulate_scenario(
     sol_model_exists=load_unc_model,
     model_solution=model_solution,
     util_type=util_type,
+    seed=seed,
 )
 df_base = df_base.reset_index()
 
@@ -106,6 +107,7 @@ df_cf, _ = solve_and_simulate_scenario(
     sol_model_exists=load_unc_model,
     model_solution=model_solved_unc,  # use same solution as baseline
     util_type=util_type,
+    seed=seed,
 )
 df_cf = df_cf.reset_index()
 

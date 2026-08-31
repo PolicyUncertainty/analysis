@@ -23,7 +23,7 @@ from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 
 # %%
 # Set specifications
-seeed = 123
+seed = 123
 model_name = specs["model_name"]
 util_type = specs["util_type"]
 
@@ -69,6 +69,7 @@ for i, sra in enumerate(sra_at_63):
         solution_exists=load_unc_solution,
         sol_model_exists=load_sol_model,
         util_type=util_type,
+        seed=seed,
     )
 
     df_base = df_base.reset_index()
@@ -91,6 +92,7 @@ for i, sra in enumerate(sra_at_63):
         solution_exists=load_no_unc_solution,
         sol_model_exists=load_sol_model,
         util_type=util_type,
+        seed=seed,
     )
 
     df_cf = df_cf.reset_index()

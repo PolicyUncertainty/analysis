@@ -13,6 +13,7 @@ path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict)
 
 
+seed = 123
 model_name = specs["model_name"]
 util_type = specs["util_type"]
 
@@ -37,6 +38,7 @@ generate_start_states_from_obs(
     model_class=model,
     inital_SRA=65,
     only_informed=False,
+    seed=seed,
 )
 initial_obs_table = investigate_start_obs(
     model_class=model,

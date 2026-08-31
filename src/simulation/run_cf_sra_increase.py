@@ -114,7 +114,7 @@ def create_result_dfs(sra_at_63, scenarios, het_mask_dict):
 
 # %%
 # Set specifications
-seeed = 123
+seed = 123
 model_name = specs["model_name"]
 util_type = specs["util_type"]
 load_unc_model = True
@@ -182,6 +182,7 @@ for scenario_label in scenarios:
             sol_model_exists=load_sol_model,
             model_solution=model_sol,
             util_type=util_type,
+            seed=seed,
         )
 
         df = df.reset_index()

@@ -25,7 +25,7 @@ from simulation.tables.debias_table import (
 
 # %%
 # Set specifications
-seeed = 123
+seed = 123
 model_name = specs["model_name"]
 util_type = specs["util_type"]
 sra_at_63 = 67.0
@@ -40,50 +40,51 @@ load_df_baseline = None  # True = load existing df, False = create new df, None 
 load_df_unbiased = None  # same as above
 
 
-# # Load params
-# params = pkl.load(
-#     open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
-# )
+# Load params
+params = pkl.load(
+    open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
+)
 
-# # Simulate baseline
-# start_simulation_print(
-#     model_name=model_name,
-#     sra_63=sra_at_63,
-#     uncertainty=True,
-#     misinformation=True,
-#     load_model=load_unc_model,
-#     load_solution=load_unc_solution,
-#     load_df=load_df_baseline,
-# )
+# Simulate baseline
+start_simulation_print(
+    model_name=model_name,
+    sra_63=sra_at_63,
+    uncertainty=True,
+    misinformation=True,
+    load_model=load_unc_model,
+    load_solution=load_unc_solution,
+    load_df=load_df_baseline,
+)
 
-# df_base, _ = solve_and_simulate_scenario(
-#     path_dict=path_dict,
-#     params=params,
-#     subj_unc=True,
-#     custom_resolution_age=None,
-#     announcement_age=None,
-#     SRA_at_retirement=sra_at_63,
-#     SRA_at_start=67,
-#     model_name=model_name,
-#     df_exists=load_df_baseline,
-#     only_informed=False,
-#     solution_exists=load_unc_solution,
-#     sol_model_exists=load_unc_model,
-#     model_solution=model_solution,
-#     util_type=util_type,
-# )
-# df_base = df_base.reset_index()
+df_base, _ = solve_and_simulate_scenario(
+    path_dict=path_dict,
+    params=params,
+    subj_unc=True,
+    custom_resolution_age=None,
+    announcement_age=None,
+    SRA_at_retirement=sra_at_63,
+    SRA_at_start=67,
+    model_name=model_name,
+    df_exists=load_df_baseline,
+    only_informed=False,
+    solution_exists=load_unc_solution,
+    sol_model_exists=load_unc_model,
+    model_solution=model_solution,
+    util_type=util_type,
+    seed=seed,
+)
+df_base = df_base.reset_index()
 
 save_folder = path_dict["sim_results"] + model_name + "/"
 if not os.path.exists(save_folder):
     os.makedirs(save_folder)
 
-# df_base_plot = df_base[(df_base["choice"] == 0) & (df_base["lagged_choice"] != 0)]
-# bunching_shares_base = compute_bunching_shares(df_base_plot, specs)
-# bunching_shares_base.to_csv(save_folder + "bunching_shares_base.csv", index=False)
+df_base_plot = df_base[(df_base["choice"] == 0) & (df_base["lagged_choice"] != 0)]
+bunching_shares_base = compute_bunching_shares(df_base_plot, specs)
+bunching_shares_base.to_csv(save_folder + "bunching_shares_base.csv", index=False)
 
-# del df_base_plot
-# del df_base
+del df_base_plot
+del df_base
 
 model_name_informed = model_name + "_inf"
 params_informed = pkl.load(
@@ -122,6 +123,7 @@ df_cf, _ = solve_and_simulate_scenario(
     sol_model_exists=load_unc_model,
     model_solution=model_solution_informed,  # use same solution as baseline
     util_type=util_type,
+    seed=seed,
 )
 df_cf = df_cf.reset_index()
 

@@ -10,6 +10,7 @@ path_dict = create_path_dict()
 specs = generate_derived_and_data_derived_specs(path_dict)
 
 
+seed = 123
 model_name = specs["model_name"]
 util_type = specs["util_type"]
 
@@ -57,6 +58,7 @@ if which_plots in ["p", "wc"]:
         specs=specs,
         params=params,
         model_name=model_name,
+        seed=seed,
         load_df=load_df,
         load_solution=load_solution,
         load_sol_model=load_sol_model,
@@ -69,6 +71,7 @@ if which_plots in ["a", "c", "wc"]:
         specs=specs,
         params=params,
         model_name=model_name,
+        seed=seed,
         load_df=load_df,
         load_solution=load_solution,
         load_sol_model=load_sol_model,
@@ -79,6 +82,7 @@ if which_plots in ["a", "c", "wc"]:
         specs=specs,
         params=params,
         model_name=model_name,
+        seed=seed,
         load_df=load_df,
         load_solution=load_solution,
         load_sol_model=load_sol_model,
@@ -100,6 +104,7 @@ if which_plots in ["a", "w", "wc"]:
         sim_col_name="assets_begin_of_period",
         obs_col_name="assets_begin_of_period",
         file_name="average_wealth",
+        seed=seed,
         load_df=load_df,
         load_solution=load_solution,
         load_sol_model=load_sol_model,
@@ -118,6 +123,7 @@ if which_plots in ["a", "s"]:
         specs,
         params,
         model_name,
+        seed=seed,
         load_df=load_df,
         load_solution=load_solution,
         load_sol_model=load_sol_model,
@@ -138,6 +144,7 @@ if which_plots in ["a", "i"]:
         params=params,
         model_name=model_name,
         file_name=None,
+        seed=seed,
         load_df=load_df,
         load_solution=load_solution,
         load_sol_model=load_sol_model,

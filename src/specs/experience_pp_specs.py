@@ -1,5 +1,3 @@
-import pickle as pkl
-
 import numpy as np
 import pandas as pd
 
@@ -144,9 +142,16 @@ def add_very_long_insured_specs(specs, path_dict):
 
 
 def create_pension_points_per_exp(path_dict, specs, load_precomputed=False):
+    pp_per_exp_path = path_dict["first_step_incomes"] + "pp_per_exp.csv"
     if load_precomputed:
-        pp_per_exp = pkl.load(
-            open(path_dict["first_step_incomes"] + "pp_per_exp.pkl", "rb")
+        df_pp = pd.read_csv(pp_per_exp_path)
+        n_sexes = df_pp["sex"].nunique()
+        n_edu_types = df_pp["education"].nunique()
+        n_exp = df_pp["experience"].nunique()
+        pp_per_exp = (
+            df_pp.sort_values(["sex", "education", "experience"])["pp_per_exp"]
+            .to_numpy()
+            .reshape(n_sexes, n_edu_types, n_exp)
         )
         specs["pp_for_exp_by_sex_edu"] = pp_per_exp
         return specs
@@ -196,6 +201,22 @@ def create_pension_points_per_exp(path_dict, specs, load_precomputed=False):
                     / mean_hourly_wage
                 )
 
-    pkl.dump(pp_per_exp, open(path_dict["first_step_incomes"] + "pp_per_exp.pkl", "wb"))
+    sex_idx, edu_idx, exp_idx = np.meshgrid(
+        np.arange(specs["n_sexes"]),
+        np.arange(specs["n_education_types"]),
+        exp_grid,
+        indexing="ij",
+    )
+    df_pp = pd.DataFrame(
+        {
+            "sex": sex_idx.ravel(),
+            "education": edu_idx.ravel(),
+            "experience": exp_idx.ravel(),
+            # Round away sub-1e-6 noise from re-solving, so reruns don't
+            # produce spurious diffs in the saved csv.
+            "pp_per_exp": np.round(pp_per_exp.ravel(), 6),
+        }
+    )
+    df_pp.to_csv(pp_per_exp_path, index=False)
     specs["pp_for_exp_by_sex_edu"] = pp_per_exp
     return specs

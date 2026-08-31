@@ -84,6 +84,9 @@ def solve_and_simulate_scenario(
         Which education level to simulate ("all", "low", "high")
     util_type : str, default "add" = additive separable
         Utility function specification
+    seed : int
+        Random seed for simulation draws. Required — must be set explicitly by
+        the caller (e.g. at the top of the run script), no implicit default.
 
     Returns
     -------
@@ -99,6 +102,11 @@ def solve_and_simulate_scenario(
     - Set df_exists=True to skip simulation if results already computed. !This will return None for model_solution!
     - Use df_exists=None for temporary simulations you don't want to save
     """
+    if seed is None:
+        raise ValueError(
+            "seed must be set explicitly by the caller (e.g. at the top of the "
+            "run script) — there is no implicit default."
+        )
     model_out_folder = get_model_results_path(path_dict, model_name)
 
     # Make intitial SRA only two digits after point
@@ -191,6 +199,11 @@ def simulate_scenario(
     initial_states=None,
     seed=None,
 ):
+    if seed is None:
+        raise ValueError(
+            "seed must be set explicitly by the caller (e.g. at the top of the "
+            "run script) — there is no implicit default."
+        )
     if initial_states is None:
         # Generate initial states from observed data
         initial_states = generate_start_states_from_obs(
@@ -199,11 +212,9 @@ def simulate_scenario(
             model_class=model_solved,
             inital_SRA=initial_SRA,
             only_informed=only_informed,
+            seed=seed,
         )
     specs = generate_derived_and_data_derived_specs(path_dict)
-
-    if seed is None:
-        seed = specs["seed"]
 
     df = model_solved.simulate(
         states_initial=initial_states,

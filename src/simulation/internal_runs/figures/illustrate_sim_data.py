@@ -17,6 +17,7 @@ def plot_sim_vars(
     params,
     model_name,
     sim_var,
+    seed,
     plot_dead=False,
     load_df=True,
     load_solution=True,
@@ -35,6 +36,7 @@ def plot_sim_vars(
         df_exists=load_df,
         solution_exists=load_solution,
         sol_model_exists=load_sol_model,
+        seed=seed,
     )
     data_sim = data_sim.reset_index()
 
@@ -68,6 +70,7 @@ def plott_all_incomes(
     specs,
     params,
     model_name,
+    seed,
     plot_dead=False,
     load_df=True,
     load_solution=True,
@@ -86,6 +89,7 @@ def plott_all_incomes(
         df_exists=load_df,
         solution_exists=load_solution,
         sol_model_exists=load_sol_model,
+        seed=seed,
     )
     data_sim = data_sim.reset_index()
 

@@ -30,6 +30,7 @@ from model_code.transform_data_from_model import create_informed_probability
 from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
+seed = 123
 model_name = "sra_partner_fake_fixed_women"
 params = pkl.load(
     open(paths_dict["struct_results"] + f"est_params_sra_partner_fixed.pkl", "rb")
@@ -91,6 +92,7 @@ data_sim, _ = solve_and_simulate_scenario(
     df_exists=LOAD_DF,
     solution_exists=LOAD_SOLUTION,
     sol_model_exists=LOAD_SOL_MODEL,
+    seed=seed,
 )
 
 # Assume unobserved informed, health and job offers

@@ -89,6 +89,7 @@ for sample_split in ["full", "informed", "uninformed"]:
                 sol_model_exists=load_unc_model,
                 model_solution=model_solution,
                 util_type=util_type,
+                seed=seed,
             )
             # df_post.to_csv(
             #     f"df_post_{reform_scenario}_{sample_split}.csv"
@@ -122,6 +123,7 @@ for sample_split in ["full", "informed", "uninformed"]:
             sol_model_exists=load_unc_model,
             model_solution=model_solution,
             util_type=util_type,
+            seed=seed,
         )
         # df_ante.to_csv(
         #     f"df_ante_{sample_split}.csv"

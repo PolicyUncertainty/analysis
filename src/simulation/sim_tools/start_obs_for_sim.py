@@ -13,7 +13,7 @@ from model_code.transform_data_from_model import load_scale_and_correct_data
 
 
 def generate_start_states_from_obs(
-    path_dict, params, inital_SRA, model_class=None, only_informed=False
+    path_dict, params, inital_SRA, seed, model_class=None, only_informed=False
 ):
     if model_class is None:
         from specs.derive_specs import generate_derived_and_data_derived_specs
@@ -55,7 +55,6 @@ def generate_start_states_from_obs(
     n_individuals = periods.shape[0]
     n_multiply_start_obs = model_specs["n_multiply_start_obs"]
 
-    seed = model_specs["seed"]
     np.random.seed(seed)
 
     # Draw jax keys

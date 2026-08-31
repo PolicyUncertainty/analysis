@@ -22,6 +22,9 @@
 # output -- rerun just the missing case with --case.
 
 module add cuda/12.4.1
+# The compute node's bare shell doesn't have git on PATH by default (unlike the
+# login node) -- this script needs it for the branch checkouts below.
+module add git/2.51.0
 
 DCEGM_DIR="../../submodules/dcegm"
 

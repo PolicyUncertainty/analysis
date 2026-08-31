@@ -165,8 +165,9 @@ def aggregate_comparison_baseline_cf(
     latex_lines.append(r"    \bottomrule")
     latex_lines.append(r"  \end{tabular}")
 
-    # Join lines
-    latex_table = "\n".join(latex_lines)
+    # Join lines (trailing newline so the pre-commit end-of-file hook has
+    # nothing to fix)
+    latex_table = "\n".join(latex_lines) + "\n"
 
     # Save to file
     table_dir = path_dict["simulation_tables"] + model_name + "/"

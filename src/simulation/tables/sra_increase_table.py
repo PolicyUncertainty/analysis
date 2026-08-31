@@ -146,7 +146,8 @@ def sra_increase_table(path_dict, model_name):
         latex_lines.append("    \\bottomrule")
         latex_lines.append("\\end{tabular}")
 
-        latex_table = "\n".join(latex_lines)
+        # Trailing newline so the pre-commit end-of-file hook has nothing to fix
+        latex_table = "\n".join(latex_lines) + "\n"
 
         # Save to file
         table_dir = path_dict["simulation_tables"] + model_name + "/"
@@ -208,7 +209,8 @@ def welfare_table(path_dict, model_name):
     latex_lines.append("    \\bottomrule")
     latex_lines.append("\\end{tabular}")
 
-    latex_table = "\n".join(latex_lines)
+    # Trailing newline so the pre-commit end-of-file hook has nothing to fix
+    latex_table = "\n".join(latex_lines) + "\n"
 
     # Save to file
     table_dir = path_dict["simulation_tables"] + model_name + "/"
@@ -309,7 +311,8 @@ def welfare_table_2(path_dict, model_name):
     latex_lines.append("    \\bottomrule")
     latex_lines.append("\\end{tabular}")
 
-    latex_table = "\n".join(latex_lines)
+    # Trailing newline so the pre-commit end-of-file hook has nothing to fix
+    latex_table = "\n".join(latex_lines) + "\n"
 
     # Save to file
     table_dir = path_dict["simulation_tables"] + model_name + "/"

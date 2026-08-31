@@ -68,8 +68,9 @@ def create_ex_post_ex_ante_table(path_dict, specs):
     latex_lines.append("\\bottomrule")
     latex_lines.append("\\end{tabular}")
 
-    # Join and save
-    latex_table = "\n".join(latex_lines)
+    # Join and save (trailing newline so the pre-commit end-of-file hook has
+    # nothing to fix)
+    latex_table = "\n".join(latex_lines) + "\n"
     # Save to file
     table_dir = path_dict["simulation_tables"] + model_name + "/"
     if not os.path.exists(table_dir):

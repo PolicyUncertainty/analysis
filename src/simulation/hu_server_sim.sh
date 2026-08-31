@@ -14,10 +14,6 @@
 
 module add cuda/12.4.1
 
-echo "env ready: $(date)"
-python -c "import sys; print('python ok', sys.version, flush=True)"
-python -c "import jax; print('jax devices:', jax.devices(), flush=True)"
-
 python run_cf_debias.py
 python run_ex_ante_ex_post.py
 python run_bunching.py

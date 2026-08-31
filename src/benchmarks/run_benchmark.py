@@ -78,13 +78,26 @@ CASES = [
 
 # =====================================================================================
 # Specification -- shared across all four cases, so they're comparable
+#
+# Memory warning: dcegm allocates the value/policy/endog_grid solution containers as
+# three (n_state_choices, n_continuous_state_combinations, n_total_wealth_grid)
+# float64 arrays *before* backward induction even starts. n_total_wealth_grid scales
+# ~linearly with n_assets_end_of_period (fues: n_assets_end_of_period * 1.2; dj:
+# len(assets_begin_of_period) + 1), so doubling either wealth grid roughly doubles
+# these containers. At sex_type/edu_type = "all"/"all" (the real production state
+# space) with n_assets_end_of_period=100, this OOM'd on an 80GB H100 -- just the
+# three containers needed ~47GB, before any working memory for the actual solve.
+# The production model itself uses a 28-point assets_end_of_period grid (see
+# model_code.wealth_and_budget.assets_grid.create_end_of_period_assets), which is
+# what these defaults are set close to. Increase deliberately, and expect roughly
+# proportional GPU memory growth.
 # =====================================================================================
 SPECS = {
     "sex_type": "all",
     "edu_type": "all",
     "seed": 123,
-    "n_assets_end_of_period": 100,
-    "n_assets_begin_of_period": 100,
+    "n_assets_end_of_period": 30,
+    "n_assets_begin_of_period": 30,
     "n_experience_points": 11,
     "max_wealth_raw": 10_000_000,
     "max_wealth_model_units": 1_000,
@@ -174,14 +187,25 @@ model = specify_model(
     experience_grid=experience_grid,
 )
 
-print(f"Solving case '{case['name']}' ...", flush=True)
+# dcegm builds fresh jax.jit(...) closures inside backward_induction/simulate on
+# every call, so the *first* call to .solve()/.simulate() always pays XLA
+# compilation cost on top of actual runtime. JAX's compilation cache keys on the
+# traced computation, not the wrapper object's identity, so a second call with the
+# same shapes/case still hits the cache and is fast -- do one untimed warm-up call
+# before each timed one, and only record the second.
+print(
+    f"Warm-up solve for case '{case['name']}' (includes JIT compilation)...", flush=True
+)
+warmup_solved = model.solve(params)
+jax.block_until_ready((warmup_solved.value, warmup_solved.policy))
+del warmup_solved
+
+print(f"Solving case '{case['name']}' (timed) ...", flush=True)
 solve_start = time.perf_counter()
 model_solved = model.solve(params)
 jax.block_until_ready((model_solved.value, model_solved.policy))
 solve_seconds = time.perf_counter() - solve_start
 print(f"Solved in {solve_seconds:.1f}s", flush=True)
-
-mem_after_solve = jax.local_devices()[0].memory_stats()
 
 # %%
 # Simulate
@@ -194,29 +218,27 @@ initial_states = generate_start_states_from_obs(
     only_informed=False,
 )
 
-print("Simulating ...", flush=True)
+
+def _simulate():
+    sim_df = model_solved.simulate(states_initial=initial_states, seed=SPECS["seed"])
+    sim_df = sim_df[sim_df["health"] != 3].copy()
+    sim_df.reset_index(inplace=True)  # "period"/"agent" start out as a MultiIndex
+    return sim_df
+
+
+print("Warm-up simulate (includes JIT compilation)...", flush=True)
+_simulate()
+
+print("Simulating (timed) ...", flush=True)
 simulate_start = time.perf_counter()
-df = model_solved.simulate(states_initial=initial_states, seed=SPECS["seed"])
-df = df[df["health"] != 3].copy()
-df.reset_index(inplace=True)  # "period"/"agent" start out as a MultiIndex
+df = _simulate()
 simulate_seconds = time.perf_counter() - simulate_start
 print(f"Simulated in {simulate_seconds:.1f}s", flush=True)
 
-mem_after_simulate = jax.local_devices()[0].memory_stats()
-
-
-def _peak_bytes(mem_stats):
-    return None if mem_stats is None else mem_stats.get("peak_bytes_in_use")
-
-
-peak_bytes_in_use = max(
-    (
-        b
-        for b in (_peak_bytes(mem_after_solve), _peak_bytes(mem_after_simulate))
-        if b is not None
-    ),
-    default=None,
-)
+# Peak memory across the whole case (warm-up + timed calls) -- a high-water mark
+# that JAX doesn't reset between calls, so one reading at the end covers both.
+mem_stats = jax.local_devices()[0].memory_stats()
+peak_bytes_in_use = None if mem_stats is None else mem_stats.get("peak_bytes_in_use")
 
 # %%
 # Per-period outcomes

@@ -1,0 +1,6 @@
+Case,dcegm Branch,Commit,Upper Envelope,Solve (s),Simulate (s),Total (s),Peak GPU Mem (GB),Device
+production,HEAD,170588e,fues,26.1,23.8,49.9,46.16,gpu (NVIDIA H100 NVL)
+new_fues,HEAD,170588e,fues,26.0,24.3,50.3,46.25,gpu (NVIDIA H100 NVL)
+new_dj,HEAD,170588e,druedahl_jorgensen,13.1,23.6,36.7,46.25,gpu (NVIDIA H100 NVL)
+main_dj,main,4e6f5cc,druedahl_jorgensen,17.3,23.5,40.8,50.28,gpu (NVIDIA H100 NVL)
+main_fues,main,4e6f5cc,fues,29.2,22.3,51.5,56.56,gpu (NVIDIA H100 NVL)

@@ -12,7 +12,7 @@ Only solve is timed (no simulate): for judging a grid's runtime/memory footprint
 solving is what matters, and simulating roughly doubles wall time for no extra cost
 information.
 
-No dcegm-branch bookkeeping -- settled in an earlier benchmark round, not revisited.
+No dcegm-branch bookkeeping here.
 
 Note on GPU memory: `peak_bytes_in_use` is a high-water mark that JAX never resets
 within a process, so later candidates' readings are contaminated by whatever the
@@ -105,19 +105,35 @@ def timed_solve(name, model):
 
 
 # %%
+# Appended to disk after each candidate (not batched to the end) so a crash
+# partway through doesn't lose the candidates that already timed successfully. A
+# failing candidate is logged and skipped rather than aborting the rest of the
+# sweep.
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+timing_csv_path = OUTPUT_DIR / "timing_by_candidate.csv"
+timing_csv_path.unlink(missing_ok=True)
+
+
+def save_row(row):
+    pd.DataFrame([row]).to_csv(
+        timing_csv_path, mode="a", header=not timing_csv_path.exists(), index=False
+    )
+
+
 rows = []
+failed_candidates = []
 
 fues_solved, solve_seconds, peak_bytes = timed_solve(
     "fues_production", build_model("fues")
 )
-rows.append(
-    {
-        "candidate": "fues_production",
-        "n_assets_begin_of_period": None,
-        "solve_seconds": solve_seconds,
-        "peak_gpu_mem_gb": None if peak_bytes is None else peak_bytes / 1e9,
-    }
-)
+row = {
+    "candidate": "fues_production",
+    "n_assets_begin_of_period": None,
+    "solve_seconds": solve_seconds,
+    "peak_gpu_mem_gb": None if peak_bytes is None else peak_bytes / 1e9,
+}
+rows.append(row)
+save_row(row)
 
 # fues's own solved endogenous grid gives the candidates their shape -- see
 # dj_candidates.py / check_dj_grid.py for why this and not assets_end_of_period.
@@ -126,23 +142,27 @@ del fues_solved
 
 for cand in CANDIDATE_SPECS:
     grid = build_candidate_grid(cand, endog_grid_sample)
-    dj_solved, solve_seconds, peak_bytes = timed_solve(
-        cand["name"], build_model("druedahl_jorgensen", grid)
-    )
-    rows.append(
-        {
-            "candidate": cand["name"],
-            "n_assets_begin_of_period": len(grid),
-            "solve_seconds": solve_seconds,
-            "peak_gpu_mem_gb": None if peak_bytes is None else peak_bytes / 1e9,
-        }
-    )
+    try:
+        dj_solved, solve_seconds, peak_bytes = timed_solve(
+            cand["name"], build_model("druedahl_jorgensen", grid)
+        )
+    except Exception as exc:  # noqa: BLE001 -- keep sweeping past a bad candidate
+        print(f"FAILED '{cand['name']}' (n_points={len(grid)}): {exc}", flush=True)
+        failed_candidates.append(cand["name"])
+        continue
+    row = {
+        "candidate": cand["name"],
+        "n_assets_begin_of_period": len(grid),
+        "solve_seconds": solve_seconds,
+        "peak_gpu_mem_gb": None if peak_bytes is None else peak_bytes / 1e9,
+    }
+    rows.append(row)
+    save_row(row)
     del dj_solved
 
 # %%
-OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-timing_df = pd.DataFrame(rows)
-timing_df.to_csv(OUTPUT_DIR / "timing_by_candidate.csv", index=False)
+if failed_candidates:
+    print(f"\nFailed candidates (skipped): {failed_candidates}")
 print("\n=== Solve time / peak GPU memory, by candidate ===")
-print(timing_df.to_string(index=False))
-print(f"\nSaved: {OUTPUT_DIR / 'timing_by_candidate.csv'}")
+print(pd.DataFrame(rows).to_string(index=False))
+print(f"\nSaved incrementally to: {timing_csv_path}")

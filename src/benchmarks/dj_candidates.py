@@ -15,14 +15,16 @@ grids.pool_positive_finite) -- not from assets_end_of_period:
 from benchmarks.grids import build_power_spaced_grid, build_quantile_grid
 
 CANDIDATE_SPECS = [
+    {"name": "quantile_10", "kind": "quantile", "n_points": 10},
     {"name": "quantile_15", "kind": "quantile", "n_points": 15},
-    {"name": "quantile_25", "kind": "quantile", "n_points": 25},
+    {"name": "quantile_20", "kind": "quantile", "n_points": 20},
+    {"name": "quantile_28", "kind": "quantile", "n_points": 28},
     {"name": "quantile_40", "kind": "quantile", "n_points": 40},
-    {"name": "quantile_60", "kind": "quantile", "n_points": 60},
+    {"name": "power3_10", "kind": "power", "n_points": 10, "power": 3.0},
     {"name": "power3_15", "kind": "power", "n_points": 15, "power": 3.0},
-    {"name": "power3_25", "kind": "power", "n_points": 25, "power": 3.0},
+    {"name": "power3_20", "kind": "power", "n_points": 20, "power": 3.0},
+    {"name": "power3_28", "kind": "power", "n_points": 28, "power": 3.0},
     {"name": "power3_40", "kind": "power", "n_points": 40, "power": 3.0},
-    {"name": "power3_60", "kind": "power", "n_points": 60, "power": 3.0},
 ]
 
 

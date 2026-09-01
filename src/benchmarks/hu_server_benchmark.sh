@@ -13,13 +13,13 @@
 
 # Runs the druedahl_jorgensen assets_begin_of_period grid sweep: check_dj_grid.py
 # (accuracy vs. the fues reference) and run_dj_grid_timing.py (solve time/memory for
-# the same candidate set, see dj_candidates.py). No dcegm-branch switching -- that
-# question was settled in an earlier benchmark round. Submit from src/benchmarks/.
+# the same candidate set, see dj_candidates.py). No dcegm-branch switching. Submit
+# from src/benchmarks/.
 #
 # Sizing --time: each script solves a fues reference plus one dj solve per candidate
-# (8 candidates); check_dj_grid.py additionally simulates every one of those. Earlier
-# rounds put a single solve+simulate on production-sized grids at ~50s, so ~9x that
-# for check_dj_grid.py (~7-8 min) plus ~9 solves for run_dj_grid_timing.py (~4 min)
+# (10 candidates); check_dj_grid.py additionally simulates every one of those. A
+# single solve+simulate on production-sized grids takes roughly 50s, so ~11x that
+# for check_dj_grid.py (~9 min) plus ~11 solves for run_dj_grid_timing.py (~5 min)
 # comfortably fits --time=1:00:00, but check a real log before shrinking it.
 
 module add cuda/12.4.1

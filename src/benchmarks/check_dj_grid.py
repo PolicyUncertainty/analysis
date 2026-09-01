@@ -12,9 +12,9 @@ this script uses:
     constraint, sparser where consumption is smooth -- so it's used as the *shape*
     source for the dj assets_begin_of_period candidates in dj_candidates.py.
     Deliberately NOT derived from assets_end_of_period: begin-of-period wealth and
-    end-of-period savings are different quantities (see the previous benchmark
-    round's docstring), so borrowing endog_grid's placement is a property of the
-    solved problem itself, not an assumption about a different grid.
+    end-of-period savings are different quantities, so borrowing endog_grid's
+    placement is a property of the solved problem itself, not an assumption about a
+    different grid.
   - `fues_sim_df`: fues simulated forward from real starting states/seed. This is
     the realistic distribution of (period, discrete state, wealth) combinations
     agents actually visit -- used to *weight* how much a candidate grid's error
@@ -34,13 +34,11 @@ errors concentrate near the credit constraint specifically.
 Caveat: choices/wealth feed into next period's state, so a candidate's simulated
 path can diverge from the fues reference after any early mismatch (compounding, not
 just local grid error). That's intentional here -- it's a direct closed-loop check
-of whether reported simulated moments would change, the same thing round 1/2 of this
-benchmark already compared. `choice_mismatch_rate` flags when a consumption-error
-number is confounded by a different discrete choice being taken, since consumption
-under different choices isn't the same object.
+of whether reported simulated moments would change. `choice_mismatch_rate` flags
+when a consumption-error number is confounded by a different discrete choice being
+taken, since consumption under different choices isn't the same object.
 
-No dcegm-branch bookkeeping -- that question was settled in an earlier benchmark
-round and isn't being revisited; this only cares about grid accuracy on whatever
+No dcegm-branch bookkeeping here; this only cares about grid accuracy on whatever
 dcegm version happens to be checked out.
 
 Results: src/benchmarks/output_dj_grid_check/error_by_candidate.csv and
@@ -152,21 +150,39 @@ fues_sim_df["wealth_decile"] = pd.qcut(
 )
 
 # %% Sweep dj candidates
+# Results are appended to disk after each candidate (not batched to the end) so a
+# crash partway through the sweep doesn't lose the candidates that already
+# finished. A failing candidate is logged and skipped rather than aborting the rest
+# of the sweep.
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+candidate_csv_path = OUTPUT_DIR / "error_by_candidate.csv"
+decile_csv_path = OUTPUT_DIR / "error_by_wealth_decile.csv"
+# Start each run from a clean file -- the header-on-first-write logic below assumes
+# these don't already exist from a previous run.
+candidate_csv_path.unlink(missing_ok=True)
+decile_csv_path.unlink(missing_ok=True)
+
 candidate_rows = []
 decile_rows = []
+failed_candidates = []
 for cand in CANDIDATE_SPECS:
     print(f"\n=== Candidate: {cand['name']} ===", flush=True)
     grid = build_candidate_grid(cand, endog_grid_sample)
 
-    dj_solved = build_model(
-        upper_envelope_method="druedahl_jorgensen",
-        assets_begin_of_period_grid=grid,
-    ).solve(params)
-    jax.block_until_ready((dj_solved.value, dj_solved.policy))
+    try:
+        dj_solved = build_model(
+            upper_envelope_method="druedahl_jorgensen",
+            assets_begin_of_period_grid=grid,
+        ).solve(params)
+        jax.block_until_ready((dj_solved.value, dj_solved.policy))
 
-    print(f"Simulating '{cand['name']}' ...", flush=True)
-    dj_sim_df = simulate_model(dj_solved, initial_states)
-    del dj_solved
+        print(f"Simulating '{cand['name']}' ...", flush=True)
+        dj_sim_df = simulate_model(dj_solved, initial_states)
+        del dj_solved
+    except Exception as exc:  # noqa: BLE001 -- keep sweeping past a bad candidate
+        print(f"FAILED '{cand['name']}' (n_points={len(grid)}): {exc}", flush=True)
+        failed_candidates.append(cand["name"])
+        continue
 
     paired = fues_sim_df[
         ["period", "agent", "consumption", "choice", "wealth_decile"]
@@ -178,38 +194,47 @@ for cand in CANDIDATE_SPECS:
     paired["abs_error"] = (paired["consumption_dj"] - paired["consumption_fues"]).abs()
     paired["choice_mismatch"] = paired["choice_dj"] != paired["choice_fues"]
 
-    candidate_rows.append(
+    candidate_row = {
+        "candidate": cand["name"],
+        "n_assets_begin_of_period": len(grid),
+        "mean_abs_consumption_error": paired["abs_error"].mean(),
+        "max_abs_consumption_error": paired["abs_error"].max(),
+        "choice_mismatch_rate": paired["choice_mismatch"].mean(),
+    }
+    candidate_rows.append(candidate_row)
+    pd.DataFrame([candidate_row]).to_csv(
+        candidate_csv_path,
+        mode="a",
+        header=not candidate_csv_path.exists(),
+        index=False,
+    )
+
+    decile_means = paired.groupby("wealth_decile")["abs_error"].mean()
+    new_decile_rows = [
         {
             "candidate": cand["name"],
-            "n_assets_begin_of_period": len(grid),
-            "mean_abs_consumption_error": paired["abs_error"].mean(),
-            "max_abs_consumption_error": paired["abs_error"].max(),
-            "choice_mismatch_rate": paired["choice_mismatch"].mean(),
+            "wealth_decile": decile,
+            "mean_abs_consumption_error": mean_abs_error,
         }
+        for decile, mean_abs_error in decile_means.items()
+    ]
+    decile_rows.extend(new_decile_rows)
+    pd.DataFrame(new_decile_rows).to_csv(
+        decile_csv_path, mode="a", header=not decile_csv_path.exists(), index=False
     )
-    decile_means = paired.groupby("wealth_decile")["abs_error"].mean()
-    for decile, mean_abs_error in decile_means.items():
-        decile_rows.append(
-            {
-                "candidate": cand["name"],
-                "wealth_decile": decile,
-                "mean_abs_consumption_error": mean_abs_error,
-            }
-        )
+    print(f"Saved '{cand['name']}' to {OUTPUT_DIR}", flush=True)
 
 # %%
-OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+if failed_candidates:
+    print(f"\nFailed candidates (skipped): {failed_candidates}")
 
-candidate_df = pd.DataFrame(candidate_rows)
-candidate_df.to_csv(OUTPUT_DIR / "error_by_candidate.csv", index=False)
 print("\n=== Error vs. fues reference, by candidate ===")
-print(candidate_df.to_string(index=False))
+print(pd.DataFrame(candidate_rows).to_string(index=False))
 
 decile_df = pd.DataFrame(decile_rows).pivot(
     index="wealth_decile", columns="candidate", values="mean_abs_consumption_error"
 )
-decile_df.to_csv(OUTPUT_DIR / "error_by_wealth_decile.csv")
 print("\n=== Mean abs consumption error by wealth decile (0 = poorest) ===")
 print(decile_df.to_string())
 
-print(f"\nSaved: {OUTPUT_DIR}")
+print(f"\nSaved incrementally to: {OUTPUT_DIR}")

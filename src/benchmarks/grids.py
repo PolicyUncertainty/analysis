@@ -30,3 +30,21 @@ def build_assets_begin_of_period_grid(n_points, max_wealth_model_units=1_000):
 def build_experience_grid(n_points):
     """Experience grid on [0, 1], matching the production grid's range."""
     return np.linspace(0.0, 1.0, n_points)
+
+
+def refine_grid(base_grid, n_subdivisions):
+    """Insert extra evenly-spaced points inside each interval of ``base_grid``,
+    preserving its (possibly non-uniform) breakpoint structure -- i.e. a grid
+    that's denser wherever ``base_grid`` already is, just more so.
+
+    ``n_subdivisions=1`` returns ``base_grid`` unchanged; ``n_subdivisions=2``
+    inserts one midpoint per interval (roughly doubles the point count);
+    ``n_subdivisions=3`` inserts two, etc.
+    """
+    base_grid = np.asarray(base_grid)
+    if n_subdivisions <= 1:
+        return base_grid
+    refined = [base_grid[0]]
+    for lo, hi in zip(base_grid[:-1], base_grid[1:]):
+        refined.extend(np.linspace(lo, hi, n_subdivisions + 1)[1:])
+    return np.array(refined)

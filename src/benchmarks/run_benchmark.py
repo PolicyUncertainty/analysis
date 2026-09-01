@@ -1,31 +1,46 @@
 # %%
-"""dcegm engine benchmark: solve + simulate our retirement model for three specs.
+"""dcegm engine benchmark: solve our retirement model for three specs.
 
-Round 1 (see output_v1_uniform_grid_branch_check/) already confirmed that the
-on-demand law-of-motion refactor on this dcegm branch reproduces `main` exactly, so
-branch comparison is settled -- this round always runs all three specs below in one
-process against whatever dcegm branch is currently checked out:
+Round 1 (see output_v1_uniform_grid_branch_check/) confirmed the on-demand
+law-of-motion refactor on this dcegm branch reproduces `main` exactly, so branch
+comparison is settled. Round 2 confirmed the grid-override plumbing in
+specify_model faithfully reproduces production when given production's grids.
+
+This is the grid-refinement round: only the *solve* is compared (no simulation) --
+for judging whether a grid is good enough, the solved value/policy functions are
+what matters; simulated behavior is a derived, noisier proxy for the same thing and
+roughly doubles runtime for no extra information here. All three specs are fully
+explicit (no None anywhere) so nothing depends on a hidden default:
 
   - "production": fues, production's real (non-uniform) assets_end_of_period and
-    experience grids, completely unmodified -- i.e. exactly what run_cf_debias.py
-    etc. use.
-  - "new_fues": fues, the same production grids passed explicitly through the
-    benchmark's override machinery -- a control that should match "production"
-    exactly, proving the override plumbing is faithful.
-  - "new_dj": druedahl_jorgensen, the same production assets_end_of_period/
-    experience grids, plus assets_begin_of_period built from the same (non-uniform)
-    points as assets_end_of_period, in model units -- so dj gets a comparably
-    well-resolved grid instead of round 1's uniform one (round 1 found fues/dj
-    diverging substantially, suspected to be partly because dj's uniform
-    assets_begin_of_period had zero resolution below ~323,000 raw currency, right
-    where the credit constraint bites).
+    experience grids -- the fixed, never-touched baseline we compare grid
+    experiments against going forward.
+  - "new_fues": fues, same grids as "production" right now -- this is the one to
+    start shrinking/repositioning in later rounds (keeping "production" pinned as
+    the reference).
+  - "new_dj": druedahl_jorgensen, same assets_end_of_period/experience grids as
+    "production", plus an explicit assets_begin_of_period grid (see note below).
 
 Both asset AND experience grids are production's hand-tuned ones on purpose: both
 are manually optimized, and experience in particular has large discontinuities
-around retirement timing that a uniform grid misses.
+around retirement timing that a uniform grid misses (see the very_long_insured
+threshold discussion -- production pins exact grid nodes there deliberately).
 
-Results are pickled to src/benchmarks/results/<spec_name>.pkl. Run make_table.py
-afterwards to build the comparison table.
+Note on assets_begin_of_period: dj evaluates directly on this grid, so it needs to
+be in the same units as everything else the model computes wealth in (i.e. divided
+by specs["wealth_unit"], exactly like assets_end_of_period is inside
+create_model_config_wo_informed) -- that division is a pure unit conversion, nothing
+more. It is a separate question whether assets_end_of_period's *values* are a good
+stand-in for assets_begin_of_period: they aren't derived from one another (end-of-
+period savings and begin-of-period wealth, after returns and income, are genuinely
+different quantities), we're just borrowing assets_end_of_period's non-uniform
+*point placement* (dense near the credit constraint) as the best available prior,
+since production never needed a begin-of-period grid before (fues doesn't use one).
+Flagging this as a simplification worth revisiting, not a derivation.
+
+Results (solved value/policy/endog_grid arrays + the grids used + timing/memory)
+are pickled to src/benchmarks/results/<spec_name>.pkl. Run make_table.py afterwards
+for the runtime/memory summary.
 """
 import os
 import pickle as pkl
@@ -33,16 +48,16 @@ import time
 from pathlib import Path
 
 import jax
-import pandas as pd
+import numpy as np
 
 jax.config.update("jax_enable_x64", True)
 
+from benchmarks.grids import refine_grid
 from benchmarks.provenance import get_dcegm_git_info
 from model_code.specify_model import specify_model
 from model_code.state_space.experience import define_experience_grid
 from model_code.wealth_and_budget.assets_grid import create_end_of_period_assets
 from set_paths import create_path_dict
-from simulation.sim_tools.start_obs_for_sim import generate_start_states_from_obs
 from specs.derive_specs import generate_derived_and_data_derived_specs
 
 BENCHMARK_DIR = Path(__file__).resolve().parent
@@ -55,7 +70,13 @@ EXPECTED_DCEGM_BRANCH = "remove_endog"
 SPECS = {
     "sex_type": "all",
     "edu_type": "all",
-    "seed": 123,
+    # dj evaluates directly on assets_begin_of_period (no endogenous refinement),
+    # so it needs more resolution than fues's endogenous grid to hit comparable
+    # accuracy. 1 = production's assets_end_of_period point placement as-is (27
+    # points); 2 = one extra point per interval (~53); 3 = two extra (~79); etc.
+    # See refine_grid() -- density stays concentrated wherever the production grid
+    # already is (near the credit constraint), just more so.
+    "assets_begin_of_period_subdivisions": 2,
 }
 
 # %%
@@ -94,30 +115,34 @@ params = pkl.load(
 production_assets_end_of_period_grid = create_end_of_period_assets()
 production_experience_grid = define_experience_grid(specs)
 
-# druedahl_jorgensen needs assets_begin_of_period explicitly and evaluates directly
-# on it (no endogenous refinement), so give it the same non-uniform points as
-# assets_end_of_period, converted to model units. dcegm prepends its own 0, so drop
-# ours to avoid a duplicate/degenerate first grid point.
+# See module docstring "Note on assets_begin_of_period" -- unit conversion is
+# necessary and unrelated to the (separate, unresolved) question of whether these
+# point locations are the right ones for begin-of-period wealth.
 assets_begin_of_period_grid = (
     production_assets_end_of_period_grid / specs["wealth_unit"]
 )
 assets_begin_of_period_grid = assets_begin_of_period_grid[
     assets_begin_of_period_grid > 0
 ]
+# dj evaluates directly on this grid (no endogenous refinement), so densify it --
+# see SPECS["assets_begin_of_period_subdivisions"].
+assets_begin_of_period_grid = refine_grid(
+    assets_begin_of_period_grid, SPECS["assets_begin_of_period_subdivisions"]
+)
 
 SPEC_LIST = [
     {
         "name": "production",
-        "upper_envelope_method": None,
-        "assets_end_of_period_grid": None,
-        "assets_begin_of_period_grid": None,
-        "experience_grid": None,
+        "upper_envelope_method": "fues",
+        "assets_end_of_period_grid": production_assets_end_of_period_grid,
+        "assets_begin_of_period_grid": None,  # not used by fues
+        "experience_grid": production_experience_grid,
     },
     {
         "name": "new_fues",
         "upper_envelope_method": "fues",
         "assets_end_of_period_grid": production_assets_end_of_period_grid,
-        "assets_begin_of_period_grid": None,
+        "assets_begin_of_period_grid": None,  # not used by fues
         "experience_grid": production_experience_grid,
     },
     {
@@ -154,11 +179,11 @@ def run_spec(spec):
         experience_grid=spec["experience_grid"],
     )
 
-    # dcegm builds fresh jax.jit(...) closures inside backward_induction/simulate on
-    # every call, so the *first* call always pays XLA compilation cost on top of
-    # actual runtime. JAX's compilation cache keys on the traced computation, not
-    # the wrapper object's identity, so a second call with the same shapes is fast
-    # -- do one untimed warm-up call before each timed one.
+    # dcegm builds fresh jax.jit(...) closures inside backward_induction on every
+    # call, so the *first* call always pays XLA compilation cost on top of actual
+    # runtime. JAX's compilation cache keys on the traced computation, not the
+    # wrapper object's identity, so a second call with the same shapes is fast --
+    # do one untimed warm-up call before the timed one.
     print(
         f"Warm-up solve for '{spec['name']}' (includes JIT compilation)...", flush=True
     )
@@ -173,62 +198,39 @@ def run_spec(spec):
     solve_seconds = time.perf_counter() - solve_start
     print(f"Solved in {solve_seconds:.1f}s", flush=True)
 
-    initial_states = generate_start_states_from_obs(
-        path_dict=path_dict,
-        params=params,
-        inital_SRA=67,
-        seed=SPECS["seed"],
-        model_class=model_solved,
-        only_informed=False,
-    )
-
-    def _simulate():
-        sim_df = model_solved.simulate(
-            states_initial=initial_states, seed=SPECS["seed"]
-        )
-        sim_df = sim_df[sim_df["health"] != 3].copy()
-        sim_df.reset_index(inplace=True)  # "period"/"agent" start out as a MultiIndex
-        return sim_df
-
-    print("Warm-up simulate (includes JIT compilation)...", flush=True)
-    _simulate()
-
-    print("Simulating (timed) ...", flush=True)
-    simulate_start = time.perf_counter()
-    df = _simulate()
-    simulate_seconds = time.perf_counter() - simulate_start
-    print(f"Simulated in {simulate_seconds:.1f}s", flush=True)
-
-    # Peak memory across the whole spec (warm-up + timed calls) -- a high-water
-    # mark that JAX doesn't reset between calls, so one reading at the end covers
-    # both.
+    # Peak memory across both calls (warm-up + timed) -- a high-water mark that
+    # JAX doesn't reset between calls, so one reading at the end covers both.
     mem_stats = jax.local_devices()[0].memory_stats()
     peak_bytes_in_use = (
         None if mem_stats is None else mem_stats.get("peak_bytes_in_use")
     )
 
-    per_period_consumption = df.groupby("period")["consumption"].mean()
-    per_period_choice_shares = pd.crosstab(
-        df["period"], df["choice"], normalize="index"
-    )
-
     result = {
         "case_name": spec["name"],
-        "upper_envelope_method": spec["upper_envelope_method"] or "fues",
+        "upper_envelope_method": spec["upper_envelope_method"],
         "dcegm_branch": dcegm_git_info["branch"],
         "dcegm_commit": dcegm_git_info["commit"],
         "dcegm_dirty": dcegm_git_info["dirty"],
         "specs": SPECS,
+        "assets_end_of_period_grid": np.asarray(spec["assets_end_of_period_grid"]),
+        "assets_begin_of_period_grid": (
+            None
+            if spec["assets_begin_of_period_grid"] is None
+            else np.asarray(spec["assets_begin_of_period_grid"])
+        ),
+        "experience_grid": np.asarray(spec["experience_grid"]),
         "solve_seconds": solve_seconds,
-        "simulate_seconds": simulate_seconds,
-        "total_seconds": solve_seconds + simulate_seconds,
         "jax_platform": jax.local_devices()[0].platform,
         "jax_device_kind": jax.local_devices()[0].device_kind,
         "peak_bytes_in_use": peak_bytes_in_use,
-        "n_agents_simulated": df["agent"].nunique(),
-        "per_period_consumption": per_period_consumption,
-        "per_period_choice_shares": per_period_choice_shares,
-        "choice_labels": specs["choice_labels"],
+        # The solution itself -- what this round is actually about.
+        "value": np.asarray(model_solved.value),
+        "policy": np.asarray(model_solved.policy),
+        "endog_grid": (
+            None
+            if model_solved.endog_grid is None
+            else np.asarray(model_solved.endog_grid)
+        ),
     }
 
     os.makedirs(RESULTS_DIR, exist_ok=True)

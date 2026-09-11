@@ -33,7 +33,6 @@ def specify_simple_model(
     """Generate model class."""
 
     SRA_belief_solution, specs = select_solution_transition_func_and_update_specs(
-        path_dict=path_dict,
         specs=specs,
         subj_unc=False,
         custom_resolution_age=None,

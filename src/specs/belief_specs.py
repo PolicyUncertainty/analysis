@@ -25,11 +25,6 @@ def add_sra_belief_specs(specs, path_dict):
     alpha_row = beliefs_params_df[beliefs_params_df["parameter"] == "alpha"]
     sigma_sq_row = beliefs_params_df[beliefs_params_df["parameter"] == "sigma_sq"]
 
-    if len(alpha_row) == 0 or len(sigma_sq_row) == 0:
-        raise ValueError(
-            "Required SRA belief parameters (alpha, sigma_sq) not found in beliefs_parameters.csv"
-        )
-
     specs["sra_belief_alpha"] = float(alpha_row["estimate"].iloc[0])
     specs["sra_belief_sigma_sq"] = float(sigma_sq_row["estimate"].iloc[0])
 

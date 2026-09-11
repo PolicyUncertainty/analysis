@@ -15,7 +15,6 @@ from model_code.policy_processes.step_function import (
 
 
 def select_solution_transition_func_and_update_specs(
-    path_dict,
     specs,
     subj_unc,
     custom_resolution_age,
@@ -33,7 +32,7 @@ def select_solution_transition_func_and_update_specs(
             specs["resolution_age"] = custom_resolution_age
 
         # Assign subjective expectation funtion and output.
-        specs = update_specs_exp_ret_age_trans_mat(specs=specs, path_dict=path_dict)
+        specs = update_specs_exp_ret_age_trans_mat(specs=specs)
         transition_func_sol = expected_SRA_with_resolution
     else:
         # If there is no subjective uncertainty and a resolution age is given, we return an error.

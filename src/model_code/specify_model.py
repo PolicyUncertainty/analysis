@@ -115,7 +115,6 @@ def specify_model(
     """
 
     SRA_belief_solution, specs = select_solution_transition_func_and_update_specs(
-        path_dict=path_dict,
         specs=specs,
         subj_unc=subj_unc,
         custom_resolution_age=custom_resolution_age,
@@ -257,7 +256,6 @@ def define_alternative_sim_specifications(
         stochastic_states_transitions["informed"] = degenerate_informed_transition
 
         transition_func_sim, specs = select_solution_transition_func_and_update_specs(
-            path_dict=path_dict,
             specs=specs,
             subj_unc=subj_unc,
             custom_resolution_age=custom_resolution_age,

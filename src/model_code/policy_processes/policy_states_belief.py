@@ -63,7 +63,7 @@ def check_for_longer_retirement_and_degenerate_vector(
     return trans_vector
 
 
-def update_specs_exp_ret_age_trans_mat(specs, path_dict=None):
+def update_specs_exp_ret_age_trans_mat(specs):
     """Update specs with SRA expectation transition matrix.
 
     Args:

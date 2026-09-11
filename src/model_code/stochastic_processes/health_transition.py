@@ -7,6 +7,7 @@ from model_code.stochastic_processes.math_funcs import logit_formula
 def health_transition(
     sex, health, education, period, params, choice, lagged_choice, model_specs
 ):
+    """Probability vector of health states next period."""
     trans_mat = model_specs["health_trans_mat"]
     prob_vector = trans_mat[sex, education, period, health, :]
 

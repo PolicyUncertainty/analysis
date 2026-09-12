@@ -1,0 +1,2 @@
+sex_type,edu_type,n_state_choices,n_cont_combos,n_total_wealth_grid,n_containers,stochastic_fanout,max_batch_size,container_gb,peak_gpu_gb,fits_23gb_slice,solve_seconds,device
+men,low,306108,12,33,3,168,10968,2.909,,,66.71,cpu

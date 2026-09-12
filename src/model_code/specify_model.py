@@ -57,8 +57,10 @@ def create_model_config_wo_informed(
 
     if sex_type == "all":
         batch_seps = [44]  # Full model
+        batch_mode = "largest_block"
     else:
-        batch_seps = [33, 43, 44]  # Fastest model single
+        batch_seps = [29, 43, 44]  # Fastest model single
+        batch_mode = ["largest_block", "largest_block", "period_max", "largest_block"]
 
     continuous_states = {
         "assets_end_of_period": assets_end_of_period_grid / specs["wealth_unit"],
@@ -69,6 +71,7 @@ def create_model_config_wo_informed(
 
     model_config = {
         "min_period_batch_segments": batch_seps,
+        "batch_mode": batch_mode,
         "n_periods": specs["n_periods"],
         "choices": np.arange(specs["n_choices"], dtype=int),
         "deterministic_states": {

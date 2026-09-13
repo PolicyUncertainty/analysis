@@ -34,7 +34,6 @@ jax.config.update("jax_enable_x64", True)
 from benchmarks.dj_candidates import CANDIDATE_SPECS, build_candidate_grid
 from benchmarks.grids import pool_positive_finite
 from model_code.specify_model import specify_model
-from model_code.state_space.experience import define_experience_grid
 from model_code.wealth_and_budget.assets_grid import create_end_of_period_assets
 from set_paths import create_path_dict
 from specs.derive_specs import generate_derived_and_data_derived_specs
@@ -60,7 +59,6 @@ params = pkl.load(
 )
 
 production_assets_end_of_period_grid = create_end_of_period_assets()
-production_experience_grid = define_experience_grid(specs)
 
 
 def build_model(upper_envelope_method, assets_begin_of_period_grid=None):
@@ -82,7 +80,6 @@ def build_model(upper_envelope_method, assets_begin_of_period_grid=None):
         upper_envelope_method=upper_envelope_method,
         assets_end_of_period_grid=production_assets_end_of_period_grid,
         assets_begin_of_period_grid=assets_begin_of_period_grid,
-        experience_grid=production_experience_grid,
     )
 
 

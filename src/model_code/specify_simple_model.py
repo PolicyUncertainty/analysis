@@ -11,7 +11,6 @@ from model_code.policy_processes.informed_state_transition import (
 from model_code.policy_processes.select_policy_belief import (
     select_solution_transition_func_and_update_specs,
 )
-from model_code.state_space.experience import define_experience_grid
 from model_code.state_space.state_space import create_state_space_functions
 from model_code.stochastic_processes.health_transition import health_transition
 from model_code.stochastic_processes.job_offers import job_offer_process_transition
@@ -41,7 +40,9 @@ def specify_simple_model(
     # Create savings grid
     savings_grid = create_end_of_period_assets()
 
-    experience_grid = define_experience_grid(specs)
+    # Single-sex model (sex fixed to 0 below), so the men row of the sex-specific
+    # experience grid is a plain static array here -- no continuous_grid_functions.
+    experience_grid = specs["experience_grid_by_sex"][0]
 
     model_config = {
         "min_period_batch_segments": [33, 44],

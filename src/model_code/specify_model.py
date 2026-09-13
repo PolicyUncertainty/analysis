@@ -13,7 +13,7 @@ from model_code.policy_processes.select_policy_belief import (
     select_sim_policy_function_and_update_specs,
     select_solution_transition_func_and_update_specs,
 )
-from model_code.state_space.experience import define_experience_grid
+from model_code.state_space.experience import experience_grid_from_state
 from model_code.state_space.state_space import create_state_space_functions
 from model_code.stochastic_processes.health_transition import health_transition
 from model_code.stochastic_processes.job_offers import job_offer_process_transition
@@ -33,22 +33,19 @@ def create_model_config_wo_informed(
     upper_envelope_method=None,
     assets_end_of_period_grid=None,
     assets_begin_of_period_grid=None,
-    experience_grid=None,
 ):
     """Build the model config.
 
-    The four ``*_grid``/``upper_envelope_method`` arguments default to the production
+    The ``*_grid``/``upper_envelope_method`` arguments default to the production
     grids/upper-envelope method and only exist so benchmarks (see
-    ``src/benchmarks/``) can override them without duplicating this function.
+    ``src/benchmarks/``) can override them without duplicating this function. The
+    experience grid is sex-specific and supplied via ``continuous_grid_functions``
+    (``experience_grid_from_state``), not as a static array here.
 
     """
     # Create savings grid
     if assets_end_of_period_grid is None:
         assets_end_of_period_grid = create_end_of_period_assets()
-
-    # Experience grid
-    if experience_grid is None:
-        experience_grid = define_experience_grid(specs)
 
     sex_grid, edu_grid = specify_type_grids(
         sex_type=sex_type,
@@ -64,7 +61,9 @@ def create_model_config_wo_informed(
 
     continuous_states = {
         "assets_end_of_period": assets_end_of_period_grid / specs["wealth_unit"],
-        "experience": experience_grid,
+        # Supplied per state-choice by continuous_grid_functions (sex-specific),
+        # so no static array is declared here.
+        "experience": None,
     }
     if assets_begin_of_period_grid is not None:
         continuous_states["assets_begin_of_period"] = assets_begin_of_period_grid
@@ -108,7 +107,6 @@ def specify_model(
     upper_envelope_method=None,
     assets_end_of_period_grid=None,
     assets_begin_of_period_grid=None,
-    experience_grid=None,
 ):
     """Generate model class.
 
@@ -137,7 +135,6 @@ def specify_model(
         upper_envelope_method=upper_envelope_method,
         assets_end_of_period_grid=assets_end_of_period_grid,
         assets_begin_of_period_grid=assets_begin_of_period_grid,
-        experience_grid=experience_grid,
     )
 
     if sim_specs is not None:
@@ -195,6 +192,7 @@ def specify_model(
             budget_constraint=budget_constraint,
             shock_functions=shock_function_dict(),
             stochastic_states_transitions=stochastic_states_transitions,
+            continuous_grid_functions={"experience": experience_grid_from_state},
             model_load_path=model_path,
             alternative_sim_specifications=alternative_sim_specifications,
             debug_info=debug_info,
@@ -211,6 +209,7 @@ def specify_model(
             budget_constraint=budget_constraint,
             shock_functions=shock_function_dict(),
             stochastic_states_transitions=stochastic_states_transitions,
+            continuous_grid_functions={"experience": experience_grid_from_state},
             model_save_path=model_path,
             alternative_sim_specifications=alternative_sim_specifications,
             debug_info=debug_info,

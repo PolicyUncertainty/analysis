@@ -4,6 +4,7 @@ import pandas as pd
 from model_code.pension_system.experience_stock import (
     calc_pension_points_for_experience,
 )
+from model_code.state_space.experience import build_experience_grid_by_sex
 from model_code.wealth_and_budget.wages import calc_hourly_wage
 
 
@@ -12,6 +13,7 @@ def add_experience_and_pp_specs(specs, path_dict, load_precomputed):
     specs = create_max_experience_working(path_dict, specs, load_precomputed)
     specs = create_pension_points_per_exp(path_dict, specs, load_precomputed)
     specs = create_max_pension_point(path_dict, specs, load_precomputed)
+    specs["experience_grid_by_sex"] = build_experience_grid_by_sex(specs)
     return specs
 
 

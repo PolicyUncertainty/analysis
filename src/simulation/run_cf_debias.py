@@ -77,8 +77,6 @@ df_base, model_solved_unc = solve_and_simulate_scenario(
     model_solution=model_solution,
     util_type=util_type,
     seed=seed,
-    chunked_solve=True,
-    chunked_parallel=True,
 )
 df_base = df_base.reset_index()
 

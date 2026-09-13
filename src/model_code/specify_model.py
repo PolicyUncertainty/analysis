@@ -303,11 +303,21 @@ def specify_and_solve_model(
     edu_type="all",
     util_type="add",
     debug_info=None,
+    chunked_solve=False,
+    chunked_parallel=False,
 ):
     """Specify and solve model.
 
     Also includes possibility to save solutions.
     men_only=False,
+
+    When ``chunked_solve`` is True (only valid for sex_type='all', edu_type='all'),
+    the full solve is assembled from the four per-type (sex x edu) sub-model solves via
+    ``dcegm.get_solve_from_small_models`` instead of one pooled solve, so the full
+    solution never has to be solved on device in one piece. Loading a stored solution
+    needs no solve and is unaffected. ``chunked_parallel`` dispatches the sub-model
+    solves across ``jax.devices()`` (one block per device) rather than one at a time;
+    it only helps with several devices and holds several blocks in memory at once.
 
     """
 
@@ -339,6 +349,46 @@ def specify_and_solve_model(
         sol_name = "sol_no_subj_unc.pkl"
 
     solution_file = solve_folder["solution"] + sol_name
+
+    if chunked_solve and load_solution is not True:
+        if not (sex_type == "all" and edu_type == "all"):
+            raise ValueError(
+                "chunked_solve=True is only valid for sex_type='all' and "
+                "edu_type='all'; it assembles the full solve from per-type sub-models."
+            )
+        sub_models = [
+            specify_model(
+                path_dict=path_dict,
+                specs=generate_derived_and_data_derived_specs(path_dict),
+                subj_unc=subj_unc,
+                custom_resolution_age=custom_resolution_age,
+                load_model=load_model,
+                sim_specs=sim_specs,
+                simulate_expectations=simulate_expectations,
+                debug_info=debug_info,
+                sex_type=sub_sex_type,
+                edu_type=sub_edu_type,
+                util_type=util_type,
+            )
+            for sub_sex_type in ("men", "women")
+            for sub_edu_type in ("low", "high")
+        ]
+        solve_from_small_models = dcegm.get_solve_from_small_models(
+            small_models=sub_models,
+            parallel=chunked_parallel,
+            big_model=model,
+        )
+        model_solved = solve_from_small_models(params)
+        if load_solution is False:
+            pickle.dump(
+                {
+                    "value": model_solved.value,
+                    "policy": model_solved.policy,
+                    "endog_grid": model_solved.endog_grid,
+                },
+                open(solution_file, "wb"),
+            )
+        return model_solved
 
     if load_solution is None:
         model_solved = model.solve(params)

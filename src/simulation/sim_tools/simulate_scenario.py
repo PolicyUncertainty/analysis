@@ -35,6 +35,8 @@ def solve_and_simulate_scenario(
     edu_type="all",
     util_type="add",
     seed=None,
+    chunked_solve=False,
+    chunked_parallel=False,
 ):
     """
     Solve and simulate a policy scenario for the retirement model.
@@ -151,6 +153,8 @@ def solve_and_simulate_scenario(
             sex_type=sex_type,
             edu_type=edu_type,
             util_type=util_type,
+            chunked_solve=chunked_solve,
+            chunked_parallel=chunked_parallel,
         )
     else:
         # Use existing model solution but update sim specs

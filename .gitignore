@@ -67,3 +67,6 @@ output/tables/simulation/old/
 # scratch (rerun run_benchmark.py); only src/benchmarks/output/ (make_table.py's
 # comparison tables) is tracked.
 src/benchmarks/results/
+
+# Large diagnostic outputs (regenerable via benchmarks/inspect_experience_discontinuities.py)
+src/benchmarks/output_experience_discontinuities/sol_cache.pkl

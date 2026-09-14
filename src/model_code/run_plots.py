@@ -25,30 +25,35 @@ save_plots = True
 # Set plot defaults
 set_plot_defaults()
 
+# Retirement-system feature plots (specs only, no solved model needed)
+from model_code.plots.retirement_system_plots import plot_all_retirement_system
+
+plot_all_retirement_system(path_dict, specs, show=show_plots, save=save_plots)
+
 # from model_code.wealth_and_budget.tax_and_ssc import calc_inc_tax_for_single_income
 # incomes = np.arange(0, 300_000, 2000)
 # plt.plot(incomes, calc_inc_tax_for_single_income(incomes, specs))
-
-# Load model parameters - try estimated params first, fall back to start params
-model_name = specs["model_name"]
-estimated_params_path = path_dict["struct_results"] + f"est_params_{model_name}.pkl"
-
-if os.path.exists(estimated_params_path):
-    params = pickle.load(open(estimated_params_path, "rb"))
-    params_source = "estimated"
-else:
-    print(f"WARNING: Estimated parameters file '{estimated_params_path}' not found.")
-    print(
-        "Using start values from estimation/struct_estimation/start_params_and_bounds/start_params.yaml"
-    )
-
-    # Load start parameters
-    params = load_and_set_start_params(path_dict)
-    params_source = "start_values"
-
-generate_print_func(
-    params.keys(), specs, print_men_examples=True, print_women_examples=True
-)(params)
+#
+# # Load model parameters - try estimated params first, fall back to start params
+# model_name = specs["model_name"]
+# estimated_params_path = path_dict["struct_results"] + f"est_params_{model_name}.pkl"
+#
+# if os.path.exists(estimated_params_path):
+#     params = pickle.load(open(estimated_params_path, "rb"))
+#     params_source = "estimated"
+# else:
+#     print(f"WARNING: Estimated parameters file '{estimated_params_path}' not found.")
+#     print(
+#         "Using start values from estimation/struct_estimation/start_params_and_bounds/start_params.yaml"
+#     )
+#
+#     # Load start parameters
+#     params = load_and_set_start_params(path_dict)
+#     params_source = "start_values"
+#
+# generate_print_func(
+#     params.keys(), specs, print_men_examples=True, print_women_examples=True
+# )(params)
 
 from model_code.plots.plot_sollution import plot_ret_solution, plot_solution
 from model_code.plots.retirement_probs_illustration import (

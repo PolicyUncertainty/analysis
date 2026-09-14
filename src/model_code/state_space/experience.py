@@ -6,43 +6,24 @@ from model_code.pension_system.experience_stock import (
     calc_pension_points_for_experience,
 )
 
-# Fixed skeleton on the normalized [0, 1] experience axis, shared by every type.
-# 5 anchors pin the boundary and end spacing; 5 filler candidates fill the
-# interior. Two fillers are dropped per sex to make room for that sex's
-# very-long-insured bracket, so every sex ends up with the same 10 nodes.
-_EXPERIENCE_ANCHORS = np.array([0.0, 0.15, 0.85, 0.9, 1.0])
-_EXPERIENCE_FILLERS = np.array([0.3, 0.4, 0.5, 0.6, 0.7])
 
+def define_experience_grid(specs):
+    # Experience grid
+    experience_grid = np.linspace(0, 1, 11)
+    # Add very long insured threshold to experience grid and sort
+    experience_grid = np.append(experience_grid, specs["very_long_insured_grid_points"])
+    # Delete 0.5
+    experience_grid = experience_grid[
+        (~np.isclose(experience_grid, 0.5))
+        & ~np.isclose(experience_grid, 0.6)
+        & (~np.isclose(experience_grid, 0))
+    ]
 
-def build_experience_grid_by_sex(specs):
-    """Per-sex experience grid on [0, 1]: one row per sex, all equal length.
-
-    Splices in only that sex's very-long-insured bracket (the eligibility
-    threshold and the half-year below it, the tightest bracket the half-year
-    experience quantum allows) and drops the interior fillers nearest to it, so
-    the discontinuity nodes replace crowding uniform nodes instead of clustering.
-    Built once in NumPy at spec-build time; the grid dcegm evaluates per
-    state-choice at solve time is ``experience_grid_from_state`` below.
-    """
-    vli = np.asarray(specs["very_long_insured_grid_points"])
-    n_sexes = specs["n_sexes"]
-
-    rows = []
-    for sex in range(n_sexes):
-        bracket = np.sort(vli[sex::n_sexes])  # this sex's [threshold - 0.5, threshold]
-        dist = np.min(np.abs(_EXPERIENCE_FILLERS[:, None] - bracket[None, :]), axis=1)
-        kept = _EXPERIENCE_FILLERS[np.sort(np.argsort(dist)[len(bracket) :])]
-        rows.append(np.unique(np.concatenate([_EXPERIENCE_ANCHORS, kept, bracket])))
-
-    lengths = {len(row) for row in rows}
-    if len(lengths) != 1:
-        raise ValueError(f"Per-sex experience grids differ in length: {lengths}")
-    return jnp.asarray(np.stack(rows))
-
-
-def experience_grid_from_state(sex, model_specs):
-    """Grid dcegm evaluates per state-choice (jit-safe gather on ``sex``)."""
-    return model_specs["experience_grid_by_sex"][sex]
+    experience_grid = np.sort(experience_grid)
+    experience_grid[0] = 0
+    experience_grid[1] = 0.15
+    experience_grid[-3] = 0.85
+    return jnp.asarray(experience_grid)
 
 
 def get_next_period_experience(

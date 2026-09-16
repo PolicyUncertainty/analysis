@@ -11,7 +11,6 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
     load_and_set_start_params,
 )
 from model_code.specify_model import specify_and_solve_model, specify_model
-from model_code.specify_simple_model import specify_and_solve_simple_model
 from set_paths import create_path_dict
 from set_styles import set_plot_defaults
 from specs.derive_specs import generate_derived_and_data_derived_specs

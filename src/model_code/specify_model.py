@@ -35,7 +35,7 @@ def create_model_config_wo_informed(
     """Build the model config.
 
     ``upper_envelope_method`` defaults to the production upper-envelope method
-    and only exists so benchmarks (see ``src/benchmarks/``) can override it
+    and only exists so callers can override it (e.g. an upper-envelope benchmark)
     without duplicating this function. The assets and experience grids are not
     configurable here: ``assets_end_of_period`` is always the production savings
     grid, and ``experience`` is always supplied per state-choice via
@@ -102,8 +102,8 @@ def specify_model(
 ):
     """Generate model class.
 
-    ``upper_envelope_method`` lets benchmarks (see ``src/benchmarks/``) override
-    the production upper-envelope method; leave it at ``None`` for normal use.
+    ``upper_envelope_method`` lets a caller override the production upper-envelope
+    method; leave it at ``None`` for normal use.
 
     """
 
@@ -172,7 +172,8 @@ def specify_model(
         + f"model_{sex_type}_{edu_type}_{era_append}_{exp_append}.pkl"
     )
 
-    # Period-specific experience grid, per state-choice.
+    # Sex- and age-specific experience grid, per state-choice (retired states
+    # reuse the same axis as pension points; see experience_grid_from_state).
     continuous_grid_functions = {"experience": experience_grid_from_state}
 
     if load_model:

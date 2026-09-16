@@ -2,8 +2,7 @@
 state and its grid.
 
 Every figure is a 2x2 grid of panels over (sex x education) -- the four solved
-types -- except the normalization map, which is sex-only (education does not enter
-the [0,1] rescaling or the grid). The panel selects `sex` and `education`; the
+types. The panel selects `sex` and `education`; the
 text below lists what else each sweep holds fixed and what each line varies. The
 sweeps call the same pension functions the solver uses (`experience_stock.py`), so
 the plots show the actual model, not a stylized redraw.
@@ -34,8 +33,8 @@ Plot 1 -- `plot_pension_points_from_experience`
     - solid: pension points vs experience (`calc_pension_points_form_experience`).
       Convex because wages rise with experience; the small slope changes are the
       piecewise-linear interpolation between integer-year nodes.
-    - scatter: the type's experience-grid nodes, de-normalized to years, showing
-      where the grid samples this curve.
+    - scatter: the sex's production experience-grid nodes (real years, at the last
+      working period), showing where the grid samples this curve.
 
 Plot 2 -- `plot_pension_vs_retirement_age`
   Pension points a person WOULD receive if they retired fresh at each age,
@@ -89,20 +88,7 @@ Plot 4 -- `plot_informed_vs_uninformed_deductions`
     - "Uninformed": penalty = estimated `uninformed_ERP[education]` -- steeper, and
       education-specific, which is why the two education columns differ.
 
-Plot 5 -- `plot_experience_normalization_map`
-  The deterministic map between raw experience years and the normalized [0,1] axis
-  the model solves on, and where the grid nodes land. Sex-only (2 panels):
-  education does not affect the normalization or the grid.
-  x-axis: experience years, 0 .. 59. y-axis: normalized experience = years / 59.
-  Held fixed: nothing stochastic -- this is a fixed linear rescaling (scale =
-  max_exps_period_working[-1]).
-  Lines / marks:
-    - solid: the identity map years -> years/scale.
-    - vertical + horizontal lines: the sex-specific VLI threshold on both axes.
-    - scatter: the sex's experience-grid nodes, showing the cluster placed around
-      that sex's threshold.
-
-Plot 6 -- `plot_pension_by_retirement_timing`
+Plot 5 -- `plot_pension_by_retirement_timing`
   Pension points vs current experience at a FIXED current age (default 60), with
   one line per retirement-timing choice. Shows the timing trade-off directly:
   working longer raises experience AND changes the retirement age (smaller
@@ -135,7 +121,6 @@ from model_code.pension_system.experience_stock import (
     calc_pension_points_for_experience,
     calc_pension_points_form_experience,
 )
-from model_code.state_space.experience import define_experience_grid
 from set_styles import get_figsize, set_colors
 
 SEX_LABELS = ["Men", "Women"]
@@ -150,9 +135,17 @@ def _sra_policy_state(specs):
     return int(round((_ILLUSTRATIVE_SRA - specs["min_SRA"]) / specs["SRA_grid_size"]))
 
 
-def _norm_scale(specs):
-    """The experience-year value that maps to normalized experience 1.0."""
+def _axis_max(specs):
+    """Max experience (years) for the plot x-axis range."""
     return float(specs["max_exps_period_working"][-1])
+
+
+def _grid_nodes(specs, sex):
+    """Production experience-grid nodes (real years) for this sex at the last working
+    period -- the widest grid, spanning the full attainable range with the VLI
+    bracket. The grid is per (sex, period) and does not depend on education."""
+    period = specs["max_ret_age"] - specs["start_age"]
+    return np.asarray(specs["experience_grid_working_by_sex_period"])[sex, period]
 
 
 def _save(fig, path_dict, filename_base):
@@ -212,7 +205,7 @@ def _sweep(specs, experience_values, period_values, sex, education, health):
 # =====================================================================================
 def plot_pension_points_from_experience(path_dict, specs, show=False, save=False):
     colors, _ = set_colors()
-    scale = _norm_scale(specs)
+    scale = _axis_max(specs)
     exp_years = np.linspace(0.0, scale, 400)
 
     fig, axes = plt.subplots(2, 2, figsize=get_figsize(2, 2))
@@ -231,8 +224,8 @@ def plot_pension_points_from_experience(path_dict, specs, show=False, save=False
             )
             ax.plot(exp_years, pp, color=colors[0])
 
-            # Grid nodes (de-normalized to experience years) as ticks along the curve.
-            nodes = np.asarray(define_experience_grid(specs)) * scale
+            # Production experience-grid nodes (real years) as ticks along the curve.
+            nodes = _grid_nodes(specs, sex)
             node_pp = np.interp(nodes, exp_years, pp)
             ax.scatter(
                 nodes, node_pp, color=colors[3], zorder=3, s=40, label="Grid nodes"
@@ -309,7 +302,7 @@ def plot_pension_vs_retirement_age(path_dict, specs, show=False, save=False):
 # =====================================================================================
 def plot_vli_discontinuity(path_dict, specs, show=False, save=False):
     colors, _ = set_colors()
-    scale = _norm_scale(specs)
+    scale = _axis_max(specs)
     start_age = specs["start_age"]
     # The binding VLI decision: retire at SRA - 2 (the deduction-free VLI age).
     ret_age = _ILLUSTRATIVE_SRA - 2
@@ -341,8 +334,8 @@ def plot_vli_discontinuity(path_dict, specs, show=False, save=False):
             )
             ax.axvline(threshold, color=colors[3], linewidth=2, label="VLI threshold")
 
-            # Experience-grid nodes for this sex (de-normalized).
-            nodes = np.asarray(define_experience_grid(specs)) * scale
+            # Production experience-grid nodes for this sex (real years).
+            nodes = _grid_nodes(specs, sex)
             for node in nodes:
                 ax.axvline(node, color="grey", linewidth=1, linestyle=":", alpha=0.7)
             ax.plot([], [], color="grey", linestyle=":", label="Grid nodes")
@@ -402,48 +395,7 @@ def plot_informed_vs_uninformed_deductions(path_dict, specs, show=False, save=Fa
 
 
 # =====================================================================================
-# 5. Experience normalization map (sex-only)
-# =====================================================================================
-def plot_experience_normalization_map(path_dict, specs, show=False, save=False):
-    colors, _ = set_colors()
-    scale = _norm_scale(specs)
-    exp_years = np.linspace(0.0, scale, 200)
-
-    fig, axes = plt.subplots(1, 2, figsize=get_figsize(1, 2))
-    fig.suptitle(
-        "Experience normalization to [0, 1] and grid placement (education-invariant)",
-        fontweight="bold",
-    )
-
-    for sex in range(specs["n_sexes"]):
-        ax = axes[sex]
-        ax.plot(exp_years, exp_years / scale, color=colors[0])
-
-        threshold = float(specs["experience_threshold_very_long_insured"][sex])
-        ax.axvline(threshold, color=colors[3], linewidth=2, label="VLI threshold")
-        ax.axhline(threshold / scale, color=colors[3], linewidth=1, alpha=0.5)
-
-        nodes_norm = np.asarray(define_experience_grid(specs))
-        ax.scatter(
-            nodes_norm * scale,
-            nodes_norm,
-            color=colors[1],
-            zorder=3,
-            s=40,
-            label="Grid nodes",
-        )
-
-        ax.set_title(SEX_LABELS[sex])
-        ax.set_xlabel("Experience (years)")
-        ax.set_ylabel("Normalized experience")
-        ax.grid(True, alpha=0.3)
-        ax.legend()
-
-    _finish(fig, path_dict, "retirement_experience_normalization", show, save)
-
-
-# =====================================================================================
-# 6. Pension points by retirement timing at a fixed current age
+# 5. Pension points by retirement timing at a fixed current age
 # =====================================================================================
 def plot_pension_by_retirement_timing(
     path_dict,
@@ -519,5 +471,4 @@ def plot_all_retirement_system(path_dict, specs, show=False, save=True):
     plot_pension_vs_retirement_age(path_dict, specs, show=show, save=save)
     plot_vli_discontinuity(path_dict, specs, show=show, save=save)
     plot_informed_vs_uninformed_deductions(path_dict, specs, show=show, save=save)
-    plot_experience_normalization_map(path_dict, specs, show=show, save=save)
     plot_pension_by_retirement_timing(path_dict, specs, show=show, save=save)

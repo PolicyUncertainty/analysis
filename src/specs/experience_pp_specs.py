@@ -4,7 +4,10 @@ import pandas as pd
 from model_code.pension_system.experience_stock import (
     calc_pension_points_for_experience,
 )
-from model_code.state_space.experience import build_experience_grid_by_period
+from model_code.state_space.experience_grids import (
+    build_experience_grid_cap_by_period,
+    build_experience_grid_working_by_sex_period,
+)
 from model_code.wealth_and_budget.wages import calc_hourly_wage
 
 
@@ -13,7 +16,13 @@ def add_experience_and_pp_specs(specs, path_dict, load_precomputed):
     specs = create_max_experience_working(path_dict, specs, load_precomputed)
     specs = create_pension_points_per_exp(path_dict, specs, load_precomputed)
     specs = create_max_pension_point(path_dict, specs, load_precomputed)
-    specs["experience_grid_by_period"] = build_experience_grid_by_period(specs)
+    working_table = build_experience_grid_working_by_sex_period(specs)
+    specs["experience_grid_working_by_sex_period"] = working_table
+    # Per-period cap of the working axis; retired states rescale pension points
+    # onto it (see scale_experience_years).
+    specs["experience_grid_cap_by_period"] = build_experience_grid_cap_by_period(
+        working_table
+    )
     return specs
 
 
@@ -74,50 +83,47 @@ def create_max_pension_point(path_dict, specs, load_precomputed=False):
 
 
 def create_max_experience_working(path_dict, specs, load_precomputed=False):
-    # Initial experience
+    # Sex-specific max initial experience (max of experience - period over working
+    # observations of that sex). Caps each sex's experience grid at
+    # max_exp_diff_period_working[sex] + period (see
+    # build_experience_grid_working_by_sex_period).
+    exp_diff_path = path_dict["first_step_incomes"] + "max_exp_diff_period_working.txt"
+    max_exp_diff_by_sex = None
     if load_precomputed:
-        max_exp_diff_period_working = np.loadtxt(
-            path_dict["first_step_incomes"] + "max_exp_diff_period_working.txt",
-            dtype=float,
-        )
-    else:
-        # max initial experience
+        loaded = np.atleast_1d(np.loadtxt(exp_diff_path, dtype=float))
+        # Older runs stored a single pooled value; recompute if the stored shape
+        # is not per-sex.
+        if loaded.shape[0] == specs["n_sexes"]:
+            max_exp_diff_by_sex = loaded
+    if max_exp_diff_by_sex is None:
         data_decision = pd.read_csv(path_dict["struct_est_sample"])
         df_working = data_decision[data_decision["lagged_choice"] != 0]
-        max_exp_diff_period_working = float(
-            (df_working["experience"] - df_working["period"]).max()
+        exp_diff = df_working["experience"] - df_working["period"]
+        max_exp_diff_by_sex = (
+            df_working.assign(exp_diff=exp_diff)
+            .groupby("sex")["exp_diff"]
+            .max()
+            .reindex(range(specs["n_sexes"]))
+            .to_numpy(dtype=float)
         )
+        np.savetxt(exp_diff_path, max_exp_diff_by_sex)
 
-        np.savetxt(
-            path_dict["first_step_incomes"] + "max_exp_diff_period_working.txt",
-            [max_exp_diff_period_working],
-        )
-        # Calculate the maximum experience one can have in a working state.
-    max_exp_working = (
-        specs["max_ret_age"] - specs["start_age"] + max_exp_diff_period_working
-    )
+    # Pooled envelope (max over sexes) drives the pension-point normalization range
+    # (max_exps_period_working); the sex-specific caps drive the grids themselves.
+    max_exp_diff_pooled = float(max_exp_diff_by_sex.max())
+    # Calculate the maximum experience one can have in a working state.
+    max_exp_working = specs["max_ret_age"] - specs["start_age"] + max_exp_diff_pooled
     # Now span for each period the maximum experience for working periods.
-    max_exps_period_working = np.arange(
-        max_exp_diff_period_working, max_exp_working + 2
-    )
+    max_exps_period_working = np.arange(max_exp_diff_pooled, max_exp_working + 2)
     # Lowest period very long insured
     min_period_very_long_insured = specs["min_SRA"] - 2 - specs["start_age"]
     # Assign the maximum experience for all the periods one can choose very long insured
     max_exps_period_working[min_period_very_long_insured:] = max_exps_period_working[-1]
 
-    # And now create sex specific interpolation grid points for experience exact at very long insured threshold
-    exp_thresholds_very_long_insured = specs["experience_threshold_very_long_insured"]
-    exp_thresholds_not_very_long_insured = exp_thresholds_very_long_insured - 0.5
-    # Now duplicate the grid point
-    all_exp_thresholds_very_long_insured = np.append(
-        exp_thresholds_very_long_insured,
-        exp_thresholds_not_very_long_insured,
-    )
-
-    specs["very_long_insured_grid_points"] = (
-        all_exp_thresholds_very_long_insured / max_exps_period_working[-1]
-    )
     specs["max_exps_period_working"] = max_exps_period_working
+    # Per-sex max initial experience (n_sexes,): caps each sex's working grid at
+    # max_exp_diff_period_working[sex] + period (see build_experience_grid_working_by_sex_period).
+    specs["max_exp_diff_period_working"] = max_exp_diff_by_sex
     return specs
 
 

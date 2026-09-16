@@ -61,6 +61,7 @@ def plot_ret_experience_multi(path_dict, specs, show=False, save=False):
                         exp = scale_experience_years(
                             experience_years=exp_years,
                             period=periods - 1,
+                            sex=sex,
                             is_retired=np.zeros_like(periods, dtype=bool),
                             model_specs=specs,
                         )
@@ -81,6 +82,7 @@ def plot_ret_experience_multi(path_dict, specs, show=False, save=False):
                         exp_years_next = construct_experience_years(
                             float_experience=exp_next,
                             period=periods,
+                            sex=sex,
                             is_retired=np.ones_like(periods, dtype=bool),
                             model_specs=specs,
                         )
@@ -183,6 +185,7 @@ def plot_ret_experience_combined(path_dict, specs, show=False, save=False):
                         exp = scale_experience_years(
                             experience_years=exp_years,
                             period=periods - 1,
+                            sex=sex,
                             is_retired=np.zeros_like(periods, dtype=bool),
                             model_specs=specs,
                         )
@@ -202,6 +205,7 @@ def plot_ret_experience_combined(path_dict, specs, show=False, save=False):
                         exp_years_next = construct_experience_years(
                             float_experience=exp_next,
                             period=periods,
+                            sex=sex,
                             is_retired=np.ones_like(periods, dtype=bool),
                             model_specs=specs,
                         )

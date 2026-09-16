@@ -32,6 +32,7 @@ def budget_constraint(
     experience_years = construct_experience_years(
         float_experience=experience,
         period=period,
+        sex=sex,
         is_retired=lagged_choice == 0,
         model_specs=model_specs,
     )

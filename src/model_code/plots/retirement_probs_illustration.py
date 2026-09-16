@@ -50,6 +50,7 @@ def plot_ret_probs_for_state(model_solved, specs, path_dict):
         exp_grid_float = scale_experience_years(
             experience_years=exp_years,
             period=periods,
+            sex=sex,
             is_retired=False,
             model_specs=specs,
         )
@@ -130,6 +131,7 @@ def plot_work_probs_for_state(model_solved, specs, path_dict):
     exp_grid_float = scale_experience_years(
         experience_years=exp_grid,
         period=periods,
+        sex=sex,
         is_retired=False,
         model_specs=specs,
     )

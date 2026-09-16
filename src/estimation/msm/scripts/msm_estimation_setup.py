@@ -242,6 +242,7 @@ def load_and_prep_data(path_dict):
     data_decision["experience"] = scale_experience_years(
         period=data_decision["period"].values,
         experience_years=data_decision["experience"].values,
+        sex=data_decision["sex"].values,
         is_retired=data_decision["lagged_choice"].values == 0,
         model_specs=specs,
     )

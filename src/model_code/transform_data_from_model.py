@@ -137,6 +137,7 @@ def load_scale_and_correct_data(path_dict, model_class):
     data_decision["experience"] = scale_experience_years(
         experience_years=data_decision["experience"].values,
         period=data_decision["period"].values,
+        sex=data_decision["sex"].values,
         is_retired=data_decision["lagged_choice"].values == 0,
         model_specs=model_specs,
     )

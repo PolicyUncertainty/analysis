@@ -57,6 +57,7 @@ def plot_ret_solution(model_solved, specs, path_dict):
             exp_years = construct_experience_years(
                 float_experience=exp_float,
                 period=states["period"],
+                sex=states["sex"],
                 is_retired=states["lagged_choice"] == 0,
                 model_specs=specs,
             )
@@ -125,6 +126,7 @@ def plot_solution(model_solved, specs, path_dict):
         exp_years = construct_experience_years(
             float_experience=exp_float,
             period=period,
+            sex=states["sex"],
             is_retired=states["lagged_choice"] == 0,
             model_specs=specs,
         )

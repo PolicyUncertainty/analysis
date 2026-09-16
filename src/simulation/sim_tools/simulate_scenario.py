@@ -299,6 +299,7 @@ def _transform_states_into_variables(df, specs):
     df.loc[:, "exp_years"] = construct_experience_years(
         float_experience=df["experience"].values,
         period=df["period"].values,
+        sex=df["sex"].values,
         is_retired=df["lagged_choice"].values == 0,
         model_specs=specs,
     )

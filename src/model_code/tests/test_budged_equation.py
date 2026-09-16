@@ -62,6 +62,7 @@ def test_budget_unemployed(
     exp_cont = scale_experience_years(
         experience_years=2,
         period=period,
+        sex=sex,
         is_retired=False,
         model_specs=specs_internal,
     )
@@ -187,6 +188,7 @@ def test_budget_worker(
     exp_cont = scale_experience_years(
         experience_years=experience,
         period=period,
+        sex=sex,
         is_retired=False,
         model_specs=specs_internal,
     )
@@ -319,6 +321,7 @@ def test_retiree(
     scaled_pension_point_last_period = scale_experience_years(
         experience_years=exp,
         period=period - 1,
+        sex=sex,
         is_retired=True,
         model_specs=specs_internal,
     )
@@ -458,6 +461,7 @@ def test_fresh_retiree(
     exp_cont_prev = scale_experience_years(
         experience_years=exp,
         period=period - 1,
+        sex=sex,
         is_retired=False,
         model_specs=specs_internal,
     )
@@ -628,6 +632,7 @@ def test_informed(
     exp_cont_prev = scale_experience_years(
         experience_years=45,
         period=period - 1,
+        sex=0,
         is_retired=False,
         model_specs=specs_internal,
     )

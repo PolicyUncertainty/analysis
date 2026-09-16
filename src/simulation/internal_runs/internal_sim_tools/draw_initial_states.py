@@ -38,6 +38,7 @@ def draw_initial_states(
     states_dict["experience"] = scale_experience_years(
         period=start_period_data["period"].values,
         experience_years=start_period_data["experience"].values,
+        sex=start_period_data["sex"].values,
         is_retired=start_period_data["lagged_choice"].values == 0,
         model_specs=specs,
     )
@@ -184,6 +185,7 @@ def draw_initial_states(
     exp_agents = scale_experience_years(
         experience_years=exp_agents,
         period=jnp.zeros_like(exp_agents, dtype=int),
+        sex=jnp.asarray(sex_agents, dtype=int),
         is_retired=lagged_choice == 0,
         model_specs=specs,
     )

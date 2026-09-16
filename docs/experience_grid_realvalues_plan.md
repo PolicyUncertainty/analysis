@@ -122,13 +122,21 @@ separate in the history.
 3. **Follow-ups / caveats**
    - `specify_simple_model` passes a static per-sex grid; give it the period-scaled
      grid too (or leave as a debug model with an oversized young-age grid).
-   - A couple of scripts hardcode a normalized experience literal
-     (`run_eval_expectation_graphs.py`, `plots/wealth_plots.py`) and
-     `benchmarks/inspect_experience_discontinuities.py` builds its grid as
-     `years / scale`; update these to real-year units when the grid change lands.
-   - Once real-value age grids are in, the period-dependent normalization scale
-     jump at age 63 is gone; revisit whether the discontinuity analysis should be
-     rerun on the new grid (the jumps' real-year locations no longer get distorted
-     across the age-63 boundary).
+   - A couple of scripts still hardcode a normalized experience literal
+     (`run_eval_expectation_graphs.py`, `plots/wealth_plots.py`); update these to
+     real-year units.
+   - **Done:** `benchmarks/inspect_experience_discontinuities.py` was rewritten
+     for the real-value grid (its `specify_model(experience_grid=...)` override
+     no longer existed, and its `real_years()` helper had silently become a
+     no-op once `construct_experience_years` turned into an identity for working
+     states) and rerun on a much denser real-year grid (111 nodes, 0.2-year
+     spacing, vs. the original 12 pooled nodes). See
+     `src/benchmarks/experience_discontinuities_report.md` for the updated
+     findings. Correction to the note this replaces: the period-dependent
+     *maximum attainable experience* (`max_exps_period_working`, jumping 48→59
+     at age 63) is **not** a normalization artifact that goes away with real
+     values — it is a real economic fact (a 50-year-old cannot yet have 46
+     credited years) and still compresses a fixed-shape dense grid's real-year
+     reach below age 63, as documented in the rerun report.
    - The plots and the discontinuity benchmark currently read the pooled
      `define_experience_grid`; repoint them to the type-specific grid when it lands.

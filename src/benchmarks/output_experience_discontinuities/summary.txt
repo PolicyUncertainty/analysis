@@ -1,24 +1,71 @@
-Type: men, low edu. SRA=67 (policy_state=8), subj_unc=False. Threshold=42.0 model-yr. Norm scale (max)=59.
-Dense band (model-years): 25..45.
-Grid (model-years): [0.0, 12.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0, 31.0, 32.0, 33.0, 34.0, 35.0, 36.0, 37.0, 38.0, 39.0, 40.0, 41.0, 42.0, 43.0, 44.0, 45.0, 50.0, 59.0]
+Type: men, low edu. SRA=69 (policy_state=16), subj_unc=False. Threshold=42.0 model-yr.
+Fine band (1y spacing): 30..60 (31 nodes). Coarse filler (2y spacing): 0..28 (15 nodes). Total target years: 46.
+Grid construction: absolute real-year targets clipped per period to that period's own attainable max (no rescaling) -- every attainable target year sits at its exact requested real-year location at every age; only years beyond a period's own cap collapse harmlessly near the top and are excluded from the jump search via the `genuine` mask.
+Attainable target years by age (# genuine nodes / cap):
+  age  50: cap= 36.0y, genuine nodes=22
+  age  51: cap= 37.0y, genuine nodes=23
+  age  52: cap= 38.0y, genuine nodes=24
+  age  53: cap= 39.0y, genuine nodes=25
+  age  54: cap= 40.0y, genuine nodes=26
+  age  55: cap= 41.0y, genuine nodes=27
+  age  56: cap= 42.0y, genuine nodes=28
+  age  57: cap= 43.0y, genuine nodes=29
+  age  58: cap= 44.0y, genuine nodes=30
+  age  59: cap= 45.0y, genuine nodes=31
+  age  60: cap= 46.0y, genuine nodes=32
+  age  61: cap= 47.0y, genuine nodes=33
+  age  62: cap= 48.0y, genuine nodes=34
+  age  63: cap= 59.0y, genuine nodes=45
+  age  64: cap= 59.0y, genuine nodes=45
+  age  65: cap= 59.0y, genuine nodes=45
+  age  66: cap= 59.0y, genuine nodes=45
+  age  67: cap= 59.0y, genuine nodes=45
+  age  68: cap= 59.0y, genuine nodes=45
+  age  69: cap= 59.0y, genuine nodes=45
 
 Largest in-band experience jump in the FULL-TIME value, by age:
   age | jump @ exp-years | jump size | at band edge?
-   50 |          15.56 |   +0.2564 | YES
-   51 |          15.99 |   +0.2634 | YES
-   52 |          16.42 |   +0.2704 | YES
-   53 |          16.86 |   +0.2770 | YES
-   54 |          17.29 |   +0.2832 | YES
-   55 |          17.72 |   +0.2890 | YES
-   56 |          18.15 |   +0.2944 | YES
-   57 |          18.58 |   +0.2996 | YES
-   58 |          19.02 |   +0.3051 | YES
-   59 |          19.45 |   +0.3111 | YES
-   60 |          19.88 |   +0.3177 | YES
-   61 |          20.31 |   +0.3247 | YES
-   62 |          20.75 |   +0.3319 | YES
-   63 |          39.50 |   +0.7148 | no
-   64 |          40.50 |   +0.9289 | no
-   65 |          40.50 |   +0.6412 | no
-   66 |          25.50 |   +0.3787 | YES
-   67 |          40.50 |   +0.3165 | no
+   50 |          30.50 |   +0.2989 | YES
+   51 |          30.50 |   +0.3012 | YES
+   52 |          30.50 |   +0.3024 | YES
+   53 |          30.50 |   +0.3039 | YES
+   54 |          30.50 |   +0.3081 | YES
+   55 |          30.50 |   +0.3119 | YES
+   56 |          30.50 |   +0.3174 | YES
+   57 |          31.50 |   +0.3171 | no
+   58 |          30.50 |   +0.3176 | YES
+   59 |          30.50 |   +0.3238 | YES
+   60 |          30.50 |   +0.3328 | YES
+   61 |          30.50 |   +0.3400 | YES
+   62 |          30.50 |   +0.3395 | YES
+   63 |          37.50 |   +0.3587 | no
+   64 |          38.50 |   +0.4326 | no
+   65 |          39.50 |   +0.6129 | no
+   66 |          40.50 |   +0.9164 | no
+   67 |          40.50 |   +0.6130 | no
+   68 |          30.50 |   +0.3010 | YES
+   69 |          31.50 |   +0.3035 | no
+
+Largest jump in the ALREADY-RETIRED continuation value (lagged_choice=0), over the whole attainable pension-points range, by age:
+  age | jump @ pension points | jump size | at band edge?
+   50 |               10.37 |   +5.1124 | no
+   51 |               10.09 |   +4.8620 | no
+   52 |                9.83 |   +4.6210 | no
+   53 |                9.57 |   +4.3891 | no
+   54 |                9.33 |   +4.1659 | no
+   55 |                9.11 |   +3.9512 | no
+   56 |                8.89 |   +3.7447 | no
+   57 |                8.68 |   +3.5461 | no
+   58 |                8.49 |   +3.3557 | no
+   59 |                8.30 |   +3.1736 | no
+   60 |                8.12 |   +2.9999 | no
+   61 |                7.94 |   +2.8345 | no
+   62 |                7.78 |   +2.6768 | no
+   63 |               10.55 |   +2.1128 | no
+   64 |               10.55 |   +2.0326 | no
+   65 |               10.55 |   +1.9533 | no
+   66 |               10.55 |   +1.8748 | no
+   67 |               10.55 |   +1.7970 | no
+   68 |               10.55 |   +1.7201 | no
+   69 |               10.55 |   +1.6438 | no
+  NOTE: these are all located in the low-pension-points COARSE (2y) band (~4-14 pension points), not a discontinuity -- spot-checked pointwise: consecutive coarse-cell raw ΔV changes smoothly (e.g. age 50: 5.05, 5.11, 4.88, ...), consistent with steep-but-smooth concave curvature near very low pension points (diminishing marginal utility), exaggerated by the wide 2-year cells there -- not a kink. No discontinuity was found anywhere in the already-retired continuation value on this grid.

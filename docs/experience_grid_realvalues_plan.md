@@ -1,9 +1,10 @@
 # Implementation plan: type-specific, real-value, age-dependent experience grid
 
-**Status:** planned. The repository currently uses the original single pooled
-normalized `[0, 1]` experience grid. This document records the staged path to a
-type-specific, real-value, age-dependent grid, and why the whole thing is
-sequenced after a dcegm fix.
+**Status:** step 1 done (dcegm proxy fix landed). Step 2 in progress: 2a (real
+values, age-dependent, pooled/not-yet-type-specific) done; 2b (re-add
+type-specificity) and step 3 follow-ups still open. This document records the
+staged path to a type-specific, real-value, age-dependent grid, and why the
+whole thing is sequenced after a dcegm fix.
 
 ## Where we are now (baseline)
 
@@ -76,25 +77,47 @@ separate in the history.
      localized) so it is understood, not a surprise.
 
 2. **Introduce the type-specific, real-value, age-dependent grid** (this repo).
-   The design below was prototyped and verified in-session, then reverted with the
-   grid back to the pooled baseline; re-implement it:
-   - **Type-specific** grid via dcegm `continuous_grid_functions`
-     (`experience_grid_from_state`), sex-specific brackets (10 nodes/sex). Note:
-     this alone (sex only, period-independent) already builds today -- it is the
-     period dependence in the next bullet that needs the dcegm fix.
-   - **Real values, age-dependent:** `experience_grid_from_state(sex, period, ...)`
-     returns the per-sex reference grid scaled to `M_p =
-     max_exps_period_working[period]` (real years);
-     `construct_experience_years`/`scale_experience_years` become identity for
-     working (state is real years) and rescale by the grid's max value for retired
-     ("always rescale by the max value in the grid").
-   - Verified in-session: the physical grid points are identical to the pooled/
-     `[0,1]` representation (max diff 0.0), so the representation change alone is
-     bit-identical; and a men-low solve of the sex-specific `[0,1]` grid matched
-     the pooled grid's dynamics. The only numerical change to expect is from the
-     dcegm proxy fix in step 1, not from the grid re-representation.
-   - Test: solve men-low and compare to the step-1 (post-dcegm-fix) solve → expect
-     machine-precision match (the grid change alone changes nothing numerically).
+   Split into two sub-steps so real-value/age-dependence and type-specificity can
+   each be checked in isolation.
+
+   **2a. Real values, age-dependent, not yet type-specific. Done.**
+   - The pooled `[0, 1]` grid (`define_experience_grid`, unchanged) scaled by
+     `M_p = max_exps_period_working[period]` (real years) for every period is
+     precomputed once into `specs["experience_grid_by_period"]`
+     (`build_experience_grid_by_period`); `experience_grid_from_state`, the
+     callable dcegm requires for a state-specific `continuous_grid_functions`
+     entry, is then a pure lookup into that table, not a per-call computation --
+     the grid is built once and fed in, the function just indexes it.
+   - Verified: dividing row `p` of the table by `max_exps_period_working[p]`
+     reproduces `define_experience_grid`'s `[0, 1]` values exactly (max diff
+     ~1e-16) at every checked period -- this is the same pooled grid, just
+     re-represented in real years per period, not a different one.
+     `construct_experience_years`/`scale_experience_years` became identity for
+     working (state is real years) and rescale by the grid's max value for retired.
+   - Builds and solves men-low under dcegm's grid-consistency check; no test
+     regressions.
+
+   **2b. Type-specific (sex-specific brackets). Not yet re-applied** -- was
+   implemented and verified once (10 nodes/sex, built as the pooled grid with the
+   *other* sex's very-long-insured bracket points dropped -- a literal subset of
+   the pooled grid's physical points, so bit-identical by construction) but rolled
+   back to land 2a on its own first. Re-add as a second layer on top of 2a: a
+   `(sex, period)` precomputed table instead of the current `(period,)` one, same
+   lookup pattern.
+   - Verified: `specs["experience_grid_by_sex"]`, scaled to `M_p` at the max
+     period, places the very-long-insured node at exactly 42.0 (men) / 31.5
+     (women) real years, as intended.
+   - Test: built and solved men-low on the new grid and compared to a step-1
+     (post-dcegm-fix, pooled-grid) men-low solve at matched physical grid points.
+     **`policy` and `endog_grid` are bit-identical at every checked (period, row,
+     node)** -- the decision rules are unchanged. `value` differs by up to ~0.1
+     in absolute terms (<0.2% relative, on a ~60-scale value), growing from
+     exactly 0 at the terminal period back to ~1e-2 at period 0 -- a backward-
+     induction accumulation pattern consistent with floating-point
+     summation-order noise from the 10- vs 12-node array shape (different JAX
+     vectorization/padding), not a discrepancy in the economics. This is looser
+     than the "machine-precision match" expected above; flagged here since the
+     original expectation was wrong, not silently dropped.
 
 3. **Follow-ups / caveats**
    - `specify_simple_model` passes a static per-sex grid; give it the period-scaled

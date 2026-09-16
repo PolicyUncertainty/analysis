@@ -26,6 +26,37 @@ def define_experience_grid(specs):
     return jnp.asarray(experience_grid)
 
 
+def build_experience_grid_by_period(specs):
+    """Real-year, age-dependent experience grid for every period (not sex-specific yet).
+
+    Built once here in NumPy, at spec-build time -- ``experience_grid_from_state``
+    below is then a pure lookup into this table, not a per-call computation. The
+    pooled ``[0, 1]`` grid (``define_experience_grid``) is multiplied by that
+    period's real-year cap to get real credited-years, so dividing row ``p`` back
+    by ``max_exps_period_working[p]`` reproduces ``define_experience_grid`` exactly
+    -- this is a re-representation of the same pooled grid, not a different one.
+    Periods past the working range (already-retired periods) reuse the last
+    (maximum) entry, matching ``jnp.take(..., mode="clip")``'s behavior elsewhere
+    in this module.
+    """
+    pooled_grid = np.asarray(define_experience_grid(specs))  # (n_nodes,), [0, 1]
+    max_exps_period_working = np.asarray(specs["max_exps_period_working"])
+    grid_max_by_period = np.take(
+        max_exps_period_working, np.arange(specs["n_periods"]), mode="clip"
+    )  # (n_periods,)
+    table = grid_max_by_period[:, None] * pooled_grid[None, :]
+    return jnp.asarray(table)  # (n_periods, n_nodes)
+
+
+def experience_grid_from_state(period, model_specs):
+    """Real-year, age-dependent experience grid dcegm evaluates per state-choice.
+
+    Pure lookup into the precomputed ``experience_grid_by_period`` table (see
+    ``build_experience_grid_by_period``).
+    """
+    return model_specs["experience_grid_by_period"][period]
+
+
 def get_next_period_experience(
     period,
     lagged_choice,
@@ -84,7 +115,8 @@ def get_next_period_experience(
         fresh_retired, on_true=pension_points, on_false=exp_years_this_period
     )
 
-    # Now scale between 0 and 1
+    # Store on the grid's scale: real years while working, pension points
+    # rescaled onto the grid's real-year range while retired.
     exp_scaled = scale_experience_years(
         experience_years=exp_years_this_period,
         period=period,
@@ -98,23 +130,25 @@ def get_next_period_experience(
 
 
 def construct_experience_years(float_experience, period, is_retired, model_specs):
-    """Experience and period can also be arrays. We have to distinguish between the phases where individals are already
-    longer retired or not."""
-    # If period is past the last working period, then we take the maximum experience
-    scale_not_retired = jnp.take(
-        model_specs["max_exps_period_working"], period, mode="clip"
-    )
-    scale_retired = model_specs["max_pp_retirement"]
-    scale = is_retired * scale_retired + (1 - is_retired) * scale_not_retired
-    return float_experience * scale
+    """Recover real experience-years (working) or pension points (retired).
+
+    The "experience" state is real credited-years directly while working (the
+    grid itself is real-valued, see ``experience_grid_from_state``), so that
+    branch is the identity. Retired states store pension points rescaled onto
+    the same period's real-year range (see ``scale_experience_years``), so
+    recovering the real pension points means undoing that rescaling. ``period``
+    is kept for interface parity with callers across the codebase, even though
+    the working branch no longer uses it.
+    """
+    grid_max = jnp.take(model_specs["max_exps_period_working"], period, mode="clip")
+    pension_points = float_experience * model_specs["max_pp_retirement"] / grid_max
+    return is_retired * pension_points + (1 - is_retired) * float_experience
 
 
 def scale_experience_years(experience_years, period, is_retired, model_specs):
-    """Scale experience between 0 and 1."""
-    # If period is past the last working period, then we take the maximum experience
-    scale_not_retired = jnp.take(
-        model_specs["max_exps_period_working"], period, mode="clip"
+    """Inverse of ``construct_experience_years``: real years/pension points -> stored state."""
+    grid_max = jnp.take(model_specs["max_exps_period_working"], period, mode="clip")
+    scaled_pension_points = (
+        experience_years * grid_max / model_specs["max_pp_retirement"]
     )
-    scale_retired = model_specs["max_pp_retirement"]
-    scale = is_retired * scale_retired + (1 - is_retired) * scale_not_retired
-    return experience_years / scale
+    return is_retired * scaled_pension_points + (1 - is_retired) * experience_years

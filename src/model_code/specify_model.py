@@ -13,7 +13,7 @@ from model_code.policy_processes.select_policy_belief import (
     select_sim_policy_function_and_update_specs,
     select_solution_transition_func_and_update_specs,
 )
-from model_code.state_space.experience import define_experience_grid
+from model_code.state_space.experience import experience_grid_from_state
 from model_code.state_space.state_space import create_state_space_functions
 from model_code.stochastic_processes.health_transition import health_transition
 from model_code.stochastic_processes.job_offers import job_offer_process_transition
@@ -31,25 +31,18 @@ def create_model_config_wo_informed(
     sex_type,
     edu_type,
     upper_envelope_method=None,
-    assets_end_of_period_grid=None,
-    assets_begin_of_period_grid=None,
-    experience_grid=None,
 ):
     """Build the model config.
 
-    The four ``*_grid``/``upper_envelope_method`` arguments default to the production
-    grids/upper-envelope method and only exist so benchmarks (see
-    ``src/benchmarks/``) can override them without duplicating this function.
+    ``upper_envelope_method`` defaults to the production upper-envelope method
+    and only exists so benchmarks (see ``src/benchmarks/``) can override it
+    without duplicating this function. The assets and experience grids are not
+    configurable here: ``assets_end_of_period`` is always the production savings
+    grid, and ``experience`` is always supplied per state-choice via
+    ``continuous_grid_functions`` (``experience_grid_from_state``, wired in
+    ``specify_model``).
 
     """
-    # Create savings grid
-    if assets_end_of_period_grid is None:
-        assets_end_of_period_grid = create_end_of_period_assets()
-
-    # Experience grid
-    if experience_grid is None:
-        experience_grid = define_experience_grid(specs)
-
     sex_grid, edu_grid = specify_type_grids(
         sex_type=sex_type,
         edu_type=edu_type,
@@ -63,11 +56,11 @@ def create_model_config_wo_informed(
         batch_mode = ["largest_block", "largest_block", "period_max", "largest_block"]
 
     continuous_states = {
-        "assets_end_of_period": assets_end_of_period_grid / specs["wealth_unit"],
-        "experience": experience_grid,
+        "assets_end_of_period": create_end_of_period_assets() / specs["wealth_unit"],
+        # Supplied per state-choice by continuous_grid_functions
+        # (experience_grid_from_state), wired in specify_model.
+        "experience": None,
     }
-    if assets_begin_of_period_grid is not None:
-        continuous_states["assets_begin_of_period"] = assets_begin_of_period_grid
 
     model_config = {
         "min_period_batch_segments": batch_seps,
@@ -106,14 +99,11 @@ def specify_model(
     edu_type="all",
     util_type="add",
     upper_envelope_method=None,
-    assets_end_of_period_grid=None,
-    assets_begin_of_period_grid=None,
-    experience_grid=None,
 ):
     """Generate model class.
 
-    ``upper_envelope_method``/``*_grid`` let benchmarks (see ``src/benchmarks/``)
-    override the production model config; leave them at ``None`` for normal use.
+    ``upper_envelope_method`` lets benchmarks (see ``src/benchmarks/``) override
+    the production upper-envelope method; leave it at ``None`` for normal use.
 
     """
 
@@ -135,9 +125,6 @@ def specify_model(
         sex_type=sex_type,
         edu_type=edu_type,
         upper_envelope_method=upper_envelope_method,
-        assets_end_of_period_grid=assets_end_of_period_grid,
-        assets_begin_of_period_grid=assets_begin_of_period_grid,
-        experience_grid=experience_grid,
     )
 
     if sim_specs is not None:
@@ -185,6 +172,9 @@ def specify_model(
         + f"model_{sex_type}_{edu_type}_{era_append}_{exp_append}.pkl"
     )
 
+    # Period-specific experience grid, per state-choice.
+    continuous_grid_functions = {"experience": experience_grid_from_state}
+
     if load_model:
         model = dcegm.setup_model(
             model_specs=specs,
@@ -195,6 +185,7 @@ def specify_model(
             budget_constraint=budget_constraint,
             shock_functions=shock_function_dict(),
             stochastic_states_transitions=stochastic_states_transitions,
+            continuous_grid_functions=continuous_grid_functions,
             model_load_path=model_path,
             alternative_sim_specifications=alternative_sim_specifications,
             debug_info=debug_info,
@@ -211,6 +202,7 @@ def specify_model(
             budget_constraint=budget_constraint,
             shock_functions=shock_function_dict(),
             stochastic_states_transitions=stochastic_states_transitions,
+            continuous_grid_functions=continuous_grid_functions,
             model_save_path=model_path,
             alternative_sim_specifications=alternative_sim_specifications,
             debug_info=debug_info,

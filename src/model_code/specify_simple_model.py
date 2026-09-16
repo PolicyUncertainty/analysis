@@ -41,7 +41,12 @@ def specify_simple_model(
     # Create savings grid
     savings_grid = create_end_of_period_assets()
 
-    experience_grid = define_experience_grid(specs)
+    # Static real-year grid, scaled to the global max. Not period-specific like
+    # the production grid (see experience_grid_from_state) -- acceptable here
+    # since this is a debug/simple model, not production.
+    experience_grid = (
+        define_experience_grid(specs) * specs["max_exps_period_working"][-1]
+    )
 
     model_config = {
         "min_period_batch_segments": [33, 44],

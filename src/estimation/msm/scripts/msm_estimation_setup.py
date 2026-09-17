@@ -266,8 +266,19 @@ def load_and_prep_data(path_dict):
         for name in model.model_structure["discrete_states_names"]
     }
     states_dict["experience"] = data_decision["experience"].values
+    # data_decision["wealth"] is real (household-scale) survey wealth, but
+    # budget_constraint's asset_end_of_previous_period is individual
+    # bookkeeping units (real wealth divided by wealth_mult = 1 + has_partner
+    # for a partnered person -- see budget_equation.py). adjust_observed_assets
+    # feeds this straight into budget_constraint via compute_assets_begin_of_period,
+    # so it needs the same conversion as load_scale_and_correct_data
+    # (transform_data_from_model.py) applies -- this function loads
+    # data_decision independently rather than calling that helper, so the
+    # conversion has to be repeated here too.
+    has_partner_int_obs = (data_decision["partner_state"].values > 0).astype(int)
+    wealth_mult_obs = 1 + has_partner_int_obs
     states_dict["assets_begin_of_period"] = (
-        data_decision["wealth"].values / specs["wealth_unit"]
+        data_decision["wealth"].values / specs["wealth_unit"] / wealth_mult_obs
     )
 
     assets_begin_of_period = adjust_observed_assets(

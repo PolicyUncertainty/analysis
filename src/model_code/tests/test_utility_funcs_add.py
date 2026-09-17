@@ -45,7 +45,7 @@ def paths_and_specs():
 )
 def test_consumption_cale(partner_state, sex, education, period, paths_and_specs):
     model_specs = paths_and_specs[1]
-    cons_scale, hh_size_calc = consumption_scale(
+    cons_scale = consumption_scale(
         partner_state=partner_state,
         sex=sex,
         education=education,
@@ -54,9 +54,8 @@ def test_consumption_cale(partner_state, sex, education, period, paths_and_specs
     )
     has_partner = int(partner_state > 0)
     nb_children = model_specs["children_by_state"][sex, education, has_partner, period]
-    hh_size = 1 + has_partner
+    hh_size = 1 + has_partner + nb_children
     np.testing.assert_almost_equal(cons_scale, np.sqrt(hh_size))
-    np.testing.assert_almost_equal(hh_size_calc, hh_size)
 
 
 @pytest.mark.parametrize(
@@ -119,7 +118,7 @@ def test_utility_func(
     }
 
     model_specs = paths_and_specs[1]
-    cons_scale, hh_size = consumption_scale(
+    cons_scale = consumption_scale(
         partner_state=partner_state,
         sex=sex,
         education=education,
@@ -149,14 +148,25 @@ def test_utility_func(
 
     mu_edu = mu + education
 
+    # consumption is dcegm's individual-bookkeeping choice variable: for a
+    # partnered person it is drawn from a jointly funded (pooled) account,
+    # so felicity is evaluated at wealth_mult * consumption / cons_scale,
+    # not consumption / cons_scale -- see utility_functions_add.py and the
+    # dcegm guide "Implementing a divorce/marriage transition without a
+    # lagged partner state". The felicity is additionally multiplied by
+    # cons_scale so per-equivalent consumption follows the standard Euler
+    # equation -- see docs/consumption_allocation.md.
+    wealth_mult = 1 + int(partner_state > 0)
+    scaled_consumption = wealth_mult * consumption / cons_scale
+
     if mu_edu == 1:
         utility_lambda = (
-            lambda disutil: hh_size * np.log(consumption / cons_scale) - disutil
+            lambda disutil: cons_scale * np.log(scaled_consumption) - disutil
         )
     else:
         utility_lambda = (
-            lambda disutil: hh_size
-            * ((consumption / cons_scale) ** (1 - mu_edu) - 1)
+            lambda disutil: cons_scale
+            * (scaled_consumption ** (1 - mu_edu) - 1)
             / (1 - mu_edu)
             - disutil
         )
@@ -300,18 +310,34 @@ def test_marginal_utility(
         "kappa_high_women": 18,
     }
 
-    random_choice = np.random.choice(np.array([0, 1, 2, 3]))
-    marg_util_jax = jax.jacfwd(utility_func, argnums=0)(
-        consumption,
-        sex,
-        partner_state,
-        education,
-        health,
-        period,
-        random_choice,
-        params,
-        model_specs,
+    model_specs = paths_and_specs[1]
+    cons_scale = consumption_scale(
+        partner_state=partner_state,
+        sex=sex,
+        education=education,
+        period=period,
+        model_specs=model_specs,
     )
+    mu_edu = mu + education
+    wealth_mult = 1 + int(partner_state > 0)
+    x = wealth_mult * consumption / cons_scale
+
+    # marginal_utility_function_alive is *not* the literal derivative of
+    # utility_func w.r.t. consumption (that derivative would carry an extra
+    # outer wealth_mult factor) -- it deliberately evaluates felicity'
+    # directly at the scaled argument x, dropping the wealth_mult chain-rule
+    # factor. The cons_scale factor in front of the felicity cancels the
+    # 1/cons_scale from the chain rule, leaving marg = x**(-mu). This is
+    # required for dcegm's Euler-equation solver (which hardcodes the marginal
+    # return on savings as 1 + interest_rate and never differentiates
+    # budget_constraint) to reproduce the correct (transition-based) economics
+    # -- see the dcegm guide "Implementing a divorce/marriage transition
+    # without a lagged partner state" for the derivation and equivalence proof.
+    if mu_edu == 1:
+        expected_marg_util = 1 / x
+    else:
+        expected_marg_util = x ** (-mu_edu)
+
     marg_util_model = marginal_utility_function_alive(
         consumption=consumption,
         partner_state=partner_state,
@@ -321,7 +347,7 @@ def test_marginal_utility(
         params=params,
         model_specs=model_specs,
     )
-    np.testing.assert_almost_equal(marg_util_jax, marg_util_model)
+    np.testing.assert_almost_equal(expected_marg_util, marg_util_model)
 
 
 @pytest.mark.parametrize(

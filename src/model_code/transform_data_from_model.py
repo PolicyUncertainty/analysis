@@ -144,8 +144,19 @@ def load_scale_and_correct_data(path_dict, model_class):
 
     # We can adjust wealth outside, as it does not depend on estimated parameters. We assign wealth as assets at the
     # beginning of the period. It will be overwritten in the functions below.
+    # data_decision["wealth"] is real (household-scale) survey wealth, but
+    # budget_constraint's asset_end_of_previous_period -- which
+    # adjust_observed_assets below feeds this into -- is individual
+    # bookkeeping units (real wealth divided by wealth_mult = 1 + has_partner
+    # for a partnered person; see budget_equation.py and the dcegm guide
+    # "Implementing a divorce/marriage transition without a lagged partner
+    # state"). Convert here, once, at the source, so every downstream user of
+    # assets_begin_of_period (simulation start states, MSM/likelihood wealth
+    # moments) sees a consistent individual-bookkeeping convention.
+    has_partner_int_obs = (data_decision["partner_state"].values > 0).astype(int)
+    wealth_mult_obs = 1 + has_partner_int_obs
     data_decision["assets_begin_of_period"] = (
-        data_decision["wealth"] / model_specs["wealth_unit"]
+        data_decision["wealth"] / model_specs["wealth_unit"] / wealth_mult_obs
     )
 
     data_decision = correct_wealth_to_include_non_pension_retirement_income(
@@ -252,5 +263,13 @@ def correct_wealth_to_include_non_pension_retirement_income(
         * discount_factor ** df["years_until_payment_starts"]
     )
     df["wealth_correction"] = 0.4 * df["pension_wealth"] / model_specs["wealth_unit"]
-    df["assets_begin_of_period"] += df["wealth_correction"]
+    # assets_begin_of_period is in individual-bookkeeping units at this point
+    # (see load_scale_and_correct_data), so this real-dollar correction needs
+    # the same wealth_mult division before being added, to stay in the same
+    # unit convention (own, non-pooled pension wealth divided 50/50 through
+    # this division when partnered, exactly like budget_constraint's income
+    # terms).
+    has_partner_int = (df["partner_state"].values > 0).astype(int)
+    wealth_mult = 1 + has_partner_int
+    df["assets_begin_of_period"] += df["wealth_correction"] / wealth_mult
     return df

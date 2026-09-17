@@ -75,23 +75,28 @@ def utility_func_alive(
         params=params,
         model_specs=model_specs,
     )
-    cons_scale, hh_size = consumption_scale(
+    cons_scale = consumption_scale(
         partner_state=partner_state,
         sex=sex,
         education=education,
         period=period,
         model_specs=model_specs,
     )
-    # compute utility
-    scaled_consumption = consumption / cons_scale
-    utility_cons_not_one = (scaled_consumption ** (1 - mu) - 1) / (1 - mu)
+    # We keep track in the model of the individual account. So if you have a partner and choose consumption, then you are
+    # actually choosing double the consumption or vice versa consumption only costs half in your individual account if you
+    # have a partner. A model trick to not have a transition equation dependent on lagged partner.
+    has_partner_int = (partner_state > 0).astype(int)
+    wealth_mult = 1 + has_partner_int
+
+    scaled_consumption = (wealth_mult * consumption) / cons_scale
+    utility_cons_not_one = cons_scale * (scaled_consumption ** (1 - mu) - 1) / (1 - mu)
 
     utility_cons = jax.lax.select(
         jnp.allclose(mu, 1),
-        jnp.log(consumption / cons_scale),
+        cons_scale * jnp.log(scaled_consumption),
         utility_cons_not_one,
     )
-    return hh_size * utility_cons - disutil_work
+    return utility_cons - disutil_work
 
 
 def marginal_utility_func(
@@ -135,7 +140,7 @@ def marginal_utility_function_alive(
     params,
     model_specs,
 ):
-    cons_scale, hh_size = consumption_scale(
+    cons_scale = consumption_scale(
         partner_state=partner_state,
         sex=sex,
         education=education,
@@ -145,12 +150,18 @@ def marginal_utility_function_alive(
     mu = jax.lax.select(
         education == 1, on_true=params["mu_high"], on_false=params["mu_low"]
     )
+    has_partner_int = (partner_state > 0).astype(int)
+    wealth_mult = 1 + has_partner_int
+    # Note the consunmption trick mentioned in the utility function carries over.
+    # The cons_scale factor in front of the felicity cancels the 1/cons_scale
+    # from the chain rule, leaving marg = x**(-mu).
+    x = (wealth_mult * consumption) / cons_scale
 
-    marg_util_mu_not_one = hh_size * (consumption / cons_scale) ** (-mu) / cons_scale
+    marg_util_mu_not_one = x ** (-mu)
 
     marg_util = jax.lax.select(
         jnp.allclose(mu, 1),
-        hh_size / consumption,
+        cons_scale / (wealth_mult * consumption),
         marg_util_mu_not_one,
     )
 
@@ -166,7 +177,7 @@ def inverse_marginal_func(
     params,
     model_specs,
 ):
-    cons_scale, hh_size = consumption_scale(
+    cons_scale = consumption_scale(
         partner_state=partner_state,
         sex=sex,
         education=education,
@@ -176,12 +187,17 @@ def inverse_marginal_func(
     mu = jax.lax.select(
         education == 1, on_true=params["mu_high"], on_false=params["mu_low"]
     )
+    has_partner_int = (partner_state > 0).astype(int)
+    wealth_mult = 1 + has_partner_int
 
-    consumption_mu_not_one = cons_scale * (marginal_utility * cons_scale / hh_size) ** (
-        -1 / mu
-    )
+    # Inverts marginal_utility_function_alive above:
+    # m = (wealth_mult*c/cons_scale)**(-mu)
+    # => c = cons_scale * m**(-1/mu) / wealth_mult
+    consumption_mu_not_one = cons_scale * marginal_utility ** (-1 / mu) / wealth_mult
     consumption = jax.lax.select(
-        jnp.allclose(mu, 1), hh_size / marginal_utility, consumption_mu_not_one
+        jnp.allclose(mu, 1),
+        cons_scale / (wealth_mult * marginal_utility),
+        consumption_mu_not_one,
     )
     return consumption
 
@@ -320,6 +336,6 @@ def disutility_work(
 
 def consumption_scale(partner_state, sex, education, period, model_specs):
     has_partner = (partner_state > 0).astype(int)
-    # nb_children = model_specs["children_by_state"][sex, education, has_partner, period]
-    hh_size = 1 + has_partner
-    return jnp.sqrt(hh_size), hh_size
+    nb_children = model_specs["children_by_state"][sex, education, has_partner, period]
+    hh_size = 1 + has_partner + nb_children
+    return jnp.sqrt(hh_size)

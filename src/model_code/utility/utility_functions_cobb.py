@@ -81,13 +81,21 @@ def utility_func_alive(
         period=period,
         model_specs=model_specs,
     )
-    # compute utility
-    scaled_consumption = consumption * eta / cons_scale
-    utility_mu_not_one = (scaled_consumption ** (1 - mu) - 1) / (1 - mu)
+    # We keep track in the model of the individual account. So if you have a partner and choose consumption, then you are
+    # actually choosing double the consumption or vice versa consumption only costs half in your individual account if you
+    # have a partner. A model trick to not have a transition equation dependent on lagged partner.
+    has_partner_int = (partner_state > 0).astype(int)
+    wealth_mult = 1 + has_partner_int
+    # compute utility. The felicity is multiplied by cons_scale so that
+    # per-equivalent consumption follows the standard Euler equation and total
+    # consumption always tilts toward the larger household, independent of mu --
+    # see docs/consumption_allocation.md.
+    scaled_consumption = (wealth_mult * consumption) * eta / cons_scale
+    utility_mu_not_one = cons_scale * (scaled_consumption ** (1 - mu) - 1) / (1 - mu)
 
     utility = jax.lax.select(
         jnp.allclose(mu, 1),
-        jnp.log(consumption * eta / cons_scale),
+        cons_scale * jnp.log(scaled_consumption),
         utility_mu_not_one,
     )
     return utility
@@ -158,11 +166,27 @@ def marginal_utility_function_alive(
         params=params,
         model_specs=model_specs,
     )
-    marg_util_mu_not_one = ((eta / cons_scale) ** (1 - mu)) * (consumption ** (-mu))
+    has_partner_int = (partner_state > 0).astype(int)
+    wealth_mult = 1 + has_partner_int
+
+    # Felicity is cons_scale * ((wealth_mult*c*eta/cons_scale)**(1-mu) - 1)/(1-mu);
+    # its exact derivative wrt consumption is wealth_mult * eta *
+    # (wealth_mult*c*eta/cons_scale)**(-mu). We drop the wealth_mult chain-rule
+    # factor -- dcegm's Euler-equation solver hardcodes the marginal return on
+    # savings as 1 + interest_rate and never differentiates budget_constraint,
+    # so dropping it is what reproduces the transition-based (halve on divorce,
+    # double on marriage) economics exactly. See the dcegm guide "Implementing a
+    # divorce/marriage transition without a lagged partner state"
+    # (docs/source/guides/) for the derivation and equivalence proof.
+    marg_util_mu_not_one = (
+        cons_scale
+        * ((eta / cons_scale) ** (1 - mu))
+        * ((wealth_mult * consumption) ** (-mu))
+    )
 
     marg_util = jax.lax.select(
         jnp.allclose(mu, 1),
-        1 / consumption,
+        cons_scale / (wealth_mult * consumption),
         marg_util_mu_not_one,
     )
 
@@ -200,11 +224,22 @@ def inverse_marginal_func(
         params=params,
         model_specs=model_specs,
     )
-    consumption_mu_not_one = marginal_utility ** (-1 / mu) * (eta / cons_scale) ** (
-        (1 - mu) / mu
+    has_partner_int = (partner_state > 0).astype(int)
+    wealth_mult = 1 + has_partner_int
+
+    # Inverts marginal_utility_function_alive above:
+    # m = cons_scale * (eta/cons_scale)**(1-mu) * (wealth_mult*c)**(-mu)
+    # => c = cons_scale * m**(-1/mu) * eta**((1-mu)/mu) / wealth_mult
+    consumption_mu_not_one = (
+        cons_scale
+        * marginal_utility ** (-1 / mu)
+        * eta ** ((1 - mu) / mu)
+        / wealth_mult
     )
     consumption = jax.lax.select(
-        jnp.allclose(mu, 1), 1 / marginal_utility, consumption_mu_not_one
+        jnp.allclose(mu, 1),
+        cons_scale / (wealth_mult * marginal_utility),
+        consumption_mu_not_one,
     )
     return consumption
 

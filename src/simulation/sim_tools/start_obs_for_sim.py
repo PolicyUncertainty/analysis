@@ -46,6 +46,11 @@ def generate_start_states_from_obs(
         name: start_period_data[name].values
         for name in model_structure["discrete_states_names"]
     }
+    # assets_begin_of_period here is already the output of
+    # load_scale_and_correct_data -> adjust_observed_assets, which runs
+    # observed wealth through budget_constraint's own individual-bookkeeping
+    # conversion (see transform_data_from_model.py). No further adjustment
+    # needed here.
     states_dict["assets_begin_of_period"] = start_period_data[
         "assets_begin_of_period"
     ].values

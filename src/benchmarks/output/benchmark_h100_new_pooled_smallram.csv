@@ -1,0 +1,19 @@
+run_name,timestamp,solve_mode,solve_mode_applies,small_ram,income_shock_batch_size,n_devices,device_kind,stage,call_index,phase,seconds,peak_device_bytes,device_bytes_in_use,peak_host_bytes,note
+h100_new,2026-09-19T19:41:25+00:00,pooled,True,True,1,1,NVIDIA A100 80GB PCIe,build_model,1,compile,724.8181564139959,11508752384,926257920,30528675840,
+h100_new,2026-09-19T19:42:16+00:00,pooled,True,True,1,1,NVIDIA A100 80GB PCIe,solve,1,compile,50.623355574003654,54249081088,19172104960,30528675840,
+h100_new,2026-09-19T19:42:31+00:00,pooled,True,True,1,1,NVIDIA A100 80GB PCIe,solve,2,steady,15.097435656003654,54249081088,19172104960,30528675840,
+h100_new,2026-09-19T19:42:46+00:00,pooled,True,True,1,1,NVIDIA A100 80GB PCIe,solve,3,steady,15.09175033599604,54249081088,19172104960,30528675840,
+h100_new,2026-09-19T19:43:01+00:00,pooled,True,True,1,1,NVIDIA A100 80GB PCIe,solve,4,steady,15.09254929999588,54249081088,19172104960,30528675840,
+h100_new,2026-09-19T19:43:16+00:00,pooled,True,True,1,1,NVIDIA A100 80GB PCIe,solve,5,steady,15.093221030998393,54249081088,19172104960,30528675840,
+h100_new,2026-09-19T19:43:21+00:00,pooled,False,True,1,1,NVIDIA A100 80GB PCIe,build_likelihood_func,1,compile,0.3411382980120834,54249081088,2343542784,30528675840,67759 observations
+h100_new,2026-09-19T19:44:23+00:00,pooled,False,True,1,1,NVIDIA A100 80GB PCIe,likelihood,1,compile,62.06262314799824,54971374848,2344084992,30528675840,always the pooled solve; get_solve_from_small_models is solve-only
+h100_new,2026-09-19T19:44:38+00:00,pooled,False,True,1,1,NVIDIA A100 80GB PCIe,likelihood,2,steady,15.047360277007101,54971374848,2344084992,30528675840,always the pooled solve; get_solve_from_small_models is solve-only
+h100_new,2026-09-19T19:44:53+00:00,pooled,False,True,1,1,NVIDIA A100 80GB PCIe,likelihood,3,steady,15.047833425007411,54971374848,2344084992,30528675840,always the pooled solve; get_solve_from_small_models is solve-only
+h100_new,2026-09-19T19:45:08+00:00,pooled,False,True,1,1,NVIDIA A100 80GB PCIe,likelihood,4,steady,15.049693827997544,54971374848,2344084992,30528675840,always the pooled solve; get_solve_from_small_models is solve-only
+h100_new,2026-09-19T19:45:23+00:00,pooled,False,True,1,1,NVIDIA A100 80GB PCIe,likelihood,5,steady,15.055850750009995,54971374848,2344084992,30528675840,always the pooled solve; get_solve_from_small_models is solve-only
+h100_new,2026-09-19T19:45:28+00:00,pooled,False,True,1,1,NVIDIA A100 80GB PCIe,build_solve_simulate_func,1,compile,0.01992480999615509,54971374848,3043543296,30528675840,491000 simulated agents
+h100_new,2026-09-19T19:47:10+00:00,pooled,False,True,1,1,NVIDIA A100 80GB PCIe,solve_simulate,1,compile,102.34609051399457,61970943744,3043543296,33834688512,always the pooled solve; get_solve_from_small_models is solve-only
+h100_new,2026-09-19T19:47:38+00:00,pooled,False,True,1,1,NVIDIA A100 80GB PCIe,solve_simulate,2,steady,27.538770286992076,61970943744,3043543296,33836122112,always the pooled solve; get_solve_from_small_models is solve-only
+h100_new,2026-09-19T19:48:05+00:00,pooled,False,True,1,1,NVIDIA A100 80GB PCIe,solve_simulate,3,steady,27.495323235008982,61970943744,3043543296,33836122112,always the pooled solve; get_solve_from_small_models is solve-only
+h100_new,2026-09-19T19:48:33+00:00,pooled,False,True,1,1,NVIDIA A100 80GB PCIe,solve_simulate,4,steady,27.51455562200863,61970943744,3043543296,33836122112,always the pooled solve; get_solve_from_small_models is solve-only
+h100_new,2026-09-19T19:49:00+00:00,pooled,False,True,1,1,NVIDIA A100 80GB PCIe,solve_simulate,5,steady,27.491502288001357,61970943744,3043543296,33836122112,always the pooled solve; get_solve_from_small_models is solve-only

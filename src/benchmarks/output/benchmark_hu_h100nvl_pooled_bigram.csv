@@ -1,0 +1,19 @@
+run_name,timestamp,solve_mode,solve_mode_applies,small_ram,income_shock_batch_size,n_devices,device_kind,stage,call_index,phase,seconds,peak_device_bytes,device_bytes_in_use,peak_host_bytes,note
+hu_h100nvl,2026-09-19T18:09:54+00:00,pooled,True,False,,1,NVIDIA H100 NVL,build_model,1,compile,717.671359045009,11508752384,988926464,30902816768,
+hu_h100nvl,2026-09-19T18:10:26+00:00,pooled,True,False,,1,NVIDIA H100 NVL,solve,1,compile,31.218272199999774,25143799552,19278021888,30902816768,
+hu_h100nvl,2026-09-19T18:10:36+00:00,pooled,True,False,,1,NVIDIA H100 NVL,solve,2,steady,10.522931384999538,25143799552,19278021888,30902816768,
+hu_h100nvl,2026-09-19T18:10:47+00:00,pooled,True,False,,1,NVIDIA H100 NVL,solve,3,steady,10.516054203995736,25143799552,19278021888,30902816768,
+hu_h100nvl,2026-09-19T18:10:57+00:00,pooled,True,False,,1,NVIDIA H100 NVL,solve,4,steady,10.509484419002547,25143799552,19278021888,30902816768,
+hu_h100nvl,2026-09-19T18:11:08+00:00,pooled,True,False,,1,NVIDIA H100 NVL,solve,5,steady,10.511437623004895,25143799552,19278021888,30902816768,
+hu_h100nvl,2026-09-19T18:11:13+00:00,pooled,False,False,,1,NVIDIA H100 NVL,build_likelihood_func,1,compile,0.3454945480043534,25143799552,2491039488,30902816768,67759 observations
+hu_h100nvl,2026-09-19T18:11:55+00:00,pooled,False,False,,1,NVIDIA H100 NVL,likelihood,1,compile,41.833255090998136,25888727296,2491581696,30902816768,always the pooled solve; get_solve_from_small_models is solve-only
+hu_h100nvl,2026-09-19T18:12:05+00:00,pooled,False,False,,1,NVIDIA H100 NVL,likelihood,2,steady,10.343454493005993,25888727296,2491581696,30902816768,always the pooled solve; get_solve_from_small_models is solve-only
+hu_h100nvl,2026-09-19T18:12:15+00:00,pooled,False,False,,1,NVIDIA H100 NVL,likelihood,3,steady,10.35252699200646,25888727296,2491581696,30902816768,always the pooled solve; get_solve_from_small_models is solve-only
+hu_h100nvl,2026-09-19T18:12:26+00:00,pooled,False,False,,1,NVIDIA H100 NVL,likelihood,4,steady,10.310624295991147,25888727296,2491581696,30902816768,always the pooled solve; get_solve_from_small_models is solve-only
+hu_h100nvl,2026-09-19T18:12:36+00:00,pooled,False,False,,1,NVIDIA H100 NVL,likelihood,5,steady,10.310700498012011,25888727296,2491581696,30902816768,always the pooled solve; get_solve_from_small_models is solve-only
+hu_h100nvl,2026-09-19T18:12:41+00:00,pooled,False,False,,1,NVIDIA H100 NVL,build_solve_simulate_func,1,compile,0.013921645004302263,25888727296,3234787072,30902816768,491000 simulated agents
+hu_h100nvl,2026-09-19T18:14:01+00:00,pooled,False,False,,1,NVIDIA H100 NVL,solve_simulate,1,compile,80.3734845900035,33150946560,3234787072,33595207680,always the pooled solve; get_solve_from_small_models is solve-only
+hu_h100nvl,2026-09-19T18:14:24+00:00,pooled,False,False,,1,NVIDIA H100 NVL,solve_simulate,2,steady,22.727441658003954,33150946560,3234787072,33595207680,always the pooled solve; get_solve_from_small_models is solve-only
+hu_h100nvl,2026-09-19T18:14:47+00:00,pooled,False,False,,1,NVIDIA H100 NVL,solve_simulate,3,steady,22.892295343001024,33150946560,3234787072,33595207680,always the pooled solve; get_solve_from_small_models is solve-only
+hu_h100nvl,2026-09-19T18:15:10+00:00,pooled,False,False,,1,NVIDIA H100 NVL,solve_simulate,4,steady,22.740154391998658,33150946560,3234787072,33595207680,always the pooled solve; get_solve_from_small_models is solve-only
+hu_h100nvl,2026-09-19T18:15:32+00:00,pooled,False,False,,1,NVIDIA H100 NVL,solve_simulate,5,steady,22.770232988987118,33150946560,3234787072,33595207680,always the pooled solve; get_solve_from_small_models is solve-only

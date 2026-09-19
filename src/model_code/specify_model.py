@@ -31,12 +31,17 @@ def create_model_config_wo_informed(
     sex_type,
     edu_type,
     upper_envelope_method=None,
+    income_shock_batch_size=None,
 ):
     """Build the model config.
 
     ``upper_envelope_method`` defaults to the production upper-envelope method
     and only exists so callers can override it (e.g. an upper-envelope benchmark)
-    without duplicating this function. The assets and experience grids are not
+    without duplicating this function. ``income_shock_batch_size`` is the same
+    kind of override: left at None the solve interpolates all ``n_quad_points``
+    income-shock draws at once, an integer dividing ``n_quad_points`` makes it
+    work through them in blocks of that size, which lowers the peak memory of
+    the interpolation step without changing the solution. The assets and experience grids are not
     configurable here: ``assets_end_of_period`` is always the production savings
     grid, and ``experience`` is always supplied per state-choice via
     ``continuous_grid_functions`` (``experience_grid_from_state``, wired in
@@ -63,6 +68,7 @@ def create_model_config_wo_informed(
     }
 
     model_config = {
+        "income_shock_batch_size": income_shock_batch_size,
         "min_period_batch_segments": batch_seps,
         "batch_mode": batch_mode,
         "n_periods": specs["n_periods"],
@@ -99,11 +105,13 @@ def specify_model(
     edu_type="all",
     util_type="add",
     upper_envelope_method=None,
+    income_shock_batch_size=None,
 ):
     """Generate model class.
 
-    ``upper_envelope_method`` lets a caller override the production upper-envelope
-    method; leave it at ``None`` for normal use.
+    ``upper_envelope_method`` and ``income_shock_batch_size`` let a caller override
+    the production upper-envelope method and the income-shock block size; leave both
+    at ``None`` for normal use.
 
     """
 
@@ -125,6 +133,7 @@ def specify_model(
         sex_type=sex_type,
         edu_type=edu_type,
         upper_envelope_method=upper_envelope_method,
+        income_shock_batch_size=income_shock_batch_size,
     )
 
     if sim_specs is not None:

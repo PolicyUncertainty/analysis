@@ -54,8 +54,8 @@ def create_model_config_wo_informed(
     )
 
     if sex_type == "all":
-        batch_seps = [44]  # Full model
-        batch_mode = "largest_block"
+        batch_seps = [29, 33, 42, 44]  # Full model
+        batch_mode = "period_max"
     else:
         batch_seps = [29, 43, 44]  # Fastest model single
         batch_mode = ["largest_block", "largest_block", "period_max", "largest_block"]

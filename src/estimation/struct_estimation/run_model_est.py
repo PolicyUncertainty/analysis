@@ -21,20 +21,28 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
     load_and_set_start_params,
 )
 
-model_name = "alg1_sparse_inf_women"
+model_name = "alg1_sparse_women"
 params_to_estimate_names = (
     women_disutil_params
     + women_disability_params
     + women_job_offer_params
     # + women_taste
 )
+# model_name = "alg1_sparse_men"
+# params_to_estimate_names = (
+#     men_disutil_params
+#     + men_disability_params
+#     + men_job_offer_params
+#     # + men_taste
+# )
+
 sex_type = "women"
 edu_type = "all"
 util_type = "add"
 old_sample_only = False
 
 LOAD_SOL_MODEL = False
-LOAD_LAST_ESTIMATE = False
+LOAD_LAST_ESTIMATE = True
 SAVE_RESULTS = True
 USE_WEIGHTS = False
 
@@ -47,7 +55,7 @@ print(
 
 if LOAD_LAST_ESTIMATE:
     last_estimate = pkl.load(
-        open(paths_dict["struct_results"] + f"est_params_alg1_informed_men.pkl", "rb")
+        open(paths_dict["struct_results"] + f"est_params_alg1_sparse.pkl", "rb")
     )
 else:
     last_estimate = None
@@ -72,7 +80,7 @@ estimation_results, end_params = estimate_model(
     print_women_examples=True,
     slow_version=False,
     scale_opt=True,
-    multistart=True,
+    multistart=False,
 )
 print(estimation_results)
 

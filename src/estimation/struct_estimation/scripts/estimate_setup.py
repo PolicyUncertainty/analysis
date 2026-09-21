@@ -59,6 +59,15 @@ def estimate_model(
         print_women_examples=print_women_examples,
     )
 
+    # Job finding params are bounded below by their data-based full-observation
+    # estimates, which are the values start_params_all carries before a warm
+    # start replaces them.
+    job_finding_lower_bounds = {
+        name: start_params_all[name]
+        for name in params_to_estimate_names
+        if "job_finding" in name
+    }
+
     # # Assign start params from before
     if last_estimate is not None:
         print_function(last_estimate)
@@ -94,8 +103,7 @@ def estimate_model(
     lower_bounds = {}
     for param in params_to_estimate_names:
         if "job_finding" in param:
-            # Set lower bound for job finding params to start values
-            lower_bounds[param] = start_params_all[param]
+            lower_bounds[param] = job_finding_lower_bounds[param]
         else:
             lower_bounds[param] = lower_bounds_all[param]
 

@@ -14,6 +14,6 @@
 module add cuda/12.4.1
 
 # python run_fake_data_est.py
-# python run_model_est.py
-python run_fit_plot.py
+ python run_model_est.py
+#python run_fit_plot.py
 # python grid_search.py

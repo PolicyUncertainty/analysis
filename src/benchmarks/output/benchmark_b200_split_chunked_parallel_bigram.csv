@@ -1,0 +1,3 @@
+run_name,timestamp,solve_mode,solve_mode_applies,small_ram,income_shock_batch_size,n_devices,device_kind,stage,call_index,phase,seconds,peak_device_bytes,device_bytes_in_use,peak_host_bytes,note
+b200_split,2026-09-21T14:01:06+00:00,chunked_parallel,True,False,,4,NVIDIA B200 MIG 1g.23gb,build_model,1,compile,387.77691409899853,32256,26368,36167536640,
+b200_split,2026-09-21T14:08:23+00:00,chunked_parallel,True,False,,4,NVIDIA B200 MIG 1g.23gb,build_sub_models,1,compile,436.5872599701397,32256,26368,36167536640,four sex x education sub-models for the chunked solve

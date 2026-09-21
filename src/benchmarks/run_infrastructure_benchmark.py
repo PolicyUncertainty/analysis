@@ -55,13 +55,13 @@ from set_paths import create_path_dict
 # Manual identifier for the machine this is running on. Free-form, but keep it stable
 # per device so rows from repeated runs line up (e.g. "hu_h100nvl", "hu_a100_80gb",
 # "hu_a100_mig_20gb", "laptop_cpu").
-RUN_NAME = "b200_full"
+RUN_NAME = "b200_split"
 
 # "pooled" | "chunked_seq" | "chunked_parallel"
-SOLVE_MODE = "pooled"
+SOLVE_MODE = "chunked_parallel"
 
 # True -> income_shock_batch_size = 1 (block the income-shock draws)
-SMALL_RAM = False
+SMALL_RAM = True
 
 # First call is compilation, the remaining ones are the steady-state cost.
 N_CALLS = 5

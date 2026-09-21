@@ -93,6 +93,18 @@ def create_model_config_wo_informed(
     return model_config
 
 
+def cpu_build():
+    """Place the model build phase on the CPU.
+
+    The build -- state space, sparse stochastic transition map, batch information,
+    and the data preparation that evaluates model functions over the observed
+    states -- reserves no GPU memory this way. The arrays it creates stay
+    uncommitted, so the solve and the likelihood still run on the default device
+    and the arrays move there when they are first called.
+    """
+    return jax.default_device(jax.devices("cpu")[0])
+
+
 def specify_model(
     path_dict,
     specs,
@@ -186,39 +198,40 @@ def specify_model(
     # reuse the same axis as pension points; see experience_grid_from_state).
     continuous_grid_functions = {"experience": experience_grid_from_state}
 
-    if load_model:
-        model = dcegm.setup_model(
-            model_specs=specs,
-            model_config=model_config,
-            state_space_functions=create_state_space_functions(),
-            utility_functions=create_utility_functions(),
-            utility_functions_final_period=create_final_period_utility_functions(),
-            budget_constraint=budget_constraint,
-            shock_functions=shock_function_dict(),
-            stochastic_states_transitions=stochastic_states_transitions,
-            continuous_grid_functions=continuous_grid_functions,
-            model_load_path=model_path,
-            alternative_sim_specifications=alternative_sim_specifications,
-            debug_info=debug_info,
-            use_stochastic_sparsity=True,
-        )
+    with cpu_build():
+        if load_model:
+            model = dcegm.setup_model(
+                model_specs=specs,
+                model_config=model_config,
+                state_space_functions=create_state_space_functions(),
+                utility_functions=create_utility_functions(),
+                utility_functions_final_period=create_final_period_utility_functions(),
+                budget_constraint=budget_constraint,
+                shock_functions=shock_function_dict(),
+                stochastic_states_transitions=stochastic_states_transitions,
+                continuous_grid_functions=continuous_grid_functions,
+                model_load_path=model_path,
+                alternative_sim_specifications=alternative_sim_specifications,
+                debug_info=debug_info,
+                use_stochastic_sparsity=True,
+            )
 
-    else:
-        model = dcegm.setup_model(
-            model_specs=specs,
-            model_config=model_config,
-            state_space_functions=create_state_space_functions(),
-            utility_functions=create_utility_functions(),
-            utility_functions_final_period=create_final_period_utility_functions(),
-            budget_constraint=budget_constraint,
-            shock_functions=shock_function_dict(),
-            stochastic_states_transitions=stochastic_states_transitions,
-            continuous_grid_functions=continuous_grid_functions,
-            model_save_path=model_path,
-            alternative_sim_specifications=alternative_sim_specifications,
-            debug_info=debug_info,
-            use_stochastic_sparsity=True,
-        )
+        else:
+            model = dcegm.setup_model(
+                model_specs=specs,
+                model_config=model_config,
+                state_space_functions=create_state_space_functions(),
+                utility_functions=create_utility_functions(),
+                utility_functions_final_period=create_final_period_utility_functions(),
+                budget_constraint=budget_constraint,
+                shock_functions=shock_function_dict(),
+                stochastic_states_transitions=stochastic_states_transitions,
+                continuous_grid_functions=continuous_grid_functions,
+                model_save_path=model_path,
+                alternative_sim_specifications=alternative_sim_specifications,
+                debug_info=debug_info,
+                use_stochastic_sparsity=True,
+            )
 
     print("Model specified.", flush=True)
     return model

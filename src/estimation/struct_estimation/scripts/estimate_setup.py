@@ -13,7 +13,7 @@ from estimation.struct_estimation.scripts.std_errors import (
     calc_and_save_standard_errors,
     calc_scores,
 )
-from model_code.specify_model import specify_model
+from model_code.specify_model import cpu_build, specify_model
 from model_code.stochastic_processes.job_offers import (
     calc_job_finding_prob_men,
     calc_job_finding_prob_women,
@@ -130,26 +130,29 @@ def estimate_model(
 
     bounds = om.Bounds(lower=lower_bounds, upper=upper_bounds)
 
-    # Initialize estimation class
-    est_class = est_class_from_paths(
-        path_dict=path_dict,
-        specs=specs,
-        start_params_all=start_params_all,
-        print_function=print_function,
-        file_append=file_append,
-        load_model=load_model,
-        use_weights=use_weights,
-        save_results=save_results,
-        print_men_examples=print_men_examples,
-        print_women_examples=print_women_examples,
-        use_observed_data=use_observed_data,
-        old_only=old_only,
-        sim_data=sim_data,
-        sex_type=sex_type,
-        edu_type=edu_type,
-        slow_version=slow_version,
-        util_type=util_type,
-    )
+    # Initialize estimation class. The whole build -- model setup, the asset
+    # correction over the observed states, and the likelihood construction --
+    # runs on the CPU; only the likelihood evaluations below use the GPU.
+    with cpu_build():
+        est_class = est_class_from_paths(
+            path_dict=path_dict,
+            specs=specs,
+            start_params_all=start_params_all,
+            print_function=print_function,
+            file_append=file_append,
+            load_model=load_model,
+            use_weights=use_weights,
+            save_results=save_results,
+            print_men_examples=print_men_examples,
+            print_women_examples=print_women_examples,
+            use_observed_data=use_observed_data,
+            old_only=old_only,
+            sim_data=sim_data,
+            sex_type=sex_type,
+            edu_type=edu_type,
+            slow_version=slow_version,
+            util_type=util_type,
+        )
 
     if supply_jacobian:
         add_kwargs = {"jac": est_class.jacobian_func}

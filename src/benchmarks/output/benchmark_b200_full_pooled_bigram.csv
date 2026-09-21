@@ -1,0 +1,19 @@
+run_name,timestamp,solve_mode,solve_mode_applies,small_ram,income_shock_batch_size,n_devices,device_kind,stage,call_index,phase,seconds,peak_device_bytes,device_bytes_in_use,peak_host_bytes,note
+b200_full,2026-09-21T13:47:53+00:00,pooled,True,False,,1,NVIDIA B200,build_model,1,compile,383.76773960492574,32256,26368,39866875904,
+b200_full,2026-09-21T13:48:05+00:00,pooled,True,False,,1,NVIDIA B200,solve,1,compile,11.491971611976624,38419345152,18525967104,39866875904,
+b200_full,2026-09-21T13:48:09+00:00,pooled,True,False,,1,NVIDIA B200,solve,2,steady,4.161067795008421,38419345152,18525967104,39866875904,
+b200_full,2026-09-21T13:48:13+00:00,pooled,True,False,,1,NVIDIA B200,solve,3,steady,4.158402425004169,38419345152,18525967104,39866875904,
+b200_full,2026-09-21T13:48:18+00:00,pooled,True,False,,1,NVIDIA B200,solve,4,steady,4.159773668041453,38419345152,18525967104,39866875904,
+b200_full,2026-09-21T13:48:22+00:00,pooled,True,False,,1,NVIDIA B200,solve,5,steady,4.1604511621408165,38419345152,18525967104,39866875904,
+b200_full,2026-09-21T13:50:27+00:00,pooled,False,False,,1,NVIDIA B200,build_likelihood_func,1,compile,0.6553904530592263,38419345152,1977589504,39866875904,67759 observations
+b200_full,2026-09-21T13:50:42+00:00,pooled,False,False,,1,NVIDIA B200,likelihood,1,compile,15.62827272596769,39454071040,1978635776,39866875904,always the pooled solve; get_solve_from_small_models is solve-only
+b200_full,2026-09-21T13:50:46+00:00,pooled,False,False,,1,NVIDIA B200,likelihood,2,steady,4.173654604936019,39454071040,1978635776,39866875904,always the pooled solve; get_solve_from_small_models is solve-only
+b200_full,2026-09-21T13:50:51+00:00,pooled,False,False,,1,NVIDIA B200,likelihood,3,steady,4.169206897960976,39454071040,1978635776,39866875904,always the pooled solve; get_solve_from_small_models is solve-only
+b200_full,2026-09-21T13:50:55+00:00,pooled,False,False,,1,NVIDIA B200,likelihood,4,steady,4.166910861153156,39454071040,1978635776,39866875904,always the pooled solve; get_solve_from_small_models is solve-only
+b200_full,2026-09-21T13:50:59+00:00,pooled,False,False,,1,NVIDIA B200,likelihood,5,steady,4.1666601349134,39454071040,1978635776,39866875904,always the pooled solve; get_solve_from_small_models is solve-only
+b200_full,2026-09-21T13:51:03+00:00,pooled,False,False,,1,NVIDIA B200,build_solve_simulate_func,1,compile,0.14729967899620533,39454071040,2960406528,39866875904,491000 simulated agents
+b200_full,2026-09-21T13:51:46+00:00,pooled,False,False,,1,NVIDIA B200,solve_simulate,1,compile,42.77796038612723,46001524992,2960406528,42108235776,always the pooled solve; get_solve_from_small_models is solve-only
+b200_full,2026-09-21T13:51:58+00:00,pooled,False,False,,1,NVIDIA B200,solve_simulate,2,steady,11.852778490865603,46001524992,2960406528,42112397312,always the pooled solve; get_solve_from_small_models is solve-only
+b200_full,2026-09-21T13:52:10+00:00,pooled,False,False,,1,NVIDIA B200,solve_simulate,3,steady,12.459876329172403,46001524992,2960406528,42112397312,always the pooled solve; get_solve_from_small_models is solve-only
+b200_full,2026-09-21T13:52:22+00:00,pooled,False,False,,1,NVIDIA B200,solve_simulate,4,steady,11.954852926079184,46001524992,2960406528,42112397312,always the pooled solve; get_solve_from_small_models is solve-only
+b200_full,2026-09-21T13:52:34+00:00,pooled,False,False,,1,NVIDIA B200,solve_simulate,5,steady,11.842211012961343,46001524992,2960406528,42118418432,always the pooled solve; get_solve_from_small_models is solve-only

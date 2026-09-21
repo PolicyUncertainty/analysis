@@ -54,6 +54,7 @@ def create_model_config_wo_informed(
     )
 
     if sex_type == "all":
+        # This is the best for H100.
         batch_seps = [44]  # Full model
         batch_mode = "period_max"
     else:

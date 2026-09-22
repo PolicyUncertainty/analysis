@@ -58,7 +58,7 @@ from set_paths import create_path_dict
 RUN_NAME = "b200_split"
 
 # "pooled" | "chunked_seq" | "chunked_parallel"
-SOLVE_MODE = "chunked_parallel"
+SOLVE_MODE = "chunked_seq"
 
 # True -> income_shock_batch_size = 1 (block the income-shock draws)
 SMALL_RAM = True

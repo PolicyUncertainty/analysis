@@ -21,7 +21,7 @@ from estimation.struct_estimation.start_params_and_bounds.set_start_params impor
     load_and_set_start_params,
 )
 
-model_name = "alg1_sparse_women"
+model_name = "summer_women"
 params_to_estimate_names = (
     women_disutil_params
     + women_disability_params

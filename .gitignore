@@ -60,6 +60,11 @@ data_with_probs.csv
 !output/est_results/struct_results/*alg1_sparse*
 !output/tables/*/alg1_sparse/
 
+# new results
+!output/sim_results/summer/*
+!output/est_results/struct_results/*summer*
+!output/tables/*/summer/
+
 output/est_results/struct_results/archive/
 output/tables/simulation/old/
 

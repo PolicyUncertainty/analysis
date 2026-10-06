@@ -150,9 +150,9 @@ def load_scale_and_correct_data(path_dict, model_class):
     # bookkeeping units (real wealth divided by wealth_mult = 1 + has_partner
     # for a partnered person; see budget_equation.py and the dcegm guide
     # "Implementing a divorce/marriage transition without a lagged partner
-    # state"). Convert here, once, at the source, so every downstream user of
-    # assets_begin_of_period (simulation start states, MSM/likelihood wealth
-    # moments) sees a consistent individual-bookkeeping convention.
+    # state"). Convert here, once, at the source, so every downstream asset
+    # column (MSM/likelihood wealth moments, simulation start states) sees a
+    # consistent individual-bookkeeping convention.
     has_partner_int_obs = (data_decision["partner_state"].values > 0).astype(int)
     wealth_mult_obs = 1 + has_partner_int_obs
     data_decision["assets_begin_of_period"] = (
@@ -163,6 +163,17 @@ def load_scale_and_correct_data(path_dict, model_class):
         df=data_decision,
         model_specs=model_specs,
     )
+
+    # Survey wealth is observed without the income of last period's choice, so
+    # de-interesting it recovers what the agent carried out of the previous
+    # period -- the same inversion adjust_observed_assets does internally before
+    # running the budget equation forward. dcegm's simulation wants exactly this
+    # quantity as its initial state and rebuilds beginning-of-period wealth from
+    # it, so keep both columns side by side.
+    interest_rate = model_class.model_funcs["read_funcs"]["interest_rate"]({})
+    data_decision["assets_end_of_previous_period"] = data_decision[
+        "assets_begin_of_period"
+    ] / (1 + interest_rate)
 
     states_dict = create_states_dict(df=data_decision, model_class=model_class)
 

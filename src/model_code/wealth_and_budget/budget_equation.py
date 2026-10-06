@@ -22,7 +22,7 @@ def budget_constraint(
     partner_state,
     alg_1_claim,
     asset_end_of_previous_period,  # A_{t-1}
-    income_shock_previous_period,  # epsilon_{t - 1}
+    income_shock,  # epsilon_t
     model_specs,
 ):
     assets_scaled = asset_end_of_previous_period * model_specs["wealth_unit"]
@@ -87,7 +87,7 @@ def budget_constraint(
         age=age,
         education=education,
         sex=sex,
-        income_shock=income_shock_previous_period,
+        income_shock=income_shock,
         model_specs=model_specs,
     )
 

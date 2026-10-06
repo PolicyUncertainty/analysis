@@ -52,7 +52,7 @@
 # # policy_state = 0
 # wealth_id = 15
 # savings_end_of_previous_period = model["exog_savings_grid"][wealth_id]
-# income_shock_previous_period = 0
+# income_shock = 0
 # job_offer = 0
 # options = model["options"]
 # choice = 2
@@ -84,7 +84,7 @@
 #         np.array(partner_state),
 #         policy_state,  # current applicable SRA identifyer
 #         savings_end_of_previous_period,  # A_{t-1}
-#         income_shock_previous_period,  # epsilon_{t - 1}
+#         income_shock,  # epsilon_t
 #         params,
 #         options["model_params"],
 #     )

@@ -3,7 +3,6 @@
 import os
 
 import pandas as pd
-from pandas.io.sql import table_exists
 
 from set_paths import create_path_dict
 from simulation.sim_tools.calc_aggregate_results import add_overall_results
@@ -29,7 +28,7 @@ import numpy as np
 
 # %%
 # Set specifications
-seed = 123
+start_states_seed = 123
 model_name = specs["model_name"]
 util_type = specs["util_type"]
 
@@ -54,16 +53,21 @@ model_solution = None
 start_states = None
 for sample_split in ["full", "informed", "uninformed"]:
     if sample_split != "full":
+        # The split is imposed by overwriting "informed" below, not by
+        # subsetting the observed start sample: all three splits then share one
+        # population and one set of draws, so the compensated variations differ
+        # only in the informed status. Hence the fixed seed here -- the inner
+        # loop's simulation seed must not leak into the start states.
         start_states = generate_start_states_from_obs(
             path_dict=path_dict,
-            specs=specs,
-            sample_split=sample_split,
-            seed=seed,
+            params=params,
+            inital_SRA=initial_SRA,
+            seed=start_states_seed,
             model_class=model_solution,
         )
         informed = int(sample_split == "informed")
         start_states["informed"] = jnp.ones_like(start_states["informed"]) * informed
-    for seed in [234, 456]:
+    for sim_seed in [234, 456]:
         # The order of this loop matters for the cv calculation
         for reform_scenario in ["no_reform", "reform"]:
             if reform_scenario == "no_reform":
@@ -89,7 +93,7 @@ for sample_split in ["full", "informed", "uninformed"]:
                 sol_model_exists=load_unc_model,
                 model_solution=model_solution,
                 util_type=util_type,
-                seed=seed,
+                seed=sim_seed,
             )
             # df_post.to_csv(
             #     f"df_post_{reform_scenario}_{sample_split}.csv"
@@ -123,7 +127,7 @@ for sample_split in ["full", "informed", "uninformed"]:
             sol_model_exists=load_unc_model,
             model_solution=model_solution,
             util_type=util_type,
-            seed=seed,
+            seed=sim_seed,
         )
         # df_ante.to_csv(
         #     f"df_ante_{sample_split}.csv"

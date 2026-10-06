@@ -46,13 +46,14 @@ def generate_start_states_from_obs(
         name: start_period_data[name].values
         for name in model_structure["discrete_states_names"]
     }
-    # assets_begin_of_period here is already the output of
-    # load_scale_and_correct_data -> adjust_observed_assets, which runs
-    # observed wealth through budget_constraint's own individual-bookkeeping
-    # conversion (see transform_data_from_model.py). No further adjustment
-    # needed here.
-    states_dict["assets_begin_of_period"] = start_period_data[
-        "assets_begin_of_period"
+    # dcegm's first simulated period runs the budget equation like every other
+    # one, so it needs the assets carried *into* it, not the wealth it ends up
+    # with. load_scale_and_correct_data supplies that column already in
+    # budget_constraint's individual-bookkeeping units; period 0's wealth then
+    # comes out of the budget equation, with a drawn income shock rather than
+    # the zero shock adjust_observed_assets uses for the observed-data columns.
+    states_dict["assets_end_of_previous_period"] = start_period_data[
+        "assets_end_of_previous_period"
     ].values
     states_dict["experience"] = start_period_data["experience"].values
     periods = start_period_data["period"].values

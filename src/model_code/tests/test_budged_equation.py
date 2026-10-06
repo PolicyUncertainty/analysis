@@ -5,6 +5,7 @@ import numpy as np
 import pytest
 
 from model_code.state_space.experience import (
+    construct_experience_years,
     get_next_period_experience,
     scale_experience_years,
 )
@@ -76,7 +77,7 @@ def test_budget_unemployed(
         lagged_choice=1,
         experience=exp_cont,
         asset_end_of_previous_period=savings,
-        income_shock_previous_period=0,
+        income_shock=0,
         model_specs=specs_internal,
     )
 
@@ -206,7 +207,7 @@ def test_budget_worker(
         alg_1_claim=0,
         experience=exp_cont,
         asset_end_of_previous_period=savings,
-        income_shock_previous_period=income_shock,
+        income_shock=income_shock,
         model_specs=specs_internal,
     )
     age = specs_internal["start_age"] + period
@@ -346,9 +347,15 @@ def test_retiree(
         informed=0,
         health=2,
         model_specs=specs_internal,
-    )
+    )["experience"]
     # Check that experience does not get updated or added any penalty
-    pension_points = scaled_pension_points * specs_internal["max_pp_retirement"]
+    pension_points = construct_experience_years(
+        float_experience=scaled_pension_points,
+        period=period,
+        sex=sex,
+        is_retired=True,
+        model_specs=specs_internal,
+    )
     np.testing.assert_allclose(pension_points, exp)
 
     wealth, aux_budget = budget_constraint(
@@ -360,7 +367,7 @@ def test_retiree(
         sex=sex,
         experience=scaled_pension_points,
         asset_end_of_previous_period=savings,
-        income_shock_previous_period=0,
+        income_shock=0,
         model_specs=specs_internal,
     )
 
@@ -489,7 +496,7 @@ def test_fresh_retiree(
         informed=informed,
         health=health,
         model_specs=specs_internal,
-    )
+    )["experience"]
 
     wealth, aux_budget = budget_constraint(
         period=period,
@@ -500,7 +507,7 @@ def test_fresh_retiree(
         sex=sex,
         experience=pension_points_scaled,
         asset_end_of_previous_period=savings,
-        income_shock_previous_period=0,
+        income_shock=0,
         model_specs=specs_internal,
     )
 
@@ -659,7 +666,7 @@ def test_informed(
         informed=0,
         health=1,
         model_specs=specs_internal,
-    )
+    )["experience"]
 
     exp_cont_inf = get_next_period_experience(
         period=period,
@@ -672,7 +679,7 @@ def test_informed(
         informed=1,
         health=1,
         model_specs=specs_internal,
-    )
+    )["experience"]
 
     # Test if experience is the same
     np.testing.assert_allclose(exp_cont_inf, exp_cont_uninf)

@@ -2,8 +2,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from set_styles import set_colors, get_figsize
+
 from model_code.wealth_and_budget.budget_equation import budget_constraint
+from set_styles import get_figsize, set_colors
 
 
 def plot_budget_of_unemployed(path_dict, specs, show=False, save=False):
@@ -39,7 +40,7 @@ def plot_budget_of_unemployed(path_dict, specs, show=False, save=False):
                 sex=sex_var,
                 partner_state=np.array([0]),
                 asset_end_of_previous_period=savings,
-                income_shock_previous_period=0,
+                income_shock=0,
                 model_specs=specs,
             )
             ax.plot(savings, wealth, label=edu_label, color=colors[edu_var])

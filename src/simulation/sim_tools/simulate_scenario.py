@@ -35,7 +35,7 @@ def solve_and_simulate_scenario(
     edu_type="all",
     util_type="add",
     seed=None,
-    chunked_solve=False,
+    chunked_solve=None,
     chunked_parallel=False,
 ):
     """
@@ -89,6 +89,15 @@ def solve_and_simulate_scenario(
     seed : int
         Random seed for simulation draws. Required — must be set explicitly by
         the caller (e.g. at the top of the run script), no implicit default.
+
+    Solve splitting
+    ---------------
+    chunked_solve : {None, "sex", "sex_edu"}, default None
+        Assemble the full solve from per-type sub-model solves instead of solving
+        it pooled. The simulation is unaffected: the assembled solution is the
+        full model's.
+    chunked_parallel : bool, default False
+        Dispatch the sub-model solves across ``jax.devices()``, one per device.
 
     Returns
     -------

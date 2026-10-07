@@ -305,6 +305,29 @@ def define_alternative_sim_specifications(
     return alternative_sim_specifications, specs
 
 
+def chunk_blocks_from_split(chunked_solve):
+    """Resolve the ``chunked_solve`` split into its (sex_type, edu_type) sub-models."""
+    # Both states are permanent, so the problem is block-diagonal in them and each
+    # block is an exact sub-problem.
+    chunk_blocks = {
+        "sex": (("men", "all"), ("women", "all")),
+        "sex_edu": (
+            ("men", "low"),
+            ("men", "high"),
+            ("women", "low"),
+            ("women", "high"),
+        ),
+    }
+    if chunked_solve is None or chunked_solve is False:
+        return None
+    if chunked_solve not in chunk_blocks:
+        raise ValueError(
+            f"chunked_solve must be one of {sorted(chunk_blocks)}, or None for a "
+            f"pooled solve, got {chunked_solve!r}."
+        )
+    return chunk_blocks[chunked_solve]
+
+
 def specify_and_solve_model(
     path_dict,
     file_append,
@@ -319,7 +342,7 @@ def specify_and_solve_model(
     edu_type="all",
     util_type="add",
     debug_info=None,
-    chunked_solve=False,
+    chunked_solve=None,
     chunked_parallel=False,
 ):
     """Specify and solve model.
@@ -327,15 +350,17 @@ def specify_and_solve_model(
     Also includes possibility to save solutions.
     men_only=False,
 
-    When ``chunked_solve`` is True (only valid for sex_type='all', edu_type='all'),
-    the full solve is assembled from the four per-type (sex x edu) sub-model solves via
-    ``dcegm.get_solve_from_small_models`` instead of one pooled solve, so the full
-    solution never has to be solved on device in one piece. Loading a stored solution
-    needs no solve and is unaffected. ``chunked_parallel`` dispatches the sub-model
-    solves across ``jax.devices()`` (one block per device) rather than one at a time;
-    it only helps with several devices and holds several blocks in memory at once.
+    ``chunked_solve`` names the split the full solve is assembled from instead of being
+    solved pooled: "sex" (two sub-models), "sex_edu" (four), None pooled. The sub-solves
+    are scattered into the full solution container on the host, which lowers the solve's
+    peak memory but not the solution's footprint. Only valid for sex_type='all',
+    edu_type='all'; loading a stored solution is unaffected. ``chunked_parallel``
+    dispatches the sub-solves across ``jax.devices()``, one block per device, instead of
+    one at a time; it only helps with several devices and holds several blocks at once.
 
     """
+    # Resolved before the build, so an unknown split fails fast.
+    chunk_blocks = chunk_blocks_from_split(chunked_solve)
 
     specs = generate_derived_and_data_derived_specs(path_dict)
 
@@ -360,17 +385,23 @@ def specify_and_solve_model(
     # Generate name of solution
     if subj_unc:
         resolution_age = specs["resolution_age"]
-        sol_name = f"sol_subj_unc_{resolution_age}.pkl"
+        sol_name = f"sol_subj_unc_{resolution_age}"
     else:
-        sol_name = "sol_no_subj_unc.pkl"
+        sol_name = "sol_no_subj_unc"
 
-    solution_file = solve_folder["solution"] + sol_name
+    # Loading a solution does not check its shape against the model, so a
+    # edu/sex type-restricted solve must not share the full model's file.
+    if not (sex_type == "all" and edu_type == "all"):
+        sol_name += f"_{sex_type}_{edu_type}"
 
-    if chunked_solve and load_solution is not True:
+    solution_file = solve_folder["solution"] + sol_name + ".pkl"
+
+    if chunk_blocks is not None and load_solution is not True:
         if not (sex_type == "all" and edu_type == "all"):
             raise ValueError(
-                "chunked_solve=True is only valid for sex_type='all' and "
-                "edu_type='all'; it assembles the full solve from per-type sub-models."
+                f"chunked_solve={chunked_solve!r} is only valid for sex_type='all' "
+                "and edu_type='all'; it assembles the full solve from per-type "
+                "sub-models."
             )
         sub_models = [
             specify_model(
@@ -386,8 +417,7 @@ def specify_and_solve_model(
                 edu_type=sub_edu_type,
                 util_type=util_type,
             )
-            for sub_sex_type in ("men", "women")
-            for sub_edu_type in ("low", "high")
+            for sub_sex_type, sub_edu_type in chunk_blocks
         ]
         solve_from_small_models = dcegm.get_solve_from_small_models(
             small_models=sub_models,

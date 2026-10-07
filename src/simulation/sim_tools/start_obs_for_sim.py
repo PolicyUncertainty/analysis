@@ -116,9 +116,8 @@ def generate_start_states_from_obs(
             key=keys[2], a=2, shape=(n_multiply_start_obs,), p=prob_vector
         )
         health_draw += 1
-        # Good health is 0. So if observed this is 0, otherwise its the draw
-        bool_observed_health = health > -1
-        health = (1 - bool_observed_health) * health_draw
+        # Observed health if health is 0 or 2!
+        health = jnp.where(health > -1, health, health_draw)
 
         return job_offers, informed_draws_edu, health
 

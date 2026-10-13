@@ -102,7 +102,7 @@ def choice_probs_for_choice_vals(
     unobserved_state_specs=None,
     use_probability_of_observed_states=False,
 ):
-    choice_prob_func = create_choice_prob_function(
+    choice_prob_func, data_from_observed = create_choice_prob_function(
         model_structure=model_solved.model_structure,
         model_specs=model_solved.model_specs,
         model_funcs=model_solved.model_funcs,
@@ -118,6 +118,7 @@ def choice_probs_for_choice_vals(
         value_in=model_solved.value,
         endog_grid_in=model_solved.endog_grid,
         params_in=params,
+        data_from_observed=data_from_observed,
     )
     return choice_probs_observations
 

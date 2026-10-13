@@ -28,7 +28,7 @@ def plot_weights(model_class, params, specs, paths):
 
     unobserved_state_specs = create_unobserved_state_specs(df)
 
-    _, debug_func = create_choice_prob_function(
+    _, debug_func, _ = create_choice_prob_function(
         model_structure=model_class.model_structure,
         model_specs=model_class.model_specs,
         model_funcs=model_class.model_funcs,

@@ -21,6 +21,7 @@ load_sol_model = True
 load_solution = None
 load_data_from_sol = False
 util_type = "add"
+chunked_solve = "sex"
 
 params = pkl.load(
     open(path_dict["struct_results"] + f"est_params_{model_name}.pkl", "rb")
@@ -65,6 +66,7 @@ create_fit_plots(
     sex_type="all",
     edu_type="all",
     util_type=util_type,
+    chunked_solve=chunked_solve,
     skip_model_plots=False,
 )
 

@@ -28,6 +28,7 @@ from simulation.tables.debias_table import (
 seed = 123
 model_name = specs["model_name"]
 util_type = specs["util_type"]
+chunked_solve = "sex"
 sra_at_63 = 67.0
 
 base_label = "Baseline with Misinformed"
@@ -71,6 +72,7 @@ df_base, _ = solve_and_simulate_scenario(
     sol_model_exists=load_unc_model,
     model_solution=model_solution,
     util_type=util_type,
+    chunked_solve=chunked_solve,
     seed=seed,
 )
 df_base = df_base.reset_index()
@@ -123,6 +125,7 @@ df_cf, _ = solve_and_simulate_scenario(
     sol_model_exists=load_unc_model,
     model_solution=model_solution_informed,  # use same solution as baseline
     util_type=util_type,
+    chunked_solve=chunked_solve,
     seed=seed,
 )
 df_cf = df_cf.reset_index()

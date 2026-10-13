@@ -36,6 +36,7 @@ def create_fit_plots(
     sex_type="all",
     edu_type="all",
     util_type="add",
+    chunked_solve=None,
     skip_model_plots=False,
 ):
 
@@ -77,6 +78,7 @@ def create_fit_plots(
             edu_type=edu_type,
             sex_type=sex_type,
             util_type=util_type,
+            chunked_solve=chunked_solve,
         )
 
         data_decision.to_csv(folder_name_plots + "data_with_probs.csv")
@@ -295,6 +297,7 @@ def create_df_with_probs(
     edu_type="all",
     sex_type="all",
     util_type="add",
+    chunked_solve=None,
     unobs_choice_probs=False,
 ):
     model_solved = specify_and_solve_model(
@@ -309,6 +312,7 @@ def create_df_with_probs(
         edu_type=edu_type,
         sex_type=sex_type,
         util_type=util_type,
+        chunked_solve=chunked_solve,
         debug_info="all",
     )
 

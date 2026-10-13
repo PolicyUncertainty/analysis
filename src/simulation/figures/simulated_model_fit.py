@@ -11,7 +11,7 @@ from model_code.transform_data_from_model import load_scale_and_correct_data
 from simulation.sim_tools.simulate_scenario import solve_and_simulate_scenario
 
 
-def create_paper_wealth_fit(
+def simulate_and_load_fit_data(
     path_dict,
     specs,
     params,
@@ -21,8 +21,15 @@ def create_paper_wealth_fit(
     load_solution=True,
     load_sol_model=True,
     util_type="add",
+    chunked_solve=None,
 ):
-    # Simulate baseline with subjective belief
+    """Solve and simulate the baseline scenario the fit plots below share.
+
+    Returns the simulated panel, the observed sample, the asset-corrected observed
+    sample and the solved model. The two observed frames are not interchangeable: the
+    plain sample carries experience in years and surveyed health, the corrected one
+    carries assets in the model's bookkeeping units.
+    """
     data_sim, model_solved = solve_and_simulate_scenario(
         announcement_age=None,
         path_dict=path_dict,
@@ -37,14 +44,33 @@ def create_paper_wealth_fit(
         sol_model_exists=load_sol_model,
         util_type=util_type,
         seed=seed,
+        chunked_solve=chunked_solve,
     )
-
     data_sim = data_sim.reset_index()
+    data_sim["age"] = data_sim["period"] + specs["start_age"]
 
-    data_decision = load_scale_and_correct_data(
+    data_decision = pd.read_csv(path_dict["struct_est_sample"])
+    data_decision["age"] = data_decision["period"] + specs["start_age"]
+
+    if model_solved is None:
+        raise ValueError(
+            "Correcting the observed assets needs the solved model, which loading a "
+            "stored simulation does not give: set load_df to None or False."
+        )
+    data_decision_corrected = load_scale_and_correct_data(
         path_dict=path_dict, model_class=model_solved
     )
 
+    return data_sim, data_decision, data_decision_corrected, model_solved
+
+
+def create_paper_wealth_fit(
+    path_dict,
+    specs,
+    model_name,
+    data_sim,
+    data_decision,
+):
     set_plot_defaults()
     # figsize = get_figsize(ncols=1, nrows=1)
 
@@ -104,43 +130,14 @@ def create_paper_wealth_fit(
 def plot_quantiles(
     path_dict,
     specs,
-    params,
     model_name,
+    data_sim,
+    data_decision,
     quantiles,
     sim_col_name,
     obs_col_name,
     file_name,
-    seed,
-    load_df=True,
-    load_solution=True,
-    load_sol_model=True,
-    util_type="add",
 ):
-    # Simulate baseline with subjective belief
-    data_sim, model_solved = solve_and_simulate_scenario(
-        announcement_age=None,
-        path_dict=path_dict,
-        params=params,
-        subj_unc=True,
-        custom_resolution_age=None,
-        SRA_at_retirement=67,
-        SRA_at_start=67,
-        model_name=model_name,
-        df_exists=load_df,
-        solution_exists=load_solution,
-        sol_model_exists=load_sol_model,
-        util_type=util_type,
-        seed=seed,
-    )
-
-    data_sim = data_sim.reset_index()
-
-    data_decision = load_scale_and_correct_data(
-        path_dict=path_dict, model_class=model_solved
-    )
-
-    data_sim["age"] = data_sim["period"] + specs["start_age"]
-
     fig, axs = plt.subplots(
         ncols=specs["n_education_types"],
         figsize=get_figsize(ncols=specs["n_education_types"]),
@@ -207,40 +204,10 @@ def plot_quantiles(
 def plot_choice_shares_by_partner(
     path_dict,
     specs,
-    params,
     model_name,
-    seed,
-    load_df=True,
-    load_solution=True,
-    load_sol_model=True,
-    util_type="add",
+    data_sim,
+    data_decision,
 ):
-    # alpha_belief = float(np.loadtxt(
-    # path_dict["est_results"] + "exp_val_params.txt"))
-
-    # Simulate baseline with subjective belief
-    data_sim, _ = solve_and_simulate_scenario(
-        announcement_age=None,
-        path_dict=path_dict,
-        params=params,
-        subj_unc=True,
-        custom_resolution_age=None,
-        SRA_at_retirement=67,
-        SRA_at_start=67,
-        model_name=model_name,
-        df_exists=load_df,
-        solution_exists=load_solution,
-        sol_model_exists=load_sol_model,
-        util_type=util_type,
-        seed=seed,
-    )
-
-    data_sim = data_sim.reset_index()
-    data_decision = pd.read_csv(path_dict["struct_est_sample"])
-
-    data_decision["age"] = data_decision["period"] + specs["start_age"]
-    data_sim["age"] = data_sim["period"] + specs["start_age"]
-
     for partner_state, partner_label in enumerate(specs["partner_labels"]):
         fig, axes = plt.subplots(
             2,
@@ -311,40 +278,10 @@ def plot_choice_shares_by_partner(
 def plot_choice_shares_single(
     path_dict,
     specs,
-    params,
     model_name,
-    seed,
-    load_df=True,
-    load_solution=True,
-    load_sol_model=True,
-    util_type="add",
+    data_sim,
+    data_decision,
 ):
-    # alpha_belief = float(np.loadtxt(
-    # path_dict["est_results"] + "exp_val_params.txt"))
-
-    # Simulate baseline with subjective belief
-    data_sim, _ = solve_and_simulate_scenario(
-        announcement_age=None,
-        path_dict=path_dict,
-        params=params,
-        subj_unc=True,
-        custom_resolution_age=None,
-        SRA_at_retirement=67,
-        SRA_at_start=67,
-        model_name=model_name,
-        df_exists=load_df,
-        solution_exists=load_solution,
-        sol_model_exists=load_sol_model,
-        util_type=util_type,
-        seed=seed,
-    )
-
-    data_sim = data_sim.reset_index()
-    data_decision = pd.read_csv(path_dict["struct_est_sample"])
-
-    data_decision["age"] = data_decision["period"] + specs["start_age"]
-    data_sim["age"] = data_sim["period"] + specs["start_age"]
-
     fig, axes = plt.subplots(
         2, specs["n_choices"], figsize=get_figsize(ncols=specs["n_choices"], nrows=2)
     )
@@ -406,41 +343,11 @@ def plot_choice_shares_single(
 def plot_states(
     path_dict,
     specs,
-    params,
     model_name,
-    seed,
-    load_df=True,
-    load_solution=True,
-    load_sol_model=True,
-    util_type="add",
+    data_sim,
+    data_decision,
+    model_solved,
 ):
-    # Simulate baseline with subjective belief
-    data_sim, model_solved = solve_and_simulate_scenario(
-        path_dict=path_dict,
-        params=params,
-        subj_unc=True,
-        custom_resolution_age=None,
-        announcement_age=None,
-        SRA_at_retirement=67,
-        SRA_at_start=67,
-        model_name=model_name,
-        df_exists=load_df,
-        solution_exists=load_solution,
-        sol_model_exists=load_sol_model,
-        util_type=util_type,
-        seed=seed,
-    )
-
-    data_sim = data_sim.reset_index()
-
-    data_decision = pd.read_csv(path_dict["struct_est_sample"])
-
-    data_decision["age"] = data_decision["period"] + specs["start_age"]
-    data_sim["age"] = data_sim["period"] + specs["start_age"]
-
-    data_decision["age"] = data_decision["period"] + specs["start_age"]
-    data_sim["age"] = data_sim["period"] + specs["start_age"]
-
     grouped_obs = data_decision.groupby(["sex", "education", "age"])
     grouped_sim = data_sim.groupby(["sex", "education", "age"])
 

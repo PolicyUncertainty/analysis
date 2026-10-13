@@ -13,6 +13,7 @@ specs = generate_derived_and_data_derived_specs(path_dict)
 seed = 123
 model_name = specs["model_name"]
 util_type = specs["util_type"]
+chunked_solve = "sex"
 
 load_df = None
 load_solution = None
@@ -50,10 +51,12 @@ from simulation.figures.simulated_model_fit import (
     plot_choice_shares_single,
     plot_quantiles,
     plot_states,
+    simulate_and_load_fit_data,
 )
 
-if which_plots in ["p", "wc"]:
-    create_paper_wealth_fit(
+# %% Solve and simulate once; every plot below reads this one panel.
+if which_plots != "i":
+    data_sim, data_obs, data_obs_corrected, model_solved = simulate_and_load_fit_data(
         path_dict=path_dict,
         specs=specs,
         params=params,
@@ -63,77 +66,56 @@ if which_plots in ["p", "wc"]:
         load_solution=load_solution,
         load_sol_model=load_sol_model,
         util_type=util_type,
+        chunked_solve=chunked_solve,
+    )
+
+if which_plots in ["p", "wc"]:
+    create_paper_wealth_fit(
+        path_dict=path_dict,
+        specs=specs,
+        model_name=model_name,
+        data_sim=data_sim,
+        data_decision=data_obs_corrected,
     )
 
 if which_plots in ["a", "c", "wc"]:
     plot_choice_shares_by_partner(
         path_dict=path_dict,
         specs=specs,
-        params=params,
         model_name=model_name,
-        seed=seed,
-        load_df=load_df,
-        load_solution=load_solution,
-        load_sol_model=load_sol_model,
-        util_type=util_type,
+        data_sim=data_sim,
+        data_decision=data_obs,
     )
     plot_choice_shares_single(
         path_dict=path_dict,
         specs=specs,
-        params=params,
         model_name=model_name,
-        seed=seed,
-        load_df=load_df,
-        load_solution=load_solution,
-        load_sol_model=load_sol_model,
-        util_type=util_type,
+        data_sim=data_sim,
+        data_decision=data_obs,
     )
-    # After running, we can set all to true
-    load_df = True if load_df is not None else load_df
-    load_solution = True if load_solution is not None else load_solution
-    load_sim_model = True
-    load_sol_model = True
 
 if which_plots in ["a", "w", "wc"]:
     plot_quantiles(
         path_dict=path_dict,
         specs=specs,
-        params=params,
         model_name=model_name,
+        data_sim=data_sim,
+        data_decision=data_obs_corrected,
         quantiles=[0.5],
         sim_col_name="assets_begin_of_period",
         obs_col_name="assets_begin_of_period",
         file_name="average_wealth",
-        seed=seed,
-        load_df=load_df,
-        load_solution=load_solution,
-        load_sol_model=load_sol_model,
-        util_type=util_type,
     )
-    # After running, we can set all to true
-    load_df = True if load_df is not None else load_df
-    load_solution = True if load_solution is not None else load_solution
-    load_sim_model = True
-    load_sol_model = True
-
 
 if which_plots in ["a", "s"]:
     plot_states(
-        path_dict,
-        specs,
-        params,
-        model_name,
-        seed=seed,
-        load_df=load_df,
-        load_solution=load_solution,
-        load_sol_model=load_sol_model,
-        util_type=util_type,
+        path_dict=path_dict,
+        specs=specs,
+        model_name=model_name,
+        data_sim=data_sim,
+        data_decision=data_obs,
+        model_solved=model_solved,
     )
-    # After running, we can set all to true
-    load_df = True if load_df is not None else load_df
-    load_solution = True if load_solution is not None else load_solution
-    load_sim_model = True
-    load_sol_model = True
 
 if which_plots in ["a", "i"]:
     from simulation.internal_runs.figures import net_incomes

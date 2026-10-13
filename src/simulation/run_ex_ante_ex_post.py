@@ -31,6 +31,7 @@ import numpy as np
 start_states_seed = 123
 model_name = specs["model_name"]
 util_type = specs["util_type"]
+chunked_solve = "sex"
 
 load_unc_model = True
 load_unc_solution = None  # baseline solution conntainer
@@ -93,6 +94,7 @@ for sample_split in ["full", "informed", "uninformed"]:
                 sol_model_exists=load_unc_model,
                 model_solution=model_solution,
                 util_type=util_type,
+                chunked_solve=chunked_solve,
                 seed=sim_seed,
             )
             # df_post.to_csv(
@@ -127,6 +129,7 @@ for sample_split in ["full", "informed", "uninformed"]:
             sol_model_exists=load_unc_model,
             model_solution=model_solution,
             util_type=util_type,
+            chunked_solve=chunked_solve,
             seed=sim_seed,
         )
         # df_ante.to_csv(

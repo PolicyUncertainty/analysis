@@ -80,9 +80,9 @@ def plot_pension_claims(path_dict, show=False, save=True):
 
     # Create labels with proper formatting
     labels = [
-        "figures age: standard",
-        "figures age: long work life",
-        "figures age: with penalties",
+        "old age: standard",
+        "old age: long work life",
+        "old age: with penalties",
         "disability: occupation",
         "disability: severe",
         "other",

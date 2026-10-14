@@ -43,6 +43,11 @@ def plot_utility(path_dict, params, specs, show=False, save=False):
                 health=1,
                 education=education,
                 period=period,
+                # Illustrative: all four curves are drawn, so pick a state where the
+                # whole choice set is feasible.
+                lagged_choice=3,
+                policy_state=0,
+                job_offer=1,
                 choice=choice,
                 params=params,
                 model_specs=specs,

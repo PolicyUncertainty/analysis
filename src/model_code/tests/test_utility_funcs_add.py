@@ -8,6 +8,7 @@ from model_code.utility.bequest_utility import (
     marginal_utility_final_consume_all,
     utility_final_consume_all,
 )
+from model_code.utility.choice_set_correction import choice_set_size_correction
 from model_code.utility.utility_functions_add import (
     consumption_scale,
     inverse_marginal_func,
@@ -95,6 +96,8 @@ def test_utility_func(
         "disutil_unemployed_bad_men": disutil_unemployed,
         "disutil_unemployed_good_men": disutil_unemployed,
         "disutil_partner_retired_men": -disutil_unemployed,
+        "taste_shock_scale_men": 0.3,
+        "taste_shock_scale_women": 0.4,
         # Women - Health specific (no longer education-specific)
         "disutil_ft_work_good_women": disutil_work + 1,
         "disutil_ft_work_bad_women": disutil_work,
@@ -159,9 +162,25 @@ def test_utility_func(
     wealth_mult = 1 + int(partner_state > 0)
     scaled_consumption = wealth_mult * consumption / cons_scale
 
+    # A state that leaves work and unemployment feasible but not retirement, so the
+    # correction is non-zero and utility_func has to net it out of every choice.
+    lagged_choice, policy_state, job_offer = 3, 0, 1
+    correction = choice_set_size_correction(
+        period=period,
+        lagged_choice=lagged_choice,
+        sex=sex,
+        policy_state=policy_state,
+        job_offer=job_offer,
+        health=health,
+        params=params,
+        model_specs=model_specs,
+    )
+
     if mu_edu == 1:
         utility_lambda = (
-            lambda disutil: cons_scale * np.log(scaled_consumption) - disutil
+            lambda disutil: cons_scale * np.log(scaled_consumption)
+            - disutil
+            - correction
         )
     else:
         utility_lambda = (
@@ -169,6 +188,7 @@ def test_utility_func(
             * (scaled_consumption ** (1 - mu_edu) - 1)
             / (1 - mu_edu)
             - disutil
+            - correction
         )
 
     # Test retirement choice (choice = 0)
@@ -181,6 +201,9 @@ def test_utility_func(
             health=health,
             sex=sex,
             period=period,
+            lagged_choice=lagged_choice,
+            policy_state=policy_state,
+            job_offer=job_offer,
             choice=0,
             params=params,
             model_specs=model_specs,
@@ -197,6 +220,9 @@ def test_utility_func(
             health=health,
             sex=sex,
             period=period,
+            lagged_choice=lagged_choice,
+            policy_state=policy_state,
+            job_offer=job_offer,
             choice=1,
             params=params,
             model_specs=model_specs,
@@ -226,6 +252,9 @@ def test_utility_func(
                 health=health,
                 sex=sex,
                 period=period,
+                lagged_choice=lagged_choice,
+                policy_state=policy_state,
+                job_offer=job_offer,
                 choice=2,
                 params=params,
                 model_specs=model_specs,
@@ -242,6 +271,9 @@ def test_utility_func(
             health=health,
             sex=sex,
             period=period,
+            lagged_choice=lagged_choice,
+            policy_state=policy_state,
+            job_offer=job_offer,
             choice=3,
             params=params,
             model_specs=model_specs,

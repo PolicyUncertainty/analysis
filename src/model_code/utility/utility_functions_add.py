@@ -5,6 +5,7 @@ from model_code.utility.bequest_utility import (
     marginal_utility_final_consume_all,
     utility_final_consume_all,
 )
+from model_code.utility.choice_set_correction import choice_set_size_correction
 
 
 def create_utility_functions():
@@ -22,6 +23,9 @@ def utility_func(
     education,
     health,
     period,
+    lagged_choice,
+    policy_state,
+    job_offer,
     choice,
     params,
     model_specs,
@@ -45,7 +49,18 @@ def utility_func(
     )
     death_bool = health == model_specs["death_health_var"]
     utility = jax.lax.select(death_bool, utility_death, utility_alive)
-    return utility
+    # Common to all choices in the state, so it shifts the continuation value without
+    # touching the choice probabilities; zero in the death states, where J = 1.
+    return utility - choice_set_size_correction(
+        period=period,
+        lagged_choice=lagged_choice,
+        sex=sex,
+        policy_state=policy_state,
+        job_offer=job_offer,
+        health=health,
+        params=params,
+        model_specs=model_specs,
+    )
 
 
 def utility_func_alive(

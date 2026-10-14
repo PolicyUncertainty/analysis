@@ -21,6 +21,13 @@ from process_data.data_plots.retirement_timing import plot_retirement_timing_dat
 
 plot_retirement_timing_data(path_dict, specs, show=show_plots, save=save_plots)
 
+# Derived (spell-based) retirement age in months, needs art_choice.pkl
+from process_data.data_plots.retirement_timing import (
+    plot_derived_retirement_age_months,
+)
+
+plot_derived_retirement_age_months(path_dict, specs, show=show_plots, save=save_plots)
+
 # Choice distribution plots
 from process_data.data_plots.choices import plot_data_choices
 

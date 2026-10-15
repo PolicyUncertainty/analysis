@@ -72,23 +72,24 @@ kappa_high_women: 50
 kappa_low_men: 50
 kappa_low_women: 50
 
-# Job finding men
+# Job finding men. Age steps are capped at 0, so the offer probability
+# does not increase with age.
 job_finding_logit_const_men: 5
 job_finding_logit_high_educ_men: 5
 # job_finding_logit_good_health_men: 5
 # job_finding_logit_age_men: 0.5
-job_finding_logit_above_50_men: 5
-job_finding_logit_above_55_men: 5
-job_finding_logit_above_60_men: 5
+job_finding_logit_above_50_men: 0
+job_finding_logit_above_55_men: 0
+job_finding_logit_above_60_men: 0
 
 # Job finding women
 job_finding_logit_const_women: 5
 job_finding_logit_high_educ_women: 5
 # job_finding_logit_good_health_women: 5
 # job_finding_logit_age_women: 0.5
-job_finding_logit_above_50_women: 5
-job_finding_logit_above_55_women: 5
-job_finding_logit_above_60_women: 5
+job_finding_logit_above_50_women: 0
+job_finding_logit_above_55_women: 0
+job_finding_logit_above_60_women: 0
 
 # Disability probability men
 disability_logit_const_men: 5

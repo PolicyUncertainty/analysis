@@ -14,6 +14,9 @@ from estimation.struct_estimation.scripts.std_errors import (
     calc_scores,
 )
 from model_code.specify_model import cpu_build, specify_model
+from model_code.stochastic_processes.health_transition import (
+    calc_disability_probability,
+)
 from model_code.stochastic_processes.job_offers import (
     calc_job_finding_prob_men,
     calc_job_finding_prob_women,
@@ -48,6 +51,7 @@ def estimate_model(
     scale_opt=False,
     multistart=False,
     slow_version=False,
+    reference_params=None,
 ):
 
     specs = generate_derived_and_data_derived_specs(path_dict)
@@ -59,14 +63,16 @@ def estimate_model(
         print_women_examples=print_women_examples,
     )
 
-    # Job finding params are bounded below by their data-based full-observation
-    # estimates, which are the values start_params_all carries before a warm
-    # start replaces them.
-    job_finding_lower_bounds = {
-        name: start_params_all[name]
-        for name in params_to_estimate_names
-        if "job_finding" in name
-    }
+    # After estimation the implied job finding and disability probabilities are
+    # compared cell by cell with those of reference_params. By default these are
+    # the reduced-form logit estimates, which start_params_all carries before a
+    # warm start replaces them. They are not imposed as bounds.
+    if reference_params is None:
+        reference_params = {
+            name: start_params_all[name]
+            for name in start_params_all
+            if ("job_finding_logit" in name) or ("disability_logit" in name)
+        }
 
     # # Assign start params from before
     if last_estimate is not None:
@@ -100,12 +106,7 @@ def estimate_model(
     lower_bounds_all = yaml.safe_load(
         open(path_dict["start_params_and_bounds"] + "lower_bounds.yaml", "rb")
     )
-    lower_bounds = {}
-    for param in params_to_estimate_names:
-        if "job_finding" in param:
-            lower_bounds[param] = job_finding_lower_bounds[param]
-        else:
-            lower_bounds[param] = lower_bounds_all[param]
+    lower_bounds = {name: lower_bounds_all[name] for name in params_to_estimate_names}
 
     upper_bounds_all = yaml.safe_load(
         open(path_dict["start_params_and_bounds"] + "upper_bounds.yaml", "rb")
@@ -184,6 +185,13 @@ def estimate_model(
     pickle.dump(
         start_params_all,
         open(path_dict["struct_results"] + f"est_params_{file_append}.pkl", "wb"),
+    )
+
+    compare_probs_with_reference(
+        reference_params=reference_params,
+        est_params=start_params_all,
+        specs=specs,
+        path=path_dict["struct_results"] + f"prob_check_{file_append}.csv",
     )
 
     calc_and_save_standard_errors(
@@ -331,6 +339,77 @@ class est_class_from_paths:
             params_to_estimate_names=params.keys(),
         )
         return self.weights @ scores / self.weight_sum
+
+
+def compare_probs_with_reference(reference_params, est_params, specs, path):
+    """Compare estimated job finding and disability probabilities with a reference.
+
+    With the reduced-form logit estimates as reference, the reference rates are
+    observed transitions, which need an offer (or a disability state) and the
+    choice to act on it. They should therefore lie weakly below the structural
+    probabilities in every cell, and a negative gap signals that the restriction
+    is violated. With the true params of a Monte Carlo as reference, the gap is
+    the estimation error.
+
+    """
+    age_bins = [40, 50, 55, 60]
+    rows = []
+    for sex_var, sex_label in enumerate(["men", "women"]):
+        job_func = (
+            calc_job_finding_prob_men if sex_var == 0 else calc_job_finding_prob_women
+        )
+        for edu in range(2):
+            for age in age_bins:
+                period = np.array(age - specs["start_age"])
+                for prob_type in ["job_finding", "disability"]:
+                    probs = {}
+                    for source, params in [
+                        ("reference", reference_params),
+                        ("structural", est_params),
+                    ]:
+                        if prob_type == "job_finding":
+                            prob = job_func(
+                                params=params,
+                                education=edu,
+                                good_health=1,
+                                age=age,
+                            )
+                        else:
+                            prob = calc_disability_probability(
+                                params=params,
+                                sex=sex_var,
+                                education=edu,
+                                period=period,
+                                model_specs=specs,
+                            )
+                        probs[source] = float(prob)
+                    rows.append(
+                        {
+                            "type": prob_type,
+                            "sex": sex_label,
+                            "education": edu,
+                            "age_from": age,
+                            **probs,
+                            "gap": probs["structural"] - probs["reference"],
+                        }
+                    )
+
+    df = pd.DataFrame(rows)
+    df.to_csv(path, index=False)
+
+    violations = df[df["gap"] < 0]
+    if len(violations) > 0:
+        print(
+            "Structural probability below reference in these cells:",
+            flush=True,
+        )
+        print(violations.to_string(index=False), flush=True)
+    else:
+        print(
+            "Structural probabilities lie weakly above the reference in all cells.",
+            flush=True,
+        )
+    return df
 
 
 def load_and_prep_data_estimation(path_dict, model_class):

@@ -104,21 +104,22 @@ job_finding_logit_above_50_women: -5
 job_finding_logit_above_55_women: -5
 job_finding_logit_above_60_women: -5
 
-# Disability probability men
+# Disability probability men. Age steps are bounded below by 0, so the
+# disability probability does not decrease with age.
 disability_logit_const_men: -30
 # disability_logit_age_above_50_men: -5
 disability_logit_high_educ_men: -5
-disability_logit_above_50_men: -5
-disability_logit_above_55_men: -5
-disability_logit_above_60_men: -5
+disability_logit_above_50_men: 0
+disability_logit_above_55_men: 0
+disability_logit_above_60_men: 0
 
 # Disability probability women
 disability_logit_const_women: -30
 # disability_logit_age_above_50_women: -5
 disability_logit_high_educ_women: -5
-disability_logit_above_50_women: -5
-disability_logit_above_55_women: -5
-disability_logit_above_60_women: -5
+disability_logit_above_50_women: 0
+disability_logit_above_55_women: 0
+disability_logit_above_60_women: 0
 
 # # SRA firing params
 # SRA_firing_logit_intercept_men_low: 2.0

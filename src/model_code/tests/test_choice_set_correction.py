@@ -67,6 +67,10 @@ def whole_state_space(model_specs):
     n_choices_in_state is arithmetic, so it takes the whole state space in one call;
     the truth comes from looping the model's own state_specific_choice_set.
     """
+    return _enumerate_state_space(model_specs)
+
+
+def _enumerate_state_space(model_specs):
     axes = [
         np.arange(model_specs["n_periods"]),
         np.arange(model_specs["n_choices"]),
@@ -96,6 +100,16 @@ def test_n_choices_matches_the_enumerated_choice_set(whole_state_space, model_sp
     states, n_choices_true = whole_state_space
     n_choices = n_choices_in_state(model_specs=model_specs, **states)
     np.testing.assert_array_equal(np.asarray(n_choices), n_choices_true)
+
+
+def test_n_choices_matches_with_disabled_must_retire(model_specs):
+    """Also when disabled individuals can only choose retirement."""
+    model_specs = {**model_specs, "disabled_must_retire": True}
+    states, n_choices_true = _enumerate_state_space(model_specs)
+    n_choices = n_choices_in_state(model_specs=model_specs, **states)
+    np.testing.assert_array_equal(np.asarray(n_choices), n_choices_true)
+    disabled = states["health"] == model_specs["disabled_health_var"]
+    assert (n_choices_true[disabled] == 1).all()
 
 
 def test_no_state_has_an_empty_choice_set(whole_state_space):

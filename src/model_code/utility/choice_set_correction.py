@@ -61,5 +61,9 @@ def n_choices_in_state(
         (health == model_specs["death_health_var"])
         | (lagged_choice == 0)
         | (age >= model_specs["max_ret_age"])
+        | (
+            model_specs.get("disabled_must_retire", False)
+            & (health == model_specs["disabled_health_var"])
+        )
     )
     return jnp.where(forced_to_be_retired, 1, n_choices)

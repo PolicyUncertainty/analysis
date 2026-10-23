@@ -23,6 +23,12 @@ def state_specific_choice_set(
     # Above the maximum retirement age, also everybody needs to be retired
     elif age >= model_specs["max_ret_age"]:
         return np.array([0])
+    # Optionally, disabled individuals can't work or be unemployed and must take up
+    # the disability pension.
+    elif model_specs.get("disabled_must_retire", False) & (
+        health == model_specs["disabled_health_var"]
+    ):
+        return np.array([0])
     else:
         # For the rest of the life span, we now check a few rules and delete choices
         # accordingly.
